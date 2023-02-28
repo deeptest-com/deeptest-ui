@@ -1,5 +1,5 @@
 <template>
-  <div class="scenario-tree-main dp-tree">
+  <div class="plan-tree-main dp-tree">
     <div class="toolbar">
       <div class="tips">
         <span>{{ tips }}</span>
@@ -78,20 +78,20 @@ import {expandAllKeys, expandOneKey} from "@/services/tree";
 
 import {getExpandedKeys, getSelectedKey, setExpandedKeys, setSelectedKey} from "@/utils/cache";
 import {getContextMenuStyle} from "@/utils/dom";
-import {StateType as ScenarioStateType} from "../store";
+import {StateType as PlanStateType} from "../store";
 import {StateType as ProjectStateType} from "@/store/project";
-import {isRoot, updateNodeName, isInterface, updateCategoryName} from "../service";
+import {updateCategoryName} from "../service";
 import TreeContextMenu from "./tree-context-menu.vue";
 
 const useForm = Form.useForm;
 
 const {t} = useI18n();
 
-const store = useStore<{ Scenario: ScenarioStateType, ProjectGlobal: ProjectStateType }>();
+const store = useStore<{ Plan: PlanStateType, ProjectGlobal: ProjectStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
-const treeDataCategory = computed<any>(() => store.state.Scenario.treeDataCategory);
-const treeDataMapCategory = computed<any>(() => store.state.Scenario.treeDataMapCategory);
-const nodeDataCategory = computed<any>(()=> store.state.Scenario.nodeDataCategory);
+const treeDataCategory = computed<any>(() => store.state.Plan.treeDataCategory);
+const treeDataMapCategory = computed<any>(() => store.state.Plan.treeDataMapCategory);
+const nodeDataCategory = computed<any>(()=> store.state.Plan.nodeDataCategory);
 
 watch(treeDataCategory, () => {
   console.log('watch treeDataCategory', treeDataCategory)
@@ -105,7 +105,7 @@ watch(treeDataCategory, () => {
 })
 
 const loadTree = debounce(async () => {
-  await store.dispatch('Scenario/loadCategory');
+  await store.dispatch('Plan/loadCategory');
 }, 60)
 loadTree();
 
@@ -137,7 +137,7 @@ const selectNode = (keys, e) => {
   setSelectedKey('category', currProject.value.id, selectedKeys.value[0])
 
   const selectedData = treeDataMapCategory.value[selectedKeys.value[0]]
-  store.dispatch('Scenario/getCategoryNode', selectedData)
+  store.dispatch('Plan/getCategoryNode', selectedData)
 }
 
 const updateName = (id) => {
@@ -146,18 +146,18 @@ const updateName = (id) => {
 
   updateCategoryName(id, name).then((json) => {
     if (json.code === 0) {
-      store.dispatch('Scenario/saveTreeMapItemPropCategory', {id: id, prop: 'name', value: name})
-      store.dispatch('Scenario/saveTreeMapItemPropCategory', {id: id, prop: 'isEdit', value: false})
+      store.dispatch('Plan/saveTreeMapItemPropCategory', {id: id, prop: 'name', value: name})
+      store.dispatch('Plan/saveTreeMapItemPropCategory', {id: id, prop: 'isEdit', value: false})
 
       if (id === nodeDataCategory.value.processorId) {
-        store.dispatch('Scenario/getCategory', {id: id})
+        store.dispatch('Plan/getCategory', {id: id})
       }
     }
   })
 }
 const cancelUpdate = (id) => {
   console.log('cancelUpdate', id)
-  store.dispatch('Scenario/saveTreeMapItemPropCategory', {id: id, prop: 'isEdit', value: false})
+  store.dispatch('Plan/saveTreeMapItemPropCategory', {id: id, prop: 'isEdit', value: false})
 }
 
 let contextNode = ref({} as any)
@@ -261,9 +261,9 @@ const renameNode = () => {
   editedData.value[targetModelId] = treeDataMapCategory.value[targetModelId].name
 
   Object.keys(treeDataMapCategory.value).forEach((key) => {
-    store.dispatch('Scenario/saveTreeMapItemPropCategory', {id: key, prop: 'isEdit', value: false})
+    store.dispatch('Plan/saveTreeMapItemPropCategory', {id: key, prop: 'isEdit', value: false})
   })
-  store.dispatch('Scenario/saveTreeMapItemPropCategory', {id: targetModelId, prop: 'isEdit', value: true})
+  store.dispatch('Plan/saveTreeMapItemPropCategory', {id: targetModelId, prop: 'isEdit', value: true})
   setTimeout(() => {
     console.log('==', currentInstance.ctx.$refs[`name-editor-${targetModelId}`])
     currentInstance.ctx.$refs[`name-editor-${targetModelId}`]?.focus()
@@ -274,7 +274,7 @@ const renameNode = () => {
 const addNode = (mode, targetId) => {
   console.log('addNode', mode, targetId)
 
-    store.dispatch('Scenario/createCategoryNode', {mode, targetId, name: '新分类'}).then((newNode) => {
+    store.dispatch('Plan/createCategoryNode', {mode, targetId, name: '新分类'}).then((newNode) => {
       console.log('createCategoryNode successfully', newNode)
       selectNode([newNode.id], null)
       expandOneKey(treeDataMapCategory.value, mode === 'parent' ? newNode.id : newNode.parentId, expandedKeys.value) // expend new node
@@ -284,7 +284,7 @@ const addNode = (mode, targetId) => {
 
 const removeNode = () => {
   console.log('removeNode')
-  store.dispatch('Scenario/removeCategoryNode', targetModelId);
+  store.dispatch('Plan/removeCategoryNode', targetModelId);
   selectNode([], null)
 }
 const clearMenu = () => {
@@ -301,10 +301,12 @@ const onDrop = (info: DropEvent) => {
   const dragKey = info.dragNode.eventKey;
   const dropPos = info.node.pos.split('-');
   let dropPosition = info.dropPosition - Number(dropPos[dropPos.length - 1]);
-  if (isInterface(treeDataMapCategory.value[dropKey].processorCategory) && dropPosition === 0) dropPosition = 1
+  if (treeDataMapCategory.value[dropKey].isLeaf && dropPosition === 0) {
+    dropPosition = 1
+  }
   console.log(dragKey, dropKey, dropPosition);
 
-  store.dispatch('Scenario/moveCategoryNode', {dragKey: dragKey, dropKey: dropKey, dropPos: dropPosition}).then(
+  store.dispatch('Plan/moveCategoryNode', {dragKey: dragKey, dropKey: dropKey, dropPos: dropPosition}).then(
       (result) => {
         if (result) {
           expandOneKey(treeDataMapCategory.value, dropKey, expandedKeys.value) // expend parent node
@@ -327,7 +329,7 @@ onUnmounted(() => {
 </script>
 
 <style lang="less">
-.scenario-tree-main {
+.plan-tree-main {
   .ant-tree-iconEle {
     height: 20px !important;
     line-height: 20px !important;
@@ -357,6 +359,6 @@ onUnmounted(() => {
 </style>
 
 <style lang="less" scoped>
-.scenario-tree-main {
+.plan-tree-main {
 }
 </style>
