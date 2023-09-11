@@ -1,38 +1,25 @@
 <template>
   <!-- 高级mock 期望 -->
-  <div class="container">
-    <div class="top-action">
-      <span class="enable">
-        是否开启 &nbsp;&nbsp;
-        <a-switch v-model:checked="checked" @change="handleChange" />
-      </span>
-      <a-button type="primary" @click="handleCreate">新建期望</a-button>
-    </div>
-    <div class="except-list" v-if="activityKey === 'mock'">
-      <div class="except-tip">
-        <QuestionCircleOutlined />
-        当您请求Mock接口时，会根据请求参数匹配的期望条件自动返回相应的结果。Mock请求地址：https://xx.xxx.xx/mock/txt
-      </div>
-      <a-table 
-        :pagination="false"
-        :rowKey="(record) => record.id" 
-        :dataSource="expectList"
-        :loading="loading" 
-        :columns="exceptColumns(store)" 
-        id="except-table">
-        <template #mockName="{ record }">
-          <div class="except-name">
-            <HolderOutlined class="except-sort" style="margin-right: 6px" />
-            <EditAndShowField 
-              :custom-class="'custom-endpoint show-on-hover'"
-              :value="record.name"
-              placeholder="期望名称"
-              @update="(val) => handleUpdateName(val, record)"
-              @edit="handleEdit(record)"/>
-          </div>
-        </template>
-      </a-table>
-    </div>
+  <div class="except-list">
+    <a-table 
+      :pagination="false"
+      :rowKey="(record) => record.id" 
+      :dataSource="expectList"
+      :loading="loading" 
+      :columns="exceptColumns(store)" 
+      id="except-table">
+      <template #mockName="{ record }">
+        <div class="except-name">
+          <HolderOutlined class="except-sort" style="margin-right: 6px" />
+          <EditAndShowField 
+            :custom-class="'custom-endpoint show-on-hover'"
+            :value="record.name"
+            placeholder="期望名称"
+            @update="(val) => handleUpdateName(val, record)"
+            @edit="handleEdit(record)"/>
+        </div>
+      </template>
+    </a-table>
   </div>
 
   <Detail v-if="open" @cancel="open = false" />
@@ -146,6 +133,7 @@ onMounted(() => {
 }
 
 .except-list {
+  margin-top: 20px;
   .except-tip {
     margin: 10px 0;
     display: flex;
