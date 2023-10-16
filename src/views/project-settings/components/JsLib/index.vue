@@ -40,13 +40,13 @@
 
             <template #scriptFile="{ record }">
               <a @click="downloadFile(serverUrl + record.scriptFile, record.name + '.js')" :title="record.name + '.js'">
-                {{record.name + '.js'}}
+                upload/{{record.name + '.js'}}
               </a>
             </template>
 
             <template #typesFile="{ record }">
               <a @click="downloadFile(serverUrl + record.typesFile, record.name + '.d.ts')" :title="record.name + '.d.ts'">
-                {{record.name + '.d.ts'}}
+                upload/{{record.name + '.d.ts'}}
               </a>
             </template>
 
