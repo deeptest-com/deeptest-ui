@@ -15,7 +15,14 @@
 
       <EmptyComp>
         <template #content>
-          <a-table :data-source="models" :columns="jslibColumns" :rowKey="(_record, index) => _record.id">
+          <a-table class="dp-table"
+                    :data-source="models" :columns="jslibColumns" :rowKey="(_record, index) => _record.id"
+                   :pagination="{
+                      showTotal: (total) => {
+                         return `共 ${total} 条数据`;
+                      },
+                    }" >
+
             <template #name="{ text, record }">
               <div class="record-name">
                 <EditAndShowField :custom-class="'custom-serve show-on-hover'" placeholder="请输入自定义脚本库名称"
@@ -31,12 +38,16 @@
               </a-tag>
             </template>
 
-            <template #typesFile="{ text }">
-             {{ text }}
+            <template #scriptFile="{ record }">
+              <a-link :to="serverUrl + record.scriptFile" target="_blank" :title="record.scriptFile">
+                {{record.scriptFile}}
+              </a-link>
             </template>
 
-            <template #scriptFile="{ text }">
-              {{ text }}
+            <template #typesFile="{ record }">
+              <a-link :to="serverUrl + record.typesFile" target="_blank" :title="record.typesFile">
+                {{record.typesFile}}
+              </a-link>
             </template>
 
             <template #createUser="{record}">
@@ -88,23 +99,37 @@
 import {computed, createVNode, onMounted, reactive, ref, watch} from 'vue';
 import {useStore} from "vuex";
 import {ExclamationCircleOutlined, MoreOutlined} from '@ant-design/icons-vue';
-import {StateType as SysSettingStateType} from '../store';
+import {StateType as ProjectSettingStateType} from '../../store';
 import {useI18n} from "vue-i18n";
 import {disabledStatus, disabledStatusTagColor} from "@/config/constant"
-import {notifyError, notifySuccess} from "@/utils/notify";
 import {Modal} from "ant-design-vue";
 import {momentUtc} from '@/utils/datetime';
 
-import {jslibColumns} from '../config';
+import {jslibColumns} from './config';
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import EmptyComp from '@/components/TableEmpty/index.vue';
 import EditDrawer from './drawer.vue';
 import debounce from "lodash.debounce";
+import {StateType as ProjectStateType} from "@/store/project";
+import {getUrls} from "@/utils/request";
+import ALink from "@/components/ALink/index.vue";
+import {addSepIfNeeded} from "@/utils/url";
 
 const {t} = useI18n();
 
-const store = useStore<{ SysSetting: SysSettingStateType }>();
-const models = computed<any>(() => store.state.SysSetting.jslibModels);
+const store = useStore<{ ProjectSetting: ProjectSettingStateType, ProjectGlobal: ProjectStateType }>();
+const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
+const models = computed<any>(() => store.state.ProjectSetting.jslibModels);
+
+const serverUrl = addSepIfNeeded(getUrls().serverUrl?.replace('api/v1', ''))
+
+watch(currProject, (val) => {
+  if (!val.id) return
+  queryParams.value ={
+    keywords: '',
+  }
+  list()
+}, { deep: true })
 
 const drawerVisible = ref(false);
 const modelId = ref(0);
@@ -119,11 +144,11 @@ const onSearch = debounce(() => {
 list()
 function list() {
   console.log('list', queryParams.value)
-  store.dispatch('SysSetting/listJslib', queryParams.value)
+  store.dispatch('ProjectSetting/listJslib', queryParams.value)
 }
 
 function updateName(value: string, record: any) {
-  store.dispatch('SysSetting/updateJslibName', {
+  store.dispatch('ProjectSetting/updateJslibName', {
     id: record.id,
     name: value
   });
@@ -140,13 +165,13 @@ async function remove(record: any) {
     title: '确认要删除该自定义脚本库吗？',
     icon: createVNode(ExclamationCircleOutlined),
     onOk() {
-      store.dispatch('SysSetting/deleteJslib', record.id);
+      store.dispatch('ProjectSetting/deleteJslib', record.id);
     }
   })
 }
 
 async function onDisable(record: any) {
-  store.dispatch('SysSetting/disableJslib', record.id);
+  store.dispatch('ProjectSetting/disableJslib', record.id);
 }
 
 function onClose() {

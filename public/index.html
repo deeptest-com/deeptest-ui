@@ -5,9 +5,8 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-
-    <% if (process.env.VUE_APP_DEPLOY_ENV !=='ly' ) { %>
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+    <% if (process.env.VUE_APP_DEPLOY_ENV !=='ly' ) { %>
     <title>
         <%= htmlWebpackPlugin.options.title %>
     </title>
@@ -152,30 +151,28 @@
 </head>
 
 <body>
-    <noscript>
-        <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled.
-                Please enable it to continue.</strong>
-    </noscript>
-    <div id="app"></div>
-    <div class="app-loading">
-        <% if(process.env.VUE_APP_DEPLOY_ENV === 'ly') { %>
-            <img src="https://leyanapi.nancalcloud.com/upload/images/leyan-api-logo.jpg" class="app-loading-logo" alt="Logo" />
-        <% } else { %>
-            <!-- <img src="https://leyanapi.nancalcloud.com/upload/images/logo.jpg" class="app-loading-logo" alt="Logo" /> -->
-        <% } %>
-        <div class="app-loading-dots">
-            <span class="dot dot-spin"><i></i><i></i><i></i><i></i></span>
-        </div>
-        <div class="app-loading-title"></div>
-        <script>
-            const titleEl = document.getElementsByClassName('app-loading-title');
-            if (titleEl[0] && env === 'ly') {
-                titleEl[0].innerHTML =!!window.require ? "<%= process.env.VUE_APP_DEPLOY_ENV_TITLE %>" : location.host;
-            } else {
-                titleEl[0].innerHTML = 'DeepTest.com';
-            }
-        </script>
+<noscript>
+    <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled.
+        Please enable it to continue.</strong>
+</noscript>
+<div id="app"></div>
+<div class="app-loading">
+    <% if (process.env.VUE_APP_DEPLOY_ENV ==='ly' ) { %>
+    <img src="<%= process.env.VUE_APP_DEPLOY_ENV_LOADING_ICON %>" class="app-loading-logo" alt="Logo"/>
+    <% } %>
+    <div class="app-loading-dots">
+        <span class="dot dot-spin"><i></i><i></i><i></i><i></i></span>
     </div>
-    <!-- built files will be auto injected -->
+    <div class="app-loading-title"></div>
+    <script>
+        const titleEl = document.getElementsByClassName('app-loading-title');
+        if (titleEl[0] && env === 'ly') {
+            titleEl[0].innerHTML =!!window.require ? "<%= process.env.VUE_APP_DEPLOY_ENV_TITLE %>" : location.host;
+        } else {
+            titleEl[0].innerHTML = 'DeepTest.com';
+        }
+    </script>
+</div>
+<!-- built files will be auto injected -->
 </body>
 </html>

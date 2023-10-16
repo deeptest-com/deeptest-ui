@@ -164,7 +164,6 @@ export default defineComponent({
         &.leyan-logo{
           width: 100%;
           height: 40px;
-          background-image: url("../../../assets/images/leyan-api-logo.png");
           background-size: 100% 100%;
           transform: unset;
         }

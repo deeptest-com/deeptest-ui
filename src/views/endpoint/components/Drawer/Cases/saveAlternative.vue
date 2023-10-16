@@ -5,7 +5,6 @@
            @cancel="cancel"
            title="另存为用例">
     <a-form :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-
       <a-form-item label="名称前缀" v-bind="validateInfos.prefix">
         <a-input v-model:value="modelRef.prefix"
                  @blur="validate('name', { trigger: 'blur' }).catch(() => {})"/>
@@ -13,6 +12,13 @@
           {{ `生成的用例会以"${modelRef.prefix}-"开头` }}
         </div>
       </a-form-item>
+
+<!--  <a-form-item label="生成模式" v-bind="validateInfos.prefix">
+        <a-radio-group v-model:value="modelRef.type">
+          <a-radio value="multi">每个路径独立用例</a-radio>
+          <a-radio value="single">所有路径一个用例</a-radio>
+        </a-radio-group>
+      </a-form-item> -->
 
     </a-form>
   </a-modal>
@@ -48,12 +54,18 @@ const props = defineProps({
 
 const modelRef = ref({
   prefix: '',
+  type: 'multi',
+  baseId: 0,
+  values: []
 });
 
-watch(() => props.visible, () => {
-  console.log('watch props.visible', props?.visible)
+watch(() => props.model, () => {
+  console.log('watch props.visible', props?.model)
   modelRef.value = {
     prefix: '备选用例-',
+    type: 'multi',
+    baseId: props.model.baseId,
+    values: props.model.values,
   }
 }, {immediate: true, deep: true})
 
@@ -66,9 +78,9 @@ const rulesRef = reactive({
 const {resetFields, validate, validateInfos} = useForm(modelRef, rulesRef);
 
 const submit = () => {
-  console.log('submit', modelRef.value, props.model)
-  validate().then(() => {
-    // submit
+  console.log('submit', modelRef.value)
+  validate().then(async () => {
+    await store.dispatch('Endpoint/saveAlternativeCase', modelRef.value)
 
     resetFields();
     props.onClose()

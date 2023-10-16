@@ -228,6 +228,16 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         }
       },
       {
+        icon: 'script',
+        title: 'index-layout.menu.project.setting.jslib',
+        path: 'jslib',
+        component: () => import('@/views/project-settings/components/JsLib/index.vue'),
+        hidden: false,
+        meta: {
+          code: 'PROJECT-SETTING-JSLIB'
+        }
+      },
+      {
         icon: 'swaggerSync',
         title: 'index-layout.menu.project.setting.swaggerSync',
         path: 'swaggerSync',

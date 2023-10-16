@@ -2,9 +2,9 @@
   <div :class="['indexlayout-top-settings', theme]">
     <div class="user-info">
 
-      <template v-if="isLyEnv">
-        <!--  客户端下载 -->
-        <a-dropdown placement="bottomRight" v-if="!isElectronEnv">
+      <!--  客户端下载 -->
+      <template v-if="!isElectronEnv">
+        <a-dropdown placement="bottomRight" v-if="isLyEnv">
           <a class="indexlayout-top-usermenu ant-dropdown-link" style="margin-right: 4px;margin-left: 4px;">
             <DesktopOutlined type="top-right-web" class="top-right-icon-desktop"/>
             <span class="user-name">{{ '客户端下载' }}</span>
@@ -19,67 +19,53 @@
           </template>
         </a-dropdown>
 
-        <!--  切换Agent -->
-        <a-dropdown placement="bottomRight">
-          <a class="indexlayout-top-usermenu ant-dropdown-link" style="margin-right: 6px;margin-left: 8px;">
-            <IconSvg type="top-right-web" class="top-right-icon"/>
-            <span class="user-name">{{ currentAgent.name }}</span>
-            <DownOutlined class="user-icon"/>
+        <span v-else>
+          <CloudDownloadOutlined class="user-icon" style="color: #c0c4cc;" />
+          <a href="https://deeptest.com/setup.html" target="_blank" style="color: #fff;">
+            客户端下载
           </a>
-          <template #overlay>
-            <a-menu @click="changeAgentEnv">
-              <template v-for="agent in agents">
-                <template v-if="agent.id !== currentAgent?.id">
-                  <a-menu-item :key="agent.id">
-                    <a-tooltip placement="left" :title="agent.desc">
-                      {{ agent.name }}
-                    </a-tooltip>
-                  </a-menu-item>
-                </template>
+        </span>
+      </template>
+
+      <!--  切换Agent -->
+      <a-dropdown placement="bottomRight" v-if="agents?.length">
+        <a class="indexlayout-top-usermenu ant-dropdown-link" style="margin-right: 6px;margin-left: 8px;">
+          <IconSvg type="top-right-web" class="top-right-icon"/>
+          <span class="user-name">{{ currentAgent.name }}</span>
+          <DownOutlined class="user-icon"/>
+        </a>
+        <template #overlay>
+          <a-menu @click="changeAgentEnv">
+            <template v-for="agent in agents">
+              <template v-if="agent.id !== currentAgent?.id">
+                <a-menu-item :key="agent.id">
+                  <a-tooltip placement="left" :title="agent.desc">
+                    {{ agent.name }}
+                  </a-tooltip>
+                </a-menu-item>
               </template>
-            </a-menu>
-          </template>
-        </a-dropdown>
-      </template>
+            </template>
+          </a-menu>
+        </template>
+      </a-dropdown>
 
-      <template v-else> <!-- 系统菜单 -->
-        <a-dropdown placement="bottomRight">
-          <a class="indexlayout-top-sysmenu ant-dropdown-link" style="margin-right: 6px;margin-left: 8px;">
-            <SettingOutlined class="top-right-icon-desktop"/>
-            <span class="user-name">系统</span>
-            <DownOutlined class="user-icon"/>
-          </a>
-          <template #overlay>
-            <a-menu @click="onSysMenuClick">
-              <a-sub-menu key="agent-sub-menu" title="切换代理 &nbsp;">
-                  <a-menu-item v-for="agent in agents"
-                               :key="agent.id"
-                               :style="agent.id === currentAgent?.id ? {color:'#1890ff','background-color': '#e6f7ff'} : {}">
-                    <a-tooltip placement="left" :title="agent.desc">
-                      {{ agent.name }}
-                    </a-tooltip>
-                  </a-menu-item>
-              </a-sub-menu>
-
-              <a-menu-item key="agentManage">
-                代理管理
-              </a-menu-item>
-
-              <a-menu-item key="userManage">
-                用户管理
-              </a-menu-item>
-
-              <a-menu-item key="jslibManage">
-                自定义代码库
-              </a-menu-item>
-
-              <a-menu-item key="download">
-                下载客户端
-              </a-menu-item>
-            </a-menu>
-          </template>
-        </a-dropdown>
-      </template>
+      <a-dropdown placement="bottomRight">
+        <a class="indexlayout-top-sysmenu ant-dropdown-link" style="margin-right: 6px;margin-left: 8px;">
+          <SettingOutlined class="top-right-icon-desktop"/>
+          <span class="user-name">系统</span>
+          <DownOutlined class="user-icon"/>
+        </a>
+        <template #overlay>
+          <a-menu @click="onSysMenuClick">
+            <a-menu-item key="agentManage">
+              代理管理
+            </a-menu-item>
+            <a-menu-item key="userManage">
+              用户管理
+            </a-menu-item>
+          </a-menu>
+        </template>
+      </a-dropdown>
 
       <!-- ::::用户信息 -->
       <a-dropdown placement="bottomRight">
@@ -130,7 +116,7 @@ import {
   LogoutOutlined,
   FullscreenOutlined,
   FullscreenExitOutlined,
-  DesktopOutlined, CheckOutlined,
+  DesktopOutlined, CloudDownloadOutlined,
 } from '@ant-design/icons-vue';
 import {useI18n} from "vue-i18n";
 import IconSvg from "@/components/IconSvg";
@@ -139,6 +125,7 @@ import {useRouter} from "vue-router";
 import {useFullscreen} from '@vueuse/core';
 import {StateType as GlobalStateType} from "@/store/global";
 import {Cache_Key_Agent} from "@/utils/const";
+import {isLeyan} from "@/utils/comm";
 
 const props = defineProps({
   theme: {
@@ -220,7 +207,7 @@ function downloadClient(event: any) {
   }
 }
 
-const isLyEnv = process?.env?.VUE_APP_DEPLOY_ENV === 'ly';
+const isLyEnv = isLeyan()
 const clientDownloadUrlOpts = computed(() => {
   if (!isLyEnv) {
     return []
@@ -245,7 +232,6 @@ onMounted(async () => {
   // 设置当前代理，LocalStore里没有，取列表中的第1个
   await store.dispatch('Global/listAgent');
   await store.commit('Global/setCurrAgent', null);
-
   // 获取客户端最新版本号
   await store.dispatch('Global/getClientVersion');
 })

@@ -116,16 +116,6 @@ export const routes: RoutesDataItem[] = [
             }
           },
           {
-            icon: 'script',
-            title: 'custom.lib',
-            path: 'jslib',
-            component: () => import('@/views/sys-settings/JsLib/index.vue'),
-            meta: {
-              title: '自定义脚本库',
-              code: 'SYS-SETTING-JSLIB'
-            }
-          },
-          {
             icon: 'agent',
             title: 'exec.agent',
             path: 'agent',

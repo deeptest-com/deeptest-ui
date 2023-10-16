@@ -4,7 +4,7 @@
       <template #title>
         <div class="tips">
           <div>{{title}}</div>
-          <div @click="openHelp(section)" class="dp-link-primary">
+          <div v-if="section" @click="openHelp()" class="dp-link-primary">
             了解更多 <ArrowRightOutlined/>
           </div>
         </div>
@@ -19,17 +19,19 @@ import {defineProps} from "vue";
 import { QuestionCircleOutlined, ArrowRightOutlined } from '@ant-design/icons-vue';
 import {isLeyan} from "@/utils/comm";
 
-defineProps<{
+const props = defineProps<{
   title: string
   section: string
 }>()
 
-const openHelp = (page, bookmark?) => {
+const openHelp = (bookmark?) => {
+  if (!props.section) return
+
   if (isLeyan()) {
     //
   } else {
     const base = process.env.VUE_APP_HELP_URL;
-    const url = `${base}/${page}.html`
+    const url = `${base}/${props.section}.html`
     console.log('process.env', process.env)
     window.open(url);
   }

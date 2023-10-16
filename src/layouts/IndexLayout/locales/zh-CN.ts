@@ -43,5 +43,6 @@ export default {
   'index-layout.menu.project.setting.service': '服务管理',
   'index-layout.menu.project.setting.members': '项目成员',
   'index-layout.menu.project.setting.mock': 'Mock设置',
+  'index-layout.menu.project.setting.jslib': '自定义脚本库',
   'index-layout.menu.project.setting.swaggerSync': '自动同步',
 };

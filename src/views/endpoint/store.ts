@@ -21,7 +21,6 @@ import {
     updateEndpointCaseName,
     removeEndpointCase,
     getEndpointCase,
-    listEndpointCase,
     saveEndpointCase,
     saveEndpointCaseDebugData,
     batchUpdateField,
@@ -47,7 +46,7 @@ import {
 
     getMockScript,
     updateMockScript,
-    generateJsonExample, loadAlternativeCases, loadAlternativeCasesSaved, saveAlternativeCase,
+    generateJsonExample, loadAlternativeCases, loadAlternativeCasesSaved, saveAlternativeCase, queryEndpointCase,
 } from './service';
 
 import {
@@ -91,7 +90,8 @@ export interface StateType {
     selectedMethodDetail: any;
     selectedCodeDetail: any;
 
-    caseList: any[];
+    caseQueryParams: any;
+    caseList: QueryResult;
     caseDetail: any;
     tagList: any;
     caseTree:any;
@@ -108,6 +108,7 @@ export interface StateType {
     mockExpectLoading: boolean;
     mockScript:any;
 
+    // 用例生成
     alternativeCases:any;
     alternativeCasesSaved:any;
 }
@@ -142,6 +143,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setSelectedMethodDetail: Mutation<StateType>;
         setSelectedCodeDetail: Mutation<StateType>;
 
+        setCaseQueryParams: Mutation<StateType>;
         setEndpointCaseList: Mutation<StateType>;
         setEndpointCaseDetail: Mutation<StateType>;
         setEndpointTagList: Mutation<StateType>;
@@ -270,8 +272,20 @@ const initState: StateType = {
     refsOptions: {},
     selectedMethodDetail: {},
     selectedCodeDetail: {},
-    caseList: [],
+
+    caseQueryParams: {},
+    caseList: {
+        list: [],
+        pagination: {
+        total: 0,
+            current: 1,
+            pageSize: 10,
+            showSizeChanger: true,
+            showQuickJumper: true,
+        },
+    },
     caseDetail: {},
+
     tagList:[],
     caseTree:[],
     caseTreeMap:[],
@@ -410,6 +424,9 @@ const StoreModel: ModuleType = {
             }
         },
 
+        setCaseQueryParams(state, payload) {
+            state.caseQueryParams = payload;
+        },
         setEndpointCaseList(state, payload) {
             state.caseList = payload;
         },
@@ -891,15 +908,31 @@ const StoreModel: ModuleType = {
             }
             return result;
         },
-        async listCase({commit}, endpointId: number) {
-            const resp = await listEndpointCase(endpointId);
-            commit('setEndpointId', endpointId);
 
-            if (resp.code === 0) {
-                commit('setEndpointCaseList', resp.data);
+        async listCase({commit, dispatch, state}, params: QueryParams | any) {
+            try {
+                commit('setEndpointId', params.endpointId);
+                commit('setCaseQueryParams', params);
+
+                const response: ResponseData = await queryEndpointCase(params);
+                if (response.code != 0) return false;
+
+                const data = response.data;
+
+                commit('setEndpointCaseList', {
+                    ...initState.listResult,
+                    list: data.result || [],
+                    pagination: {
+                        ...initState.listResult.pagination,
+                        current: params.page,
+                        pageSize: params.pageSize,
+                        total: data.total || 0,
+                    },
+                });
+
                 return true;
-            } else {
-                return false
+            } catch (error) {
+                return false;
             }
         },
         async getCase({commit}, id: number) {
@@ -915,7 +948,7 @@ const StoreModel: ModuleType = {
         async saveCase({state, dispatch}, payload: any) {
             const jsn = await saveEndpointCase(payload)
             if (jsn.code === 0) {
-                dispatch('listCase', state.endpointId);
+                dispatch('listCase', state.caseQueryParams);
                 return true;
             } else {
                 return false
@@ -932,7 +965,7 @@ const StoreModel: ModuleType = {
         async updateCaseName({state, dispatch}, payload: any) {
             const jsn = await updateEndpointCaseName(payload)
             if (jsn.code === 0) {
-                dispatch('listCase', state.endpointId);
+                dispatch('listCase', state.caseQueryParams);
                 return true;
             } else {
                 return false
@@ -942,7 +975,7 @@ const StoreModel: ModuleType = {
             try {
                 const jsn = await removeEndpointCase(record);
                 if (jsn.code === 0) {
-                    dispatch('listCase', state.endpointId);
+                    dispatch('listCase', state.caseQueryParams);
                     return true;
                 }
                 return false;
@@ -988,8 +1021,8 @@ const StoreModel: ModuleType = {
                 return false
             }
         },
-        async saveAlternativeCase({ commit, state, dispatch }, baseId: number) {
-            const jsn = await saveAlternativeCase(baseId)
+        async saveAlternativeCase({ commit, state, dispatch }, data: any) {
+            const jsn = await saveAlternativeCase(data)
             if (jsn.code === 0) {
                 return true;
             } else {

@@ -81,8 +81,7 @@ export default defineComponent({
       cursor: pointer;
       &.leyan-logo{
         transform: scale(1.1) translateX(5px);
-
-        background-image: url("https://leyanapi.nancalcloud.com/upload/images/202306291016448.svg");
+        background-image: url('../assets/images/logo.svg');
       }
     }
   }

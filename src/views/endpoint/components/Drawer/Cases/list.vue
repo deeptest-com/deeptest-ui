@@ -7,13 +7,25 @@
     </div>
 
     <div class="content">
-      <a-table
-          v-if="caseList.length > 0"
-          :data-source="caseList"
-          :columns="columns"
-          :loading="loading"
-          row-key="id"
-          class="dp-table">
+      <a-table v-if="list.length > 0"
+                :data-source="list"
+                :pagination="{
+                    ...pagination,
+                    onChange: (page) => {
+                      query(page,pagination.pageSize);
+                    },
+                    onShowSizeChange: (_page, size) => {
+                      query(1,size);
+                    },
+                    showTotal: (total) => {
+                      return `共 ${total} 条数据`;
+                    },
+                }"
+
+                :columns="columns"
+                :loading="loading"
+                row-key="id"
+                class="dp-table">
 
         <template #name="{ record, text }">
           <EditAndShowField placeholder="名称"
@@ -52,8 +64,16 @@
       </a-table>
 
       <a-empty class="dp-empty-no-margin"
-               v-if="caseList.length === 0"
+               v-if="list.length === 0"
                :image="simpleImage"/>
+
+      <CaseEdit
+          v-if="editVisible"
+          :visible="editVisible"
+          :model="editModel"
+          :onFinish="createFinish"
+          :onCancel="createCancel"/>
+
     </div>
   </div>
 </template>
@@ -73,8 +93,11 @@ import {StateType as Endpoint} from "@/views/endpoint/store";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {StateType as Project} from "@/views/project/store";
 
-import EditAndShowField from '@/components/EditAndShow/index.vue';
 import {notifyError, notifySuccess} from "@/utils/notify";
+import {PaginationConfig} from "@/views/endpoint/data";
+import EditAndShowField from '@/components/EditAndShow/index.vue';
+import CaseEdit from "./edit.vue";
+import GenerateCasePopup from "./generate.vue";
 
 provide('usedBy', UsedBy.InterfaceDebug)
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
@@ -82,8 +105,10 @@ const {t} = useI18n();
 
 const store = useStore<{ Endpoint: Endpoint, Debug: Debug, Project: Project }>();
 const endpoint = computed<any>(() => store.state.Endpoint.endpointDetail);
-const caseList = computed<any[]>(() => store.state.Endpoint.caseList);
 const userList = computed<any>(() => store.state.Project.userList);
+
+const list = computed<any[]>(() => store.state.Endpoint.caseList.list);
+let pagination = computed<PaginationConfig>(() => store.state.Endpoint.caseList.pagination);
 
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
@@ -101,14 +126,18 @@ const props = defineProps({
 
 const loading = ref<boolean>(true);
 
-const list = debounce(async (endpointId: number): Promise<void> => {
+const query = debounce(async (page, size): Promise<void> => {
   console.log('getList')
 
   loading.value = true;
-  await store.dispatch('Endpoint/listCase', endpointId);
+  await store.dispatch('Endpoint/listCase', {
+    endpointId: endpoint.value.id,
+    page: page,
+    pageSize: size,
+  });
   loading.value = false
 }, 300)
-list(endpoint.value.id)
+query(1, pagination.value.pageSize)
 
 const editVisible = ref(false)
 const editModel = ref({} as any)
@@ -161,7 +190,7 @@ const updateName = async (value: string, record: any) => {
     name: value,
     endpointId: endpoint.value.id,
   });
-  list(endpoint.value.id)
+  query(1, pagination.value.pageSize)
 }
 
 const username = (user:string)=>{
@@ -169,8 +198,6 @@ const username = (user:string)=>{
   return result?.label || '-'
 }
 
-const generateCasesVisible = ref(false)
-const generateCasesModel = ref({} as any)
 const generate = (record) => {
   props.onGenerate(record)
 }

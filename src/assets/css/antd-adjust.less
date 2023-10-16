@@ -18,6 +18,14 @@
     color: rgba(0, 0, 0, 0.45);
     cursor: default;
 }
+.dp-no-label-after {
+    .ant-form-item-label > label::after {
+        content: '' !important;
+    }
+}
+.ant-form-item.dp-form-item-no-bottom-space {
+    margin-bottom: 0px;
+}
 
 .ant-tree li .ant-tree-node-content-wrapper.ant-tree-node-selected {
     background-color: @itemSelectedBackground;
@@ -152,7 +160,7 @@
             border-color: transparent;
             box-shadow: none;
         }
-    
+
         .ant-input {
             border-color: transparent;
             box-shadow: none;
@@ -164,7 +172,7 @@
             }
         }
     }
-    
+
     .ant-tabs-bar {
         border: 0 !important
     }

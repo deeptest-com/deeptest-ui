@@ -19,7 +19,7 @@
             </a-card>
           </div>
 
-          <div class="title">代码片段：</div>
+          <div class="title">代码片段：11</div>
           <div>
             <div @click="addSnippet('get_param')" class="dp-link-primary">获取指定参数值</div>
             <div @click="addSnippet('get_header')" class="dp-link-primary">获取指定Header值</div>
@@ -28,7 +28,20 @@
             <div @click="addSnippet('set_mock_resp_code')" class="dp-link-primary">设置响应码</div>
             <div @click="addSnippet('set_mock_resp_field')" class="dp-link-primary">修改JSON响应字段</div>
             <div @click="addSnippet('set_mock_resp_text')" class="dp-link-primary">修改字符串响应内容</div>
+          </div>
 
+          <div class="title">
+            自定义脚本库<Tips title="可输入名称+点，根据提示使用。" />：
+            <router-link :to="'/'+currProject.shortName+'/project-setting/jslib'"
+                         target="_blank" class="dp-link-primary">
+              前往添加
+            </router-link>
+          </div>
+          <div>
+            <div class="dp-link-primary"
+                 v-for="(item, index) in jslibNames" :key="index">
+              {{item}}
+            </div>
           </div>
         </div>
       </div>
@@ -42,20 +55,26 @@ import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import {UsedBy} from "@/utils/enum";
 
-import {StateType as Debug} from "@/views/component/debug/store";
+import {StateType as Snippet} from "@/store/snippet";
+
 import {MonacoOptions, NotificationKeyCommon} from "@/utils/const";
 import MonacoEditor from "@/components/Editor/MonacoEditor.vue";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
-import {notifyError, notifySuccess} from "@/utils/notify";
+import Tips from "@/components/Tips/index.vue";
+import {StateType as ProjectStateType} from "@/store/project";
 
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 
-const store = useStore<{ Endpoint }>();
+const store = useStore<{ ProjectGlobal: ProjectStateType, Endpoint, Snippet: Snippet }>();
+const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const endpoint = computed<any>(() => store.state.Endpoint.endpointDetail);
 const mockScript = computed<any>(() => store.state.Endpoint.mockScript);
+const jslibNames = computed<any>(() => store.state.Snippet.jslibNames);
+
+store.dispatch('Snippet/listJslibNames')
 
 const timestamp = ref('')
 watch(mockScript, (newVal) => {

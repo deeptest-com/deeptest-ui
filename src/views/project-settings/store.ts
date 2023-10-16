@@ -53,6 +53,7 @@ import {
 import {disabledStatus, disabledStatusTagColor, serveStatus, serveStatusTagColor} from '@/config/constant';
 import { momentUtc } from '@/utils/datetime';
 import {notifyError, notifySuccess} from "@/utils/notify";
+import {deleteJslib, disableJslib, getJslib, listJslib, saveJslib, updateJsLibName} from "@/views/sys-settings/service";
 
 export interface StateType {
     envList: any;
@@ -71,6 +72,9 @@ export interface StateType {
     serveVersionsList: any;
     activeEnvDetail: any;
     selectEnvId: number | null;
+
+    jslibModels: any[];
+    jslibModel: any;
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -93,6 +97,9 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setSwaggerSync: Mutation<StateType>,
         setMock: Mutation<StateType>,
+
+        setJslibs: Mutation<StateType>,
+        setJslib: Mutation<StateType>,
     };
     actions: {
         // 环境-全局变量-全局参数相关
@@ -153,6 +160,13 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         saveMock: Action<StateType, StateType>,
         getMock: Action<StateType, StateType>,
+
+        listJslib: Action<StateType, StateType>,
+        getJslib: Action<StateType, StateType>,
+        saveJslib: Action<StateType, StateType>,
+        updateJsLibName: Action<StateType, StateType>,
+        deleteJslib: Action<StateType, StateType>,
+        disableJslib: Action<StateType, StateType>,
     }
 }
 
@@ -185,7 +199,10 @@ const initState: StateType = {
     },
     selectEnvId: null,
     swaggerSyncDetail: {},
-    mockSettings: {}
+    mockSettings: {},
+
+    jslibModels: [],
+    jslibModel: {},
 };
 
 const StoreModel: ModuleType = {
@@ -239,7 +256,14 @@ const StoreModel: ModuleType = {
         },
         setMock(state, payload){
             state.mockSettings = payload;
-        }
+        },
+
+        setJslibs(state, payload) {
+            state.jslibModels = payload;
+        },
+        setJslib(state, payload) {
+            state.jslibModel = payload;
+        },
     },
     actions: {
         async getEnvsList({ commit }, { projectId }: EnvReqParams) {
@@ -683,7 +707,7 @@ const StoreModel: ModuleType = {
         async saveSwaggerSync({ commit }, params: SwaggerSync){
             const res = await saveSwaggerSync(params);
             if (res.code === 0) {
-                 commit('setSwaggerSync', res.data)
+                commit('setSwaggerSync', res.data)
                 return true
             } else {
                 notifyError('保存同步信息失败')
@@ -693,7 +717,7 @@ const StoreModel: ModuleType = {
         async getSwaggerSync({ commit }){
             const res = await getSwaggerSync();
             if (res.code === 0) {
-                 commit('setSwaggerSync', res.data)
+                commit('setSwaggerSync', res.data)
             } else {
                 notifyError('获取同步信息失败');
             }
@@ -716,6 +740,62 @@ const StoreModel: ModuleType = {
                 commit('setMock', res.data)
             } else {
                 notifyError('获取Mock设置失败');
+            }
+        },
+
+        async listJslib({ commit }, params) {
+            const res = await listJslib(params)
+            if (res.code === 0) {
+                commit('setJslibs', res.data);
+                return true;
+            } else {
+                return false;
+            }
+        },
+        async getJslib({ commit, dispatch }, id: number) {
+            const res = await getJslib(id);
+            if (res.code === 0) {
+                commit('setJslib', res.data);
+            } else {
+                notifyError(`获取自定义脚本库失败`);
+            }
+        },
+        async saveJslib({ dispatch }, data) {
+            const res = await saveJslib(data);
+
+            if (res.code === 0) {
+                notifySuccess('保存成功');
+                dispatch('listJslib')
+            } else {
+                notifyError('删除自定义脚本库失败');
+            }
+            return res.msgKey
+        },
+        async updateJsLibName({ dispatch }, data) {
+            const res = await updateJsLibName(data);
+
+            if (res.code === 0) {
+                dispatch('listJslib')
+            } else {
+                notifyError('修改自定义脚本库名称失败');
+            }
+            return res.msgKey
+        },
+        async deleteJslib({ dispatch }, id) {
+            const res = await deleteJslib(id);
+            if (res.code === 0) {
+                notifySuccess('删除自定义脚本库成功');
+                dispatch('listJslib')
+            } else {
+                notifyError('删除自定义脚本库失败');
+            }
+        },
+        async disableJslib({ dispatch }, id) {
+            const res = await disableJslib(id);
+            if (res.code === 0) {
+                dispatch('listJslib')
+            } else {
+                notifyError('删除自定义脚本库失败');
             }
         },
     }

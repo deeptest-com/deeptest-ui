@@ -44,7 +44,7 @@ const StoreModel: ModuleType = {
                 const { data } = response;
                 await setToken(data.token || '');
 
-                // 乐研客户端里，保存用户信息
+                // 客户端里，保存用户信息
                 const isElectron = !!window?.require;
                 const ipcRenderer = undefined as any
                 if (isElectron && !ipcRenderer) {

@@ -33,7 +33,7 @@
             placeholder="请选择所属分类"
             allow-clear/>
       </a-form-item>
-      
+
       <a-form-item name="dataSyncType">
         <template v-slot:label>
         数据合并策略
@@ -54,7 +54,7 @@
             :options="dataSyncTypeOpts"
             placeholder="请选择"/>
       </a-form-item>
-      
+
       <a-form-item label="开启url导入" name="openUrlImport">
         <a-radio-group :disabled="disabled"
             :options="openUrlImportOpts"
@@ -64,7 +64,7 @@
         <a-spin tip="上传中..." :spinning="uploading">
           <a-upload
               :fileList="fileList"
-              accept=".json"
+              accept=".json,.yaml,.yml"
               :remove="handleRemove"
               @change="handleChangeFile"
               :before-upload="beforeUpload">
@@ -124,7 +124,7 @@ const dataSyncTypeOpts = [
     label: '智能合并',
     value: 2,
   },
-  /*  
+  /*
   {
     label: '完全覆盖',
     value: 'full_cover',

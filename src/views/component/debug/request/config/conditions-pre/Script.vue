@@ -24,6 +24,20 @@
             <div @click="addSnippet('datapool_get')" class="dp-link-primary">获取数据池变量</div>
             <div @click="addSnippet('log')" class="dp-link-primary">打印日志</div>
           </div>
+
+          <div class="title">
+            自定义脚本库<Tips title="可输入名称+点，根据提示使用。" />：
+            <router-link :to="'/'+currProject.shortName+'/project-setting/jslib'"
+                         target="_blank" class="dp-link-primary">
+              前往添加
+            </router-link>
+          </div>
+          <div>
+            <div class="dp-link"
+                 v-for="(item, index) in jslibNames" :key="index">
+              {{item}}
+            </div>
+          </div>
         </div>
       </div>
   </div>
@@ -37,21 +51,29 @@ import {useStore} from "vuex";
 import {UsedBy} from "@/utils/enum";
 
 import {StateType as Debug} from "@/views/component/debug/store";
-import {MonacoOptions, NotificationKeyCommon} from "@/utils/const";
+import {StateType as Snippet} from "@/store/snippet";
+
+import {MonacoOptions} from "@/utils/const";
 import MonacoEditor from "@/components/Editor/MonacoEditor.vue";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
+import Tips from "@/components/Tips/index.vue";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import {StateType as ProjectStateType} from "@/store/project";
 
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 
-const store = useStore<{  Debug: Debug }>();
+const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet: Snippet }>();
 
+const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const scriptData = computed<any>(() => store.state.Debug.scriptData);
+const jslibNames = computed<any>(() => store.state.Snippet.jslibNames);
+
+store.dispatch('Snippet/listJslibNames')
 
 const timestamp = ref('')
 const monacoEditor = ref();

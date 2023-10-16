@@ -2,11 +2,6 @@
 node_modules
 /dist
 
-
-# local env files
-.env.local
-.env.*.local
-
 # Log files
 npm-debug.log*
 yarn-debug.log*
@@ -29,3 +24,22 @@ test.js
 
 local
 .env.ly-client
+
+############  忽略内部版本敏感信息（如环境变量、品牌LOGO等） start ############
+.env.dev
+.env.demo
+.env.client
+
+package.json
+.yarnrc
+
+src/assets/images/logo.png
+src/assets/images/logo.svg
+src/assets/images/logo-mini.svg
+public/favicon.ico
+
+/frontend-config
+/config
+############  忽略内部版本敏感信息（如环境变量、品牌LOGO等） end ############
+
+*.sh

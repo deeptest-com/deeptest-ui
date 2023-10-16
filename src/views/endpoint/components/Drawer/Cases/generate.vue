@@ -10,24 +10,33 @@
         </a-button>
       </div>
       <div class="right">
-        <a-button @click="saveAsCase">
+        <a-button :disabled="checkedKeys.length===0" @click="saveAsCase">
           另存为用例
         </a-button>
       </div>
     </div>
 
-    <a-form :label-col="{ span: 3 }"
-            :wrapper-col="{ span: 20 }">
+    <a-tabs type="card" v-model:activeKey="activeKey">
+      <a-tab-pane key="paths" tab="备选路径">
+        <a-form :label-col="{ span: 3 }"
+                :wrapper-col="{ span: 20 }">
 
-      <a-form-item label="备选路径">
-        <a-tree
-            :replaceFields="replaceFields"
-            :tree-data="alternativeCases"
-            :expandedKeys="expandedKeys"
-            :checkable="true"
-            v-model:checkedKeys="checkedKeys"
-            :show-icon="true">
-          <template #title="nodeProps">
+          <a-form-item label="" :wrapper-col="{offset: 2 }" class="dp-form-item-no-bottom-space">
+            <span @click="selectAll" class="dp-link-primary">
+              <span v-if="!allSelected">选择所有</span>
+              <span v-else>取消选择所有</span>
+            </span>
+          </a-form-item>
+
+          <a-form-item label="" :wrapper-col="{offset: 2 }">
+            <a-tree
+                :replaceFields="replaceFields"
+                :tree-data="alternativeCases"
+                :expandedKeys="expandedKeys"
+                :checkable="true"
+                v-model:checkedKeys="checkedKeys"
+                :show-icon="true">
+              <template #title="nodeProps">
             <span class="tree-title">
               <span>{{ nodeProps.title }}</span>
               <template v-if="nodeProps.category==='case'">
@@ -50,16 +59,20 @@
 
               </template>
             </span>
-          </template>
+              </template>
 
-          <template #icon="slotProps">
-            <FolderOutlined v-if="slotProps.isDir && !slotProps.expanded"/>
-            <FolderOpenOutlined v-if="slotProps.isDir && slotProps.expanded"/>
-            <FileOutlined v-if="!slotProps.isDir"/>
-          </template>
-        </a-tree>
-      </a-form-item>
-    </a-form>
+              <template #icon="slotProps">
+                <FolderOutlined v-if="slotProps.isDir && !slotProps.expanded"/>
+                <FolderOpenOutlined v-if="slotProps.isDir && slotProps.expanded"/>
+                <FileOutlined v-if="!slotProps.isDir"/>
+              </template>
+            </a-tree>
+          </a-form-item>
+        </a-form>
+      </a-tab-pane>
+      <a-tab-pane key="assert" tab="统一断言">
+      </a-tab-pane>
+    </a-tabs>
 
     <SaveAlternative
         :visible="saveAsVisible"
@@ -93,6 +106,9 @@ const store = useStore<{ Endpoint: EndpointStateType }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const alternativeCases = computed<any>(() => store.state.Endpoint.alternativeCases);
 
+const activeKey = ref('paths')
+const allSelected = ref(false)
+
 const sampleRef = ref('')
 const treeDataMap = ref({})
 
@@ -118,34 +134,42 @@ const modelRef = ref({
 
 const replaceFields = {key: 'key'};
 const expandedKeys = ref<string[]>([]);
-const checkedKeys = ref<string[]>([])
+const checkedKeys = ref<string[]>([] as any[])
 
 const loadCaseTree = () => {
   store.dispatch('Endpoint/loadAlternativeCases', modelRef.value.baseId).then((result) => {
     console.log('loadCaseTree', result)
     expandAll()
   })
-  store.dispatch('Endpoint/loadAlternativeCasesSaved', modelRef.value.baseId)
+  // store.dispatch('Endpoint/loadAlternativeCasesSaved', modelRef.value.baseId)
 }
 
+function selectAll() {
+  const keys: any = [];
+
+  if (!allSelected.value) {
+    getAllKeys(alternativeCases.value, keys);
+    checkedKeys.value = keys;
+  } else {
+    checkedKeys.value = []
+  }
+  allSelected.value = !allSelected.value
+}
 function expandAll() {
   const keys: any = [];
-  const data = alternativeCases.value;
-
-  function fn(arr: any) {
-    if (!Array.isArray(arr)) {
-      return;
-    }
-    arr.forEach((item, index) => {
-      keys.push(item.key);
-      if (Array.isArray(item.children)) {
-        fn(item.children)
-      }
-    });
-  }
-
-  fn(data);
+  getAllKeys(alternativeCases.value, keys);
   expandedKeys.value = keys;
+}
+function getAllKeys(arr: any, keys: any[]) {
+  if (!Array.isArray(arr)) {
+    return;
+  }
+  arr.forEach((item, index) => {
+    keys.push(item.key);
+    if (Array.isArray(item.children)) {
+      getAllKeys(item.children, keys)
+    }
+  });
 }
 
 watch(() => props.model, () => {
@@ -170,31 +194,27 @@ const saveAsCase = () => {
   console.log('saveAsCase', checkedKeys.value)
   saveAsVisible.value = true
 
-  const paths = ref([] as any[])
+  const values = ref([] as any[])
   checkedKeys.value.forEach((key) => {
     if (treeDataMap.value[key]) {
-      paths.value.push(treeDataMap.value[key].path)
+      const item = treeDataMap.value[key]
+      const val = {
+        path: item.path,
+        sample: item.sample,
+        fieldType: item.fieldType,
+        Category: item.category,
+        Type: item.type,
+        Rule: item.rule,
+      }
+      values.value.push(val)
     }
   })
   const baseId = modelRef.value.baseId
-  saveAsModel.value = {paths, baseId}
+  saveAsModel.value = {values, baseId}
 }
 const saveAsClosed = () => {
   saveAsVisible.value = false
   saveAsModel.value = {}
-}
-
-const finish = () => {
-  console.log('finish', modelRef.value)
-  validate().then(() => {
-    props.onFinish(modelRef.value)
-    resetFields();
-  }).catch((error) => console.log('error', error))
-}
-
-const cancel = () => {
-  console.log('cancel')
-  resetFields()
 }
 
 const editStart = (key) => {
@@ -241,7 +261,6 @@ function getNodeMap(treeNode: any, mp: any) {
   return
 }
 
-
 // const generateCasesFinish = async (model) => {
 //   console.log('generateCasesFinish', model, debugData.value.url)
 //
@@ -284,6 +303,13 @@ const back = () => {
     .right {
       width: 100px;
       text-align: right;
+    }
+  }
+
+  .multi-label {
+    display: block;
+    div {
+      margin-bottom: 5px;
     }
   }
 

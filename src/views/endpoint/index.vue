@@ -209,8 +209,10 @@ const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: Ser
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
+
 const list = computed<Endpoint[]>(() => store.state.Endpoint.listResult.list);
 let pagination = computed<PaginationConfig>(() => store.state.Endpoint.listResult.pagination);
+
 const createApiModalVisible = ref(false);
 const router = useRouter();
 type Key = ColumnProps['key'];

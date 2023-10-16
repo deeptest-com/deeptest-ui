@@ -298,8 +298,6 @@ function validatePath() {
 watch(() => {
   return currServe.value;
 }, val => {
-  console.log(val);
-  console.log(debugData.value);
   debugData.value.baseUrl = val.url;
   debugData.value.serveId = val.serveId;
 }, {

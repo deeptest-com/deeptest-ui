@@ -113,7 +113,7 @@ import {
   defineProps,
   ref,
   watch,
-  createVNode, onMounted
+  createVNode,
 } from 'vue';
 import {useStore} from 'vuex';
 import {Modal} from 'ant-design-vue';
@@ -128,11 +128,13 @@ import {MonacoOptions} from '@/utils/const';
 import {schemaColumns} from '../../config';
 import {StateType as ProjectSettingStateType} from '../../store';
 import cloneDeep from "lodash/cloneDeep";
-
 const props = defineProps({
   serveId: {
     required: true
   },
+  refId: {
+    required: false
+  }
 })
 
 const rules = {
@@ -230,8 +232,20 @@ const edit = async (value: any) => {
   exampleStr.value = JSON.stringify(record?.examples || '');
   schemaType.value = record?.type || '';
   schemeVisibleKey.value++;
-
 };
+
+watch(() => {
+  return props.refId
+},(newVal) => {
+  if(newVal){
+    const record = dataSource.value.find(arrItem => arrItem.ref == newVal);
+    if(record?.ref){
+      edit(record);
+    }
+  }
+},{
+  immediate: true
+});
 
 // 保存组件
 async function handleAdd(formState: any) {
@@ -292,8 +306,6 @@ const total = ref(10);
 async function getList() {
   await changePage(page.value, size.value);
 }
-
-
 
 async function changePage(pageNum, pageSize) {
   page.value = pageNum;

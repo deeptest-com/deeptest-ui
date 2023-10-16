@@ -144,9 +144,16 @@
     </template>
     <a href="javascript:void(0)">
       {{ typesLabel }}
-      <LinkOutlined v-if="props?.value?.ref"/>
     </a>
   </a-popover>
+  <a-tooltip>
+    <template #title>
+      <span>{{`编辑组件 ${props?.value?.ref}`}}</span>
+    </template>
+    <span class="viewComponent" style="margin-left:4px" @click="goViewComponent">
+      <LinkOutlined v-if="props?.value?.ref"/>
+    </span>
+  </a-tooltip>
 </template>
 <script lang="ts" setup>
 import {ref, defineProps, defineEmits, watch, reactive, toRaw, computed, onMounted} from 'vue';
@@ -158,12 +165,12 @@ import cloneDeep from "lodash/cloneDeep";
 import {useStore} from "vuex";
 import {StateType as ServeStateType} from "@/store/serve";
 import debounce from "lodash.debounce";
-
+import { useRouter } from "vue-router";
 const props = defineProps(['value', 'serveId', 'isRefChildNode', 'isRoot']);
 const emit = defineEmits(['change']);
 const tabsList: any = ref([]);
 const visible: any = ref(false);
-
+const router = useRouter();
 // 当前选中的顶层 tab index
 /**
  * 这里备注下：Components 和 Combine Schemas 两种类型，都是通过 tabsList[0] 来控制的，所以这里的 tabsIndex 也是通过 tabsList[0] 来控制的
@@ -325,7 +332,9 @@ function getValueFromTabsList(tabsList: any) {
       };
       const activeTabProps = activeTab?.props?.find((prop: any) => prop.value === activeTab.value);
       activeTabProps?.props?.options?.forEach((opt: any) => {
-        res[opt.name] = opt.value;
+        if(opt.value !== '' && opt.value !== undefined && opt.value !== null){
+          res[opt.name] = opt.value;
+        }
       })
     }
     result.push(res);
@@ -349,6 +358,15 @@ async function searchRefs(keyword) {
   }, 500)();
 }
 
+/**
+ * 查看组件
+ * */
+function goViewComponent() {
+  console.log('goViewComponent', props.value);
+  const refStr = encodeURIComponent(props.value.ref);
+  const url = `${window.location.origin}/${router.currentRoute.value.params.projectNameAbbr}/project-setting/service-setting?sectab=service-component&serveId=${props.serveId}&refId=${refStr}`;
+  window.open(url, '_blank')
+}
 
 watch(() => {
   return visible.value
@@ -374,9 +392,10 @@ watch(() => {
     const value = getValueFromTabsList(tabsList.value);
     // 如果是 ref, 则直接返回, ref的优先级高于 type
     const newTypes = value.map((item: any) => item.ref || item.type);
-    if (JSON.stringify(allTypes) !== JSON.stringify(newTypes)) {
-      emit('change', value);
-    }
+    emit('change', value);
+    // if (JSON.stringify(allTypes) !== JSON.stringify(newTypes)) {
+    //   emit('change', value);
+    // }
   }
 }, {immediate: false})
 
@@ -445,6 +464,15 @@ watch(() => {
   display: inline-block;
   text-align: left;
   font-weight: bold;
+}
+
+.viewComponent{
+  margin-left: 4px;
+  //color: #1890ff;
+  cursor: pointer;
+  &:hover{
+    color: #40a9ff;
+  }
 }
 
 </style>

@@ -29,16 +29,17 @@ export default defineComponent({
     const { locale } = useI18n();
     const antdLocales = computed(()=> antdMessages[locale.value]);
 
+
     const isLyEnv = isLeyan();
-    // NOTICE: 以下代码仅适用于乐研环境，其他环境删除即可
+    // NOTICE: 以下代码仅适用于ly环境，其他环境删除即可
     const store = useStore<{User: UserStateType}>();
     const currentUser = computed<CurrentUser>(()=> store.state.User.currentUser);
     watch(() => {
       return currentUser.value
     },(newVal) => {
-      // 仅乐研环境才会接入
+      // 仅ly环境才会接入
       if(newVal?.username && isLyEnv){
-        // 渲染乐研评论反馈系统
+        // 渲染ly评论反馈系统
         renderfeedback(currentUser);
       }
     },{immediate:true})

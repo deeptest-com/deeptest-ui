@@ -84,7 +84,7 @@ export default defineComponent({
         });
 
         onMounted(async () => {
-          // 乐研客户端里，自动填充用户名和密码
+          // 客户端里，自动填充用户名和密码
           const isElectron = !!window?.require;
           const ipcRenderer = undefined as any
           if (isElectron && !ipcRenderer) {

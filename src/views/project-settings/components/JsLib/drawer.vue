@@ -15,28 +15,39 @@
 
       <div v-if="visible">
         <a-form :model="model" :label-col="labelCol" :wrapper-col="wrapperCol">
-          <a-form-item label="名称" v-bind="validateInfos.name" required>
+
+          <a-form-item class="dp-no-label-after">
+            <template #label>
+              <span v-if="isLy">
+                <ExclamationCircleOutlined />
+              </span>
+              <a v-else href="https://deeptest.com/jslib.html" target="_blank">
+                <QuestionCircleOutlined class="dp-icon-btn dp-trans-80"/>
+              </a>
+            </template>
+
+            <div>
+              导入第三方/自定义JavaScript类库，可以在自定义脚本中，通过
+              {{model.name?model.name:'moduleName'}}.funcName(参数)的形式来调用自定义函数。
+              <br />
+              页面上填写的模块名称和.d.ts文件里声明的模块名称，二者须保持一致。
+            </div>
+          </a-form-item>
+
+          <a-form-item label="模块名称" v-bind="validateInfos.name" required>
             <a-input v-model:value="model.name"
                      @blur="validate('name', { trigger: 'blur' }).catch(() => {})"/>
           </a-form-item>
 
-          <a-form-item label="上传脚本文件"
+          <a-form-item label="脚本文件 (.js)"
                        v-bind="validateInfos.scriptFile" required>
-            <div v-if="isElectron" class="upload-file">
-              <div class="input-container">
-                <a-input v-model:value="model.path" readonly="readonly"/>
-              </div>
-              <div class="upload-container">
-                <a-button @click="uploadFile()">
-                  <UploadOutlined/>
-                </a-button>
-              </div>
-            </div>
             <div v-if="isElectron" class="upload-file-by-electron">
               <a-input v-model:value="model.path" readonly="readonly"/>
               <a-button @click="uploadFile()">
                 <UploadOutlined/>
-              </a-button>
+              </a-button> &nbsp;
+
+              <a-link v-if="model.scriptFile" :to="serverUrl + model.scriptFile" target="_blank">下载</a-link>
             </div>
 
             <div v-else class="upload-file">
@@ -53,25 +64,25 @@
                   </a-button>
                 </a-upload>
               </div>
+
+              <div class="download dp-link-primary">
+                <a-link v-if="model.scriptFile" :to="serverUrl + model.scriptFile" target="_blank">下载</a-link>
+              </div>
+            </div>
+            <div class="dp-input-tip">
+              包含函数的具体实现代码。&nbsp;
+              <a-link :to="serverUrl + 'upload/math.js'" target="_blank">示例</a-link>
             </div>
           </a-form-item>
 
-          <a-form-item label="上传类型文件">
-            <div v-if="isElectron" class="upload-file">
-              <div class="input-container">
-                <a-input v-model:value="model.path" readonly="readonly"/>
-              </div>
-              <div class="upload-container">
-                <a-button @click="uploadFile()">
-                  <UploadOutlined/>
-                </a-button>
-              </div>
-            </div>
+          <a-form-item label="声明文件 (.d.ts)">
             <div v-if="isElectron" class="upload-file-by-electron">
               <a-input v-model:value="model.path" readonly="readonly"/>
               <a-button @click="uploadFile()">
                 <UploadOutlined/>
-              </a-button>
+              </a-button> &nbsp;
+
+              <a-link v-if="model.typesFile" :to="serverUrl + model.typesFile" target="_blank">下载</a-link>
             </div>
 
             <div v-else class="upload-file">
@@ -87,14 +98,14 @@
                   </a-button>
                 </a-upload>
               </div>
-            </div>
-          </a-form-item>
 
-          <a-form-item :wrapperCol="{ span: wrapperCol.span, offset: labelCol.span }">
+              <div class="download dp-link-primary">
+                <a-link v-if="model.typesFile" :to="serverUrl + model.typesFile" target="_blank">下载</a-link>
+              </div>
+            </div>
             <div class="dp-input-tip">
-              请参照<a href="https://deeptest.com/jslib.html" target="_blank">这里</a>准备实现和声明两个JavaScript文件，
-              在代码中使用 {{model.name?model.name:'name'}}(参数) 的形式来调用自定义库函数。<br />
-              注意：页面上填写的名称、.d.ts声明文件里的函数名称、以及.js实现文件里的函数名称，三者必须保持一致。
+              用于前端脚本编辑器中的定义声明，缺少这个文件将导致Web代码编辑器里报红色的语法错误。&nbsp;
+              <a-link :to="serverUrl + 'upload/math.d.ts'" target="_blank">示例</a-link>
             </div>
           </a-form-item>
 
@@ -112,21 +123,26 @@
 import {computed, defineEmits, defineProps, reactive, ref, watch} from 'vue';
 import {Form, notification} from 'ant-design-vue';
 import {useStore} from 'vuex';
-import {UploadOutlined} from '@ant-design/icons-vue';
+import {UploadOutlined, QuestionCircleOutlined,ExclamationCircleOutlined} from '@ant-design/icons-vue';
 
 import settings from "@/config/settings";
 import {getUrls} from "@/utils/request";
 import {getToken} from "@/utils/localToken";
 
-import {StateType as SysSettingStateType} from "../store";
+import {StateType as ProjectSettingStateType} from "../../store";
 import {uploadRequest} from "@/utils/upload";
-import {notifyWarn} from "@/utils/notify";
 import {pattern} from "@/utils/const";
+import {isLeyan} from "@/utils/comm";
+import {addSepIfNeeded} from "@/utils/url";
+import ALink from "@/components/ALink/index.vue";
 
 const useForm = Form.useForm;
 
-const store = useStore<{ SysSetting: SysSettingStateType }>();
-const model = computed<any>(() => store.state.SysSetting.jslibModel);
+const store = useStore<{ ProjectSetting: ProjectSettingStateType }>();
+const model = computed<any>(() => store.state.ProjectSetting.jslibModel);
+
+const isLy = isLeyan()
+const serverUrl = addSepIfNeeded(getUrls().serverUrl?.replace('api/v1', ''))
 
 const props = defineProps({
   visible: {
@@ -162,9 +178,9 @@ watch(props, () => {
   console.log('editId', props)
 
   if (props.modelId === 0) {
-    store.commit('SysSetting/setJslib', {name: '', typesFile: '', scriptFile: ''});
+    store.commit('ProjectSetting/setJslib', {name: '', typesFile: '', scriptFile: ''});
   } else {
-    store.dispatch('SysSetting/getJslib', props.modelId);
+    store.dispatch('ProjectSetting/getJslib', props.modelId);
   }
 }, {deep: true, immediate: true})
 
@@ -224,7 +240,7 @@ const onSubmit = async () => {
   console.log('onSubmit', model.value)
 
   validate().then(async () => {
-    store.dispatch('SysSetting/saveJslib', model.value).then(() => {
+    store.dispatch('ProjectSetting/saveJslib', model.value).then(() => {
       props.onClose();
     })
   }).catch(err => {
@@ -232,12 +248,15 @@ const onSubmit = async () => {
   })
 }
 
-const labelCol = {span: 4}
+const labelCol = {span: 5}
 const wrapperCol = {span: 18}
 
 </script>
 
 <style lang="less" scoped>
 .jslib-edit-main {
+  .sample {
+
+  }
 }
 </style>

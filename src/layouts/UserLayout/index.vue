@@ -1,12 +1,13 @@
 <template>
   <div class="user-layout">
-    <div class="logo" :class="{'ly-logo':isLeyanEnv}"></div>
+    <div class="logo" :class="{'ly-logo':isLeyanEnv}" ></div>
     <div class="right-main">
       <div class="right-content">
         <router-view></router-view>
       </div>
       <div class="right-footer">
-        Copyright © 2018 @deeptest.com
+        Copyright © {{new Date().getFullYear()}} {{company}} <br>
+        {{companyCopyRight}}
       </div>
     </div>
     <div class="lang">
@@ -40,6 +41,7 @@ export default defineComponent({
     // 设置title
     useTitle(routeItem);
 
+
     onMounted(() => {
       const appLoadingEl = document.getElementsByClassName('app-loading');
       if (appLoadingEl[0]) {
@@ -50,8 +52,13 @@ export default defineComponent({
       }
     });
 
+    const company = process.env.VUE_APP_DEPLOY_ENV_COMPANY;
+    const companyCopyRight = process.env.VUE_APP_DEPLOY_ENV_COMPANY_COPYRIGHT;
+
     return {
-      isLeyanEnv
+      isLeyanEnv,
+      company,
+      companyCopyRight,
     }
 
   }
@@ -78,9 +85,9 @@ export default defineComponent({
     background-image: url('../../assets/images/logo.png');
     background-position: center;
     background-size: cover;
-   background-repeat: no-repeat;
+    background-repeat: no-repeat;
     &.ly-logo{
-      background-image: url("https://leyanapi.nancalcloud.com/upload/images/202306291016448.svg");
+      background-image: url("../../assets/images/logo.svg");
       background-size: contain;
     }
   }

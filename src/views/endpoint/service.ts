@@ -188,12 +188,11 @@ export async function importEndpointData(data: any): Promise<any> {
     });
 }
 
-export async function listEndpointCase(endpointId: number): Promise<any> {
-    const params = {endpointId}
+export async function queryEndpointCase(data): Promise<any> {
     return request({
-        url: `/${apiPathCase}/list`,
-        method: 'GET',
-        params
+        url: `/${apiPathCase}/query`,
+        method: 'POST',
+        data
     })
 }
 export async function getEndpointCase(id: Number | String | any): Promise<any> {
@@ -243,8 +242,8 @@ export async function loadAlternativeCases(baseId: number): Promise<any> {
     const params = {baseId}
     return request({
         url: `/${apiPathCase}/loadAlternative`,
-        method: 'POST',
-        params
+        method: 'GET',
+        params,
     })
 }
 export async function loadAlternativeCasesSaved(baseId: number): Promise<any> {
@@ -252,7 +251,7 @@ export async function loadAlternativeCasesSaved(baseId: number): Promise<any> {
     return request({
         url: `/${apiPathCase}/loadAlternativeCasesSaved`,
         method: 'POST',
-        params
+        params,
     })
 }
 export async function saveAlternativeCase(data: any): Promise<any> {

@@ -25,6 +25,20 @@
           <div @click="addSnippet('set_mock_resp_field')" class="dp-link-primary">修改JSON响应对象</div>
           <div @click="addSnippet('set_mock_resp_text')" class="dp-link-primary">修改字符串响应内容</div>
         </div>
+
+        <div class="title">
+          自定义脚本库<Tips title="可输入名称+点，根据提示使用。" />：
+          <router-link :to="'/'+currProject.shortName+'/project-setting/jslib'"
+                       target="_blank" class="dp-link-primary">
+            前往添加
+          </router-link>
+        </div>
+        <div>
+          <div class="dp-link-primary"
+               v-for="(item, index) in jslibNames" :key="index">
+              {{item}}
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -32,27 +46,32 @@
 
 <script setup lang="ts">
 import {computed, defineProps, inject, onBeforeUnmount, onMounted, reactive, ref, watch} from "vue";
-import {message, Form, notification} from 'ant-design-vue';
+import {Form} from 'ant-design-vue';
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import { QuestionCircleOutlined, DeleteOutlined, ClearOutlined } from '@ant-design/icons-vue';
 import {UsedBy} from "@/utils/enum";
 
 import {StateType as Debug} from "@/views/component/debug/store";
-import {MonacoOptions, NotificationKeyCommon} from "@/utils/const";
+import {StateType as Snippet} from "@/store/snippet";
+
+import {MonacoOptions} from "@/utils/const";
 import MonacoEditor from "@/components/Editor/MonacoEditor.vue";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
+import Tips from "@/components/Tips/index.vue";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import {StateType as ProjectStateType} from "@/store/project";
 
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
-const store = useStore<{  Debug: Debug }>();
+const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet: Snippet }>();
 
+const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const model = computed<any>(() => store.state.Debug.scriptData);
+const jslibNames = computed<any>(() => store.state.Snippet.jslibNames);
 
 const props = defineProps({
   condition: {
@@ -68,6 +87,7 @@ const props = defineProps({
 const load = () => {
   console.log('load script ...', props.condition)
   store.dispatch('Debug/getScript', props.condition.entityId)
+  store.dispatch('Snippet/listJslibNames')
 }
 load()
 

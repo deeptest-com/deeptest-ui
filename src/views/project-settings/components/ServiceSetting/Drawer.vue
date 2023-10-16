@@ -23,7 +23,7 @@
                         <ServiceVersion :serveId="formState.id" />
                     </a-tab-pane>
                     <a-tab-pane key="service-component" tab="服务组件">
-                        <ServiceComponent :serveId="formState.id" />
+                        <ServiceComponent :serveId="formState.id"  :refId="refId"/>
                     </a-tab-pane>
                     <a-tab-pane key="service-security" tab="Security">
                         <ServiceSecurity :serveId="formState.id"/>
@@ -52,11 +52,11 @@ import { StateType as ProjectStateType } from "@/store/project";
 import { StateType as ProjectSettingStateType } from '../../store';
 import { ServeDetail } from '../../data';
 import {notifyError} from "@/utils/notify";
-
+import { useRouter } from 'vue-router';
 const store = useStore<{ ProjectGlobal: ProjectStateType, ProjectSetting: ProjectSettingStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const formState = computed<ServeDetail>(() => store.state.ProjectSetting.selectServiceDetail);
-
+const route = useRouter();
 const props = defineProps<{
     drawerVisible: boolean
     tabKey: string
@@ -65,6 +65,8 @@ const props = defineProps<{
 
 const emits = defineEmits(['onClose', 'update:formState', 'update:tabKey']);
 const activeKey = ref('service-version');
+const refId = route.currentRoute.value.query?.refId || '';
+
 
 function onClose() {
     emits('onClose');
