@@ -34,7 +34,7 @@
             </div>
           </a-form-item>
 
-          <a-form-item label="模块名称" v-bind="validateInfos.name" required>
+          <a-form-item label="名称" v-bind="validateInfos.name" required>
             <a-input v-model:value="model.name"
                      @blur="validate('name', { trigger: 'blur' }).catch(() => {})"/>
           </a-form-item>
@@ -47,7 +47,8 @@
                 <UploadOutlined/>
               </a-button> &nbsp;
 
-              <a-link v-if="model.scriptFile" :to="serverUrl + model.scriptFile" target="_blank">下载</a-link>
+              <a v-if="model.scriptFile"
+                 @click="downloadFile(serverUrl + model.scriptFile, (model.name?model.name:'module') + '.js')">下载</a>
             </div>
 
             <div v-else class="upload-file">
@@ -66,7 +67,8 @@
               </div>
 
               <div class="download dp-link-primary">
-                <a-link v-if="model.scriptFile" :to="serverUrl + model.scriptFile" target="_blank">下载</a-link>
+                <a v-if="model.scriptFile"
+                   @click="downloadFile(serverUrl + model.scriptFile, (model.name?model.name:'module') + '.js')">下载</a>
               </div>
             </div>
             <div class="dp-input-tip">
@@ -82,7 +84,9 @@
                 <UploadOutlined/>
               </a-button> &nbsp;
 
-              <a-link v-if="model.typesFile" :to="serverUrl + model.typesFile" target="_blank">下载</a-link>
+              <a v-if="model.typesFile"
+                 @click="downloadFile(serverUrl + model.typesFile, (model.name?model.name:'module') + '.d.ts')">
+                下载</a>
             </div>
 
             <div v-else class="upload-file">
@@ -100,7 +104,9 @@
               </div>
 
               <div class="download dp-link-primary">
-                <a-link v-if="model.typesFile" :to="serverUrl + model.typesFile" target="_blank">下载</a-link>
+                <a v-if="model.typesFile"
+                   @click="downloadFile(serverUrl + model.typesFile, (model.name?model.name:'module') + '.d.ts')">
+                  下载</a>
               </div>
             </div>
             <div class="dp-input-tip">
@@ -131,6 +137,7 @@ import {getToken} from "@/utils/localToken";
 
 import {StateType as ProjectSettingStateType} from "../../store";
 import {uploadRequest} from "@/utils/upload";
+import {downloadFile} from "@/utils/link";
 import {pattern} from "@/utils/const";
 import {isLeyan} from "@/utils/comm";
 import {addSepIfNeeded} from "@/utils/url";

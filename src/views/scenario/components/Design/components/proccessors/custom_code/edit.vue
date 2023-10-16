@@ -25,17 +25,19 @@
         </div>
 
         <div class="title">
-          自定义脚本库<Tips title="可输入名称+点，根据提示使用。" />：
+          自定义脚本库<Tips title="导入第三方/自定义JavaScript类库，可以在自定义脚本中，通过 moduleName.funcName(参数)的形式来调用自定义函数。" />：
           <router-link :to="'/'+currProject.shortName+'/project-setting/jslib'"
                        target="_blank" class="dp-link-primary">
             前往添加
           </router-link>
         </div>
         <div>
-          <div class="dp-link-primary"
-               v-for="(item, index) in jslibNames" :key="index">
-            {{item}}
-          </div>
+          <ul>
+            <li class="dp-link-primary"
+                v-for="(item, index) in jslibNames" :key="index">
+              {{item}}
+            </li>
+          </ul>
         </div>
       </div>
     </div>

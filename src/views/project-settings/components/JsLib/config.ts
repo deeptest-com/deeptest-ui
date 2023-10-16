@@ -1,7 +1,7 @@
 export const jslibColumns = [
     {
         title: '名称',
-        width: '300px',
+        width: '200px',
         dataIndex: 'name',
         slots: { customRender: 'name'},
         ellipsis: true
