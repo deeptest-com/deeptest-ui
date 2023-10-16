@@ -39,15 +39,15 @@
             </template>
 
             <template #scriptFile="{ record }">
-              <a-link :to="serverUrl + record.scriptFile" target="_blank" :title="record.scriptFile">
-                {{record.scriptFile}}
-              </a-link>
+              <a @click="downloadFile(serverUrl + record.scriptFile, record.name + '.js')" :title="record.name + '.js'">
+                {{record.name + '.js'}}
+              </a>
             </template>
 
             <template #typesFile="{ record }">
-              <a-link :to="serverUrl + record.typesFile" target="_blank" :title="record.typesFile">
-                {{record.typesFile}}
-              </a-link>
+              <a @click="downloadFile(serverUrl + record.typesFile, record.name + '.d.ts')" :title="record.name + '.d.ts'">
+                {{record.name + '.d.ts'}}
+              </a>
             </template>
 
             <template #createUser="{record}">
@@ -104,6 +104,7 @@ import {useI18n} from "vue-i18n";
 import {disabledStatus, disabledStatusTagColor} from "@/config/constant"
 import {Modal} from "ant-design-vue";
 import {momentUtc} from '@/utils/datetime';
+import {downloadFile} from "@/utils/link";
 
 import {jslibColumns} from './config';
 import EditAndShowField from '@/components/EditAndShow/index.vue';
