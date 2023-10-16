@@ -42,7 +42,7 @@
           <a-form-item label="脚本文件 (.js)"
                        v-bind="validateInfos.scriptFile" required>
             <div v-if="isElectron" class="upload-file-by-electron">
-              {{model.name?model.name + '.js' : ''}}
+              {{model.scriptFile? (model.name?model.name:'module') + '.js' : ''}}
 
               <a-button @click="uploadFile()">
                 <UploadOutlined/>
@@ -54,7 +54,7 @@
 
             <div v-else class="upload-file">
               <div class="input-container">
-                {{model.name?model.name + '.js' : ''}}
+                {{model.scriptFile? (model.name?model.name:'module') + '.js' : ''}}
               </div>
               <div class="upload-container">
                 <a-upload :beforeUpload="uploadScript"
@@ -79,7 +79,7 @@
 
           <a-form-item label="声明文件 (.d.ts)">
             <div v-if="isElectron" class="upload-file-by-electron">
-              {{model.name?model.name + '.td.ts' : ''}}
+              {{model.typesFile? (model.name?model.name:'module') + '.td.ts' : ''}}
 
               <a-button @click="uploadFile()">
                 <UploadOutlined/>
@@ -92,7 +92,7 @@
 
             <div v-else class="upload-file">
               <div class="input-container">
-                {{model.name?model.name + '.td.ts' : ''}}
+                {{model.typesFile? (model.name?model.name:'module') + '.td.ts' : ''}}
               </div>
               <div class="upload-container">
                 <a-upload :beforeUpload="uploadTypes"
