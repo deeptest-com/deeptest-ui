@@ -10,7 +10,11 @@
         </a-button>
       </div>
       <div class="right">
-        <a-button :disabled="checkedKeys.length===0" @click="saveAsCase">
+        <a-button v-if="activeKey==='paths'" :disabled="checkedKeys.length===0" @click="execSelected">
+          执行选中
+        </a-button>
+        &nbsp;
+        <a-button v-if="activeKey==='paths'" :disabled="checkedKeys.length===0" @click="saveAsCase">
           另存为用例
         </a-button>
       </div>
@@ -101,6 +105,7 @@ import {
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
 import Assertions from "./assertions.vue";
 import SaveAlternative from "./saveAlternative.vue";
+import useCaseExecution from "@/views/endpoint/components/Drawer/Cases/exec-alternative-cases";
 
 const usedBy = UsedBy.CaseGenerate
 provide('usedBy', usedBy)
@@ -191,29 +196,21 @@ const rulesRef = reactive({
 
 const {resetFields, validate, validateInfos} = useForm(modelRef, rulesRef);
 
+const {progressStatus, execStart, execStop} = useCaseExecution()
+const execSelected = () => {
+  console.log('execSelected')
+  const selectedNodes = getSelectedNodes()
+}
+
 const saveAsVisible = ref(false)
 const saveAsModel = ref({} as any)
 const saveAsCase = () => {
   console.log('saveAsCase', checkedKeys.value)
   saveAsVisible.value = true
 
-  const values = ref([] as any[])
-  checkedKeys.value.forEach((key) => {
-    if (treeDataMap.value[key]) {
-      const item = treeDataMap.value[key]
-      const val = {
-        path: item.path,
-        sample: item.sample,
-        fieldType: item.fieldType,
-        Category: item.category,
-        Type: item.type,
-        Rule: item.rule,
-      }
-      values.value.push(val)
-    }
-  })
+  const selectedNodes = getSelectedNodes()
   const baseId = modelRef.value.baseId
-  saveAsModel.value = {values, baseId}
+  saveAsModel.value = {selectedNodes, baseId}
 }
 const saveAsClosed = () => {
   saveAsVisible.value = false
@@ -264,6 +261,27 @@ function getNodeMap(treeNode: any, mp: any) {
   return
 }
 
+const getSelectedNodes = () => {
+  const ret = ref([] as any[])
+
+  checkedKeys.value.forEach((key) => {
+    if (treeDataMap.value[key]) {
+      const item = treeDataMap.value[key]
+      const val = {
+        path: item.path,
+        sample: item.sample,
+        fieldType: item.fieldType,
+        Category: item.category,
+        Type: item.type,
+        Rule: item.rule,
+      }
+      ret.value.push(val)
+    }
+  })
+
+  return ret
+}
+
 const back = () => {
   console.log('back')
   props.onBack()
@@ -282,7 +300,7 @@ const back = () => {
     }
 
     .right {
-      width: 100px;
+      width: 200px;
       text-align: right;
     }
   }
