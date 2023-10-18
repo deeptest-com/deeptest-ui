@@ -9,7 +9,7 @@
           <slot name="left"></slot>
         </div>
         <multipane-resizer />
-        <div :class="['pane', 'right', !isFold && 'unfold']" :style="{ flexGrow: 1  }">
+        <div :class="['pane', 'right', !isFold && 'unfold']">
           <slot name="right"></slot>
           <div v-if="showExpand" class="expand-icon" @click="toggle">
             <img :src="PutAway" />

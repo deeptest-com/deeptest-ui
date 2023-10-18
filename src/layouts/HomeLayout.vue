@@ -57,9 +57,9 @@ export default defineComponent({
 </script>
 <style scoped lang="less">
 .home-wrap {
-  background: #F5F5F5;
+  background: #FFF;
   min-width: 1440px;
-  max-height: 100vh;
+  height: 100vh;
   overflow: hidden;
 
   .home-header {
@@ -87,7 +87,7 @@ export default defineComponent({
   }
 
   .home-content {
-    max-height: calc(100vh - 64px);
+    height: calc(100vh - 64px);
     overflow-y: scroll;
   }
 }

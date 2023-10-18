@@ -2,8 +2,9 @@
   <div id="indexlayout-right-top" :class="{'topNavEnable': !topNavEnable, 'tabNavEnable': !tabNavEnable }">
     <div class="indexlayout-right-top-top">
       <div class="indexlayout-top-menu">
-        <RightTopProject/>
-        <RightTopServer v-if="showServerSelector" />
+        <DetailBreadCrumb  v-if="isDetailPage"/>
+        <RightTopProject v-if="!isDetailPage"/>
+        <RightTopServer v-if="showServerSelector && !isDetailPage" />
       </div>
       <div class="indexlayout-top-menu-right">
         <RightTopSettings/>
@@ -14,7 +15,7 @@
   </div>
 </template>
 <script lang="ts">
-import {defineComponent, PropType, toRefs, watch, ref} from "vue";
+import {defineComponent, PropType, toRefs, watch, ref, nextTick} from "vue";
 import {useI18n} from "vue-i18n";
 import {useRouter} from "vue-router";
 import {BreadcrumbType, RoutesDataItem} from '@/utils/routes';
@@ -23,6 +24,7 @@ import RightTopServer from "./RightTopServer.vue";
 import RightTopSettings from './RightTopSettings.vue';
 import RightTopWebsocket from './RightTopWebsocket.vue';
 import RightTopUpdate from './RightTopUpdate.vue';
+import DetailBreadCrumb from "./DetailBreadCrumb.vue";
 import useTopMenuWidth from "../composables/useTopMenuWidth";
 
 export default defineComponent({
@@ -32,7 +34,8 @@ export default defineComponent({
     RightTopSettings,
     RightTopWebsocket,
     RightTopUpdate,
-    RightTopServer
+    RightTopServer,
+    DetailBreadCrumb,
   },
   props: {
     collapsed: {
@@ -76,18 +79,29 @@ export default defineComponent({
     const {topNavEnable} = toRefs(props);
     const showServerSelector = ref(false);
     const router = useRouter();
+    const isDetailPage = ref(true);
 
     const {topMenuCon, topMenuWidth} = useTopMenuWidth(topNavEnable);
 
     watch(() => {return router.currentRoute.value.path;}, (val: string) => {
       showServerSelector.value = val.includes('IM');
-    }, {immediate: true})
+    }, {immediate: true});
+
+    watch(() => {
+      return router.currentRoute.value;
+    }, async (val: any) => {
+      showServerSelector.value = val.path.includes('IM');
+      isDetailPage.value = (val.meta.type || '').includes('detail');
+    }, {
+      immediate: true,
+    })
 
     return {
       t,
       topMenuCon,
       topMenuWidth,
-      showServerSelector
+      showServerSelector,
+      isDetailPage,
     }
   }
 })
@@ -108,6 +122,7 @@ export default defineComponent({
     height: @headerHeight;
     background-color: @menu-white-bg;
     color: #c0c4cc;
+    align-items: center;
     .indexlayout-flexible {
       width: 18px;
       //height: 50px;
@@ -181,8 +196,6 @@ export default defineComponent({
     }
 
     .indexlayout-top-menu-right {
-      height: @headerHeight;
-      line-height: @headerHeight;
       .indexlayout-top-project {
         float: left;
         padding: 10px 10px;

@@ -1,23 +1,35 @@
 <template>
-  <div class="scenario-exec-info-main">
-    <ReportBasicInfo :items="baseInfoList || []"
-                     :showBtn="show"
-                     :btnText="'另存为报告'"
-                     @handleBtnClick="genReport"/>
-    <StatisticTable :data="statisticData" :value="statInfo"/>
-    <Progress :exec-status="progressStatus"
-              :percent="progressValue"
-              :key="progressKey"
-              @exec-cancel="execCancel" />
-    <LogTreeView class="scenario-exec-log-tree"
+  <a-drawer
+    :placement="'right'"
+    :width="1000"
+    :closable="true"
+    :visible="execDrawerVisible"
+    :title="'执行场景'"
+    class="drawer"
+    wrapClassName="drawer-exec"
+    @close="onClose">
+    <div class="scenario-exec-info-main" v-if="execDrawerVisible">
+      <ReportBasicInfo 
+        :items="baseInfoList || []"
+        :showBtn="show"
+        :btnText="'另存为报告'"
+        @handleBtnClick="genReport"/>
+      <StatisticTable :data="statisticData" :value="statInfo"/>
+      <Progress 
+        :exec-status="progressStatus"
+        :percent="progressValue"
+        :key="progressKey"
+        @exec-cancel="execCancel" />
+      <LogTreeView 
+        class="scenario-exec-log-tree"
         :treeData="scenarioReports"
-                 :isSingleScenario="true" />
-  </div>
+        :isSingleScenario="true" />
+    </div>
+  </a-drawer>
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, onUnmounted, ref} from "vue";
-import {useRouter} from "vue-router";
+import {computed, ref, defineProps, defineEmits, watch} from "vue";
 
 import {useStore} from "vuex";
 
@@ -29,16 +41,12 @@ import {ExecStatus} from "@/store/exec";
 import {StateType as ScenarioStateType} from "../../store";
 import {StateType as DebugStateType} from "@/views/component/debug/store";
 import bus from "@/utils/eventBus";
-import {useI18n} from "vue-i18n";
 import {getToken} from "@/utils/localToken";
-import {Scenario} from "@/views/scenario/data";
-import {message} from "ant-design-vue";
 import {ProcessorInterface} from "@/utils/enum";
 import {StateType as ReportStateType} from "@/views/report/store";
 
 import {
   resetData,
-  initData,
   progressStatus,
   progressValue,
   scenarioReports,
@@ -52,11 +60,13 @@ import {momentUtc} from "@/utils/datetime";
 import {CurrentUser} from "@/store/user";
 import {notifyError, notifySuccess} from "@/utils/notify";
 
-const {t} = useI18n();
-const router = useRouter();
+const props = defineProps<{
+  execDrawerVisible: boolean;
+}>();
+
+const emits = defineEmits(['onClose'])
 
 const store = useStore<{ Report: ReportStateType, Scenario: ScenarioStateType, Debug: DebugStateType, Global: GlobalStateType, Exec: ExecStatus, ProjectSetting, Environment,User }>();
-const collapsed = computed<boolean>(() => store.state.Global.collapsed);
 const nodeData = computed<any>(() => store.state.Scenario.nodeData);
 const detailResult = computed<any>(() => store.state.Scenario.detailResult);
 const currentUser:any = computed<CurrentUser>(()=> store.state.User.currentUser);
@@ -64,12 +74,6 @@ const currEnvId = computed(() => store.state.ProjectSetting.selectEnvId);
 const envList = computed(() => store.state.ProjectSetting.envList);
 const scenarioId = computed(() => {
   return detailResult.value.id
-});
-
-
-const envName = computed(() => {
-  const curEnv = envList.value.find((item: any) => item.id === currEnvId.value)
-  return curEnv?.name || '暂无'
 });
 
 const reportId = ref('');
@@ -111,18 +115,19 @@ const stopExec = () => {
   WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify(msg));
 }
 
-onMounted(async () => {
-  progressStatus.value = 'in_progress';
-  await execStart();
-  bus.on(settings.eventWebSocketMsg, OnWebSocketMsg);
-  bus.on(settings.eventWebSocketConnStatus, onWebSocketConnStatusMsg);
-
-})
-
-onUnmounted(() => {
-  execCancel();
-  bus.off(settings.eventWebSocketMsg, OnWebSocketMsg);
-  bus.off(settings.eventWebSocketConnStatus, onWebSocketConnStatusMsg);
+watch(() => {
+  return props.execDrawerVisible;
+}, async val => {
+  if (val) {
+    progressStatus.value = 'in_progress';
+    await execStart();
+    bus.on(settings.eventWebSocketMsg, OnWebSocketMsg);
+    bus.on(settings.eventWebSocketConnStatus, onWebSocketConnStatusMsg);
+  } else {
+    execCancel();
+    bus.off(settings.eventWebSocketMsg, OnWebSocketMsg);
+    bus.off(settings.eventWebSocketConnStatus, onWebSocketConnStatusMsg);
+  }
 })
 
 const OnWebSocketMsg = (data: any) => {
@@ -193,6 +198,10 @@ async function genReport() {
     notifyError('生成报告失败');
   }
 }
+
+const onClose = () => {
+  emits('onClose');
+};
 
 </script>
 

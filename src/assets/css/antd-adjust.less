@@ -194,7 +194,15 @@
         .ant-drawer-body {
             flex: 1;
             height: 0;
-            padding: 16px 16px 32px;
+            padding: 16px;
+
+            .report-exec-info-main {
+                height: calc(100vh - 64px) !important;
+                display: flex;
+                overflow: hidden;
+                flex-direction: column;
+                padding-bottom: 16px;
+            }
 
             .scenario-exec-info-main, .report-exec-info-main, .plan-exec-info-main {
                 height: 100%;

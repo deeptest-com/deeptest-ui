@@ -47,11 +47,14 @@
       :loading="loading"
       :columns="linked ? columns : columnsForSelect"
       :data-source="linked ? linkedPlans : notLinkedPlans">
+    <template #name="{ record }">
+      <TooltipCell :width="200" :text="record.name" />
+    </template>  
     <template #status="{ record }">
       {{ scenarioStatus.get(record.status) || '未知' }}
     </template>
-    <template #updatedAt="{ record }">
-      <span>{{ momentUtc(record.updatedAt) }}</span>
+    <template #updatedAt="{ record, column }">
+      <TooltipCell :width="column.width" :text="momentUtc(record.updatedAt)" />
     </template>
     <template #testPassRate="{ record }">
       <span>{{ record.testPassRate }}</span>
@@ -82,6 +85,7 @@ import {momentUtc} from "@/utils/datetime";
 import {Scenario} from "@/views/scenario/data";
 
 import {priorityOptions, scenarioStatusOptions, scenarioStatus} from "@/config/constant";
+import TooltipCell from '@/components/Table/tooltipCell.vue';
 
 const props = defineProps({
   linked: {
@@ -110,35 +114,42 @@ const columns = [
   {
     title: '编号',
     dataIndex: 'serialNumber',
+    width: 120,
   },
   {
     title: '名称',
     dataIndex: 'name',
-    slots: {customRender: 'name'}
+    slots: {customRender: 'name'},
+    width: 200,
   },
   {
     title: '状态',
     dataIndex: 'status',
-    slots: {customRender: 'status'}
+    slots: {customRender: 'status'},
+    width: 120,
   },
   {
     title: '测试通过率',
     dataIndex: 'testPassRate',
-    slots: {customRender: 'testPassRate'}
+    slots: {customRender: 'testPassRate'},
+    width: 120,
   },
   {
     title: '负责人',
     dataIndex: 'adminName',
+    width: 80,
   },
   {
     title: '最近更新',
     dataIndex: 'updatedAt',
-    slots: {customRender: 'updatedAt'}
+    slots: {customRender: 'updatedAt'},
+    width: 200,
   },
   {
     title: '操作',
     dataIndex: 'action',
-    slots: {customRender: 'operation'}
+    slots: {customRender: 'operation'},
+    width: 100,
   },
 ];
 const columnsForSelect = [

@@ -1,15 +1,33 @@
 <template>
-  <div class="scenario-exec-info-main">
-    <ReportBasicInfo :showBtn="true"
-                     :btnText="'另存为报告'"
-                     :items="baseInfoList || []"
-                     @handleBtnClick="genReport"/>
-    <StatisticTable :data="statisticData" :value="statInfo"/>
-    <LogTreeView :treeData="scenarioList" :isSingleScenario="true"/>
-  </div>
+  <!-- ::::静态数据：查看执行历史的详情 -->
+  <a-drawer
+    :placement="'right'"
+    :width="1000"
+    :title="'执行详情'"
+    :closable="true"
+    :visible="execListDetailVisible"
+    class="drawer"
+    wrapClassName="drawer-exec-history-detail"
+    @close="onClose">
+    <template #title>
+      <div class="drawer-header">
+        <div>{{ '测试报告详情' }}</div>
+      </div>
+    </template>
+    <div class="scenario-exec-info-main">
+      <ReportBasicInfo 
+        :showBtn="true"
+        :btnText="'另存为报告'"
+        :items="baseInfoList || []"
+        @handleBtnClick="genReport"/>
+      <StatisticTable :data="statisticData" :value="statInfo"/>
+      <LogTreeView :treeData="scenarioList" :isSingleScenario="true"/>
+    </div>
+  </a-drawer>
+  
 </template>
 <script setup lang="ts">
-import {defineProps, defineEmits, ref, computed} from 'vue';
+import {computed, defineProps, defineEmits} from 'vue';
 import {useStore} from 'vuex';
 
 import {
@@ -17,17 +35,18 @@ import {
   StatisticTable,
   LogTreeView
 } from '@/views/component/Report/components';
-
-
-import {PaginationConfig, Scenario} from "@/views/scenario/data";
+import {PaginationConfig} from "@/views/scenario/data";
 import {momentUtc} from "@/utils/datetime"
-import {message} from "ant-design-vue";
-import {getDivision, getPercentStr} from "@/utils/number";
+import {getPercentStr} from "@/utils/number";
 import {notifyError, notifySuccess} from "@/utils/notify";
 
+defineProps<{
+  execListDetailVisible: boolean;
+}>();
+
+const emits = defineEmits(['onClose']);
+
 const store = useStore<{ Scenario, ProjectGlobal, ServeGlobal, }>();
-const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
-const scenariosReports = computed(() => store.state.Scenario.scenariosReports);
 const reportsDetail: any = computed<PaginationConfig>(() => store.state.Scenario.reportsDetail);
 
 
@@ -121,6 +140,10 @@ async function genReport() {
     notifyError('生成报告失败');
   }
 }
+
+const onClose = () => {
+  emits('onClose');
+};
 
 </script>
 <style scoped lang="less">

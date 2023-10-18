@@ -160,7 +160,7 @@ const handleDelete = async (id: number) => {
     okType: 'danger',
     cancelText: () => '取消',
     onOk: async () => {
-      const res = store.dispatch('Report/remove', id);
+      const res = await store.dispatch('Report/remove', id);
       if (res) {
         notifySuccess('删除成功');
       } else {
