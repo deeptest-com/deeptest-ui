@@ -1,19 +1,9 @@
-# [DeepTest.com](http://deeptest.com)
+# [LeYanAPI](https://leyanapi.nancalcloud.com/)
 
-## DeepTest Software Testing Platform - Frontend
+## LeYanAPI, Software API management and automation testing platform - Frontend
 Vue.js 3, Ant Design Vue, TypeScript, WebSocket
 
-### Quick start
-TODO
-
-### Licenses
-All source code is licensed under the [GPLv3 License](LICENSE.md).
-
-## Thanks
-Thank you [JetBrains](https://www.jetbrains.com) for providing free open source licenses.
-
-
-## 软件测试平台 - 前端
+## 软件接口管理和自动化测试平台 - 前端
 
 ### 快速开始
 

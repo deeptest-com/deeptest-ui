@@ -1,20 +1,20 @@
 <!-- ::::参数设置器-->
 <template>
   <div class="main">
-    <a-input 
+    <a-input
       v-if="!needAutoComplete" :value="fieldState.name"
       @change="handleChangeName"
       style="width: 200px"
       :disabled="hasRef"
       placeholder="输入字段名称" />
     <a-auto-complete
-      v-else 
+      v-else
       :value="fieldState.name"
       @change="handleChangeName"
       style="width: 200px"
       :disabled="hasRef"
       :options="options"
-      placeholder="输入字段名称" />         
+      placeholder="输入字段名称" />
     <a-select
       :value="fieldState.type"
       placeholder="请选择类型"
@@ -106,10 +106,9 @@
                             :placeholder="opt.placeholder"/>
                         <a-input-number
                             v-if="opt.component === 'inputNumber'"
-                            :value="fieldState[opt.name] || null"
+                            :value="fieldState[opt.name] === 0 ?  0 : (fieldState[opt.name] || null)"
                             :disabled="hasRef"
                             allowClear
-                            :min="0"
                             :step="1"
                             class="input-number"
                             @change="(val) => {

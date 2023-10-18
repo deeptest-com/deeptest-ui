@@ -103,7 +103,7 @@ export const JSONSchemaDataTypes = [
                 {
                     label: 'behavior',
                     name: 'behavior',
-                    type: 'boolean',
+                    type: 'string',
                     component: 'select',
                     placeholder: 'select a value',
                     value: null,
@@ -209,7 +209,7 @@ export const JSONSchemaDataTypes = [
                 {
                     label: 'behavior',
                     name: 'behavior',
-                    type: 'boolean',
+                    type: 'string',
                     component: 'select',
                     placeholder: 'select a value',
                     value: null,
@@ -337,7 +337,7 @@ export const JSONSchemaDataTypes = [
                 {
                     label: 'behavior',
                     name: 'behavior',
-                    type: 'boolean',
+                    type: 'string',
                     component: 'select',
                     placeholder: 'select a value',
                     value: null,
@@ -543,18 +543,18 @@ export const JSONSchemaDataTypes = [
                 {
                     label: 'default',
                     name: 'default',
-                    type: 'boolean',
+                    type: 'string',
                     component: 'select',
                     placeholder: 'select a value',
                     value: '',
                     options: [
                         {
                             label: 'true',
-                            value: true,
+                            value: 'true',
                         },
                         {
                             label: 'false',
-                            value: false,
+                            value: 'false',
                         },
                     ]
                 },

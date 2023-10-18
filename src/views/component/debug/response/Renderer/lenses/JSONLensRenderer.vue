@@ -23,7 +23,11 @@
           <a-tooltip overlayClassName="dp-tip-small">
             <template #title>下载</template>
             <DownloadOutlined class="dp-icon-btn dp-trans-80" />
-          </a-tooltip>-->
+          </a-tooltip>
+            -->
+            <a-tooltip placement="topLeft" title="提取运行结果到接口文档响应定义">
+             <a-button type="text" v-if="debugData.usedBy=='interface_debug' || debugData.usedBy=='case_debug'" @click="extractToSchema" ><VerticalAlignTopOutlined />提取到响应定义</a-button>
+            </a-tooltip>
         </a-col>
       </a-row>
     </div>
@@ -52,13 +56,19 @@
         :onCancel="responseExtractorCancel"
     />
   </div>
+  <GenerateFromResponse  
+  v-if="generateFromResponseVisible" 
+  :contentStr="contentStr"
+  :serveId="debugData.serveId"
+  :interfaceId="debugData.endpointInterfaceId"
+  @close="close"/>
 </template>
 
 <script setup lang="ts">
 import {computed, inject, onMounted, onUnmounted, ref, watch} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import { DownloadOutlined, CopyOutlined, ClearOutlined } from '@ant-design/icons-vue';
+import { DownloadOutlined, CopyOutlined, ClearOutlined,VerticalAlignTopOutlined } from '@ant-design/icons-vue';
 import MonacoEditor from "@/components/Editor/MonacoEditor.vue";
 import {MonacoOptions} from "@/utils/const";
 
@@ -68,6 +78,8 @@ import {StateType as Debug} from "@/views/component/debug/store";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import ResponseExtractor from "@/components/Editor/ResponseExtractor.vue";
+import GenerateFromResponse from "@/views/endpoint/components/Drawer/Define/GenerateFromResponse/index.vue";
+
 
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
@@ -175,6 +187,22 @@ watch (()=>{return language.value} ,(val)=>{
   console.log(content.value)
 
 }, {immediate: true}) 
+
+const contentStr = ref('')
+const generateFromResponseVisible = ref(false)
+const extractToSchema = async () => {
+  await generateFromJSON(responseData.value.content)
+  generateFromResponseVisible.value = true
+}
+
+async function generateFromJSON(JSONStr: string) {
+  let content = await store.dispatch('Endpoint/example2schema', {data: JSONStr});
+  contentStr.value = JSON.stringify(content);
+}
+
+const close = ()=>{
+  generateFromResponseVisible.value = false
+}
 
 </script>
 

@@ -77,6 +77,15 @@
         <div class="req-item req-path-params" v-if="info?.requestBody?.schemaItem?.content">
           <h3 class="body-header">请求体（Request Body）
             <a-tag class="tag" color="default">{{ info.requestBody?.mediaType || '未定义请求体类型'}}</a-tag>
+            <a-button class="gen-btn"
+                  size="small"
+                  @click="genCode(info?.requestBody?.schemaItem?.content)"
+                  type="text">
+              <template #icon>
+                <icon-svg type="script" class="icon"  />
+              </template>
+            生成代码
+          </a-button>
           </h3>
           <p v-if="info.requestBody.description">{{ info.requestBody.description }}</p>
           <SchemaViewer
@@ -116,6 +125,15 @@
         <div class="res-item res-path-params">
           <h3 class="body-header">响应体（Response Body）
             <a-tag class="tag" color="default">{{ res.mediaType || '未定义响应类型' }}</a-tag>
+            <a-button class="gen-btn"
+                  size="small"
+                  @click="genCode(res?.schemaItem?.content)"
+                  type="text">
+              <template #icon>
+                <icon-svg type="script" class="icon"  />
+              </template>
+            生成代码
+          </a-button>
           </h3>
           <p v-if="res.description">{{ res.description }}</p>
           <SchemaViewer :examples-str="res?.examples"
@@ -126,6 +144,13 @@
       </div>
     </div>
   </div>
+  <GenerateCode 
+  v-if="genCodeVisible"
+  :visible="genCodeVisible" 
+  @close="close"
+  :contentStr="contentStr"
+  :serveId="info?.serveId"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -139,6 +164,8 @@ import {CopyOutlined} from '@ant-design/icons-vue';
 import {useClipboard, useFullscreen} from '@vueuse/core'
 import {message, notification} from "ant-design-vue";
 import {notifySuccess} from "@/utils/notify";
+import IconSvg from "@/components/IconSvg";
+import GenerateCode from '@/components/SchemaEditor/GenerateCode.vue';
 const props = defineProps(['info']);
 const {text, copy, copied, isSupported} = useClipboard({});
 const info: any = computed(() => {
@@ -222,6 +249,20 @@ function handlePathStr(str) {
 function copyURL(url) {
     copy(url)
   notifySuccess('已复制到剪切板 ');
+}
+
+const genCodeVisible = ref(false)
+const contentStr = ref('')
+
+function genCode(content:string) {
+  contentStr.value = content
+  genCodeVisible.value = true;
+  console.log("genCode",genCodeVisible.value)
+}
+
+function close (){
+  genCodeVisible.value = false;
+  console.log("close",genCodeVisible.value)
 }
 
 </script>

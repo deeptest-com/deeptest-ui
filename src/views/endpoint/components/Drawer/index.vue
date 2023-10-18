@@ -66,7 +66,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineEmits, defineProps, provide, ref,} from 'vue';
+import {computed, defineEmits, defineProps, provide, ref,watch} from 'vue';
 import { ShareAltOutlined } from '@ant-design/icons-vue';
 import IconSvg from "@/components/IconSvg";
 import EndpointBasicInfo from './EndpointBasicInfo.vue';
@@ -194,6 +194,18 @@ async function changeCategory(value) {
 
 
 const activeTabKey = ref('request');
+
+const globalActiveTab = computed(()=>store.state.Endpoint.globalActiveTab);
+
+watch(() => {
+  return globalActiveTab.value
+}, (newVal) => {
+  if (newVal != "") {
+    //activeTabKey.value = globalActiveTab
+    switchToDefineTab()
+  }
+}, {immediate: true});
+
 
 async function cancel() {
   emit('close');

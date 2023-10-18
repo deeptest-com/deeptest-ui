@@ -32,7 +32,7 @@
           </router-link>
         </div>
         <div>
-          <ul>
+          <ul style="margin-left: 16px;">
             <li class="dp-link-primary"
                 v-for="(item, index) in jslibNames" :key="index">
               {{item}}

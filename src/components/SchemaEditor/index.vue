@@ -18,6 +18,15 @@
           </template>
           通过JSON生成Schema
         </a-button>
+        <a-button class="gen-btn"
+                  size="small"
+                  @click="genCode"
+                  type="text">
+          <template #icon>
+            <icon-svg type="script" class="icon"  />
+          </template>
+          生成代码
+        </a-button>
       </div>
     </div>
     <div class="tab-body" v-if="!activeGenSchemaMode">
@@ -119,6 +128,13 @@
       </div>
     </div>
   </div>
+  <GenerateCode 
+  v-if="genCodeVisible"
+  :visible="genCodeVisible" 
+  @close="close"
+  :contentStr="contentStr"
+  :serveId="serveId"
+  />
 </template>
 <script lang="ts" setup>
 import {
@@ -127,11 +143,14 @@ import {
   DeleteOutlined,
   InfoCircleOutlined,
   PlusOutlined,
+  FileDoneOutlined
 } from '@ant-design/icons-vue';
 import {computed, defineProps, defineEmits, ref, watch} from "vue";
 import Schema from './schema';
 import MonacoEditor from "@/components/Editor/MonacoEditor.vue";
 import {MonacoOptions} from '@/utils/const';
+import IconSvg from "@/components/IconSvg";
+import GenerateCode from './GenerateCode.vue';
 
 
 const props = defineProps(['tabContentStyle', 'contentStr', 'serveId', 'exampleStr', 'schemeVisibleKey']);
@@ -215,6 +234,19 @@ function generate() {
   activeGenSchemaMode.value = false;
   activeTab.value = 'schema';
   emit('generateFromJSON', exampleJsonStr.value);
+}
+
+const genCodeVisible = ref(false)
+
+function genCode() {
+ 
+  genCodeVisible.value = true;
+  console.log("genCode",genCodeVisible.value)
+}
+
+function close (){
+  genCodeVisible.value = false;
+  console.log("close",genCodeVisible.value)
 }
 
 

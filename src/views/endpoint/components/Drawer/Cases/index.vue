@@ -60,7 +60,7 @@ const baseModel = ref({}as any)
 const generate = (record) => {
   console.log('generate', record)
   show.value = 'generate'
-  baseModel.value = {baseId: record.id, debugInterfaceId: record.debugInterfaceId}
+  baseModel.value = {baseId: record.id}
   emit('update:showList', false)
 }
 

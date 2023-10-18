@@ -312,3 +312,10 @@ export function handleParamsLinkPath(path, oldPathParams) {
 
     return newPath
 }
+
+export function getFileName(path) {
+    const index = path.lastIndexOf('/')
+    const name = path.substring(index + 1)
+
+    return name
+}

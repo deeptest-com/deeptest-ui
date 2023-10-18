@@ -138,10 +138,9 @@
                               :placeholder="opt.placeholder"/>
                           <a-input-number
                               v-if="opt.component === 'inputNumber'"
-                              :value="fieldState[opt.name] || null"
+                              :value="fieldState[opt.name] === 0 ?  0 : (fieldState[opt.name] || null)"
                               :disabled="hasRef"
                               allowClear
-                              :min="0"
                               :step="1"
                               class="input-number"
                               @change="(val) => {

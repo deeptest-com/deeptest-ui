@@ -174,10 +174,21 @@ const selectedCodes: any = computed(() => {
 })
 
 onMounted(() => {
-  if (selectedMethodDetail?.value?.responseBodies?.length) {
+  if (selectedCodeDetail?.value?.code) {
+    selectedCode.value = selectedCodeDetail.value.code
+  }else if (selectedMethodDetail?.value?.responseBodies?.length) {
     selectedCode.value = selectedMethodDetail?.value?.responseBodies[0].code;
   }
 })
+
+watch(() => {
+  return selectedCodeDetail?.value?.code
+}, (newVal) => {
+  if (newVal) {
+    selectedCode.value = selectedCodeDetail.value.code
+  }
+}, {immediate: true});
+
 
 watch(() => {
   return selectedCode.value

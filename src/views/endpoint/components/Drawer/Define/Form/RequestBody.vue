@@ -25,7 +25,7 @@
         <a-col :span="24">
           <a-input @change="handleChangeDesc"
                    placeholder="描述信息"
-                   :value="selectedMethodDetail.requestBody.description"/>
+                   :value="selectedMethodDetail.requestBody?.description"/>
         </a-col>
       </a-row>
       <!-- 增加请求体 - scheme定义 -->
