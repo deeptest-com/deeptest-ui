@@ -20,7 +20,7 @@
         @changeCategory="changeCategory"/>
     </template>
     <template #tabHeader>
-      <DetailTabHeader :tab-list="EndpointTabsList" :show-btn="true" @change-tab="changeTab">
+      <DetailTabHeader :tab-list="EndpointTabsList" :show-btn="true" @change-tab="changeTab" :active-key="activeTabKey">
         <template #btn>
           <a-button v-if="activeTabKey === 'request' && showFooter" type="primary" @click="save">
             <template #icon>

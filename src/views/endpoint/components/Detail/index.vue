@@ -15,7 +15,7 @@
         @changeCategory="changeCategory"/>
     </template>
     <template #tabHeader>
-      <DetailTabHeader :tab-list="EndpointTabsList" :show-btn="true" @change-tab="changeTab">
+      <DetailTabHeader :tab-list="EndpointTabsList" :show-btn="true" @change-tab="changeTab" :active-key="activeTabKey">
         <template #btn>
           <a-button v-if="activeTabKey === 'request' && showFooter" type="primary" @click="save">
             <template #icon>
@@ -76,6 +76,7 @@ import {StateType as ServeStateType} from "@/store/serve";
 const router = useRouter();
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal: ServeStateType, Global }>();
 const imDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
+const globalActiveTab = computed(()=>store.state.Endpoint.globalActiveTab);
 
 /**
  * 页面渲染时
@@ -182,6 +183,14 @@ async function save() {
   await store.commit('Global/setSpinning', false);
   notifySuccess('保存成功');
 }
+
+watch(() => {
+  return globalActiveTab.value
+}, (newVal) => {
+  if (newVal) {
+    activeTabKey.value = 'request';
+  }
+}, {immediate: true});
 
 provide('notScrollIntoView', true);
 

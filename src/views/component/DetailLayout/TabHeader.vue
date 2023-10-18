@@ -12,23 +12,30 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, defineEmits, defineProps } from "vue";
+import { ref, defineEmits, defineProps, watch } from "vue";
 
 const props = defineProps<{
   tabList: any[];
-  btnText?: string;
-  btnTextStls?: any;
   showBtn?: boolean;
+  activeKey?: string;
 }>();
 
 const emits = defineEmits(['changeTab', 'handleClickBtn']);
 
-const activeKey = ref(props.tabList[0].key);
+const activeKey = ref(props.activeKey || props.tabList[0].key);
 
 const changeTab = (key) => {
   activeKey.value = key;
   emits('changeTab', key);
 };
+
+watch(() => {
+  return props.activeKey;
+}, val => {
+  if (val) {
+    activeKey.value = val;
+  }
+})
 
 </script>
 

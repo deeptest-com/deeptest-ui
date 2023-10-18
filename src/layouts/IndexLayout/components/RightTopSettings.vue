@@ -29,7 +29,7 @@
 
       <!--  切换Agent -->
       <a-dropdown placement="bottomRight" v-if="agents?.length" class="user-agent-manage">
-        <a class="indexlayout-top-usermenu ant-dropdown-link" style="margin-right: 6px;margin-left: 8px;">
+        <a class="indexlayout-top-usermenu ant-dropdown-link" style="margin-right: 6px;margin-left: 15px;">
           <IconSvg type="top-right-web" class="top-right-icon"/>
           <span class="agent-name">
             {{ currentAgent.name }}
@@ -48,10 +48,8 @@
       </a-dropdown>
 
       <a-dropdown placement="bottomRight" v-if="isAdmin">
-        <a class="indexlayout-top-sysmenu ant-dropdown-link" style="margin-right: 6px;margin-left: 8px;">
+        <a class="indexlayout-top-sysmenu ant-dropdown-link operation-name message" style="margin-right: 6px;margin-left: 8px;">
           <SettingOutlined class="top-right-icon-desktop"/>
-          <span class="operation-name">系统</span>
-          <DownOutlined class="user-icon"/>
         </a>
         <template #overlay>
           <a-menu @click="onSysMenuClick">
@@ -327,8 +325,8 @@ const isAdmin = computed(() => {
     display: inline-block;
     color: #8A8A8A;
 
-    .message {
-      margin-left: 15px;
+    &.message {
+      margin-left: 8px !important;
       cursor: pointer;
     }
   }
