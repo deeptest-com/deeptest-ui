@@ -7,15 +7,15 @@ export const jslibColumns = [
         ellipsis: true
     },
     {
-        title: '脚本文件',
-        dataIndex: 'scriptFile',
-        slots: { customRender: 'scriptFile'},
-        ellipsis: true
-    },
-    {
         title: '定义文件',
         dataIndex: 'typesFile',
         slots: { customRender: 'typesFile'},
+        ellipsis: true
+    },
+    {
+        title: '脚本文件',
+        dataIndex: 'scriptFile',
+        slots: { customRender: 'scriptFile'},
         ellipsis: true
     },
     {

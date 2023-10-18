@@ -70,7 +70,9 @@
           </a-form-item>
         </a-form>
       </a-tab-pane>
+
       <a-tab-pane key="assert" tab="统一断言">
+          <Assertions :model="model" />
       </a-tab-pane>
     </a-tabs>
 
@@ -82,7 +84,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineProps, inject, reactive, ref, watch} from 'vue';
+import {computed, defineProps, inject, provide, reactive, ref, watch} from 'vue';
 import {UsedBy} from "@/utils/enum";
 import {Form} from "ant-design-vue";
 import {useStore} from "vuex";
@@ -96,14 +98,15 @@ import {
   FolderOutlined
 } from '@ant-design/icons-vue';
 
-import {Endpoint} from "@/views/endpoint/data";
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
+import Assertions from "./assertions.vue";
 import SaveAlternative from "./saveAlternative.vue";
 
+const usedBy = UsedBy.CaseGenerate
+provide('usedBy', usedBy)
 const useForm = Form.useForm;
 
 const store = useStore<{ Endpoint: EndpointStateType }>();
-const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const alternativeCases = computed<any>(() => store.state.Endpoint.alternativeCases);
 
 const activeKey = ref('paths')
@@ -137,11 +140,11 @@ const expandedKeys = ref<string[]>([]);
 const checkedKeys = ref<string[]>([] as any[])
 
 const loadCaseTree = () => {
-  store.dispatch('Endpoint/loadAlternativeCases', modelRef.value.baseId).then((result) => {
+  store.dispatch('Endpoint/loadAlternativeCase', modelRef.value.baseId).then((result) => {
     console.log('loadCaseTree', result)
     expandAll()
   })
-  // store.dispatch('Endpoint/loadAlternativeCasesSaved', modelRef.value.baseId)
+  // store.dispatch('Endpoint/loadAlternativeCaseSaved', modelRef.value.baseId)
 }
 
 function selectAll() {
@@ -176,7 +179,7 @@ watch(() => props.model, () => {
   console.log('watch props.visible', props.model)
   modelRef.value = {
     baseId: props.model.baseId,
-    prefix: props.model?.prefix || '异常路径',
+    prefix: props.model?.prefix || '异常路径-',
   }
 
   loadCaseTree()
@@ -260,28 +263,6 @@ function getNodeMap(treeNode: any, mp: any) {
 
   return
 }
-
-// const generateCasesFinish = async (model) => {
-//   console.log('generateCasesFinish', model, debugData.value.url)
-//
-//   const data = Object.assign({...model}, debugInfo.value)
-//
-//   store.commit("Global/setSpinning",true)
-//   const res = await store.dispatch('Debug/generateCases', data)
-//   store.commit("Global/setSpinning",false)
-//
-//   if (res === true) {
-//     generateCasesVisible.value = false
-//
-//     notifySuccess(`自动生成用例成功`);
-//   } else {
-//     notifyError(`自动生成用例保存失败`);
-//   }
-// }
-// const generateCasesCancel = () => {
-//   console.log('generateCasesCancel')
-//   generateCasesVisible.value = false
-// }
 
 const back = () => {
   console.log('back')
