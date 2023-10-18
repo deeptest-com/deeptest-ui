@@ -67,9 +67,19 @@
 
       <!-- ::::消息通知 -->
       <a-tooltip placement="bottom" title="消息通知">
-        <span class="operation-name" @click="onMessageClick">
+        <span class="operation-name message" @click="onMessageClick">
           <BellOutlined />
         </span>
+      </a-tooltip>
+
+      <a-tooltip placement="bottom" @click="toggle">
+        <template #title>{{ isFullscreen ? '退出全屏' : '全屏' }}</template>
+        <a-button type="text" class="share-btn">
+          <FullscreenOutlined v-if="isFullscreen"
+                              :style="{'font-size': '14px','color':theme === 'white-theme' ? '#fff' : '#8A8A8A'}"/>
+          <FullscreenExitOutlined v-if="!isFullscreen"
+                                  :style="{'font-size': '14px','color':theme === 'white-theme' ? '#fff' : '#8A8A8A'}"/>
+        </a-button>
       </a-tooltip>
 
       <!-- ::::用户信息 -->
@@ -93,15 +103,6 @@
         </template>
       </a-dropdown>
 
-      <a-tooltip placement="bottom" @click="toggle">
-        <template #title>{{ isFullscreen ? '退出全屏' : '全屏' }}</template>
-        <a-button type="text" class="share-btn">
-          <FullscreenOutlined v-if="isFullscreen"
-                              :style="{'font-size': '14px','color':theme === 'white-theme' ? '#fff' : '#8A8A8A'}"/>
-          <FullscreenExitOutlined v-if="!isFullscreen"
-                                  :style="{'font-size': '14px','color':theme === 'white-theme' ? '#fff' : '#8A8A8A'}"/>
-        </a-button>
-      </a-tooltip>
     </div>
   </div>
 </template>
@@ -325,6 +326,11 @@ const isAdmin = computed(() => {
     margin-right: 4px;
     display: inline-block;
     color: #8A8A8A;
+
+    .message {
+      margin-left: 15px;
+      cursor: pointer;
+    }
   }
 
   .user-info {
