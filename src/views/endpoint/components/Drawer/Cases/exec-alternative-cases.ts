@@ -13,6 +13,7 @@ import {ProcessorInterface} from "@/utils/enum";
 import {WebSocket} from "@/services/websocket";
 import {getToken} from "@/utils/localToken";
 import {getUuid} from "@/utils/string";
+import {computed} from "vue/dist/vue";
 
 interface CaseExecution {
     progressStatus: Ref<any>,
@@ -61,6 +62,8 @@ function useCaseExecution(): CaseExecution {
     }
 
     const execStart = async (cases, envId) => {
+        console.log('=== execStart', cases, envId)
+
         execUuid.value = getUuid()
         const data = {
             execUuid: execUuid,

@@ -10,7 +10,7 @@
         </a-button>
       </div>
       <div class="right">
-        <a-button v-if="activeKey==='paths'" :disabled="checkedKeys.length===0" @click="execSelected">
+        <a-button v-if="activeKey==='paths'" :disabled="checkedKeys.length===0" @click="selectExecEnv">
           执行选中
         </a-button>
         &nbsp;
@@ -84,6 +84,12 @@
         :visible="saveAsVisible"
         :onClose="saveAsClosed"
         :model="saveAsModel"/>
+
+    <EnvSelector
+        :env-select-drawer-visible="selectEnvVisible"
+        @on-ok="onSelectExecEnvFinish"
+        @on-cancel="onSelectExecEnvCancel" />
+
   </div>
 </template>
 
@@ -103,16 +109,19 @@ import {
 } from '@ant-design/icons-vue';
 
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
+import { StateType as ProjectSettingStateType } from "@/views/project-settings/store";
 import Assertions from "./assertions.vue";
 import SaveAlternative from "./saveAlternative.vue";
+import EnvSelector from "@/views/component/EnvSelector/index.vue";
 import useCaseExecution from "@/views/endpoint/components/Drawer/Cases/exec-alternative-cases";
 
 const usedBy = UsedBy.CaseGenerate
 provide('usedBy', usedBy)
 const useForm = Form.useForm;
 
-const store = useStore<{ Endpoint: EndpointStateType }>();
+const store = useStore<{ Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType }>();
 const alternativeCases = computed<any>(() => store.state.Endpoint.alternativeCases);
+const currEnvId = computed(() => store.state.ProjectSetting.selectEnvId);
 
 const activeKey = ref('paths')
 const allSelected = ref(false)
@@ -196,12 +205,6 @@ const rulesRef = reactive({
 
 const {resetFields, validate, validateInfos} = useForm(modelRef, rulesRef);
 
-const {progressStatus, execStart, execStop} = useCaseExecution()
-const execSelected = () => {
-  console.log('execSelected')
-  const selectedNodes = getSelectedNodes()
-}
-
 const saveAsVisible = ref(false)
 const saveAsModel = ref({} as any)
 const saveAsCase = () => {
@@ -280,6 +283,29 @@ const getSelectedNodes = () => {
   })
 
   return ret
+}
+
+// execution
+const execVisible = ref<boolean>(false);
+const selectEnvVisible = ref<boolean>(false);
+
+const {progressStatus, execStart, execStop} = useCaseExecution()
+
+const selectExecEnv = () => {
+  console.log('selectExecEnv')
+  selectEnvVisible.value = true;
+}
+async function onSelectExecEnvFinish() {
+  console.log('onSelectExecEnvFinish')
+  selectEnvVisible.value = false;
+  execVisible.value = true;
+
+  const selectedNodes = getSelectedNodes()
+  execStart(selectedNodes.value, currEnvId.value)
+}
+async function onSelectExecEnvCancel() {
+  console.log('onSelectExecEnvCancel')
+  selectEnvVisible.value = false;
 }
 
 const back = () => {
