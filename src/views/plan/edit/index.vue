@@ -5,6 +5,8 @@
       <DetailHeader 
         :show-action="true" 
         :show-detail="true"
+        :show-share="true"
+        :share-link="detailLink"
         :serial-number="planDetail.serialNumber"
         :name="planDetail.name"
         :detail-link="detailLink"

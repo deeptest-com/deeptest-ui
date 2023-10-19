@@ -136,6 +136,7 @@ import { planStatusColorMap, planStatusTextMap, planStatusOptions } from "@/conf
 import Select from '@/components/Select/index.vue';
 import { DropdownActionMenu } from "@/components/DropDownMenu";
 import {notifyError} from "@/utils/notify";
+import useSharePage from "@/hooks/share";
 
 const columns = [
   {
@@ -208,12 +209,17 @@ const dropdownMenuList = [
     auth: '',
   },
   {
+    label: '分享链接',
+    action: (record) => share(record, 'TP'),
+    auth: '',
+  },
+  {
     label: '删除',
     action: (record) => remove(record.id),
     auth: '',
   }
 ]
-
+const { share } = useSharePage();
 const store = useStore<{ Plan: StateType, ProjectGlobal: ProjectStateType,Project }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const nodeDataCategory = computed<any>(() => store.state.Plan.nodeDataCategory);

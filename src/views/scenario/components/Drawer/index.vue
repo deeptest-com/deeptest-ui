@@ -8,6 +8,8 @@
           :serial-number="detailResult.serialNumber"
           :show-action="true" 
           :show-detail="true" 
+          :show-share="true"
+          :share-link="detailLink"
           :name="detailResult?.name || ''" 
           @update-title="updateTitle" 
           :detail-link="detailLink"  />
