@@ -76,7 +76,7 @@
       </a-tab-pane>
 
       <a-tab-pane key="assert" tab="统一断言">
-          <Assertions :model="model" />
+        <Assertions :model="model" />
       </a-tab-pane>
     </a-tabs>
 

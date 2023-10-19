@@ -30,7 +30,7 @@
                 v-if="tab.active"
                 :disabled="isDisabled"
                 v-model:value="tab.value"
-                @change="(event) => changeType(tabsIndex, event)"
+                @change="(event) => changeType(tabsIndex,tab, event)"
                 button-style="solid">
               <a-radio-button
                   v-for="item in tab.props"
@@ -205,8 +205,16 @@ const typesLabel: any = computed(() => {
   return JSON.stringify(result).replace(/[",]/g, '').replace(/^\[/, '').replace(/\]$/, '');
 });
 
-function changeType(tabsIndex: any, e: any) {
+function changeType(tabsIndex: any,tab:any, e: any) {
   let type = e.target.value;
+  // debugger;
+  // 切换类型时，需要清空 format 字段
+  const currentTypeObj = tab.props?.find((prop: any) => prop.value === type);
+  currentTypeObj?.props?.options?.forEach((opt:any) => {
+   if(['format','example','default'].includes(opt.name))
+     opt.value = null;
+   })
+
   if (type === 'array') {
     if (tabsList.value.length === tabsIndex + 1) {
       tabsList.value.push(cloneDeep(schemaSettingInfo));
@@ -241,7 +249,7 @@ function selectTab(tabs: any, tabIndex: number) {
   if (tabIndex === 0 && tabs[tabIndex].value === 'array' && tabsList.value.length === 1) {
     tabsList.value.push(cloneDeep(schemaSettingInfo));
   }
-  console.log('832 tabsList', tabsList.value)
+  // console.log('832 tabsList', tabsList.value)
   // 切换到 组件 Tab 或者 组合schema Tab 时，需要清空其他的tab
   // if(tabIndex === 2 || tabIndex === 1){
   //   tabsList.value.splice(1);

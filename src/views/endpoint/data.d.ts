@@ -103,3 +103,10 @@ export interface QueryCaseTreeParams {
     currentProjectId:number
     serveId:number
   }
+
+export interface GenerateFromResponseParams {
+    code: string;
+    contentType: string;
+    description: string;
+    interfaceId:number;
+}

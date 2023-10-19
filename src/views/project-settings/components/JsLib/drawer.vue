@@ -34,7 +34,7 @@
             </div>
           </a-form-item>
 
-          <a-form-item label="名称" v-bind="validateInfos.name" required>
+          <a-form-item label="模块名称" v-bind="validateInfos.name" required>
             <a-input v-model:value="model.name"
                      @blur="validate('name', { trigger: 'blur' }).catch(() => {})"/>
           </a-form-item>
@@ -42,7 +42,7 @@
           <a-form-item label="脚本文件 (.js)"
                        v-bind="validateInfos.scriptFile" required>
             <div v-if="isElectron" class="upload-file-by-electron">
-              {{model.scriptFile? 'upload/'+(model.name?model.name:'module') + '.js' : ''}}
+              {{getFileName(model.scriptFile)}}
 
               <a-button @click="uploadFile()">
                 <UploadOutlined/>
@@ -53,9 +53,6 @@
             </div>
 
             <div v-else class="upload-file">
-              <div class="input-container">
-                {{model.scriptFile? 'upload/'+(model.name?model.name:'module') + '.js' : ''}}
-              </div>
               <div class="upload-container">
                 <a-upload :beforeUpload="uploadScript"
                           :showUploadList="false"
@@ -64,6 +61,10 @@
                     <UploadOutlined/>
                   </a-button>
                 </a-upload>
+              </div>
+
+              <div class="input-container"> &nbsp;
+                {{getFileName(model.scriptFile)}}
               </div>
 
               <div class="download dp-link-primary">
@@ -79,7 +80,7 @@
 
           <a-form-item label="声明文件 (.d.ts)">
             <div v-if="isElectron" class="upload-file-by-electron">
-              {{model.typesFile? 'upload/'+(model.name?model.name:'module') + '.td.ts' : ''}}
+              {{getFileName(model.typesFile)}}
 
               <a-button @click="uploadFile()">
                 <UploadOutlined/>
@@ -91,9 +92,6 @@
             </div>
 
             <div v-else class="upload-file">
-              <div class="input-container">
-                {{model.typesFile? 'upload/'+(model.name?model.name:'module') + '.td.ts' : ''}}
-              </div>
               <div class="upload-container">
                 <a-upload :beforeUpload="uploadTypes"
                           :showUploadList="false"
@@ -102,6 +100,10 @@
                     <UploadOutlined/>
                   </a-button>
                 </a-upload>
+              </div>
+
+              <div class="input-container"> &nbsp;
+                {{getFileName(model.typesFile)}}
               </div>
 
               <div class="download dp-link-primary">
@@ -143,6 +145,7 @@ import {pattern} from "@/utils/const";
 import {isLeyan} from "@/utils/comm";
 import {addSepIfNeeded} from "@/utils/url";
 import ALink from "@/components/ALink/index.vue";
+import {getFileName} from "@/utils/dom";
 
 const useForm = Form.useForm;
 
@@ -230,6 +233,7 @@ const uploadTypes = (file, fileList) => {
 
   uploadRequest(file, {isJslib: true}).then((res) => {
     model.value.typesFile = res.path
+    model.value.typesName = res.name
   })
 
   return false
@@ -239,6 +243,7 @@ const uploadScript = (file, fileList) => {
 
   uploadRequest(file, {isJslib: true}).then((res) => {
     model.value.scriptFile = res.path
+    model.value.scriptName = res.name
   })
 
   return false

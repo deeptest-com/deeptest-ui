@@ -109,6 +109,7 @@ import {notifyWarn} from "@/utils/notify";
 const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
+const servers = computed<any[]>(() => store.state.Debug.serves);
 const currService = computed(() => store.state.ServeGlobal.currServe);
 const currServe = computed(() => store.state.Debug.currServe);
 

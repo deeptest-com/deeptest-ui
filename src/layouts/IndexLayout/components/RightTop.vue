@@ -181,7 +181,6 @@ export default defineComponent({
     }
 
     .indexlayout-top-menu-right {
-      width: 380px;
       height: @headerHeight;
       line-height: @headerHeight;
       .indexlayout-top-project {

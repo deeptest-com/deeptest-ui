@@ -121,12 +121,23 @@ export const routes: RoutesDataItem[] = [
             path: 'agent',
             component: () => import('@/views/sys-settings/Agent/index.vue'),
             meta: {
-              title: '执行dialing',
+              title: '代理管理',
               code: 'SYS-SETTING-AGENT'
             }
           },
         ]
-      }
+      },
+
+      {
+        icon: 'profile',
+        title: '上传文件',
+        path: 'fileUpload',
+        component: () => import('@/views/uploadFile/index.vue'),
+        hidden: true,
+        meta: {
+          title: '上传文件'
+        }
+      },
     ]
   },
   {

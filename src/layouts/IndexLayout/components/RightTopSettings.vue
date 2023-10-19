@@ -28,23 +28,21 @@
       </template>
 
       <!--  切换Agent -->
-      <a-dropdown placement="bottomRight" v-if="agents?.length">
+      <a-dropdown placement="bottomRight" v-if="agents?.length" class="user-agent-manage">
         <a class="indexlayout-top-usermenu ant-dropdown-link" style="margin-right: 6px;margin-left: 8px;">
           <IconSvg type="top-right-web" class="top-right-icon"/>
-          <span class="user-name">{{ currentAgent.name }}</span>
+          <span class="agent-name">
+            {{ currentAgent.name }}
+          </span>
           <DownOutlined class="user-icon"/>
         </a>
         <template #overlay>
           <a-menu @click="changeAgentEnv">
-            <template v-for="agent in agents">
-              <template v-if="agent.id !== currentAgent?.id">
-                <a-menu-item :key="agent.id">
-                  <a-tooltip placement="left" :title="agent.desc">
-                    {{ agent.name }}
-                  </a-tooltip>
-                </a-menu-item>
-              </template>
-            </template>
+            <a-menu-item :key="agent.id" v-for="agent in agents"  :style="agent.id === currentAgent.id ? {color:'#1890ff','background-color': '#e6f7ff'} : {}">
+              <a-tooltip placement="left" :title="agent.desc">
+                {{ agent.name }}
+              </a-tooltip>
+            </a-menu-item>
           </a-menu>
         </template>
       </a-dropdown>
@@ -57,7 +55,7 @@
         </a>
         <template #overlay>
           <a-menu @click="onSysMenuClick">
-            <a-menu-item key="agentManage">
+            <a-menu-item v-if="isAdmin" key="agentManage">
               代理管理
             </a-menu-item>
             <a-menu-item key="userManage">
@@ -79,10 +77,6 @@
             <a-menu-item key="profile">
               <SettingOutlined class="settings"/>
               个人信息
-            </a-menu-item>
-            <a-menu-item v-if="isLyEnv" key="management">
-              <SettingOutlined class="settings"/>
-              用户管理
             </a-menu-item>
             <a-menu-item key="logout">
               <LogoutOutlined/>
@@ -106,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, onMounted, ref} from "vue";
+import {computed, defineProps, onMounted,ref} from "vue";
 import {useStore} from "vuex";
 import {getAgentUrlByValue, isElectronEnv} from '@/utils/agentEnv'
 import {
@@ -236,6 +230,11 @@ onMounted(async () => {
   await store.dispatch('Global/getClientVersion');
 })
 
+const isAdmin = computed(() => {
+  return (currentUser.value.sysRoles || []).includes('admin');
+});
+
+
 </script>
 
 <style lang="less" scoped>
@@ -260,6 +259,10 @@ onMounted(async () => {
       }
 
       .user-name {
+        color: #fff;
+      }
+
+      .agent-name {
         color: #fff;
       }
     }
@@ -288,6 +291,24 @@ onMounted(async () => {
 }
 
 .user-info {
+  display: flex;
+  align-items: center;
+
+  :deep(.user-agent-manage) {
+    display: flex;
+    align-items: center;
+
+    .agent-name {
+      display: inline-block;
+      width: 56px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: #8A8A8A;
+      margin-left: 6px;
+    }
+  }
+
   .user-name {
     margin-left: 4px;
     margin-right: 4px;

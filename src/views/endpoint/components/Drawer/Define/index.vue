@@ -21,7 +21,7 @@
           class="editor"
           :value="endpointDetailYamlCode"
           :language="'yaml'"
-          :height="600"
+          :height="400"
           theme="vs"
           :options="{...MonacoOptions}"
           @change="handleYamlCodeChange"

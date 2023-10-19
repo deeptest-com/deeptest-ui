@@ -12,7 +12,6 @@ export enum UsedBy {
     DiagnoseDebug = "diagnose_debug",
     CaseDebug = "case_debug",
     CaseGenerate = "case_generate",
-
     MockData = "mock_data",
     MockResp = "mock_resp",
 
