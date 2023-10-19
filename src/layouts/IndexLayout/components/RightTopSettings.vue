@@ -7,7 +7,7 @@
         <a-dropdown placement="bottomRight" v-if="isLyEnv">
           <a class="indexlayout-top-usermenu ant-dropdown-link" style="margin-right: 4px;margin-left: 4px;">
             <DesktopOutlined type="top-right-web" class="top-right-icon-desktop"/>
-            <span class="user-name">{{ '客户端下载' }}</span>
+            <span class="operation-name">{{ '客户端下载' }}</span>
             <DownOutlined class="user-icon"/>
           </a>
           <template #overlay>
@@ -29,7 +29,7 @@
 
       <!--  切换Agent -->
       <a-dropdown placement="bottomRight" v-if="agents?.length" class="user-agent-manage">
-        <a class="indexlayout-top-usermenu ant-dropdown-link" style="margin-right: 6px;margin-left: 8px;">
+        <a class="indexlayout-top-usermenu ant-dropdown-link" style="margin-right: 6px;margin-left: 15px;">
           <IconSvg type="top-right-web" class="top-right-icon"/>
           <span class="agent-name">
             {{ currentAgent.name }}
@@ -47,15 +47,13 @@
         </template>
       </a-dropdown>
 
-      <a-dropdown placement="bottomRight">
-        <a class="indexlayout-top-sysmenu ant-dropdown-link" style="margin-right: 6px;margin-left: 8px;">
+      <a-dropdown placement="bottomRight" v-if="isAdmin">
+        <a class="indexlayout-top-sysmenu ant-dropdown-link operation-name message" style="margin-right: 6px;margin-left: 8px;">
           <SettingOutlined class="top-right-icon-desktop"/>
-          <span class="user-name">系统</span>
-          <DownOutlined class="user-icon"/>
         </a>
         <template #overlay>
           <a-menu @click="onSysMenuClick">
-            <a-menu-item v-if="isAdmin" key="agentManage">
+            <a-menu-item key="agentManage">
               代理管理
             </a-menu-item>
             <a-menu-item key="userManage">
@@ -65,11 +63,28 @@
         </template>
       </a-dropdown>
 
+      <!-- ::::消息通知 -->
+      <a-tooltip placement="bottom" title="消息通知">
+        <span class="operation-name message" @click="onMessageClick">
+          <BellOutlined />
+        </span>
+      </a-tooltip>
+
+      <a-tooltip placement="bottom" @click="toggle">
+        <template #title>{{ isFullscreen ? '退出全屏' : '全屏' }}</template>
+        <a-button type="text" class="share-btn">
+          <FullscreenOutlined v-if="isFullscreen"
+                              :style="{'font-size': '14px','color':theme === 'white-theme' ? '#fff' : '#8A8A8A'}"/>
+          <FullscreenExitOutlined v-if="!isFullscreen"
+                                  :style="{'font-size': '14px','color':theme === 'white-theme' ? '#fff' : '#8A8A8A'}"/>
+        </a-button>
+      </a-tooltip>
+
       <!-- ::::用户信息 -->
       <a-dropdown placement="bottomRight">
         <a class="indexlayout-top-usermenu ant-dropdown-link" style="margin-right: 6px;margin-left: 8px;">
           <UserOutlined class="user-icon"/>
-          <span class="user-name">{{ currentUser.name }}</span>
+          <span class="operation-name">{{ currentUser.name }}</span>
           <DownOutlined class="user-icon"/>
         </a>
         <template #overlay>
@@ -86,15 +101,6 @@
         </template>
       </a-dropdown>
 
-      <a-tooltip placement="bottom" @click="toggle">
-        <template #title>{{ isFullscreen ? '退出全屏' : '全屏' }}</template>
-        <a-button type="text" class="share-btn">
-          <FullscreenOutlined v-if="isFullscreen"
-                              :style="{'font-size': '14px','color':theme === 'white-theme' ? '#fff' : '#8A8A8A'}"/>
-          <FullscreenExitOutlined v-if="!isFullscreen"
-                                  :style="{'font-size': '14px','color':theme === 'white-theme' ? '#fff' : '#8A8A8A'}"/>
-        </a-button>
-      </a-tooltip>
     </div>
   </div>
 </template>
@@ -110,7 +116,7 @@ import {
   LogoutOutlined,
   FullscreenOutlined,
   FullscreenExitOutlined,
-  DesktopOutlined, CloudDownloadOutlined,
+  DesktopOutlined, CloudDownloadOutlined, BellOutlined,
 } from '@ant-design/icons-vue';
 import {useI18n} from "vue-i18n";
 import IconSvg from "@/components/IconSvg";
@@ -183,6 +189,10 @@ const onSysMenuClick = (event: any) => {
     store.commit('Global/setCurrAgent', currAgent)
     // window.location.reload();
   }
+}
+
+const onMessageClick = () => {
+    router.push({ path: '/notification' });
 }
 
 function changeAgentEnv(event: any) {
@@ -258,7 +268,7 @@ const isAdmin = computed(() => {
         color: #fff;
       }
 
-      .user-name {
+      .operation-name {
         color: #fff;
       }
 
@@ -309,11 +319,16 @@ const isAdmin = computed(() => {
     }
   }
 
-  .user-name {
+  .operation-name {
     margin-left: 4px;
     margin-right: 4px;
     display: inline-block;
     color: #8A8A8A;
+
+    &.message {
+      margin-left: 8px !important;
+      cursor: pointer;
+    }
   }
 
   .user-info {

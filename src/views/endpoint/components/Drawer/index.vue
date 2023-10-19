@@ -2,41 +2,34 @@
   <DrawerLayout :visible="visible" @close="emit('close');" :stickyKey="stickyKey">
     <!-- 头部信息  -->
     <template #header>
-      <div class="header-text">
-        <span class="serialNumber">[{{ endpointDetail.serialNumber }}]</span>
-        <EditAndShowField :custom-class="'show-on-hover'" placeholder="修改标题" :value="endpointDetail?.title || ''"
-                          @update="updateTitle"/>
-      </div>
-      <div class="header-operation">
-        <a-tooltip :title="'分享链接'">
-          <ShareAltOutlined @click.stop="handleShare" />
-        </a-tooltip>
-      </div>
+      <DetailHeader 
+        :name="endpointDetail?.title"
+        :serial-number="endpointDetail?.serialNumber"
+        :show-action="true"
+        :detail-link="detailLink"
+        :share-link="detailLink"
+        :show-detail="true"
+        :show-share="true" 
+        @update-title="updateTitle"/>
     </template>
     <template #basicInfo>
       <!-- 基本信息 -->
-      <EndpointBasicInfo @changeStatus="changeStatus"
-                         @change-description="changeDescription"
-                         @changeCategory="changeCategory"/>
+      <EndpointBasicInfo
+        @changeStatus="changeStatus"
+        @change-description="changeDescription"
+        @changeCategory="changeCategory"/>
     </template>
     <template #tabHeader>
-      <div class="tab-header-items">
-        <div class="tab-header-item"
-             v-for="tab in tabsList"
-             :key="tab.key"
-             :class="{'active':tab.key === activeTabKey}"
-             @click="changeTab(tab.key)">
-          <span>{{ tab.label }}</span>
-        </div>
-      </div>
-      <div class="tab-header-btns">
-        <a-button v-if="activeTabKey === 'request' && showFooter" type="primary" @click="save">
-          <template #icon>
-            <icon-svg class="icon dp-icon-with-text" type="save" />
-          </template>
-          保存
-        </a-button>
-      </div>
+      <DetailTabHeader :tab-list="EndpointTabsList" :show-btn="true" @change-tab="changeTab" :active-key="activeTabKey">
+        <template #btn>
+          <a-button v-if="activeTabKey === 'request' && showFooter" type="primary" @click="save">
+            <template #icon>
+              <icon-svg class="icon dp-icon-with-text" type="save" />
+            </template>
+            保存
+          </a-button>
+        </template>
+      </DetailTabHeader>
     </template>
     <template #tabContent>
       <div class="tab-pane">
@@ -66,62 +59,40 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineEmits, defineProps, provide, ref,watch} from 'vue';
-import { ShareAltOutlined } from '@ant-design/icons-vue';
+import {computed, defineEmits, defineProps, provide, ref, watch} from 'vue';
+import {useStore} from "vuex";
+import { useRouter } from "vue-router";
+
 import IconSvg from "@/components/IconSvg";
 import EndpointBasicInfo from './EndpointBasicInfo.vue';
-import EditAndShowField from '@/components/EditAndShow/index.vue';
 import EndpointDefine from './Define/index.vue';
 import EndpointDebug from './Debug/index.vue';
 import EndpointCases from './Cases/index.vue';
 import EndpointMock from './Mock/index.vue';
 import Docs from '@/components/Docs/index.vue';
 import DrawerLayout from "@/views/component/DrawerLayout/index.vue";
-import {useStore} from "vuex";
+
 import {Endpoint} from "@/views/endpoint/data";
 import {notifySuccess} from "@/utils/notify";
+import { DetailHeader, DetailTabHeader } from '@/views/component/DetailLayout';
+import { EndpointTabsList } from '@/config/constant';
 
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal,Global }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 
-const props = defineProps({
+defineProps({
   visible: {
     required: true,
     type: Boolean,
-  }
+  },
 })
 
 const emit = defineEmits(['ok', 'close', 'refreshList', 'share']);
 
+const router = useRouter();
+
 const showList = ref(true)
 const docsData = ref(null);
-
-const tabsList = [
-  {
-    "key": "request",
-    "label": "定义"
-  },
-  {
-    "key": "run",
-    "label": "调试"
-  },
-  {
-    "key": "cases",
-    "label": "用例"
-  },
- // {
- //   "key": "mock",
- //   "label": "Mock"
- // },
-  {
-    "key": "mock",
-    "label": "高级Mock"
-  },
-  {
-    "key": "docs",
-    "label": "文档"
-  },
-]
 
 const stickyKey = ref(0);
 async function changeTab(value) {
@@ -225,9 +196,10 @@ async function save() {
   emit('refreshList');
 }
 
-function handleShare() {
-  emit('share', endpointDetail.value.id);
-}
+const detailLink = computed(() => {
+  const { params: { projectNameAbbr = '' } } = router.currentRoute.value;
+  return `${window.location.origin}/${projectNameAbbr}/IM/${endpointDetail.value?.serialNumber}`;
+})
 
 provide('notScrollIntoView', true);
 </script>

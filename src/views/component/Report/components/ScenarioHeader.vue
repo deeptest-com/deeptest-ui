@@ -26,12 +26,6 @@ const status = computed(() => {
   return props.record?.resultStatus || 'in-progress'
 })
 
-watch(() => props.record, val => {
-  console.log('实时获取到 进度', val);
-}, {
-  immediate: true,
-});
-
 const progressInfo = computed(() => {
   const { resultStatus = ''} = props.record || {};
   return {

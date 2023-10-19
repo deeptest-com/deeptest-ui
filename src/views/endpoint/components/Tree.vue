@@ -75,18 +75,18 @@ import {
   computed, ref, onMounted,
   watch, defineEmits, defineProps, createVNode, nextTick
 } from 'vue';
-import { useRouter } from 'vue-router';
+import {useStore} from "vuex";
 import {
   PlusOutlined,
   CaretDownOutlined,
   MoreOutlined,
   ExclamationCircleOutlined
 } from '@ant-design/icons-vue';
-import {message, Modal, notification} from 'ant-design-vue';
-import cloneDeep from "lodash/cloneDeep";
-import CreateCategoryModal from '@/components/CreateCategoryModal/index.vue';
+import {Modal} from 'ant-design-vue';
 import {DropEvent} from 'ant-design-vue/es/tree/Tree';
-import {useStore} from "vuex";
+import cloneDeep from "lodash/cloneDeep";
+
+import CreateCategoryModal from '@/components/CreateCategoryModal/index.vue';
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
 import {StateType as ProjectStateType} from "@/store/project";
 import {setSelectedKey} from "@/utils/cache";
@@ -96,7 +96,6 @@ import settings from "@/config/settings";
 import { getUrlKey } from '@/utils/url';
 import {notifyError, notifySuccess, notifyWarn} from "@/utils/notify";
 
-const router = useRouter();
 const store = useStore<{ Endpoint: EndpointStateType, ProjectGlobal: ProjectStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);

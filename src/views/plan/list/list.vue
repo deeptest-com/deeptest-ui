@@ -93,27 +93,26 @@
     @get-list="getList(1)"
   />
   <!-- 编辑计划抽屉 -->
-  <PlanEdit
-    :tab-active-key="editTabActiveKey"
-    :edit-drawer-visible="editDrawerVisible"
-    @update:tab-key="e => editTabActiveKey = e"
-    @onSelectEnv="handleEnvSelect"
-    @onUpdate="handleUpdate"
-    @on-cancel="editDrawerVisible = false" />
+  <div v-if="editDrawerVisible">
+    <PlanEdit
+      :tab-active-key="editTabActiveKey"
+      :edit-drawer-visible="editDrawerVisible"
+      @update:tab-key="e => editTabActiveKey = e"
+      @onSelectEnv="handleEnvSelect"
+      @onUpdate="handleUpdate"
+      @on-cancel="editDrawerVisible = false" />
+  </div>
 
   <!-- 执行计划抽屉 -->
   <ExecResult
     :drawer-visible="execReportVisible"
-    :title="execReportTitle"
-    :scenario-expand-active="true"
-    :show-scenario-info="true"
-    :scene="ReportDetailType.ExecPlan"
     @on-close="execReportVisible = false"
   />
-  <EnvSelector @on-cancel="envSelectVisible = false;execEnvId= null"
-               :execEnvId="execEnvId"
-               :env-select-drawer-visible="envSelectVisible"
-               @on-ok="onExec" />
+  <EnvSelector
+    @on-cancel="envSelectVisible = false;execEnvId= null"
+    :execEnvId="execEnvId"
+    :env-select-drawer-visible="envSelectVisible"
+    @on-ok="onExec" />
 </template>
 
 <script setup lang="ts">
@@ -136,7 +135,6 @@ import { planStatusColorMap, planStatusTextMap, planStatusOptions } from "@/conf
 
 import Select from '@/components/Select/index.vue';
 import { DropdownActionMenu } from "@/components/DropDownMenu";
-import { ReportDetailType } from "@/utils/enum";
 import {notifyError} from "@/utils/notify";
 
 const columns = [
@@ -243,7 +241,6 @@ const createDrawerVisible = ref(false);
 const editDrawerVisible = ref(false); // 编辑弹窗控制visible
 const editTabActiveKey = ref('test-scenario'); // 打开编辑弹窗时,需要选中的tab
 const execReportVisible = ref(false);
-const execReportTitle = ref(''); // 执行报告标题
 const envSelectVisible = ref(false); // 选择执行环境
 
 const getList = debounce(async (current: number): Promise<void> => {
@@ -262,7 +259,7 @@ const getList = debounce(async (current: number): Promise<void> => {
 const onExec = async () => {
   // editDrawerVisible.value = false;
   envSelectVisible.value = false;
-  await store.dispatch('Plan/initExecResult');
+  await store.dispatch('Plan/getPlan', currPlan.value.id);
   // 执行完后，重新拉取列表数据，保证 列表中 curEnvId 为最新的
   await getList(pagination.value.current);
   execReportVisible.value = true;

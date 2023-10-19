@@ -1,7 +1,7 @@
 <template>
   <ContentPane 
     :showExpand="true" 
-    :containerStyle="{ padding:0, margin:0, overflow: 'hidden'}">
+    :containerStyle="{ padding:0, margin:0}">
     <template #left>
       <ScenarioTree/>
     </template>

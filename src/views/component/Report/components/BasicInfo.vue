@@ -1,8 +1,7 @@
 <template>
   <div class="report-basicinfo">
-<!--    <TextItem :key="item.label" v-for="item in items" :label="item.label" :value="item.value"/>-->
     <a-descriptions :title="null" :column="3" :size="'small'">
-      <a-descriptions-item :key="item.label" v-for="item in items" :label="item.label">
+      <a-descriptions-item :key="item.label" v-for="item in items" :label="item.label" :contentStyle="{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'noWrap' }">
         {{ item.value }}
       </a-descriptions-item>
     </a-descriptions>
@@ -16,6 +15,7 @@
   </div>
 </template>
 <script setup lang="ts">
+import TooltipCell from '@/components/Table/tooltipCell.vue';
 import {defineProps, defineEmits} from 'vue';
 // import TextItem from './TextItem.vue';
 

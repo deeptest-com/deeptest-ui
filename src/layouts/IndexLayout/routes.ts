@@ -35,6 +35,17 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         meta: {
           code: 'IM'
         }
+      },
+      {
+        icon: 'define',
+        title: 'endpoint-management',
+        path: ':imSerialNumber',
+        component: () => import('@/views/endpoint/components/Detail/index.vue'),
+        hidden: false,
+        meta: {
+          code: 'IM',
+          type: 'im-detail'
+        }
       }
     ],
   },
@@ -89,6 +100,17 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         meta: {
           code: 'TS'
         }
+      },
+      {
+        icon: 'test',
+        title: 'index-layout.menu.ts',
+        path: ':tsSerialNumber',
+        component: () => import('@/views/scenario/components/Detail/index.vue'),
+        hidden: false,
+        meta: {
+          code: 'TS',
+          type: 'ts-detail'
+        }
       }
     ],
   },
@@ -109,6 +131,17 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
           code: 'TP'
         }
       },
+      {
+        icon: 'tp',
+        title: 'index-layout.menu.tp',
+        path: ':planSerialNumber',
+        component: () => import('@/views/plan/detail/index.vue'),
+        hidden: false,
+        meta: {
+          code: 'TP',
+          type: 'plan-detail',
+        }
+      },
     ],
   },
 
@@ -116,7 +149,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
     title: 'index-layout.menu.tr',
     path: '/:projectNameAbbr/TR',
     redirect: '/:projectNameAbbr/TR',
-    component: () => import('@/views/report/index.vue'),
+    component: BlankLayout,
     children: [
       {
         icon: 'tr',
@@ -126,6 +159,17 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         hidden: false,
         meta: {
           code: 'TR'
+        }
+      },
+      {
+        icon: 'tr',
+        title: 'index-layout.menu.tr',
+        path: ':reportSerialNumber',
+        component: () => import('@/views/report/Detail/index.vue'),
+        hidden: false,
+        meta: {
+          code: 'TR',
+          type: 'report-detail',
         }
       }
     ],

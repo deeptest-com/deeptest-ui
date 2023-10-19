@@ -31,7 +31,7 @@ const props = defineProps<{
 const store = useStore<{ Plan: PlanStateType }>();
 const emits = defineEmits(['onCancel', 'onOk']);
 const scenarioLists = computed<any[]>(() => store.state.Plan.scenarios.list);
-const currPlan = computed<any>(() => store.state.Plan.currPlan);
+const currPlan = computed<any>(() => store.state.Plan.detailResult);
 let pagination = computed<any>(() => store.state.Plan.scenarios.pagination);
 let queryParams = reactive<any>({
   keywords: '', enabled: '1',
