@@ -13,7 +13,7 @@
       </template>
 
       <div v-if="visible">
-        <a-form :model="model" :label-col="labelCol" :wrapper-col="wrapperCol">
+        <a-form :model="model" :label-col="{ style: { width: '56px' } }" :wrapper-col="wrapperCol">
           <a-form-item label="名称" v-bind="validateInfos.name" required>
             <a-input v-model:value="model.name"
                      @blur="validate('name', { trigger: 'blur' }).catch(() => {})"/>

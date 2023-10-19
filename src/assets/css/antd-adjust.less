@@ -217,3 +217,31 @@
         }
     }
 }
+
+.ant-form-item-label {
+    width: 82px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    text-align: left;
+    
+    label::after {
+        color: transparent;
+    }
+
+    label:not(.ant-form-item-required)::before {
+        display: inline-block;
+        margin-right: 4px;
+        color: transparent;
+        font-size: 14px;
+        font-family: SimSun, sans-serif;
+        line-height: 1;
+        content: '*';
+    }
+}
+
+.custom-center-form {
+    .ant-row {
+        justify-content: center;
+    }
+}

@@ -5,7 +5,7 @@
         <div>编辑用户</div>
       </template>
       <div>
-        <a-form :label-col="labelCol" :wrapper-col="wrapperCol">
+        <a-form :label-col="{ style: { width: '66px' } }" :wrapper-col="wrapperCol">
           <a-form-item label="用户名" v-bind="validateInfos.username">
             <a-input v-model:value="modelRef.username"
                      @blur="validate('username', { trigger: 'blur' }).catch(() => {})" />

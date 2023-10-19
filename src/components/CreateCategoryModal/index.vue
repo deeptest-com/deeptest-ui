@@ -7,9 +7,9 @@
       :title="mode === 'new' ? '新建分类' : '修改分类'">
     <a-form
         ref="tagFormRef"
+        class="custom-center-form"
         :rules="rules"
         :model="formState"
-        :label-col="{ span: 6 }"
         :wrapper-col="{ span: 14 }">
       <a-form-item label="分类名称" name="name">
         <a-input placeholder="请输入分类名称" v-model:value="formState.name"/>
