@@ -1,6 +1,6 @@
 <template>
   <div class="response-checkpoint-main">
-    <a-form :label-col="labelCol" :wrapper-col="wrapperCol">
+    <a-form :label-col="{ style: { width: '68px' } }" :wrapper-col="wrapperCol">
       <a-form-item label="类型" v-bind="validateInfos.type">
         <a-select v-model:value="model.type"
                   @change="selectType"

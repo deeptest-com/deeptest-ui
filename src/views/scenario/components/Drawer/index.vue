@@ -23,6 +23,7 @@
         <DetailTabHeader 
           :tab-list="ScenarioTabList" 
           :showBtn="activeKey === '1' ? true : false"
+          :active-key="activeKey"
           @change-tab="changeTab">
           <template #btn>
             <a-button class="tab-header-btn" type="primary" @click="exec">执行场景</a-button>
