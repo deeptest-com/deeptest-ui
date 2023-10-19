@@ -83,6 +83,7 @@ const handlePaneResize = (...args) => {
       overflow: scroll;
       position: relative;
       z-index: 2;
+      padding-left: 1px;
 
       &.unfold {
         overflow: scroll;
