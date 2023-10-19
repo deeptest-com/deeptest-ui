@@ -66,11 +66,13 @@ function useCaseExecution(): CaseExecution {
 
         execUuid.value = getUuid()
         const data = {
-            execUuid: execUuid,
+            execUuid: execUuid.value,
             cases: cases,
             environmentId: envId,
         }
-        WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify({act: 'execCasesStart', scenarioExecReq: data}))
+        console.log('=== data', data)
+
+        WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify({act: 'execCases', casesExecReq: data}))
     }
     const execStop = () => {
         const msg = {act: 'execCasesStop', execReq: {execUuid: execUuid.value}};

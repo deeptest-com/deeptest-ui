@@ -1,6 +1,6 @@
 <template>
   <a-modal
-      :title="'配置'+t(model.entityType)"
+      :title="'配置'+ t(model?.conditionEntityType ? model?.conditionEntityType : model?.entityType)"
       :visible="visible"
       :footer="null"
       @cancel="cancel"
