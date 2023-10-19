@@ -87,7 +87,7 @@ defineProps({
   },
 })
 
-const emit = defineEmits(['ok', 'close', 'refreshList', 'share']);
+const emit = defineEmits(['ok', 'close', 'refreshList']);
 
 const router = useRouter();
 

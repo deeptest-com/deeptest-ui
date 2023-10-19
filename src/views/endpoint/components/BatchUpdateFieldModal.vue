@@ -9,7 +9,7 @@
         ref="formRef"
         :model="formState"
         :rules="rules"
-        :label-col="{ span: 5 }"
+        class="custom-center-form"
         :wrapper-col="{ span: 17 }">
       <a-form-item :wrapper-col="{ span: 16, offset: 2 }" style="font-weight: bold">
         <span class="">共选择了{{ selectedEndpointNum }}个接口进行批量修改。修改后无法撤回，请谨慎操作</span>

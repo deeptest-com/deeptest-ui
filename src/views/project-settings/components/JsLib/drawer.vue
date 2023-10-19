@@ -14,23 +14,22 @@
       </template>
 
       <div v-if="visible">
-        <a-form :model="model" :label-col="labelCol" :wrapper-col="wrapperCol">
+        <a-form :model="model" :label-col="{ style: { width: '120px' } }" :wrapper-col="wrapperCol">
 
           <a-form-item class="dp-no-label-after">
-            <template #label>
+            <div style="display: flex;">
               <span v-if="isLy">
                 <ExclamationCircleOutlined />
               </span>
               <a v-else href="https://deeptest.com/jslib.html" target="_blank">
                 <QuestionCircleOutlined class="dp-icon-btn dp-trans-80"/>
               </a>
-            </template>
-
-            <div>
-              导入第三方/自定义JavaScript类库，可以在自定义脚本中，通过
-              {{model.name?model.name:'moduleName'}}.funcName(参数)的形式来调用自定义函数。
-              <br />
-              页面上填写的模块名称和.d.ts文件里声明的模块名称，二者须保持一致。
+              <div class="margin-left: 6px">
+                导入第三方/自定义JavaScript类库，可以在自定义脚本中，通过
+                {{model.name?model.name:'moduleName'}}.funcName(参数)的形式来调用自定义函数。
+                <br />
+                页面上填写的模块名称和.d.ts文件里声明的模块名称，二者须保持一致。
+              </div>
             </div>
           </a-form-item>
 

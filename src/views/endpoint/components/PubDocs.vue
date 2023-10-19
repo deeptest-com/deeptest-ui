@@ -9,6 +9,7 @@
         ref="formRef"
         :model="formState"
         :rules="rules"
+        class="custom-center-form"
         :label-col="{ span: 5 }"
         :wrapper-col="{ span: 17 }">
 

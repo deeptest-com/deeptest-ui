@@ -3,7 +3,7 @@
     <ProcessorHeader/>
     <a-card :bordered="false">
       <div>
-        <a-form :label-col="labelCol" :wrapper-col="wrapperCol">
+        <a-form :label-col="{ style: { width: '56px' } }" :wrapper-col="wrapperCol">
           <a-form-item label="输出" v-bind="validateInfos.rightValue">
             <a-input v-model:value="modelRef.rightValue"
                      @blur="validate('rightValue', { trigger: 'blur' }).catch(() => {})" />

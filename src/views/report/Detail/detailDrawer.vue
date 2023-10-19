@@ -11,6 +11,8 @@
         :name="detailResult.name" 
         :show-action="true" 
         :show-detail="true" 
+        :show-share="true"
+        :share-link="detailLink"
         :detail-link="detailLink" />
     </template>
     <template #tabContent>

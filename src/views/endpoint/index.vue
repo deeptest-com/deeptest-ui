@@ -163,7 +163,6 @@
     <!-- 编辑接口时，展开抽屉：外层再包一层 div, 保证每次打开弹框都重新渲染   -->
     <div v-if="drawerVisible">
       <Drawer
-          @share="id => share({ id })"
           :destroyOnClose="true"
           :visible="drawerVisible"
           @refreshList="refreshList"
@@ -182,7 +181,6 @@ import debounce from "lodash.debounce";
 import {ColumnProps} from 'ant-design-vue/es/table/interface';
 import {ExclamationCircleOutlined} from '@ant-design/icons-vue';
 import {Modal} from 'ant-design-vue';
-import {useClipboard} from '@vueuse/core'
 
 import {endpointStatusOpts, endpointStatus} from '@/config/constant';
 import ContentPane from '@/views/component/ContentPane/index.vue';
@@ -203,12 +201,11 @@ import Tags from './components/Tags/index.vue';
 import TooltipCell from '@/components/Table/tooltipCell.vue';
 import { DropdownActionMenu } from '@/components/DropDownMenu/index';
 
-import { getUrlKey } from '@/utils/url';
 import { getMethodColor } from '@/utils/interface';
 import {notifyError, notifySuccess} from "@/utils/notify";
+import useSharePage from '@/hooks/share';
 
-const { copy } = useClipboard({});
-
+const { share } = useSharePage();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType,Project }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
@@ -302,7 +299,7 @@ const MenuList = [
     key: '2',
     auth: '',
     label: '分享链接',
-    action: (record: any) => share(record)
+    action: (record: any) => share(record, 'IM')
   },
 
   {
@@ -409,17 +406,6 @@ async function editEndpoint(record) {
   // 打开抽屉详情时，拉取mock表达式列表
   await store.dispatch('Endpoint/getMockExpressions');
   drawerVisible.value = true;
-}
-
-/**
- * 分享相关
- * @param record
- */
-function share(record: any) {
-  const { params: { projectNameAbbr = '' } } = router.currentRoute.value;
-  const text = `${window.location.origin}/${projectNameAbbr}/IM/${record.serialNumber}`;
-  copy(text);
-  notifySuccess('复制成功，项目成员可通过此链接访问');
 }
 
 /**

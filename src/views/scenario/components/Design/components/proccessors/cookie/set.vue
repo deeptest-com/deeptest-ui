@@ -3,7 +3,7 @@
     <ProcessorHeader/>
     <a-card :bordered="false">
       <div>
-        <a-form :label-col="labelCol" :wrapper-col="wrapperCol">
+        <a-form :label-col="{ style: { width: '96px' } }" :wrapper-col="wrapperCol">
 
           <a-form-item label="Cookie名称" v-bind="validateInfos.cookieName">
             <a-input v-model:value="modelRef.cookieName"

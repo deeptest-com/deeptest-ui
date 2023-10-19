@@ -15,7 +15,7 @@
       </a-form-item>
       --->
 
-      <a-form :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }"
+      <a-form :wrapper-col="{ span: 16 }"
           @submit.prevent>
         <a-form-item label="变量名称" name="variableName" v-bind="validateInfos.variableName" required>
           <a-input v-model:value="formState.variableName"

@@ -1,85 +1,78 @@
 <template>
   <a-modal
       class="create-project-modal"
-      style="padding: 0"
       :visible="visible"
       @ok="handleOk"
       width="700px"
       :footer="null"
       :closable="true"
+      :title="formState?.id ? '编辑项目' : '新建项目'"
       @cancel="handleCancel"
   >
     <div class="project-edit-main">
-      <a-card :bordered="false">
-        <template #title>
-          <div>{{ formState?.id ? "编辑项目" : "新建项目" }}</div>
-        </template>
-        <div>
-          <a-form
-              :model="formStateRef"
-              :label-col="labelCol"
-              :wrapper-col="wrapperCol"
+      <a-form
+        class="custom-center-form"
+        :model="formStateRef"
+        :wrapper-col="wrapperCol"
+      >
+        <a-form-item label="项目名称" v-bind="validateInfos.name">
+                    <a-input
+              v-model:value="formStateRef.name"
+              placeholder="请输入项目名称"
+              @blur="validate('name', { trigger: 'blur' }).catch(() => {})"
+          />
+        </a-form-item>
+        <a-form-item label="英文缩写" v-bind="validateInfos.shortName">
+                    <a-input 
+            v-model:value="formStateRef.shortName"
+            placeholder="大写英文字母开头,仅限字母和数字,<=10位"
+            @blur="validate('shortName', { trigger: 'blur' }).catch(() => {})" />
+        </a-form-item>
+        <a-form-item label="logo" v-bind="validateInfos.logo">
+                    <div class="logo-picker">
+            <div :class="{
+                'logo-picker-item': true,
+                'logo-picker-item-active': selectLogoKey === item.imgName,
+              }"
+                  v-for="(item, index) in projectLogoList"
+                  :key="index"
+                  @click="handleSelectLogo(item)"
+            >
+              <img :src="item.icon" alt=""/>
+            </div>
+          </div>
+        </a-form-item>
+        <a-form-item label="管理员" v-bind="validateInfos.adminId">
+          <a-select
+              v-model:value="formStateRef.adminId"
+              show-search
+              placeholder="请选择管理员"
+              @blur="validate('adminId', { trigger: 'blur' }).catch(() => {})"
+              optionFilterProp="label"
+              :filter-option="filterOption"
           >
-            <a-form-item label="项目名称" v-bind="validateInfos.name">
-              <a-input
-                  v-model:value="formStateRef.name"
-                  placeholder="请输入项目名称"
-                  @blur="validate('name', { trigger: 'blur' }).catch(() => {})"
-              />
-            </a-form-item>
-            <a-form-item label="英文缩写" v-bind="validateInfos.shortName">
-              <a-input 
-                v-model:value="formStateRef.shortName"
-                placeholder="大写英文字母开头,仅限字母和数字,<=10位"
-                @blur="validate('shortName', { trigger: 'blur' }).catch(() => {})" />
-            </a-form-item>
-            <a-form-item label="logo" v-bind="validateInfos.logo">
-              <div class="logo-picker">
-                <div :class="{
-                    'logo-picker-item': true,
-                    'logo-picker-item-active': selectLogoKey === item.imgName,
-                  }"
-                     v-for="(item, index) in projectLogoList"
-                     :key="index"
-                     @click="handleSelectLogo(item)"
-                >
-                  <img :src="item.icon" alt=""/>
-                </div>
-              </div>
-            </a-form-item>
-            <a-form-item label="管理员" v-bind="validateInfos.adminId">
-              <a-select
-                  v-model:value="formStateRef.adminId"
-                  show-search
-                  placeholder="请选择管理员"
-                  @blur="validate('adminId', { trigger: 'blur' }).catch(() => {})"
-                  optionFilterProp="label"
-                  :filter-option="filterOption"
-              >
-                <a-select-option
-                    v-for="option in userListOptions"
-                    :key="option.id+'-'+option.name"
-                    :value="option.id"
-                >{{ option.label }}
-                </a-select-option
-                >
-              </a-select>
-            </a-form-item>
-            <a-form-item label="示例数据">
-              <a-switch v-model:checked="formStateRef.includeExample"/>
-            </a-form-item>
+            <a-select-option
+                v-for="option in userListOptions"
+                :key="option.id+'-'+option.name"
+                :value="option.id"
+            >{{ option.label }}
+            </a-select-option
+            >
+          </a-select>
+        </a-form-item>
+        <a-form-item label="示例数据">
+          <a-switch v-model:checked="formStateRef.includeExample"/>
+        </a-form-item>
 
-            <a-form-item label="项目简介" v-bind="validateInfos.desc">
-              <a-textarea v-model:value="formStateRef.desc"
-                          @blur="validate('desc', { trigger: 'blur' }).catch(() => {})"/>
-            </a-form-item>
-            <a-form-item :wrapper-col="{ span: 12, offset: 18 }">
-              <a-button type="primary" @click.prevent="submitForm" :loading="loading">确定</a-button>
-              <a-button @click="handleCancel" style="margin-left:10px">取消</a-button>
-            </a-form-item>
-          </a-form>
-        </div>
-      </a-card>
+        <a-form-item label="项目简介" v-bind="validateInfos.desc">
+          <a-textarea v-model:value="formStateRef.desc"
+                      @blur="validate('desc', { trigger: 'blur' }).catch(() => {})"/>
+        </a-form-item>
+        <a-form-item :wrapper-col="{ span: 12, offset: 18 }">
+          <a-button type="primary" @click.prevent="submitForm" :loading="loading">确定</a-button>
+          <a-button @click="handleCancel" style="margin-left:10px">取消</a-button>
+        </a-form-item>
+      </a-form>
     </div>
   </a-modal>
 </template>
@@ -88,10 +81,10 @@
 import {computed, defineEmits, defineProps, reactive, ref, watch} from "vue";
 import {Form, message, notification} from "ant-design-vue";
 import {StateType as UserStateType} from "@/store/user";
+import { CustomLabel } from "@/components/Form/label";
 import {StateType as ProjectStateType} from "@/views/project/store";
 import {SelectTypes} from "ant-design-vue/es/select";
 import {useStore} from "vuex";
-import {RuleObject} from "ant-design-vue/es/form/interface";
 import {getProjectLogo, projectLogoList} from "./index";
 import {notifyError, notifySuccess} from "@/utils/notify";
 

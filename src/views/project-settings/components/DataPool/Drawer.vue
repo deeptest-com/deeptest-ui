@@ -10,7 +10,7 @@
       </template>
 
       <div v-if="drawerVisible" class="">
-        <a-form :model="formState" :label-col="labelCol" :wrapper-col="wrapperCol">
+        <a-form :model="formState" :label-col="{ style: { width: '96px' } }" :wrapper-col="wrapperCol">
           <a-form-item label="名称" v-bind="validateInfos.name">
             <a-input v-model:value="formState.name"
                      @blur="validate('name', { trigger: 'blur' }).catch(() => {})"/>
