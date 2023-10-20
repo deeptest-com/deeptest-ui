@@ -1,43 +1,32 @@
 <template>
   <div class="header">
-    <a-row type="flex" class="row">
-      <a-col flex="1" class="left">
-        <icon-svg type="script" class="icon" />&nbsp;
-        <span>JavaScript代码</span>
-      </a-col>
+    <div class="left">
+      <icon-svg type="script" class="icon" />&nbsp;
+      <span>JavaScript代码</span>
+    </div>
+    <div class="right">
+      <a-button type="primary" size="small" @click.stop="save()" style="margin-right: 4px;">保存</a-button>
+      <!-- <a-tooltip overlayClassName="dp-tip-small">
+        <template #title>帮助</template>
+        <QuestionCircleOutlined class="dp-icon-btn dp-trans-80" />
+      </a-tooltip> -->
 
-      <a-col flex="100px" class="dp-right">
-        <a-tooltip overlayClassName="dp-tip-small">
-          <template #title>保存</template>
-          <icon-svg
-            class="icon dp-link-primary dp-icon-large"
-            type="save"
-            title="保存"
-            @click.stop="save()"
-          />
-        </a-tooltip>
-        <!-- <a-tooltip overlayClassName="dp-tip-small">
-          <template #title>帮助</template>
-          <QuestionCircleOutlined class="dp-icon-btn dp-trans-80" />
-        </a-tooltip> -->
-
-        <a-tooltip overlayClassName="dp-tip-small">
-          <template #title>{{
-            mode === "fullscreen" ? "还原" : "全屏"
-          }}</template>
-          <FullscreenExitOutlined
-            v-if="mode === 'fullscreen'"
-            @click.stop="closeFullScreen()"
-            class="dp-icon-btn dp-trans-80"
-          />
-          <FullscreenOutlined
-            v-else
-            @click.stop="openFullscreen()"
-            class="dp-icon-btn dp-trans-80"
-          />
-        </a-tooltip>
-      </a-col>
-    </a-row>
+      <a-tooltip overlayClassName="dp-tip-small">
+        <template #title>{{
+          mode === "fullscreen" ? "还原" : "全屏"
+        }}</template>
+        <FullscreenExitOutlined
+          v-if="mode === 'fullscreen'"
+          @click.stop="closeFullScreen()"
+          class="dp-icon-btn dp-trans-80"
+        />
+        <FullscreenOutlined
+          v-else
+          @click.stop="openFullscreen()"
+          class="dp-icon-btn dp-trans-80"
+        />
+      </a-tooltip>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
@@ -85,11 +74,27 @@ const save = async () => {
 </script>
 <style scoped lang="less">
 .header {
-  height: 32px;
+  height: 42px;
   padding: 3px 8px;
   border: 1px solid #d9d9d9;
   background-color: #fafafa;
   border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .left,.right {
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .left {
+    flex: 1;
+  }
+  .right {
+    justify-content: flex-end;
+  }
 }
 
 </style>

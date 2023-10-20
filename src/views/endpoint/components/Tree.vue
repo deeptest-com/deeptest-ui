@@ -165,29 +165,6 @@ const showKeywordsTip = computed(() => {
   return searchValue.value && treeData.value.length === 0;
 })
 
-function handleFindSearch() {
-  const result = getUrlKey('shareInfo', window.location.href) || "";
-  const shareInfo = result ? JSON.parse(result  as string) : {};
-  console.log(
-  '%c 接口定义 分享详情share-info',
-  'border: 1px solid white;border-radius: 3px 0 0 3px;padding: 2px 5px;color: white;background-color: green;',
-  shareInfo
-  );
-  if (shareInfo.selectedCategoryId) {
-    selectedKeys.value.push(shareInfo.selectedCategoryId);
-    setSelectedKey('category-endpoint', currProject.value.id, selectedKeys.value[0]);
-    setTimeout(() => {
-      if (document.getElementsByClassName('ant-tree-treenode-selected').length > 0) {
-        document.getElementsByClassName('ant-tree-treenode-selected')[0].scrollIntoView({
-          behavior: 'auto',
-          block: 'center',
-          inline: 'center',
-        });
-      }
-    }, 1000);
-  }
-}
-
 onMounted(async () => {
   await loadCategories();
 });
@@ -196,7 +173,6 @@ async function loadCategories() {
   await store.dispatch('Endpoint/loadCategory');
   expandAll();
   await nextTick();
-  handleFindSearch();
 }
 
 watch(() => {

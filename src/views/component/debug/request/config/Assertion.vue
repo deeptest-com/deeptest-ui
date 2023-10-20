@@ -42,10 +42,7 @@
                 </div>
               </div>
               <div class="buttons">
-                <icon-svg class="icon dp-link-primary dp-icon-large" type="save"
-                          title="保存"
-                          v-if="activeAssertion.id === element.id"
-                          @click.stop="save(element)" />
+                <a-button size="small" type="primary" v-if="activeAssertion.id === element.id" @click.stop="save(element)">保存</a-button>          
 
                 <ClearOutlined v-if="activeAssertion.id === +element.id && element.entityType === ConditionType.script"
                                @click.stop="format(element)"  class="dp-icon-btn dp-trans-80" />&nbsp;
@@ -248,7 +245,7 @@ const closeFullScreen = (item) => {
         }
 
         .header {
-          height: 28px;
+          height: 36px;
           padding: 3px;
           background-color: #fafafa;
           border-radius: 5px;
@@ -287,6 +284,9 @@ const closeFullScreen = (item) => {
           .buttons {
             width: 160px;
             text-align: right;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
           }
         }
         .content {

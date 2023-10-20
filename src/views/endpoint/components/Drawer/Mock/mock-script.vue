@@ -1,31 +1,23 @@
 <template>
   <div class="endpoint-mock-script-main">
-    <div class="head">
-      <a-row type="flex" class="row">
-        <a-col flex="1" class="left">
-          <icon-svg type="script" class="icon"  />
-          <span>自定义JavaScript代码</span>
-        </a-col>
+    <div class="header">
+      <div class="left">
+        <icon-svg type="script" class="icon"  />
+        <span>自定义JavaScript代码</span>
+      </div>
+      <div class="right">
+        <a-button size="small" type="primary" @click.stop="updateMockScript" style="margin-right: 4px;">保存</a-button>
 
-        <a-col flex="100px" class="dp-right">
-          <a-tooltip overlayClassName="dp-tip-small">
-            <template #title>保存</template>
-            <icon-svg type="save" class="dp-icon dp-link-primary dp-icon-large"
-                      @click.stop="updateMockScript" />
-          </a-tooltip>
+        <a-tooltip overlayClassName="dp-tip-small">
+          <template #title>帮助</template>
+          <QuestionCircleOutlined class="dp-icon-btn dp-trans-80"/>
+        </a-tooltip>
 
-          <a-tooltip overlayClassName="dp-tip-small">
-            <template #title>帮助</template>
-            <QuestionCircleOutlined class="dp-icon-btn dp-trans-80"/>
-          </a-tooltip>
-
-          <a-tooltip overlayClassName="dp-tip-small">
-            <template #title>全屏</template>
-            <FullscreenOutlined @click.stop="openFullscreen()"  class="dp-icon-btn dp-trans-80" />
-          </a-tooltip>
-
-        </a-col>
-      </a-row>
+        <a-tooltip overlayClassName="dp-tip-small">
+          <template #title>全屏</template>
+          <FullscreenOutlined @click.stop="openFullscreen()"  class="dp-icon-btn dp-trans-80" />
+        </a-tooltip>
+      </div>
     </div>
 
     <div class="content">
@@ -130,21 +122,26 @@ const format = (item) => {
 <style lang="less" scoped>
 .endpoint-mock-script-main {
   height: 100%;
-  display: flex;
-  flex-direction: column;
   position: relative;
 
-  .head {
-    height: 30px;
+  .header {
+    height: 42px;
     padding: 2px 3px;
     border-bottom: 1px solid #d9d9d9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-    .row {
-      .left {
-        .icon {
-          margin-right: 5px;
-        }
-      }
+    .left {
+      display: flex;
+      align-items: center;
+      flex: 1;
+    }
+
+    .right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
     }
   }
   .content {

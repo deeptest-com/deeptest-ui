@@ -14,25 +14,19 @@
       </template>
 
       <div v-if="visible">
+        <div class="jslib-tips-container">
+          <span v-if="isLy">
+            <ExclamationCircleOutlined />
+          </span>
+          <a v-else href="https://deeptest.com/jslib.html" target="_blank">
+            <QuestionCircleOutlined class="dp-icon-btn dp-trans-80"/>
+          </a>
+          <div class="jslib-tip">
+            导入第三方/自定义JavaScript类库，可以在自定义脚本中，通过{{model.name?model.name:'moduleName'}}.funcName(参数)的形式来调用自定义函数。
+            页面上填写的模块名称和.d.ts文件里声明的模块名称，二者须保持一致。
+          </div>
+        </div>
         <a-form :model="model" :label-col="{ style: { width: '120px' } }" :wrapper-col="wrapperCol">
-
-          <a-form-item class="dp-no-label-after">
-            <div style="display: flex;">
-              <span v-if="isLy">
-                <ExclamationCircleOutlined />
-              </span>
-              <a v-else href="https://deeptest.com/jslib.html" target="_blank">
-                <QuestionCircleOutlined class="dp-icon-btn dp-trans-80"/>
-              </a>
-              <div class="margin-left: 6px">
-                导入第三方/自定义JavaScript类库，可以在自定义脚本中，通过
-                {{model.name?model.name:'moduleName'}}.funcName(参数)的形式来调用自定义函数。
-                <br />
-                页面上填写的模块名称和.d.ts文件里声明的模块名称，二者须保持一致。
-              </div>
-            </div>
-          </a-form-item>
-
           <a-form-item label="模块名称" v-bind="validateInfos.name" required>
             <a-input v-model:value="model.name"
                      @blur="validate('name', { trigger: 'blur' }).catch(() => {})"/>
@@ -266,9 +260,12 @@ const wrapperCol = {span: 18}
 </script>
 
 <style lang="less" scoped>
-.jslib-edit-main {
-  .sample {
+.jslib-tips-container {
+  display: flex;
+  margin-bottom: 20px;
 
+  .jslib-tip {
+    margin-left: 6px;
   }
 }
 </style>
