@@ -59,6 +59,8 @@
                   {{ nodeProps.sample ? nodeProps.sample : '空' }}
                   &nbsp;
                   <EditOutlined @click="editStart(nodeProps.key)"/>
+                  &nbsp;
+                  {{nodeProps.execStatus}}
                 </span>
 
               </template>
@@ -304,7 +306,7 @@ async function onSelectExecEnvFinish() {
   execVisible.value = true;
 
   const selectedNodes = getSelectedNodes()
-  execStart(currProject.value.id, props.model.baseId, selectedNodes.value, currEnvId.value)
+  execStart(currProject.value.id, props.model.baseId, selectedNodes.value, currEnvId.value, treeDataMap.value)
 }
 async function onSelectExecEnvCancel() {
   console.log('onSelectExecEnvCancel')

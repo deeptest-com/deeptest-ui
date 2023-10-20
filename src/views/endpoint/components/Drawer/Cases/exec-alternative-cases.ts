@@ -13,6 +13,7 @@ interface CaseExecution {
 function useCaseExecution(): CaseExecution {
     const execUuid = ref('')
     const progressStatus = ref({} as any)
+    const treeData = ref({} as any)
 
     const onWebSocketConnStatusMsg = (data: any) => {
         if (!data.msg) {
@@ -28,7 +29,7 @@ function useCaseExecution(): CaseExecution {
 
         const wsMsg = JSON.parse(data.msg);
         console.log('wsMsg***', wsMsg);
-        if (wsMsg.source !== 'execCases') return
+        if (!wsMsg.data || wsMsg.data.source !== 'execCases') return
 
         const log = wsMsg.data ? JSON.parse(JSON.stringify(wsMsg.data)) : {};
 
@@ -39,6 +40,8 @@ function useCaseExecution(): CaseExecution {
         // 更新结果
         else if (wsMsg.category == 'result') {
             console.log('update case result')
+            const node = treeData.value[wsMsg.data.caseUuid]
+            node.execStatus = wsMsg.data.status
         }
         // 执行异常
         else if (wsMsg.category === "exception") {
@@ -51,8 +54,9 @@ function useCaseExecution(): CaseExecution {
         }
     }
 
-    const execStart = async (projectId, baseCaseId, cases, environmentId) => {
+    const execStart = async (projectId, baseCaseId, cases, environmentId, treeDataMap) => {
         console.log('=== execStart', projectId, baseCaseId, cases, environmentId)
+        treeData.value = treeDataMap
 
         execUuid.value = getUuid()
         const data = {
