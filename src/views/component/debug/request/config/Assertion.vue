@@ -42,7 +42,7 @@
                 </div>
               </div>
               <div class="buttons">
-                <a-button size="small" type="primary" v-if="activeAssertion.id === element.id" @click.stop="save(element)">保存</a-button>          
+                <a-button size="small" type="primary" v-if="activeAssertion.id === element.id" @click.stop="save(element)" style="margin-right: 4px;">保存</a-button>          
 
                 <ClearOutlined v-if="activeAssertion.id === +element.id && element.entityType === ConditionType.script"
                                @click.stop="format(element)"  class="dp-icon-btn dp-trans-80" />&nbsp;
