@@ -33,6 +33,7 @@ local
 .env.local
 .env.prod
 .env.test
+.env.pre
 package.json
 .yarnrc
 
