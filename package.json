@@ -4,13 +4,15 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "serve": "sh init.project.sh && vue-cli-service --mode=dev serve",
-
+    "serve": "sh init.project.sh && vue-cli-service serve",
+    "local": "sh init.project.sh && vue-cli-service --mode=local serve",
+    "test": "sh init.project.sh && vue-cli-service --mode=test serve",
+    "dev": "sh init.project.sh && vue-cli-service --mode=development serve",
     "build:dev": "sh init.project.sh && vue-cli-service build --mode=dev",
     "build:test": "sh init.project.sh && vue-cli-service build --mode=test",
     "build:prod": "sh init.project.sh && vue-cli-service build --mode=prod",
-    "build:client": "sh init.project.sh && vue-cli-service build --mode=client --dest ../deeptest-main/client/ui",
-
+    "build:pre": "sh init.project.sh && vue-cli-service build --mode=pre",
+    "build:client": "sh init.project.sh && vue-cli-service build --mode=client --dest ../leyanapi-backend/client/ui",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint",
     "svgo": "svgo -f src/assets/iconsvg --config=src/assets/iconsvg/svgo.yml"
@@ -18,6 +20,7 @@
   "dependencies": {
     "@ant-design/icons-vue": "^6.0.1",
     "@handsontable/vue3": "^12.3.0",
+    "@leyan/feedback": "0.0.4",
     "@toast-ui/editor": "^2.5.3",
     "@vuepic/vue-datepicker": "^3.6.5",
     "ant-design-vue": "^2.2.8",

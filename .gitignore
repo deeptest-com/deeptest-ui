@@ -29,7 +29,10 @@ local
 .env.dev
 .env.demo
 .env.client
-
+.env.development
+.env.local
+.env.prod
+.env.test
 package.json
 .yarnrc
 
@@ -37,9 +40,12 @@ src/assets/images/logo.png
 src/assets/images/logo.svg
 src/assets/images/logo-mini.svg
 public/favicon.ico
+src/utils/feedback.ts
+
 
 /frontend-config
 /config
 ############  忽略内部版本敏感信息（如环境变量、品牌LOGO等） end ############
 
 *.sh
+
