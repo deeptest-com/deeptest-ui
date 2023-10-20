@@ -273,6 +273,7 @@ const getSelectedNodes = () => {
     if (treeDataMap.value[key]) {
       const item = treeDataMap.value[key]
       const val = {
+        key: item.key,
         path: item.path,
         sample: item.sample,
         fieldType: item.fieldType,
