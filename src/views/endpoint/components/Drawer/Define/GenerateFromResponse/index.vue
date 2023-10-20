@@ -10,13 +10,14 @@
       height="600px"
   >
     <a-form
-    :model="formState"
-    name="horizontal_login"
-    layout="inline"
-    autocomplete="off"
-    @finish="onFinish"
-    @finishFailed="onFinishFailed"
-  >
+      :model="formState"
+      name="horizontal_login"
+      class="inline-form"
+      layout="inline"
+      autocomplete="off"
+      @finish="onFinish"
+      @finishFailed="onFinishFailed"
+    >
     <a-form-item
       label="响应码"
       name="code"
@@ -40,13 +41,8 @@
           :options="mediaTypesOpts">
     </a-select>
     </a-form-item>
-    <a-form-item
-      label="描述"
-      name="description"
-      :labelCol="{span: 5, offset: 2}"
-    >
-    <a-input v-model:value="formState.description" style="width: 200px">
-      </a-input>
+    <a-form-item label="描述" name="description" stlye="margin-top: 20px">
+      <a-input v-model:value="formState.description" style="width: 200px" />
     </a-form-item>
   </a-form>
   <div class="schemaContent">
