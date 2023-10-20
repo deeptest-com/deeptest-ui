@@ -1,6 +1,6 @@
 <template>
   <a-modal
-      :title="'配置'+t(model.entityType)"
+      :title="'配置'+t(model.entityType || model.conditionEntityType)"
       :visible="visible"
       :footer="null"
       @cancel="cancel"
@@ -42,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, inject, ref} from "vue";
+import {defineProps, onMounted} from "vue";
 import {useI18n} from "vue-i18n";
 
 import {ConditionType} from "@/utils/enum";
