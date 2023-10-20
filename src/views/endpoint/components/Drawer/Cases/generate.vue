@@ -301,7 +301,7 @@ async function onSelectExecEnvFinish() {
   execVisible.value = true;
 
   const selectedNodes = getSelectedNodes()
-  execStart(selectedNodes.value, currEnvId.value)
+  execStart(props.model.baseId, selectedNodes.value, currEnvId.value)
 }
 async function onSelectExecEnvCancel() {
   console.log('onSelectExecEnvCancel')

@@ -43,11 +43,11 @@ function useCaseExecution(): CaseExecution {
         const log = wsMsg.data ? JSON.parse(JSON.stringify(wsMsg.data)) : {};
 
         // 初始化
-        if (wsMsg.category == 'start') {
+        if (wsMsg.category == 'start' || wsMsg.category == 'in_progress') {
             progressStatus.value = 'in_progress';
         }
         // 更新结果
-        else if (wsMsg.category == 'case_result') {
+        else if (wsMsg.category == 'result') {
             console.log('update case result')
         }
         // 执行异常
@@ -61,14 +61,18 @@ function useCaseExecution(): CaseExecution {
         }
     }
 
-    const execStart = async (cases, envId) => {
-        console.log('=== execStart', cases, envId)
+    const execStart = async (baseCaseId, cases, environmentId) => {
+        console.log('=== execStart', baseCaseId, cases, environmentId)
 
         execUuid.value = getUuid()
         const data = {
+            serverUrl: process.env.VUE_APP_API_SERVER, // used by agent to submit result to server
+            token: await getToken(),
+
+            baseCaseId,
             execUuid: execUuid.value,
-            cases: cases,
-            environmentId: envId,
+            cases,
+            environmentId,
         }
         console.log('=== data', data)
 
