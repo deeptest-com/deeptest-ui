@@ -1,19 +1,9 @@
 import { ref, onMounted, onUnmounted, Ref } from 'vue'
-import {getContextMenuStyle2} from "@/utils/dom";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
-import {
-    progressStatus,
-    resetData,
-    updateExecLogs,
-    updateExecResult,
-    updateStatFromLog
-} from "@/composables/useExecLogs";
-import {ProcessorInterface} from "@/utils/enum";
 import {WebSocket} from "@/services/websocket";
 import {getToken} from "@/utils/localToken";
 import {getUuid} from "@/utils/string";
-import {computed} from "vue/dist/vue";
 
 interface CaseExecution {
     progressStatus: Ref<any>,
@@ -61,14 +51,15 @@ function useCaseExecution(): CaseExecution {
         }
     }
 
-    const execStart = async (baseCaseId, cases, environmentId) => {
-        console.log('=== execStart', baseCaseId, cases, environmentId)
+    const execStart = async (projectId, baseCaseId, cases, environmentId) => {
+        console.log('=== execStart', projectId, baseCaseId, cases, environmentId)
 
         execUuid.value = getUuid()
         const data = {
             serverUrl: process.env.VUE_APP_API_SERVER, // used by agent to submit result to server
             token: await getToken(),
 
+            projectId: projectId,
             baseCaseId,
             execUuid: execUuid.value,
             cases,

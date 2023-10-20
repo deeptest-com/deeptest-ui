@@ -114,14 +114,16 @@ import Assertions from "./assertions.vue";
 import SaveAlternative from "./saveAlternative.vue";
 import EnvSelector from "@/views/component/EnvSelector/index.vue";
 import useCaseExecution from "@/views/endpoint/components/Drawer/Cases/exec-alternative-cases";
+import {StateType as ProjectStateType} from "@/store/project";
 
 const usedBy = UsedBy.CaseGenerate
 provide('usedBy', usedBy)
 const useForm = Form.useForm;
 
-const store = useStore<{ Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType }>();
+const store = useStore<{ Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType, ProjectGlobal: ProjectStateType }>();
 const alternativeCases = computed<any>(() => store.state.Endpoint.alternativeCases);
 const currEnvId = computed(() => store.state.ProjectSetting.selectEnvId);
+const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 
 const activeKey = ref('paths')
 const allSelected = ref(false)
@@ -301,7 +303,7 @@ async function onSelectExecEnvFinish() {
   execVisible.value = true;
 
   const selectedNodes = getSelectedNodes()
-  execStart(props.model.baseId, selectedNodes.value, currEnvId.value)
+  execStart(currProject.value.id, props.model.baseId, selectedNodes.value, currEnvId.value)
 }
 async function onSelectExecEnvCancel() {
   console.log('onSelectExecEnvCancel')
