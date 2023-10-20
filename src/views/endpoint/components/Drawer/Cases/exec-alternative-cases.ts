@@ -75,7 +75,6 @@ function useCaseExecution(): CaseExecution {
             environmentId,
         }
         console.log('=== data', data)
-
         WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify({act: 'execCases', casesExecReq: data}))
     }
     const execStop = () => {
