@@ -60,7 +60,14 @@
                   &nbsp;
                   <EditOutlined @click="editStart(nodeProps.key)"/>
                   &nbsp;
-                  {{nodeProps.execStatus}}
+                  <span :class="getDpResultClass(nodeProps.execStatus)">
+                    <span v-if="nodeProps.execStatus===ResultStatus.Pass">
+                      <CheckCircleOutlined />
+                    </span>
+                    <span v-if="nodeProps.execStatus===ResultStatus.Fail">
+                      <CloseCircleOutlined />
+                    </span>&nbsp;
+                  </span>
                 </span>
 
               </template>
@@ -97,7 +104,7 @@
 
 <script lang="ts" setup>
 import {computed, defineProps, inject, provide, reactive, ref, watch} from 'vue';
-import {UsedBy} from "@/utils/enum";
+import {ResultStatus, UsedBy} from "@/utils/enum";
 import {Form} from "ant-design-vue";
 import {useStore} from "vuex";
 import IconSvg from "@/components/IconSvg";
@@ -107,7 +114,8 @@ import {
   EditOutlined,
   FileOutlined,
   FolderOpenOutlined,
-  FolderOutlined
+  FolderOutlined,
+  CheckCircleOutlined, CloseCircleOutlined,
 } from '@ant-design/icons-vue';
 
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
@@ -117,6 +125,7 @@ import SaveAlternative from "./saveAlternative.vue";
 import EnvSelector from "@/views/component/EnvSelector/index.vue";
 import useCaseExecution from "@/views/endpoint/components/Drawer/Cases/exec-alternative-cases";
 import {StateType as ProjectStateType} from "@/store/project";
+import {getDpResultClass} from "@/utils/dom";
 
 const usedBy = UsedBy.CaseGenerate
 provide('usedBy', usedBy)

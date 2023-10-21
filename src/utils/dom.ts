@@ -3,6 +3,7 @@ import settings from "@/config/settings";
 import debounce from "lodash.debounce";
 import {defaultPathParams, requestMethodOpts} from "@/config/constant";
 import {cloneByJSON} from "@/utils/object";
+import {ResultStatus} from "@/utils/enum";
 
 export function resizeWidth(mainId: string, leftId: string, splitterId: string, rightId: string,
                             leftMin: number, rightMin: number): boolean {
@@ -155,19 +156,6 @@ export function formatXml(xml: any) : string {
     }).join('\r\n');
 }
 
-export function getResultCls (result) {
-    if (!result) return 'dp-color-unknown'
-
-    result = result.toLowerCase()
-    if (result === 'pass') {
-        return 'dp-color-pass'
-    } else if (result === 'fail') {
-        return 'dp-color-fail'
-    } else {
-        return 'dp-color-unknown'
-    }
-}
-
 export function getContextMenuStyle (x, y, height) {
     let top = y + 6
     if (y + height > document.body.clientHeight)
@@ -318,4 +306,21 @@ export function getFileName(path) {
     const name = path.substring(index + 1)
 
     return name
+}
+
+export function getDpResultClass (result) {
+    if (!result) return 'dp-color-unknown'
+
+    result = result.toLowerCase()
+    if (result === 'pass') {
+        return 'dp-color-pass'
+    } else if (result === 'fail') {
+        return 'dp-color-fail'
+    } else {
+        return 'dp-color-unknown'
+    }
+}
+export function getResultClass (resultStatus) {
+    return resultStatus===ResultStatus.Pass? 'pass':
+        resultStatus===ResultStatus.Fail ? 'fail' : ''
 }

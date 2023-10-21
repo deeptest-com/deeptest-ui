@@ -2,7 +2,7 @@
   <div class="response-console-main" v-if="consoleData && consoleData.length">
     <div v-for="(item, index) in consoleData"
          :key="index"
-         :class="getResultClass(item)" class="item">
+         :class="getResultClass(item.resultStatus)" class="item">
 
       <span v-if="item.resultStatus===ResultStatus.Pass">
         <CheckCircleOutlined />
@@ -38,6 +38,7 @@ import {ConditionType, ResultStatus} from "@/utils/enum";
 import { CheckCircleOutlined, CloseCircleOutlined} from '@ant-design/icons-vue';
 import IconSvg from "@/components/IconSvg";
 import Empty from "@/components/others/empty.vue";
+import {getResultClass} from "@/utils/dom";
 
 const {t} = useI18n();
 
@@ -54,11 +55,6 @@ watch(responseData, (newVal) => {
   if (responseData.value.invokeId)
     store.dispatch("Debug/getInvocationLog", responseData.value.invokeId)
 }, {deep: true, immediate: true})
-
-const getResultClass = (item) => {
-  return item.resultStatus===ResultStatus.Pass? 'pass':
-      item.resultStatus===ResultStatus.Fail ? 'fail' : ''
-}
 
 </script>
 

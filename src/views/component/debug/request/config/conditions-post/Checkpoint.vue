@@ -68,7 +68,7 @@ import {
 } from "@/views/component/debug/service";
 import {ComparisonOperator, CheckpointType, UsedBy} from "@/utils/enum";
 import {isInArray} from "@/utils/array";
-import {getResultCls} from "@/utils/dom"
+import {getDpResultClass} from "@/utils/dom"
 import {getCompareOptsForRespCode, getCompareOptsForString} from "@/utils/compare";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {Checkpoint} from "@/views/component/debug/data";
