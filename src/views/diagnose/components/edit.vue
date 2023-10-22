@@ -9,7 +9,7 @@
         ref="tagFormRef"
         :rules="rules"
         :model="formState"
-        :label-col="{ span: 6 }"
+        class="custom-center-form"
         :wrapper-col="{ span: 14 }">
 
       <a-form-item :label="(formState.type === 'interface' ? '接口' : '目录') + '名称'" name="name">

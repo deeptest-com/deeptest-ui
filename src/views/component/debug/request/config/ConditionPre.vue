@@ -8,11 +8,7 @@
         </a-col>
 
         <a-col flex="100px" class="dp-right">
-          <a-tooltip overlayClassName="dp-tip-small">
-            <template #title>保存</template>
-            <icon-svg type="save" class="dp-icon dp-link-primary dp-icon-large"
-                      @click.stop="save" />
-          </a-tooltip>
+          <a-button size="small" type="primary" @click.stop="save" style="margin-right: 4px">保存</a-button>
 
           <Tips section="pre-condition" title="请求前的预处理脚本" />
 
@@ -113,11 +109,18 @@ const format = (item) => {
   flex-direction: column;
 
   .head {
-    height: 30px;
+    height: 42px;
     padding: 2px 3px;
     border-bottom: 1px solid #d9d9d9;
 
     .row {
+      height: 100%;
+
+      :deep(.ant-col) {
+        align-items: center;
+        display: flex;
+      }
+
       .left {
         .icon {
           margin-right: 5px;

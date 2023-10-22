@@ -165,8 +165,7 @@ import {useStore} from "vuex";
 import {momentUtc} from "@/utils/datetime";
 import {StateType} from "../../store";
 import debounce from "lodash.debounce";
-import {useRouter} from "vue-router";
-import {message, Modal, notification} from "ant-design-vue";
+import {Modal} from "ant-design-vue";
 import {StateType as ProjectStateType} from "@/store/project";
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import ScenarioCreate from "../Create/index.vue";
@@ -175,7 +174,6 @@ import EnvSelector from "@/views/component/EnvSelector/index.vue";
 import {ColumnProps} from 'ant-design-vue/es/table/interface';
 import ExecInfo from "../Exec/index.vue";
 import {
-  scenarioStatusColorMap,
   scenarioStatus,
   scenarioStatusOptions,
   priorityOptions,
@@ -188,6 +186,7 @@ import Select from '@/components/Select/index.vue';
 import TooltipCell from '@/components/Table/tooltipCell.vue';
 import { DropdownActionMenu } from "@/components/DropDownMenu";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import useSharePage from "@/hooks/share";
 
 type Key = ColumnProps['key'];
 
@@ -198,8 +197,7 @@ interface DataType {
   address: string;
 }
 
-const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
-const router = useRouter();
+const { share } = useSharePage();
 const store = useStore<{ Scenario: StateType, ProjectGlobal: ProjectStateType,Project }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const nodeDataCategory = computed<any>(() => store.state.Scenario.nodeDataCategory);
@@ -227,6 +225,11 @@ const dropdownMenuList = [
   {
     label: '执行历史',
     action: (record) => editScenario(record, '2'),
+    auth: '',
+  },
+  {
+    label: '分享链接',
+    action: (record) => share(record, 'TS'),
     auth: '',
   },
   {
@@ -277,16 +280,6 @@ const getUserList = () => {
   store.dispatch('Project/getUserList')
 
 }
-const exec = (id: number) => {
-  console.log('exec')
-  router.push(`/scenario/exec/${id}`)
-}
-
-
-const design = (id: number) => {
-  console.log('design')
-  router.push(`/scenario/design/${id}`)
-}
 
 const isEditVisible = ref(false)
 
@@ -296,7 +289,6 @@ const edit = (id: number) => {
 }
 
 const onEditFinish = () => {
-  console.log('onEditFinish')
   isEditVisible.value = false
 
   getList(1, nodeDataCategory.value.id)

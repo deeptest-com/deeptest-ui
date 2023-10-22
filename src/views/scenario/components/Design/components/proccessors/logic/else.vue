@@ -4,7 +4,7 @@
     <a-card :bordered="false">
       <a-form
           :model="formState"
-          :label-col="{ span: 4 }"
+          :label-col="{ style: { width: '56px' } }"
           :wrapper-col="{ span: 16 }">
 
         <a-form-item label="备注" name="comments">

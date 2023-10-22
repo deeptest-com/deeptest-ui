@@ -29,11 +29,8 @@ local
 .env.dev
 .env.demo
 .env.client
-.env.development
-.env.local
-.env.prod
-.env.test
-.env.pre
+.env.*
+
 package.json
 .yarnrc
 

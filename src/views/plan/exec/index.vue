@@ -55,11 +55,6 @@ import {
 
 const props = defineProps<{
   drawerVisible: boolean
-  title: string
-  scenarioExpandActive: boolean
-  showScenarioInfo: boolean
-  scene: string // 查看详情的场景 【执行测试计划 exec_plan， 执行测试场景 exec_scenario， 查看报告详情 query_detail】
-  reportId?: number
 }>();
 
 const emits = defineEmits(['onClose']);
@@ -74,7 +69,7 @@ const store = useStore<{
   CurrentUser
 }>();
 
-const currPlan = computed<any>(() => store.state.Plan.currPlan);
+const currPlan = computed<any>(() => store.state.Plan.detailResult);
 const currEnvId = computed(() => store.state.ProjectSetting.selectEnvId);
 const envList = computed(() => store.state.ProjectSetting.envList);
 const currentUser = computed(() => store.state.User.currentUser);

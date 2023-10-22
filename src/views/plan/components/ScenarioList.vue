@@ -68,7 +68,7 @@
     />
 </template>
 <script lang="ts" setup>
-import { ref, reactive, defineProps, defineEmits, PropType, computed, watch } from 'vue';
+import { ref, reactive, defineProps, defineEmits, PropType, computed, watch, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { PlusOutlined } from '@ant-design/icons-vue';
 import RelationScenario from './RelationScenario.vue';
@@ -116,7 +116,7 @@ const props = defineProps({
 
 const emits = defineEmits(['selectRowKeys', 'refreshList']);
 const store = useStore<{ Plan: PlanStateType,Project }>();
-const currPlan = computed<any>(() => store.state.Plan.currPlan);
+const currPlan = computed<any>(() => store.state.Plan.detailResult);
 const members = computed(() => store.state.Plan.members);
 const associateModalVisible = ref(false);
 const selectedRowKeys = ref<any[]>(props.selectedKeys || []); // Check here to configure the default column
@@ -192,6 +192,10 @@ const username = (user:string)=>{
   let result = userList.value.find(arrItem => arrItem.value == user);
   return result?.label || '-'
 }
+
+onMounted(() => {
+    emits('refreshList', formState);
+})
 
 watch(() => {
     return props.selectedKeys;

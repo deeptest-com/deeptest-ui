@@ -1,6 +1,6 @@
 <template>
   <div class="response-extractor-main">
-    <a-form :label-col="labelCol" :wrapper-col="wrapperCol">
+    <a-form :label-col="{ style: { width: '120px' } }" :wrapper-col="wrapperCol">
       <a-form-item label="数据来源" v-bind="validateInfos.src" required>
         <a-radio-group name="srcGroup" v-model:value="model.src"
                        @blur="validate('src', { trigger: 'change' }).catch(() => {})">

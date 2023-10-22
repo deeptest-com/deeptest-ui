@@ -21,7 +21,7 @@ import {isLeyan} from "@/utils/comm";
 
 const props = defineProps<{
   title: string
-  section: string
+  section?: string
 }>()
 
 const openHelp = (bookmark?) => {

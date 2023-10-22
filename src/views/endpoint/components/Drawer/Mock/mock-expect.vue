@@ -8,7 +8,9 @@
 
     <div class="toolbar">
       是否开启<a-switch @change="disable()" class="switch" v-model:checked="advancedMockEnabled" />
-      <a-button @click="createExpect" type="primary" class="btn-create">新建期望</a-button>
+      <a-tooltip :title="hasMethod ? null : '请先定义接口定义方法'">
+        <a-button :disabled="hasMethod ? false : true" @click="createExpect" type="primary" class="btn-create">新建期望</a-button>
+      </a-tooltip>
     </div>
 
     <Expect />
@@ -30,6 +32,10 @@ const {t} = useI18n()
 
 const store = useStore<{ Endpoint }>();
 const endpoint = computed<any>(() => store.state.Endpoint.endpointDetail);
+
+const hasMethod = computed(() => {
+  return (store.state.Endpoint.endpointDetail.interfaces || []).length > 0;
+});
 
 const open = ref(false);
 const advancedMockEnabled = ref(true)

@@ -48,8 +48,8 @@
 import {computed, ref, defineEmits, defineProps, createVNode} from "vue";
 import { useStore } from "vuex";
 import { ColumnProps } from 'ant-design-vue/es/table/interface';
-import {message, Modal, notification} from "ant-design-vue";
-import {ExclamationCircleOutlined, MoreOutlined} from "@ant-design/icons-vue";
+import { Modal } from "ant-design-vue";
+import {ExclamationCircleOutlined} from "@ant-design/icons-vue";
 import { StateType as ProjectStateType } from "@/store/project";
 import { StateType } from "../store";
 import { PaginationConfig } from "../data";
@@ -57,6 +57,7 @@ import { momentUtc, formatWithSeconds } from "@/utils/datetime";
 import ToolTipCell from '@/components/Table/tooltipCell.vue';
 import { DropdownActionMenu } from "@/components/DropDownMenu";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import useSharePage from "@/hooks/share";
 
 
 defineProps({
@@ -71,7 +72,7 @@ defineProps({
     }
 })
 const emits = defineEmits(['queryDetail', 'getList']);
-
+const { share }  = useSharePage();
 const store = useStore<{ Report: StateType, ProjectGlobal: ProjectStateType }>();
 // 分页数据
 let pagination = computed<PaginationConfig>(() => store.state.Report.listResult.pagination);
@@ -132,6 +133,11 @@ const dropdownMenuList = [
     //     auth: '',
     // },
     {
+        label: '分享链接',
+        action: (record) => share(record, 'TR'),
+        auth: '',   
+    },
+    {
         label: '查看报告',
         action: (record) => handleQueryDetail(record),
         auth: '',
@@ -143,15 +149,6 @@ const dropdownMenuList = [
     },
 ];
 
-const onSelectChange = (keys: Key[], rows: any) => {
-    selectedRowKeys.value = [...keys];
-}
-
-
-const handleExport = (id: number) => {
-    console.log('export');
-}
-
 const handleDelete = async (id: number) => {
   Modal.confirm({
     title: () => '确定删除该报告吗？',
@@ -160,7 +157,7 @@ const handleDelete = async (id: number) => {
     okType: 'danger',
     cancelText: () => '取消',
     onOk: async () => {
-      const res = store.dispatch('Report/remove', id);
+      const res = await store.dispatch('Report/remove', id);
       if (res) {
         notifySuccess('删除成功');
       } else {

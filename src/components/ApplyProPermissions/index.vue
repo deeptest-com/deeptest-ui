@@ -17,8 +17,8 @@
         <div>
           <a-form
             :model="formStateRef"
-            :label-col="labelCol"
             :wrapper-col="wrapperCol"
+            class="custom-center-form"
           >
             <a-form-item label="项目名称">
               {{ item.projectName }}
@@ -91,7 +91,7 @@ const emits = defineEmits(["update:visible", "handleOk", "handleSuccess"]);
 const store = useStore<{ User: UserStateType; Project: ProjectStateType }>();
 const roles = computed<SelectTypes["options"]>(() => store.state.Project.roles);
 const auditUsers = computed(()=>store.state.Project.auditUsers)
-const labelCol = { span: 6 };
+const labelCol = { span: 6, };
 const wrapperCol = { span: 14 };
 const projectInfo:any = {
   projectId: "",

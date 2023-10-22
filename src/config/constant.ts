@@ -1355,3 +1355,101 @@ export const responseHeaderOptions = [
         "label": "Transfer-Encoding"
     }
 ];
+
+/**
+ * 测试计划，接口定义，测试开发的抽屉内tab切换列表 
+ */
+export const ScenarioTabList = [
+    {
+      "key": "1",
+      "label": "测试开发"
+    },
+    {
+      "key": "2",
+      "label": "执行历史"
+    },
+    {
+      "key": "3",
+      "label": "关联测试计划"
+    },
+];
+
+export const PlanTabsList = [
+    {
+      "key": "test-scenario",
+      "label": "测试场景"
+    },
+    {
+      "key": "test-report",
+      "label": "测试报告"
+    },
+];
+
+export const EndpointTabsList = [
+    {
+      "key": "request",
+      "label": "定义"
+    },
+    {
+      "key": "run",
+      "label": "调试"
+    },
+    {
+      "key": "cases",
+      "label": "用例"
+    },
+    {
+      "key": "mock",
+      "label": "高级Mock"
+    },
+    {
+      "key": "docs",
+      "label": "文档"
+    },
+];
+
+/**
+ * 详情页的面包屑配置
+ */
+export const DetailBreadcrumbMap = {
+    'im-detail': [
+        {
+            path: '/:projectNameAbbr/IM',
+            breadcrumbName: '接口定义',
+        },
+        {
+            path: '/:projectNameAbbr/IM/:imSerialNumber',
+            breadcrumbName: '接口详情',
+        }
+    ],
+    'ts-detail': [
+        {
+            path: '/:projectNameAbbr/TS',
+            breadcrumbName: '测试开发',
+        },
+        {
+            path: '/:projectNameAbbr/TS/:tsSerialNumber',
+            breadcrumbName: '开发详情',
+        }
+    ],
+    'plan-detail':  [
+        {
+            path: '/:projectNameAbbr/TP',
+            breadcrumbName: '测试计划',
+        },
+        {
+            path: '/:projectNameAbbr/TP/:planSerialNumber',
+            breadcrumbName: '计划详情',
+        }
+    ],
+    'report-detail':  [
+        {
+            path: '/:projectNameAbbr/TR',
+            breadcrumbName: '测试报告',
+        },
+        {
+            path: '/:projectNameAbbr/TR/:reportSerialNumber',
+            breadcrumbName: '报告详情',
+        }
+    ],
+}

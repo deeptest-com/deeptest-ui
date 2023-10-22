@@ -9,7 +9,7 @@
     width="600px"
   >
     <div class="plan-create-main">
-      <a-form :label-col="labelCol" :wrapper-col="wrapperCol" :ref="formRef">
+      <a-form class="custom-center-form" :wrapper-col="wrapperCol" :ref="formRef">
         <a-form-item label="计划名称" v-bind="validateInfos.name">
           <a-input
             v-model:value="modelRef.name"

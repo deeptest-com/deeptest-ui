@@ -3,7 +3,7 @@
     <ProcessorHeader/>
     <a-card :bordered="false">
       <div>
-        <a-form :label-col="labelCol" :wrapper-col="wrapperCol">
+        <a-form :label-col="{ style: { width: '96px' } }" :wrapper-col="wrapperCol">
           <a-form-item label="判断表达式" v-bind="validateInfos.expression">
             <a-input v-model:value="modelRef.expression"
                      @blur="validate('expression', { trigger: 'blur' }).catch(() => {})" />

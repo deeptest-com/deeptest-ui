@@ -37,7 +37,6 @@ import {
   nextTick,
   ref, watch,
 } from 'vue';
-import {message, notification} from 'ant-design-vue';
 import {
   EditOutlined,
   CheckOutlined,
@@ -76,6 +75,11 @@ const props = defineProps({
     type: String,
     default: '暂无',
   },
+  canEdit: {
+    required: false,
+    default: true,
+    type: Boolean,
+  }
 })
 const emit = defineEmits(['update', 'edit']);
 
@@ -145,6 +149,16 @@ watch(() => {return props.autoFocus}, (newVal) => {
       .edit-icon {
         display: inline-block;
         color: #8A8A8A;
+      }
+    }
+
+  }
+
+  &.readonly {
+
+    &:hover {
+      .edit-icon {
+        display: none !important;
       }
     }
   }

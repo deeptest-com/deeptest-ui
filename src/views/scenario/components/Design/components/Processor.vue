@@ -91,6 +91,7 @@ const selectedNode = computed<any>(()=> store.state.Scenario.nodeData);
 <style lang="less" scoped>
 .scenario-processor-edit-main {
   height: 100%;
+  overflow: hidden;
 
   :deep(.ant-form) {
     .ant-row.ant-form-item.processor-btn {

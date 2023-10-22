@@ -10,13 +10,14 @@
       height="600px"
   >
     <a-form
-    :model="formState"
-    name="horizontal_login"
-    layout="inline"
-    autocomplete="off"
-    @finish="onFinish"
-    @finishFailed="onFinishFailed"
-  >
+      :model="formState"
+      name="horizontal_login"
+      class="inline-form"
+      layout="inline"
+      autocomplete="off"
+      @finish="onFinish"
+      @finishFailed="onFinishFailed"
+    >
     <a-form-item
       label="响应码"
       name="code"
@@ -40,13 +41,8 @@
           :options="mediaTypesOpts">
     </a-select>
     </a-form-item>
-    <a-form-item
-      label="描述"
-      name="description"
-      :labelCol="{span: 5, offset: 2}"
-    >
-    <a-input v-model:value="formState.description" style="width: 200px">
-      </a-input>
+    <a-form-item label="描述" name="description" stlye="margin-top: 20px">
+      <a-input v-model:value="formState.description" style="width: 200px" />
     </a-form-item>
   </a-form>
   <div class="schemaContent">
@@ -54,7 +50,7 @@
             :value="contentStr"
             :serveId="Number(serveId)"
             @change="handleContentChange"
-            :contentStyle="tabContentStyle"/>
+            />
   </div>
 </a-modal>
 </template>
@@ -111,12 +107,14 @@ const handleOk = async () => {
   if (codes.value.indexOf(formState.code) != -1) {
     confirmToDo(`接口中已定义` + formState.code + `响应码，保存后将覆盖原来的响应码定义。`,'确认要保存吗？', async () => {
       await store.dispatch('Endpoint/generateSchemaByResponse', formState );
+      store.commit('Endpoint/setGlobalActiveTab',  Date.now() + '')
     });
   } else {
       await store.dispatch('Endpoint/generateSchemaByResponse', formState );
+      store.commit('Endpoint/setGlobalActiveTab',  Date.now() + '')
   }
   emits("close");
-  store.commit('Endpoint/setGlobalActiveTab',  Date.now() + '')
+
 }
 
 const handleContentChange = (value) => {
