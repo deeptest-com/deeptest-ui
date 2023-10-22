@@ -10,7 +10,11 @@
         </a-button>
       </div>
       <div class="right">
-        <a-button :disabled="checkedKeys.length===0" @click="saveAsCase">
+        <a-button v-if="activeKey==='paths'" :disabled="checkedKeys.length===0" @click="selectExecEnv">
+          执行选中
+        </a-button>
+        &nbsp;
+        <a-button v-if="activeKey==='paths'" :disabled="checkedKeys.length===0" @click="saveAsCase">
           另存为用例
         </a-button>
       </div>
@@ -70,7 +74,9 @@
           </a-form-item>
         </a-form>
       </a-tab-pane>
+
       <a-tab-pane key="assert" tab="统一断言">
+        <Assertions :model="model" />
       </a-tab-pane>
     </a-tabs>
 
@@ -78,11 +84,17 @@
         :visible="saveAsVisible"
         :onClose="saveAsClosed"
         :model="saveAsModel"/>
+
+    <EnvSelector
+        :env-select-drawer-visible="selectEnvVisible"
+        @on-ok="onSelectExecEnvFinish"
+        @on-cancel="onSelectExecEnvCancel" />
+
   </div>
 </template>
 
 <script lang="ts" setup>
-import {computed, defineProps, inject, reactive, ref, watch} from 'vue';
+import {computed, defineProps, inject, provide, reactive, ref, watch} from 'vue';
 import {UsedBy} from "@/utils/enum";
 import {Form} from "ant-design-vue";
 import {useStore} from "vuex";
@@ -96,15 +108,20 @@ import {
   FolderOutlined
 } from '@ant-design/icons-vue';
 
-import {Endpoint} from "@/views/endpoint/data";
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
+import { StateType as ProjectSettingStateType } from "@/views/project-settings/store";
+import Assertions from "./assertions.vue";
 import SaveAlternative from "./saveAlternative.vue";
+import EnvSelector from "@/views/component/EnvSelector/index.vue";
+import useCaseExecution from "@/views/endpoint/components/Drawer/Cases/exec-alternative-cases";
 
+const usedBy = UsedBy.CaseGenerate
+provide('usedBy', usedBy)
 const useForm = Form.useForm;
 
-const store = useStore<{ Endpoint: EndpointStateType }>();
-const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
+const store = useStore<{ Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType }>();
 const alternativeCases = computed<any>(() => store.state.Endpoint.alternativeCases);
+const currEnvId = computed(() => store.state.ProjectSetting.selectEnvId);
 
 const activeKey = ref('paths')
 const allSelected = ref(false)
@@ -137,11 +154,11 @@ const expandedKeys = ref<string[]>([]);
 const checkedKeys = ref<string[]>([] as any[])
 
 const loadCaseTree = () => {
-  store.dispatch('Endpoint/loadAlternativeCases', modelRef.value.baseId).then((result) => {
+  store.dispatch('Endpoint/loadAlternativeCase', modelRef.value.baseId).then((result) => {
     console.log('loadCaseTree', result)
     expandAll()
   })
-  // store.dispatch('Endpoint/loadAlternativeCasesSaved', modelRef.value.baseId)
+  // store.dispatch('Endpoint/loadAlternativeCaseSaved', modelRef.value.baseId)
 }
 
 function selectAll() {
@@ -176,7 +193,7 @@ watch(() => props.model, () => {
   console.log('watch props.visible', props.model)
   modelRef.value = {
     baseId: props.model.baseId,
-    prefix: props.model?.prefix || '异常路径',
+    prefix: props.model?.prefix || '异常路径-',
   }
 
   loadCaseTree()
@@ -194,23 +211,9 @@ const saveAsCase = () => {
   console.log('saveAsCase', checkedKeys.value)
   saveAsVisible.value = true
 
-  const values = ref([] as any[])
-  checkedKeys.value.forEach((key) => {
-    if (treeDataMap.value[key]) {
-      const item = treeDataMap.value[key]
-      const val = {
-        path: item.path,
-        sample: item.sample,
-        fieldType: item.fieldType,
-        Category: item.category,
-        Type: item.type,
-        Rule: item.rule,
-      }
-      values.value.push(val)
-    }
-  })
+  const selectedNodes = getSelectedNodes()
   const baseId = modelRef.value.baseId
-  saveAsModel.value = {values, baseId}
+  saveAsModel.value = {selectedNodes, baseId}
 }
 const saveAsClosed = () => {
   saveAsVisible.value = false
@@ -261,27 +264,49 @@ function getNodeMap(treeNode: any, mp: any) {
   return
 }
 
-// const generateCasesFinish = async (model) => {
-//   console.log('generateCasesFinish', model, debugData.value.url)
-//
-//   const data = Object.assign({...model}, debugInfo.value)
-//
-//   store.commit("Global/setSpinning",true)
-//   const res = await store.dispatch('Debug/generateCases', data)
-//   store.commit("Global/setSpinning",false)
-//
-//   if (res === true) {
-//     generateCasesVisible.value = false
-//
-//     notifySuccess(`自动生成用例成功`);
-//   } else {
-//     notifyError(`自动生成用例保存失败`);
-//   }
-// }
-// const generateCasesCancel = () => {
-//   console.log('generateCasesCancel')
-//   generateCasesVisible.value = false
-// }
+const getSelectedNodes = () => {
+  const ret = ref([] as any[])
+
+  checkedKeys.value.forEach((key) => {
+    if (treeDataMap.value[key]) {
+      const item = treeDataMap.value[key]
+      const val = {
+        path: item.path,
+        sample: item.sample,
+        fieldType: item.fieldType,
+        Category: item.category,
+        Type: item.type,
+        Rule: item.rule,
+      }
+      ret.value.push(val)
+    }
+  })
+
+  return ret
+}
+
+// execution
+const execVisible = ref<boolean>(false);
+const selectEnvVisible = ref<boolean>(false);
+
+const {progressStatus, execStart, execStop} = useCaseExecution()
+
+const selectExecEnv = () => {
+  console.log('selectExecEnv')
+  selectEnvVisible.value = true;
+}
+async function onSelectExecEnvFinish() {
+  console.log('onSelectExecEnvFinish')
+  selectEnvVisible.value = false;
+  execVisible.value = true;
+
+  const selectedNodes = getSelectedNodes()
+  execStart(selectedNodes.value, currEnvId.value)
+}
+async function onSelectExecEnvCancel() {
+  console.log('onSelectExecEnvCancel')
+  selectEnvVisible.value = false;
+}
 
 const back = () => {
   console.log('back')
@@ -301,7 +326,7 @@ const back = () => {
     }
 
     .right {
-      width: 100px;
+      width: 200px;
       text-align: right;
     }
   }
