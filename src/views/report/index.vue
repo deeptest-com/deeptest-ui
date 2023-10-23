@@ -6,14 +6,11 @@
       <div class="report-list">
           <List :loading="loading" :list="list" @get-list="getList" @query-detail="queryDetail"/>
       </div>
-      <DetailDrawer
-        :title="'测试报告详情'"
-        :show-scenario-info="true"
-        :scenario-expand-active="false"
-        :drawer-visible="drawerVisible"
-        :report-id="currPlanId"
-        :scene="ReportDetailType.QueryDetail"
-        @on-close="drawerVisible = false" />
+      <div v-if="drawerVisible">
+        <DetailDrawer
+          :drawer-visible="drawerVisible"
+          @on-close="drawerVisible = false" />
+      </div>
     </div>
 </template>
 <script setup lang="ts">
@@ -22,7 +19,7 @@ import { useStore } from "vuex";
 
 import { TableFilter } from '@/views/component/Report/components';
 import List from './List/index.vue';
-import DetailDrawer from './Detail/index.vue';
+import DetailDrawer from './Detail/detailDrawer.vue';
 
 import { StateType as ProjectStateType } from "@/store/project";
 import { StateType } from "./store";

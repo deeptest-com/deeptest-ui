@@ -6,7 +6,7 @@
              @cancel="cancel"
              class="scenario-edit"
              width="600px">
-      <a-form :label-col="labelCol" :wrapper-col="wrapperCol">
+      <a-form class="custom-center-form" :wrapper-col="wrapperCol">
         <a-form-item label="名称" v-bind="validateInfos.name">
           <a-input v-model:value="modelRef.name"
                    placeholder="请输入场景名称"

@@ -1,6 +1,6 @@
 <template>
   <a-descriptions :size="'small'" :title="null" :column="4">
-    <a-descriptions-item label="创建人">{{ endpointDetail?username(endpointDetail.createUser):'' }}</a-descriptions-item>
+    <a-descriptions-item label="创建人">{{ endpointDetail ? username(endpointDetail.createUser) :'' }}</a-descriptions-item>
     <a-descriptions-item label="状态">
       <EditAndShowSelect
           :label="endpointStatus.get(endpointDetail?.status || 0 )"
@@ -12,7 +12,7 @@
       <Tags
        :options="tagList"
        :size="'small'"
-       :values="endpointDetail.tags"
+       :values="endpointDetail?.tags"
        @updateTags = "(values:[])=>{
           updateTags(values,endpointDetail.id,endpointDetail.projectId)
         }"

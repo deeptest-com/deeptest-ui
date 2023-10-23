@@ -75,18 +75,18 @@ import {
   computed, ref, onMounted,
   watch, defineEmits, defineProps, createVNode, nextTick
 } from 'vue';
-import { useRouter } from 'vue-router';
+import {useStore} from "vuex";
 import {
   PlusOutlined,
   CaretDownOutlined,
   MoreOutlined,
   ExclamationCircleOutlined
 } from '@ant-design/icons-vue';
-import {message, Modal, notification} from 'ant-design-vue';
-import cloneDeep from "lodash/cloneDeep";
-import CreateCategoryModal from '@/components/CreateCategoryModal/index.vue';
+import {Modal} from 'ant-design-vue';
 import {DropEvent} from 'ant-design-vue/es/tree/Tree';
-import {useStore} from "vuex";
+import cloneDeep from "lodash/cloneDeep";
+
+import CreateCategoryModal from '@/components/CreateCategoryModal/index.vue';
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
 import {StateType as ProjectStateType} from "@/store/project";
 import {setSelectedKey} from "@/utils/cache";
@@ -96,7 +96,6 @@ import settings from "@/config/settings";
 import { getUrlKey } from '@/utils/url';
 import {notifyError, notifySuccess, notifyWarn} from "@/utils/notify";
 
-const router = useRouter();
 const store = useStore<{ Endpoint: EndpointStateType, ProjectGlobal: ProjectStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
@@ -166,29 +165,6 @@ const showKeywordsTip = computed(() => {
   return searchValue.value && treeData.value.length === 0;
 })
 
-function handleFindSearch() {
-  const result = getUrlKey('shareInfo', window.location.href) || "";
-  const shareInfo = result ? JSON.parse(result  as string) : {};
-  console.log(
-  '%c 接口定义 分享详情share-info',
-  'border: 1px solid white;border-radius: 3px 0 0 3px;padding: 2px 5px;color: white;background-color: green;',
-  shareInfo
-  );
-  if (shareInfo.selectedCategoryId) {
-    selectedKeys.value.push(shareInfo.selectedCategoryId);
-    setSelectedKey('category-endpoint', currProject.value.id, selectedKeys.value[0]);
-    setTimeout(() => {
-      if (document.getElementsByClassName('ant-tree-treenode-selected').length > 0) {
-        document.getElementsByClassName('ant-tree-treenode-selected')[0].scrollIntoView({
-          behavior: 'auto',
-          block: 'center',
-          inline: 'center',
-        });
-      }
-    }, 1000);
-  }
-}
-
 onMounted(async () => {
   await loadCategories();
 });
@@ -197,7 +173,6 @@ async function loadCategories() {
   await store.dispatch('Endpoint/loadCategory');
   expandAll();
   await nextTick();
-  handleFindSearch();
 }
 
 watch(() => {

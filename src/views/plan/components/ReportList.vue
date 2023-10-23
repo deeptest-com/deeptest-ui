@@ -37,7 +37,7 @@ import { useStore } from 'vuex';
 
 import { TableFilter } from "@/views/component/Report/components";
 import TooltipCell from '@/components/Table/tooltipCell.vue';
-import ExecDetail from '@/views/report/Detail/index.vue';
+import ExecDetail from '@/views/report/Detail/detailDrawer.vue';
 
 import { StateType as ReportStateType } from '@/views/report/store';
 import { StateType as PlanStateType } from '../store';
@@ -45,12 +45,6 @@ import { momentUtc, formatWithSeconds } from '@/utils/datetime';
 import { ReportDetailType } from '@/utils/enum';
 import settings from "@/config/settings";
 import bus from "@/utils/eventBus";
-
-const editPlanDrawerVisible = inject('editPlanDrawerVisible') as any;
-
-const props = defineProps<{
-    showReportList: Boolean
-}>();
 
 const columns = [
     {
@@ -97,7 +91,7 @@ const columns = [
 
 const store = useStore<{ Plan: PlanStateType, Report: ReportStateType }>();
 const list = computed<any[]>(() => store.state.Report.listResult.list);
-const currPlan = computed<any>(() => store.state.Plan.currPlan);
+const currPlan = computed<any>(() => store.state.Plan.detailResult);
 const detailDrawerVisible = ref(false);
 let formState = reactive({});
 const loading = ref(false);
@@ -107,6 +101,7 @@ onMounted(() => {
   bus.on(settings.eventGetPlansReports, async () => {
     refreshList({});
   })
+  refreshList({});
 });
 
 function handleFilter(params) {
@@ -138,15 +133,5 @@ async function queryDetail(id) {
     detailDrawerVisible.value = true;
 }
 
-watch(() => {
-    return [editPlanDrawerVisible.value, props.showReportList];
-}, val => {
-   const [editVisible, show] = val;
-   if (editVisible && show) {
-    refreshList({});
-   }
-}, {
-    immediate: true
-})
 </script>
 

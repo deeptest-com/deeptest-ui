@@ -9,7 +9,7 @@
         ref="formRef"
         :model="formState"
         :rules="rules"
-        :label-col="{ span: 5 }"
+        class="custom-center-form"
         :wrapper-col="{ span: 17 }">
       <a-form-item label="接口名称" name="title">
         <a-input placeholder="请输入接口名称" v-model:value="formState.title"/>

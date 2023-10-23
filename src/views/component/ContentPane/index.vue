@@ -9,7 +9,7 @@
           <slot name="left"></slot>
         </div>
         <multipane-resizer />
-        <div :class="['pane', 'right', !isFold && 'unfold']" :style="{ flexGrow: 1  }">
+        <div :class="['pane', 'right', !isFold && 'unfold']">
           <slot name="right"></slot>
           <div v-if="showExpand" class="expand-icon" @click="toggle">
             <img :src="PutAway" />
@@ -83,6 +83,7 @@ const handlePaneResize = (...args) => {
       overflow: scroll;
       position: relative;
       z-index: 2;
+      padding-left: 1px;
 
       &.unfold {
         overflow: scroll;

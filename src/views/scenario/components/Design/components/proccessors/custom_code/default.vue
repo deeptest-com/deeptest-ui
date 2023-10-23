@@ -44,7 +44,7 @@ provide('fullscreen', computed(() => fullscreen.value));
   flex-direction: column;
 
   .header {
-    height: 32px;
+    height: 42px;
     padding: 3px 8px;
     border: 1px solid #d9d9d9;
     background-color: #fafafa;

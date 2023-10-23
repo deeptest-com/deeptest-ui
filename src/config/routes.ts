@@ -90,7 +90,7 @@ export const routes: RoutesDataItem[] = [
       {
         icon: 'message',
         title: '消息',
-        path: 'message',
+        path: 'notification',
         component: () => import('@/views/user/info/message.vue'),
         hidden: true,
         meta: {

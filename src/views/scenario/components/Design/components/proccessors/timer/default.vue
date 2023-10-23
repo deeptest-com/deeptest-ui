@@ -4,7 +4,7 @@
     <a-card :bordered="false">
       <a-form
           :model="formState"
-          :label-col="{ span: 4 }"
+          :label-col="{ style: { width: '120px' } }"
           :wrapper-col="{ span: 16 }">
         <!-- <a-form-item label="计时器名称" name="name">
           <a-input v-model:value="formState.name" style="width: 200px"/>

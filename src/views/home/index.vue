@@ -219,7 +219,8 @@ const handleExit = (item) => {
 <style lang="less" scoped>
 .home {
   padding: 16px;
-
+  background-color: #F5F5F5;
+  min-height: 100%;
   :deep(.ant-card-head .ant-tabs-bar) {
     border-bottom: none;
   }

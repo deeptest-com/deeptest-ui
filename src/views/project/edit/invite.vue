@@ -8,7 +8,7 @@
   <div class="invite-main">
     <a-card>
 
-      <a-form :label-col="labelCol" :wrapper-col="wrapperCol" ref="formRef">
+      <a-form class="custom-center-form" :label-col="{ style: { width: '68px' } }" :wrapper-col="wrapperCol" ref="formRef">
         <a-form-item label="用户名" v-bind="validateInfos.userId">
                 <a-select v-model:value="modelRef.userId" show-search @change="selectUser" :options="options" optionFilterProp="label"
                           @blur="validate('userId', { trigger: 'blur' }).catch(() => {})">

@@ -130,7 +130,7 @@
                     style="width: 100%"/>
               </a-form-item>
 
-              <div style="margin-top: 12px;margin-left: -14px;">
+              <div style="margin-top: 12px;margin-left: 20px;">
                 <ul>
                   <li><a-typography-text type="secondary"><span class="form-item-info">all of：</span>根据所有子模式验证值</a-typography-text></li>
                   <li><a-typography-text type="secondary"><span class="form-item-info">one of:</span> 根据其中一个子模式验证值</a-typography-text></li>

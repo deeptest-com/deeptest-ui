@@ -74,7 +74,6 @@
   </a-card>
   <a-modal
     v-model:visible="visible"
-    @ok="handleOk"
     width="700px"
     :footer="null"
   >
@@ -91,21 +90,18 @@
 import { PaginationConfig, QueryParams, User } from "../../data.d";
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useStore } from "vuex";
-import { Modal, notification } from "ant-design-vue";
-import { NotificationKeyCommon } from "@/utils/const";
+import { Modal } from "ant-design-vue";
 import debounce from "lodash.debounce";
-import { useRouter } from "vue-router";
 import EditPage from "../../edit/edit.vue";
-import { defineProps } from 'vue'
 import {SelectTypes} from "ant-design-vue/lib/select";
 import {notifyError, notifySuccess} from "@/utils/notify";
 
-const props = defineProps(['isAdmin'])
-
-const router = useRouter();
 const store = useStore();
 
 const list = computed<User[]>(() => store.state.UserInternal.queryResult.list);
+const isAdmin = computed(() => {
+  return (store.state.User.currentUser.sysRoles || []).includes('admin');
+});
 const roles = ()=>{
   let rolesList = {}
   store.state.Project.roles.forEach((item:any)=>{

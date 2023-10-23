@@ -18,11 +18,7 @@
     color: rgba(0, 0, 0, 0.45);
     cursor: default;
 }
-.dp-no-label-after {
-    .ant-form-item-label > label::after {
-        content: '' !important;
-    }
-}
+
 .ant-form-item.dp-form-item-no-bottom-space {
     margin-bottom: 0px;
 }
@@ -194,7 +190,15 @@
         .ant-drawer-body {
             flex: 1;
             height: 0;
-            padding: 16px 16px 32px;
+            padding: 16px;
+
+            .report-exec-info-main {
+                height: calc(100vh - 64px) !important;
+                display: flex;
+                overflow: hidden;
+                flex-direction: column;
+                padding-bottom: 16px;
+            }
 
             .scenario-exec-info-main, .report-exec-info-main, .plan-exec-info-main {
                 height: 100%;
@@ -207,5 +211,39 @@
                 }
             }
         }
+    }
+}
+
+.ant-form-item-label {
+    width: 82px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    text-align: left;
+    
+    label::after {
+        color: transparent;
+    }
+
+    label:not(.ant-form-item-required)::before {
+        display: inline-block;
+        margin-right: 4px;
+        color: transparent;
+        font-size: 14px;
+        font-family: SimSun, sans-serif;
+        line-height: 1;
+        content: '*';
+    }
+}
+
+.custom-center-form {
+    .ant-row {
+        justify-content: center;
+    }
+}
+
+.inline-form {
+    .ant-row {
+        margin-bottom: 16px;
     }
 }
