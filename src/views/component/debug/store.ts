@@ -494,7 +494,8 @@ const StoreModel: ModuleType = {
         // conditions
         async getPreConditionScript({commit, state}) {
             try {
-                const resp = await getPreConditionScript(state.debugInfo.debugInterfaceId, state.debugData.endpointInterfaceId);
+                const resp = await getPreConditionScript(
+                    state.debugInfo.debugInterfaceId, state.debugData.endpointInterfaceId, state.debugInfo.usedBy);
                 const {data} = resp;
                 commit('setScript', data);
                 return true;
@@ -506,7 +507,7 @@ const StoreModel: ModuleType = {
         async listPostCondition({commit, state}) {
             try {
                 const resp = await listPostConditions(state.debugInfo.debugInterfaceId, state.debugData.endpointInterfaceId,
-                    ConditionCategory.console);
+                    ConditionCategory.console, state.debugInfo.usedBy);
                 const {data} = resp;
                 commit('setPostConditions', data);
                 return true;
@@ -517,7 +518,7 @@ const StoreModel: ModuleType = {
         async listAssertionCondition({commit, state}) {
             try {
                 const resp = await listPostConditions(state.debugInfo.debugInterfaceId, state.debugData.endpointInterfaceId,
-                    ConditionCategory.assert);
+                    ConditionCategory.assert, state.debugInfo.usedBy);
 
                 const {data} = resp;
                 commit('setAssertionConditions', data);

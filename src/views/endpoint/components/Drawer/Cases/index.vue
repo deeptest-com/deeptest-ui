@@ -11,7 +11,6 @@
 
     <CaseGenerate
         v-if="show === 'generate'"
-        :model="baseModel"
         :onBack="back" />
   </div>
 </template>
@@ -56,12 +55,12 @@ const design = (record) => {
   store.commit('Endpoint/setEndpointCaseDetail', record);
 }
 
-const baseModel = ref({}as any)
 const generate = (record) => {
   console.log('generate', record)
   show.value = 'generate'
-  baseModel.value = {baseId: record.id}
   emit('update:showList', false)
+
+  store.commit('Endpoint/setEndpointCaseDetail', record);
 }
 
 const back = () => {

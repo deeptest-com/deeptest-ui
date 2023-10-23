@@ -84,9 +84,18 @@
         </a-form>
       </a-tab-pane>
 
-      <a-tab-pane key="assert" tab="统一断言">
-        <Assertions :model="model" />
+      <a-tab-pane key="pre-condition" tab="预处理">
+        <PreCondition v-if="activeKey === 'pre-condition'" />
       </a-tab-pane>
+
+      <a-tab-pane key="post-condition" tab="后置处理">
+        <PostCondition v-if="activeKey === 'post-condition'" />
+      </a-tab-pane>
+
+      <a-tab-pane key="assertion" tab="断言">
+        <Assertion v-if="activeKey === 'assertion'" />
+      </a-tab-pane>
+
     </a-tabs>
 
     <SaveAlternative
@@ -118,23 +127,30 @@ import {
   CheckCircleOutlined, CloseCircleOutlined,
 } from '@ant-design/icons-vue';
 
+import {getDpResultClass} from "@/utils/dom";
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
+import {StateType as Debug} from "@/views/component/debug/store";
 import { StateType as ProjectSettingStateType } from "@/views/project-settings/store";
-import Assertions from "./assertions.vue";
+import {StateType as ProjectStateType} from "@/store/project";
+
+import PreCondition from "@/views/component/debug/request/config/ConditionPre.vue";
+import PostCondition from "@/views/component/debug/request/config/ConditionPost.vue";
+import Assertion from "@/views/component/debug/request/config/Assertion.vue";
+
+import useCaseExecution from "@/views/endpoint/components/Drawer/Cases/exec-alternative-cases";
 import SaveAlternative from "./saveAlternative.vue";
 import EnvSelector from "@/views/component/EnvSelector/index.vue";
-import useCaseExecution from "@/views/endpoint/components/Drawer/Cases/exec-alternative-cases";
-import {StateType as ProjectStateType} from "@/store/project";
-import {getDpResultClass} from "@/utils/dom";
 
-const usedBy = UsedBy.CaseGenerate
+const usedBy = UsedBy.AlternativeCaseDebug
 provide('usedBy', usedBy)
 const useForm = Form.useForm;
 
-const store = useStore<{ Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType, ProjectGlobal: ProjectStateType }>();
+const store = useStore<{ Debug: Debug, Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType, ProjectGlobal: ProjectStateType }>();
 const alternativeCases = computed<any>(() => store.state.Endpoint.alternativeCases);
 const currEnvId = computed(() => store.state.ProjectSetting.selectEnvId);
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
+const endpointCase = computed<any>(() => store.state.Endpoint.caseDetail);
+const debugData = computed<any>(() => store.state.Debug.debugData);
 
 const activeKey = ref('paths')
 const allSelected = ref(false)
@@ -142,15 +158,7 @@ const allSelected = ref(false)
 const sampleRef = ref('')
 const treeDataMap = ref({})
 
-watch(alternativeCases, (newVal) => {
-  getNodeMap({key: '', children: newVal}, treeDataMap.value)
-}, {deep: true, immediate: true});
-
 const props = defineProps({
-  model: {
-    required: true,
-    type: Object,
-  },
   onBack: {
     type: Function,
     required: true,
@@ -166,13 +174,33 @@ const replaceFields = {key: 'key'};
 const expandedKeys = ref<string[]>([]);
 const checkedKeys = ref<string[]>([] as any[])
 
+const loadDebugData = async () => {
+  console.log('loadDebugData', endpointCase.value.id, usedBy)
+
+  await store.dispatch('Debug/loadDataAndInvocations', {
+    caseInterfaceId: endpointCase.value.id,
+    usedBy: usedBy,
+  });
+}
 const loadCaseTree = () => {
-  store.dispatch('Endpoint/loadAlternativeCase', modelRef.value.baseId).then((result) => {
+  store.dispatch('Endpoint/loadAlternativeCase', debugData.value.caseInterfaceId).then((result) => {
     console.log('loadCaseTree', result)
     expandAll()
   })
   // store.dispatch('Endpoint/loadAlternativeCaseSaved', modelRef.value.baseId)
 }
+
+watch(endpointCase, async (newVal) => {
+  if (!endpointCase.value) return
+
+  console.log('watch endpointCase', endpointCase.value.id)
+  await loadDebugData()
+  loadCaseTree()
+}, {immediate: true, deep: true})
+
+watch(alternativeCases, (newVal) => {
+  getNodeMap({key: '', children: newVal}, treeDataMap.value)
+}, {deep: true, immediate: true});
 
 function selectAll() {
   const keys: any = [];
@@ -202,18 +230,7 @@ function getAllKeys(arr: any, keys: any[]) {
   });
 }
 
-watch(() => props.model, () => {
-  console.log('watch props.visible', props.model)
-  modelRef.value = {
-    baseId: props.model.baseId,
-    prefix: props.model?.prefix || '异常路径-',
-  }
-
-  loadCaseTree()
-}, {immediate: true, deep: true})
-
 const rulesRef = reactive({
-
 });
 
 const {resetFields, validate, validateInfos} = useForm(modelRef, rulesRef);
