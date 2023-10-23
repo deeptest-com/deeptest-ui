@@ -1,4 +1,5 @@
 import {Mutation, Action} from 'vuex';
+import cloneDeep from "lodash/cloneDeep";
 import {StoreModuleType} from "@/utils/store";
 import {ResponseData} from '@/utils/request';
 import {
@@ -47,7 +48,7 @@ import {
     getMockScript,
     updateMockScript,
 
-    generateJsonExample, loadAlternativeCases, loadAlternativeCasesSaved, saveAlternativeCase,queryEndpointCase,generateCode,generateSchemaByResponse
+    generateJsonExample, loadAlternativeCases, loadAlternativeCasesSaved, saveAlternativeCase,queryEndpointCase,generateCode,generateSchemaByResponse, updateName
 
 } from './service';
 
@@ -146,6 +147,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setSecurityOpts: Mutation<StateType>;
         setYamlCode: Mutation<StateType>;
         setStatus: Mutation<StateType>;
+        setName: Mutation<StateType>;
 
         setInterfaceMethodToObjMap: Mutation<StateType>;
         deleteInterfaceMethodToObjMap: Mutation<StateType>;
@@ -200,6 +202,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         copy: Action<StateType, StateType>;
         getEndpointDetail: Action<StateType, StateType>;
         updateEndpointDetail: Action<StateType, StateType>;
+        updateEndpointName: Action<StateType, StateType>;
         getServerList: Action<StateType, StateType>;
         changeServer: Action<StateType, StateType>;
         getSecurityList: Action<StateType, StateType>;
@@ -393,6 +396,13 @@ const StoreModel: ModuleType = {
             state.listResult.list.forEach((item) => {
                 if (item.id === payload.id) {
                     item.status = payload.status;
+                }
+            });
+        },
+        setName(state, payload) {
+            state.listResult.list.forEach((item: any) => {
+                if (item.id === payload.id) {
+                    item.title = payload.name;
                 }
             });
         },
@@ -675,7 +685,7 @@ const StoreModel: ModuleType = {
                     item.updatedAt = momentUtc(item.updatedAt);
                 })
                 commit('setList', {
-                    list: result || [],
+                    list: cloneDeep(result) || [],
                     pagination: {
                         ...initState.listResult.pagination,
                         "current": page,
@@ -759,6 +769,16 @@ const StoreModel: ModuleType = {
             if (res.code === 0) {
                 await dispatch("getEndpointDetail", {id: res.data})
                 await dispatch('loadList', {projectId: payload.projectId});
+            } else {
+                return false
+            }
+        },
+
+        async updateEndpointName({ dispatch, commit, rootState }: any, payload: any) {
+            const res = await updateName(payload);
+            if (res.code === 0) {
+                commit('setName', payload);
+                await dispatch('loadList', {projectId: rootState.ProjectGlobal.currProject.id});
             } else {
                 return false
             }
