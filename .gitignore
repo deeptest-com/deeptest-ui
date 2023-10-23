@@ -46,7 +46,6 @@ src/utils/feedback.ts
 
 /frontend-config
 /config
-README.md
 ############  忽略内部版本敏感信息（如环境变量、品牌LOGO等） end ############
 
 *.sh
