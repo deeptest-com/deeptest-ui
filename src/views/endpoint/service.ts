@@ -147,9 +147,8 @@ export async function saveEndpoint(data: any): Promise<any> {
  */
 export async function updateName(data: any): Promise<any> {
     return request({
-        url: 'endpoint/updateName',
+        url: `endpoint/updateName?id=${data.id}&name=${data.name}`,
         method: 'PUT',
-        data,
     })
 }
 
