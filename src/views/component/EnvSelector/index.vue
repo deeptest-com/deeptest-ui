@@ -56,6 +56,8 @@ async function changeEnv(value) {
 }
 
 async function save() {
+  console.log('select env: ', currEnvId.value)
+
   if (!currEnvId.value) {
     notifyError('请先选择执行环境');
     return;

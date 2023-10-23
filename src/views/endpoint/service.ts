@@ -7,6 +7,9 @@ const apiPath = 'endpoints';
 const apiPathInterface = 'endpoints/interfaces';
 const apiPathCase = 'endpoints/cases';
 
+const apiAlternativeCase = 'endpoints/cases/alternatives';
+const apiAlternativeCaseAssertions = 'endpoints/cases/alternatives/assertions';
+
 export async function query(params?: QueryParams): Promise<any> {
     return request({
         url: `/${apiPath}`,
@@ -198,80 +201,6 @@ export async function importEndpointData(data: any): Promise<any> {
             ...data,
         }
     });
-}
-
-export async function queryEndpointCase(data): Promise<any> {
-    return request({
-        url: `/${apiPathCase}/query`,
-        method: 'POST',
-        data
-    })
-}
-export async function getEndpointCase(id: Number | String | any): Promise<any> {
-    return request({
-        url: `/${apiPathCase}/${id}`,
-        method: 'GET',
-    });
-}
-export async function saveEndpointCase(data: any): Promise<any> {
-    return request({
-        url: `/${apiPathCase}/${data.id?data.id:0}`,
-        method: 'post',
-        data
-    });
-}
-export async function copyEndpointCase(id: number): Promise<any> {
-    const params = {id}
-    return request({
-        url: `/${apiPathCase}/copy`,
-        method: 'post',
-        params
-    });
-}
-export async function saveEndpointCaseDebugData(data: any): Promise<any> {
-    return request({
-        url: `/${apiPathCase}/saveDebugData`,
-        method: 'post',
-        data,
-    });
-}
-export async function updateEndpointCaseName(data): Promise<any> {
-    return request({
-        url: `/${apiPathCase}/updateName`,
-        method: 'put',
-        data
-    });
-}
-export async function removeEndpointCase(data): Promise<any> {
-    return request({
-        url: `/${apiPathCase}/${data.id}`,
-        method: 'delete',
-        data
-    });
-}
-
-export async function loadAlternativeCases(baseId: number): Promise<any> {
-    const params = {baseId}
-    return request({
-        url: `/${apiPathCase}/loadAlternative`,
-        method: 'GET',
-        params,
-    })
-}
-export async function loadAlternativeCasesSaved(baseId: number): Promise<any> {
-    const params = {baseId}
-    return request({
-        url: `/${apiPathCase}/loadAlternativeCasesSaved`,
-        method: 'POST',
-        params,
-    })
-}
-export async function saveAlternativeCase(data: any): Promise<any> {
-    return request({
-        url: `/${apiPathCase}/saveAlternativeCase`,
-        method: 'POST',
-        data
-    })
 }
 
 /**
@@ -477,4 +406,116 @@ export function generateSchemaByResponse(data:any) {
         method: 'post',
         data,
     })
+}
+
+// case
+export async function queryEndpointCase(data): Promise<any> {
+    return request({
+        url: `/${apiPathCase}/query`,
+        method: 'POST',
+        data
+    })
+}
+export async function getEndpointCase(id: Number | String | any): Promise<any> {
+    return request({
+        url: `/${apiPathCase}/${id}`,
+        method: 'GET',
+    });
+}
+export async function saveEndpointCase(data: any): Promise<any> {
+    return request({
+        url: `/${apiPathCase}/${data.id?data.id:0}`,
+        method: 'post',
+        data
+    });
+}
+export async function copyEndpointCase(id: number): Promise<any> {
+    const params = {id}
+    return request({
+        url: `/${apiPathCase}/copy`,
+        method: 'post',
+        params
+    });
+}
+export async function saveEndpointCaseDebugData(data: any): Promise<any> {
+    return request({
+        url: `/${apiPathCase}/saveDebugData`,
+        method: 'post',
+        data,
+    });
+}
+export async function updateEndpointCaseName(data): Promise<any> {
+    return request({
+        url: `/${apiPathCase}/updateName`,
+        method: 'put',
+        data
+    });
+}
+export async function removeEndpointCase(data): Promise<any> {
+    return request({
+        url: `/${apiPathCase}/${data.id}`,
+        method: 'delete',
+        data
+    });
+}
+
+// alternative case
+export async function loadAlternativeCase(baseId: number): Promise<any> {
+    const params = {baseId}
+    return request({
+        url: `/${apiAlternativeCase}/load`,
+        method: 'GET',
+        params,
+    })
+}
+export async function loadAlternativeCaseSaved(baseId: number): Promise<any> {
+    const params = {baseId}
+    return request({
+        url: `/${apiAlternativeCase}/loadSaved`,
+        method: 'POST',
+        params,
+    })
+}
+export async function saveAlternativeCase(data: any): Promise<any> {
+    return request({
+        url: `/${apiAlternativeCase}/save`,
+        method: 'POST',
+        data
+    })
+}
+
+// alternative case's assertion
+export async function listAlternativeCaseAssertion(alternativeCaseId: number): Promise<any> {
+    const params = {alternativeCaseId}
+    return request({
+        url: `/${apiAlternativeCaseAssertions}`,
+        method: 'GET',
+        params
+    })
+}
+export async function saveAlternativeCaseAssertion(data): Promise<any> {
+    return request({
+        url: `/${apiAlternativeCaseAssertions}`,
+        method: 'POST',
+        data: data,
+    });
+}
+export async function disableAlternativeCaseAssertion(id): Promise<any> {
+    return request({
+        url: `/${apiAlternativeCaseAssertions}/${id}/disable`,
+        method: 'POST',
+    });
+}
+export async function removeAlternativeCaseAssertion(id): Promise<any> {
+    return request({
+        url: `/${apiAlternativeCaseAssertions}/${id}`,
+        method: 'DELETE',
+    });
+}
+export async function moveAlternativeCaseAssertion(data): Promise<any> {
+    return request({
+        url: `/${apiAlternativeCaseAssertions}/move`,
+        method: 'POST',
+        data: data,
+    });
 }

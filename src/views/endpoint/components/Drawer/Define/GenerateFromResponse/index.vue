@@ -50,7 +50,7 @@
             :value="contentStr"
             :serveId="Number(serveId)"
             @change="handleContentChange"
-            :contentStyle="tabContentStyle"/>
+            />
   </div>
 </a-modal>
 </template>
@@ -107,12 +107,14 @@ const handleOk = async () => {
   if (codes.value.indexOf(formState.code) != -1) {
     confirmToDo(`接口中已定义` + formState.code + `响应码，保存后将覆盖原来的响应码定义。`,'确认要保存吗？', async () => {
       await store.dispatch('Endpoint/generateSchemaByResponse', formState );
+      store.commit('Endpoint/setGlobalActiveTab',  Date.now() + '')
     });
   } else {
       await store.dispatch('Endpoint/generateSchemaByResponse', formState );
+      store.commit('Endpoint/setGlobalActiveTab',  Date.now() + '')
   }
   emits("close");
-  store.commit('Endpoint/setGlobalActiveTab',  Date.now() + '')
+
 }
 
 const handleContentChange = (value) => {
