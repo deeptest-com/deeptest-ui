@@ -332,7 +332,7 @@ async function onSelectExecEnvFinish() {
   execVisible.value = true;
 
   const selectedNodes = getSelectedNodes()
-  execStart(currProject.value.id, props.model.baseId, selectedNodes.value, currEnvId.value, treeDataMap.value)
+  execStart(currProject.value.id, endpointCase.value.id, selectedNodes.value, currEnvId.value, treeDataMap.value, usedBy)
 }
 async function onSelectExecEnvCancel() {
   console.log('onSelectExecEnvCancel')

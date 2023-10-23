@@ -54,8 +54,8 @@ function useCaseExecution(): CaseExecution {
         }
     }
 
-    const execStart = async (projectId, baseCaseId, cases, environmentId, treeDataMap) => {
-        console.log('=== execStart', projectId, baseCaseId, cases, environmentId)
+    const execStart = async (projectId, baseCaseId, cases, environmentId, treeDataMap, usedBy) => {
+        console.log('=== execStart', projectId, baseCaseId, cases, environmentId, usedBy)
         treeData.value = treeDataMap
 
         execUuid.value = getUuid()
@@ -65,6 +65,7 @@ function useCaseExecution(): CaseExecution {
 
             projectId: projectId,
             baseCaseId,
+            usedBy,
             execUuid: execUuid.value,
             cases,
             environmentId,
