@@ -1,11 +1,5 @@
-# [LeYanAPI](https://leyanapi.nancalcloud.com/)
 
-## LeYanAPI, Software API management and automation testing platform - Frontend
-Vue.js 3, Ant Design Vue, TypeScript, WebSocket
-
-## 软件接口管理和自动化测试平台 - 前端
-
-### 快速开始
+## 快速开始
 
 1.执行命令，初始化项目
 
@@ -14,6 +8,7 @@ Vue.js 3, Ant Design Vue, TypeScript, WebSocket
 git clone git@gitlab.nancalcloud.com:leyanapi/frontend-config.git
 
 sh ./init.project.sh
+
 ``` 
 
 2. 安装依赖
