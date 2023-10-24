@@ -101,7 +101,6 @@ const { validate, validateInfos, resetFields } = useForm(
   rulesRef
 );
 const submitForm = async () => {
-  console.log("~~~~~~~~~formStateRef", formStateRef);
   validate()
     .then(async () => {
       let res = await applyJoin({
@@ -109,7 +108,6 @@ const submitForm = async () => {
         description: formStateRef.description,
         projectRoleName: formStateRef.projectId.split("-")[1],
       });
-      console.log("申请加入", res);
       if (res.code === 0) {
         notifySuccess("申请成功");
         emits("handleSuccess");
@@ -133,7 +131,6 @@ const handleOk = () => {
 watch(() => props.visible, (val) => {
     if (val) {
        resetFields()
-      console.log("roles", roles);
       store.dispatch("Project/getRoles");
       store.dispatch("Project/getAuditUsers",props.item.projectId)
 
