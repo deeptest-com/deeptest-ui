@@ -6,7 +6,7 @@ import NProgress from 'nprogress'; // progress bar
 import 'nprogress/nprogress.css'; // progress bar style
 NProgress.configure({ showSpinner: false, easing: 'ease', speed: 1000 }); // NProgress Configuration
 
-import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import { RoutesDataItem } from "@/utils/routes";
 import settings from "@/config/settings";
 
@@ -169,6 +169,11 @@ export const routes: RoutesDataItem[] = [
     title: 'app.global.menu.notfound',
     path: '/:pathMatch(.*)*',
     component: () => import('@/views/404/index.vue'),
+  },
+  {
+    title: '访问失效',
+    path: '/error/:codeNumber',
+    component: () => import('@/views/error/index.vue'),
   },
 ]
 

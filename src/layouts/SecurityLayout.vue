@@ -11,8 +11,6 @@ import { computed, ComputedRef, defineComponent, onMounted, Ref, ref, unref, wat
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { StateType as UserStateType, CurrentUser } from "@/store/user";
-import { RouteMenuType } from "@/types/permission";
-import { notifyError } from "@/utils/notify";
 
 interface SecurityLayoutSetupData {
     isLogin: ComputedRef<boolean>;
@@ -49,29 +47,6 @@ export default defineComponent({
                     }
                 })
                 return;
-            }
-
-            const { params: { projectNameAbbr }, meta: { code } } = router.currentRoute.value;
-            // 查看具体项目页面时刷新才会校验 权限按钮以及权限路由
-            if (projectNameAbbr) {
-                // 校验项目权限
-                const result = await store.dispatch('ProjectGlobal/checkProjectAndUser', { project_code: projectNameAbbr });
-                if (!result) {
-                    isReady.value = true;
-                    router.replace('/');
-                    return;
-                }
-
-                // 获取权限路由
-                const { menuData } = await store.dispatch('Global/getPermissionList', { projectId: result.id });
-
-                // 校验路由权限
-                if (!menuData[RouteMenuType[`${code}`]]) {
-                    isReady.value = true;
-                    notifyError('权限不足');
-                    router.replace('/');
-                    return;
-                }
             }
 
             isReady.value = true;

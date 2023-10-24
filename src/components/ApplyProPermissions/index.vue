@@ -7,79 +7,71 @@
     width="700px"
     :footer="null"
     :closable="true"
+    title="申请项目权限"
     @cancel="handleCancel"
   >
     <div class="project-edit-main">
-      <a-card :bordered="false">
-        <template #title>
-          <div>申请项目权限</div>
-        </template>
-        <div>
-          <a-form
-            :model="formStateRef"
-            :wrapper-col="wrapperCol"
-            class="custom-center-form"
+      <a-form
+        :model="formStateRef"
+        :wrapper-col="wrapperCol"
+        class="custom-center-form"
+      >
+        <a-form-item label="项目名称">
+          {{ item.projectName }}
+        </a-form-item>
+
+        <a-form-item label="申请角色" v-bind="validateInfos.projectId">
+          <a-select
+            v-model:value="formStateRef.projectId"
+            show-search
+            @blur="
+              validate('projectId', { trigger: 'blur' }).catch(() => {})
+            "
           >
-            <a-form-item label="项目名称">
-              {{ item.projectName }}
-            </a-form-item>
-
-            <a-form-item label="申请角色" v-bind="validateInfos.projectId">
-              <a-select
-                v-model:value="formStateRef.projectId"
-                show-search
-                @blur="
-                  validate('projectId', { trigger: 'blur' }).catch(() => {})
-                "
-              >
-                <a-select-option
-                  v-for="(option, key) in roles"
-                  :key="key"
-                  :value="item.projectId + '-' + option.name"
-                  >{{ option.displayName }}</a-select-option
-                >
-              </a-select>
-            </a-form-item>
-
-            <a-form-item label="申请原因" v-bind="validateInfos.description">
-              <a-textarea
-                v-model:value="formStateRef.description"
-                @blur="
-                  validate('description', { trigger: 'blur' }).catch(() => {})
-                "
-              />
-            </a-form-item>
-            <a-form-item label="审批人">
-            <a-select
-              v-model:value="auditUsers"
-              mode="multiple"
-              disabled
-            ></a-select>
-            </a-form-item>
-            <a-form-item
-              class="edit-button"
-              :wrapper-col="{ offset: labelCol.span, span: wrapperCol.span }"
+            <a-select-option
+              v-for="(option, key) in roles"
+              :key="key"
+              :value="item.projectId + '-' + option.name"
+              >{{ option.displayName }}</a-select-option
             >
-              <a-button type="primary" @click.prevent="submitForm"
-                >保存</a-button
-              >
-            </a-form-item>
-          </a-form>
-        </div>
-      </a-card>
+          </a-select>
+        </a-form-item>
+
+        <a-form-item label="申请原因" v-bind="validateInfos.description">
+          <a-textarea
+            v-model:value="formStateRef.description"
+            @blur="
+              validate('description', { trigger: 'blur' }).catch(() => {})
+            "
+          />
+        </a-form-item>
+        <a-form-item label="审批人">
+        <a-select
+          v-model:value="auditUsers"
+          mode="multiple"
+          disabled
+        ></a-select>
+        </a-form-item>
+        <a-form-item
+          class="edit-button"
+          :wrapper-col="{ offset: labelCol.span, span: wrapperCol.span }"
+        >
+          <a-button type="primary" @click.prevent="submitForm"
+            >保存</a-button
+          >
+        </a-form-item>
+      </a-form>
     </div>
   </a-modal>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, watch, defineProps, defineEmits, computed, onMounted } from "vue";
-import {Form, message, notification} from "ant-design-vue";
+import { ref, reactive, watch, defineProps, defineEmits, computed } from "vue";
+import {Form} from "ant-design-vue";
 import { StateType as UserStateType } from "@/store/user";
 import { StateType as ProjectStateType } from "@/views/project/store";
 import { SelectTypes } from "ant-design-vue/es/select";
 import { useStore } from "vuex";
-import { projectLogoList } from "./index";
-import { getProjectLogo } from "@/components/CreateProjectModal";
 import { applyJoin } from "@/views/home/service";
 import {notifyError, notifySuccess} from "@/utils/notify";
 const useForm = Form.useForm;
@@ -136,11 +128,6 @@ const handleCancel = () => {
 
 const handleOk = () => {
   emits("handleOk", formStateRef);
-};
-
-const handleSelectLogo = (item: any) => {
-  selectLogoKey.value = item.imgName;
-  formStateRef.logo = item.imgName;
 };
 
 watch(() => props.visible, (val) => {
