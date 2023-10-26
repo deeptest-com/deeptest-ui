@@ -134,6 +134,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setServes: Mutation<StateType>; // 获取环境列表
         setCurrServe: Mutation<StateType>; // 设置当前所选环境
+
+        setGlobalParams: Mutation<StateType>;
     };
     actions: {
         loadDataAndInvocations: Action<StateType, StateType>;
@@ -311,6 +313,13 @@ const StoreModel: ModuleType = {
         },
         setCurrServe(state, payload) {
             state.currServe = payload;
+        },
+        setGlobalParams(state, payload){
+            state.debugData.globalParams.forEach((item:any,index:number,arr:any[])=>{
+                    if (item.name == payload.name && item.in == payload.in) {
+                        arr[index].disabled = payload.disabled
+                    }
+            })
         }
     },
     actions: {
