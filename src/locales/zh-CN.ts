@@ -81,6 +81,7 @@ export default {
     'cookie_en':  'Cookie',
     'query_en':  'Query',
     'body_en':  'Body',
+    'path_en':  'Path',
 
     'responseStatus': '响应码',
     'responseHeader': '响应头',

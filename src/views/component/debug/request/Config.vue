@@ -1,11 +1,14 @@
 <template>
   <div class="config-main">
     <a-tabs v-model:activeKey="activeKey" :animated="false" class="dp-tabs-full-height">
+
       <a-tab-pane key="query-param" :tab="getTabTitle('queryParams')">
+        <GlobalParameters :in="'query'" />
         <QueryParameters v-if="activeKey === 'query-param'" />
       </a-tab-pane>
 
       <a-tab-pane key="path-param" :tab="getTabTitle('pathParams')">
+        <GlobalParameters :in="'path'" />
         <PathParameters />
       </a-tab-pane>
 
@@ -13,7 +16,9 @@
         <RequestBody v-if="activeKey === 'body'" />
       </a-tab-pane>
 
+
       <a-tab-pane key="header" :tab="getTabTitle('headers')">
+        <GlobalParameters :in="'header'" />
         <RequestHeaders v-if="activeKey === 'header'" />
       </a-tab-pane>
 
@@ -44,6 +49,7 @@ import {StateType as Debug} from "@/views/component/debug/store";
 
 import QueryParameters from "./config/QueryParameters.vue";
 import PathParameters from "./config/PathParameters.vue";
+import GlobalParameters from "./config/GlobalParameters.vue";
 
 import RequestBody from "./config/Body.vue";
 import RequestHeaders from "./config/Headers.vue";
