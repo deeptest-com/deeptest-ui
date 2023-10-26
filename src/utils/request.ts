@@ -3,7 +3,7 @@
  * @author LiQingSong
  */
 import axios, {AxiosPromise, AxiosRequestConfig, AxiosResponse} from 'axios';
-import router from '@/config/routes';
+import router from '@/router';
 import i18n from "@/config/i18n";
 import bus from "@/utils/eventBus";
 import settings from '@/config/settings';
@@ -143,11 +143,12 @@ const errorHandler = (axiosResponse: AxiosResponse) => {
 
         const reqUrl = (url + '').split("?")[0].replace(baseURL + '', '');
         const noNeedLogin = settings.ajaxResponseNoVerifyUrl.includes(reqUrl);
+        const { params: { projectNameAbbr }, fullPath } = router.currentRoute.value;
         if (code === 401 && !noNeedLogin) {
             router.replace('/user/login');
-        } else if (code === 403 && router.currentRoute.value.fullPath !== '/') {
-            // 无权限访问时 返回到首页
-            router.replace('/');
+        } else if (code === 403 && fullPath !== '/' && !projectNameAbbr) {
+            // 无权限访问系统页面时 返回到首页
+            router.replace(`/error/${code}?msg=${msg}`);
         }
 
     } else {
@@ -156,7 +157,7 @@ const errorHandler = (axiosResponse: AxiosResponse) => {
         })
     }
 
-    return Promise.reject({})
+    return Promise.reject(axiosResponse.data || {})
 }
 
 export default function (config: AxiosRequestConfig): AxiosPromise<any> {

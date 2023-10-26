@@ -3,7 +3,7 @@ import { Mutation, Action } from 'vuex';
 import { StoreModuleType } from "@/utils/store";
 import { TabNavItem } from '@/utils/routes';
 import settings from '@/config/settings';
-import router from '@/config/routes';
+import router from '@/router';
 import { getPermissionMenuList } from '@/services/project';
 import {getConfigByKey, getServerConfig} from "@/services/config";
 import {getClientVersion} from "@/services/static";

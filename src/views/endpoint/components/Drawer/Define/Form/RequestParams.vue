@@ -17,7 +17,12 @@
                       'box-shadow': `none` ,
                       background:  selectedParamType !== item.value ? '#f5f5f5' : '#fff',
                      'border-color': '#d9d9d9'}"
-              v-for="item in paramTypeOpts" :key="item.value" :value="item.value">{{item.label}}</a-radio-button>
+              v-for="item in paramTypeOpts" 
+              :key="item.value" 
+              :value="item.value">
+                {{item.label}}
+                {{ getRpNumbers(item.value) }}
+              </a-radio-button>
         </a-radio-group>
 
         <span style="width: 12px;display: inline-block"></span>
@@ -122,9 +127,7 @@
 <script lang="ts" setup>
 import {
   ref,
-  defineProps,
   defineEmits,
-  watch,
   computed,
 } from 'vue';
 import { useRouter } from 'vue-router';
@@ -144,12 +147,29 @@ const store = useStore<{ Endpoint, Debug, ProjectGlobal, User }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const selectedMethodDetail = computed<any>(() => store.state.Endpoint.selectedMethodDetail);
 const securityOpts: any = computed<any>(() => store.state.Endpoint.securityOpts);
-const props = defineProps({});
 const emit = defineEmits([]);
 // 是否折叠,默认展开
 const collapse = ref(true);
 // 是否展示安全定义
 const showSecurity = ref(!!selectedMethodDetail.value?.security);
+const getRpNumbers = computed(() => {
+  return value => {
+    const valueMap = {
+      header: 'headers',
+      query: 'params',
+      cookie: 'cookies',
+      security: 'security',
+    };
+    const sourceData = selectedMethodDetail.value[valueMap[value]];
+    if (value === 'security') {
+      return '';
+    }
+    if (!sourceData) {
+      return '';
+    }
+    return sourceData.length ? '(*)'.replace('*', sourceData.length)  : '';
+  }
+})
 
 const paramTypeOpts = [
   {

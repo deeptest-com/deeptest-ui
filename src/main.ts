@@ -12,12 +12,13 @@ import { importAllSvg } from "@/components/IconSvg/index";
 importAllSvg();
 
 import App from '@/App.vue';
-import router from '@/config/routes';
+import router from '@/router';
 import store from '@/config/store';
 import i18n from '@/config/i18n';
 
 import _ from "lodash";
 import mitt, {Emitter} from "@/utils/mitt";
+import { setupRouterGuard } from './router/guard';
 
 const app = createApp(App);
 app.use(store);
@@ -44,6 +45,8 @@ app.directive('contextmenu', {
         })
     }
 })
+
+setupRouterGuard(router);
 
 app.mount('#app');
 
