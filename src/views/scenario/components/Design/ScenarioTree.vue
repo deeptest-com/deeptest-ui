@@ -31,7 +31,7 @@
             :tree-data="treeDataNeedRender"
             :replace-fields="replaceFields">
           <template #switcherIcon>
-            <CaretDownOutlined/>
+            <CaretDownOutlined />
           </template>
           <template #title="{dataRef}">
             <div class="tree-title"
@@ -126,10 +126,8 @@
   </div>
 </template>
 <script setup lang="ts">
-import {computed, defineProps, onMounted, onUnmounted, ref, watch, getCurrentInstance} from "vue";
-
-import {useI18n} from "vue-i18n";
-import {Form, message, Modal} from 'ant-design-vue';
+import {computed, onMounted, onUnmounted, ref, watch, getCurrentInstance} from "vue";
+import {Modal} from 'ant-design-vue';
 import {useStore} from "vuex";
 import debounce from "lodash.debounce";
 import {confirmToDelete} from "@/utils/confirm";
@@ -144,13 +142,13 @@ import {
 } from "./config";
 import {getMethodColor} from "@/utils/dom";
 import {DropEvent, TreeDragEvent} from "ant-design-vue/es/tree/Tree";
-import {PlusOutlined, CaretDownOutlined, MoreOutlined, FolderOpenOutlined, FolderOutlined} from '@ant-design/icons-vue';
+import {PlusOutlined, CaretDownOutlined, MoreOutlined} from '@ant-design/icons-vue';
 import {expandAllKeys, expandOneKey} from "@/services/tree";
 import TreeMenu from "./components/TreeMenu/index.vue";
 import IconSvg from "@/components/IconSvg";
-import {getExpandedKeys, getSelectedKey, setExpandedKeys} from "@/utils/cache";
+import {getExpandedKeys, setExpandedKeys} from "@/utils/cache";
 import {StateType as ScenarioStateType} from "../../store";
-import {isRoot, updateNodeName, isInterface} from "../../service";
+import {isRoot, isInterface} from "../../service";
 import {Scenario} from "@/views/scenario/data";
 import EditModal from "./components/edit.vue";
 import InterfaceSelectionFromDefine from "@/views/component/InterfaceSelectionFromDefine/main.vue";
@@ -162,8 +160,6 @@ import {showLineScenarioType, onlyShowDisableAndDeleteTypes, loopIteratorTypes} 
 import TooltipCell from "@/components/Table/tooltipCell.vue";
 import {notifyWarn} from "@/utils/notify";
 
-const props = defineProps<{}>()
-const {t} = useI18n();
 const store = useStore<{ Scenario: ScenarioStateType; }>();
 const treeData = computed<any>(() => store.state.Scenario.treeData);
 const treeDataNeedRender = computed<any>(() => {
@@ -882,6 +878,13 @@ onUnmounted(() => {
 
   :deep(.out) {
     padding-bottom: 2px;
+  }
+
+  :deep(.ant-tree-treenode-switcher-close:has(.title.dp-disabled)),
+  :deep(.ant-tree-treenode-switcher-open:has(.title.dp-disabled)) {
+    .ant-tree-switcher-icon {
+      opacity: .3;
+    }
   }
 }
 
