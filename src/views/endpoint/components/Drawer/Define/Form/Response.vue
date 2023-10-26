@@ -2,7 +2,7 @@
 <template>
   <!-- 响应定义  -->
   <a-row class="form-item-response">
-    <a-col :span="3" class="form-label form-label-first">
+    <a-col class="form-label form-label-first" style="width: 120px;">
       <RightOutlined v-if="!collapse" @click="collapse = !collapse"/>
       <DownOutlined v-if="collapse" @click="collapse = !collapse"/>
       <span class="label-name">选择响应代码</span>
@@ -272,6 +272,7 @@ function handleResHeaderChange(data) {
 
 .form-label {
   font-weight: bold;
+  width: 120px;
 }
 
 .form-label-first, .form-label-header {
@@ -297,7 +298,7 @@ function handleResHeaderChange(data) {
     &:before {
       content: "";
       position: absolute;
-      left: -145px;
+      left: -133px;
       top: -12px;
       width: 2px;
       background: #E5E5E5;

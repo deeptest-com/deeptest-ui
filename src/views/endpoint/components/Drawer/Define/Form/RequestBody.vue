@@ -2,7 +2,7 @@
 <template>
   <!-- 增加请求体 -->
   <a-row class="form-request-body">
-    <a-col :span="3" class="form-label-first">
+    <a-col class="form-label-first">
       <RightOutlined v-if="!collapse" @click="collapse = !collapse"/>
       <DownOutlined v-if="collapse" @click="collapse = !collapse"/>
       <span class="label-name">增加请求体</span>
@@ -19,7 +19,7 @@
     </a-col>
   </a-row>
   <a-row class="form-request-body-content">
-    <a-col :span="3"/>
+    <a-col style="width: 120px;"/>
     <a-col :span="18">
       <a-row class="form-item-request-item" v-if="collapse">
         <a-col :span="24">
@@ -147,15 +147,12 @@ function changeContent(content: any) {
 
 </script>
 <style lang="less" scoped>
-.form-label {
-  font-weight: bold;
-  position: relative;
-}
 
 .form-label-first {
   font-weight: bold;
   position: relative;
   left: -18px;
+  width: 120px;
 }
 
 .label-name {

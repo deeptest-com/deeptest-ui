@@ -2,7 +2,7 @@
 <template>
   <!-- 增加请求参数 -->
   <a-row class="form-item-request-item" style="margin-top: 16px;">
-    <a-col :span="3" class="form-label form-label-first">
+    <a-col class="form-label form-label-first">
       <RightOutlined v-if="!collapse" @click="collapse = !collapse"/>
       <DownOutlined v-if="collapse" @click="collapse = !collapse"/>
       <span class="label-name">增加请求参数</span>
@@ -273,6 +273,7 @@ function handleParamsChange(type, data) {
   font-weight: bold;
   position: relative;
   left: -18px;
+  width: 120px;
 }
 
 .form-label-first {
