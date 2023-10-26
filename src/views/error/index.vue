@@ -74,7 +74,10 @@ const handleSuccess = () => {
 watch(() => {
   return router.currentRoute.value;
 }, (val: any) => {
-  const { params: { codeNumber }, query: { msg, projectId, projectName } } = val;
+  const { params: { codeNumber }, query: { msg, projectId, projectName }, path } = val;
+  if (!path.includes('error')) {
+    return;
+  }
   errorInfo.value = {
     ...ErrorInfoMap[codeNumber],
     desc: msg || ErrorInfoMap[codeNumber].desc
