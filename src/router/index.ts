@@ -173,7 +173,12 @@ export const routes: RoutesDataItem[] = [
   {
     title: '访问失效',
     path: '/error/:codeNumber',
-    component: () => import('@/views/error/index.vue'),
+    component: SecurityLayout,
+    children: [{
+      title: '访问失效',
+      path: '',
+      component: () => import('@/views/error/index.vue'),
+    }]
   },
 ]
 
