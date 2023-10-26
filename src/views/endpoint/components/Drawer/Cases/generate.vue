@@ -8,96 +8,140 @@
           </template>
           返回
         </a-button>
-      </div>
-      <div class="right">
-        <a-button v-if="activeKey==='paths'" :disabled="checkedKeys.length===0" @click="selectExecEnv">
-          执行选中
-        </a-button>
-        &nbsp;
-        <a-button v-if="activeKey==='paths'" :disabled="checkedKeys.length===0" @click="saveAsCase">
-          另存为用例
-        </a-button>
+
+        <span>填写 用例名称</span>
       </div>
     </div>
+    <!-- :::: 用例路径，方法展示区域 -->
+    
+    <!-- :::: 基准用例 -->
+    <CaseHeader>
+      <template #header>
+        <div class="case-title">
+          <span class="name">基准用例</span>
+          <span class="serial-number">Demo0929-1204-10</span>
+          <EditAndShowField 
+            placeholder="修改标题"
+            :value="'sdsadsa'"
+            @update="updateTitle"/>
+        </div>
+      </template>
+      <template #extra>
+        <div class="case-operation">
+          <a-button 
+            v-for="(item, index) in baseCaseActionList" 
+            :key="index" 
+            :type="item.type" 
+            @click="item.action()">
+            {{ item.text }}
+          </a-button>
+        </div>
+      </template>
+      <template #content>
+        基准用例内容
+      </template>
+    </CaseHeader>
 
-    <a-tabs type="card" v-model:activeKey="activeKey">
-      <a-tab-pane key="paths" tab="备选路径">
-        <a-form :label-col="{ span: 3 }"
-                :wrapper-col="{ span: 20 }">
+    <!-- :::: 用例因子 -->
+    <CaseHeader>
+      <template #header>
+        <div class="case-title">
+          <span class="name">用例生成因子</span>
+        </div>
+      </template>
+      <template #extra>
+        <div class="case-operation">
+          <a-button 
+            v-for="(item, index) in caseFactorActionList" 
+            :key="index" 
+            :type="item.type" 
+            @click="item.action()">
+            {{ item.text }}
+          </a-button>
+        </div>
+      </template>
+      <template #content>
+        <a-tabs type="card" v-model:activeKey="activeKey">
+          <a-tab-pane key="paths" tab="备选路径">
+            <a-form :label-col="{ span: 3 }"
+                    :wrapper-col="{ span: 20 }">
 
-          <a-form-item label="" :wrapper-col="{offset: 2 }" class="dp-form-item-no-bottom-space">
-            <span @click="selectAll" class="dp-link-primary">
-              <span v-if="!allSelected">选择所有</span>
-              <span v-else>取消选择所有</span>
-            </span>
-          </a-form-item>
-
-          <a-form-item label="" :wrapper-col="{offset: 2 }">
-            <a-tree
-                :replaceFields="replaceFields"
-                :tree-data="alternativeCases"
-                :expandedKeys="expandedKeys"
-                :checkable="true"
-                v-model:checkedKeys="checkedKeys"
-                :show-icon="true">
-              <template #title="nodeProps">
-            <span class="tree-title">
-              <span>{{ nodeProps.title }}</span>
-              <template v-if="nodeProps.category==='case'">
-                <span>: &nbsp;&nbsp;&nbsp;</span>
-
-                <span v-if="treeDataMap[nodeProps.key]?.isEdit">
-                  <a-input size="small"
-                           :style="{width: '160px'}"
-                           v-model:value="sampleRef"/>
-                  &nbsp;
-                  <CheckOutlined @click="editFinish(nodeProps.key)" class="dp-icon-btn2 dp-trans-80"/>
-                  <CloseOutlined @click="editCancel(nodeProps.key)" class="dp-icon-btn2 dp-trans-80"/>
+              <a-form-item label="" :wrapper-col="{offset: 2 }" class="dp-form-item-no-bottom-space">
+                <span @click="selectAll" class="dp-link-primary">
+                  <span v-if="!allSelected">选择所有</span>
+                  <span v-else>取消选择所有</span>
                 </span>
+              </a-form-item>
 
-                <span v-else>
-                  {{ nodeProps.sample ? nodeProps.sample : '空' }}
-                  &nbsp;
-                  <EditOutlined @click="editStart(nodeProps.key)"/>
-                  &nbsp;
-                  <span :class="getDpResultClass(nodeProps.execStatus)">
-                    <span v-if="nodeProps.execStatus===ResultStatus.Pass">
-                      <CheckCircleOutlined />
+              <a-form-item label="" :wrapper-col="{offset: 2 }">
+                <a-tree
+                    :replaceFields="replaceFields"
+                    :tree-data="alternativeCases"
+                    :expandedKeys="expandedKeys"
+                    :checkable="true"
+                    v-model:checkedKeys="checkedKeys"
+                    :show-icon="true">
+                  <template #title="nodeProps">
+                <span class="tree-title">
+                  <span>{{ nodeProps.title }}</span>
+                  <template v-if="nodeProps.category==='case'">
+                    <span>: &nbsp;&nbsp;&nbsp;</span>
+
+                    <span v-if="treeDataMap[nodeProps.key]?.isEdit">
+                      <a-input size="small"
+                              :style="{width: '160px'}"
+                              v-model:value="sampleRef"/>
+                      &nbsp;
+                      <CheckOutlined @click="editFinish(nodeProps.key)" class="dp-icon-btn2 dp-trans-80"/>
+                      <CloseOutlined @click="editCancel(nodeProps.key)" class="dp-icon-btn2 dp-trans-80"/>
                     </span>
-                    <span v-if="nodeProps.execStatus===ResultStatus.Fail">
-                      <CloseCircleOutlined />
-                    </span>&nbsp;
-                  </span>
+
+                    <span v-else>
+                      {{ nodeProps.sample ? nodeProps.sample : '空' }}
+                      &nbsp;
+                      <EditOutlined @click="editStart(nodeProps.key)"/>
+                      &nbsp;
+                      <span :class="getDpResultClass(nodeProps.execStatus)">
+                        <span v-if="nodeProps.execStatus===ResultStatus.Pass">
+                          <CheckCircleOutlined />
+                        </span>
+                        <span v-if="nodeProps.execStatus===ResultStatus.Fail">
+                          <CloseCircleOutlined />
+                        </span>&nbsp;
+                      </span>
+                    </span>
+
+                  </template>
                 </span>
+                  </template>
 
-              </template>
-            </span>
-              </template>
+                  <template #icon="slotProps">
+                    <FolderOutlined v-if="slotProps.isDir && !slotProps.expanded"/>
+                    <FolderOpenOutlined v-if="slotProps.isDir && slotProps.expanded"/>
+                    <FileOutlined v-if="!slotProps.isDir"/>
+                  </template>
+                </a-tree>
+              </a-form-item>
+            </a-form>
+          </a-tab-pane>
 
-              <template #icon="slotProps">
-                <FolderOutlined v-if="slotProps.isDir && !slotProps.expanded"/>
-                <FolderOpenOutlined v-if="slotProps.isDir && slotProps.expanded"/>
-                <FileOutlined v-if="!slotProps.isDir"/>
-              </template>
-            </a-tree>
-          </a-form-item>
-        </a-form>
-      </a-tab-pane>
+          <a-tab-pane key="pre-condition" tab="预处理">
+            <PreCondition v-if="activeKey === 'pre-condition'" />
+          </a-tab-pane>
 
-      <a-tab-pane key="pre-condition" tab="预处理">
-        <PreCondition v-if="activeKey === 'pre-condition'" />
-      </a-tab-pane>
+          <a-tab-pane key="post-condition" tab="后置处理">
+            <PostCondition v-if="activeKey === 'post-condition'" />
+          </a-tab-pane>
 
-      <a-tab-pane key="post-condition" tab="后置处理">
-        <PostCondition v-if="activeKey === 'post-condition'" />
-      </a-tab-pane>
+          <a-tab-pane key="assertion" tab="断言">
+            <Assertion v-if="activeKey === 'assertion'" />
+          </a-tab-pane>
 
-      <a-tab-pane key="assertion" tab="断言">
-        <Assertion v-if="activeKey === 'assertion'" />
-      </a-tab-pane>
-
-    </a-tabs>
-
+        </a-tabs>
+      </template>
+    </CaseHeader>
+    
+    <!-- :::: 其他弹窗展示 -->
     <SaveAlternative
         :visible="saveAsVisible"
         :onClose="saveAsClosed"
@@ -136,6 +180,8 @@ import {StateType as ProjectStateType} from "@/store/project";
 import PreCondition from "@/views/component/debug/request/config/ConditionPre.vue";
 import PostCondition from "@/views/component/debug/request/config/ConditionPost.vue";
 import Assertion from "@/views/component/debug/request/config/Assertion.vue";
+import CaseHeader from "./caseHeader.vue";
+import EditAndShowField from '@/components/EditAndShow/index.vue';
 
 import useCaseExecution from "@/views/endpoint/components/Drawer/Cases/exec-alternative-cases";
 import SaveAlternative from "./saveAlternative.vue";
@@ -344,13 +390,61 @@ const back = () => {
   props.onBack()
 }
 
+/**
+ * ::::: 基准用例操作列表
+ */
+const baseCaseActionList = [
+  {
+    text: '调试',
+    type: 'primary',
+    action: () => {},
+  },
+  {
+    text: '保存',
+    type: 'default',
+    action: () => {},
+  },
+  {
+    text: '另存为',
+    type: 'default',
+    action: () => {},
+  }
+];
+
+/**
+ * 用例因子的操作列表
+ */
+const caseFactorActionList = [
+  {
+    text: '调试',
+    type: 'primary',
+    action: () => {},
+  },
+  {
+    text: '生成用例',
+    type: 'default',
+    action: () => {},
+  },
+];
+
+/**
+ * 更新用例名称
+ * @param v 更新以后的值
+ */
+const updateTitle = (v) => {
+  console.log('更新用例标题', v);
+};
+
+
+
 </script>
 
 <style lang="less">
 .case-generate-main {
+  padding-top: 16px;
   .toolbar {
     display: flex;
-    margin-bottom: 10px;
+    margin-bottom: 16px;
 
     .left {
       flex: 1;
@@ -377,6 +471,29 @@ const back = () => {
         height: 24px;
         background-color: white;
       }
+    }
+  }
+
+  .case-title {
+    display: flex;
+    align-items: center;
+    flex: 1;
+
+    span {
+      margin-right: 6px;
+
+      &.name {
+        font-weight: bold;
+      }
+    }
+  }
+
+  .case-operation {
+    display: flex;
+    align-items: center;
+
+    button {
+      margin-right: 10px;
     }
   }
 
