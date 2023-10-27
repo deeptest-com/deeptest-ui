@@ -71,7 +71,7 @@ const handleSuccess = () => {
   applyProPermissionsModalVisible.value = false;
   setTimeout(() => {
     router.replace('/');
-  }, 200);
+  }, 500);
 }
 
 watch(() => {
