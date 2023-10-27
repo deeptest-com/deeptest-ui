@@ -92,7 +92,7 @@ export default {
     'judgement': '表达式',
 
     'fulltext': '全文本',
-    'jsonpath':  'JSON路径',
+    'jsonpath':  'JSONPath',
     'jsonquery':  'JSON查询',
     'htmlquery':  'HTML查询',
     'xmlquery':  'XML查询',

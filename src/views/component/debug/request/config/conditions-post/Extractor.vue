@@ -44,7 +44,7 @@
       </template>
 
       <a-form-item v-if="model.src === 'body' && model.type !== 'boundary'"
-                   :label="model.type==='regx' ? '表达式': (model.type==='jsonpath' ? 'JsonPath' : 'XPath')" v-bind="validateInfos.expression" required>
+                   :label="model.type==='regx' ? '表达式': (model.type==='jsonpath' ? t('jsonpath') : 'XPath')" v-bind="validateInfos.expression" required>
         <a-input v-model:value="model.expression"
                  @blur="validate('expression', { trigger: 'blur' }).catch(() => {})"/>
       </a-form-item>
