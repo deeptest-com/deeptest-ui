@@ -67,6 +67,7 @@ import EndpointDefine from '../Drawer/Define/index.vue';
 import EndpointDebug from '../Drawer/Debug/index.vue';
 import EndpointCases from '../Drawer/Cases/index.vue';
 import EndpointMock from '../Drawer/Mock/index.vue';
+import IconSvg from "@/components/IconSvg";
 import Docs from '@/components/Docs/index.vue';
 import { DetailHeader, DetailLayout, DetailTabHeader } from '@/views/component/DetailLayout';
 import { EndpointTabsList } from '@/config/constant';

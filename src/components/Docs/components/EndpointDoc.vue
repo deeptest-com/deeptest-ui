@@ -166,7 +166,10 @@ import {message, notification} from "ant-design-vue";
 import {notifySuccess} from "@/utils/notify";
 import IconSvg from "@/components/IconSvg";
 import GenerateCode from '@/components/SchemaEditor/GenerateCode.vue';
-const props = defineProps(['info']);
+const props = defineProps<{
+  info: Object;
+  onlyShowDocs?: boolean;
+}>();
 const {text, copy, copied, isSupported} = useClipboard({});
 const info: any = computed(() => {
   return props.info;
