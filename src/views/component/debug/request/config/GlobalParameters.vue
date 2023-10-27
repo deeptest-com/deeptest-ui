@@ -9,7 +9,7 @@
         <div class="head" v-if="collapse">
           <a-row type="flex">
             <a-col flex="20px" class="title">
-              <span @click="selectAll">
+              <span @click="selectAll" class="select-option">
               <IconSvg type="check-circle" v-if="selectedAll"/>
               <IconSvg type="check-circle-no" v-if="!selectedAll"/>
               </span>
@@ -21,7 +21,7 @@
         <div class="params" v-if="collapse">
           <a-row v-for="(item, idx) in globalParams" :key="idx" type="flex" class="param">
             <a-col flex="20px" class="title">
-              <span @click="toggle(item)">
+              <span @click="toggle(item)" class="select-option">
                 <IconSvg type="check-circle" v-if="!globalParams[idx].disabled"/>
                 <IconSvg type="check-circle-no" v-if="globalParams[idx].disabled"/>
               </span>
@@ -76,7 +76,7 @@
 
   } 
 
-  watch(globalParams.value, (newVal) => {
+  watch(()=>globalParams.value, (newVal) => {
     selectedAll.value = true
     newVal.forEach((item)=>{
       if (item.disabled) {
@@ -101,6 +101,10 @@
       padding: 0 10px;
       height: 32px;
       line-height: 32px;
+    }
+
+    .select-option {
+      cursor:pointer;
     }
 
     .label-name {
