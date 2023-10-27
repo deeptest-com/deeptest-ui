@@ -118,10 +118,11 @@ const tabPaneList = [{
 }, {
     name: 'body',
     type: 'body'
-},{
-    name: 'path',
-    type: 'path'
-}
+},
+//{
+//    name: 'path',
+//    type: 'path'
+//}
 ];
 
 

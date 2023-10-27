@@ -4,7 +4,7 @@
         <div class="label-name">
           <RightOutlined v-if="!collapse" @click="collapse = !collapse"/>
           <DownOutlined v-if="collapse" @click="collapse = !collapse"/>
-          <span class="label-text">全局参数查询</span>
+          <span class="label-text">{{title}}</span>
         </div>
         <div class="head" v-if="collapse">
           <a-row type="flex">
@@ -44,11 +44,14 @@
   import { RightOutlined, DownOutlined} from '@ant-design/icons-vue';
   import IconSvg from "@/components/IconSvg";
   import {StateType as Debug} from "@/views/component/debug/store";
+  import {GlobalParamsMap} from '@/config/constant';
 
 
   const store = useStore<{  Debug: Debug }>();
   
   const props = defineProps(['in']);
+
+  const title = computed<string>(()=>GlobalParamsMap[props.in])
 
   
   const globalParams = computed<any[]>(()=>store.state.Debug.debugData.globalParams.filter(item=>item.in == props.in));
