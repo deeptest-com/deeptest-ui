@@ -79,7 +79,14 @@ const getTabTitle = computed(() => {
   }
   return type => {
     const sourceData = type === 'postConditions' ? (postConditions.value || []) : type === 'assertionConditions' ? (assertionConditions.value || []) : (debugData.value[type] || []).filter(e => e.name);
-    return `${typeMap[type]}${sourceData.length ? `${'(*)'.replace('*', sourceData.length)}` : ''}`
+    const globalParamsType = type === 'queryParams' ? 'query' : type === 'pathParams' ? 'path' : type === 'headers' ? 'header' : '';
+    let globalParamsLength = 0;
+    if (globalParamsType) {
+      const globalParams = debugData.value.globalParams.filter( item => item.in === globalParamsType);
+      globalParamsLength = globalParams.length;
+    }
+    const numbers = sourceData.length + globalParamsLength;
+    return `${typeMap[type]}${numbers ? `${'(*)'.replace('*', numbers)}` : ''}`
   }
 });
 

@@ -43,7 +43,7 @@
 <!--          </a-row>-->
           <!-- Description -->
           <a-row class="form-item-request-item">
-            <a-col :span="3" class="form-label">
+            <a-col class="form-label">
               描述信息
             </a-col>
             <a-col :span="12">
@@ -202,6 +202,10 @@ function cancelDeleteMethod(code: string) {
   .form-item-request-item {
     margin-top: 16px;
     align-items: center;
+
+    .form-label {
+      width: 120px;
+    }
   }
 }
 
