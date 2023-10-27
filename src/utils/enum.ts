@@ -189,6 +189,7 @@ export enum ExtractorSrc {
 }
 export enum ExtractorType {
     boundary = 'boundary',
+    jsonpath = 'jsonpath',
     jsonquery = 'jsonquery',
     htmlquery = 'htmlquery',
     xmlquery = 'xmlquery',
