@@ -107,8 +107,9 @@
 import {computed, defineProps, inject, provide, reactive, ref, watch} from "vue";
 import {ResultStatus, UsedBy} from "@/utils/enum";
 import {useStore} from "vuex";
-import IconSvg from "@/components/IconSvg";
+import cloneDeep from "lodash/cloneDeep";
 
+import IconSvg from "@/components/IconSvg";
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
 import {StateType as Debug} from "@/views/component/debug/store";
 import { StateType as ProjectSettingStateType } from "@/views/project-settings/store";
@@ -126,6 +127,8 @@ import DebugConfig  from "@/views/component/debug/config.vue";
 import useCaseExecution from "@/views/endpoint/components/Drawer/Cases/exec-alternative-cases";
 import SaveAlternative from "./saveAlternative.vue";
 import EnvSelector from "@/views/component/EnvSelector/index.vue";
+import { prepareDataForRequest } from "@/views/component/debug/service";
+import { notifyError, notifySuccess } from "@/utils/notify";
 
 const usedBy = UsedBy.AlternativeCaseDebug
 provide('usedBy', usedBy)
@@ -261,6 +264,25 @@ const back = () => {
 /**
  * ::::: 基准用例操作列表
  */
+
+// 保存基准用例
+const saveBaseCase = async () => {
+  let data = prepareDataForRequest(cloneDeep(debugData.value));
+  Object.assign(data, {shareVars: null, envVars: null, globalEnvVars: null, globalParamVars: null})
+  const res = await store.dispatch('Endpoint/saveCaseDebugData', data)
+  res ? notifySuccess('保存成功') : notifyError('保存失败');
+};
+
+// 另存为
+const saveAsNewCase = async () => {
+  const res = await store.dispatch('Endpoint/copyCase', debugData.value.id);
+  if (res?.id) {
+    notifySuccess('复制成功');
+  } else {
+    notifyError('复制失败');
+  }
+};
+
 const baseCaseActionList = [
   {
     text: '调试',
@@ -270,12 +292,12 @@ const baseCaseActionList = [
   {
     text: '保存',
     type: 'default',
-    action: () => {},
+    action: saveBaseCase,
   },
   {
     text: '另存为',
     type: 'default',
-    action: () => {},
+    action: saveAsNewCase,
   }
 ];
 
