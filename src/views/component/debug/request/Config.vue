@@ -8,7 +8,9 @@
       </a-tab-pane>
 
       <a-tab-pane key="path-param" :tab="getTabTitle('pathParams')">
+        <!--
         <GlobalParameters :in="'path'" />
+        -->
         <PathParameters />
       </a-tab-pane>
 
