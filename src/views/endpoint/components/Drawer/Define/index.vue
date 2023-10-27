@@ -21,7 +21,6 @@
           class="editor"
           :value="endpointDetailYamlCode"
           :language="'yaml'"
-          :height="400"
           theme="vs"
           :options="{...MonacoOptions}"
           @change="handleYamlCodeChange"
@@ -63,7 +62,7 @@ const emit = defineEmits(['switchMode']);
 const showMode = ref('form');
 
 async function switchMode(val) {
-  
+
   // 需求去请求YAML格式
   if (val === 'code') {
     await store.dispatch('Endpoint/getYamlCode', endpointDetail.value);
@@ -83,17 +82,20 @@ function handleYamlCodeChange(code) {
 
 <style lang="less" scoped>
 .content {
-  //padding: 16px;
-  //height: 100%;
-  //min-height: calc(100vh - 200px);
   position: relative;
-  //margin-top: 24px;
-  //padding-top: 16px;
   .mode-btns {
     position: absolute;
     right: 0;
     top:16px;
     z-index: 99;
   }
+   .endpoint-code {
+     min-height: calc(100vh - 96px);
+      .editor {
+        height: 100%;
+        min-height: calc(100vh - 96px);
+      }
+    }
+
 }
 </style>
