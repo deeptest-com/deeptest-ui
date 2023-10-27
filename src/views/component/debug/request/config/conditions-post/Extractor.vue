@@ -44,7 +44,7 @@
       </template>
 
       <a-form-item v-if="model.src === 'body' && model.type !== 'boundary'"
-                   :label="model.type==='regx'?'表达式':'XPath'" v-bind="validateInfos.expression" required>
+                   :label="model.type==='regx' ? '表达式': (model.type==='jsonpath' ? t('jsonpath') : 'XPath')" v-bind="validateInfos.expression" required>
         <a-input v-model:value="model.expression"
                  @blur="validate('expression', { trigger: 'blur' }).catch(() => {})"/>
       </a-form-item>
@@ -146,18 +146,18 @@ const rules = computed(() => { return {
 }})
 
 watch(model, (newVal) => {
-  if (!isInit.value) return
+      if (!isInit.value) return
 
-  isInit.value = false
+      isInit.value = false
 
-  if (responseData.value.contentLang === 'json') {
-    model.value.type = ExtractorType.jsonquery
-  } else if (responseData.value.contentLang === 'xml') {
-    model.value.type = ExtractorType.xmlquery
-  } else if (responseData.value.contentLang === 'html') {
-    model.value.type = ExtractorType.htmlquery
-  }
-  }, {immediate: true, deep: true}
+      if (responseData.value.contentLang === 'json') {
+        model.value.type = ExtractorType.jsonquery
+      } else if (responseData.value.contentLang === 'xml') {
+        model.value.type = ExtractorType.xmlquery
+      } else if (responseData.value.contentLang === 'html') {
+        model.value.type = ExtractorType.htmlquery
+      }
+    }, {immediate: true, deep: true}
 )
 
 const props = defineProps({
