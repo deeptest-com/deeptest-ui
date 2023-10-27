@@ -146,18 +146,18 @@ const rules = computed(() => { return {
 }})
 
 watch(model, (newVal) => {
-  if (!isInit.value) return
+      if (!isInit.value) return
 
-  isInit.value = false
+      isInit.value = false
 
-  if (responseData.value.contentLang === 'json') {
-    model.value.type = ExtractorType.jsonquery
-  } else if (responseData.value.contentLang === 'xml') {
-    model.value.type = ExtractorType.xmlquery
-  } else if (responseData.value.contentLang === 'html') {
-    model.value.type = ExtractorType.htmlquery
-  }
-  }, {immediate: true, deep: true}
+      if (responseData.value.contentLang === 'json') {
+        model.value.type = ExtractorType.jsonquery
+      } else if (responseData.value.contentLang === 'xml') {
+        model.value.type = ExtractorType.xmlquery
+      } else if (responseData.value.contentLang === 'html') {
+        model.value.type = ExtractorType.htmlquery
+      }
+    }, {immediate: true, deep: true}
 )
 
 const props = defineProps({
