@@ -4,7 +4,7 @@
         <div class="label-name">
           <RightOutlined v-if="!collapse" @click="collapse = !collapse"/>
           <DownOutlined v-if="collapse" @click="collapse = !collapse"/>
-          <span>全局参数查询</span>
+          <span class="label-text">全局参数查询</span>
         </div>
         <div class="head" v-if="collapse">
           <a-row type="flex">
@@ -94,15 +94,18 @@
     margin-bottom: 20px;
 
     .dp-param-grid .params .param .ant-col {
-    border-right: 1px solid #d9d9d9;
-    padding: 0 10px;
+      border-right: 1px solid #d9d9d9;
+      padding: 0 10px;
+      height: 32px;
+      line-height: 32px;
     }
 
     .label-name {
-      margin-bottom: 5px;
-      span {
-      font-weight: bold;
-    }
+      margin: 12px 0;
+      .label-text {
+        font-weight: bold;
+        margin-left: 4px;
+      }
 
     } 
   }
