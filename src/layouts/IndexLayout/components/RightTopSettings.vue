@@ -239,10 +239,14 @@ watch(() => {
   return isAdmin.value;
 }, async val => {
   if (val) {
-  // 设置当前代理，LocalStore里没有，取列表中的第1个
-  await store.dispatch('Global/listAgent');
-  await store.commit('Global/setCurrAgent', null);
+    // 设置当前代理，LocalStore里没有，取列表中的第1个
+    await store.dispatch('Global/listAgent');
+    await store.commit('Global/setCurrAgent', null);
+  } else {
+    await store.commit('Global/setAgents', []);
   }
+}, {
+  immediate: true,
 })
 
 
