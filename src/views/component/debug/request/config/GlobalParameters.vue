@@ -54,7 +54,7 @@
   const title = computed<string>(()=>GlobalParamsMap[props.in])
 
   
-  const globalParams = computed<any[]>(()=>store.state.Debug.debugData.globalParams.filter(item=>item.in == props.in));
+  const globalParams = computed<any[]>(()=>(store.state.Debug.debugData.globalParams || []).filter(item=>item.in == props.in));
 
   const collapse = ref(true);
 
