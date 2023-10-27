@@ -166,7 +166,9 @@
           :destroyOnClose="true"
           :visible="drawerVisible"
           @refreshList="refreshList"
-          @close="drawerVisible = false;"/>
+          @close="() => {
+            closeDrawer();
+          }"/>
     </div>
   </a-spin>
 </template>
@@ -592,6 +594,47 @@ const username = (user:string)=>{
   return result?.label || '-'
 }
 
+const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
+const debugData = computed<any>(() => store.state.Debug.debugData);
+const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
+watch(() => {
+  return endpointDetail.value
+},(newVal) => {
+  console.log('832222 endpointDetail',newVal)
+},{
+  deep:true
+})
+watch(() => {
+  return debugData.value
+},(newVal) => {
+  console.log('832222 debugData',newVal)
+},{
+  deep:true
+})
+watch(() => {
+  return debugInfo.value
+},(newVal) => {
+  console.log('832222 debugInfo',newVal)
+},{
+  deep:true
+})
+
+
+
+function closeDrawer() {
+  Modal.confirm({
+    title: () => '确定要关闭?',
+    icon: () => createVNode(ExclamationCircleOutlined),
+    content: '关闭后，当前未保存的数据将会丢失',
+    onOk() {
+      drawerVisible.value = false;
+    },
+    onCancel() {
+      console.log('Cancel');
+    },
+    class: 'test',
+  });
+}
 
 </script>
 <style scoped lang="less">

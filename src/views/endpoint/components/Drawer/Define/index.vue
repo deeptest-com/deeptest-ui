@@ -14,7 +14,7 @@
       </a-button>
     </div>
 
-    <EndpointForm v-if="showMode === 'form'"/>
+    <EndpointForm v-show="showMode === 'form'"/>
 
     <div class="endpoint-code" v-if="showMode === 'code' && endpointDetailYamlCode!=''">
       <MonacoEditor
