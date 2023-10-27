@@ -23,20 +23,20 @@ export default {
 .dp-multipane-con.layout-v .multipane-resizer {
   position: relative;
   z-index: 2;
-  width: 1px;
+  width: 8px;
   display: flex;
   align-items: center;
+  cursor: col-resize;
   &:after {
     width: 1px;
     content: '';
     height: 100%;
     position: absolute;
     background-color: #f0f0f0;
-    left:0;
+    left:4px;
   }
 
   &:hover:after {
-
     cursor: col-resize;
     width: 2px;
     background-color: #1890ff;
@@ -53,10 +53,11 @@ export default {
 .dp-multipane-con.layout-h .multipane-resizer {
   position: relative;
   z-index: 2;
-  height: 2px;
+  height: 8px;
   width: 100%;
   display: flex;
   align-items: center;
+  cursor: row-resize;
   &:after {
     height: 2px;
     content: '';
@@ -64,6 +65,7 @@ export default {
     position: absolute;
     background-color: #f0f0f0;
     left:0;
+    top:4px;
   }
 
   &:hover:after {

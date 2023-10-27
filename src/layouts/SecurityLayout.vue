@@ -42,7 +42,7 @@ export default defineComponent({
                 router.replace({
                     path: '/user/login',
                     query: {
-                        redirect: router.currentRoute.value.path,
+                        redirect: router.currentRoute.value.path.includes('error') ? '' : router.currentRoute.value.path,
                         ...router.currentRoute.value.query
                     }
                 })
@@ -67,7 +67,7 @@ export default defineComponent({
             if (appLoadingEl[0]) {
                 appLoadingEl[0].classList.add('hide');
                 setTimeout(() => {
-                    document.body.removeChild(appLoadingEl[0]);
+                    document.body?.removeChild(appLoadingEl[0]);
                 }, 600);
             }
         })
