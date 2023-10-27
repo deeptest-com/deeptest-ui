@@ -34,7 +34,7 @@
         </a-tooltip>
       </div>
 
-      <div class="send">
+      <div class="send" v-if="showOperation">
         <a-button type="primary" trigger="click"
                   @click="send"
                   :disabled="!isPathValid">
@@ -42,7 +42,7 @@
         </a-button>
       </div>
 
-      <div class="save">
+      <div class="save" v-if="showOperation">
         <a-button trigger="click" class="dp-bg-light"
                   @click="save"
                   :disabled="!isPathValid">
@@ -51,14 +51,14 @@
         </a-button>
       </div>
 
-      <div v-if="usedBy === UsedBy.InterfaceDebug"
+      <div v-if="usedBy === UsedBy.InterfaceDebug && showOperation"
            :disabled="!isPathValid"
            class="save-as-case">
         <a-button trigger="click" @click="saveAsCase" class="dp-bg-light">
           另存为用例
         </a-button>
       </div>
-      <div v-if="isShowSync"
+      <div v-if="isShowSync && showOperation"
            :disabled="!isPathValid"
            class="sync">
         <a-button trigger="click" @click="sync" class="dp-bg-light">
@@ -116,7 +116,7 @@ const currServe = computed(() => store.state.Debug.currServe);
 const props = defineProps({
   onSave: {
     type: Function as PropType<(data) => void>,
-    required: true
+    required: false
   },
   onSaveAsCase: {
     type: Function,
@@ -142,6 +142,11 @@ const props = defineProps({
     required: false,
     default: false
   },
+  showOperation: {
+    type: Boolean,
+    required: false,
+    default: true,
+  }
 })
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
