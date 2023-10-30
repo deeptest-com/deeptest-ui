@@ -97,7 +97,6 @@ import {notifyError, notifySuccess} from "@/utils/notify";
 import {PaginationConfig} from "@/views/endpoint/data";
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import CaseEdit from "./edit.vue";
-import GenerateCasePopup from "./generate.vue";
 
 provide('usedBy', UsedBy.InterfaceDebug)
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE

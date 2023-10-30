@@ -9,7 +9,7 @@
         v-if="show === 'design'"
         :onBack="back" />
 
-    <CaseGenerate
+    <AlternativeCase
         v-if="show === 'generate'"
         :onBack="back" />
   </div>
@@ -21,7 +21,7 @@ import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import CaseList from "./list.vue";
 import CaseDesign from "./design.vue";
-import CaseGenerate from "./generate.vue";
+import AlternativeCase from "./alternativeCase.vue";
 
 const {t} = useI18n()
 
