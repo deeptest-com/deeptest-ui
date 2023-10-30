@@ -27,7 +27,7 @@
     <a-tree 
       class="case-tree"
       :replaceFields="replaceFields" 
-      :tree-data="alternativeCases" 
+      :tree-data="treeData" 
       :expandedKeys="expandedKeys" 
       :checkable="true"
       v-model:checkedKeys="checkedKeys" 
@@ -96,8 +96,28 @@ const alternativeCases = computed<any>(() => store.state.Endpoint.alternativeCas
 const endpointCase = computed<any>(() => store.state.Endpoint.caseDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 
-const allSelected = ref(false)
-const treeDataMap = ref({})
+const allSelected = ref(false);
+const treeDataMap = ref({});
+
+const treeData = computed(() => {
+  const setDisabledIfDir = (nodes) => {
+    let originalCasesData = cloneDeep(nodes);
+    if (Array.isArray(originalCasesData)) {
+      originalCasesData = originalCasesData.map(node => {
+        if (node.isDir) {
+          node.disabled = true;
+        }
+        if (node.children?.length > 0) {
+          node.children = setDisabledIfDir(node.children);
+        }
+        return node;
+      })
+    }
+    
+    return cloneDeep(originalCasesData);
+  };
+  return unref(executionType) === 'single' ? cloneDeep(unref(alternativeCases)) : setDisabledIfDir(cloneDeep(unref(alternativeCases))); 
+})
 
 const modelRef = ref({
   baseId: 0,
@@ -200,16 +220,6 @@ const onChecked = (keys, treeNode) => {
   const currentNode = treeNode.node.dataRef;
   const parentTreeNode = treeNode.node.vcTreeNode;
 
-  const getParentKeys = (parentNode, result) => {
-    if (parentNode.dataRef) {
-      result.push(parentNode.dataRef.key);
-    }
-    if (parentNode.vcTreeNode && parentNode.vcTreeNode.dataRef) {
-      getParentKeys(parentNode.vcTreeNode, result);
-    }
-
-    return cloneDeep(result);
-  }
 
   const removeCheckedKeys = (checked: any[], parentNode) => {
     if (!checked.some(e => (parentNode.children || []).map(child => child.key).includes(e)) && parentNode.dataRef) {
@@ -221,20 +231,6 @@ const onChecked = (keys, treeNode) => {
     return cloneDeep(checked);
   }
 
-  const removeChildKeys = (checked: any[], parentNode) => {
-    const children = parentNode.children || [];
-    if (children.length) {
-      children.forEach(e => {
-        checked = checked.filter(key => key !== e.key);
-        if (e.children) {
-          checked = removeChildKeys(checked, e);
-        }
-      })
-    }
-    
-    return cloneDeep(checked);
-  }
-
   const siblingNodes = parentTreeNode.children;
   const currentChecked = keys.checked;
   // 多参数异常情况下： 参属下的约束条件只能选择一个，为单选的状态。
@@ -243,10 +239,9 @@ const onChecked = (keys, treeNode) => {
       if (currentChecked.includes(currentNode.key)) {
         // 选中当前case
         const checked = cloneDeep(currentChecked).filter(e => !siblingNodes.map(node => node.key).includes(e)).concat([currentNode.key]);
-        const parentKeys = getParentKeys(parentTreeNode, []);
         checkedKeys.value = {
           ...keys,
-          checked: [...new Set(checked.concat(parentKeys))],
+          checked,
         };
       } else {
         // 反选
@@ -254,12 +249,6 @@ const onChecked = (keys, treeNode) => {
           ...keys,
           checked: removeCheckedKeys(currentChecked, parentTreeNode)
         } 
-      }
-    } else {
-      // 选中 目录
-      checkedKeys.value = {
-        ...keys,
-        checked: currentChecked.includes(currentNode.key) ? [...new Set(getParentKeys(parentTreeNode, currentChecked))] : [...new Set(removeCheckedKeys(removeChildKeys(currentChecked, currentNode), parentTreeNode))]
       }
     }
   }
