@@ -77,15 +77,9 @@ const StoreModel: ModuleType = {
           dispatch('changeProject', result.data.id);
           return result.data;
         }
-        if (result.code === 10600) {
-          return false;
-        }
-        if (result.code === 10700) {
-          return false;
-        }
-        return false;
+        return result;
       } catch (error) {
-        return false;
+        return error;
       }
     }
   },

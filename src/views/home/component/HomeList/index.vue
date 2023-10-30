@@ -163,7 +163,6 @@ const columns = [
 ];
 
 async function goProject(item: any) {
-  console.log(item);
   if (item?.accessible === 0) {
     handleJoin(item);
     return false;

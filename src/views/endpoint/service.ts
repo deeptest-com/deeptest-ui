@@ -140,6 +140,17 @@ export async function saveEndpoint(data: any): Promise<any> {
     });
 }
 
+/**
+ * 更新接口名称
+ * @param data  { id, name } 
+ * @returns 
+ */
+export async function updateName(data: any): Promise<any> {
+    return request({
+        url: `endpoint/updateName?id=${data.id}&name=${data.name}`,
+        method: 'PUT',
+    })
+}
 
 /**
  * 更新接口状态

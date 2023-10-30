@@ -2,7 +2,7 @@
 <template>
   <!-- 增加响应体体 -->
   <a-row class="form-item-response-item">
-    <a-col :span="3" class="form-label form-label-first">
+    <a-col class="form-label form-label-first">
       <RightOutlined v-if="!collapse" @click="collapse = !collapse"/>
       <DownOutlined v-if="collapse" @click="collapse = !collapse"/>
       <span class="label-name">增加响应体</span>
@@ -137,6 +137,7 @@ function changeExamples(examples: any) {
   position: relative;
   left: -18px;
   margin-bottom: 16px;
+  width: 120px;
 }
 
 .form-item-response-item {

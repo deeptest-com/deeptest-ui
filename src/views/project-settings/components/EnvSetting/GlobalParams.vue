@@ -3,7 +3,7 @@
 
     <div class="title">全局参数</div>
     <a-tabs :pagination="false" v-model:activeKey="globalParamsActiveKey">
-      <a-tab-pane v-for="(tabItem) in tabPaneList" :key="tabItem.type" :tab="t(tabItem.name+'_en')">
+      <a-tab-pane v-for="(tabItem) in tabPaneList" :key="tabItem.type" :tab="getTabTitle(tabItem)">
         <a-row type="flex">
           <a-col flex="100px" class="envDetail-btn">
             <PermissionButton
@@ -109,6 +109,14 @@ const formState = reactive({
   globalParamsData
 });
 const formRef = ref<any>();
+
+const getTabTitle = computed(() => {
+  return (tabItem) => {
+    const numbers = (globalParamsData.value?.[tabItem.name] || []).length;
+    const text = t(tabItem.name+'_en');
+    return numbers ? text + '(*)'.replace('*', numbers) : text;
+  }  
+});
 
 function getParamsData() {
   store.dispatch('ProjectSetting/getEnvironmentsParamList', {projectId: currProject.value.id});

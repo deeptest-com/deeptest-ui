@@ -6,7 +6,6 @@ import { accountLogin } from './service';
 import { LoginParamsType } from "./data.d";
 import {getCache, setCache} from "@/utils/localCache";
 import settings from "@/config/settings";
-import {ref} from "vue/dist/vue";
 export interface StateType {
     loginStatus?: 'ok' | 'error';
 }
@@ -52,8 +51,8 @@ const StoreModel: ModuleType = {
                 }
 
                 status = 'ok';
-            } catch (error) {
-                if (error.message && error.message === 'CustomError') {
+            } catch (error: any) {
+                if (error?.code === 5000) {
                     status = 'error';
                 }
             }

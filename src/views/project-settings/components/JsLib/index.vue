@@ -183,10 +183,10 @@ function onClose() {
 
 <style scoped lang="less">
 .js-lib-list-main {
-  margin: 20px;
 
   .search {
-    width: 270px; margin-left: 16px
+    width: 270px; 
+    margin-left: 16px
   }
 
   .operation {

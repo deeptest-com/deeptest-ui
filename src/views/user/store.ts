@@ -3,11 +3,13 @@ import {StoreModuleType} from "@/utils/store";
 import {Action, Mutation} from "vuex";
 import {ResponseData} from "@/utils/request";
 import {query, detail, remove, save, updateSysRole} from "./service";
+import { getAuditList } from "../project/service";
 
 export interface StateType {
     queryResult: QueryResult;
     detailResult: User;
     queryParams: any;
+    auditList: QueryResult;
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -16,6 +18,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setList: Mutation<StateType>;
         setItem: Mutation<StateType>;
         setQueryParams: Mutation<StateType>;
+        setAuditList: Mutation<StateType>;
     };
     actions: {
         queryUser: Action<StateType, StateType>;
@@ -23,6 +26,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         removeUser: Action<StateType, StateType>;
         saveUser: Action<StateType, StateType>;
         updateSysRole: Action<StateType, StateType>;
+        getAuditList: Action<StateType, StateType>;
     };
 }
 
@@ -39,6 +43,16 @@ const initState: StateType = {
     },
     detailResult: {} as User,
     queryParams: {},
+    auditList: {
+        list: [],
+        pagination: {
+            total: 0,
+            page: 1,
+            pageSize: 10,
+            showQuickJumper: false,
+            showSizeChanger: true,
+        }
+    },
 };
 
 const StoreModel: ModuleType = {
@@ -57,6 +71,9 @@ const StoreModel: ModuleType = {
         setQueryParams(state, payload) {
             state.queryParams = payload;
         },
+        setAuditList(state, payload) {
+            state.auditList = payload;
+        }
     },
     actions: {
         async queryUser({ commit }, params: QueryParams ) {
@@ -127,6 +144,27 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
+        async getAuditList({ commit, state }, payload) {
+            try {
+                const response = await getAuditList(payload);
+                if (response.code === 0) {
+                    commit('setAuditList', {
+                        list: response.data.result || [],
+                        pagination: {
+                            ...state.auditList.pagination,
+                            total: response.data.total,
+                            page: response.data.page,
+                            pageSize: response.data.pageSize,
+                        }
+                    });
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (error) {   
+                return false;
+            }
+        }
     }
 };
 

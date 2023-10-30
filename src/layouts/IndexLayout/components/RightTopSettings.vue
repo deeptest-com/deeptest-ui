@@ -106,9 +106,9 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, onMounted,ref} from "vue";
+import {computed, defineProps, onMounted, watch} from "vue";
 import {useStore} from "vuex";
-import {getAgentUrlByValue, isElectronEnv} from '@/utils/agentEnv'
+import {isElectronEnv} from '@/utils/agentEnv'
 import {
   DownOutlined,
   SettingOutlined,
@@ -145,8 +145,6 @@ const currentAgent = computed<any>(() => store.state.Global.currAgent);
 
 // 点击菜单
 const onMenuClick = (event: any) => {
-  console.log('onMenuClick')
-  // console.log(currentUser.value);
   const {key} = event;
 
   if (key === 'profile') {
@@ -170,7 +168,6 @@ const onMenuClick = (event: any) => {
 
 // 系统菜单
 const onSysMenuClick = (event: any) => {
-  console.log('onSysMenuClick', event)
   const {key, keyPath} = event;
 
   if (key === 'agentManage') {
@@ -196,12 +193,9 @@ const onMessageClick = () => {
 }
 
 function changeAgentEnv(event: any) {
-  console.log('changeAgentEnv', event)
-
   const {key} = event;
   const currAgent = agents.value.find((item) => item.id === +key)
   store.commit('Global/setCurrAgent', currAgent)
-  // window.location.reload();
 }
 
 // 下载客户端
@@ -233,11 +227,10 @@ const clientDownloadUrlOpts = computed(() => {
 });
 
 onMounted(async () => {
-  // 设置当前代理，LocalStore里没有，取列表中的第1个
-  await store.dispatch('Global/listAgent');
-  await store.commit('Global/setCurrAgent', null);
   // 获取客户端最新版本号
   await store.dispatch('Global/getClientVersion');
+  await store.dispatch('Global/listAgent');
+  await store.commit('Global/setCurrAgent', null);
 })
 
 const isAdmin = computed(() => {

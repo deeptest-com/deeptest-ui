@@ -1,40 +1,47 @@
 
 <template>
-<a-card :bordered="false">
-    <a-table
-      row-key="id"
-      :columns="applyColumns"
-      :data-source="auditLst.list"
-      :loading="loading"
-      :pagination="{
-        ...auditLst.pagination,
-        onChange: (page) => {
-          getAudits(page);
-        },
-        onShowSizeChange: (page, size) => {
-          pagination.pageSize = size;
-          getAudits(page);
-        },
-        showTotal: (total) => {
-          return `共 ${total} 条数据`;
-        },
-      }"
-    >
-      <template #status="{ text }">
-        {{ text == 0 ? "待审批" : text == 1 ? "已同意" : "已拒绝" }}
-      </template>
-    </a-table>
-  </a-card>
+  <a-table
+    row-key="id"
+    :columns="applyColumns"
+    :data-source="listResult.list"
+    :loading="loading"
+    :pagination="{
+      ...listResult.pagination,
+      onChange: (page) => {
+        listResult.pagination.page = page;
+        getAudits();
+      },
+      onShowSizeChange: (page, size) => {
+        listResult.pagination.pageSize = size;
+        getAudits();
+      },
+      showTotal: (total) => {
+        return `共 ${total} 条数据`;
+      },
+    }"
+  >
+    <template #status="{ text }">
+      {{ text == 0 ? "待审批" : text == 1 ? "已同意" : "已拒绝" }}
+    </template>
+  </a-table>
 </template>
 
 <script setup lang="ts">
 
-import {  ref, watch,onMounted } from "vue";
+import {  ref, computed, defineProps, defineEmits } from "vue";
 import { useStore } from "vuex";
 
-import { getAuditList, doAudit } from "@/views/project/service";
+defineProps<{
+  loading: boolean;
+}>();
+
+const emits = defineEmits(['refresh']);
 
 const store = useStore();
+
+const listResult = computed(() => {
+  return store.state.UserInternal.auditList;
+});
 
 const roles = ()=>{
   let rolesList = {}
@@ -48,7 +55,6 @@ const getRoleName = (val:any)=>{
   let rolesList = roles()
   return rolesList[val.text]
 }
-const auditLst = ref({});
 const applyColumns = [
 {
     title: "ID",
@@ -80,47 +86,14 @@ const applyColumns = [
   },
 ];
 
-
-const pagination = ref({
-  total: 0,
-  current: 1,
-  pageSize: 10,
-  showSizeChanger: true,
-  showQuickJumper: true,
-});
-const loading = ref<boolean>(true);
-
-const getAudits = (page: number) => {
-  loading.value = true;
-
-  getAuditList({
-    pageSize: pagination.value.pageSize,
-    page: page,
-    type:  1,
+const getAudits = async () => {
+  emits('refresh', {
+    pagination: {
+      page: listResult.value.pagination.page,
+      pageSize: listResult.value.pagination.pageSize,
+    },
+    val: 1,
   })
-    .then((json) => {
-      console.log("审批列表", json);
-      if (json.code === 0) {
-        // auditLst.value = json.data.result;
-        auditLst.value = {
-          current: 1,
-          list: json.data.result || [],
-          pagination: {
-            ...pagination.value,
-            current: page,
-            total: json.data.total || 0,
-          },
-        };
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
 };
-
-onMounted(() => {
-  getAudits(1);
-});
-
 
 </script>
