@@ -70,7 +70,7 @@
       <template #content>
         <a-tabs v-model:activeKey="activeKey">
           <a-tab-pane key="paths" tab="备选路径">
-            <CaseFactor />
+            <CaseFactor ref="caseFactor" />
           </a-tab-pane>
 
           <a-tab-pane key="pre-condition" tab="预处理">
@@ -129,6 +129,7 @@ import SaveAlternative from "./saveAlternative.vue";
 import EnvSelector from "@/views/component/EnvSelector/index.vue";
 import { prepareDataForRequest } from "@/views/component/debug/service";
 import { notifyError, notifySuccess } from "@/utils/notify";
+import { message } from "ant-design-vue";
 
 const usedBy = UsedBy.AlternativeCaseDebug
 provide('usedBy', usedBy)
@@ -185,7 +186,7 @@ const saveAsCase = () => {
   console.log('saveAsCase', checkedKeys.value)
   saveAsVisible.value = true
 
-  const selectedNodes = getSelectedNodes()
+  const selectedNodes = caseFactor.value.getSelectedNodes();
   const baseId = modelRef.value.baseId
   saveAsModel.value = {selectedNodes, baseId}
 }
@@ -209,27 +210,6 @@ function getNodeMap(treeNode: any, mp: any) {
   return
 }
 
-const getSelectedNodes = () => {
-  const ret = ref([] as any[])
-
-  checkedKeys.value.forEach((key) => {
-    if (treeDataMap.value[key]) {
-      const item = treeDataMap.value[key]
-      const val = {
-        key: item.key,
-        path: item.path,
-        sample: item.sample,
-        fieldType: item.fieldType,
-        Category: item.category,
-        Type: item.type,
-        Rule: item.rule,
-      }
-      ret.value.push(val)
-    }
-  })
-
-  return ret
-}
 
 /**
  * :::: 执行 execution
@@ -237,9 +217,15 @@ const getSelectedNodes = () => {
 const execVisible = ref<boolean>(false);
 const selectEnvVisible = ref<boolean>(false);
 
-const {progressStatus, execStart, execStop} = useCaseExecution()
+const {progressStatus, execStart, execStop} = useCaseExecution();
+const caseFactor = ref();
 
 const selectExecEnv = () => {
+  const selectedNodes = caseFactor.value.getSelectedNodes();
+  if (selectedNodes.length === 0) {
+    message.error('请选择调试参数');
+    return;
+  }
   console.log('selectExecEnv')
   selectEnvVisible.value = true;
 }
@@ -247,9 +233,8 @@ async function onSelectExecEnvFinish() {
   console.log('onSelectExecEnvFinish')
   selectEnvVisible.value = false;
   execVisible.value = true;
-
-  const selectedNodes = getSelectedNodes()
-  execStart(currProject.value.id, endpointCase.value.id, selectedNodes.value, currEnvId.value, treeDataMap.value, usedBy)
+  const selectedNodes = caseFactor.value.getSelectedNodes();
+  execStart(currProject.value.id, endpointCase.value.id, selectedNodes, currEnvId.value, treeDataMap.value, usedBy)
 }
 async function onSelectExecEnvCancel() {
   console.log('onSelectExecEnvCancel')
@@ -287,7 +272,7 @@ const baseCaseActionList = [
   {
     text: '调试',
     type: 'primary',
-    action: () => {},
+    action: selectExecEnv,
   },
   {
     text: '保存',
@@ -308,12 +293,12 @@ const caseFactorActionList = [
   {
     text: '调试',
     type: 'primary',
-    action: () => {},
+    action: selectExecEnv,
   },
   {
     text: '生成用例',
     type: 'default',
-    action: () => {},
+    action: saveAsNewCase,
   },
 ];
 

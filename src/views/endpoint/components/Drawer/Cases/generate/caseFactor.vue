@@ -17,6 +17,11 @@
           </a-tooltip>
         </a-radio>
       </a-radio-group>
+
+      <span class="multiple-execution-result" v-if="executionType === 'multiple'">
+        <span>通过</span>
+        <a-button class="case-exec-detail" type="link" @click.stop="queryDetail()">详情</a-button>
+      </span>
     </div>
     
     <a-tree 
@@ -26,6 +31,8 @@
       :expandedKeys="expandedKeys" 
       :checkable="true"
       v-model:checkedKeys="checkedKeys" 
+      @check="onChecked"
+      :checkStrictly="executionType === 'multiple'"
       :show-icon="true">
       <template #title="nodeProps">
         <span class="case-tree-title">
@@ -41,7 +48,7 @@
               placeholder="修改标题"
               :value="nodeProps.sample"
               @update="v => editFinish(nodeProps.key, v)"/>
-            <span class="case-exec-result">
+            <span class="case-exec-result" v-if="executionType === 'single'">
               <!-- 运行结果 -->
               <span :class="[getDpResultClass(nodeProps.execStatus), 'case-exec-status']">
               <!-- <span v-if="nodeProps.execStatus"> -->
@@ -53,7 +60,6 @@
               <!-- 运行详情查看 -->
               <a-button class="case-exec-detail" type="link" @click.stop="queryDetail(nodeProps)">详情</a-button>
             </span>  
-            
           </template>
         </span>
       </template>
@@ -62,7 +68,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, provide, ref, watch} from 'vue';
+import {computed, provide, ref, watch, unref, defineExpose} from 'vue';
 import {ResultStatus, UsedBy} from "@/utils/enum";
 import {useStore} from "vuex";
 import {
@@ -71,6 +77,7 @@ import {
   FolderOutlined,
 QuestionCircleOutlined,
 } from '@ant-design/icons-vue';
+import cloneDeep from "lodash/cloneDeep";
 
 import {getDpResultClass} from "@/utils/dom";
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
@@ -78,16 +85,14 @@ import {StateType as Debug} from "@/views/component/debug/store";
 import { StateType as ProjectSettingStateType } from "@/views/project-settings/store";
 import {StateType as ProjectStateType} from "@/store/project";
 
-import useCaseExecution from "@/views/endpoint/components/Drawer/Cases/exec-alternative-cases";
 import EditAndShowField from '@/components/EditAndShow/index.vue';
+import { clone } from 'handsontable/helpers';
 
 const usedBy = UsedBy.AlternativeCaseDebug
 provide('usedBy', usedBy)
 
 const store = useStore<{ Debug: Debug, Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType, ProjectGlobal: ProjectStateType }>();
 const alternativeCases = computed<any>(() => store.state.Endpoint.alternativeCases);
-const currEnvId = computed(() => store.state.ProjectSetting.selectEnvId);
-const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const endpointCase = computed<any>(() => store.state.Endpoint.caseDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 
@@ -100,7 +105,7 @@ const modelRef = ref({
 });
 const replaceFields = {key: 'key'};
 const expandedKeys = ref<string[]>([]);
-const checkedKeys = ref<string[]>([] as any[]);
+const checkedKeys = ref<any>([] as any[]);
 const executionType = ref('single'); // single: 单参数异常  multiple: 多参数异常
 
 const loadCaseTree = () => {
@@ -123,7 +128,7 @@ function selectAll() {
 
   if (allSelected.value) {
     getAllKeys(alternativeCases.value, keys);
-    checkedKeys.value = keys;
+    checkedKeys.value = executionType.value === 'single' ? keys : { checked: keys, halfChecked: [] };
   } else {
     checkedKeys.value = []
   }
@@ -138,7 +143,9 @@ function getAllKeys(arr: any, keys: any[]) {
     return;
   }
   arr.forEach((item, index) => {
-    keys.push(item.key);
+    if (executionType.value === 'single' || (executionType.value === 'multiple' && item.isDir)) {
+      keys.push(item.key);
+    }   
     if (Array.isArray(item.children)) {
       getAllKeys(item.children, keys)
     }
@@ -151,11 +158,7 @@ const editFinish = async (key, v) => {
   const item = treeDataMap.value[key]
   const data = {baseId: modelRef.value.baseId, path: item.path}
 
-  const result = await store.dispatch('Endpoint/saveAlternativeCase', data)
-  if (result) {
-    treeDataMap.value[key].isEdit = false
-    treeDataMap.value[key].sample = v;
-  }
+  await store.dispatch('Endpoint/saveAlternativeCase', data)
 }
 
 function getNodeMap(treeNode: any, mp: any) {
@@ -173,10 +176,100 @@ function getNodeMap(treeNode: any, mp: any) {
   return
 }
 
-const getSelectedNodes = () => {
-  const ret = ref([] as any[])
 
-  checkedKeys.value.forEach((key) => {
+const queryDetail = (node?: any) => {
+  console.log('查看执行详情：', node || '多因子参数异常的结果');
+}
+
+const handleExecTypeChange = evt => {
+  console.log('当前执行类型:', evt.target.value);
+  checkedKeys.value = evt === 'single' ? [] : {
+    checked: [],
+    halfChecked: [],
+  };
+  allSelected.value = false;
+}
+
+const handleSelect = evt => {
+  console.log('当前是否全选', evt.target.checked);
+  allSelected.value = evt.target.checked;
+  selectAll();
+}
+
+const onChecked = (keys, treeNode) => {
+  const currentNode = treeNode.node.dataRef;
+  const parentTreeNode = treeNode.node.vcTreeNode;
+
+  const getParentKeys = (parentNode, result) => {
+    if (parentNode.dataRef) {
+      result.push(parentNode.dataRef.key);
+    }
+    if (parentNode.vcTreeNode && parentNode.vcTreeNode.dataRef) {
+      getParentKeys(parentNode.vcTreeNode, result);
+    }
+
+    return cloneDeep(result);
+  }
+
+  const removeCheckedKeys = (checked: any[], parentNode) => {
+    if (!checked.some(e => (parentNode.children || []).map(child => child.key).includes(e)) && parentNode.dataRef) {
+      checked = checked.filter(e => e !== parentNode.dataRef.key);
+    }
+    if (parentNode.vcTreeNode && parentNode.vcTreeNode.dataRef) {
+      checked = removeCheckedKeys(checked, parentNode.vcTreeNode);
+    }
+    return cloneDeep(checked);
+  }
+
+  const removeChildKeys = (checked: any[], parentNode) => {
+    const children = parentNode.children || [];
+    if (children.length) {
+      children.forEach(e => {
+        checked = checked.filter(key => key !== e.key);
+        if (e.children) {
+          checked = removeChildKeys(checked, e);
+        }
+      })
+    }
+    
+    return cloneDeep(checked);
+  }
+
+  const siblingNodes = parentTreeNode.children;
+  const currentChecked = keys.checked;
+  // 多参数异常情况下： 参属下的约束条件只能选择一个，为单选的状态。
+  if (unref(executionType) === 'multiple') {
+    if (currentNode.category === 'case') {
+      if (currentChecked.includes(currentNode.key)) {
+        // 选中当前case
+        const checked = cloneDeep(currentChecked).filter(e => !siblingNodes.map(node => node.key).includes(e)).concat([currentNode.key]);
+        const parentKeys = getParentKeys(parentTreeNode, []);
+        checkedKeys.value = {
+          ...keys,
+          checked: [...new Set(checked.concat(parentKeys))],
+        };
+      } else {
+        // 反选
+        checkedKeys.value = {
+          ...keys,
+          checked: removeCheckedKeys(currentChecked, parentTreeNode)
+        } 
+      }
+    } else {
+      // 选中 目录
+      checkedKeys.value = {
+        ...keys,
+        checked: currentChecked.includes(currentNode.key) ? [...new Set(getParentKeys(parentTreeNode, currentChecked))] : [...new Set(removeCheckedKeys(removeChildKeys(currentChecked, currentNode), parentTreeNode))]
+      }
+    }
+  }
+  console.log('当前选中的参数:', unref(checkedKeys));
+}
+
+const getSelectedNodes = () => {
+  const ret: any[] = [];
+
+  (executionType.value === 'single' ? checkedKeys.value : (checkedKeys.value.checked || [])).forEach((key) => {
     if (treeDataMap.value[key]) {
       const item = treeDataMap.value[key]
       const val = {
@@ -188,51 +281,14 @@ const getSelectedNodes = () => {
         Type: item.type,
         Rule: item.rule,
       }
-      ret.value.push(val)
+      ret.push(val)
     }
   })
 
   return ret
 }
 
-/**
- * :::: 执行 execution
- */
-const execVisible = ref<boolean>(false);
-const selectEnvVisible = ref<boolean>(false);
-
-const {progressStatus, execStart, execStop} = useCaseExecution()
-
-const selectExecEnv = () => {
-  console.log('selectExecEnv')
-  selectEnvVisible.value = true;
-}
-async function onSelectExecEnvFinish() {
-  console.log('onSelectExecEnvFinish')
-  selectEnvVisible.value = false;
-  execVisible.value = true;
-
-  const selectedNodes = getSelectedNodes()
-  execStart(currProject.value.id, endpointCase.value.id, selectedNodes.value, currEnvId.value, treeDataMap.value, usedBy)
-}
-async function onSelectExecEnvCancel() {
-  console.log('onSelectExecEnvCancel')
-  selectEnvVisible.value = false;
-}
-
-const queryDetail = (node) => {
-  console.log('查看执行详情：', node);
-}
-
-const handleExecTypeChange = evt => {
-  console.log('当前执行类型:', evt.target.value);
-}
-
-const handleSelect = evt => {
-  console.log('当前是否全选', evt.target.checked);
-  allSelected.value = evt.target.checked;
-  selectAll();
-}
+defineExpose({ getSelectedNodes });
 
 </script>
 
@@ -245,6 +301,13 @@ const handleSelect = evt => {
 
     .dp-link-primary {
       margin-right: 16px;
+    }
+
+    .multiple-execution-result {
+      flex: 1;
+      justify-content: flex-end;
+      display: flex;
+      align-items: center;
     }
   }
   :deep(.ant-tree li .ant-tree-node-content-wrapper) {
