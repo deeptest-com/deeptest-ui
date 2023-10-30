@@ -1,12 +1,32 @@
 <template>
   <div class="formdata-main">
     <div class="dp-param-grid">
+      <div class="head">
+        <a-row type="flex">
+          <a-col flex="1" class="head-title">参数名</a-col>
+          <a-col flex="72px" class="head-title">类型</a-col>
+          <a-col flex="2" class="head-title">参数值</a-col>
+          <a-col flex="80px" class="dp-right">
+            <Tips section="path-param" title="请求URL中的路径参数" />
+
+            <a-tooltip @click="removeAll" overlayClassName="dp-tip-small">
+              <template #title>全部清除</template>
+              <DeleteOutlined class="dp-icon-btn dp-trans-80"/>
+            </a-tooltip>
+
+            <a-tooltip @click="add" overlayClassName="dp-tip-small">
+              <template #title>新增</template>
+              <PlusOutlined class="dp-icon-btn dp-trans-80"/>
+            </a-tooltip>
+          </a-col>
+        </a-row>
+      </div>
       <div class="params">
         <a-row v-for="(item, idx) in debugData.bodyFormData" :key="idx" type="flex" class="param">
           <a-col flex="1">
             <a-input v-model:value="item.name" @change="onFormDataChange(idx)" class="dp-bg-input-transparent" />
           </a-col>
-          <a-col width="72px">
+          <a-col flex="72px" class="title">
             <a-select
                 v-model:value="item.type"
                 @change="onFormDataChange(idx)"
@@ -175,6 +195,10 @@ onMounted(() => {
         border-color: #d9d9d9;
       }
     }
+  }
+
+  .head-title {
+    text-indent:10px;
   }
 }
 

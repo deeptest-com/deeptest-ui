@@ -11,7 +11,9 @@
                class="dp-small-table"
                :rowClassName="(record, index) => {return record.name==='' ? 'hidden' : ''}"
                :pagination="false"/>
-      <div v-else>空</div>
+      <div v-else>
+        <Empty :desc="'暂无数据'" style="margin-top: 100px" />
+      </div>
     </div>
   </div>
 </template>
@@ -20,6 +22,7 @@
 import {useI18n} from "vue-i18n";
 import {defineProps, PropType} from "vue";
 import ConBoxTitle from '@/components/ConBoxTitle/index.vue';
+import Empty from "@/components/others/empty.vue";
 
 const {t} = useI18n();
 

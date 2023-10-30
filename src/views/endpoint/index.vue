@@ -69,16 +69,14 @@
                        :scroll="{ x: '1240px' || true }"
                        :columns="columns"
                        :data-source="list">
-                <template #colTitle="{text,record}">
+                <template #colTitle="{record}">
                   <div class="customTitleColRender">
-                    <span>
-                      <a :title="record?.title" href="javascript:void (0)" @click="editEndpoint(record)">{{ text }}</a>
-                    </span>
-                    <!--                    <EditAndShowField :custom-class="'custom-endpoint show-on-hover'"-->
-                    <!--                                      :value="text"-->
-                    <!--                                      placeholder="请输入接口名称"-->
-                    <!--                                      @update="(e: string) => handleUpdateEndpoint(e, record)"-->
-                    <!--                                      @edit="editEndpoint(record)"/>-->
+                    <EditAndShowField 
+                      :custom-class="'custom-endpoint show-on-hover'"
+                      :value="record.title"
+                      placeholder="请输入接口名称"
+                      @update="(e: string) => updateTitle(e, record)"
+                      @edit="editEndpoint(record)"/>
                   </div>
                 </template>
 
@@ -183,7 +181,7 @@ import debounce from "lodash.debounce";
 import {ColumnProps} from 'ant-design-vue/es/table/interface';
 import {ExclamationCircleOutlined} from '@ant-design/icons-vue';
 import {Modal} from 'ant-design-vue';
-
+import EditAndShowField from '@/components/EditAndShow/index.vue';
 import {endpointStatusOpts, endpointStatus} from '@/config/constant';
 import ContentPane from '@/views/component/ContentPane/index.vue';
 import CreateEndpointModal from './components/CreateEndpointModal.vue';
@@ -397,9 +395,9 @@ async function handleChangeStatus(value: any, record: any,) {
   });
 }
 
-async function handleUpdateEndpoint(value: string, record: any) {
-  await store.dispatch('Endpoint/updateEndpointDetail',
-      {...record, title: value}
+async function updateTitle(value: string, record: any) {
+  await store.dispatch('Endpoint/updateEndpointName',
+      {id: record.id, name: value}
   );
 }
 // 打开抽屉

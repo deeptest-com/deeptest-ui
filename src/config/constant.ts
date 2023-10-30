@@ -1453,3 +1453,11 @@ export const DetailBreadcrumbMap = {
         }
     ],
 }
+
+
+export const GlobalParamsMap = {
+    "query":"全局查询参数",
+    "body":"全局body参数",
+    "header":"全局Header",
+    "cookie":"全局Cookie",
+}

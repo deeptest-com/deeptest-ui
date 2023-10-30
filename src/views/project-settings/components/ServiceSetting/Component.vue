@@ -236,11 +236,17 @@ const edit = async (value: any) => {
 
 watch(() => {
   return props.refId
-},(newVal) => {
+},async (newVal) => {
   if(newVal){
-    const record = dataSource.value.find(arrItem => arrItem.ref == newVal);
+    let record = dataSource.value.find(arrItem => arrItem.ref == newVal);
+    if(!record?.ref){
+       record = await store.dispatch('Endpoint/getRefDetail', {
+        ref: newVal,
+        serveId: props.serveId
+      })
+    }
     if(record?.ref){
-      edit(record);
+      await edit(record);
     }
   }
 },{

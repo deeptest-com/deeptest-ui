@@ -57,12 +57,9 @@ export default defineComponent({
   },
 
   mounted() {
-    console.log('editor mounted')
-
     this.initMonaco()
 
     bus.on(settings.eventEditorAction, (data) => {
-      console.log('eventEditorAction', data)
       if (data.act === settings.eventTypeFormat) {
         this.formatDocUpdate(this.editor)
       }
@@ -76,14 +73,12 @@ export default defineComponent({
     bus.off(settings.eventEditorAction)
   },
   unmounted() {
-    console.log('editor unmounted', this.$props, this.editor);
     this.editor && this.editor.dispose();
     bus.off(settings.eventEditorAction)
   },
 
   methods: {
     initMonaco() {
-      console.log('initMonaco ...')
       this.$emit('editorWillMount', this.monaco)
 
       const {value, language, theme, options} = this;
@@ -177,14 +172,12 @@ export default defineComponent({
     },
 
     formatDocInit: (editor) => {
-      console.log('format codes - int')
       nextTick(() => {
         editor.getAction('editor.action.formatDocument')?.run()
       })
     },
 
     formatDocUpdate: debounce((editor) => {
-      console.log('format codes - update')
       nextTick(() => {
         editor.getAction('editor.action.formatDocument')?.run()
       })

@@ -1,38 +1,37 @@
 <template>
-<a-card :bordered="false">
-    <a-table
-      row-key="id"
-      :columns="auditColumns"
-      :data-source="auditLst.list"
-      :loading="loading"
-      :pagination="{
-        ...auditLst.pagination,
-        onChange: (page) => {
-          getAudits(page);
-        },
-        onShowSizeChange: (page, size) => {
-          pagination.pageSize = size;
-          getAudits(page);
-        },
-        showTotal: (total) => {
-          return `共 ${total} 条数据`;
-        },
-      }"
-    >
-      <template #status="{ text }">
-        {{ text == 0 ? "待审批" : text == 1 ? "已同意" : "已拒绝" }}
-      </template>
-      <template #action="{ record }">
-        <a-button
-          v-if="record.status == 0"
-          type="link"
-          style="padding: 0"
-          @click="() => audit(record.id)"
-          >审批</a-button
-        >
-      </template>
-    </a-table>
-  </a-card>
+  <a-table
+    row-key="id"
+    :columns="auditColumns"
+    :data-source="listResult.list"
+    :loading="loading"
+    :pagination="{
+      ...listResult.pagination,
+      onChange: (page) => {
+        listResult.pagination.page = page;
+        getAudits();
+      },
+      onShowSizeChange: (page, size) => {
+        listResult.pagination.pageSize = size;
+        getAudits();
+      },
+      showTotal: (total) => {
+        return `共 ${total} 条数据`;
+      },
+    }"
+  >
+    <template #status="{ text }">
+      {{ text == 0 ? "待审批" : text == 1 ? "已同意" : "已拒绝" }}
+    </template>
+    <template #action="{ record }">
+      <a-button
+        v-if="record.status == 0"
+        type="link"
+        style="padding: 0"
+        @click="() => audit(record.id)"
+        >审批</a-button
+      >
+    </template>
+  </a-table>
   <a-modal
     v-model:visible="auditModal"
     title="审批"
@@ -45,7 +44,7 @@
       <a-button
         key="submit"
         type="primary"
-        :loading="loading"
+        :loading="auditLoading"
         @click="handleAudit(1)"
         >同意</a-button
       >
@@ -53,20 +52,19 @@
   </a-modal>
 </template>
 <script setup lang="ts">
-
-import {  User } from "../../data.d";
-import { computed, ref, watch,onMounted } from "vue";
+import { computed, ref, defineProps, defineEmits } from "vue";
 import { useStore } from "vuex";
-import { Modal, notification } from "ant-design-vue";
-import { NotificationKeyCommon } from "@/utils/const";
-import debounce from "lodash.debounce";
-import { getAuditList, doAudit } from "@/views/project/service";
+import { doAudit } from "@/views/project/service";
 import {notifyError, notifySuccess} from "@/utils/notify";
 
+defineProps<{
+  loading: boolean;
+}>();
+
+const emits = defineEmits(['refresh']);
 
 const store = useStore();
 
-const list = computed<User[]>(() => store.state.UserInternal.queryResult.list);
 const roles = ()=>{
   let rolesList = {}
   store.state.Project.roles.forEach((item:any)=>{
@@ -74,15 +72,17 @@ const roles = ()=>{
   })
   return rolesList
 }
-let activeKey = ref("1");
 
 const getRoleName = (val:any)=>{
   let rolesList = roles()
   return rolesList[val.text]
 }
-const auditLst = ref({});
 const auditModal = ref(false);
 const auditId = ref(0);
+const listResult = computed(() => {
+  return store.state.UserInternal.auditList;
+});
+
 
 const auditColumns = [
 {
@@ -123,46 +123,19 @@ const auditColumns = [
   {
     title: "操作",
     key: "action",
-    width: 50,
+    width: 80,
     slots: { customRender: "action" },
   },
 ];
 
-const pagination = ref({
-  total: 0,
-  current: 1,
-  pageSize: 10,
-  showSizeChanger: true,
-  showQuickJumper: true,
-});
-const loading = ref<boolean>(true);
-
-const getAudits = (page: number) => {
-  loading.value = true;
-
-  getAuditList({
-    pageSize: pagination.value.pageSize,
-    page: page,
-    type: 0,
-  })
-    .then((json) => {
-      console.log("审批列表", json);
-      if (json.code === 0) {
-        // auditLst.value = json.data.result;
-        auditLst.value = {
-          current: 1,
-          list: json.data.result || [],
-          pagination: {
-            ...pagination.value,
-            current: page,
-            total: json.data.total || 0,
-          },
-        };
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
+const getAudits = async() => {
+  emits('refresh', {
+    pagination: {
+      page: listResult.value.pagination.page,
+      pageSize: listResult.value.pagination.pageSize,
+    },
+    val: 0,
+  });
 };
 const audit = (id: number) => {
   console.log("remove");
@@ -170,37 +143,24 @@ const audit = (id: number) => {
   auditId.value = id;
 };
 
+const auditLoading = ref(false);
+
 const handleAudit = async (type: number) => {
+  auditLoading.value = true;
   await doAudit({ id: auditId.value, status: type }).then((json) => {
     if (json.code === 0) {
-      getAudits(1);
+      listResult.value.pagination = {
+        ...listResult.value.pagination,
+        page: 1,
+      }
+      getAudits();
       notifySuccess(`审批成功`);
     } else {
       notifyError(`审批失败`);
     }
   });
-
+  auditLoading.value = false;
   auditModal.value = false;
 };
-
-const visible = ref(false);
-
-onMounted(() => {
-  getAudits(1);
-});
-
-watch(
-  () => activeKey.value,
-  (val) => {
-    if (val) {
-      if (val == "2" || val == "3") {
-        getAudits(1);
-      }
-    }
-  },
-  {
-    immediate: true,
-  }
-);
 
 </script>
