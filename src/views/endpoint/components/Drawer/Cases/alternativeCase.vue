@@ -35,7 +35,7 @@
             v-for="(item, index) in baseCaseActionList" 
             :key="index" 
             :type="item.type" 
-            size="middle"
+            size="small"
             @click.stop="item.action()">
             {{ item.text }}
           </a-button>
@@ -61,7 +61,7 @@
             v-for="(item, index) in caseFactorActionList" 
             :key="index" 
             :type="item.type" 
-            size="middle"
+            size="small"
             @click.stop="item.action()">
             {{ item.text }}
           </a-button>
@@ -74,15 +74,18 @@
           </a-tab-pane>
 
           <a-tab-pane key="pre-condition" tab="预处理">
-            <PreCondition v-if="activeKey === 'pre-condition'" />
+            <CaseTips type="pre-condition" @reset="onReset" />
+            <PreCondition />
           </a-tab-pane>
 
           <a-tab-pane key="post-condition" tab="后置处理">
-            <PostCondition v-if="activeKey === 'post-condition'" />
+            <CaseTips type="post-condition" @reset="onReset" />
+            <PostCondition />
           </a-tab-pane>
 
           <a-tab-pane key="assertion" tab="断言">
-            <Assertion v-if="activeKey === 'assertion'" />
+            <CaseTips type="assertion" @reset="onReset" />
+            <Assertion />
           </a-tab-pane>
 
         </a-tabs>
@@ -118,9 +121,9 @@ import {StateType as ProjectStateType} from "@/store/project";
 import PreCondition from "@/views/component/debug/request/config/ConditionPre.vue";
 import PostCondition from "@/views/component/debug/request/config/ConditionPost.vue";
 import Assertion from "@/views/component/debug/request/config/Assertion.vue";
-import CaseHeader from "./alternative/caseHeader.vue";
-import CaseFactor from "./alternative/caseFactor.vue";
-import SaveAlternative from "./alternative/saveAlternative.vue";
+
+import { CaseHeader, CaseFactor, CaseTips, SaveAlternative } from "./alternative";
+
 import useCaseExecution from "./alternative/exec-alternative-cases";
 import EditAndShowField from "@/components/EditAndShow/index.vue";
 import Invocation from "@/views/component/debug/request/Invocation.vue";
@@ -265,6 +268,11 @@ const saveAsNewCase = async () => {
   } else {
     notifyError('复制失败');
   }
+};
+
+// 恢复默认
+const onReset = (type) => {
+  console.log('恢复默认：', type);
 };
 
 const baseCaseActionList = [

@@ -18,6 +18,15 @@
   :deep(.ant-collapse-header) {
     display: flex;
     align-items: center;
+    padding: 6px 6px 6px 28px;
+
+    .ant-collapse-arrow {
+      left: 10px
+    }
+  }
+
+  :deep(.ant-collapse-content-box) {
+    padding: 0 16px;
   }
 }
 </style>
