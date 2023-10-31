@@ -82,7 +82,7 @@ import {
   ref,
   watch,
   createVNode,
-  onMounted
+  onMounted, nextTick
 } from 'vue';
 import { useStore } from "vuex";
 import { useRouter } from 'vue-router';
@@ -235,13 +235,14 @@ async function onCopy(record: any) {
   store.dispatch('ProjectSetting/copyStoreServe', { id: record.id, projectId: currProject.value.id });
 }
 
-async function getList(name = '') {
+async function getList(name = '',callback?:any) {
   await store.dispatch('ProjectSetting/getServersList', {
     projectId: currProject.value.id,
     page: 0,
     pageSize: 100,
     name
-  })
+  });
+  callback && callback();
 }
 
 onMounted(async () => {
@@ -250,14 +251,16 @@ onMounted(async () => {
 
 // 实时监听项目切换，如果项目切换了则重新请求数据
 watch(() => {
-  return currProject.value;
+  return currProject.value.id;
 }, async (newVal) => {
-  await getList()
-  await isHasProps()
-
+  await getList('',async ()=>{
+    await initDrawer();
+  });
 }, {
-  immediate: true
+  immediate: false
 })
+
+
 
 watch(() => {
   return userListOptions.value;
@@ -276,7 +279,7 @@ watch(() => {
 })
 
 // 判断是否携带参数，用于security模块
-async function isHasProps() {
+async function initDrawer() {
   const { query: { serveId = '', sectab = '' } = {} }: any = route.currentRoute.value;
   if (serveId) {
     let record = {}
@@ -285,7 +288,7 @@ async function isHasProps() {
         record = item
       }
     })
-    await edit(record)
+    await edit(record);
     currentTabKey.value = sectab;
   }
 }

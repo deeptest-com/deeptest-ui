@@ -1,3 +1,4 @@
+import cloneDeep from "lodash/cloneDeep";
 import request from '@/utils/request';
 import {requestToAgent} from '@/utils/request';
 import {DebugInfo, Interface, OAuth20} from "./data";
@@ -160,7 +161,8 @@ export async function clearShareVar(data: any): Promise<any> {
 }
 
 // helper
-export function prepareDataForRequest(data: any) {
+export function prepareDataForRequest(sourceData: any) {
+    const data = cloneDeep(sourceData);
     if (data.headers) {
         data.headers = data.headers.filter((item) => {
             return !!item.name

@@ -12,15 +12,15 @@
             <ResponseLensImage v-else-if="isImage(responseData.contentType)" />
           </a-tab-pane>
 
-          <a-tab-pane key="header" tab="响应头">
+          <a-tab-pane key="header" :tab="getTabTitle('headers')">
             <ResponseHeaders />
           </a-tab-pane>
 
-          <a-tab-pane key="cookie" tab="Cookie">
+          <a-tab-pane key="cookie" :tab="getTabTitle('cookies')">
             <ResponseCookies />
           </a-tab-pane>
 
-          <a-tab-pane key="console" tab="控制台">
+          <a-tab-pane key="console" :tab="getTabTitle('console')">
             <ResponseConsole />
           </a-tab-pane>
 
@@ -67,15 +67,31 @@ import {UsedBy} from "@/utils/enum";
 import {StateType as Debug} from "@/views/component/debug/store";
 const store = useStore<{  Debug: Debug }>();
 
-const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const responseData = computed<any>(() => store.state.Debug.responseData);
 const invokedMap = computed<any>(() => store.state.Debug.invokedMap);
+const consoleData = computed<any>(() => store.state.Debug.consoleData);
+
+const getTabTitle = computed(() => {
+  const typeMap = {
+    cookies: 'Cookie',
+    headers: '响应头',
+    console: '控制台',
+  }
+  return type => {
+    const sourceData = type === 'console' ? (consoleData.value || []) :  (responseData.value[type] || []);
+    return `${typeMap[type]}${sourceData.length ? `${'(*)'.replace('*', sourceData.length)}` : ''}`
+  }
+});
 
 watch(debugInfo, () => {
   console.log('watch debugInfo', debugInfo.value)
   activeKey.value = 'body'
-}, {deep: true})
+}, {deep: true});
+
+watch(responseData, () => {
+  if (responseData.value.invokeId) store.dispatch("Debug/getInvocationLog", responseData.value.invokeId)
+}, {deep: true, immediate: true});
 
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();

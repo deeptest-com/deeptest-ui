@@ -40,9 +40,11 @@
 
     <div class="body">
       <div v-if="debugData.bodyType === 'multipart/form-data'">
+        <GlobalParameters :in="'body'" />
         <BodyFormData></BodyFormData>
       </div>
       <div v-if="debugData.bodyType === 'application/x-www-form-urlencoded'">
+        <GlobalParameters :in="'body'" />
         <BodyFormUrlencoded></BodyFormUrlencoded>
       </div>
 
@@ -78,6 +80,7 @@ import BodyFormData from "./Body-FormData.vue";
 import {getRequestBodyTypes} from "@/views/scenario/service";
 import {UsedBy} from "@/utils/enum";
 import Tips from "@/components/Tips/index.vue";
+import GlobalParameters from "./GlobalParameters.vue";
 
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();

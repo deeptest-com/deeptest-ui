@@ -68,7 +68,7 @@
 import {computed, watch, ref, onMounted, onUnmounted, unref} from "vue";
 import {useStore} from "vuex";
 import {useRoute} from "vue-router";
-import router from '@/config/routes';
+import router from '@/router';
 import {StateType as UserStateType} from "@/store/user";
 import {StateType as ProjectStateType} from "@/store/project";
 import {StateType as ServeStateType} from "@/store/serve";
@@ -131,7 +131,10 @@ const selectProject = async (item): Promise<void> => {
   await store.dispatch("ServeGlobal/fetchServe");
 
   // 更新左侧菜单以及按钮权限
-  await store.dispatch('Global/getPermissionList', { projectId: item.id });
+  if (params.projectNameAbbr) {
+    await store.dispatch('Global/getPermissionList', { projectId: item.id });
+  }
+  
 }
 
 const handleClickOut = (event) => {

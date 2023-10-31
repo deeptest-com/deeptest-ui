@@ -118,7 +118,12 @@ const tabPaneList = [{
 }, {
     name: 'body',
     type: 'body'
-}];
+},
+//{
+//    name: 'path',
+//    type: 'path'
+//}
+];
 
 
 const serviceColumns = [

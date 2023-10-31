@@ -22,7 +22,8 @@ export interface QueryParams {
 
 export interface PaginationConfig {
     total: number;
-    current: number;
+    current?: number;
+    page?: number;
     pageSize: number;
     showSizeChanger: boolean;
     showQuickJumper: boolean;

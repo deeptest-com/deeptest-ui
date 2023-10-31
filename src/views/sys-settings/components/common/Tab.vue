@@ -10,11 +10,12 @@
 import { computed, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useI18n } from "vue-i18n";
+import { useRouter } from 'vue-router';
+
 import { RoutesDataItem, vueRoutes } from '@/utils/routes';
-import {routes} from '@/config/routes';
+import {routes} from '@/router';
 import { StateType as GlobalStateType } from "@/store/global";
 import { RouteMenuType } from '@/types/permission';
-import { useRouter } from 'vue-router';
 
 const { t } = useI18n();
 const store = useStore<{ Global: GlobalStateType }>();
