@@ -26,12 +26,16 @@
                 <IconSvg type="check-circle-no" v-if="globalParams[idx].disabled"/>
               </span>
             </a-col>
+            <TooltipJumpUrl :jumpUrl="jumpUrl">
             <a-col flex="1" class="title">
               {{item.name}}
             </a-col>
+            </TooltipJumpUrl>
+            <TooltipJumpUrl :jumpUrl="jumpUrl">
             <a-col flex="1" class="title">
               {{item.defaultValue}}
             </a-col>
+           </TooltipJumpUrl> 
           </a-row>
         </div>
       </div>
@@ -45,7 +49,9 @@
   import IconSvg from "@/components/IconSvg";
   import {StateType as Debug} from "@/views/component/debug/store";
   import {GlobalParamsMap} from '@/config/constant';
+  import TooltipJumpUrl from '@/components/others/TooltipJumpUrl.vue';
 
+  const jumpUrl = ref('project-setting/enviroment/params')
 
   const store = useStore<{  Debug: Debug }>();
   

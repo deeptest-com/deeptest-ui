@@ -86,7 +86,8 @@
               </a-tooltip>
             </div>
           </div>
-          <div class="params-defined-item" v-if="selectedMethodDetail?.headers?.length &&  selectedParamType === 'header'">
+          <div class="params-defined-item" v-if="selectedParamType === 'header'">
+            <GlobalParams :in="'header'" :selectedMethodDetail="selectedMethodDetail"/>
             <div class="header-defined header-defined-items">
               <div v-for="(item,index) in selectedMethodDetail.headers" :key="item.id">
                 <RequestHeader
@@ -97,7 +98,8 @@
               </div>
             </div>
           </div>
-          <div class="params-defined-item" v-if="selectedMethodDetail?.params?.length  &&  selectedParamType === 'query'">
+          <div class="params-defined-item" v-if="selectedParamType === 'query'">
+            <GlobalParams :in="'query'" :selectedMethodDetail="selectedMethodDetail"/>
             <div class="header-defined ">
               <div v-for="(item,index) in selectedMethodDetail.params" :key="item.id">
                 <Field
@@ -108,7 +110,8 @@
               </div>
             </div>
           </div>
-          <div class="params-defined-item" v-if="selectedMethodDetail?.cookies?.length &&  selectedParamType === 'cookie'">
+          <div class="params-defined-item" v-if="selectedParamType === 'cookie'">
+            <GlobalParams :in="'cookie'" :selectedMethodDetail="selectedMethodDetail" />
             <div class="header-defined ">
               <div v-for="(item,index) in selectedMethodDetail.cookies" :key="item.id">
                 <Field
@@ -140,6 +143,7 @@ import {
 import {PlusOutlined, DeleteOutlined, RightOutlined, DownOutlined, FormOutlined} from '@ant-design/icons-vue';
 import Field from './Field.vue'
 import RequestHeader from './RequestHeader.vue'
+import GlobalParams from './GlobalParams.vue'
 import {Endpoint} from "@/views/endpoint/data";
 import {cloneByJSON} from "@/utils/object";
 

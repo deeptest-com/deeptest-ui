@@ -14,6 +14,9 @@
               <div class="type">
                 <a-typography-text type="secondary">{{ item.type }}</a-typography-text>
               </div>
+              <div class="global" v-if="item.isGlobal">
+                <a-typography-text type="secondary"><a-tag>全局</a-tag></a-typography-text>
+              </div>
               <a-divider class="divider" v-if="item.required"/>
               <div>
                 <div class="required" v-if="item.deprecated" style="margin-right: 6px;">
@@ -105,6 +108,7 @@ const data = computed(() => {
       name: item?.name,
       type: item?.type,
       required: item?.required,
+      isGlobal:item?.isGlobal,
       options
     })
   })
@@ -136,6 +140,11 @@ function switchExpand() {
   .name {
     margin-right: 4px;
   }
+
+  .global {
+    margin-left: 4px;
+  }
+
 
   .divider {
     flex: 1;

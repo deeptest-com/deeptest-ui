@@ -1,6 +1,6 @@
 <!-- ::::参数设置器-->
 <template>
-  <div class="main" style="display:inline-block;">
+  <div class="main">
     <a-input-group compact>
       <a-auto-complete
           v-model:value="fieldState.name"
