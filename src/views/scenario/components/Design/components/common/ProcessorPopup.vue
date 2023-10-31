@@ -66,10 +66,9 @@ const wrapperCol = { span: 18, offset:4 }
     border-bottom: 1px solid #d9d9d9;
   }
   .content {
-    height: calc(100% - 30px);
 
     .processor-form {
-      height: calc(100% - 36px);
+      height: 100%;
     }
     .buttons {
       height: 36px;
