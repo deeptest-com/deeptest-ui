@@ -25,6 +25,7 @@
     </div>
     
     <a-tree 
+      v-if="treeData.length > 0"
       class="case-tree"
       :replaceFields="replaceFields" 
       :tree-data="treeData" 
@@ -64,6 +65,9 @@
         </span>
       </template>
     </a-tree>
+    <div v-if="treeData.length === 0" class="alternative-case-tree-loading">
+      <a-spin></a-spin>
+    </div>
   </div>
 </template>
 
@@ -86,7 +90,6 @@ import { StateType as ProjectSettingStateType } from "@/views/project-settings/s
 import {StateType as ProjectStateType} from "@/store/project";
 
 import EditAndShowField from '@/components/EditAndShow/index.vue';
-import { clone } from 'handsontable/helpers';
 
 const usedBy = UsedBy.AlternativeCaseDebug
 provide('usedBy', usedBy)
@@ -100,6 +103,11 @@ const allSelected = ref(false);
 const treeDataMap = ref({});
 
 const treeData = computed(() => {
+
+  /**
+   * 切换到多参数因子时，禁用 目录节点的复选框，仅可选择case 复选框
+   * @param nodes 参数节点树
+   */
   const setDisabledIfDir = (nodes) => {
     let originalCasesData = cloneDeep(nodes);
     if (Array.isArray(originalCasesData)) {
@@ -247,7 +255,6 @@ const onChecked = (keys, treeNode) => {
         // 反选
         checkedKeys.value = {
           ...keys,
-          checked: removeCheckedKeys(currentChecked, parentTreeNode)
         } 
       }
     }
@@ -323,6 +330,14 @@ defineExpose({ getSelectedNodes });
       justify-content: flex-end;
       align-items: center;
     }
+  }
+
+  .alternative-case-tree-loading {
+    width: 100%;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 } 
 </style>

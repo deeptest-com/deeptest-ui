@@ -118,14 +118,13 @@ import {StateType as ProjectStateType} from "@/store/project";
 import PreCondition from "@/views/component/debug/request/config/ConditionPre.vue";
 import PostCondition from "@/views/component/debug/request/config/ConditionPost.vue";
 import Assertion from "@/views/component/debug/request/config/Assertion.vue";
-import CaseHeader from "./generate/caseHeader.vue";
-import CaseFactor from "./generate/caseFactor.vue";
+import CaseHeader from "./alternative/caseHeader.vue";
+import CaseFactor from "./alternative/caseFactor.vue";
+import SaveAlternative from "./alternative/saveAlternative.vue";
+import useCaseExecution from "./alternative/exec-alternative-cases";
 import EditAndShowField from "@/components/EditAndShow/index.vue";
 import Invocation from "@/views/component/debug/request/Invocation.vue";
 import DebugConfig  from "@/views/component/debug/config.vue";
-
-import useCaseExecution from "@/views/endpoint/components/Drawer/Cases/exec-alternative-cases";
-import SaveAlternative from "./saveAlternative.vue";
 import EnvSelector from "@/views/component/EnvSelector/index.vue";
 import { prepareDataForRequest } from "@/views/component/debug/service";
 import { notifyError, notifySuccess } from "@/utils/notify";
