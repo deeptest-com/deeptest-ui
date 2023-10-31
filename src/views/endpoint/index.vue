@@ -71,12 +71,12 @@
                        :data-source="list">
                 <template #colTitle="{record}">
                   <div class="customTitleColRender">
-                    <EditAndShowField 
-                      :custom-class="'custom-endpoint show-on-hover'"
-                      :value="record.title"
-                      placeholder="请输入接口名称"
-                      @update="(e: string) => updateTitle(e, record)"
-                      @edit="editEndpoint(record)"/>
+                    <EditAndShowField
+                        :custom-class="'custom-endpoint show-on-hover'"
+                        :value="record.title"
+                        placeholder="请输入接口名称"
+                        @update="(e: string) => updateTitle(e, record)"
+                        @edit="editEndpoint(record)"/>
                   </div>
                 </template>
 
@@ -93,9 +93,9 @@
                 <template #colTags="{record}">
                   <div class="customTagsColRender">
                     <Tags
-                        :values = "record?.tags"
-                        :options = "tagList"
-                        @updateTags = "(values:[])=>{
+                        :values="record?.tags"
+                        :options="tagList"
+                        @updateTags="(values:[])=>{
                       updateTags(values,record.id)
                     }"
                     />
@@ -103,20 +103,22 @@
                 </template>
                 <template #colCreateUser="{record}">
                   <div class="customTagsColRender">
-                    {{username(record.createUser)}}
+                    {{ username(record.createUser) }}
                   </div>
                 </template>
                 <template #colUpdateUser="{record}">
                   <div class="customTagsColRender">
-                    {{username(record.updateUser)}}
+                    {{ username(record.updateUser) }}
                   </div>
                 </template>
                 <template #updatedAt="{ record, column }">
-                  <TooltipCell :text="record.updatedAt" :width="column.width" />
+                  <TooltipCell :text="record.updatedAt" :width="column.width"/>
                 </template>
                 <template #colPath="{text, record}">
                   <div class="customPathColRender">
-                    <a-tag :color="getMethodColor(method)" v-for="(method, index) in (record.methods)" :key="index">{{ method }}</a-tag>
+                    <a-tag :color="getMethodColor(method)" v-for="(method, index) in (record.methods)" :key="index">
+                      {{ method }}
+                    </a-tag>
                     <span class="path-col" v-if="text">
                       <a-tooltip placement="topLeft">
                         <template #title>
@@ -129,7 +131,7 @@
                   </div>
                 </template>
                 <template #action="{record}">
-                  <DropdownActionMenu :dropdownList="MenuList" :record="record" />
+                  <DropdownActionMenu :dropdownList="MenuList" :record="record"/>
                 </template>
               </a-table>
             </template>
@@ -199,14 +201,16 @@ import Tree from './components/Tree.vue'
 import BatchUpdateFieldModal from './components/BatchUpdateFieldModal.vue';
 import Tags from './components/Tags/index.vue';
 import TooltipCell from '@/components/Table/tooltipCell.vue';
-import { DropdownActionMenu } from '@/components/DropDownMenu/index';
+import {DropdownActionMenu} from '@/components/DropDownMenu/index';
+import _ from "lodash";
 
-import { getMethodColor } from '@/utils/interface';
+import {getMethodColor} from '@/utils/interface';
 import {notifyError, notifySuccess} from "@/utils/notify";
+import {equalObjectByXpath} from "@/utils/object";
 import useSharePage from '@/hooks/share';
 
-const { share } = useSharePage();
-const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType,Project }>();
+const {share} = useSharePage();
+const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
@@ -217,7 +221,7 @@ let pagination = computed<PaginationConfig>(() => store.state.Endpoint.listResul
 const createApiModalVisible = ref(false);
 const router = useRouter();
 type Key = ColumnProps['key'];
-const tagList: any = computed(()=>store.state.Endpoint.tagList);
+const tagList: any = computed(() => store.state.Endpoint.tagList);
 const userList = computed<any>(() => store.state.Project.userList);
 
 /**
@@ -278,7 +282,7 @@ const columns = [
     title: '最近更新',
     dataIndex: 'updatedAt',
     width: 180,
-    slots: { customRender: 'updatedAt' },
+    slots: {customRender: 'updatedAt'},
   },
   {
     title: '操作',
@@ -400,6 +404,7 @@ async function updateTitle(value: string, record: any) {
       {id: record.id, name: value}
   );
 }
+
 // 打开抽屉
 async function editEndpoint(record) {
   await store.dispatch('Endpoint/getEndpointDetail', {id: record.id});
@@ -460,7 +465,7 @@ async function handleBatchUpdate(data) {
   await store.dispatch('Endpoint/batchUpdateField', {
     "fieldName": data.value.fieldName,
     "value": data.value.value,
-    "endpointIds":selectedRowIds.value
+    "endpointIds": selectedRowIds.value
   });
   await refreshList();
   showBatchUpdateModal.value = false;
@@ -476,7 +481,7 @@ async function handleImport(data, callback) {
 
   const res = await store.dispatch('Endpoint/importEndpointData', {
     ...data,
-    "sourceType":2,
+    "sourceType": 2,
     "serveId": currServe.value.id,
   });
 
@@ -497,7 +502,7 @@ const filterState: any = ref({});
 
 async function selectNode(id) {
   selectedCategoryId.value = id;
-  selectedRowKeys. value = [];
+  selectedRowKeys.value = [];
   selectedRow.value = {};
   // 选中节点时，重置分页为第一页
   await loadList(1, pagination.value.pageSize);
@@ -580,50 +585,112 @@ function paneResizeStop(pane, resizer, size) {
   }
 }
 
-const updateTags = async (tags :[],id:number)=>{
-   await store.dispatch('Endpoint/updateEndpointTag', {
-      id:id,tagNames:tags
-    });
+const updateTags = async (tags: [], id: number) => {
+  await store.dispatch('Endpoint/updateEndpointTag', {
+    id: id, tagNames: tags
+  });
 
 }
 
-const username = (user:string)=>{
+const username = (user: string) => {
   let result = userList.value.find(arrItem => arrItem.value == user);
   return result?.label || '-'
 }
 
+/*************************************************
+ * ::::离开保存代码逻辑部分start
+ ************************************************/
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
+const srcEndpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.srcEndpointDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
+
+
+const newInterfaceObj = computed(() => {
+  const obj:any = {};
+  obj.path = endpointDetail?.value?.path;
+  obj.pathParams = endpointDetail?.value?.pathParams;
+  endpointDetail.value.interfaces?.forEach((item) => {
+    obj[item.method] = {
+      description: item.description,
+      params: item.params,
+      cookies: item.cookies,
+    }});
+  return obj;
+})
+const srcInterfaceObj = computed(() => {
+  const obj:any = {};
+  obj.path = srcEndpointDetail?.value?.path;
+  obj.pathParams = srcEndpointDetail?.value?.pathParams;
+  srcEndpointDetail.value.interfaces?.forEach((item) => {
+    obj[item.method] = {
+      description: item.description,
+      params: item.params,
+      cookies: item.cookies,
+    }});
+  return obj;
+})
+
+// 接口信息改变了
 watch(() => {
   return endpointDetail.value
-},(newVal) => {
-  console.log('832222 endpointDetail',newVal)
-},{
-  deep:true
-})
-watch(() => {
-  return debugData.value
-},(newVal) => {
-  console.log('832222 debugData',newVal)
-},{
-  deep:true
-})
-watch(() => {
-  return debugInfo.value
-},(newVal) => {
-  console.log('832222 debugInfo',newVal)
-},{
-  deep:true
-})
+}, (newVal, oldValue) => {
+  // debugger;
+  const c = !equalObjectByXpath(endpointDetail.value, srcEndpointDetail.value, ['interfaces']);
+  // path 路径是否改变
+  // const pathChange = !equalObjectByXpath(newInterfaceObj, srcInterfaceObj, ['path']);
+  // // // 和 pathParams 有联动，没办法准确判断它的哪个字段改变了，联动逻辑里有深拷贝，故使用 srcEndpointDetail
+  // // pathParams 是否改变
+  // const pathParamsChange = !equalObjectByXpath(newInterfaceObj, srcInterfaceObj, ['pathParams']);
+  // newVal.interfaces?.forEach((item) => {
+  //   const i = !equalObjectByXpath(newInterfaceObj, srcInterfaceObj, [item.method]);
+  //
+  //   console.log('8322222 interfaceChange', '改变了',item.method)
+  //   // 接口是否改变
+  //   // const d = !equalObjectByXpath(newInterfaceObj, srcInterfaceObj, [item.method,'description']);
+  //   // const p = !equalObjectByXpath(newInterfaceObj, srcInterfaceObj, [item.method,'params']);
+  //   // const c = !equalObjectByXpath(newInterfaceObj, srcInterfaceObj, [item.method,'cookies']);
+  //   // if (d) {
+  //   //   console.log('8322222 interfaceChange', '改变了',item.method,'描述信息')
+  //   // }
+  //   // if (p) {
+  //   //   console.log('8322222 interfaceChange', '改变了',item.method,'参数信息')
+  //   // }
+  //   // if(c){
+  //   //   console.log('8322222 interfaceChange', '改变了',item.method,'cookie信息')
+  //   // }
+  // });
+
+
+  // if (pathChange) {
+  //   console.log('pathChange', '改变了')
+  // }
+  // if (pathParamsChange) {
+  //   console.log('pathParamsChange', '改变了')
+  // }
+  // if(interfacesChange){
+  //   console.log('interfacesChange', '改变了')
+  // }
+
+}, {
+  deep: true
+});
+
+
+
+/*************************************************
+ * ::::离开保存代码逻辑部分end
+ ************************************************/
+
+
 
 
 
 function closeDrawer() {
   Modal.confirm({
-    title: () => '确定要关闭?',
+    title: () => '确定要关闭抽屉吗？',
     icon: () => createVNode(ExclamationCircleOutlined),
-    content: '关闭后，当前未保存的数据将会丢失',
+    content: '关闭后，当前未保存的数据将会丢失，确定关闭吗？',
     onOk() {
       drawerVisible.value = false;
     },

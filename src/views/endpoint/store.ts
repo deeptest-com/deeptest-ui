@@ -49,14 +49,14 @@ import {
     generateJsonExample,
     generateCode,
     generateSchemaByResponse,
-    loadAlternativeCase, 
-    loadAlternativeCaseSaved, 
-    saveAlternativeCase, 
+    loadAlternativeCase,
+    loadAlternativeCaseSaved,
+    saveAlternativeCase,
     queryEndpointCase,
-    listAlternativeCaseAssertion, 
-    saveAlternativeCaseAssertion, 
+    listAlternativeCaseAssertion,
+    saveAlternativeCaseAssertion,
     disableAlternativeCaseAssertion,
-    removeAlternativeCaseAssertion, 
+    removeAlternativeCaseAssertion,
     moveAlternativeCaseAssertion,
     updateName,
 } from './service';
@@ -93,6 +93,7 @@ export interface StateType {
     nodeDataCategory: any;
     filterState: filterFormState;
     endpointDetail: any,
+    srcEndpointDetail: any,
     endpointDetailYamlCode: any,
     serveServers: any[]; // serve list
     currServer: any; // current server 当前选中的环境
@@ -154,6 +155,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setFilterState: Mutation<StateType>;
         clearFilterState: Mutation<StateType>;
         setEndpointDetail: Mutation<StateType>;
+        initEndpointDetail: Mutation<StateType>;
         setServerList: Mutation<StateType>;
         setCurrServer: Mutation<StateType>;
         setSecurityOpts: Mutation<StateType>;
@@ -306,6 +308,7 @@ const initState: StateType = {
         tagNames: []
     },
     endpointDetail: null,
+    srcEndpointDetail: null,
     endpointDetailYamlCode: null,
     serveServers: [],
     currServer: {},
@@ -406,6 +409,9 @@ const StoreModel: ModuleType = {
         },
         setEndpointDetail(state, payload) {
             state.endpointDetail = payload;
+        },
+        initEndpointDetail(state, payload) {
+            state.srcEndpointDetail = payload;
         },
         setServerList(state, payload) {
             state.serveServers = payload;
@@ -791,6 +797,7 @@ const StoreModel: ModuleType = {
 
             if (res.code === 0) {
                 await commit('setEndpointDetail', res.data || null);
+                await commit('initEndpointDetail', cloneDeep(res.data) || null);
                 state.endpointDetail?.interfaces?.forEach((item) => {
                     commit('setInterfaceMethodToObjMap', {
                         method: item.method,
