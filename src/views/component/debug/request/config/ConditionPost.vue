@@ -221,15 +221,12 @@ const closeFullScreen = (item) => {
 <style lang="less" scoped>
 .post-condition-main {
   height: 100%;
-  display: flex;
-  flex-direction: column;
 
   .head {
     height: 30px;
     padding: 2px 3px;
   }
   .content {
-    flex: 1;
     height: calc(100% - 30px);
     overflow-y: auto;
 
@@ -265,6 +262,7 @@ const closeFullScreen = (item) => {
         border: 1px solid #d9d9d9;
 
         &.active {
+          height: 100%;
           border: 1px solid #1890ff;
         }
 
