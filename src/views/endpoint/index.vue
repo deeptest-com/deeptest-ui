@@ -165,7 +165,6 @@
       <Drawer
           :destroyOnClose="true"
           :visible="drawerVisible"
-          :isDefineChange="isDefineChange"
           @refreshList="refreshList"
           @changeTab="changeTab"
           ref="drawerRef"
@@ -609,11 +608,22 @@ const username = (user: string) => {
  * ::::离开保存代码逻辑部分start
  ************************************************/
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
+const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
+const debugChange: any = computed<Endpoint>(() => store.state.Debug.debugChange);
 const srcEndpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.srcEndpointDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 
-const isDefineChange = ref(false);
+watch(() => {
+  return debugData.value
+}, (newVal,oldValue) => {
+  console.log('832222调试信息',newVal,oldValue);
+  store.commit('Debug/setDebugChange', {
+    base:true,
+  });
+},{
+  deep: true
+})
 // 接口信息改变了
 watch(() => {
   return endpointDetail.value
@@ -623,41 +633,9 @@ watch(() => {
   if(!src || !tar){
     return;
   }
-  isDefineChange.value = !equalObjectByLodash(endpointDetail.value, srcEndpointDetail.value);
-  console.log('8322222 isDefineChange', '改变了',isDefineChange.value);
-  // path 路径是否改变
-  // const pathChange = !equalObjectByXpath(endpointDetail.value, srcEndpointDetail.value, ['path']);
-  // // // 和 pathParams 有联动，没办法准确判断它的哪个字段改变了，联动逻辑里有深拷贝，故使用 srcEndpointDetail
-  // // pathParams 是否改变
-  // const pathParamsChange = !equalObjectByXpath(endpointDetail.value, srcEndpointDetail.value, ['pathParams']);
-  // newVal.interfaces?.forEach((item) => {
-  //   const i = !equalObjectByXpath(newInterfaceObj, srcInterfaceObj, [item.method]);
-  //
-  //   console.log('8322222 interfaceChange', '改变了',item.method)
-  //   // 接口是否改变
-  //   // const d = !equalObjectByXpath(newInterfaceObj, srcInterfaceObj, [item.method,'description']);
-  //   // const p = !equalObjectByXpath(newInterfaceObj, srcInterfaceObj, [item.method,'params']);
-  //   // const c = !equalObjectByXpath(newInterfaceObj, srcInterfaceObj, [item.method,'cookies']);
-  //   // if (d) {
-  //   //   console.log('8322222 interfaceChange', '改变了',item.method,'描述信息')
-  //   // }
-  //   // if (p) {
-  //   //   console.log('8322222 interfaceChange', '改变了',item.method,'参数信息')
-  //   // }
-  //   // if(c){
-  //   //   console.log('8322222 interfaceChange', '改变了',item.method,'cookie信息')
-  //   // }
-  // });
-  // if (pathChange) {
-  //   console.log('pathChange', '改变了')
-  // }
-  // if (pathParamsChange) {
-  //   console.log('pathParamsChange', '改变了')
-  // }
-  // if(interfacesChange){
-  //   console.log('interfacesChange', '改变了')
-  // }
-
+  const isChange = !equalObjectByLodash(endpointDetail.value, srcEndpointDetail.value);
+  console.log('8322222 isDefineChange', '改变了',isChange);
+  store.commit('Endpoint/setIsDefineChange', isChange);
 }, {
   deep: true
 });

@@ -81,6 +81,7 @@ import {
     getSchemaList, getSchemaDetail
 } from "@/views/project-settings/service";
 import { changeServe } from '../project-settings/service';
+import {ref} from "vue/dist/vue";
 
 export interface StateType {
     endpointId: number;
@@ -102,6 +103,8 @@ export interface StateType {
     refsOptions: any;
     selectedMethodDetail: any;
     selectedCodeDetail: any;
+
+
 
     /**
      * 高级mock
@@ -137,6 +140,8 @@ export interface StateType {
     alternativeCasesSaved:any;
     alternativeCaseAssertions: any[];
     activeAlternativeCaseAssertion:any;
+    // 记录接口定义是否有变更
+    isDefineChange: boolean;
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -197,6 +202,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setAlternativeCasesSaved:Mutation<StateType>;
         setAlternativeCaseAssertions:Mutation<StateType>;
         setActiveAlternativeCaseAssertion:Mutation<StateType>;
+
+        setIsDefineChange:Mutation<StateType>;
     };
     actions: {
         listEndpoint: Action<StateType, StateType>;
@@ -279,6 +286,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         removeAlternativeCaseAssertion: Action<StateType, StateType>;
         disableAlternativeCaseAssertion: Action<StateType, StateType>;
         moveAlternativeCaseAssertion: Action<StateType, StateType>;
+
     }
 }
 
@@ -354,6 +362,8 @@ const initState: StateType = {
     alternativeCasesSaved: [],
     alternativeCaseAssertions: [],
     activeAlternativeCaseAssertion: {},
+
+    isDefineChange: false,
 };
 
 const StoreModel: ModuleType = {
@@ -554,6 +564,10 @@ const StoreModel: ModuleType = {
             } else {
                 state.activeAlternativeCaseAssertion = payload;
             }
+        },
+
+        setIsDefineChange(state, payload){
+            state.isDefineChange = payload
         },
     },
     actions: {

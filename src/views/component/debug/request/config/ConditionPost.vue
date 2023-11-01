@@ -46,7 +46,7 @@
                 <span v-html="element.desc || t(element.entityType)"></span>
               </div>
               <div class="buttons">
-                <a-button size="small" type="primary" v-if="activePostCondition.id === element.id" @click.stop="save(element)">保存</a-button>          
+                <a-button size="small" type="primary" v-if="activePostCondition.id === element.id" @click.stop="save(element)">保存</a-button>
 
                 <ClearOutlined v-if="activePostCondition.id === +element.id && element.entityType === ConditionType.script"
                                @click.stop="format(element)"
@@ -129,6 +129,10 @@ const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const postConditions = computed<any>(() => store.state.Debug.postConditions);
 const activePostCondition = computed<any>(() => store.state.Debug.activePostCondition);
 
+// const extractorData = computed<any>(() => store.state.Debug.extractorData);
+// const checkpointData = computed<any>(() => store.state.Debug.checkpointData);
+// const scriptData = computed<any>(() => store.state.Debug.scriptData);
+
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 
@@ -139,7 +143,9 @@ const conditionTypes = ref(getEnumSelectItems(ConditionType))
 
 const expand = (item) => {
   console.log('expand', item)
-  store.commit('Debug/setActivePostCondition', item)
+  store.commit('Debug/setActivePostCondition', item);
+
+
 }
 
 const list = () => {
@@ -151,6 +157,50 @@ watch(debugData, (newVal) => {
   console.log('watch debugData')
   list()
 }, {immediate: true, deep: true});
+
+// watch(() => {
+//   return activePostCondition.value
+// },(newVal,oldValue) => {
+//
+// },{
+//   deep:true
+// })
+
+// watch(() => {
+//   return activePostCondition.value
+// },(newVal,oldValue) => {
+//   console.log('watch postConditions 8322222111',newVal,oldValue);
+//   // 清空
+//   // store.dispatch('Debug/setCheckpoint',{})
+//   // store.dispatch('Debug/setExtractor',{})
+//   // store.dispatch('Debug/setScript',{})
+// },{
+//   deep:true
+// })
+//
+// watch(() => {
+//   return extractorData.value
+// },(newVal,oldValue) => {
+//   console.log('watch postConditions 8322222111 22222',newVal,oldValue);
+// },{
+//   deep:true
+// })
+//
+// watch(() => {
+//   return checkpointData.value
+// },(newVal,oldValue) => {
+//   console.log('watch postConditions 8322222111 33333',newVal,oldValue);
+// },{
+//   deep:true
+// })
+//
+// watch(() => {
+//   return scriptData.value
+// },(newVal,oldValue) => {
+//   console.log('watch postConditions 8322222111 44444',newVal,oldValue);
+// },{
+//   deep:true
+// })
 
 const create = () => {
   console.log('create', conditionType.value)

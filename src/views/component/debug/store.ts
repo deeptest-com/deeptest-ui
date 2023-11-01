@@ -64,7 +64,7 @@ export interface StateType {
     checkpointData: any;
     scriptData: any;
     cookieData: any;
-
+    debugChange: any;
     serves: any[];
     currServe: any;
 }
@@ -90,7 +90,12 @@ const initState: StateType = {
     checkpointData: {} as Checkpoint,
     scriptData: {} as Script,
     cookieData: {} as Cookie,
-
+    debugChange: {
+        base: false,
+        preScript: false,
+        postCondition: false,
+        checkpoint: false,
+    },
     serves: [],
     currServe: [],
 };
@@ -136,6 +141,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setCurrServe: Mutation<StateType>; // 设置当前所选环境
 
         setGlobalParams: Mutation<StateType>;
+        setDebugChange: Mutation<StateType>;
     };
     actions: {
         loadDataAndInvocations: Action<StateType, StateType>;
@@ -320,6 +326,12 @@ const StoreModel: ModuleType = {
                         arr[index].disabled = payload.disabled
                     }
             })
+        },
+        setDebugChange(state, payload){
+            state.debugChange = {
+                ...state.debugChange,
+                ...payload
+            }
         }
     },
     actions: {

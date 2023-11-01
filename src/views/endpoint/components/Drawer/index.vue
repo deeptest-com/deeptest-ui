@@ -84,16 +84,11 @@ import { EndpointTabsList } from '@/config/constant';
 import LeavePrompt from '../LeavePrompt.vue';
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal,Global }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
-
+const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
 const props = defineProps({
   visible: {
     required: true,
     type: Boolean,
-  },
-  isDefineChange: {
-    required: false,
-    type: Boolean,
-    default: false,
   },
 })
 
@@ -115,7 +110,7 @@ async function changeTab(value) {
   console.log('changeTab', value);
   clickActiveTabKey.value = value;
   // 如果接口定义有变化，需要提示用户保存
-  if(props.isDefineChange && !leavePromptVisible.value){
+  if(isDefineChange.value && !leavePromptVisible.value){
     leavePromptVisible.value = true;
     return;
   }
