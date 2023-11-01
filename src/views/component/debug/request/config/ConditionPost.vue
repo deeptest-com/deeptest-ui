@@ -46,7 +46,7 @@
                 <span v-html="element.desc || t(element.entityType)"></span>
               </div>
               <div class="buttons">
-                <a-button size="small" type="primary" v-if="activePostCondition.id === element.id" @click.stop="save(element)">保存</a-button>          
+                <a-button size="small" type="primary" v-if="activePostCondition.id === element.id" @click.stop="save(element)">保存</a-button>
 
                 <ClearOutlined v-if="activePostCondition.id === +element.id && element.entityType === ConditionType.script"
                                @click.stop="format(element)"
@@ -100,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch, getCurrentInstance, ComponentInternalInstance} from "vue";
+import {computed, inject, ref, watch, getCurrentInstance, ComponentInternalInstance, provide} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import { CheckCircleOutlined, DeleteOutlined,
@@ -108,7 +108,7 @@ import { CheckCircleOutlined, DeleteOutlined,
   DownOutlined, CloseCircleOutlined, FullscreenOutlined } from '@ant-design/icons-vue';
 import draggable from 'vuedraggable'
 import Tips from "@/components/Tips/index.vue";
-import {ConditionType, UsedBy} from "@/utils/enum";
+import {ConditionType, UsedBy, UsedWith} from "@/utils/enum";
 import {EnvDataItem} from "@/views/project-settings/data";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
@@ -129,6 +129,7 @@ const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const postConditions = computed<any>(() => store.state.Debug.postConditions);
 const activePostCondition = computed<any>(() => store.state.Debug.activePostCondition);
 
+provide('usedWith', UsedWith.PostCondition)
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 

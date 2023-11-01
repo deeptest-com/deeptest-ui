@@ -18,6 +18,10 @@ export enum UsedBy {
     OpenAPIYaml = "openapi_yaml",
 }
 
+export enum UsedWith {
+    PostCondition = "post_condition",
+}
+
 export enum ProcessorInterfaceSrc {
     Define = "define",
     Case = "case",

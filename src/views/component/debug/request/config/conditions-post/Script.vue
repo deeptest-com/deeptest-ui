@@ -24,6 +24,10 @@
           <div @click="addSnippet('set_mock_resp_code')" class="dp-link-primary">设置响应码</div>
           <div @click="addSnippet('set_mock_resp_field')" class="dp-link-primary">修改JSON响应对象</div>
           <div @click="addSnippet('set_mock_resp_text')" class="dp-link-primary">修改字符串响应内容</div>
+
+          <div @click="addSnippet('assert_resp_status_Code')" class="dp-link-primary">断言响应状态码为200</div>
+          <div @click="addSnippet('assert_resp_json_field')" class="dp-link-primary">断言JSON响应字段取值</div>
+          <div @click="addSnippet('assert_resp_content_contain')" class="dp-link-primary">断言HTML响应内容包含</div>
         </div>
 
         <div class="title">

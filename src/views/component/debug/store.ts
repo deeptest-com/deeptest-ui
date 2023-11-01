@@ -2,6 +2,10 @@ import {Action, Mutation} from 'vuex';
 import {StoreModuleType} from "@/utils/store";
 
 import {
+    assert_resp_status_Code, assert_resp_json_field, assert_resp_content_contain
+} from './config'
+
+import {
     clearShareVar,
     quickCreateExtractor,
     getCheckpoint,
@@ -750,12 +754,21 @@ const StoreModel: ModuleType = {
             let line = ''
             if (name === 'log') {
                 line = "log('test');"
+
             } else if (name === 'set_mock_resp_code') {
                 line = "dt.response.statusCode = 404;"
             } else if (name === 'set_mock_resp_field') {
                 line = "dt.response.data.field1 = 'val';"
             } else if (name === 'set_mock_resp_text') {
                 line = "dt.response.data = dt.response.data.replace('old', 'new');"
+
+            } else if (name === 'assert_resp_status_Code') {
+                line = assert_resp_status_Code
+            } else if (name === 'assert_resp_json_field') {
+                line = assert_resp_json_field
+            } else if (name === 'assert_resp_content_contain') {
+                line = assert_resp_content_contain
+
             } else {
                 const json = await getSnippet(name)
                 if (json.code === 0) {

@@ -24,7 +24,6 @@ export default defineComponent({
     const { locale } = useI18n();
     const antdLocales = computed(()=> antdMessages[locale.value]);
 
-
     const isLyEnv = isLeyan();
     // NOTICE: 以下代码仅适用于ly环境，其他环境删除即可
     const store = useStore<{User: UserStateType}>();
