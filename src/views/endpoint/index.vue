@@ -165,11 +165,18 @@
       <Drawer
           :destroyOnClose="true"
           :visible="drawerVisible"
+          :isDefineChange="isDefineChange"
           @refreshList="refreshList"
+          @changeTab="changeTab"
+          ref="drawerRef"
           @close="() => {
             closeDrawer();
           }"/>
     </div>
+    <LeavePrompt :visible="leavePromptVisible"
+                 @handleLeaveAndNoSave="handleLeaveAndNoSave"
+                 @handleSaveAndLeave="handleSaveAndLeave"
+                 @handleCancel="handleCancel"/>
   </a-spin>
 </template>
 <script setup lang="ts">
@@ -199,6 +206,7 @@ import {StateType as ServeStateType} from "@/store/serve";
 import {StateType as Debug} from "@/views/component/debug/store";
 import Tree from './components/Tree.vue'
 import BatchUpdateFieldModal from './components/BatchUpdateFieldModal.vue';
+import LeavePrompt from './components/LeavePrompt.vue';
 import Tags from './components/Tags/index.vue';
 import TooltipCell from '@/components/Table/tooltipCell.vue';
 import {DropdownActionMenu} from '@/components/DropDownMenu/index';
@@ -206,7 +214,7 @@ import _ from "lodash";
 
 import {getMethodColor} from '@/utils/interface';
 import {notifyError, notifySuccess} from "@/utils/notify";
-import {equalObjectByXpath} from "@/utils/object";
+import {equalObjectByXpath,equalObjectByLodash} from "@/utils/object";
 import useSharePage from '@/hooks/share';
 
 const {share} = useSharePage();
@@ -605,43 +613,23 @@ const srcEndpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.src
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 
-
-const newInterfaceObj = computed(() => {
-  const obj:any = {};
-  obj.path = endpointDetail?.value?.path;
-  obj.pathParams = endpointDetail?.value?.pathParams;
-  endpointDetail.value.interfaces?.forEach((item) => {
-    obj[item.method] = {
-      description: item.description,
-      params: item.params,
-      cookies: item.cookies,
-    }});
-  return obj;
-})
-const srcInterfaceObj = computed(() => {
-  const obj:any = {};
-  obj.path = srcEndpointDetail?.value?.path;
-  obj.pathParams = srcEndpointDetail?.value?.pathParams;
-  srcEndpointDetail.value.interfaces?.forEach((item) => {
-    obj[item.method] = {
-      description: item.description,
-      params: item.params,
-      cookies: item.cookies,
-    }});
-  return obj;
-})
-
+const isDefineChange = ref(false);
 // 接口信息改变了
 watch(() => {
   return endpointDetail.value
 }, (newVal, oldValue) => {
-  // debugger;
-  const c = !equalObjectByXpath(endpointDetail.value, srcEndpointDetail.value, ['interfaces']);
+  const src = srcEndpointDetail.value;
+  const tar = endpointDetail.value;
+  if(!src || !tar){
+    return;
+  }
+  isDefineChange.value = !equalObjectByLodash(endpointDetail.value, srcEndpointDetail.value);
+  console.log('8322222 isDefineChange', '改变了',isDefineChange.value);
   // path 路径是否改变
-  // const pathChange = !equalObjectByXpath(newInterfaceObj, srcInterfaceObj, ['path']);
+  // const pathChange = !equalObjectByXpath(endpointDetail.value, srcEndpointDetail.value, ['path']);
   // // // 和 pathParams 有联动，没办法准确判断它的哪个字段改变了，联动逻辑里有深拷贝，故使用 srcEndpointDetail
   // // pathParams 是否改变
-  // const pathParamsChange = !equalObjectByXpath(newInterfaceObj, srcInterfaceObj, ['pathParams']);
+  // const pathParamsChange = !equalObjectByXpath(endpointDetail.value, srcEndpointDetail.value, ['pathParams']);
   // newVal.interfaces?.forEach((item) => {
   //   const i = !equalObjectByXpath(newInterfaceObj, srcInterfaceObj, [item.method]);
   //
@@ -660,8 +648,6 @@ watch(() => {
   //   //   console.log('8322222 interfaceChange', '改变了',item.method,'cookie信息')
   //   // }
   // });
-
-
   // if (pathChange) {
   //   console.log('pathChange', '改变了')
   // }
@@ -676,30 +662,33 @@ watch(() => {
   deep: true
 });
 
-
-
+const leavePromptVisible = ref(false);
+const drawerRef:any = ref(null);
+function handleCancel() {
+  leavePromptVisible.value = false;
+}
+function handleLeaveAndNoSave() {
+  leavePromptVisible.value = false;
+  drawerVisible.value = false;
+}
+async function handleSaveAndLeave() {
+  await drawerRef?.value?.save();
+  leavePromptVisible.value = false;
+  drawerVisible.value = false;
+}
+function closeDrawer() {
+  if(isDefineChange.value) {
+    leavePromptVisible.value = true;
+  }else {
+    drawerVisible.value = false;
+  }
+}
+function changeTab(tabKey) {
+  console.log('changeTab', tabKey)
+}
 /*************************************************
  * ::::离开保存代码逻辑部分end
  ************************************************/
-
-
-
-
-
-function closeDrawer() {
-  Modal.confirm({
-    title: () => '确定要关闭抽屉吗？',
-    icon: () => createVNode(ExclamationCircleOutlined),
-    content: '关闭后，当前未保存的数据将会丢失，确定关闭吗？',
-    onOk() {
-      drawerVisible.value = false;
-    },
-    onCancel() {
-      console.log('Cancel');
-    },
-    class: 'test',
-  });
-}
 
 </script>
 <style scoped lang="less">

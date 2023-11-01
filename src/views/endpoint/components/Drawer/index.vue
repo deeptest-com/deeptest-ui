@@ -2,14 +2,14 @@
   <DrawerLayout :visible="visible" @close="emit('close');" :stickyKey="stickyKey">
     <!-- 头部信息  -->
     <template #header>
-      <DetailHeader 
+      <DetailHeader
         :name="endpointDetail?.title"
         :serial-number="endpointDetail?.serialNumber"
         :show-action="true"
         :detail-link="detailLink"
         :share-link="detailLink"
         :show-detail="true"
-        :show-share="true" 
+        :show-share="true"
         @update-title="updateTitle"/>
     </template>
     <template #basicInfo>
@@ -22,7 +22,7 @@
     <template #tabHeader>
       <DetailTabHeader :tab-list="EndpointTabsList" :show-btn="true" @change-tab="changeTab" :active-key="activeTabKey">
         <template #btn>
-          <a-button v-if="activeTabKey === 'request' && showFooter" type="primary" @click="save">
+          <a-button v-if="activeTabKey === 'request' && showFooter" type="primary" @click="save" :disabled="!isDefineChange">
             <template #icon>
               <icon-svg class="icon dp-icon-with-text" type="save" />
             </template>
@@ -42,10 +42,10 @@
         <EndpointCases v-if="activeTabKey === 'cases'"
                        v-model:showList="showList"
                        @switchToDefineTab="switchToDefineTab" />
-        
+
         <EndpointMock v-if="activeTabKey === 'mock'"
                      @switchToDefineTab="switchToDefineTab" />
-      
+
 
         <Docs :onlyShowDocs="true"
               :showHeader="false"
@@ -53,13 +53,18 @@
               :data="docsData"
               @switchToDefineTab="switchToDefineTab"
               :show-menu="true"/> <!-- use v-if to force page reload-->
+
+        <LeavePrompt :visible="leavePromptVisible"
+                     @handleLeaveAndNoSave="handleLeaveAndNoSave"
+                     @handleSaveAndLeave="handleSaveAndLeave"
+                     @handleCancel="handleCancel"/>
       </div>
     </template>
   </DrawerLayout>
 </template>
 
 <script lang="ts" setup>
-import {computed, defineEmits, defineProps, provide, ref, watch} from 'vue';
+import {computed, defineEmits, defineProps, provide, ref, watch,defineExpose} from 'vue';
 import {useStore} from "vuex";
 import { useRouter } from "vue-router";
 
@@ -71,23 +76,32 @@ import EndpointCases from './Cases/index.vue';
 import EndpointMock from './Mock/index.vue';
 import Docs from '@/components/Docs/index.vue';
 import DrawerLayout from "@/views/component/DrawerLayout/index.vue";
-
+import {Modal} from 'ant-design-vue';
 import {Endpoint} from "@/views/endpoint/data";
 import {notifySuccess} from "@/utils/notify";
 import { DetailHeader, DetailTabHeader } from '@/views/component/DetailLayout';
 import { EndpointTabsList } from '@/config/constant';
-
+import LeavePrompt from '../LeavePrompt.vue';
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal,Global }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 
-defineProps({
+const props = defineProps({
   visible: {
     required: true,
     type: Boolean,
   },
+  isDefineChange: {
+    required: false,
+    type: Boolean,
+    default: false,
+  },
 })
 
-const emit = defineEmits(['ok', 'close', 'refreshList']);
+defineExpose({
+  save,
+});
+
+const emit = defineEmits(['ok', 'close', 'refreshList','changeTab']);
 
 const router = useRouter();
 
@@ -95,15 +109,21 @@ const showList = ref(true)
 const docsData = ref(null);
 
 const stickyKey = ref(0);
+// 点击tab时，记录当前的tabKey，用于切换到调试页面时，需要先保存
+const clickActiveTabKey = ref('');
 async function changeTab(value) {
-  console.log('changeTab', value)
-
+  console.log('changeTab', value);
+  clickActiveTabKey.value = value;
+  // 如果接口定义有变化，需要提示用户保存
+  if(props.isDefineChange && !leavePromptVisible.value){
+    leavePromptVisible.value = true;
+    return;
+  }
   // click cases tab again, will cause EndpointCases component back to case list page
   if (activeTabKey.value === 'cases' && activeTabKey.value === value) {
     showList.value = true // back to list
     return
   }
-
   activeTabKey.value = value;
   stickyKey.value ++;
   // 切换到调试页面时，需要先保存
@@ -114,13 +134,24 @@ async function changeTab(value) {
     // );
     // 获取最新的接口详情,比如新增的 接口的id可能会变化，所以需要重新获取
     // await store.dispatch('Endpoint/getEndpointDetail', {id: endpointDetail.value.id});
-
   } else if (value === 'docs') {
     docsData.value = await store.dispatch('Endpoint/getDocs', {
       endpointIds: [endpointDetail.value.id],
       needDetail: true,
     });
   }
+}
+const leavePromptVisible = ref(false);
+function handleCancel() {
+  leavePromptVisible.value = false;
+}
+async function handleSaveAndLeave() {
+  await save();
+  handleLeaveAndNoSave();
+}
+function handleLeaveAndNoSave() {
+  changeTab(clickActiveTabKey.value);
+  leavePromptVisible.value = false;
 }
 
 function switchToDefineTab() {
@@ -183,7 +214,6 @@ async function cancel() {
 }
 
 async function save() {
-
   store.commit("Global/setSpinning",true)
   await store.dispatch('Endpoint/updateEndpointDetail',
       {...endpointDetail.value}

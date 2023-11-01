@@ -75,10 +75,24 @@ export function equalObjectByXpath(obj1: Object, obj2: Object, xpath: Array<stri
         return pre?.[cur];
     }, o2);
 
-
-
     // delete val1[0].responseBodies
     // delete val2[0].responseBodies
-    console.log(8322222, val1[0].responseBodies, val2[0].responseBodies,_.isEqual(val1,val2));
+    // console.log(8322222, val1, val2, _.isEqual(val1, val2));
     return _.isEqual(val1, val2);
 }
+
+
+/**
+ * @description 传入两个对象，返回两个对象是否相等
+ * @param {Object} obj1
+ * @param {Object} obj2
+ * @returns {boolean}
+ *
+ * */
+export function equalObjectByLodash(obj1: Object, obj2: Object): boolean {
+    const o1 = cloneByJSON(obj1);
+    const o2 = cloneByJSON(obj2);
+    // console.log(8322222, o1, o2, _.isEqual(o1, o2));
+    return _.isEqual(o1, o2);
+}
+

@@ -811,15 +811,23 @@ const StoreModel: ModuleType = {
         },
         // 用于新建接口时选择接口分类
         async updateEndpointDetail({commit, dispatch}, payload: any) {
-            const res = await saveEndpoint({
-                ...payload
-            });
-            if (res.code === 0) {
-                await dispatch("getEndpointDetail", {id: res.data})
+            try {
+                const res = await saveEndpoint({
+                    ...payload
+                });
+                await dispatch("getEndpointDetail", {id: payload.id})
                 await dispatch('loadList', {projectId: payload.projectId});
-            } else {
-                return false
+            }catch (e){
+                console.error(e)
             }
+
+            // debugger
+            // if (res.code === 0) {
+            //     await dispatch("getEndpointDetail", {id: res.data})
+            //     await dispatch('loadList', {projectId: payload.projectId});
+            // } else {
+            //     return false
+            // }
         },
 
         async updateEndpointName({ dispatch, commit, rootState }: any, payload: any) {
@@ -1341,7 +1349,6 @@ const StoreModel: ModuleType = {
                     const selectedMethodDetail =  state.endpointDetail.interfaces.find(arrItem => arrItem.id == payload.interfaceId)
                     commit('setSelectedMethodDetail', selectedMethodDetail);
                     commit('setSelectedCodeDetail', res.data);
-
                 }
                 return true;
             } catch (error) {

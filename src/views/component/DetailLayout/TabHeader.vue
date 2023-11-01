@@ -22,20 +22,20 @@ const props = defineProps<{
 
 const emits = defineEmits(['changeTab', 'handleClickBtn']);
 
-const activeKey = ref(props.activeKey || props.tabList[0].key);
+// const activeKey = ref(props.activeKey || props.tabList[0].key);
 
 const changeTab = (key) => {
-  activeKey.value = key;
+  // activeKey.value = key;
   emits('changeTab', key);
 };
 
-watch(() => {
-  return props.activeKey;
-}, val => {
-  if (val) {
-    activeKey.value = val;
-  }
-})
+// watch(() => {
+//   return props.activeKey;
+// }, val => {
+//   if (val) {
+//     activeKey.value = val;
+//   }
+// })
 
 </script>
 
