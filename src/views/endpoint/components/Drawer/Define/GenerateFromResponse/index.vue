@@ -23,7 +23,7 @@
       name="code"
       :rules="[{ required: true, message: '请输入响应码' }]"
     >
-    <a-select v-model:value="formState.code"  style="width: 160px">
+    <a-select v-model:value="formState.code" style="width: 160px">
         <a-select-option v-for="item in responseCodes" :value="item.value" :label="item.label" :key="item.value">
                             <div>
                                 <span style="font-size: 13px;">{{ item.description }}</span>
@@ -42,7 +42,7 @@
     </a-select>
     </a-form-item>
     <a-form-item label="描述" name="description" stlye="margin-top: 20px">
-      <a-input v-model:value="formState.description" style="width: 200px" />
+      <a-input v-model:value="formState.description" style="width: 165px" />
     </a-form-item>
   </a-form>
   <div class="schemaContent">
@@ -129,4 +129,9 @@ const handleContentChange = (value) => {
     margin-top :10px;
     border: 1px solid #d9d9d9;
   }
+
+  .ant-form-inline {
+    display: flex;
+    flex-wrap: nowrap;
+}
 </style>
