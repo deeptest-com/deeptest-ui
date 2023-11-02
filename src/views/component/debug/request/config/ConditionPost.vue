@@ -6,7 +6,7 @@
           <a-select size="small" :style="{width:'116px'}" :bordered="true"
                     v-model:value="conditionType">
             <template v-for="item in conditionTypes" :key="item.value">
-              <a-select-option v-if="item.value !== ConditionType.checkpoint" :value="item.value">
+              <a-select-option v-if="![ConditionType.checkpoint,ConditionType.cookie].includes(item.value)" :value="item.value">
                 {{ t(item.label) }}
               </a-select-option>
             </template>
@@ -46,7 +46,7 @@
                 <span v-html="element.desc || t(element.entityType)"></span>
               </div>
               <div class="buttons">
-                <a-button size="small" type="primary" v-if="activePostCondition.id === element.id" @click.stop="save(element)">保存</a-button>          
+                <a-button size="small" type="primary" v-if="activePostCondition.id === element.id" @click.stop="save(element)">保存</a-button>
 
                 <ClearOutlined v-if="activePostCondition.id === +element.id && element.entityType === ConditionType.script"
                                @click.stop="format(element)"
@@ -230,6 +230,7 @@ const closeFullScreen = (item) => {
   .content {
     flex: 1;
     height: calc(100% - 30px);
+    margin-bottom: 8px;
     overflow-y: auto;
 
     display: flex;
@@ -262,6 +263,10 @@ const closeFullScreen = (item) => {
         margin: 4px;
         border-radius: 5px;
         border: 1px solid #d9d9d9;
+        &:last-child {
+         //border: 1px solid red;
+          //margin-bottom: 16px;
+        }
 
         &.active {
           border: 1px solid #1890ff;
