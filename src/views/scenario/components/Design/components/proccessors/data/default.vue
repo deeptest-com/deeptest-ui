@@ -37,7 +37,7 @@
                 <a-button><UploadOutlined/>上传文件</a-button>
               </a-upload>
             </div>
-            <div class="upload-path">
+            <div class="upload-path" style="margin-left: 12px;">
               <span class="dp-input-tip" :class="[isWrongFileFormat ? 'dp-red' : '']">
                 仅支持csv格式文件
               </span>
@@ -225,5 +225,8 @@ const submit = debounce(async () => {
 .top-header-tip {
   position: relative;
   margin: 6px auto 24px 60px;
+}
+.upload-container{
+  min-width: 110px;
 }
 </style>

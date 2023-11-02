@@ -4,6 +4,12 @@
         :rowKey="'id'"
         :columns="columns"
         :data-source="filterList"
+        :pagination="{
+            total: total,
+            showTotal: (total) => {
+              return `共 ${total} 条数据`;
+            },
+        }"
         :loading="isLoading">
       <template #name="{ text, record }">
         <div class="project-name" :title="text" @click="goProject(record)">
@@ -54,7 +60,9 @@ const filterList = computed(() => {
     const text2 = (props?.searchValue || '').toLowerCase();
     return text1.includes(text2);
   });
-})
+});
+
+const total = computed(() => filterList.value.length);
 
 
 // 组件接收参数

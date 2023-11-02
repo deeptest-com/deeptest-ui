@@ -4,11 +4,16 @@
     <CustomCodeHeader v-if="fullscreen" mode="fullscreen" @update-screen="emits('cancel')" />
     <div class="content">
       <div class="codes">
-        <MonacoEditor theme="vs" language="typescript" class="editor"
-                      :value="modelRef.content || ''"
-                      :timestamp="timestamp"
-                      :options="editorOptions"
-                      @change="editorChange"/>
+        <MonacoEditor 
+          customId="custom-code-container"
+          ref="monacoEditor"
+          theme="vs" 
+          language="typescript" 
+          class="editor"
+          :value="modelRef.content || ''"
+          :timestamp="timestamp"
+          :options="editorOptions"
+          @change="editorChange"/>
       </div>
 
       <div class="refer">
@@ -45,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref, watch, inject, defineEmits} from "vue";
+import {computed, ref, watch, inject, defineEmits, onMounted} from "vue";
 import {useStore} from "vuex";
 import {MonacoOptions, NotificationKeyCommon} from "@/utils/const";
 
@@ -58,10 +63,10 @@ import CustomCodeHeader from './header.vue';
 import {notifyError, notifySuccess} from "@/utils/notify";
 import Tips from "@/components/Tips/index.vue";
 import {StateType as ProjectStateType} from "@/store/project";
+import bus from "@/utils/eventBus";
+import settings from "@/config/settings";
 
 const store = useStore<{ ProjectGlobal: ProjectStateType, Scenario: ScenarioStateType, Snippet: Snippet }>();
-
-store.dispatch('Snippet/listJslibNames')
 
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const modelRef: any = computed<boolean>(() => store.state.Scenario.nodeData);
@@ -72,15 +77,27 @@ const emits = defineEmits(['cancel']);
 const fullscreen = inject('fullscreen');
 
 const editorOptions = ref(Object.assign({
-      usedWith: 'request',
-      initTsModules: true,
+  usedWith: 'request',
+  initTsModules: true,
 
-      allowNonTsExtensions: true,
-      minimap: {
-        enabled: false
-      },
-    }, MonacoOptions
-))
+  allowNonTsExtensions: true,
+  minimap: {
+    enabled: false
+  },
+}, MonacoOptions));
+const monacoEditor = ref();
+
+onMounted(() => {
+  store.dispatch('Snippet/listJslibNames');
+  bus.on(settings.paneResizeTop, async () => {
+    console.log('sdsadsadsadsad');
+    monacoEditor.value?.resizeIt({
+      act: settings.eventTypeContainerHeightChanged,
+      container: 'codes',
+      id: 'custom-code-container'
+    });
+  })
+})
 
 const save = async () => {
   const res = await store.dispatch('Scenario/saveProcessor', {
@@ -113,17 +130,21 @@ watch(modelRef, (newVal) => {
 .processor_custom_code-edit {
   height: 100%;
   width: 100%;
+  display: flex;
+  flex-direction: column;
 
   .content {
-    height: calc(100% - 110px);
     display: flex;
+    flex: 1;
 
     & > div {
       height: 100%;
     }
 
     .codes {
-      flex: 1;
+      width: calc(100% - 264px);
+      overflow: scroll;
+      overflow-y: hidden;
       .editor {
         height: 100%;
         min-height: 160px;

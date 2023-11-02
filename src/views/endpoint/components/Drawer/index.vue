@@ -3,14 +3,14 @@
     <!-- 头部信息  -->
     <template #header>
       <DetailHeader
-          :name="endpointDetail?.title"
-          :serial-number="endpointDetail?.serialNumber"
-          :show-action="true"
-          :detail-link="detailLink"
-          :share-link="detailLink"
-          :show-detail="true"
-          :show-share="true"
-          @update-title="updateTitle"/>
+        :name="endpointDetail?.title"
+        :serial-number="endpointDetail?.serialNumber"
+        :show-action="true"
+        :detail-link="detailLink"
+        :share-link="detailLink"
+        :show-detail="true"
+        :show-share="true"
+        @update-title="updateTitle"/>
     </template>
     <template #basicInfo>
       <!-- 基本信息 -->
@@ -22,8 +22,7 @@
     <template #tabHeader>
       <DetailTabHeader :tab-list="EndpointTabsList" :show-btn="true" @change-tab="changeTab" :active-key="activeTabKey">
         <template #btn>
-          <a-button v-if="activeTabKey === 'request' && showFooter" type="primary" @click="save"
-                    :disabled="!isDefineChange">
+          <a-button v-if="activeTabKey === 'request' && showSaveBtn" type="primary" @click="save">
             <template #icon>
               <icon-svg class="icon dp-icon-with-text" type="save"/>
             </template>
@@ -43,10 +42,10 @@
 
         <EndpointCases v-if="activeTabKey === 'cases'"
                        v-model:showList="showList"
-                       @switchToDefineTab="switchToDefineTab"/>
+                       @switchToDefineTab="switchToDefineTab" />
 
         <EndpointMock v-if="activeTabKey === 'mock'"
-                      @switchToDefineTab="switchToDefineTab"/>
+                     @switchToDefineTab="switchToDefineTab" />
 
 
         <Docs :onlyShowDocs="true"
@@ -185,11 +184,13 @@ function switchToDefineTab() {
   activeTabKey.value = 'request';
 }
 
-const showFooter = ref(true);
+const showSaveBtn = ref(true);
 
 function switchMode(val) {
-  showFooter.value = (val === 'form');
+  showSaveBtn.value = (val === 'form');
 }
+
+
 
 async function changeStatus(status) {
   await store.dispatch('Endpoint/updateStatus',

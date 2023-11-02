@@ -36,7 +36,7 @@ import {
   ref,
   defineProps,
   defineEmits,
-  computed, watch, provide,
+  computed, watch, provide, onMounted,
 } from 'vue';
 import {useStore} from "vuex";
 import MonacoEditor from "@/components/Editor/MonacoEditor.vue";
@@ -68,7 +68,7 @@ async function switchMode(val) {
     await store.dispatch('Endpoint/getYamlCode', endpointDetail.value);
   }
   showMode.value = val;
-  emit('switchMode', val);
+  // emit('switchMode', val);
 
 }
 
@@ -76,6 +76,14 @@ function handleYamlCodeChange(code) {
   console.log(code);
   //store.commit("Endpoint/setYamlCode", code);
 }
+
+watch(() => {
+  return showMode.value
+},(newVal) => {
+  emit('switchMode', newVal);
+},{
+  immediate:true
+})
 
 
 </script>

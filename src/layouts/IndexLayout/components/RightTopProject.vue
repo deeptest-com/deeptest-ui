@@ -99,10 +99,12 @@ const keyword = ref('');
 const dropdownVisible = ref(false);
 
 const myProject = computed(() => {
-  return projects.value.filter((item: any) => item.name.includes(keyword.value));
+  return projects.value.filter((item: any) => {
+    return item.name.toLowerCase().includes(keyword.value.toLowerCase());
+  });
 });
 const myRecentProject = computed(() => {
-  return recentProjects.value.filter((item: any) => item.name.includes(keyword.value));
+  return recentProjects.value.filter((item: any) => item.name.toLowerCase().includes(keyword.value.toLowerCase()));
 });
 
 function viewAllProject() {
@@ -134,7 +136,7 @@ const selectProject = async (item): Promise<void> => {
   if (params.projectNameAbbr) {
     await store.dispatch('Global/getPermissionList', { projectId: item.id });
   }
-  
+
 }
 
 const handleClickOut = (event) => {

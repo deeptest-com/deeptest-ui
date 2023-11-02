@@ -22,7 +22,7 @@
         </a-form-item>
         <a-form-item label="期望条件">
           <a-tabs v-model:activeKey="requestActiveKey">
-            <a-tab-pane v-for="(item) in requestTabs" :key="item.type" :tab="item.title">
+            <a-tab-pane v-for="(item) in requestTabs" :key="item.type" :tab="getTabTitle(item)">
               <div v-if="item.type === 'requestBodies'" class="requestbodies-select-type">
                 <span>匹配对象: &nbsp;</span>
                 <a-radio-group v-model:value="requestBodyType" @change="handleRequestBodyTypeChanged">
@@ -86,7 +86,7 @@
                 </div>
               </div>
             </a-tab-pane>
-            <a-tab-pane key="2" tab="响应头">
+            <a-tab-pane key="2" :tab="getTabTitle({ type: 'responseHeaders', title: '响应头' })">
               <MockData type="responseHeaders" :data="formState"  @columnChange="handleChange" @delete="handleDelete"/>
             </a-tab-pane>
           </a-tabs>
@@ -171,6 +171,15 @@ const formState: any = reactive({
     value: ''
   },
   responseHeaders: initListData([]), // 响应头
+});
+
+const getTabTitle = computed(() => {
+  return item => {    
+    const number = item.type !== 'requestBodies' 
+      ? unref(formState)[item.type].filter(e => e.name !== '').length 
+      : unref(formState)[item.type].filter(e => e.selectType === unref(requestBodyType)).filter(e => unref(requestBodyType) === 'fullText' ? e.compareWay !== '' : e.name !== '').length;
+    return `${item.title}${number > 0 ? `(${number})` : ''}`
+  }
 });
 
 /**
