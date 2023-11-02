@@ -88,7 +88,8 @@
   </a-form>
 </template>
 <script setup lang="ts">
-import {computed, createVNode, reactive, ref, watch} from 'vue';
+import { useRouter } from 'vue-router';
+import {computed, createVNode, reactive, ref, watch,onMounted} from 'vue';
 import {useStore} from 'vuex';
 import {message, Modal, notification} from 'ant-design-vue';
 import {ExclamationCircleOutlined, PlusOutlined} from '@ant-design/icons-vue';
@@ -100,11 +101,20 @@ import {StateType as ProjectStateType} from "@/store/project";
 import {StateType as ProjectSettingStateType} from "@/views/project-settings/store";
 import {useI18n} from "vue-i18n";
 import {notifyError} from "@/utils/notify";
+const router = useRouter();
+const query: any = router.currentRoute.value.query;
 
 const store = useStore<{ ProjectGlobal: ProjectStateType, ProjectSetting: ProjectSettingStateType }>();
 const globalParamsData = computed<any>(() => store.state.ProjectSetting.globalParamsData);
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const globalParamsActiveKey = ref('header');
+
+onMounted(()=>{
+  if (query.activeKey) {
+    globalParamsActiveKey.value = query.activeKey
+  }
+})
+
 const formState = reactive({
   globalParamsData
 });

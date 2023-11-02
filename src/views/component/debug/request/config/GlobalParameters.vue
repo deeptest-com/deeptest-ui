@@ -51,8 +51,7 @@
   import {GlobalParamsMap} from '@/config/constant';
   import TooltipJumpUrl from '@/components/others/TooltipJumpUrl.vue';
 
-  const jumpUrl = ref('project-setting/enviroment/params')
-
+ 
   const store = useStore<{  Debug: Debug }>();
   
   const props = defineProps(['in']);
@@ -65,6 +64,8 @@
   const collapse = ref(true);
 
   const selectedAll = ref(false)
+
+  const jumpUrl = ref(`project-setting/enviroment/params?activeKey=${props.in}`)
 
   const selectAll = () => {
     selectedAll.value = !selectedAll.value

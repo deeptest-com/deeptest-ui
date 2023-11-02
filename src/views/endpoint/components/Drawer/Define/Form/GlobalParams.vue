@@ -47,10 +47,7 @@
   import { RightOutlined, DownOutlined} from '@ant-design/icons-vue';
   import {GlobalParamsMap} from '@/config/constant';
   import TooltipJumpUrl from '@/components/others/TooltipJumpUrl.vue';
-  import { useRouter } from "vue-router";
- 
-  const router = useRouter();
-  
+   
   const props = defineProps(['in','selectedMethodDetail']);
 
   const title = computed<string>(()=>GlobalParamsMap[props.in])
@@ -59,12 +56,7 @@
 
   const collapse = ref(true);
 
-  const jumpUrl = ref('project-setting/enviroment/params')
-
-  const jump = ()=>{
-    const url = `${window.location.origin}/${router.currentRoute.value.params.projectNameAbbr}/project-setting/enviroment/params`;
-    window.open(url, '_blank')
-  }
+  const jumpUrl = ref(`project-setting/enviroment/params?activeKey=${props.in}`)
 
   </script>
   
