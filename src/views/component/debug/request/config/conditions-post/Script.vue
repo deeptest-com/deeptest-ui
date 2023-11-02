@@ -193,6 +193,7 @@ const wrapperCol = { span: 24 }
 
     .refer {
       width: 260px;
+      height: 100%;
       padding: 10px;
       overflow-y: auto;
 
@@ -200,7 +201,6 @@ const wrapperCol = { span: 24 }
         margin-top: 12px;
       }
       .desc {
-
       }
     }
   }
