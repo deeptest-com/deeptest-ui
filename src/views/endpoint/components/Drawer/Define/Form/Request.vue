@@ -149,6 +149,7 @@ function addEndpoint() {
     "serveId": endpointDetail.value.serveId,
     "useId": currentUser.value.id,
     "method": selectedMethod.value,
+    "globalParams":endpointDetail.value.globalParams,
   }
   selectedMethodDetail.value = item;
   store.commit('Endpoint/setInterfaceMethodToObjMap', {
