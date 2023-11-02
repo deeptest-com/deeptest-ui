@@ -63,16 +63,9 @@
 </template>
 <script setup lang="ts">
 import {defineProps, h, defineEmits, computed, ref, reactive} from 'vue';
-import {RightOutlined, LoadingOutlined, ExclamationCircleOutlined, CheckCircleOutlined} from '@ant-design/icons-vue';
+import {LoadingOutlined} from '@ant-design/icons-vue';
 import {responseCodes} from '@/config/constant';
-import IconSvg from "@/components/IconSvg";
 import {formatWithSeconds} from '@/utils/datetime';
-import {
-  scenarioTypeMapToText,
-  showArrowScenarioType,
-  DESIGN_TYPE_ICON_MAP,
-  showScenarioExecStatus,
-} from "@/views/scenario/components/Design/config";
 import ResponseDrawer from '@/views/component/Report/Response/index.vue';
 import { getMethodColor } from '@/utils/interface';
 
@@ -102,7 +95,7 @@ const reqContent = computed(() => props.endpointData.reqContent ? JSON.parse(pro
 const resContent = computed(() => props.endpointData.respContent ? JSON.parse(props.endpointData.respContent) : {});
 const responseCodeColorMap = {};
 const logResponseDetailVisible = ref(false);
-const currRespDetail = reactive({ reqContent: {}, resContent: {} });
+const currRespDetail = reactive({ reqContent: {}, resContent: {}, invokeId: 0 });
 
 responseCodes.forEach(e => {
   responseCodeColorMap[e.value] = e.color;
@@ -120,6 +113,7 @@ function handleQueryDetail() {
   Object.assign(currRespDetail, {
     reqContent: reqContent.value,
     resContent: resContent.value,
+    invokeId: props.endpointData.invokeId || 0
   });
   logResponseDetailVisible.value = true;
 }
