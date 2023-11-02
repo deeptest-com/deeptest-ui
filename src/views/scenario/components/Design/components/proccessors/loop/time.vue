@@ -4,9 +4,9 @@
     <ProcessorHeader/>
     <a-card :bordered="false">
       <div>
-        <a-form :label-col="labelCol" :wrapper-col="wrapperCol">
+        <a-form :wrapper-col="wrapperCol">
 
-          <a-form-item v-bind="validateInfos.variableName">
+          <a-form-item label="变量名称" v-bind="validateInfos.variableName">
             <a-input v-model:value="modelRef.variableName"
                      @blur="validate('variableName', { trigger: 'blur' }).catch(() => {})"/>
           </a-form-item>
