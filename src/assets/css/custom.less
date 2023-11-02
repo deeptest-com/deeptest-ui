@@ -506,3 +506,105 @@ input:-webkit-autofill { -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !impor
   max-width: 12px;
   width: 12px;
 }
+
+.ly-swal-container{
+  transition: all .3s cubic-bezier(.645,.045,.355,1);
+  .btn{
+    line-height: 1.5715;
+    position: relative;
+    display: inline-block;
+    font-weight: 400;
+    white-space: nowrap;
+    text-align: center;
+    background-image: none;
+    border: 1px solid transparent!important;
+    box-shadow: 0 2px #00000004!important;
+    cursor: pointer;
+    transition: all .3s cubic-bezier(.645,.045,.355,1);
+    user-select: none;
+    touch-action: manipulation;
+    height: 32px;
+    padding: 4px 15px;
+    font-size: 14px!important;
+    border-radius: 2px;
+    color: #000000d9!important;
+    background: #fff!important;
+    border-color: #d9d9d9!important;
+  }
+  .btn-primary{
+    color: #fff!important;
+    background: #1677ff!important;;
+    border-color: #1677ff!important;;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12)!important;;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045)!important;;
+    order: 3;
+  }
+
+  .btn-primary:hover{
+    olor: #fff!important;
+    background: #40a9ff!important;
+    border-color: #40a9ff!important;
+  }
+
+  .btn-normal:hover,
+  .btn-normal:active,
+  .btn-normal:focus{
+    color: #40a9ff!important;
+    background: #fff!important;
+    border-color: #40a9ff!important;
+  }
+  .btn-deny{
+    order: 2;
+  }
+  .btn-cancal{
+    order: 1;
+  }
+
+  .swal2-actions{
+    width: 100%;
+    justify-content: end;
+    //padding-right: 16px;
+  }
+  .swal2-html-container{
+    margin-top: 8px;
+    color: #000000d9;
+    font-size: 14px;
+    text-align: left;
+    margin-left: 32px;
+  }
+  .swal2-title{
+    display: block;
+    overflow: hidden;
+    color: #000000d9;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1.4;
+    text-align: left;
+    margin-top: 0;
+    padding: 0;
+    margin-left: 32px;
+  }
+  .swal2-modal{
+    width: 400px!important;
+    //padding: 16px!important;
+    padding: 32px 32px 24px!important;
+    border-radius: 2px;
+    box-shadow: 0 4px 12px #00000026;
+    animation: none!important;
+  }
+  .swal2-icon-content{
+    width: 22px;
+    height: 22px;
+    color: #faad14;
+  }
+  .swal2-icon.swal2-icon-show{
+    width: 20px;
+    height: 20px;
+    border: none;
+    color: #faad14;
+    left: 34px;
+    top: -8px;
+    position: absolute;
+  }
+
+}

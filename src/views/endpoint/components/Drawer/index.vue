@@ -3,28 +3,29 @@
     <!-- 头部信息  -->
     <template #header>
       <DetailHeader
-        :name="endpointDetail?.title"
-        :serial-number="endpointDetail?.serialNumber"
-        :show-action="true"
-        :detail-link="detailLink"
-        :share-link="detailLink"
-        :show-detail="true"
-        :show-share="true"
-        @update-title="updateTitle"/>
+          :name="endpointDetail?.title"
+          :serial-number="endpointDetail?.serialNumber"
+          :show-action="true"
+          :detail-link="detailLink"
+          :share-link="detailLink"
+          :show-detail="true"
+          :show-share="true"
+          @update-title="updateTitle"/>
     </template>
     <template #basicInfo>
       <!-- 基本信息 -->
       <EndpointBasicInfo
-        @changeStatus="changeStatus"
-        @change-description="changeDescription"
-        @changeCategory="changeCategory"/>
+          @changeStatus="changeStatus"
+          @change-description="changeDescription"
+          @changeCategory="changeCategory"/>
     </template>
     <template #tabHeader>
       <DetailTabHeader :tab-list="EndpointTabsList" :show-btn="true" @change-tab="changeTab" :active-key="activeTabKey">
         <template #btn>
-          <a-button v-if="activeTabKey === 'request' && showFooter" type="primary" @click="save" :disabled="!isDefineChange">
+          <a-button v-if="activeTabKey === 'request' && showFooter" type="primary" @click="save"
+                    :disabled="!isDefineChange">
             <template #icon>
-              <icon-svg class="icon dp-icon-with-text" type="save" />
+              <icon-svg class="icon dp-icon-with-text" type="save"/>
             </template>
             保存
           </a-button>
@@ -34,17 +35,18 @@
     <template #tabContent>
       <div class="tab-pane">
         <EndpointDefine v-if="activeTabKey === 'request'"
-                        @switchMode="switchMode" />
+                        @switchMode="switchMode"/>
 
         <EndpointDebug v-if="activeTabKey === 'run'"
-                       @switchToDefineTab="switchToDefineTab" />
+                       ref="endpointDebugRef"
+                       @switchToDefineTab="switchToDefineTab"/>
 
         <EndpointCases v-if="activeTabKey === 'cases'"
                        v-model:showList="showList"
-                       @switchToDefineTab="switchToDefineTab" />
+                       @switchToDefineTab="switchToDefineTab"/>
 
         <EndpointMock v-if="activeTabKey === 'mock'"
-                     @switchToDefineTab="switchToDefineTab" />
+                      @switchToDefineTab="switchToDefineTab"/>
 
 
         <Docs :onlyShowDocs="true"
@@ -53,21 +55,17 @@
               :data="docsData"
               @switchToDefineTab="switchToDefineTab"
               :show-menu="true"/> <!-- use v-if to force page reload-->
-
-        <LeavePrompt :visible="leavePromptVisible"
-                     @handleLeaveAndNoSave="handleLeaveAndNoSave"
-                     @handleSaveAndLeave="handleSaveAndLeave"
-                     @handleCancel="handleCancel"/>
       </div>
     </template>
   </DrawerLayout>
 </template>
 
 <script lang="ts" setup>
-import {computed, defineEmits, defineProps, provide, ref, watch,defineExpose} from 'vue';
+import {computed, defineEmits, defineProps, provide, ref, watch, defineExpose, onUnmounted} from 'vue';
 import {useStore} from "vuex";
-import { useRouter } from "vue-router";
-
+import {useRouter} from "vue-router";
+// ES6 Modules or TypeScript
+import Swal from 'sweetalert2'
 import IconSvg from "@/components/IconSvg";
 import EndpointBasicInfo from './EndpointBasicInfo.vue';
 import EndpointDefine from './Define/index.vue';
@@ -76,15 +74,19 @@ import EndpointCases from './Cases/index.vue';
 import EndpointMock from './Mock/index.vue';
 import Docs from '@/components/Docs/index.vue';
 import DrawerLayout from "@/views/component/DrawerLayout/index.vue";
-import {Modal} from 'ant-design-vue';
 import {Endpoint} from "@/views/endpoint/data";
 import {notifySuccess} from "@/utils/notify";
-import { DetailHeader, DetailTabHeader } from '@/views/component/DetailLayout';
-import { EndpointTabsList } from '@/config/constant';
-import LeavePrompt from '../LeavePrompt.vue';
-const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal,Global }>();
+import {DetailHeader, DetailTabHeader} from '@/views/component/DetailLayout';
+import {EndpointTabsList} from '@/config/constant';
+import cloneDeep from "lodash/cloneDeep";
+import bus from "@/utils/eventBus";
+import settings from "@/config/settings";
+
+const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal, Global,Debug }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
+// 调试基本信息是否有变化，因为检查点等单独保存
+const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
 const props = defineProps({
   visible: {
     required: true,
@@ -96,7 +98,7 @@ defineExpose({
   save,
 });
 
-const emit = defineEmits(['ok', 'close', 'refreshList','changeTab']);
+const emit = defineEmits(['ok', 'close', 'refreshList', 'changeTab']);
 
 const router = useRouter();
 
@@ -104,50 +106,80 @@ const showList = ref(true)
 const docsData = ref(null);
 
 const stickyKey = ref(0);
-// 点击tab时，记录当前的tabKey，用于切换到调试页面时，需要先保存
-const clickActiveTabKey = ref('');
+
+const endpointDebugRef:any = ref(null);
 async function changeTab(value) {
   console.log('changeTab', value);
-  clickActiveTabKey.value = value;
   // 如果接口定义有变化，需要提示用户保存
-  if(isDefineChange.value && !leavePromptVisible.value){
-    leavePromptVisible.value = true;
-    return;
+  if (isDefineChange.value) {
+    Swal.fire({
+      ...settings.SwalLeaveSetting
+    }).then((result) => {
+      // isConfirmed: true,  保存并离开
+      if (result.isConfirmed) {
+        save();
+        store.commit('Endpoint/setIsDefineChange', false);
+        // 保存成功后，切换tab
+        activeTabKey.value = value;
+        stickyKey.value++;
+      }
+      // isDenied: false,  不保存，并离开
+      else if (result.isDenied) {
+        activeTabKey.value = value;
+        stickyKey.value++;
+        store.commit('Endpoint/setIsDefineChange', false);
+        store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value) || null);
+      }
+      // isDismissed: false 取消,即什么也不做
+      else if (result.isDismissed) {
+        console.log('isDismissed', result.isDismissed)
+      }
+    })
   }
-  // click cases tab again, will cause EndpointCases component back to case list page
-  if (activeTabKey.value === 'cases' && activeTabKey.value === value) {
-    showList.value = true // back to list
-    return
+  // 调试模块数据有变化，需要提示用户是否要保存调试数据
+  else if(debugChangeBase.value){
+    Swal.fire({
+      ...settings.SwalLeaveSetting
+    }).then((result) => {
+      // isConfirmed: true,  保存并离开
+      if (result.isConfirmed) {
+        bus.emit(settings.eventLeaveDebugSaveData, {});
+        store.commit('Debug/setDebugChange', {base:false});
+        // 保存成功后，切换tab
+        activeTabKey.value = value;
+        stickyKey.value++;
+      }
+      // isDenied: false,  不保存，并离开
+      else if (result.isDenied) {
+        activeTabKey.value = value;
+        stickyKey.value++;
+        store.commit('Debug/setDebugChange', {base:false});
+      }
+      // isDismissed: false 取消,即什么也不做
+      else if (result.isDismissed) {
+        console.log('isDismissed', result.isDismissed)
+      }
+    })
   }
-  activeTabKey.value = value;
-  stickyKey.value ++;
-  // 切换到调试页面时，需要先保存
-  if (value === 'run') {
-    // Comment out since it cause a issue in ./Debug/method @chenqi
-    // await store.dispatch('Endpoint/updateEndpointDetail',
-    //     {...endpointDetail.value}
-    // );
-    // 获取最新的接口详情,比如新增的 接口的id可能会变化，所以需要重新获取
-    // await store.dispatch('Endpoint/getEndpointDetail', {id: endpointDetail.value.id});
-  } else if (value === 'docs') {
-    docsData.value = await store.dispatch('Endpoint/getDocs', {
-      endpointIds: [endpointDetail.value.id],
-      needDetail: true,
-    });
+  else {
+    // click cases tab again, will cause EndpointCases component back to case list page
+    if (activeTabKey.value === 'cases' && activeTabKey.value === value) {
+      showList.value = true // back to list
+      return
+    }
+    activeTabKey.value = value;
+    stickyKey.value++;
+    if (value === 'docs') {
+      docsData.value = await store.dispatch('Endpoint/getDocs', {
+        endpointIds: [endpointDetail.value.id],
+        needDetail: true,
+      });
+    }
   }
+
 }
-const leavePromptVisible = ref(false);
-function handleCancel() {
-  leavePromptVisible.value = false;
-}
-async function handleSaveAndLeave() {
-  await save();
-  handleLeaveAndNoSave();
-}
-function handleLeaveAndNoSave() {
-  changeTab(clickActiveTabKey.value);
-  leavePromptVisible.value = false;
-}
+
+
 
 function switchToDefineTab() {
   activeTabKey.value = 'request';
@@ -192,7 +224,7 @@ async function changeCategory(value) {
 
 const activeTabKey = ref('request');
 
-const globalActiveTab = computed(()=>store.state.Endpoint.globalActiveTab);
+const globalActiveTab = computed(() => store.state.Endpoint.globalActiveTab);
 
 watch(() => {
   return globalActiveTab.value
@@ -209,24 +241,31 @@ async function cancel() {
 }
 
 async function save() {
-  store.commit("Global/setSpinning",true)
+  store.commit("Global/setSpinning", true)
   await store.dispatch('Endpoint/updateEndpointDetail',
       {...endpointDetail.value}
-  ).finally( ()=>{
-        store.commit("Global/setSpinning",false)
+  ).finally(() => {
+        store.commit("Global/setSpinning", false)
       }
   );
-  store.commit("Global/setSpinning",false)
+  store.commit("Global/setSpinning", false)
   notifySuccess('保存成功');
   emit('refreshList');
 }
 
 const detailLink = computed(() => {
-  const { params: { projectNameAbbr = '' } } = router.currentRoute.value;
+  const {params: {projectNameAbbr = ''}} = router.currentRoute.value;
   return `${window.location.origin}/${projectNameAbbr}/IM/${endpointDetail.value?.serialNumber}`;
 })
 
 provide('notScrollIntoView', true);
+
+
+onUnmounted(() => {
+  // 重置接口定义变化状态 、调试变化状态，避免影响其他模块
+  store.commit('Endpoint/setIsDefineChange', false);
+  store.commit('Debug/setDebugChange', {base: false});
+})
 </script>
 
 <style lang="less" scoped>

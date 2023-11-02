@@ -166,16 +166,11 @@
           :destroyOnClose="true"
           :visible="drawerVisible"
           @refreshList="refreshList"
-          @changeTab="changeTab"
           ref="drawerRef"
           @close="() => {
             closeDrawer();
           }"/>
     </div>
-    <LeavePrompt :visible="leavePromptVisible"
-                 @handleLeaveAndNoSave="handleLeaveAndNoSave"
-                 @handleSaveAndLeave="handleSaveAndLeave"
-                 @handleCancel="handleCancel"/>
   </a-spin>
 </template>
 <script setup lang="ts">
@@ -215,6 +210,10 @@ import {getMethodColor} from '@/utils/interface';
 import {notifyError, notifySuccess} from "@/utils/notify";
 import {equalObjectByXpath,equalObjectByLodash} from "@/utils/object";
 import useSharePage from '@/hooks/share';
+import Swal from "sweetalert2";
+import cloneDeep from "lodash/cloneDeep";
+import bus from "@/utils/eventBus";
+import settings from "@/config/settings";
 
 const {share} = useSharePage();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project }>();
@@ -610,59 +609,105 @@ const username = (user: string) => {
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
 const debugChange: any = computed<Endpoint>(() => store.state.Debug.debugChange);
+const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
 const srcEndpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.srcEndpointDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
+const srcDebugData: any = computed<Endpoint>(() => store.state.Debug.srcDebugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 
 watch(() => {
   return debugData.value
 }, (newVal,oldValue) => {
+  if(!newVal?.usedBy || !oldValue?.usedBy){
+    return;
+  }
   console.log('832222调试信息',newVal,oldValue);
-  store.commit('Debug/setDebugChange', {
-    base:true,
-  });
+  // 说明切换方法了，也需要监听一下
+  if(newVal?.method !== oldValue?.method){
+    store.commit('Debug/setDebugChange', {base:false});
+  }else {
+    store.commit('Debug/setDebugChange', {base:true});
+  }
+},{
+  deep: true
+})
+
+watch(() => {
+  return debugChange.value.base
+},(newVal) => {
+  console.log('832222调试信息',newVal)
 },{
   deep: true
 })
 // 接口信息改变了
 watch(() => {
-  return endpointDetail.value
+  return [endpointDetail.value,srcEndpointDetail.value]
 }, (newVal, oldValue) => {
   const src = srcEndpointDetail.value;
-  const tar = endpointDetail.value;
-  if(!src || !tar){
+  const cur = endpointDetail.value;
+  if(!src || !cur){
     return;
   }
-  const isChange = !equalObjectByLodash(endpointDetail.value, srcEndpointDetail.value);
+  const isChange = !equalObjectByLodash(cur, srcEndpointDetail.value);
   console.log('8322222 isDefineChange', '改变了',isChange);
   store.commit('Endpoint/setIsDefineChange', isChange);
 }, {
   deep: true
 });
 
-const leavePromptVisible = ref(false);
 const drawerRef:any = ref(null);
-function handleCancel() {
-  leavePromptVisible.value = false;
-}
-function handleLeaveAndNoSave() {
-  leavePromptVisible.value = false;
-  drawerVisible.value = false;
-}
-async function handleSaveAndLeave() {
-  await drawerRef?.value?.save();
-  leavePromptVisible.value = false;
-  drawerVisible.value = false;
-}
+// 关闭弹框时，如果接口信息改变了，弹出提示
 function closeDrawer() {
-  if(isDefineChange.value) {
-    leavePromptVisible.value = true;
-  }else {
-    drawerVisible.value = false;
+  // 如果接口定义有变化，需要提示用户保存
+  if (isDefineChange.value) {
+    Swal.fire({
+      ...settings.SwalLeaveSetting
+    }).then((result) => {
+      // isConfirmed: true,  保存并离开
+      if (result.isConfirmed) {
+        drawerRef.value?.save();
+        drawerVisible.value = false;
+        store.commit('Endpoint/setIsDefineChange', false);
+      }
+      // isDenied: false,  不保存，并离开
+      else if (result.isDenied) {
+        drawerVisible.value = false;
+        store.commit('Endpoint/setIsDefineChange', false);
+        store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value) || null);
+      }
+      // isDismissed: false 取消,即什么也不做
+      else if (result.isDismissed) {
+        console.log('isDismissed', result.isDismissed)
+      }
+    })
   }
-}
-function changeTab(tabKey) {
-  console.log('changeTab', tabKey)
+  // 调试模块数据有变化，需要提示用户是否要保存调试数据
+  else if(debugChangeBase.value){
+    Swal.fire({
+      ...settings.SwalLeaveSetting
+    }).then((result) => {
+      // isConfirmed: true,  保存并离开
+      if (result.isConfirmed) {
+        drawerVisible.value = false;
+        bus.emit(settings.eventLeaveDebugSaveData, {});
+        store.commit('Debug/setDebugChange', {base:false});
+      }
+      // isDenied: false,  不保存，并离开
+      else if (result.isDenied) {
+        drawerVisible.value = false;
+        store.commit('Debug/setDebugChange', {base:false});
+      }
+      // isDismissed: false 取消,即什么也不做
+      else if (result.isDismissed) {
+        console.log('isDismissed', result.isDismissed)
+      }
+    })
+  }
+  else {
+    drawerVisible.value = false;
+    store.commit('Debug/setDebugChange', {base:false});
+    store.commit('Endpoint/setIsDefineChange', false);
+  }
 }
 /*************************************************
  * ::::离开保存代码逻辑部分end

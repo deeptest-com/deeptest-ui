@@ -15,6 +15,7 @@
       </div>
 
       <DebugComp :onSaveDebugData="saveCaseInterface"
+                 :checkDataChange="true"
                  :urlDisabled="true"/>
     </div>
 
@@ -38,6 +39,11 @@ import IconSvg from "@/components/IconSvg";
 import {NotificationKeyCommon} from "@/utils/const";
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import {notifyError, notifySuccess} from "@/utils/notify";
+import Swal from "sweetalert2";
+import cloneDeep from "lodash/cloneDeep";
+import bus from "@/utils/eventBus";
+import settings from "@/config/settings";
+import {Endpoint} from "@/views/endpoint/data";
 
 provide('usedBy', UsedBy.CaseDebug)
 const usedBy = UsedBy.CaseDebug
@@ -45,7 +51,9 @@ const usedBy = UsedBy.CaseDebug
 const store = useStore<{ Debug: Debug, Endpoint: EndpointStateType, DiagnoseInterface: DiagnoseInterfaceStateType }>();
 const endpointCase = computed<any>(() => store.state.Endpoint.caseDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
-
+const isDefineChange: any = computed<any>(() => store.state.Endpoint.isDefineChange);
+// 调试基本信息是否有变化，因为检查点等单独保存
+const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
 const props = defineProps({
   onBack: {
     type: Function,
@@ -78,6 +86,7 @@ const saveCaseInterface = async (e) => {
   Object.assign(data, {shareVars: null, envVars: null, globalEnvVars: null, globalParamVars: null})
 
   const res = await store.dispatch('Endpoint/saveCaseDebugData', data)
+  store.commit('Debug/setDebugChange', {base:false});
   if (res === true) {
     notifySuccess(`保存成功`);
   } else {
@@ -92,8 +101,35 @@ const updateName = (val) => {
 }
 
 const back = () => {
-  console.log('back')
-  props.onBack()
+  console.log('back');
+  // 调试模块数据有变化，需要提示用户是否要保存调试数据
+  if(debugChangeBase.value){
+    Swal.fire({
+      ...settings.SwalLeaveSetting
+    }).then((result) => {
+      // isConfirmed: true,  保存并离开
+      if (result.isConfirmed) {
+        bus.emit(settings.eventLeaveDebugSaveData, {});
+        store.commit('Debug/setDebugChange', {base:false});
+        // 保存成功后，切换tab
+        props.onBack();
+      }
+      // isDenied: false,  不保存，并离开
+      else if (result.isDenied) {
+        props.onBack();
+        store.commit('Debug/setDebugChange', {base:false});
+      }
+      // isDismissed: false 取消,即什么也不做
+      else if (result.isDismissed) {
+        console.log('isDismissed', result.isDismissed)
+      }
+    })
+  }
+  else {
+    props.onBack()
+  }
+
+
 }
 
 </script>

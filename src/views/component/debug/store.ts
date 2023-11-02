@@ -41,10 +41,12 @@ import {ConditionCategory, ConditionType, UsedBy} from "@/utils/enum";
 import {ResponseData} from "@/utils/request";
 import {listEnvVarByServer} from "@/services/environment";
 import {getResponseKey} from "@/utils/comm";
+import cloneDeep from "lodash/cloneDeep";
 
 export interface StateType {
     debugInfo: DebugInfo
     debugData: any;
+    srcDebugData: any;
     invokedMap: any;
 
     requestData: any;
@@ -71,6 +73,7 @@ export interface StateType {
 const initState: StateType = {
     debugInfo: {} as DebugInfo,
     debugData: {},
+    srcDebugData: {},
     invokedMap: {},
 
     requestData: {},
@@ -105,6 +108,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
     mutations: {
         setDebugInfo: Mutation<StateType>;
         setDebugData: Mutation<StateType>;
+        setSrcDebugData: Mutation<StateType>;
 
         clearInvokedMap: Mutation<StateType>;
         putInvokedMap: Mutation<StateType>;
@@ -221,6 +225,9 @@ const StoreModel: ModuleType = {
 
         setDebugData(state, payload) {
             state.debugData = payload;
+        },
+        setSrcDebugData(state, payload) {
+            state.srcDebugData = payload;
         },
         clearInvokedMap(state) {
             state.invokedMap = {}
@@ -368,6 +375,7 @@ const StoreModel: ModuleType = {
                 } as DebugInfo);
 
                 await commit('setDebugData', resp.data);
+                await commit('setSrcDebugData', cloneDeep(resp.data));
 
                 const key = getResponseKey(state.debugInfo)
                 if (state.invokedMap[key]) {
