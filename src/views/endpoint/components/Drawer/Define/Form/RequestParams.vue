@@ -171,7 +171,10 @@ const getRpNumbers = computed(() => {
     if (!sourceData) {
       return '';
     }
-    return sourceData.length ? '(*)'.replace('*', sourceData.length)  : '';
+
+    const globalParams = (selectedMethodDetail.value['globalParams'] || []).filter(item => item.in == value)
+
+    return sourceData.length+globalParams.length ? '(*)'.replace('*', sourceData.length+globalParams.length)  : '';
   }
 })
 
