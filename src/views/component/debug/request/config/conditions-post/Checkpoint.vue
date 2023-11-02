@@ -106,7 +106,9 @@ const operatorsForCode = getCompareOptsForRespCode()
 
 const load = () => {
   console.log('load', props.condition)
-  store.dispatch('Debug/getCheckpoint', props.condition.entityId)
+  if (props.condition.entityId) {
+    store.dispatch('Debug/getCheckpoint', props.condition.entityId)
+  }
 }
 load()
 

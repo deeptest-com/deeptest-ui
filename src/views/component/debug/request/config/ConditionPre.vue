@@ -1,39 +1,36 @@
 <template>
   <div class="pre-condition-main">
     <div class="head">
-      <a-row type="flex" class="row">
-        <a-col flex="1" class="left">
-          <icon-svg type="script" class="icon"  />
-          <span>JavaScript代码</span>
-        </a-col>
+      <div class="left">
+        <icon-svg type="script" class="icon"  />
+        <span>JavaScript代码</span>
+      </div> 
+      <div class="right">
+        <a-button v-if="!isAlternativeCase" size="small" type="primary" @click.stop="save" style="margin-right: 4px">保存</a-button>
 
-        <a-col flex="100px" class="dp-right">
-          <a-button size="small" type="primary" @click.stop="save" style="margin-right: 4px">保存</a-button>
+        <Tips :section="'pre-condition'" :title="'请求前的预处理脚本'" />
 
-          <Tips :section="'pre-condition'" :title="'请求前的预处理脚本'" />
-
-          <a-tooltip overlayClassName="dp-tip-small">
-            <template #title>全屏</template>
-            <FullscreenOutlined @click.stop="openFullscreen()"  class="dp-icon-btn dp-trans-80" />
-          </a-tooltip>
-
-        </a-col>
-      </a-row>
+        <a-tooltip overlayClassName="dp-tip-small">
+          <template #title>全屏</template>
+          <FullscreenOutlined @click.stop="openFullscreen()"  class="dp-icon-btn dp-trans-80" />
+        </a-tooltip>
+      </div>
     </div>
 
     <div class="content">
       <Script />
     </div>
 
-    <FullScreenPopup v-if="fullscreen"
-                     :visible="fullscreen"
-                     :model="scriptData"
-                     :onCancel="closeFullScreen" />
+    <FullScreenPopup 
+      v-if="fullscreen"
+      :visible="fullscreen"
+      :model="scriptData"
+      :onCancel="closeFullScreen" />
   </div>
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch} from "vue";
+import {computed, inject, ref, watch, defineProps, provide} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import { FullscreenOutlined } from '@ant-design/icons-vue';
@@ -47,10 +44,13 @@ import {StateType as Debug} from "@/views/component/debug/store";
 import Script from "./conditions-pre/Script.vue";
 import FullScreenPopup from "./ConditionPopup.vue";
 
-const store = useStore<{  Debug: Debug }>()
-const debugData = computed<any>(() => store.state.Debug.debugData)
-const debugInfo = computed<any>(() => store.state.Debug.debugInfo)
-const scriptData = computed<any>(() => store.state.Debug.scriptData);
+const props = defineProps<{
+  isAlternativeCase?: boolean;
+}>();
+const store = useStore<{  Debug: Debug }>();
+const debugData = computed<any>(() => store.state.Debug.debugData);
+const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
+const scriptData = computed<any>(() => props.isAlternativeCase ? store.state.Debug.alternativeCase.scriptData : store.state.Debug.scriptData);
 
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
@@ -58,7 +58,7 @@ const {t} = useI18n();
 const fullscreen = ref(false)
 
 const getPreConditionScript = () => {
-  console.log('getPreConditionScript')
+console.log('getPreConditionScript')
   store.dispatch('Debug/getPreConditionScript')
 }
 
@@ -86,6 +86,7 @@ const format = (item) => {
   bus.emit(settings.eventEditorAction, {act: settings.eventTypeFormat})
 }
 
+provide('isAlternativeCase', props.isAlternativeCase || false);
 </script>
 
 <style lang="less">
@@ -112,21 +113,21 @@ const format = (item) => {
     height: 42px;
     padding: 2px 3px;
     border-bottom: 1px solid #d9d9d9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-    .row {
-      height: 100%;
-
-      :deep(.ant-col) {
-        align-items: center;
-        display: flex;
-      }
-
-      .left {
-        .icon {
-          margin-right: 5px;
-        }
-      }
+    .left {
+      flex: 1;
+      display: flex;
+      align-items: center;
     }
+
+    .right {
+      display: flex;
+      align-items: center;
+    }
+      
   }
   .content {
     flex: 1;

@@ -75,17 +75,17 @@
 
           <a-tab-pane key="pre-condition" tab="预处理">
             <CaseTips type="pre-condition" @reset="onReset" />
-            <PreCondition :isIndependent="true" />
+            <PreCondition :isAlternativeCase="true" />
           </a-tab-pane>
 
           <a-tab-pane key="post-condition" tab="后置处理">
             <CaseTips type="post-condition" @reset="onReset" />
-            <PostCondition :isIndependent="true" />
+            <PostCondition :isAlternativeCase="true" />
           </a-tab-pane>
 
           <a-tab-pane key="assertion" tab="断言">
             <CaseTips type="assertion" @reset="onReset" />
-            <Assertion :isIndependent="true" />
+            <Assertion :isAlternativeCase="true" />
           </a-tab-pane>
 
         </a-tabs>
@@ -107,7 +107,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineProps, inject, provide, reactive, ref, watch} from "vue";
+import {computed, defineProps, provide, ref, watch} from "vue";
 import {ResultStatus, UsedBy} from "@/utils/enum";
 import {useStore} from "vuex";
 import cloneDeep from "lodash/cloneDeep";
@@ -328,7 +328,8 @@ watch(() => {
   console.log('当前用例信息:', val);
 }, {
   immediate: true,
-})
+});
+
 </script>
 
 <style lang="less">
