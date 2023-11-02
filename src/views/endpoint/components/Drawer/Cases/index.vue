@@ -3,14 +3,15 @@
     <CaseList
         v-if="show === 'list'"
         :onDesign="design"
-        :onGenerate="generate"/>
+        :open-alternative-case="showAlternativeCases"/>
 
     <CaseDesign
         v-if="show === 'design'"
         :onBack="back" />
 
     <AlternativeCase
-        v-if="show === 'generate'"
+        v-if="show === 'showAlternativeCases'"
+        :record="alternativeRecord"
         :onBack="back" />
   </div>
 </template>
@@ -27,6 +28,7 @@ const {t} = useI18n()
 
 const store = useStore<{ Endpoint }>();
 const endpoint = computed<any>(() => store.state.Endpoint.endpointDetail);
+const alternativeRecord = ref({});
 
 const emit = defineEmits(['update:showList'])
 
@@ -55,12 +57,13 @@ const design = (record) => {
   store.commit('Endpoint/setEndpointCaseDetail', record);
 }
 
-const generate = (record) => {
-  console.log('generate', record)
-  show.value = 'generate'
+const showAlternativeCases = (record) => {
+  console.log('showAlternativeCases', record)
+  store.commit('Endpoint/setEndpointCaseDetail', record);
+  show.value = 'showAlternativeCases';
+  alternativeRecord.value = record;
   emit('update:showList', false)
 
-  store.commit('Endpoint/setEndpointCaseDetail', record);
 }
 
 const back = () => {
