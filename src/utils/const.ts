@@ -23,7 +23,8 @@ export const MonacoOptions = {
     tabSize: 2,
     autoIndent: true,
     formatOnPaste: true,
-    formatOnType: true
+    formatOnType: true,
+    isInitFormat: true, // 是否初始化时，就格式化
 }
 
 export const pattern = {

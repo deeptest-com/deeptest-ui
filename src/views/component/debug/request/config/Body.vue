@@ -93,7 +93,10 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 const codeLang = computed(() => {
   return getCodeLang()
 })
-const editorOptions = ref(Object.assign({usedWith: 'request'}, MonacoOptions))
+const editorOptions = ref(Object.assign({usedWith: 'request'}, {
+  ...MonacoOptions,
+  isInitFormat:true,
+}))
 const bodyTypes = ref(getRequestBodyTypes())
 const timestamp = ref('')
 const monacoEditor = ref();

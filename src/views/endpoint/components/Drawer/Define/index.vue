@@ -90,7 +90,7 @@ onMounted(() => {
   nextTick(() => {
     setTimeout(() => {
       store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value) || null);
-    }, 1000);
+    }, 200);
   })
 })
 

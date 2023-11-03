@@ -72,6 +72,11 @@ const saveDebugInterface = async (data) => {
   store.commit("Global/setSpinning",false)
   store.commit('Debug/setDebugChange', {base:false});
 
+  setTimeout(() => {
+    store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
+  }, 200)
+
+
   if (res === true) {
     notifySuccess(`保存成功`);
   } else {

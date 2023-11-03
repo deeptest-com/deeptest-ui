@@ -137,7 +137,7 @@ onMounted(async () => {
   await nextTick(() => {
     setTimeout(() => {
       store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
-    },1000);
+    },200);
   })
 })
 

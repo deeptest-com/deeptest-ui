@@ -167,8 +167,10 @@ export default defineComponent({
       this.$emit('editorDidMount', this.editor)
 
       setTimeout(() => {
-        this.formatDocInit(editor)
-      }, 500)
+        if(options?.isInitFormat) {
+          this.formatDocInit(editor)
+        }
+      }, 100)
     },
 
     formatDocInit: (editor) => {
@@ -181,7 +183,7 @@ export default defineComponent({
       nextTick(() => {
         editor.getAction('editor.action.formatDocument')?.run()
       })
-    }, 1000),
+    }, 100),
 
     _setModel(value, original) {
       const { language } = this;
