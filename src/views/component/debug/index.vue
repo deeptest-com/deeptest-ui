@@ -7,6 +7,7 @@
                     :onSaveAsCase="saveAsCase"
                     :onSync="syncDebugData"
                     :baseUrlDisabled="baseUrlDisabled"
+                    :checkDataChange="checkDataChange"
                     :urlDisabled="urlDisabled" />
 <!--        <Name v-if="usedBy === UsedBy.ScenarioDebug" />-->
         <DebugConfig />
@@ -119,6 +120,11 @@ const props = defineProps({
     type: Boolean,
     required: false,
     default: true
+  },
+  checkDataChange: {
+    type: Boolean,
+    required: false,
+    default: false
   },
 })
 

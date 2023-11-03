@@ -160,6 +160,14 @@ watch(model, (newVal) => {
   }, {immediate: true, deep: true}
 )
 
+// watch(() => {
+//   return model.value
+// },(newVal,oldValue) => {
+//   console.log('model.value222 提取器',newVal,oldValue);
+// },{
+//   deep:true
+// })
+
 const props = defineProps({
   condition: {
     type: Object,

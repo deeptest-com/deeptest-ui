@@ -45,7 +45,7 @@
       <div class="save">
         <a-button trigger="click" class="dp-bg-light"
                   @click="save"
-                  :disabled="!isPathValid">
+                  :disabled="!isPathValid || (!debugChangeBase && checkDataChange)">
           <icon-svg class="icon dp-icon-with-text" type="save" />
           保存
         </a-button>
@@ -112,7 +112,7 @@ const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpoi
 const servers = computed<any[]>(() => store.state.Debug.serves);
 const currService = computed(() => store.state.ServeGlobal.currServe);
 const currServe = computed(() => store.state.Debug.currServe);
-
+const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
 const props = defineProps({
   onSave: {
     type: Function as PropType<(data) => void>,
@@ -138,6 +138,11 @@ const props = defineProps({
     default: true
   },
   urlDisabled: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
+  checkDataChange: {
     type: Boolean,
     required: false,
     default: false
@@ -313,6 +318,14 @@ watch(() => {
 }, {
   immediate: true
 })
+
+onMounted(() => {
+  // 离开前保存数据
+  bus.on(settings.eventLeaveDebugSaveData, (data) => {
+   save(data);
+  })
+})
+
 </script>
 
 <style lang="less" scoped>

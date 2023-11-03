@@ -7,6 +7,7 @@
       <div id="debug-bottom">
         <DebugComp :onSaveDebugData="saveDebugInterface"
                    :onSaveAsCase="saveAsCase"
+                   :checkDataChange="true"
                    :showMethodSelection="false" />
       </div>
     </div>
@@ -34,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineEmits, provide, ref} from "vue";
+import {computed, defineEmits, nextTick, onMounted, provide, ref} from "vue";
 import {useI18n} from "vue-i18n";
 import {Form, notification} from 'ant-design-vue';
 import {useStore} from "vuex";
@@ -47,6 +48,8 @@ import DebugMethod from './method.vue';
 import DebugComp from '@/views/component/debug/index.vue';
 import SaveAsCasePopup from "../Cases/edit.vue";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import {defineExpose} from "vue/dist/vue";
+import cloneDeep from "lodash/cloneDeep";
 
 const store = useStore<{ Debug: Debug, Endpoint: Endpoint }>();
 const endpointDetail = computed<any>(() => store.state.Endpoint.endpointDetail);
@@ -67,6 +70,9 @@ const saveDebugInterface = async (data) => {
   store.commit("Global/setSpinning",true)
   const res = await store.dispatch('Debug/save', data)
   store.commit("Global/setSpinning",false)
+
+  resetDebugData();
+
 
   if (res === true) {
     notifySuccess(`保存成功`);
@@ -104,6 +110,23 @@ const saveAsCancel = () => {
   console.log('saveAsVisible')
   saveAsVisible.value = false
 }
+
+const resetDebugData = () => {
+  store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
+  store.commit('Debug/setDebugChange', {base:false});
+}
+
+// onMounted(() => {
+//   resetDebugData();
+// })
+
+onMounted(() => {
+  resetDebugData()
+})
+
+defineExpose({
+  saveDebugInterface,
+});
 
 </script>
 

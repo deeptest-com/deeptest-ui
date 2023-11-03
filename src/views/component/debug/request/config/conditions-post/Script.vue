@@ -90,6 +90,7 @@ const load = () => {
   console.log('load script ...', props.condition)
   store.dispatch('Debug/getScript', props.condition.entityId)
   store.dispatch('Snippet/listJslibNames')
+
 }
 load()
 
@@ -149,6 +150,13 @@ const cancel = () => {
     props.finish()
   }
 }
+// watch(() => {
+//   return model.value
+// },(newVal,oldVal) => {
+//   console.log('model.value222 script：',newVal,oldVal)
+// },{
+//   deep:true
+// })
 
 onMounted(() => {
   console.log('onMounted')

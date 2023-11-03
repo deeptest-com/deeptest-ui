@@ -103,6 +103,13 @@ const cancel = () => {
     props.finish()
   }
 }
+// watch(() => {
+//   return model.value
+// },(newVal,oldVal) => {
+//   console.log('model.value222 cookie：',newVal,oldVal)
+// },{
+//   deep:true
+// })
 
 onMounted(() => {
   console.log('onMounted')

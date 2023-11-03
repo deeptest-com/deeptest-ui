@@ -266,6 +266,7 @@ export function removeExtraViewInfo(val: Object | any, isRemoveRefContent = fals
         if (isArray(obj.type)) {
             (function fn(obj: any) {
                 delete obj?.extraViewInfo;
+                delete obj?.types;
                 if (!isArray(obj.type)) {
                     traverse(obj);
                     return;
