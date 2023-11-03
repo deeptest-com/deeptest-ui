@@ -225,7 +225,8 @@ function confirmDeleteCode() {
     return item === selectedCode.value;
   })
   selectedCodes.value.splice(index, 1);
-  selectedCode.value = selectedCodes.value?.[index - 1] || '200';
+  selectedMethodDetail.value.responseBodies = selectedMethodDetail.value.responseBodies.filter(item=>item.code!=selectedCode.value)
+  selectedCode.value = selectedMethodDetail.value.responseBodies.length? selectedMethodDetail.value.responseBodies[0].code : '200';
   selectedMethodDetail.value.responseCodes = [...selectedCodes.value].toString();
   store.commit('Endpoint/setSelectedMethodDetail', selectedMethodDetail.value);
 }

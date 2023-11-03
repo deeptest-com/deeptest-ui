@@ -23,16 +23,16 @@
 <script setup lang="ts">
 import {useI18n} from "vue-i18n";
 import { defineProps, nextTick, ref } from 'vue'
-import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons-vue";
 
 import {Multipane, MultipaneResizer} from '@/components/Resize/index';
 import PutAway from '@/assets/images/put-away.png';
+import bus from "@/utils/eventBus";
+import settings from "@/config/settings";
 
 const {t} = useI18n();
-const props = defineProps(['containerStyle', 'showExpand'])
+defineProps(['containerStyle', 'showExpand'])
 const isFold = ref(true);
 const paneLeft = ref();
-const foldIconLeft = ref('288px');
 
 const toggle = async () => {
   isFold.value = !isFold.value;
@@ -40,6 +40,7 @@ const toggle = async () => {
 
 const handlePaneResize = (...args) => {
   isFold.value = true;
+  bus.emit(settings.paneResizeTop);
 };
 
 </script>
