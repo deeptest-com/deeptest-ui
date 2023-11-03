@@ -76,7 +76,7 @@ watch(
   },
   (newVal) => {
     if (!newVal) return;
-    const { resContent = {}, reqContent = {} }: any = props.data;
+    const { resContent = {}, reqContent = {}, invokeId }: any = props.data;
     Object.assign(interfaceResDetail, {
       ...resContent,
       bodyInfo: {
@@ -87,6 +87,7 @@ watch(
       headers: resContent.headers || [],
       cookies: resContent.cookies || [],
       requestData: reqContent,
+      invokeId,
     });
   },
   {

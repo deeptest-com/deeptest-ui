@@ -49,6 +49,12 @@
         </template>
 
         <template #action="{ record }">
+          <!--
+          <a-button type="link" @click="() => generate(record)">
+            <AppstoreAddOutlined title="备选用例" />
+          </a-button>
+        -->
+
           <a-button type="link" @click="() => copy(record)">
             <CopyOutlined title="复制" />
           </a-button>
