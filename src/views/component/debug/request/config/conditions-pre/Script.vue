@@ -46,11 +46,10 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, inject, onBeforeUnmount, onMounted, reactive, ref, watch} from "vue";
-import {message, Form, notification} from 'ant-design-vue';
+import {computed, inject, onBeforeUnmount, onMounted, ref, watch, defineProps} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import {UsedBy} from "@/utils/enum";
+import cloneDeep from "lodash/cloneDeep";
 
 import {StateType as Debug} from "@/views/component/debug/store";
 import {StateType as Snippet} from "@/store/snippet";
@@ -63,8 +62,15 @@ import Tips from "@/components/Tips/index.vue";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import {StateType as ProjectStateType} from "@/store/project";
 
-const useForm = Form.useForm;
-const usedBy = inject('usedBy') as UsedBy
+const props = defineProps({
+  fullScreen: {
+    type: Boolean,
+    default: false,
+    required: false,
+  }
+})
+
+const isAlternativeCase = inject('isAlternativeCase', false);
 const {t} = useI18n();
 
 const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet: Snippet }>();
@@ -72,7 +78,10 @@ const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet:
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
-const scriptData = computed<any>(() => store.state.Debug.scriptData);
+const scriptData = computed<any>(() => {
+  console.log('alternativeCase', store.state.Debug.alternativeCase);
+  return isAlternativeCase ? store.state.Debug.alternativeCase.scriptData : store.state.Debug.scriptData
+});
 const jslibNames = computed<any>(() => store.state.Snippet.jslibNames);
 
 store.dispatch('Snippet/listJslibNames')
@@ -84,22 +93,19 @@ watch(scriptData, (newVal) => {
 }, {immediate: true, deep: true})
 
 const editorOptions = ref(Object.assign({
-      usedWith: 'request',
-      initTsModules: true,
+  usedWith: 'request',
+  initTsModules: true,
 
-      allowNonTsExtensions: true,
-      minimap: {
-        enabled: false
-      },
-    }, MonacoOptions
-))
+  allowNonTsExtensions: true,
+  minimap: {
+    enabled: false
+  },
+}, MonacoOptions));
 
-const addSnippet = (snippetName) => {
-  console.log('addSnippet', snippetName)
-  store.dispatch('Debug/addSnippet', snippetName)
+const addSnippet = async (snippetName) => {
+  store.dispatch('Debug/addSnippet', { name: snippetName, isAlternativeCase })
 }
 const editorChange = (newScriptCode) => {
-  console.log('editorChange')
   scriptData.value.content = newScriptCode;
 }
 
@@ -118,8 +124,13 @@ const save = async () => {
   }
 }
 
-onMounted(() => {
-  console.log('onMounted')
+onMounted(async () => {
+  if (isAlternativeCase && !props.fullScreen) {
+    await store.dispatch('Debug/getPreConditionScript');
+    store.commit('Debug/setAlternativeCase', {
+      scriptData: cloneDeep(store.state.Debug.scriptData),
+    })
+  }
   bus.on(settings.eventConditionSave, save);
   bus.on(settings.paneResizeTop, () => {
     monacoEditor.value?.resizeIt({
@@ -135,8 +146,13 @@ onBeforeUnmount( () => {
   bus.off(settings.eventConditionSave, save);
 })
 
-const labelCol = { span: 0 }
-const wrapperCol = { span: 24 }
+watch(() => {
+  return isAlternativeCase;
+}, val => {
+  console.error('isAlternativeCase', val);
+}, {
+  immediate: true,
+})
 
 </script>
 

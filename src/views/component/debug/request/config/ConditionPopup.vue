@@ -23,6 +23,7 @@
 
         <PreScript v-if="model.conditionEntityType === ConditionType.script"
                 :condition="model"
+                :fullScreen="true"
                 :finish="onCancel" />
 
         <PostScript v-if="model.entityType === ConditionType.script"
