@@ -620,18 +620,16 @@ watch(() => {
 }, () => {
   const cur = debugData.value;
   const src = srcDebugData.value;
-  if(!cur?.usedBy || !src?.usedBy){
-    return;
-  }
-  console.log('832222调试信息',cur,src);
+  // 处理格式化的数据
   const isChange = !equalObjectByLodash(src, cur);
-  // 说明切换方法了，也需要监听一下
-  // if(newVal?.method !== oldValue?.method){
-  //   store.commit('Debug/setDebugChange', {base:false});
-  // }else {
-  //
-  // }
-  store.commit('Debug/setDebugChange', {base:isChange});
+  const isInit = cur?.endpointInterfaceId && src?.endpointInterfaceId;
+  console.log('832222调试信息2',cur,src,isChange);
+  if(isInit){
+    store.commit('Debug/setDebugChange', {base:isChange});
+  }else {
+    store.commit('Debug/setDebugChange', {base:false});
+  }
+
 },{
   deep: true
 })
@@ -643,14 +641,14 @@ watch(() => {
 }, (newVal, oldValue) => {
   const src = srcEndpointDetail.value;
   const cur = endpointDetail.value;
-  if(!src || !cur){
-    return;
-  }
+  const isInit = cur?.id && src?.id;
   const isChange = !equalObjectByLodash(cur, src);
-  console.log('8322222 isDefineChange', '改变了',isChange);
-  // console.log('8322222 isDefineChange', '改变了',JSON.stringify(cur));
-  // console.log('8322222 isDefineChange', '改变了',JSON.stringify(src));
-  store.commit('Endpoint/setIsDefineChange', isChange);
+  console.log('832222调试信息1',cur,src,isChange);
+  if(isInit){
+    store.commit('Endpoint/setIsDefineChange', isChange);
+  }else {
+    store.commit('Endpoint/setIsDefineChange', false);
+  }
 }, {
   deep: true
 });
@@ -673,7 +671,6 @@ function closeDrawer() {
       else if (result.isDenied) {
         drawerVisible.value = false;
         store.commit('Endpoint/setIsDefineChange', false);
-        store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value) || null);
       }
       // isDismissed: false 取消,即什么也不做
       else if (result.isDismissed) {

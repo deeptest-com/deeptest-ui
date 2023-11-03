@@ -85,11 +85,9 @@ const changeMethodCallback = async (e) => {
 
   store.commit('Debug/setDebugChange', {base:false});
   store.commit('Endpoint/setIsDefineChange', false);
-  await nextTick(() => {
-    setTimeout(() => {
-      store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
-    },500);
-  })
+
+  store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
+
 }
 
 const initMethod = async () => {

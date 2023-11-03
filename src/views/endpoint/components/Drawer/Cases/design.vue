@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, onMounted, provide, ref, watch,nextTick} from 'vue';
+import {computed, defineProps, onMounted, provide, ref, watch, nextTick, onUnmounted} from 'vue';
 import {useStore} from "vuex";
 import debounce from "lodash.debounce";
 import {UsedBy} from "@/utils/enum";
@@ -63,11 +63,11 @@ const props = defineProps({
 
 const loadDebugData = debounce(async () => {
   console.log('loadDebugData', endpointCase.value.id)
-
-  store.dispatch('Debug/loadDataAndInvocations', {
+  await store.dispatch('Debug/loadDataAndInvocations', {
     caseInterfaceId: endpointCase.value.id,
     usedBy: usedBy,
   });
+  resetDebugData();
 }, 300)
 
 watch(endpointCase, (newVal) => {
@@ -86,7 +86,9 @@ const saveCaseInterface = async (e) => {
   Object.assign(data, {shareVars: null, envVars: null, globalEnvVars: null, globalParamVars: null})
 
   const res = await store.dispatch('Endpoint/saveCaseDebugData', data)
-  store.commit('Debug/setDebugChange', {base:false});
+
+  resetDebugData();
+
   if (res === true) {
     notifySuccess(`保存成功`);
   } else {
@@ -131,15 +133,18 @@ const back = () => {
 }
 
 onMounted(async () => {
-  // todo 定制代码，需要再优化，可以单独提取处理
-  store.commit('Debug/setDebugChange', {base:false});
-  store.commit('Endpoint/setIsDefineChange', false);
-  await nextTick(() => {
-    setTimeout(() => {
-      store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
-    },200);
-  })
+  resetDebugData();
 })
+
+onUnmounted(() => {
+  store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
+  store.commit('Debug/setDebugChange', {base:false});
+})
+
+const resetDebugData = () => {
+  store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
+  store.commit('Debug/setDebugChange', {base:false});
+}
 
 </script>
 

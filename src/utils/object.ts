@@ -89,9 +89,16 @@ export function equalObjectByXpath(obj1: Object, obj2: Object, xpath: Array<stri
  * @returns {boolean}
  *
  * */
-export function equalObjectByLodash(obj1: Object, obj2: Object): boolean {
+export function equalObjectByLodash(obj1: Object, obj2: Object,): boolean {
     const o1 = cloneByJSON(obj1);
     const o2 = cloneByJSON(obj2);
+    // 编辑器会做格式化，所以需要去除空格和换行符
+    if (o1?.body && typeof o1.body === 'string') {
+        o1.body = o1.body.replace(/\s|\n/g, '')
+    }
+    if (o2?.body && typeof o2.body === 'string') {
+        o2.body = o2.body.replace(/\s|\n/g, '')
+    }
     // console.log(8322222, o1, o2, _.isEqual(o1, o2));
     return _.isEqual(o1, o2);
 }

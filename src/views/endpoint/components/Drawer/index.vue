@@ -33,7 +33,7 @@
     </template>
     <template #tabContent>
       <div class="tab-pane">
-        <EndpointDefine v-if="activeTabKey === 'request'"
+        <EndpointDefine v-if="activeTabKey === 'request' && endpointDetail?.id"
                         @switchMode="switchMode"/>
 
         <EndpointDebug v-if="activeTabKey === 'run'"
@@ -95,7 +95,7 @@ import settings from "@/config/settings";
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal, Global,Debug }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
-
+const debugData: any = computed<Endpoint>(() => store.state.Debug.debugData);
 // 调试基本信息是否有变化，因为检查点等单独保存
 const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
 const props = defineProps({
@@ -139,7 +139,6 @@ async function changeTab(value) {
         activeTabKey.value = value;
         stickyKey.value++;
         store.commit('Endpoint/setIsDefineChange', false);
-        store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value) || null);
       }
       // isDismissed: false 取消,即什么也不做
       else if (result.isDismissed) {

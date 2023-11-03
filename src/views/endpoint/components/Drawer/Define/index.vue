@@ -36,7 +36,7 @@ import {
   ref,
   defineProps,
   defineEmits,
-  computed, watch, provide, onMounted, nextTick,
+  computed, watch, provide, onMounted, nextTick, onUnmounted,
 } from 'vue';
 import {useStore} from "vuex";
 import MonacoEditor from "@/components/Editor/MonacoEditor.vue";
@@ -87,11 +87,13 @@ watch(() => {
 })
 
 onMounted(() => {
-  nextTick(() => {
-    setTimeout(() => {
-      store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value) || null);
-    }, 200);
-  })
+  setTimeout(() => {
+    store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value));
+  }, 500);
+})
+
+onUnmounted(() => {
+  store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value));
 })
 
 

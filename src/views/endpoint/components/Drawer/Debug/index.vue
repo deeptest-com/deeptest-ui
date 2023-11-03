@@ -70,11 +70,8 @@ const saveDebugInterface = async (data) => {
   store.commit("Global/setSpinning",true)
   const res = await store.dispatch('Debug/save', data)
   store.commit("Global/setSpinning",false)
-  store.commit('Debug/setDebugChange', {base:false});
 
-  setTimeout(() => {
-    store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
-  }, 200)
+  resetDebugData();
 
 
   if (res === true) {
@@ -114,17 +111,17 @@ const saveAsCancel = () => {
   saveAsVisible.value = false
 }
 
-onMounted(() => {
-  store.commit('Debug/setDebugChange', {
-    base:false,
-  });
+const resetDebugData = () => {
+  store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
+  store.commit('Debug/setDebugChange', {base:false});
+}
 
-})
+// onMounted(() => {
+//   resetDebugData();
+// })
 
 onMounted(() => {
-  store.commit('Debug/setDebugChange', {
-    base:false,
-  });
+  resetDebugData()
 })
 
 defineExpose({
