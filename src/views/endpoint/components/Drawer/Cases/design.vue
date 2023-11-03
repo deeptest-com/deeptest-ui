@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, provide, ref, watch} from 'vue';
+import {computed, defineProps, onMounted, provide, ref, watch,nextTick} from 'vue';
 import {useStore} from "vuex";
 import debounce from "lodash.debounce";
 import {UsedBy} from "@/utils/enum";
@@ -128,9 +128,18 @@ const back = () => {
   else {
     props.onBack()
   }
-
-
 }
+
+onMounted(async () => {
+  // todo 定制代码，需要再优化，可以单独提取处理
+  store.commit('Debug/setDebugChange', {base:false});
+  store.commit('Endpoint/setIsDefineChange', false);
+  await nextTick(() => {
+    setTimeout(() => {
+      store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
+    },1000);
+  })
+})
 
 </script>
 

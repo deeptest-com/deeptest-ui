@@ -36,13 +36,14 @@ import {
   ref,
   defineProps,
   defineEmits,
-  computed, watch, provide, onMounted,
+  computed, watch, provide, onMounted, nextTick,
 } from 'vue';
 import {useStore} from "vuex";
 import MonacoEditor from "@/components/Editor/MonacoEditor.vue";
 import {CodeOutlined, BarsOutlined} from '@ant-design/icons-vue';
 import {Endpoint} from "@/views/endpoint/data";
 import {MonacoOptions} from '@/utils/const';
+import cloneDeep from "lodash/cloneDeep";
 const store = useStore<{ Endpoint, ProjectGlobal }>();
 const endpointDetail = computed<Endpoint[]>(() => store.state.Endpoint.endpointDetail);
 const endpointDetailYamlCode = computed<any>(() => store.state.Endpoint.endpointDetailYamlCode);
@@ -83,6 +84,14 @@ watch(() => {
   emit('switchMode', newVal);
 },{
   immediate:true
+})
+
+onMounted(() => {
+  nextTick(() => {
+    setTimeout(() => {
+      store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value) || null);
+    }, 1000);
+  })
 })
 
 

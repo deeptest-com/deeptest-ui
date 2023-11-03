@@ -810,8 +810,25 @@ const StoreModel: ModuleType = {
             res.data.updatedAt = momentUtc(res.data.updatedAt);
 
             if (res.code === 0) {
+                // 处理 examples 不一致的情况
+                try {
+                    res.data?.interfaces?.forEach((item) => {
+                        const examples = JSON.parse(item?.requestBody?.examples || '[]');
+                        item.requestBody.examples = JSON.stringify(examples || '[]');
+                        item?.responseBodies?.forEach((codeItem)=>{
+                            const examples = JSON.parse(codeItem?.examples || '[]');
+                            codeItem.examples = JSON.stringify(examples || '[]');
+                        })
+                    })
+                }catch (e){
+                    console.error(e)
+                }
+
                 await commit('setEndpointDetail', res.data || null);
-                await commit('initEndpointDetail', cloneDeep(res.data) || null);
+                // setTimeout(() => {
+                //     commit('initEndpointDetail', cloneDeep(res.data) || null);
+                // }, 200);
+                // await commit('initEndpointDetail', cloneDeep(res.data) || null);
                 state.endpointDetail?.interfaces?.forEach((item) => {
                     commit('setInterfaceMethodToObjMap', {
                         method: item.method,

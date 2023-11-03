@@ -616,29 +616,27 @@ const srcDebugData: any = computed<Endpoint>(() => store.state.Debug.srcDebugDat
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 
 watch(() => {
-  return debugData.value
-}, (newVal,oldValue) => {
-  if(!newVal?.usedBy || !oldValue?.usedBy){
+  return [debugData.value,srcDebugData.value]
+}, () => {
+  const cur = debugData.value;
+  const src = srcDebugData.value;
+  if(!cur?.usedBy || !src?.usedBy){
     return;
   }
-  console.log('832222调试信息',newVal,oldValue);
+  console.log('832222调试信息',cur,src);
+  const isChange = !equalObjectByLodash(src, cur);
   // 说明切换方法了，也需要监听一下
-  if(newVal?.method !== oldValue?.method){
-    store.commit('Debug/setDebugChange', {base:false});
-  }else {
-    store.commit('Debug/setDebugChange', {base:true});
-  }
+  // if(newVal?.method !== oldValue?.method){
+  //   store.commit('Debug/setDebugChange', {base:false});
+  // }else {
+  //
+  // }
+  store.commit('Debug/setDebugChange', {base:isChange});
 },{
   deep: true
 })
 
-watch(() => {
-  return debugChange.value.base
-},(newVal) => {
-  console.log('832222调试信息',newVal)
-},{
-  deep: true
-})
+
 // 接口信息改变了
 watch(() => {
   return [endpointDetail.value,srcEndpointDetail.value]
@@ -648,8 +646,10 @@ watch(() => {
   if(!src || !cur){
     return;
   }
-  const isChange = !equalObjectByLodash(cur, srcEndpointDetail.value);
+  const isChange = !equalObjectByLodash(cur, src);
   console.log('8322222 isDefineChange', '改变了',isChange);
+  // console.log('8322222 isDefineChange', '改变了',JSON.stringify(cur));
+  // console.log('8322222 isDefineChange', '改变了',JSON.stringify(src));
   store.commit('Endpoint/setIsDefineChange', isChange);
 }, {
   deep: true

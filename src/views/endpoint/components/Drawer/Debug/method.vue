@@ -12,7 +12,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import {computed, ref, inject, watch, onMounted} from 'vue';
+import {computed, ref, inject, watch, onMounted, nextTick} from 'vue';
 import {useStore} from "vuex";
 
 import {requestMethodOpts} from '@/config/constant';
@@ -31,6 +31,7 @@ const endpointDetail = computed<any>(() => store.state.Endpoint.endpointDetail);
 const interfaceMethodToObjMap = computed<any>(() => store.state.Endpoint.interfaceMethodToObjMap);
 const isDefineChange: any = computed<any>(() => store.state.Endpoint.isDefineChange);
 const debugChange: any = computed<Endpoint>(() => store.state.Debug.debugChange);
+const debugData: any = computed<Endpoint>(() => store.state.Debug.debugData);
 const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
 const selectedMethod = ref('GET');
 
@@ -81,8 +82,14 @@ const changeMethodCallback = async (e) => {
   } else {
     await store.commit('Endpoint/setSelectedMethodDetail', {});
   }
+
   store.commit('Debug/setDebugChange', {base:false});
   store.commit('Endpoint/setIsDefineChange', false);
+  await nextTick(() => {
+    setTimeout(() => {
+      store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
+    },1000);
+  })
 }
 
 const initMethod = async () => {

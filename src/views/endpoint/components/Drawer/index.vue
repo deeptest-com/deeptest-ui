@@ -22,7 +22,7 @@
     <template #tabHeader>
       <DetailTabHeader :tab-list="EndpointTabsList" :show-btn="true" @change-tab="changeTab" :active-key="activeTabKey">
         <template #btn>
-          <a-button v-if="activeTabKey === 'request' && showSaveBtn" type="primary" @click="save">
+          <a-button v-if="activeTabKey === 'request' && showSaveBtn" type="primary" @click="save" :disabled="!isDefineChange || isInit">
             <template #icon>
               <icon-svg class="icon dp-icon-with-text" type="save"/>
             </template>
@@ -60,7 +60,18 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineEmits, defineProps, provide, ref, watch, defineExpose, onUnmounted} from 'vue';
+import {
+  computed,
+  defineEmits,
+  defineProps,
+  provide,
+  ref,
+  watch,
+  defineExpose,
+  onUnmounted,
+  nextTick,
+  onMounted
+} from 'vue';
 import {useStore} from "vuex";
 import {useRouter} from "vue-router";
 // ES6 Modules or TypeScript
@@ -84,6 +95,7 @@ import settings from "@/config/settings";
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal, Global,Debug }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
+
 // 调试基本信息是否有变化，因为检查点等单独保存
 const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
 const props = defineProps({
@@ -267,6 +279,13 @@ onUnmounted(() => {
   store.commit('Endpoint/setIsDefineChange', false);
   store.commit('Debug/setDebugChange', {base: false});
 })
+
+
+const isInit = ref(true);
+onMounted(() => {
+  isInit.value = false;
+})
+
 </script>
 
 <style lang="less" scoped>

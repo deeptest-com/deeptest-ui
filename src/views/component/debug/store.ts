@@ -375,7 +375,7 @@ const StoreModel: ModuleType = {
                 } as DebugInfo);
 
                 await commit('setDebugData', resp.data);
-                await commit('setSrcDebugData', cloneDeep(resp.data));
+
 
                 const key = getResponseKey(state.debugInfo)
                 if (state.invokedMap[key]) {

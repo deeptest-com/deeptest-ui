@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineEmits, onMounted, provide, ref} from "vue";
+import {computed, defineEmits, nextTick, onMounted, provide, ref} from "vue";
 import {useI18n} from "vue-i18n";
 import {Form, notification} from 'ant-design-vue';
 import {useStore} from "vuex";
@@ -49,6 +49,7 @@ import DebugComp from '@/views/component/debug/index.vue';
 import SaveAsCasePopup from "../Cases/edit.vue";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import {defineExpose} from "vue/dist/vue";
+import cloneDeep from "lodash/cloneDeep";
 
 const store = useStore<{ Debug: Debug, Endpoint: Endpoint }>();
 const endpointDetail = computed<any>(() => store.state.Endpoint.endpointDetail);
@@ -112,6 +113,7 @@ onMounted(() => {
   store.commit('Debug/setDebugChange', {
     base:false,
   });
+
 })
 
 onMounted(() => {
