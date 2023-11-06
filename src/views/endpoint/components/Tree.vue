@@ -5,6 +5,7 @@
         <a-input-search
             class="search-input"
             v-model:value="searchValue"
+            :allowClear="true"
             placeholder="搜索接口分类"/>
         <div class="add-btn" @click="newCategorie(treeDataCategory?.[0])">
           <PlusOutlined style="font-size: 16px;"/>

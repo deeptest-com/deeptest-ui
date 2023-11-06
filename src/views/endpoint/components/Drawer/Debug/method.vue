@@ -36,7 +36,6 @@ const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugCha
 const selectedMethod = ref('GET');
 
 const changeMethod = async (e?:any) => {
-
   // 切换方法时，如果有变化，需要提示用户保存
   // 调试模块数据有变化，需要提示用户是否要保存调试数据
   if(debugChangeBase.value){

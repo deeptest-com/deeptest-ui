@@ -178,7 +178,7 @@ import {
   computed, ref, onMounted,
   watch, createVNode, onUnmounted
 } from 'vue';
-import {useRouter} from 'vue-router';
+import {onBeforeRouteLeave, useRouter} from 'vue-router';
 import {useStore} from "vuex";
 import debounce from "lodash.debounce";
 import {ColumnProps} from 'ant-design-vue/es/table/interface';
@@ -655,7 +655,7 @@ watch(() => {
 
 const drawerRef:any = ref(null);
 // 关闭弹框时，如果接口信息改变了，弹出提示
-function closeDrawer() {
+function closeDrawer(callback?:any) {
   // 如果接口定义有变化，需要提示用户保存
   if (isDefineChange.value) {
     Swal.fire({
@@ -706,6 +706,53 @@ function closeDrawer() {
     store.commit('Endpoint/setIsDefineChange', false);
   }
 }
+
+// 与 beforeRouteLeave 相同，无法访问 `this`
+onBeforeRouteLeave(async (to, from,next) => {
+  // 如果接口定义有变化，需要提示用户保存
+  if (isDefineChange.value) {
+    const result = await Swal.fire({
+      ...settings.SwalLeaveSetting
+    });
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      await drawerRef.value?.save();
+      next();
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      next();
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('保留');
+      return false;
+    }
+  }
+  // 调试模块数据有变化，需要提示用户是否要保存调试数据
+  else if(debugChangeBase.value){
+    const result = await Swal.fire({
+      ...settings.SwalLeaveSetting
+    });
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      bus.emit(settings.eventLeaveDebugSaveData, {});
+      next()
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      next()
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      return false;
+    }
+  }
+  else {
+    next();
+  }
+})
+
 /*************************************************
  * ::::离开保存代码逻辑部分end
  ************************************************/

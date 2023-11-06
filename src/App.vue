@@ -4,14 +4,13 @@
     </a-config-provider>
 </template>
 <script lang="ts">
-import {defineComponent, computed, onMounted, watch, ref} from "vue";
+import {defineComponent, computed, onMounted, watch, ref,onUnmounted} from "vue";
 import { antdMessages } from "@/config/i18n";
 import { setHtmlLang } from "@/utils/i18n";
 import { useI18n } from "vue-i18n";
 // import Notification from "./components/others/Notification.vue";
 import renderfeedback from "@/utils/feedback";
 import {useStore} from "vuex";
-
 import { StateType as UserStateType, CurrentUser } from "@/store/user";
 import settings from "@/config/settings";
 import {isElectronEnv} from "@/utils/agentEnv";
@@ -27,8 +26,11 @@ export default defineComponent({
 
     const isLyEnv = isLeyan();
     // NOTICE: 以下代码仅适用于ly环境，其他环境删除即可
-    const store = useStore<{User: UserStateType}>();
+    const store = useStore<{User: UserStateType,Endpoint,Debug}>();
     const currentUser = computed<CurrentUser>(()=> store.state.User.currentUser);
+    const isDefineChange: any = computed<any>(() => store.state.Endpoint.isDefineChange);
+    const debugChangeBase: any = computed<any>(() => store.state.Debug.debugChange?.base);
+
     watch(() => {
       return currentUser.value
     },(newVal) => {
@@ -62,6 +64,26 @@ export default defineComponent({
     onMounted(() => {
       setHtmlLang(locale.value);
     })
+
+    /**
+     * 监听页面关闭的时候对用户进行提醒
+     * */
+    function onbeforeunloadCallback(e:any) {
+      if(isDefineChange.value || debugChangeBase.value){
+        e.preventDefault();
+        e.returnValue = "系统可能不会保存您所做的更改";
+        return '系统可能不会保存您所做的更改';
+      }
+      return null;
+    }
+    onMounted(() => {
+      window.addEventListener('beforeunload', onbeforeunloadCallback);
+    })
+    onUnmounted(() => {
+      window.removeEventListener('beforeunload', onbeforeunloadCallback);
+    })
+
+
 
     return {
       antdLocales
