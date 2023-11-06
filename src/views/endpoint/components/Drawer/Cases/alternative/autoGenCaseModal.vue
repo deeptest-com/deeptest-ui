@@ -77,14 +77,9 @@ const handleOk = () => {
   console.log('确认');
   validate()
     .then(res => {
-      console.log(res);
-      if (generateData.type === 'auto') {
-        console.log('当前自动生成用例的基本信息：', generateData);
-      } else {
-        console.log('当前选择的用例', generateData.caseId);
-        const record = caseList.value.find(e => e.id === generateData.caseId);
-        emits('confirm', record);
-      }
+      emits('confirm', generateData.type === 'auto' 
+        ? { endpointInterfaceId: generateData.interfaceId, name: generateData.name, type: 'auto' } 
+        : caseList.value.find(e => e.id === generateData.caseId));
     })
     .catch(err => {
       console.log(err);

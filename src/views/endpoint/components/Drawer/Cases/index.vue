@@ -58,12 +58,14 @@ const design = (record) => {
 }
 
 const showAlternativeCases = (record) => {
-  console.log('showAlternativeCases', record)
-  store.commit('Endpoint/setEndpointCaseDetail', record);
+  if (record?.type === 'auto') {
+    alternativeRecord.value = record;
+  } else {
+    alternativeRecord.value = {};
+    store.commit('Endpoint/setEndpointCaseDetail', record);
+  }
   show.value = 'showAlternativeCases';
-  alternativeRecord.value = record;
-  emit('update:showList', false)
-
+  emit('update:showList', false);
 }
 
 const back = () => {

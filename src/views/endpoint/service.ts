@@ -459,12 +459,11 @@ export async function removeEndpointCase(data): Promise<any> {
 }
 
 // alternative case
-export async function loadAlternativeCase(baseId: number): Promise<any> {
-    const params = {baseId}
+export async function loadAlternativeCase(payload: { method: string, endpointId: string }): Promise<any> {
     return request({
         url: `/${apiAlternativeCase}/load`,
         method: 'GET',
-        params,
+        params: payload,
     })
 }
 export async function loadAlternativeCaseSaved(baseId: number): Promise<any> {

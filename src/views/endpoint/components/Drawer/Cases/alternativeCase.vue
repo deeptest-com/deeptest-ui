@@ -1,99 +1,107 @@
 <template>
   <div class="case-generate-main">
-    <div class="toolbar">
-      <div class="left">
-        <a-button @click="back" size="middle" class="btn">
-          <template #icon>
-            <icon-svg class="" type="back"/>
-          </template>
-          返回
-        </a-button>
-        <span class="case-name">{{ endpointCase.name }}</span>
+    <template v-if="loadingAlternativeCase">
+      <div class="alternative-case-loading">
+        <a-spin tip="加载备选用例中..." />
       </div>
-    </div>
-    <!-- :::: 用例路径，方法展示区域 -->
-    <Invocation 
-      :showMethodSelection = "true"
-      :baseUrlDisabled="true"
-      :showOperation="false"
-      :urlDisabled="false" />
-    <!-- :::: 基准用例 -->
-    <CaseHeader>
-      <template #header>
-        <div class="case-title">
-          <span class="name">基准用例</span>
-          <span class="serial-number">Demo0929-1204-10</span>
-          <EditAndShowField 
-            placeholder="修改标题"
-            :value="'sdsadsa'"
-            @update="updateTitle"/>
-        </div>
-      </template>
-      <template #extra>
-        <div class="case-operation">
-          <a-button 
-            v-for="(item, index) in baseCaseActionList" 
-            :key="index" 
-            :type="item.type" 
-            size="small"
-            @click.stop="item.action()">
-            {{ item.text }}
+    </template>
+    <template v-else>
+      <div class="toolbar">
+        <div class="left">
+          <a-button @click="back" size="middle" class="btn">
+            <template #icon>
+              <icon-svg class="" type="back"/>
+            </template>
+            返回
           </a-button>
+          <span class="case-name">{{ alternativeCaseDetail.name || endpointCase.name }}</span>
         </div>
-      </template>
-      <template #content>
-        <div class="case-config">
-          <DebugConfig />
-        </div>
-      </template>
-    </CaseHeader>
+      </div>
+      <!-- :::: 用例路径，方法展示区域 -->
+      <Invocation 
+        :showMethodSelection = "true"
+        :baseUrlDisabled="true"
+        :showOperation="false"
+        :urlDisabled="false" />
+      <!-- :::: 基准用例 -->
+      <CaseHeader>
+        <template #header>
+          <div class="case-title">
+            <span class="name">基准用例</span>
+            <span class="serial-number">{{ endpointCase.serialNumber }}</span>
+            <EditAndShowField 
+              placeholder="修改标题"
+              :value="alternativeCaseDetail.name"
+              @update="updateTitle"/>
+          </div>
+        </template>
+        <template #extra>
+          <div class="case-operation">
+            <a-button 
+              v-for="(item, index) in baseCaseActionList" 
+              :key="index" 
+              :type="item.type" 
+              size="small"
+              @click.stop="item.action()">
+              {{ item.text }}
+            </a-button>
+          </div>
+        </template>
+        <template #content>
+          <div class="case-config">
+            <DebugConfig />
+          </div>
+        </template>
+      </CaseHeader>
 
-    <!-- :::: 用例因子 -->
-    <CaseHeader>
-      <template #header>
-        <div class="case-title">
-          <span class="name">用例生成因子</span>
-        </div>
-      </template>
-      <template #extra>
-        <div class="case-operation">
-          <a-button 
-            v-for="(item, index) in caseFactorActionList" 
-            :key="index" 
-            :type="item.type" 
-            size="small"
-            @click.stop="item.action()">
-            {{ item.text }}
-          </a-button>
-        </div>
-      </template>
-      <template #content>
-        <a-tabs v-model:activeKey="activeKey">
-          <a-tab-pane key="paths" tab="备选路径">
-            <CaseFactor ref="caseFactor" />
-          </a-tab-pane>
+      <!-- :::: 用例因子 -->
+      <CaseHeader>
+        <template #header>
+          <div class="case-title">
+            <span class="name">用例生成因子</span>
+          </div>
+        </template>
+        <template #extra>
+          <div class="case-operation">
+            <a-button 
+              v-for="(item, index) in caseFactorActionList" 
+              :key="index" 
+              :type="item.type" 
+              size="small"
+              @click.stop="item.action()">
+              {{ item.text }}
+            </a-button>
+          </div>
+        </template>
+        <template #content>
+          <a-tabs v-model:activeKey="activeKey">
+            <a-tab-pane key="paths" tab="备选路径">
+              <CaseFactor ref="caseFactor" />
+            </a-tab-pane>
 
-          <a-tab-pane key="pre-condition" tab="预处理">
-            <CaseTips type="pre-condition" @reset="onReset" />
-            <PreCondition :isAlternativeCase="true" />
-          </a-tab-pane>
+            <a-tab-pane key="pre-condition" tab="预处理">
+              <CaseTips type="pre-condition" @reset="onReset" />
+              <PreCondition :isAlternativeCase="true" />
+            </a-tab-pane>
 
-          <a-tab-pane key="post-condition" tab="后置处理">
-            <CaseTips type="post-condition" @reset="onReset" />
-            <PostCondition :isAlternativeCase="true" />
-          </a-tab-pane>
+            <a-tab-pane key="post-condition" tab="后置处理">
+              <CaseTips type="post-condition" @reset="onReset" />
+              <PostCondition :isAlternativeCase="true" />
+            </a-tab-pane>
 
-          <a-tab-pane key="assertion" tab="断言">
-            <CaseTips type="assertion" @reset="onReset" />
-            <Assertion :isAlternativeCase="true" />
-          </a-tab-pane>
+            <a-tab-pane key="assertion" tab="断言">
+              <CaseTips type="assertion" @reset="onReset" />
+              <Assertion :isAlternativeCase="true" />
+            </a-tab-pane>
 
-        </a-tabs>
-      </template>
-    </CaseHeader>
+          </a-tabs>
+        </template>
+      </CaseHeader> 
+    </template>
     
     <!-- :::: 其他弹窗展示 -->
     <SaveAlternative
+      v-if="saveAsVisible"
       :visible="saveAsVisible"
       :onClose="saveAsClosed"
       :model="saveAsModel"/>
@@ -107,7 +115,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineProps, provide, ref, watch} from "vue";
+import {computed, defineProps, provide, ref, watch, unref} from "vue";
 import {ResultStatus, UsedBy} from "@/utils/enum";
 import {useStore} from "vuex";
 import cloneDeep from "lodash/cloneDeep";
@@ -157,6 +165,7 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 const activeKey = ref('paths');
 const treeDataMap = ref({});
 const alternativeCaseDetail = ref(props.record || {});
+const loadingAlternativeCase = ref(false);
 
 const modelRef = ref({
   baseId: 0,
@@ -165,21 +174,26 @@ const modelRef = ref({
 
 const checkedKeys = ref<string[]>([] as any[])
 
-const loadDebugData = async () => {
-  console.log('loadDebugData', endpointCase.value.id, usedBy)
-
-  await store.dispatch('Debug/loadDataAndInvocations', {
-    caseInterfaceId: endpointCase.value.id,
-    usedBy: usedBy,
-  });
+const loadDebugData = async (data) => {
+  try {
+    loadingAlternativeCase.value = true;
+    await store.dispatch('Debug/loadDataAndInvocations', data);
+    loadingAlternativeCase.value = false;
+  } catch (err) { 
+    console.error('加载备选用例数据出错:', err);
+  }
 }
 
 
 watch(endpointCase, async (newVal) => {
   if (!endpointCase.value) return
-
-  console.log('watch endpointCase', endpointCase.value.id)
-  await loadDebugData()
+  await loadDebugData(Object.keys(props.record).length !== 0 ? {
+    endpointInterfaceId: props.record.endpointInterfaceId,
+    usedBy: usedBy,
+  } : {
+    caseInterfaceId: endpointCase.value.id,
+    usedBy: usedBy,
+  })
 }, {immediate: true, deep: true})
 
 watch(alternativeCases, (newVal) => {
@@ -279,23 +293,26 @@ const onReset = (type) => {
   console.log('恢复默认：', type);
 };
 
-const baseCaseActionList = [
-  {
-    text: '调试',
-    type: 'primary',
-    action: selectExecEnv,
-  },
-  {
-    text: '保存',
-    type: 'default',
-    action: saveBaseCase,
-  },
-  {
-    text: '另存为',
-    type: 'default',
-    action: saveAsNewCase,
-  }
-];
+const baseCaseActionList = computed(() => {
+  const arr = [
+    {
+      text: '调试',
+      type: 'primary',
+      action: selectExecEnv,
+    },
+    {
+      text: '保存',
+      type: 'default',
+      action: saveBaseCase,
+    },
+    unref(endpointCase).id && {
+      text: '另存为',
+      type: 'default',
+      action: saveAsNewCase,
+    }
+  ];
+  return [...arr].filter(e => ![undefined, null, false].includes(e));
+});
 
 /**
  * 用例因子的操作列表
@@ -325,7 +342,7 @@ const updateTitle = (v) => {
 watch(() => {
   return props.record;
 }, val => {
-  console.log('当前用例信息:', val);
+  console.log('当前自动生成 - 用例基本信息:', val);
 }, {
   immediate: true,
 });
@@ -336,6 +353,15 @@ watch(() => {
 .case-generate-main {
   padding-top: 16px;
   overflow-y: scroll;
+
+  .alternative-case-loading {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .toolbar {
     display: flex;
     margin-bottom: 16px;

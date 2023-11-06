@@ -60,13 +60,13 @@ const modelRef = ref({
 });
 
 watch(() => props.model, () => {
-  console.log('watch props.visible', props?.model)
-  modelRef.value = {
-    prefix: '备选用例-',
-    type: 'multi',
-    baseId: props.model.baseId,
-    values: props.model.values,
-  }
+  // console.log('watch props.visible', props?.model)
+  // modelRef.value = {
+  //   prefix: '备选用例-',
+  //   type: 'multi',
+  //   baseId: props.model.baseId,
+  //   values: props.model.values,
+  // }
 }, {immediate: true, deep: true})
 
 const rulesRef = reactive({

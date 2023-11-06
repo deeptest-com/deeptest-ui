@@ -41,7 +41,7 @@ import {
     assert_resp_status_Code,
     send_request_get,
     send_request_post
-} from "@/views/component/debug/config.vue";
+} from "@/views/component/debug/config";
 
 export interface StateType {
     scenarioId: number;

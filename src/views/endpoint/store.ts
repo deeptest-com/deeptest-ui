@@ -1483,18 +1483,16 @@ const StoreModel: ModuleType = {
             }
         },
 
-        async loadAlternativeCase({commit, state, dispatch }, baseId: number) {
-            commit('setBaseCaseId', baseId);
-
-            const jsn = await loadAlternativeCase(baseId)
+        async loadAlternativeCase({commit}, payload) {
+            const jsn = await loadAlternativeCase(payload)
             if (jsn.code === 0) {
-                commit('setAlternativeCases', jsn.data.children);
+                commit('setAlternativeCases', jsn.data.children || []);
                 return true;
             } else {
                 return false
             }
         },
-        async loadAlternativeCaseSaved({ commit, state, dispatch }, baseId: number) {
+        async loadAlternativeCaseSaved({ commit, state }, baseId: number) {
             const jsn = await loadAlternativeCaseSaved(baseId)
             if (jsn.code === 0) {
                 state.alternativeCasesSaved = jsn.data

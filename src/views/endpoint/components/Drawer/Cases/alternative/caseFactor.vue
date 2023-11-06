@@ -25,7 +25,7 @@
     </div>
     
     <a-tree 
-      v-if="treeData.length > 0"
+      v-if="!loading"
       class="case-tree"
       :replaceFields="replaceFields" 
       :tree-data="treeData" 
@@ -65,8 +65,8 @@
         </span>
       </template>
     </a-tree>
-    <div v-if="treeData.length === 0" class="alternative-case-tree-loading">
-      <a-spin></a-spin>
+    <div v-if="loading" class="alternative-case-tree-loading">
+      <a-spin tip="loading..."></a-spin>
     </div>
   </div>
 </template>
@@ -96,6 +96,7 @@ provide('usedBy', usedBy)
 
 const store = useStore<{ Debug: Debug, Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType, ProjectGlobal: ProjectStateType }>();
 const alternativeCases = computed<any>(() => store.state.Endpoint.alternativeCases);
+const endpointDetail = computed<any>(() => store.state.Endpoint.endpointDetail);
 const endpointCase = computed<any>(() => store.state.Endpoint.caseDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 
@@ -135,10 +136,18 @@ const replaceFields = {key: 'key'};
 const expandedKeys = ref<string[]>([]);
 const checkedKeys = ref<any>([] as any[]);
 const executionType = ref('single'); // single: 单参数异常  multiple: 多参数异常
+const loading = ref(true);
 
-const loadCaseTree = () => {
-  store.dispatch('Endpoint/loadAlternativeCase', debugData.value.caseInterfaceId).then((result) => {
+const loadCaseTree = async () => {
+  loading.value = true;
+  store.dispatch('Endpoint/loadAlternativeCase', {
+    method: debugData.value.method,
+    endpointId: endpointDetail.value.id
+  }).then((result) => {
+    loading.value = false;
     expandAll()
+  }).catch(() => {
+    loading.value = false;
   })
 }
 
