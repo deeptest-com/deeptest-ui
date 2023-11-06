@@ -28,7 +28,7 @@
           <span><strong>{{ path.name }}：</strong></span>
           <a-tag class="method-tag" :color="getMethodColor(info.method)">{{ info.method }}</a-tag>
           <span class="request-uri">
-            <span class="ant-typography ant-typography-secondary">{{ handlePathStr(path.url + path.path) }}</span>
+            <span class="ant-typography ant-typography-secondary doc-value" :title="handlePathStr(path.url + path.path)">{{ handlePathStr(path.url + path.path) }}</span>
             <CopyOutlined class="copy-icon" @click="copyURL(handlePathStr(path.url + path.path))"/>
           </span>
         </div>
@@ -41,7 +41,7 @@
             <span><strong>{{ mock.name }}：</strong></span>
             <a-tag class="method-tag" :color="getMethodColor(info.method)">{{ info.method }}</a-tag>
             <span class="request-uri">
-            <span class="ant-typography ant-typography-secondary">{{ mock.url }}</span>
+            <span class="ant-typography ant-typography-secondary  doc-value" :title="mock.url">{{ mock.url }}</span>
             <CopyOutlined class="copy-icon" @click="copyURL(handlePathStr(mock.url))"/>
           </span>
           </div>
@@ -405,6 +405,7 @@ function close (){
 .request-uri {
   display: flex;
   align-items: center;
+  flex:1;
 
   .copy-icon {
     //display: none;
@@ -421,6 +422,12 @@ function close (){
   }
 
 
+}
+.doc-value{
+  white-space: nowrap;         /* 防止文本换行 */
+  overflow: hidden;           /* 隐藏溢出的文本 */
+  text-overflow: ellipsis;    /* 显示省略号 */
+  max-width: 90%;
 }
 
 </style>
