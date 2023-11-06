@@ -1,6 +1,6 @@
 export const send_request_get = `
-dt.sendRequest("http://111.231.16.35:9000/get", function (err, resp) {
-    log(err? err : resp);
+dt.sendRequest("http://111.231.16.35:9000/get", function (error, response) {
+   log(err ? error : response);
 });
 `;
 
@@ -12,8 +12,8 @@ var postRequest = {
     foo: 'bar'
   }
 };
-dt.sendRequest(postRequest, (err, resp) => {
-  log(err ? err : resp);
+dt.sendRequest(postRequest, (error, response) => {
+   log(err ? error : response);
 });
 `;
 
