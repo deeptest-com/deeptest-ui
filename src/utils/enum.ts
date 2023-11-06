@@ -204,8 +204,9 @@ export enum CheckpointType {
     responseStatus = 'responseStatus',
     responseHeader = 'responseHeader',
     responseBody = 'responseBody',
+    judgement = 'judgement',
+    extractorVari = 'extractorVari',
     extractor = 'extractor',
-    judgement = 'judgement'
 }
 
 export enum AuthorizationTypes {

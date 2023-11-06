@@ -1,3 +1,22 @@
+export const send_request_get = `
+dt.sendRequest("http://111.231.16.35:9000/get", function (err, resp) {
+    log(err? err : resp);
+});
+`;
+
+export const send_request_post = `
+var postRequest = {
+  url: 'http://111.231.16.35:9000/post',
+  method: 'POST',
+  body: {
+    foo: bar
+  }
+};
+dt.sendRequest(postRequest, (err, resp) => {
+  log(err ? err : resp);
+});
+`;
+
 export const assert_resp_status_Code = `
 dt.test('Assertion 1', () => {
   dt.expect(dt.response.statusCode, 'check status code').to.equal(200);

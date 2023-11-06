@@ -1,6 +1,6 @@
 <template>
   <div class="response-checkpoint-main">
-    <a-form :label-col="{ style: { width: '68px' } }" :wrapper-col="wrapperCol">
+    <a-form :label-col="{ style: { width: '86px' } }" :wrapper-col="wrapperCol">
       <a-form-item label="类型" v-bind="validateInfos.type">
         <a-select v-model:value="model.type"
                   @change="selectType"
@@ -18,7 +18,7 @@
                  @blur="validate('expression', { trigger: 'blur' }).catch(() => {})" />
       </a-form-item>
 
-      <a-form-item v-if="model.type === 'extractor'" label="变量名称" v-bind="validateInfos.extractorVariable">
+      <a-form-item v-if="model.type === 'extractorVari'" label="变量名称" v-bind="validateInfos.extractorVariable" required>
         <a-select v-model:value="model.extractorVariable"
                   @blur="validate('extractorVariable', { trigger: 'blur' }).catch(() => {})">
           <a-select-option v-for="(item, idx) in variables" :key="idx" :value="item.name">
@@ -27,7 +27,24 @@
         </a-select>
       </a-form-item>
 
-      <a-form-item v-if="model.type !== 'judgement'" label="运算符" v-bind="validateInfos.operator">
+      <!-- for extractor -->
+      <template v-if="model.type === 'extractor'">
+        <a-form-item label="提取方法" v-bind="validateInfos.type" required>
+          <a-select v-model:value="model.extractorType"
+                    @blur="validate('extractorType', { trigger: 'change' }).catch(() => {})">
+            <a-select-option v-for="(item, idx) in extractorTypeOptions" :key="idx" :value="item.value">
+              {{ t(item.label) }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item v-if="model.extractorType"
+                     :label="model.extractorType==='jsonpath' ? t('jsonpath') : 'XPath'" v-bind="validateInfos.extractorExpression" required>
+          <a-input v-model:value="model.extractorExpression"
+                   @blur="validate('extractorExpression', { trigger: 'blur' }).catch(() => {})"/>
+        </a-form-item>
+      </template>
+
+      <a-form-item v-if="model.type !== 'judgement'" label="运算符" v-bind="validateInfos.operator" required>
         {{ void (options = model.type === 'responseStatus' ? operatorsForCode :
           isInArray(model.type, ['responseHeader', 'responseBody']) ? operatorsForString : operators) }}
         <a-select v-model:value="model.operator"
@@ -40,14 +57,14 @@
         </a-select>
       </a-form-item>
 
-      <a-form-item v-if="model.type === 'judgement'" label="判断表达式" v-bind="validateInfos.expression">
+      <a-form-item v-if="model.type === 'judgement'" label="判断表达式" v-bind="validateInfos.expression" required>
         <a-textarea v-model:value="model.expression" :auto-size="{ minRows: 2, maxRows: 5 }"
                  @blur="validate('expression', { trigger: 'blur' }).catch(() => {})" />
 
         <div class="dp-input-tip">{{t('tips_expression_bool', {name: '{name}', number: '{+number}'})}}</div>
       </a-form-item>
 
-      <a-form-item v-if="model.type !== 'judgement'" label="数值" v-bind="validateInfos.value">
+      <a-form-item v-if="model.type !== 'judgement'" label="数值" v-bind="validateInfos.value" required>
         <a-input v-model:value="model.value"
                  @blur="validate('value', { trigger: 'blur' }).catch(() => {})" />
       </a-form-item>
@@ -66,7 +83,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, CloseCircleOutlined, CheckC
 import {
   listExtractorVariable
 } from "@/views/component/debug/service";
-import {ComparisonOperator, CheckpointType, UsedBy} from "@/utils/enum";
+import {ComparisonOperator, CheckpointType, UsedBy, ExtractorType} from "@/utils/enum";
 import {isInArray} from "@/utils/array";
 import {getDpResultClass} from "@/utils/dom"
 import {getCompareOptsForRespCode, getCompareOptsForString} from "@/utils/compare";
@@ -103,6 +120,7 @@ const types = getEnumSelectItems(CheckpointType)
 const operators = getEnumSelectItems(ComparisonOperator)
 const operatorsForString = getCompareOptsForString()
 const operatorsForCode = getCompareOptsForRespCode()
+const extractorTypeOptions = getEnumSelectItems(ExtractorType)
 
 const load = () => {
   console.log('load', props.condition)
@@ -113,23 +131,29 @@ load()
 const variables = ref([])
 
 const extractorVariableRequired = [{ required: true, message: '请选择变量', trigger: 'change' }]
+const extractorTypeRequired = [{ required: true, message: '请选择提取器类型', trigger: 'change' }]
+const extractorExpressionRequired = [{ required: true, message: '请输入提取器表达式', trigger: 'change' }]
 const expressionRequired = [{ required: true, message: '请输入表达式', trigger: 'blur' }]
 const operatorRequired = [{ required: true, message: '请选择操作', trigger: 'change' }]
 const valueRequired = [{ required: true, message: '请输入数值', trigger: 'blur' }]
 
 const rulesRef = computed(() => { return {
-    type: [
-      { required: true, message: '请选择类型', trigger: 'blur' },
-    ],
-    extractorVariable: model.value.type === CheckpointType.extractor ? extractorVariableRequired : [],
-    expression: model.value.type === CheckpointType.responseHeader || model.value.type === CheckpointType.judgement ?
-        expressionRequired : [],
-    operator: [
-      model.value.type === CheckpointType.judgement ? [] : operatorRequired,
-    ],
-    value: [
-      model.value.type === CheckpointType.judgement ? [] : valueRequired,
-    ],
+  type: [
+    { required: true, message: '请选择类型', trigger: 'blur' },
+  ],
+
+  extractorVariable: model.value.type === CheckpointType.extractorVari ? extractorVariableRequired : [],
+  extractorType:  model.value.type === CheckpointType.extractor ? extractorTypeRequired : [],
+  extractorExpression: model.value.type === CheckpointType.extractor ? extractorExpressionRequired : [],
+
+  expression: model.value.type === CheckpointType.responseHeader || model.value.type === CheckpointType.judgement ?
+      expressionRequired : [],
+  operator: [
+    model.value.type === CheckpointType.judgement ? [] : operatorRequired,
+  ],
+  value: [
+    model.value.type === CheckpointType.judgement ? [] : valueRequired,
+  ],
 }})
 
 let { resetFields, validate, validateInfos } = useForm(model, rulesRef);
@@ -192,7 +216,7 @@ const loadExtractorVariable = () => {
       model.value.operator = ComparisonOperator.equal
   }
 
-  if (model.value.type === CheckpointType.extractor) {
+  if (model.value.type === CheckpointType.extractorVari) {
     listExtractorVariable(debugInfo.value).then((jsn) => {
       variables.value = jsn.data
     })

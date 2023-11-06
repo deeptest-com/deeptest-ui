@@ -36,6 +36,12 @@ import {
 
 import {getNodeMap} from "@/services/tree";
 import {getSnippet} from "@/views/component/debug/service";
+import {
+    assert_resp_json_field,
+    assert_resp_status_Code,
+    send_request_get,
+    send_request_post
+} from "@/views/component/debug/config.vue";
 
 export interface StateType {
     scenarioId: number;
@@ -565,6 +571,12 @@ const StoreModel: ModuleType = {
 
             if (name === 'log') {
                 script = "log('test');"
+
+            } else if (name === 'send_request_get') {
+                script = send_request_get
+            } else if (name === 'send_request_post') {
+                script = send_request_post
+
             } else {
                 const json = await getSnippet(name)
                 if (json.code === 0) {

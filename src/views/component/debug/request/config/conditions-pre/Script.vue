@@ -23,6 +23,9 @@
 
             <div @click="addSnippet('datapool_get')" class="dp-link-primary">获取数据池变量</div>
             <div @click="addSnippet('log')" class="dp-link-primary">打印日志</div>
+
+            <div @click="addSnippet('send_request_get')" class="dp-link-primary">发送GET请求</div>
+            <div @click="addSnippet('send_request_post')" class="dp-link-primary">发送POST请求</div>
           </div>
 
           <div class="title">

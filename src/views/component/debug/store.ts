@@ -45,6 +45,7 @@ import {ConditionCategory, ConditionType, UsedBy} from "@/utils/enum";
 import {ResponseData} from "@/utils/request";
 import {listEnvVarByServer} from "@/services/environment";
 import {getResponseKey} from "@/utils/comm";
+import {send_request_get, send_request_post} from "@/views/component/debug/config";
 
 export interface StateType {
     debugInfo: DebugInfo
@@ -761,6 +762,11 @@ const StoreModel: ModuleType = {
                 line = "dt.response.data.field1 = 'val';"
             } else if (name === 'set_mock_resp_text') {
                 line = "dt.response.data = dt.response.data.replace('old', 'new');"
+
+            } else if (name === 'send_request_get') {
+                line = send_request_get
+            } else if (name === 'send_request_post') {
+                line = send_request_post
 
             } else if (name === 'assert_resp_status_Code') {
                 line = assert_resp_status_Code
