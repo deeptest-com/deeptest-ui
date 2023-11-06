@@ -72,6 +72,14 @@ export interface StateType {
 
     serves: any[];
     currServe: any;
+
+    alternativeCase: {
+        assertionConditions: any[],
+        postConditions: any[],
+        activePostCondition: any,
+        activeAssertion: any,
+        scriptData: any,
+    }
 }
 const initState: StateType = {
     debugInfo: {} as DebugInfo,
@@ -98,6 +106,15 @@ const initState: StateType = {
 
     serves: [],
     currServe: [],
+
+    // 备选用例临时数据存储
+    alternativeCase: {
+        assertionConditions: [],
+        postConditions: [],
+        activePostCondition: {},
+        activeAssertion: {},
+        scriptData: {} as Script,
+    },
 };
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -141,6 +158,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setCurrServe: Mutation<StateType>; // 设置当前所选环境
 
         setGlobalParams: Mutation<StateType>;
+
+        setAlternativeCase: Mutation<StateType>;
     };
     actions: {
         loadDataAndInvocations: Action<StateType, StateType>;
@@ -325,7 +344,14 @@ const StoreModel: ModuleType = {
                         arr[index].disabled = payload.disabled
                     }
             })
-        }
+        },
+        setAlternativeCase(state, payload) {
+            console.log('setAlternativeCase', payload);
+            state.alternativeCase = {
+                ...state.alternativeCase,
+                ...payload,
+            };
+        },
     },
     actions: {
         // debug
@@ -751,7 +777,7 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
-        async addSnippet({commit, dispatch, state}, name: string) {
+        async addSnippet({commit, dispatch, state}, { name, isAlternativeCase }: { name: string, isAlternativeCase?: boolean }) {
             let line = ''
             if (name === 'log') {
                 line = "log('test');"
@@ -781,9 +807,19 @@ const StoreModel: ModuleType = {
                     line = json.data.script
                 }
             }
-
-            let script = (state.scriptData.content ? state.scriptData.content: '') + '\n' + line
+            const lastScriptData = isAlternativeCase ? state.alternativeCase.scriptData : state.scriptData;
+            let script = (lastScriptData.content ? lastScriptData.content: '') + '\n' + line
             script = script.trim()
+            
+            if (isAlternativeCase) {
+                commit('setAlternativeCase', {
+                    scriptData: {
+                        ...state.alternativeCase.scriptData,
+                        content: script,
+                    }
+                })
+                return true;
+            }
             commit('setScriptContent', script);
 
             return true;

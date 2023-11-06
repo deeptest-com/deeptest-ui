@@ -75,17 +75,17 @@
 
           <a-tab-pane key="pre-condition" tab="预处理">
             <CaseTips type="pre-condition" @reset="onReset" />
-            <PreCondition />
+            <PreCondition :isAlternativeCase="true" />
           </a-tab-pane>
 
           <a-tab-pane key="post-condition" tab="后置处理">
             <CaseTips type="post-condition" @reset="onReset" />
-            <PostCondition />
+            <PostCondition :isAlternativeCase="true" />
           </a-tab-pane>
 
           <a-tab-pane key="assertion" tab="断言">
             <CaseTips type="assertion" @reset="onReset" />
-            <Assertion />
+            <Assertion :isAlternativeCase="true" />
           </a-tab-pane>
 
         </a-tabs>
@@ -107,10 +107,11 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineProps, inject, provide, reactive, ref, watch} from "vue";
+import {computed, defineProps, provide, ref, watch} from "vue";
 import {ResultStatus, UsedBy} from "@/utils/enum";
 import {useStore} from "vuex";
 import cloneDeep from "lodash/cloneDeep";
+import { message } from "ant-design-vue";
 
 import IconSvg from "@/components/IconSvg";
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
@@ -131,10 +132,20 @@ import DebugConfig  from "@/views/component/debug/config.vue";
 import EnvSelector from "@/views/component/EnvSelector/index.vue";
 import { prepareDataForRequest } from "@/views/component/debug/service";
 import { notifyError, notifySuccess } from "@/utils/notify";
-import { message } from "ant-design-vue";
 
 const usedBy = UsedBy.AlternativeCaseDebug
 provide('usedBy', usedBy)
+
+const props = defineProps({
+  onBack: {
+    type: Function,
+    required: true,
+  },
+  record: {
+    type: Object,
+    required: true,
+  }
+});
 
 const store = useStore<{ Debug: Debug, Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType, ProjectGlobal: ProjectStateType }>();
 const alternativeCases = computed<any>(() => store.state.Endpoint.alternativeCases);
@@ -143,16 +154,9 @@ const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const endpointCase = computed<any>(() => store.state.Endpoint.caseDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 
-const activeKey = ref('paths')
-
-const treeDataMap = ref({})
-
-const props = defineProps({
-  onBack: {
-    type: Function,
-    required: true,
-  }
-})
+const activeKey = ref('paths');
+const treeDataMap = ref({});
+const alternativeCaseDetail = ref(props.record || {});
 
 const modelRef = ref({
   baseId: 0,
@@ -318,6 +322,13 @@ const updateTitle = (v) => {
 };
 
 
+watch(() => {
+  return props.record;
+}, val => {
+  console.log('当前用例信息:', val);
+}, {
+  immediate: true,
+});
 
 </script>
 

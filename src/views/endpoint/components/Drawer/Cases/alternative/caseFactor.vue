@@ -225,21 +225,9 @@ const handleSelect = evt => {
 }
 
 const onChecked = (keys, treeNode) => {
-  const currentNode = treeNode.node.dataRef;
-  const parentTreeNode = treeNode.node.vcTreeNode;
-
-
-  const removeCheckedKeys = (checked: any[], parentNode) => {
-    if (!checked.some(e => (parentNode.children || []).map(child => child.key).includes(e)) && parentNode.dataRef) {
-      checked = checked.filter(e => e !== parentNode.dataRef.key);
-    }
-    if (parentNode.vcTreeNode && parentNode.vcTreeNode.dataRef) {
-      checked = removeCheckedKeys(checked, parentNode.vcTreeNode);
-    }
-    return cloneDeep(checked);
-  }
-
-  const siblingNodes = parentTreeNode.children;
+  const currentNode = treeNode.node.dataRef; // 当前选中的case
+  const parentTreeNode = treeNode.node.vcTreeNode; // 所选case的父节点
+  const siblingNodes = parentTreeNode.children; // 所选case的兄弟节点。这里对应的是 case对应的 参数 所有的 其他约束条件
   const currentChecked = keys.checked;
   // 多参数异常情况下： 参属下的约束条件只能选择一个，为单选的状态。
   if (unref(executionType) === 'multiple') {
@@ -293,7 +281,8 @@ defineExpose({ getSelectedNodes });
   .case-tree-toolbar {
     display: flex;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 2px;
+    height: 22px;
 
     .dp-link-primary {
       margin-right: 16px;

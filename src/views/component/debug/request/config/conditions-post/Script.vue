@@ -117,7 +117,7 @@ const editorOptions = ref(Object.assign({
 ))
 
 const addSnippet = (snippetName) => {
-  store.dispatch('Debug/addSnippet', snippetName)
+  store.dispatch('Debug/addSnippet', { name: snippetName });
 }
 const editorChange = (newScriptCode) => {
   console.log('editorChange', newScriptCode)

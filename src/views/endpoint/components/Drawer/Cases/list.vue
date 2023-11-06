@@ -1,6 +1,7 @@
 <template>
   <div class="endpoint-debug-cases-list">
     <div class="toolbar">
+      <a-button type="default" @click="autoGenAlternativeCase">自动生成用例(Beta)</a-button>
       <a-button type="primary" trigger="click" @click="create">
         <span>新建用例</span>
       </a-button>
@@ -48,9 +49,11 @@
         </template>
 
         <template #action="{ record }">
+          <!--
           <a-button type="link" @click="() => generate(record)">
             <AppstoreAddOutlined title="备选用例" />
           </a-button>
+        -->
 
           <a-button type="link" @click="() => copy(record)">
             <CopyOutlined title="复制" />
@@ -75,6 +78,12 @@
           :onCancel="createCancel"/>
 
     </div>
+
+    <AutoGenCaseModal 
+      v-if="showAutoGenCaseModal" 
+      :show="showAutoGenCaseModal" 
+      @close="showAutoGenCaseModal = false" 
+      @confirm="handleConfirm" />
   </div>
 </template>
 
@@ -97,6 +106,7 @@ import {notifyError, notifySuccess} from "@/utils/notify";
 import {PaginationConfig} from "@/views/endpoint/data";
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import CaseEdit from "./edit.vue";
+import AutoGenCaseModal from "./alternative/autoGenCaseModal.vue";
 
 provide('usedBy', UsedBy.InterfaceDebug)
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
@@ -117,7 +127,7 @@ const props = defineProps({
     type: Function,
     required: true,
   },
-  onGenerate: {
+  openAlternativeCase: {
     type: Function,
     required: true,
   },
@@ -197,10 +207,6 @@ const username = (user:string)=>{
   return result?.label || '-'
 }
 
-const generate = (record) => {
-  props.onGenerate(record)
-}
-
 const columns = [
   {
     title: '编号',
@@ -241,6 +247,21 @@ const columns = [
   },
 ];
 
+
+/**
+ * 自动生成用例
+ */
+const showAutoGenCaseModal = ref(false);
+
+const handleConfirm = (evt) => {
+  console.log(evt);
+  props.openAlternativeCase(evt);
+  showAutoGenCaseModal.value = false;
+};
+
+const autoGenAlternativeCase = () => {
+  showAutoGenCaseModal.value = true;
+};
 </script>
 
 <style lang="less" scoped>
@@ -251,13 +272,15 @@ const columns = [
 
   .toolbar {
     position: absolute;
-    z-index: 999999;
+    z-index: 1001;
     top: -42px;
     right: 0;
-    width: 200px;
     text-align: right;
+    display: flex;
+    align-items: center;
+
     .ant-btn {
-      margin-left: 10px;
+      margin-left: 20px;
     }
   }
 
