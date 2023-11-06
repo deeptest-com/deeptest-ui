@@ -215,6 +215,7 @@ import cloneDeep from "lodash/cloneDeep";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 
+
 const {share} = useSharePage();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -223,7 +224,7 @@ const serves = computed<any>(() => store.state.ServeGlobal.serves);
 
 const list = computed<Endpoint[]>(() => store.state.Endpoint.listResult.list);
 let pagination = computed<PaginationConfig>(() => store.state.Endpoint.listResult.pagination);
-
+const isMockChange = computed<any>(() => store.state.Endpoint.isMockChange);
 const createApiModalVisible = ref(false);
 const router = useRouter();
 type Key = ColumnProps['key'];
@@ -606,6 +607,7 @@ const username = (user: string) => {
 /*************************************************
  * ::::离开保存代码逻辑部分start
  ************************************************/
+
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
 const debugChange: any = computed<Endpoint>(() => store.state.Debug.debugChange);
@@ -654,57 +656,71 @@ watch(() => {
 });
 
 const drawerRef:any = ref(null);
+const isLeaveTip = computed(() => {
+  return isDefineChange.value || isMockChange.value || debugChangeBase.value;
+});
 // 关闭弹框时，如果接口信息改变了，弹出提示
-function closeDrawer(callback?:any) {
+async function closeDrawer() {
+  // 不需要提示
+  if(!isLeaveTip.value){
+    drawerVisible.value = false;
+    return;
+  }
+  const result = await Swal.fire({
+    ...settings.SwalLeaveSetting
+  });
   // 如果接口定义有变化，需要提示用户保存
   if (isDefineChange.value) {
-    Swal.fire({
-      ...settings.SwalLeaveSetting
-    }).then((result) => {
-      // isConfirmed: true,  保存并离开
-      if (result.isConfirmed) {
-        drawerRef.value?.save();
-        drawerVisible.value = false;
-        store.commit('Endpoint/setIsDefineChange', false);
-      }
-      // isDenied: false,  不保存，并离开
-      else if (result.isDenied) {
-        drawerVisible.value = false;
-        store.commit('Endpoint/setIsDefineChange', false);
-      }
-      // isDismissed: false 取消,即什么也不做
-      else if (result.isDismissed) {
-        console.log('isDismissed', result.isDismissed)
-      }
-    })
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      drawerRef.value?.save();
+      drawerVisible.value = false;
+      store.commit('Endpoint/setIsDefineChange', false);
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      drawerVisible.value = false;
+      store.commit('Endpoint/setIsDefineChange', false);
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('isDismissed', result.isDismissed)
+    }
   }
   // 调试模块数据有变化，需要提示用户是否要保存调试数据
   else if(debugChangeBase.value){
-    Swal.fire({
-      ...settings.SwalLeaveSetting
-    }).then((result) => {
-      // isConfirmed: true,  保存并离开
-      if (result.isConfirmed) {
-        drawerVisible.value = false;
-        bus.emit(settings.eventLeaveDebugSaveData, {});
-        store.commit('Debug/setDebugChange', {base:false});
-      }
-      // isDenied: false,  不保存，并离开
-      else if (result.isDenied) {
-        drawerVisible.value = false;
-        store.commit('Debug/setDebugChange', {base:false});
-      }
-      // isDismissed: false 取消,即什么也不做
-      else if (result.isDismissed) {
-        console.log('isDismissed', result.isDismissed)
-      }
-    })
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      drawerVisible.value = false;
+      bus.emit(settings.eventLeaveDebugSaveData, {});
+      store.commit('Debug/setDebugChange', {base:false});
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      drawerVisible.value = false;
+      store.commit('Debug/setDebugChange', {base:false});
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('isDismissed', result.isDismissed)
+    }
+  }// mock 数据变化了，需要提示保存
+  else if(isMockChange.value){
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      bus.emit(settings.eventLeaveMockSaveData, {});
+      drawerVisible.value = false;
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      drawerVisible.value = false;
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('isDismissed', result.isDismissed)
+    }
   }
-  else {
-    drawerVisible.value = false;
-    store.commit('Debug/setDebugChange', {base:false});
-    store.commit('Endpoint/setIsDefineChange', false);
-  }
+
 }
 
 // 与 beforeRouteLeave 相同，无法访问 `this`

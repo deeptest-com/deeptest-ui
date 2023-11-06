@@ -96,6 +96,7 @@ const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal, Global,Debug }>()
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
 const debugData: any = computed<Endpoint>(() => store.state.Debug.debugData);
+const isMockChange = computed<any>(() => store.state.Endpoint.isMockChange);
 // 调试基本信息是否有变化，因为检查点等单独保存
 const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
 const props = defineProps({
@@ -119,59 +120,13 @@ const docsData = ref(null);
 const stickyKey = ref(0);
 
 const endpointDebugRef:any = ref(null);
+
+const isLeaveTip = computed(() => {
+  return isDefineChange.value || isMockChange.value || debugChangeBase.value;
+});
 async function changeTab(value) {
   console.log('changeTab', value);
-  // 如果接口定义有变化，需要提示用户保存
-  if (isDefineChange.value) {
-    Swal.fire({
-      ...settings.SwalLeaveSetting
-    }).then((result) => {
-      // isConfirmed: true,  保存并离开
-      if (result.isConfirmed) {
-        save();
-        store.commit('Endpoint/setIsDefineChange', false);
-        // 保存成功后，切换tab
-        activeTabKey.value = value;
-        stickyKey.value++;
-      }
-      // isDenied: false,  不保存，并离开
-      else if (result.isDenied) {
-        activeTabKey.value = value;
-        stickyKey.value++;
-        store.commit('Endpoint/setIsDefineChange', false);
-      }
-      // isDismissed: false 取消,即什么也不做
-      else if (result.isDismissed) {
-        console.log('isDismissed', result.isDismissed)
-      }
-    })
-  }
-  // 调试模块数据有变化，需要提示用户是否要保存调试数据
-  else if(debugChangeBase.value){
-    Swal.fire({
-      ...settings.SwalLeaveSetting
-    }).then((result) => {
-      // isConfirmed: true,  保存并离开
-      if (result.isConfirmed) {
-        bus.emit(settings.eventLeaveDebugSaveData, {});
-        store.commit('Debug/setDebugChange', {base:false});
-        // 保存成功后，切换tab
-        activeTabKey.value = value;
-        stickyKey.value++;
-      }
-      // isDenied: false,  不保存，并离开
-      else if (result.isDenied) {
-        activeTabKey.value = value;
-        stickyKey.value++;
-        store.commit('Debug/setDebugChange', {base:false});
-      }
-      // isDismissed: false 取消,即什么也不做
-      else if (result.isDismissed) {
-        console.log('isDismissed', result.isDismissed)
-      }
-    })
-  }
-  else {
+  if(!isLeaveTip.value) {
     // click cases tab again, will cause EndpointCases component back to case list page
     if (activeTabKey.value === 'cases' && activeTabKey.value === value) {
       showList.value = true // back to list
@@ -184,6 +139,73 @@ async function changeTab(value) {
         endpointIds: [endpointDetail.value.id],
         needDetail: true,
       });
+    }
+    return
+  }
+
+  // 走到这儿，说明接口定义有变化，需要提示用户是否要保存
+  const result = await Swal.fire({
+    ...settings.SwalLeaveSetting
+  });
+  // 如果接口定义有变化，需要提示用户保存
+  if (isDefineChange.value) {
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      await save();
+      store.commit('Endpoint/setIsDefineChange', false);
+      // 保存成功后，切换tab
+      activeTabKey.value = value;
+      stickyKey.value++;
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      activeTabKey.value = value;
+      stickyKey.value++;
+      store.commit('Endpoint/setIsDefineChange', false);
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('isDismissed', result.isDismissed)
+    }
+  }
+  // 调试模块数据有变化，需要提示用户是否要保存调试数据
+  else if(debugChangeBase.value){
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      bus.emit(settings.eventLeaveDebugSaveData, {});
+      store.commit('Debug/setDebugChange', {base:false});
+      // 保存成功后，切换tab
+      activeTabKey.value = value;
+      stickyKey.value++;
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      activeTabKey.value = value;
+      stickyKey.value++;
+      store.commit('Debug/setDebugChange', {base:false});
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('isDismissed', result.isDismissed)
+    }
+  }
+  // mock 数据变化了，需要提示保存
+  else if(isMockChange.value){
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      bus.emit(settings.eventLeaveMockSaveData, {});
+      // 保存成功后，切换tab
+      activeTabKey.value = value;
+      stickyKey.value++;
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      activeTabKey.value = value;
+      stickyKey.value++;
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('isDismissed', result.isDismissed)
     }
   }
 
