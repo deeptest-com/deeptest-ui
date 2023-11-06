@@ -18,15 +18,14 @@
         <RequestBody v-if="activeKey === 'body'" />
       </a-tab-pane>
 
-      <a-tab-pane key="cookie" :tab="getTabTitle('cookies')">
-        <GlobalParameters :in="'cookie'" />
-        <Cookie v-if="activeKey === 'cookie'" />
-      </a-tab-pane>
-
-
       <a-tab-pane key="header" :tab="getTabTitle('headers')">
         <GlobalParameters :in="'header'" />
         <RequestHeaders v-if="activeKey === 'header'" />
+      </a-tab-pane>
+
+      <a-tab-pane key="cookie" :tab="getTabTitle('cookies')">
+        <GlobalParameters :in="'cookie'" />
+        <Cookie v-if="activeKey === 'cookie'" />
       </a-tab-pane>
 
       <a-tab-pane key="auth" tab="授权">
