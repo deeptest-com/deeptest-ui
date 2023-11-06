@@ -3,14 +3,9 @@
 -->
 <template>
   <div class="doc-content" v-if="info?.name" :key="info?.id">
-    <!--    <a-breadcrumb v-if="isInterface" style="margin-bottom: 12px;">-->
-    <!--      <a-breadcrumb-item>{{isInterface ? info?.serveInfo?.name : info?.name}}</a-breadcrumb-item>-->
-    <!--      <a-breadcrumb-item ><a href="javascript:void (0)">{{info?.name}}</a></a-breadcrumb-item>-->
-    <!--    </a-breadcrumb>-->
     <!-- 服务信息 -->
     <div class="serve-info" v-if="!isInterface">
       <h1>{{ info.name }}</h1>
-      <!--      <a-tag>v1.0</a-tag>-->
       <div class="serve-info-block">
         <div class="title"><strong>服务信息</strong></div>
         <div class="items">
@@ -144,9 +139,9 @@
       </div>
     </div>
   </div>
-  <GenerateCode 
+  <GenerateCode
   v-if="genCodeVisible"
-  :visible="genCodeVisible" 
+  :visible="genCodeVisible"
   @close="close"
   :contentStr="contentStr"
   :serveId="info?.serveId"
