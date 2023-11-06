@@ -9,7 +9,7 @@ var postRequest = {
   url: 'http://111.231.16.35:9000/post',
   method: 'POST',
   body: {
-    foo: bar
+    foo: 'bar'
   }
 };
 dt.sendRequest(postRequest, (err, resp) => {
