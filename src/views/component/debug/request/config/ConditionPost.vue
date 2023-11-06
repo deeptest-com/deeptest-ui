@@ -139,6 +139,10 @@ const postConditions = computed<any>(() => store.state.Debug.postConditions);
 const activePostCondition = computed<any>(() => store.state.Debug.activePostCondition);
 
 provide('usedWith', UsedWith.PostCondition)
+// const extractorData = computed<any>(() => store.state.Debug.extractorData);
+// const checkpointData = computed<any>(() => store.state.Debug.checkpointData);
+// const scriptData = computed<any>(() => store.state.Debug.scriptData);
+
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 
@@ -179,6 +183,50 @@ watch(debugData, async (newVal) => {
     id: index + 1,
   }));
 }, {immediate: true, deep: true});
+
+// watch(() => {
+//   return activePostCondition.value
+// },(newVal,oldValue) => {
+//
+// },{
+//   deep:true
+// })
+
+// watch(() => {
+//   return activePostCondition.value
+// },(newVal,oldValue) => {
+//   console.log('watch postConditions 8322222111',newVal,oldValue);
+//   // 清空
+//   // store.dispatch('Debug/setCheckpoint',{})
+//   // store.dispatch('Debug/setExtractor',{})
+//   // store.dispatch('Debug/setScript',{})
+// },{
+//   deep:true
+// })
+//
+// watch(() => {
+//   return extractorData.value
+// },(newVal,oldValue) => {
+//   console.log('watch postConditions 8322222111 22222',newVal,oldValue);
+// },{
+//   deep:true
+// })
+//
+// watch(() => {
+//   return checkpointData.value
+// },(newVal,oldValue) => {
+//   console.log('watch postConditions 8322222111 33333',newVal,oldValue);
+// },{
+//   deep:true
+// })
+//
+// watch(() => {
+//   return scriptData.value
+// },(newVal,oldValue) => {
+//   console.log('watch postConditions 8322222111 44444',newVal,oldValue);
+// },{
+//   deep:true
+// })
 
 const create = () => {
   console.log('create', conditionType.value)

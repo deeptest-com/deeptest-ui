@@ -49,14 +49,14 @@ import {
     generateJsonExample,
     generateCode,
     generateSchemaByResponse,
-    loadAlternativeCase, 
-    loadAlternativeCaseSaved, 
-    saveAlternativeCase, 
+    loadAlternativeCase,
+    loadAlternativeCaseSaved,
+    saveAlternativeCase,
     queryEndpointCase,
-    listAlternativeCaseAssertion, 
-    saveAlternativeCaseAssertion, 
+    listAlternativeCaseAssertion,
+    saveAlternativeCaseAssertion,
     disableAlternativeCaseAssertion,
-    removeAlternativeCaseAssertion, 
+    removeAlternativeCaseAssertion,
     moveAlternativeCaseAssertion,
     updateName,
 } from './service';
@@ -81,6 +81,7 @@ import {
     getSchemaList, getSchemaDetail
 } from "@/views/project-settings/service";
 import { changeServe } from '../project-settings/service';
+import {ref} from "vue/dist/vue";
 
 export interface StateType {
     endpointId: number;
@@ -93,6 +94,7 @@ export interface StateType {
     nodeDataCategory: any;
     filterState: filterFormState;
     endpointDetail: any,
+    srcEndpointDetail: any,
     endpointDetailYamlCode: any,
     serveServers: any[]; // serve list
     currServer: any; // current server 当前选中的环境
@@ -101,6 +103,8 @@ export interface StateType {
     refsOptions: any;
     selectedMethodDetail: any;
     selectedCodeDetail: any;
+
+
 
     /**
      * 高级mock
@@ -136,6 +140,8 @@ export interface StateType {
     alternativeCasesSaved:any;
     alternativeCaseAssertions: any[];
     activeAlternativeCaseAssertion:any;
+    // 记录接口定义是否有变更
+    isDefineChange: boolean;
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -154,6 +160,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setFilterState: Mutation<StateType>;
         clearFilterState: Mutation<StateType>;
         setEndpointDetail: Mutation<StateType>;
+        initEndpointDetail: Mutation<StateType>;
         setServerList: Mutation<StateType>;
         setCurrServer: Mutation<StateType>;
         setSecurityOpts: Mutation<StateType>;
@@ -195,6 +202,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setAlternativeCasesSaved:Mutation<StateType>;
         setAlternativeCaseAssertions:Mutation<StateType>;
         setActiveAlternativeCaseAssertion:Mutation<StateType>;
+
+        setIsDefineChange:Mutation<StateType>;
     };
     actions: {
         listEndpoint: Action<StateType, StateType>;
@@ -277,6 +286,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         removeAlternativeCaseAssertion: Action<StateType, StateType>;
         disableAlternativeCaseAssertion: Action<StateType, StateType>;
         moveAlternativeCaseAssertion: Action<StateType, StateType>;
+
     }
 }
 
@@ -306,6 +316,7 @@ const initState: StateType = {
         tagNames: []
     },
     endpointDetail: null,
+    srcEndpointDetail: null,
     endpointDetailYamlCode: null,
     serveServers: [],
     currServer: {},
@@ -351,6 +362,8 @@ const initState: StateType = {
     alternativeCasesSaved: [],
     alternativeCaseAssertions: [],
     activeAlternativeCaseAssertion: {},
+
+    isDefineChange: false,
 };
 
 const StoreModel: ModuleType = {
@@ -406,6 +419,9 @@ const StoreModel: ModuleType = {
         },
         setEndpointDetail(state, payload) {
             state.endpointDetail = payload;
+        },
+        initEndpointDetail(state, payload) {
+            state.srcEndpointDetail = payload;
         },
         setServerList(state, payload) {
             state.serveServers = payload;
@@ -548,6 +564,10 @@ const StoreModel: ModuleType = {
             } else {
                 state.activeAlternativeCaseAssertion = payload;
             }
+        },
+
+        setIsDefineChange(state, payload){
+            state.isDefineChange = payload
         },
     },
     actions: {
@@ -790,7 +810,25 @@ const StoreModel: ModuleType = {
             res.data.updatedAt = momentUtc(res.data.updatedAt);
 
             if (res.code === 0) {
+                // 处理 examples 不一致的情况
+                try {
+                    res.data?.interfaces?.forEach((item) => {
+                        const examples = JSON.parse(item?.requestBody?.examples || '[]');
+                        item.requestBody.examples = JSON.stringify(examples || '[]');
+                        item?.responseBodies?.forEach((codeItem)=>{
+                            const examples = JSON.parse(codeItem?.examples || '[]');
+                            codeItem.examples = JSON.stringify(examples || '[]');
+                        })
+                    })
+                }catch (e){
+                    console.error(e)
+                }
+
                 await commit('setEndpointDetail', res.data || null);
+                // setTimeout(() => {
+                //     commit('initEndpointDetail', cloneDeep(res.data) || null);
+                // }, 200);
+                // await commit('initEndpointDetail', cloneDeep(res.data) || null);
                 state.endpointDetail?.interfaces?.forEach((item) => {
                     commit('setInterfaceMethodToObjMap', {
                         method: item.method,
@@ -804,15 +842,23 @@ const StoreModel: ModuleType = {
         },
         // 用于新建接口时选择接口分类
         async updateEndpointDetail({commit, dispatch}, payload: any) {
-            const res = await saveEndpoint({
-                ...payload
-            });
-            if (res.code === 0) {
-                await dispatch("getEndpointDetail", {id: res.data})
+            try {
+                const res = await saveEndpoint({
+                    ...payload
+                });
+                await dispatch("getEndpointDetail", {id: payload.id})
                 await dispatch('loadList', {projectId: payload.projectId});
-            } else {
-                return false
+            }catch (e){
+                console.error(e)
             }
+
+            // debugger
+            // if (res.code === 0) {
+            //     await dispatch("getEndpointDetail", {id: res.data})
+            //     await dispatch('loadList', {projectId: payload.projectId});
+            // } else {
+            //     return false
+            // }
         },
 
         async updateEndpointName({ dispatch, commit, rootState }: any, payload: any) {
@@ -1334,7 +1380,6 @@ const StoreModel: ModuleType = {
                     const selectedMethodDetail =  state.endpointDetail.interfaces.find(arrItem => arrItem.id == payload.interfaceId)
                     commit('setSelectedMethodDetail', selectedMethodDetail);
                     commit('setSelectedCodeDetail', res.data);
-
                 }
                 return true;
             } catch (error) {

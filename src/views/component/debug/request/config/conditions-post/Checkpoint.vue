@@ -185,7 +185,13 @@ const cancel = () => {
     props.finish()
   }
 }
-
+// watch(() => {
+//   return model.value
+// },(newVal,oldVal) => {
+//   console.log('model.value222 checkpoiont：',newVal,oldVal)
+// },{
+//   deep:true
+// })
 onMounted(() => {
   console.log('onMounted')
   bus.on(settings.eventConditionSave, save);

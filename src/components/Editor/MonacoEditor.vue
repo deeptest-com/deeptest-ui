@@ -178,8 +178,11 @@ export default defineComponent({
       this.$emit('editorDidMount', this.editor)
 
       setTimeout(() => {
-        this.formatDocInit(editor)
-      }, 500)
+        if(options?.isInitFormat) {
+          this.formatDocInit(editor)
+
+        }
+      }, 100)
     },
 
     formatDocInit: (editor) => {

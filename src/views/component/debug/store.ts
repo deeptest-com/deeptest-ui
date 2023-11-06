@@ -46,10 +46,12 @@ import {ResponseData} from "@/utils/request";
 import {listEnvVarByServer} from "@/services/environment";
 import {getResponseKey} from "@/utils/comm";
 import {send_request_get, send_request_post} from "@/views/component/debug/config";
+import cloneDeep from "lodash/cloneDeep";
 
 export interface StateType {
     debugInfo: DebugInfo
     debugData: any;
+    srcDebugData: any;
     invokedMap: any;
 
     requestData: any;
@@ -69,7 +71,7 @@ export interface StateType {
     checkpointData: any;
     scriptData: any;
     cookieData: any;
-
+    debugChange: any;
     serves: any[];
     currServe: any;
 
@@ -84,6 +86,7 @@ export interface StateType {
 const initState: StateType = {
     debugInfo: {} as DebugInfo,
     debugData: {},
+    srcDebugData: {},
     invokedMap: {},
 
     requestData: {},
@@ -103,7 +106,12 @@ const initState: StateType = {
     checkpointData: {} as Checkpoint,
     scriptData: {} as Script,
     cookieData: {} as Cookie,
-
+    debugChange: {
+        base: false,
+        preScript: false,
+        postCondition: false,
+        checkpoint: false,
+    },
     serves: [],
     currServe: [],
 
@@ -122,6 +130,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
     mutations: {
         setDebugInfo: Mutation<StateType>;
         setDebugData: Mutation<StateType>;
+        setSrcDebugData: Mutation<StateType>;
 
         clearInvokedMap: Mutation<StateType>;
         putInvokedMap: Mutation<StateType>;
@@ -160,6 +169,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setGlobalParams: Mutation<StateType>;
 
         setAlternativeCase: Mutation<StateType>;
+        setDebugChange: Mutation<StateType>;
     };
     actions: {
         loadDataAndInvocations: Action<StateType, StateType>;
@@ -239,6 +249,9 @@ const StoreModel: ModuleType = {
 
         setDebugData(state, payload) {
             state.debugData = payload;
+        },
+        setSrcDebugData(state, payload) {
+            state.srcDebugData = payload;
         },
         clearInvokedMap(state) {
             state.invokedMap = {}
@@ -352,6 +365,12 @@ const StoreModel: ModuleType = {
                 ...payload,
             };
         },
+        setDebugChange(state, payload){
+            state.debugChange = {
+                ...state.debugChange,
+                ...payload
+            }
+        }
     },
     actions: {
         // debug
@@ -387,6 +406,7 @@ const StoreModel: ModuleType = {
                 } as DebugInfo);
 
                 await commit('setDebugData', resp.data);
+
 
                 const key = getResponseKey(state.debugInfo)
                 if (state.invokedMap[key]) {

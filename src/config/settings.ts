@@ -1,5 +1,6 @@
 import { RoutesDataItem } from "@/utils/routes";
 import {isLeyan} from "@/utils/comm";
+import Swal from "sweetalert2";
 
 /**
  * 站点配置
@@ -59,6 +60,7 @@ export interface SettingsType {
     eventConditionSave: string,
 
     eventVariableSelectionStatus: string,
+    eventLeaveDebugSaveData: string,
     eventVariableSelectionResult: any,
     webSocketRoom: string,
     electronMsg: string,
@@ -98,6 +100,7 @@ export interface SettingsType {
      * ly api 客户端本地存储的用户信息
      * */
     lyElectronUserInfo: string;
+    SwalLeaveSetting: any;
 }
 
 const settings: SettingsType = {
@@ -133,6 +136,8 @@ const settings: SettingsType = {
 
     eventVariableSelectionStatus: 'eventVariableSelectionStatus',
     eventVariableSelectionResult: 'eventVariableSelectionResult',
+    // 调试页面离开时保存数据
+    eventLeaveDebugSaveData: 'eventLeaveDebugSaveData',
     webSocketRoom: 'webSocketRoom',
     electronMsg: 'electronMsg',
     electronMsgUsePort: 'electronMsgUsePort',
@@ -156,6 +161,24 @@ const settings: SettingsType = {
     paneResizeTop: 'paneResizeTop',
 
     lyElectronUserInfo: 'lyElectronUserInfo',
+
+    SwalLeaveSetting: {
+        title: '当前页面有修改的内容未保存',
+        html:'是否保存后再离开？',
+        iconHtml: '<svg focusable="false" class="" data-icon="exclamation-circle" width="1em" height="1em" fill="currentColor" aria-hidden="true" viewBox="64 64 896 896"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"></path><path d="M464 688a48 48 0 1096 0 48 48 0 10-96 0zm24-112h48c4.4 0 8-3.6 8-8V296c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v272c0 4.4 3.6 8 8 8z"></path></svg>',
+        showDenyButton: true,
+        showCancelButton: true,
+        cancelButtonText: `取消`,
+        confirmButtonText: '保存并离开',
+        denyButtonText: `不保存`,
+        customClass: {
+            container: 'ly-swal-container',
+            confirmButton: 'btn btn-primary',
+            cancelButton: 'btn btn-normal btn-cancel',
+            denyButton: 'btn btn-normal btn-deny',
+        },
+    }
+
 };
 
 export default settings;
