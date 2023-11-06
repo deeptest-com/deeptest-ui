@@ -71,12 +71,12 @@
                        :data-source="list">
                 <template #colTitle="{record}">
                   <div class="customTitleColRender">
-                    <EditAndShowField 
-                      :custom-class="'custom-endpoint show-on-hover'"
-                      :value="record.title"
-                      placeholder="请输入接口名称"
-                      @update="(e: string) => updateTitle(e, record)"
-                      @edit="editEndpoint(record)"/>
+                    <EditAndShowField
+                        :custom-class="'custom-endpoint show-on-hover'"
+                        :value="record.title"
+                        placeholder="请输入接口名称"
+                        @update="(e: string) => updateTitle(e, record)"
+                        @edit="editEndpoint(record)"/>
                   </div>
                 </template>
 
@@ -93,9 +93,9 @@
                 <template #colTags="{record}">
                   <div class="customTagsColRender">
                     <Tags
-                        :values = "record?.tags"
-                        :options = "tagList"
-                        @updateTags = "(values:[])=>{
+                        :values="record?.tags"
+                        :options="tagList"
+                        @updateTags="(values:[])=>{
                       updateTags(values,record.id)
                     }"
                     />
@@ -103,20 +103,22 @@
                 </template>
                 <template #colCreateUser="{record}">
                   <div class="customTagsColRender">
-                    {{username(record.createUser)}}
+                    {{ username(record.createUser) }}
                   </div>
                 </template>
                 <template #colUpdateUser="{record}">
                   <div class="customTagsColRender">
-                    {{username(record.updateUser)}}
+                    {{ username(record.updateUser) }}
                   </div>
                 </template>
                 <template #updatedAt="{ record, column }">
-                  <TooltipCell :text="record.updatedAt" :width="column.width" />
+                  <TooltipCell :text="record.updatedAt" :width="column.width"/>
                 </template>
                 <template #colPath="{text, record}">
                   <div class="customPathColRender">
-                    <a-tag :color="getMethodColor(method)" v-for="(method, index) in (record.methods)" :key="index">{{ method }}</a-tag>
+                    <a-tag :color="getMethodColor(method)" v-for="(method, index) in (record.methods)" :key="index">
+                      {{ method }}
+                    </a-tag>
                     <span class="path-col" v-if="text">
                       <a-tooltip placement="topLeft">
                         <template #title>
@@ -129,7 +131,7 @@
                   </div>
                 </template>
                 <template #action="{record}">
-                  <DropdownActionMenu :dropdownList="MenuList" :record="record" />
+                  <DropdownActionMenu :dropdownList="MenuList" :record="record"/>
                 </template>
               </a-table>
             </template>
@@ -164,7 +166,10 @@
           :destroyOnClose="true"
           :visible="drawerVisible"
           @refreshList="refreshList"
-          @close="drawerVisible = false;"/>
+          ref="drawerRef"
+          @close="() => {
+            closeDrawer();
+          }"/>
     </div>
   </a-spin>
 </template>
@@ -195,16 +200,23 @@ import {StateType as ServeStateType} from "@/store/serve";
 import {StateType as Debug} from "@/views/component/debug/store";
 import Tree from './components/Tree.vue'
 import BatchUpdateFieldModal from './components/BatchUpdateFieldModal.vue';
+import LeavePrompt from './components/LeavePrompt.vue';
 import Tags from './components/Tags/index.vue';
 import TooltipCell from '@/components/Table/tooltipCell.vue';
-import { DropdownActionMenu } from '@/components/DropDownMenu/index';
+import {DropdownActionMenu} from '@/components/DropDownMenu/index';
+import _ from "lodash";
 
-import { getMethodColor } from '@/utils/interface';
+import {getMethodColor} from '@/utils/interface';
 import {notifyError, notifySuccess} from "@/utils/notify";
+import {equalObjectByXpath,equalObjectByLodash} from "@/utils/object";
 import useSharePage from '@/hooks/share';
+import Swal from "sweetalert2";
+import cloneDeep from "lodash/cloneDeep";
+import bus from "@/utils/eventBus";
+import settings from "@/config/settings";
 
-const { share } = useSharePage();
-const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType,Project }>();
+const {share} = useSharePage();
+const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
@@ -215,7 +227,7 @@ let pagination = computed<PaginationConfig>(() => store.state.Endpoint.listResul
 const createApiModalVisible = ref(false);
 const router = useRouter();
 type Key = ColumnProps['key'];
-const tagList: any = computed(()=>store.state.Endpoint.tagList);
+const tagList: any = computed(() => store.state.Endpoint.tagList);
 const userList = computed<any>(() => store.state.Project.userList);
 
 /**
@@ -276,7 +288,7 @@ const columns = [
     title: '最近更新',
     dataIndex: 'updatedAt',
     width: 180,
-    slots: { customRender: 'updatedAt' },
+    slots: {customRender: 'updatedAt'},
   },
   {
     title: '操作',
@@ -398,6 +410,7 @@ async function updateTitle(value: string, record: any) {
       {id: record.id, name: value}
   );
 }
+
 // 打开抽屉
 async function editEndpoint(record) {
   await store.dispatch('Endpoint/getEndpointDetail', {id: record.id});
@@ -458,7 +471,7 @@ async function handleBatchUpdate(data) {
   await store.dispatch('Endpoint/batchUpdateField', {
     "fieldName": data.value.fieldName,
     "value": data.value.value,
-    "endpointIds":selectedRowIds.value
+    "endpointIds": selectedRowIds.value
   });
   await refreshList();
   showBatchUpdateModal.value = false;
@@ -474,7 +487,7 @@ async function handleImport(data, callback) {
 
   const res = await store.dispatch('Endpoint/importEndpointData', {
     ...data,
-    "sourceType":2,
+    "sourceType": 2,
     "serveId": currServe.value.id,
   });
 
@@ -495,7 +508,7 @@ const filterState: any = ref({});
 
 async function selectNode(id) {
   selectedCategoryId.value = id;
-  selectedRowKeys. value = [];
+  selectedRowKeys.value = [];
   selectedRow.value = {};
   // 选中节点时，重置分页为第一页
   await loadList(1, pagination.value.pageSize);
@@ -578,18 +591,124 @@ function paneResizeStop(pane, resizer, size) {
   }
 }
 
-const updateTags = async (tags :[],id:number)=>{
-   await store.dispatch('Endpoint/updateEndpointTag', {
-      id:id,tagNames:tags
-    });
+const updateTags = async (tags: [], id: number) => {
+  await store.dispatch('Endpoint/updateEndpointTag', {
+    id: id, tagNames: tags
+  });
 
 }
 
-const username = (user:string)=>{
+const username = (user: string) => {
   let result = userList.value.find(arrItem => arrItem.value == user);
   return result?.label || '-'
 }
 
+/*************************************************
+ * ::::离开保存代码逻辑部分start
+ ************************************************/
+const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
+const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
+const debugChange: any = computed<Endpoint>(() => store.state.Debug.debugChange);
+const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
+const srcEndpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.srcEndpointDetail);
+const debugData = computed<any>(() => store.state.Debug.debugData);
+const srcDebugData: any = computed<Endpoint>(() => store.state.Debug.srcDebugData);
+const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
+
+watch(() => {
+  return [debugData.value,srcDebugData.value]
+}, () => {
+  const cur = debugData.value;
+  const src = srcDebugData.value;
+  // 处理格式化的数据
+  const isChange = !equalObjectByLodash(src, cur);
+  const isInit = cur?.endpointInterfaceId && src?.endpointInterfaceId;
+  console.log('832222调试信息2',cur,src,isChange);
+  if(isInit){
+    store.commit('Debug/setDebugChange', {base:isChange});
+  }else {
+    store.commit('Debug/setDebugChange', {base:false});
+  }
+
+},{
+  deep: true
+})
+
+
+// 接口信息改变了
+watch(() => {
+  return [endpointDetail.value,srcEndpointDetail.value]
+}, (newVal, oldValue) => {
+  const src = srcEndpointDetail.value;
+  const cur = endpointDetail.value;
+  const isInit = cur?.id && src?.id;
+  const isChange = !equalObjectByLodash(cur, src);
+  console.log('832222调试信息1',cur,src,isChange);
+  if(isInit){
+    store.commit('Endpoint/setIsDefineChange', isChange);
+  }else {
+    store.commit('Endpoint/setIsDefineChange', false);
+  }
+}, {
+  deep: true
+});
+
+const drawerRef:any = ref(null);
+// 关闭弹框时，如果接口信息改变了，弹出提示
+function closeDrawer() {
+  // 如果接口定义有变化，需要提示用户保存
+  if (isDefineChange.value) {
+    Swal.fire({
+      ...settings.SwalLeaveSetting
+    }).then((result) => {
+      // isConfirmed: true,  保存并离开
+      if (result.isConfirmed) {
+        drawerRef.value?.save();
+        drawerVisible.value = false;
+        store.commit('Endpoint/setIsDefineChange', false);
+      }
+      // isDenied: false,  不保存，并离开
+      else if (result.isDenied) {
+        drawerVisible.value = false;
+        store.commit('Endpoint/setIsDefineChange', false);
+      }
+      // isDismissed: false 取消,即什么也不做
+      else if (result.isDismissed) {
+        console.log('isDismissed', result.isDismissed)
+      }
+    })
+  }
+  // 调试模块数据有变化，需要提示用户是否要保存调试数据
+  else if(debugChangeBase.value){
+    Swal.fire({
+      ...settings.SwalLeaveSetting
+    }).then((result) => {
+      // isConfirmed: true,  保存并离开
+      if (result.isConfirmed) {
+        drawerVisible.value = false;
+        bus.emit(settings.eventLeaveDebugSaveData, {});
+        store.commit('Debug/setDebugChange', {base:false});
+      }
+      // isDenied: false,  不保存，并离开
+      else if (result.isDenied) {
+        drawerVisible.value = false;
+        store.commit('Debug/setDebugChange', {base:false});
+      }
+      // isDismissed: false 取消,即什么也不做
+      else if (result.isDismissed) {
+        console.log('isDismissed', result.isDismissed)
+      }
+    })
+  }
+  else {
+    drawerVisible.value = false;
+    store.commit('Debug/setDebugChange', {base:false});
+    store.commit('Endpoint/setIsDefineChange', false);
+  }
+}
+/*************************************************
+ * ::::离开保存代码逻辑部分end
+ ************************************************/
 
 </script>
 <style scoped lang="less">
