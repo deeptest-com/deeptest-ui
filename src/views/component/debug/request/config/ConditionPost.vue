@@ -46,7 +46,11 @@
                 <span v-html="element.desc || t(element.entityType)"></span>
               </div>
               <div class="buttons">
-                <a-button size="small" type="primary" v-if="activePostCondition.id === element.id" @click.stop="save(element)">保存</a-button>
+                <a-button size="small" type="primary"
+                          :disabled="saveDisabled"
+                          v-if="activePostCondition.id === element.id"
+                          @click.stop="save(element)">保存</a-button>
+
 
                 <ClearOutlined v-if="activePostCondition.id === +element.id && element.entityType === ConditionType.script"
                                @click.stop="format(element)"
@@ -100,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch, getCurrentInstance, ComponentInternalInstance} from "vue";
+import {computed, inject, ref, watch, getCurrentInstance, ComponentInternalInstance,onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import { CheckCircleOutlined, DeleteOutlined,
@@ -127,7 +131,7 @@ const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const postConditions = computed<any>(() => store.state.Debug.postConditions);
-const activePostCondition = computed<any>(() => store.state.Debug.activePostCondition);
+const activePostCondition:any = computed<any>(() => store.state.Debug.activePostCondition);
 
 // const extractorData = computed<any>(() => store.state.Debug.extractorData);
 // const checkpointData = computed<any>(() => store.state.Debug.checkpointData);
@@ -144,8 +148,6 @@ const conditionTypes = ref(getEnumSelectItems(ConditionType))
 const expand = (item) => {
   console.log('expand', item)
   store.commit('Debug/setActivePostCondition', item);
-
-
 }
 
 const list = () => {
@@ -158,49 +160,7 @@ watch(debugData, (newVal) => {
   list()
 }, {immediate: true, deep: true});
 
-// watch(() => {
-//   return activePostCondition.value
-// },(newVal,oldValue) => {
-//
-// },{
-//   deep:true
-// })
 
-// watch(() => {
-//   return activePostCondition.value
-// },(newVal,oldValue) => {
-//   console.log('watch postConditions 8322222111',newVal,oldValue);
-//   // 清空
-//   // store.dispatch('Debug/setCheckpoint',{})
-//   // store.dispatch('Debug/setExtractor',{})
-//   // store.dispatch('Debug/setScript',{})
-// },{
-//   deep:true
-// })
-//
-// watch(() => {
-//   return extractorData.value
-// },(newVal,oldValue) => {
-//   console.log('watch postConditions 8322222111 22222',newVal,oldValue);
-// },{
-//   deep:true
-// })
-//
-// watch(() => {
-//   return checkpointData.value
-// },(newVal,oldValue) => {
-//   console.log('watch postConditions 8322222111 33333',newVal,oldValue);
-// },{
-//   deep:true
-// })
-//
-// watch(() => {
-//   return scriptData.value
-// },(newVal,oldValue) => {
-//   console.log('watch postConditions 8322222111 44444',newVal,oldValue);
-// },{
-//   deep:true
-// })
 
 const create = () => {
   console.log('create', conditionType.value)
@@ -250,6 +210,78 @@ const closeFullScreen = (item) => {
   console.log('closeFullScreen', item)
   fullscreen.value = false
 }
+
+
+/*************************************************
+ * ::::前置处理器保存提示
+ ************************************************/
+//TODO 以为代码有重复，需要抽出来hooks
+const scriptData = computed<any>(() => store.state.Debug.scriptData);
+const srcScriptData = computed<any>(() => store.state.Debug.srcScriptData);
+const debugChange = computed<any>(() => store.state.Debug.debugChange);
+const postConditionsDataObj = computed<any>(() => store.state.Debug.postConditionsDataObj);
+const postConditionsSrcDataObj = computed<any>(() => store.state.Debug.postConditionsSrcDataObj);
+const saveDisabled = computed(() => {
+  if(activePostCondition.value?.entityType === ConditionType.script){
+    return debugChange.value.preScript
+  }
+  return false;
+})
+watch(() => {
+  return [postConditions.value,postConditionsDataObj.value,postConditionsSrcDataObj.value]
+},(newVal,oldValue) => {
+  // todo 统一处理，变化的情况下，清空
+  console.log('8322222scriptData2222222233',newVal,oldValue);
+  store.commit('Debug/setDebugChange',{
+    preScript:scriptData.value?.content?.replace(/\s|\n/g, '') === srcScriptData.value?.content?.replace(/\s|\n/g, ''),
+  })
+},{
+  deep:true
+})
+
+// watch(() => {
+//   return activePostCondition.value
+// },(newVal,oldValue) => {
+//
+// },{
+//   deep:true
+// })
+
+// watch(() => {
+//   return activePostCondition.value
+// },(newVal,oldValue) => {
+//   console.log('watch postConditions 8322222111',newVal,oldValue);
+//   // 清空
+//   // store.dispatch('Debug/setCheckpoint',{})
+//   // store.dispatch('Debug/setExtractor',{})
+//   // store.dispatch('Debug/setScript',{})
+// },{
+//   deep:true
+// })
+//
+// watch(() => {
+//   return extractorData.value
+// },(newVal,oldValue) => {
+//   console.log('watch postConditions 8322222111 22222',newVal,oldValue);
+// },{
+//   deep:true
+// })
+//
+// watch(() => {
+//   return checkpointData.value
+// },(newVal,oldValue) => {
+//   console.log('watch postConditions 8322222111 33333',newVal,oldValue);
+// },{
+//   deep:true
+// })
+//
+// watch(() => {
+//   return scriptData.value
+// },(newVal,oldValue) => {
+//   console.log('watch postConditions 8322222111 44444',newVal,oldValue);
+// },{
+//   deep:true
+// })
 
 </script>
 

@@ -47,11 +47,11 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, inject, onBeforeUnmount, onMounted, reactive, ref, watch} from "vue";
+import {computed, defineProps, inject, onBeforeUnmount, onMounted, reactive, ref, watch,onUnmounted} from "vue";
 import {Form} from 'ant-design-vue';
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import {UsedBy} from "@/utils/enum";
+import {ConditionType, UsedBy} from "@/utils/enum";
 
 import {StateType as Debug} from "@/views/component/debug/store";
 import {StateType as Snippet} from "@/store/snippet";
@@ -72,7 +72,9 @@ const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet:
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
-const model = computed<any>(() => store.state.Debug.scriptData);
+const model = computed<any>(() => {
+  return store.state.Debug.postConditionsDataObj?.[props?.condition?.entityId] || {}
+});
 const jslibNames = computed<any>(() => store.state.Snippet.jslibNames);
 
 const props = defineProps({
@@ -89,10 +91,14 @@ const props = defineProps({
 const load = () => {
   console.log('load script ...', props.condition)
   store.dispatch('Debug/getScript', props.condition.entityId)
-  store.dispatch('Snippet/listJslibNames')
-
+  store.dispatch('Snippet/listJslibNames');
 }
-load()
+onMounted(() => {
+  if(!store.state.Debug.postConditionsDataObj?.[props?.condition?.entityId]){
+    load();
+  }
+})
+
 
 const timestamp = ref('')
 watch(model, (newVal) => {
@@ -169,6 +175,29 @@ onBeforeUnmount( () => {
 
 const labelCol = { span: 0 }
 const wrapperCol = { span: 24 }
+
+/*************************************************
+ * ::::后置处理器保存提示
+ ************************************************/
+const scriptData = computed<any>(() => store.state.Debug.scriptData);
+const srcScriptData = computed<any>(() => store.state.Debug.srcScriptData);
+const debugChange = computed<any>(() => store.state.Debug.debugChange);
+
+watch(() => {
+  return [scriptData.value?.content,srcScriptData.value?.content]
+},(newVal,oldValue) => {
+  console.log('8322222scriptData',newVal,oldValue);
+  store.commit('Debug/setDebugChange',{
+    preScript:scriptData.value?.content?.replace(/\s|\n/g, '') === srcScriptData.value?.content?.replace(/\s|\n/g, ''),
+  })
+},{
+  deep:true
+})
+onUnmounted(() => {
+  store.commit('Debug/setDebugChange',{
+    preScript:false,
+  })
+})
 
 </script>
 

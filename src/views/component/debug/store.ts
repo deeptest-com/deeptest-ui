@@ -58,6 +58,8 @@ export interface StateType {
 
     preConditions: any[];
     postConditions: any[];
+    postConditionsDataObj: any;
+    postConditionsSrcDataObj: any;
     assertionConditions: any[];
     activeAssertion: any;
     activePostCondition: any;
@@ -86,6 +88,8 @@ const initState: StateType = {
 
     preConditions: [],
     postConditions: [],
+    postConditionsDataObj: {},
+    postConditionsSrcDataObj: {},
     assertionConditions: [],
     activeAssertion: [],
     activePostCondition: [],
@@ -149,6 +153,9 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setGlobalParams: Mutation<StateType>;
         setDebugChange: Mutation<StateType>;
+
+        setPostConditionsDataObj: Mutation<StateType>;
+        setPostConditionsSrcDataObj: Mutation<StateType>;
     };
     actions: {
         loadDataAndInvocations: Action<StateType, StateType>;
@@ -345,7 +352,13 @@ const StoreModel: ModuleType = {
                 ...state.debugChange,
                 ...payload
             }
-        }
+        },
+        setPostConditionsDataObj(state, payload){
+            state.postConditionsDataObj[payload.id] = payload.value
+        },
+        setPostConditionsSrcDataObj(state, payload){
+            state.postConditionsSrcDataObj[payload.id] = payload.value
+        },
     },
     actions: {
         // debug
@@ -631,8 +644,15 @@ const StoreModel: ModuleType = {
             try {
                 const response = await getExtractor(id);
                 const {data} = response;
-
-                commit('setExtractor', data);
+                commit('setPostConditionsDataObj',{
+                    id: data.id,
+                    value:data
+                })
+                commit('setPostConditionsSrcDataObj',{
+                    id: data.id,
+                    value:cloneDeep(data)
+                })
+                // commit('setExtractor', data);
                 return true;
             } catch (error) {
                 return false;
@@ -714,8 +734,15 @@ const StoreModel: ModuleType = {
             try {
                 const response = await getCheckpoint(id);
                 const {data} = response;
-
-                commit('setCheckpoint', data);
+                commit('setPostConditionsDataObj',{
+                    id: data.id,
+                    value:data
+                });
+                commit('setPostConditionsSrcDataObj',{
+                    id: data.id,
+                    value:cloneDeep(data)
+                });
+                // commit('setCheckpoint', data);
                 return true;
             } catch (error) {
                 return false;
@@ -746,8 +773,17 @@ const StoreModel: ModuleType = {
             try {
                 const response = await getScript(id);
                 const {data} = response;
+                // commit('setScript', data);
 
-                commit('setScript', data);
+                // 缓存当前数据
+                commit('setPostConditionsDataObj',{
+                    id: data.id,
+                    value:data
+                });
+                commit('setPostConditionsSrcDataObj',{
+                    id: data.id,
+                    value:cloneDeep(data)
+                })
                 return true;
             } catch (error) {
                 return false;

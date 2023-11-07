@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch, onMounted} from "vue";
+import {computed, inject, ref, watch, onMounted,onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {Methods, UsedBy} from "@/utils/enum";
 import {StateType as Debug} from "@/views/component/debug/store";
@@ -112,6 +112,17 @@ watch(() => {
 }, {
   immediate: true,
 });
+
+
+onUnmounted(() => {
+  store.commit('Debug/setDebugChange',{
+    preScript:false,
+    postScript:false,
+    assertionScript:false,
+  })
+  store.commit('Debug/setpostConditionsDataObj',{})
+})
+
 </script>
 
 <style lang="less">

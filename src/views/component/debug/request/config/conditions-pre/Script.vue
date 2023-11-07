@@ -105,7 +105,6 @@ const editorChange = (newScriptCode) => {
 
 const save = async () => {
   console.log('save', scriptData.value)
-
   scriptData.value.debugInterfaceId = debugInfo.value.debugInterfaceId
   scriptData.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
   scriptData.value.projectId = debugData.value.projectId

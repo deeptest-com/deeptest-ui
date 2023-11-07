@@ -53,19 +53,6 @@ const scriptData = computed<any>(() => store.state.Debug.scriptData);
 const srcScriptData = computed<any>(() => store.state.Debug.srcScriptData);
 const debugChange = computed<any>(() => store.state.Debug.debugChange);
 
-/**
- * 处理是否修改了
- * */
-watch(() => {
-  return [scriptData.value?.content,srcScriptData.value?.content]
-},(newVal,oldValue) => {
-  console.log('8322222scriptData',newVal,oldValue)
-  store.commit('Debug/setDebugChange',{
-    preScript:scriptData.value?.content?.replace(/\s|\n/g, '') === srcScriptData.value?.content?.replace(/\s|\n/g, ''),
-  })
-},{
-  deep:true
-})
 
 watch(() => {
 return debugChange.value
@@ -108,10 +95,18 @@ const format = (item) => {
   bus.emit(settings.eventEditorAction, {act: settings.eventTypeFormat})
 }
 
-onUnmounted(() => {
+/*************************************************
+ * ::::前置处理器保存提示
+ ************************************************/
+watch(() => {
+  return [scriptData.value?.content,srcScriptData.value?.content]
+},(newVal,oldValue) => {
+  console.log('8322222scriptData',newVal,oldValue)
   store.commit('Debug/setDebugChange',{
-    preScript:false,
+    preScript:scriptData.value?.content?.replace(/\s|\n/g, '') === srcScriptData.value?.content?.replace(/\s|\n/g, ''),
   })
+},{
+  deep:true
 })
 
 </script>

@@ -86,7 +86,7 @@ const store = useStore<{  Debug: Debug }>();
 
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
-const model = computed<any>(() => store.state.Debug.checkpointData);
+// const model = computed<any>(() => store.state.Debug.checkpointData);
 
 const props = defineProps({
   condition: {
@@ -108,7 +108,15 @@ const load = () => {
   console.log('load', props.condition)
   store.dispatch('Debug/getCheckpoint', props.condition.entityId)
 }
-load()
+
+const model = computed<any>(() => {
+  return store.state.Debug.postConditionsDataObj?.[props?.condition?.entityId] || {}
+});
+onMounted(() => {
+  if(!store.state.Debug.postConditionsDataObj?.[props?.condition?.entityId]){
+    load();
+  }
+})
 
 const variables = ref([])
 
