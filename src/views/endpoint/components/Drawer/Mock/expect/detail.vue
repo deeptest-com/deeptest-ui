@@ -421,6 +421,7 @@ watch(() => {
     align-items: center;
     margin-right: 10px;
     height: 32px;
+    width: unset;
   }
 }
 .mock-response-data {
@@ -434,6 +435,7 @@ watch(() => {
       display: flex;
       align-items: center;
       height: 32px;
+      width: unset;
       
       label {
         font-weight: normal;
