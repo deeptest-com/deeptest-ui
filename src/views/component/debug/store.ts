@@ -65,6 +65,7 @@ export interface StateType {
     extractorData: any;
     checkpointData: any;
     scriptData: any;
+    srcScriptData: any;
     cookieData: any;
     debugChange: any;
     serves: any[];
@@ -92,6 +93,7 @@ const initState: StateType = {
     extractorData: {} as Extractor,
     checkpointData: {} as Checkpoint,
     scriptData: {} as Script,
+    srcScriptData: {} as Script,
     cookieData: {} as Cookie,
     debugChange: {
         base: false,
@@ -129,6 +131,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setExtractor: Mutation<StateType>;
         setCheckpoint: Mutation<StateType>;
         setScript: Mutation<StateType>;
+        setSrcScript: Mutation<StateType>;
         setScriptContent: Mutation<StateType>;
         setCookie: Mutation<StateType>;
 
@@ -283,6 +286,9 @@ const StoreModel: ModuleType = {
         },
         setScript(state, payload) {
             state.scriptData = payload;
+        },
+        setSrcScript(state, payload) {
+            state.srcScriptData = payload;
         },
         setCookie(state, payload) {
             state.cookieData = payload;
@@ -525,6 +531,7 @@ const StoreModel: ModuleType = {
                 const resp = await getPreConditionScript(state.debugInfo.debugInterfaceId, state.debugData.endpointInterfaceId);
                 const {data} = resp;
                 commit('setScript', data);
+                commit('setSrcScript',cloneDeep(data));
                 return true;
             } catch (error) {
                 return false;
@@ -748,8 +755,10 @@ const StoreModel: ModuleType = {
         },
         async saveScript({commit, dispatch, state}, payload: any) {
             try {
+                // debugger;
                 await saveScript(payload);
-                dispatch('listPostCondition', UsedBy.InterfaceDebug);
+                await commit('setSrcScript',cloneDeep(payload));
+                await dispatch('listPostCondition', UsedBy.InterfaceDebug);
                 return true
             } catch (error) {
                 return false;

@@ -617,6 +617,7 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 const srcDebugData: any = computed<Endpoint>(() => store.state.Debug.srcDebugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const isMockChange = computed<any>(() => store.state.Endpoint.isMockChange);
+
 watch(() => {
   return [debugData.value,srcDebugData.value]
 }, () => {
@@ -624,14 +625,8 @@ watch(() => {
   const src = srcDebugData.value;
   // 处理格式化的数据
   const isChange = !equalObjectByLodash(src, cur);
-  const isInit = cur?.endpointInterfaceId && src?.endpointInterfaceId;
   console.log('832222调试信息2',cur,src,isChange);
-  if(isInit){
-    store.commit('Debug/setDebugChange', {base:isChange});
-  }else {
-    store.commit('Debug/setDebugChange', {base:false});
-  }
-
+  store.commit('Debug/setDebugChange', {base:isChange});
 },{
   deep: true
 })

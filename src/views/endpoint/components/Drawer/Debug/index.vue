@@ -115,17 +115,11 @@ const resetDebugData = () => {
   store.commit('Debug/setDebugChange', {base:false});
 }
 
-// onMounted(() => {
-//   resetDebugData();
-// })
 
 onMounted(() => {
   resetDebugData()
 })
 
-defineExpose({
-  saveDebugInterface,
-});
 
 </script>
 

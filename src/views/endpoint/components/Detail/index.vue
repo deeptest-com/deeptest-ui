@@ -147,10 +147,6 @@ const stickyKey = ref(0);
 const showList = ref(true);
 const docsData = ref(null);
 
-
-
-
-
 function switchToDefineTab() {
   activeTabKey.value = 'request';
 }
@@ -187,8 +183,6 @@ provide('notScrollIntoView', true);
  * ::::离开保存代码逻辑部分start
  ************************************************/
 const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
-
-
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const debugChange: any = computed<Endpoint>(() => store.state.Debug.debugChange);
 const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
@@ -197,10 +191,44 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 const srcDebugData: any = computed<Endpoint>(() => store.state.Debug.srcDebugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const isMockChange = computed<any>(() => store.state.Endpoint.isMockChange);
-
 const isLeaveTip = computed(() => {
   return isDefineChange.value || isMockChange.value || debugChangeBase.value;
 });
+
+
+watch(() => {
+  return [debugData.value,srcDebugData.value]
+}, () => {
+  const cur = debugData.value;
+  const src = srcDebugData.value;
+  // 处理格式化的数据
+  const isChange = !equalObjectByLodash(src, cur);
+  console.log('832222调试信息22',cur,src,isChange);
+  store.commit('Debug/setDebugChange', {base:isChange});
+
+},{
+  deep: true
+})
+
+
+// 接口信息改变了
+watch(() => {
+  return [endpointDetail.value,srcEndpointDetail.value]
+}, (newVal, oldValue) => {
+  const src = srcEndpointDetail.value;
+  const cur = endpointDetail.value;
+  const isInit = cur?.id && src?.id;
+  const isChange = !equalObjectByLodash(cur, src);
+  console.log('832222调试信息11',cur,src,isChange);
+  if(isInit){
+    store.commit('Endpoint/setIsDefineChange', isChange);
+  }else {
+    store.commit('Endpoint/setIsDefineChange', false);
+  }
+}, {
+  deep: true
+});
+
 
 async function handleChangeTab(value) {
   console.log('changeTab', value);
@@ -290,7 +318,6 @@ async function changeTab(value) {
       console.log('isDismissed', result.isDismissed)
     }
   }
-
 }
 
 
