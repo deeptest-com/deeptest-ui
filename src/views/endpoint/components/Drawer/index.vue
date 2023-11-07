@@ -22,7 +22,8 @@
     <template #tabHeader>
       <DetailTabHeader :tab-list="EndpointTabsList" :show-btn="true" @change-tab="changeTab" :active-key="activeTabKey">
         <template #btn>
-          <a-button v-if="activeTabKey === 'request' && showSaveBtn" type="primary" @click="save" :disabled="!isDefineChange || isInit">
+          <a-button v-if="activeTabKey === 'request' && showSaveBtn" type="primary" @click="save"
+                    :disabled="!isDefineChange || isInit">
             <template #icon>
               <icon-svg class="icon dp-icon-with-text" type="save"/>
             </template>

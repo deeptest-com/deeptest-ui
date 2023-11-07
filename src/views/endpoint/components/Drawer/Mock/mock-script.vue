@@ -6,7 +6,7 @@
         <span>自定义JavaScript代码</span>
       </div>
       <div class="right">
-        <a-button size="small" type="primary" :disabled="isMockChange"  @click.stop="updateMockScript" style="margin-right: 4px;">保存</a-button>
+        <a-button size="small" type="primary" :disabled="!isMockChange"  @click.stop="updateMockScript" style="margin-right: 4px;">保存</a-button>
 
         <a-tooltip overlayClassName="dp-tip-small">
           <template #title>帮助</template>
@@ -49,6 +49,7 @@ import MockScript from "./script/Script.vue";
 import {UsedBy} from "@/utils/enum";
 import {disableScriptMock} from "@/views/endpoint/service";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import cloneDeep from "lodash/cloneDeep";
 
 const {t} = useI18n()
 provide('usedBy', UsedBy.MockData)
@@ -111,14 +112,20 @@ watch(() => {
   return mockScript?.value?.content
 },(newVal) => {
   const src = srcMockScript?.value.content;
-  store.commit('Endpoint/setIsMockChange', src === newVal)
+  store.commit('Endpoint/setIsMockChange', src !== newVal)
 })
 
 onMounted(() => {
   // 离开前保存数据
-  bus.on(settings.eventLeaveMockSaveData, async (data) => {
-    await updateMockScript();
-  })
+  bus.on(settings.eventLeaveMockSaveData, updateMockScript)
+})
+
+// 销毁时，处理数据和解除数据绑定
+onUnmounted(() => {
+  bus.off(settings.eventLeaveMockSaveData, updateMockScript)
+  store.commit('Endpoint/setIsMockChange', false);
+  store.commit('Endpoint/setMockScript', {});
+  store.commit('Endpoint/setSrcMockScript',  {});
 })
 
 

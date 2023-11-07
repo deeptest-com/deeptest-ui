@@ -224,7 +224,7 @@ const serves = computed<any>(() => store.state.ServeGlobal.serves);
 
 const list = computed<Endpoint[]>(() => store.state.Endpoint.listResult.list);
 let pagination = computed<PaginationConfig>(() => store.state.Endpoint.listResult.pagination);
-const isMockChange = computed<any>(() => store.state.Endpoint.isMockChange);
+
 const createApiModalVisible = ref(false);
 const router = useRouter();
 type Key = ColumnProps['key'];
@@ -616,7 +616,7 @@ const srcEndpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.src
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const srcDebugData: any = computed<Endpoint>(() => store.state.Debug.srcDebugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
-
+const isMockChange = computed<any>(() => store.state.Endpoint.isMockChange);
 watch(() => {
   return [debugData.value,srcDebugData.value]
 }, () => {
@@ -725,11 +725,15 @@ async function closeDrawer() {
 
 // 与 beforeRouteLeave 相同，无法访问 `this`
 onBeforeRouteLeave(async (to, from,next) => {
+  if(!isLeaveTip.value){
+    next();
+    return false;
+  }
+  const result = await Swal.fire({
+    ...settings.SwalLeaveSetting
+  });
   // 如果接口定义有变化，需要提示用户保存
   if (isDefineChange.value) {
-    const result = await Swal.fire({
-      ...settings.SwalLeaveSetting
-    });
     // isConfirmed: true,  保存并离开
     if (result.isConfirmed) {
       await drawerRef.value?.save();
@@ -747,10 +751,6 @@ onBeforeRouteLeave(async (to, from,next) => {
   }
   // 调试模块数据有变化，需要提示用户是否要保存调试数据
   else if(debugChangeBase.value){
-    const result = await Swal.fire({
-      ...settings.SwalLeaveSetting
-    });
-    // isConfirmed: true,  保存并离开
     if (result.isConfirmed) {
       bus.emit(settings.eventLeaveDebugSaveData, {});
       next()
@@ -763,10 +763,21 @@ onBeforeRouteLeave(async (to, from,next) => {
     else if (result.isDismissed) {
       return false;
     }
+  }else if(isMockChange.value){
+    if (result.isConfirmed) {
+      bus.emit(settings.eventLeaveMockSaveData, {});
+      next()
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      next()
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      return false;
+    }
   }
-  else {
-    next();
-  }
+
 })
 
 /*************************************************
