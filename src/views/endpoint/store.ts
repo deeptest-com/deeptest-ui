@@ -1503,12 +1503,16 @@ const StoreModel: ModuleType = {
                 return false
             }
         },
-        async createBenchmarkCase({ commit, state, dispatch }, data: any) {
-            const jsn = await createBenchmarkCase(data)
-            if (jsn.code === 0) {
-                return true;
-            } else {
-                return false
+        async createBenchmarkCase({ commit }, payload: any) {
+            try {
+                const jsn = await createBenchmarkCase(payload)
+                if (jsn.code === 0) {
+                    return jsn.data;
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch(err) {
+                return Promise.reject(err);
             }
         },
         async saveAlternativeCase({ commit, state, dispatch }, data: any) {

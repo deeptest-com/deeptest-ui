@@ -14,7 +14,7 @@
             </template>
             返回
           </a-button>
-          <span class="case-name">{{ alternativeCaseDetail.name || endpointCase.name }}</span>
+          <span class="case-name">{{ endpointCase.name }}</span>
         </div>
       </div>
       <!-- :::: 用例路径，方法展示区域 -->
@@ -31,7 +31,7 @@
             <span class="serial-number">{{ endpointCase.serialNumber }}</span>
             <EditAndShowField 
               placeholder="修改标题"
-              :value="alternativeCaseDetail.name"
+              :value="endpointCase.name"
               @update="updateTitle"/>
           </div>
         </template>
@@ -149,10 +149,6 @@ const props = defineProps({
     type: Function,
     required: true,
   },
-  record: {
-    type: Object,
-    required: true,
-  }
 });
 
 const store = useStore<{ Debug: Debug, Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType, ProjectGlobal: ProjectStateType }>();
@@ -164,7 +160,6 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 
 const activeKey = ref('paths');
 const treeDataMap = ref({});
-const alternativeCaseDetail = ref(props.record || {});
 const loadingAlternativeCase = ref(false);
 
 const modelRef = ref({
@@ -187,10 +182,7 @@ const loadDebugData = async (data) => {
 
 watch(endpointCase, async (newVal) => {
   if (!endpointCase.value) return
-  await loadDebugData(Object.keys(props.record).length !== 0 ? {
-    endpointInterfaceId: props.record.endpointInterfaceId,
-    usedBy: usedBy,
-  } : {
+  await loadDebugData({
     caseInterfaceId: endpointCase.value.id,
     usedBy: usedBy,
   })
@@ -337,16 +329,6 @@ const caseFactorActionList = [
 const updateTitle = (v) => {
   console.log('更新用例标题', v);
 };
-
-
-watch(() => {
-  return props.record;
-}, val => {
-  console.log('当前自动生成 - 用例基本信息:', val);
-}, {
-  immediate: true,
-});
-
 </script>
 
 <style lang="less">

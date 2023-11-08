@@ -3,6 +3,7 @@
   <a-modal
     v-model:visible="visible"
     title="自动生成用例（Beta）- 选择基准用例"
+    :confirmLoading="loading"
     @ok="handleOk"
     @cancel="handleCancel">
     <p style="padding: 0 11px;">
@@ -35,6 +36,7 @@
 import { defineProps, ref, watch, defineEmits, reactive, computed, unref } from "vue";
 import { Form } from 'ant-design-vue';
 import { useStore } from "vuex";
+import {notifyError, notifySuccess} from "@/utils/notify";
 const useForm = Form.useForm;
 
 const props = defineProps<{
@@ -44,7 +46,7 @@ const props = defineProps<{
 const emits = defineEmits(['close', 'confirm']);
 const store = useStore<{ Endpoint }>();
 const caseList = computed(() => (store.state.Endpoint.caseList.list || []));
-const caseOptions = computed<any[]>(() => (store.state.Endpoint.caseList.list || []).map(e => ({ value: e.id, label: e.name })));
+const caseOptions = computed<any[]>(() => (store.state.Endpoint.caseList.list || []).filter(e => e.caseType === 'default').map(e => ({ value: e.id, label: e.name })));
 const interfacesOptions = computed<any[]>(() => (store.state.Endpoint.endpointDetail.interfaces || []).map(e => ({ value: e.id, label: e.method })))
 
 const visible = ref(props.show || false);
@@ -55,6 +57,8 @@ const generateData = reactive({
   type: 'auto',
   caseId: null
 });
+
+const loading = ref(false);
 
 const rules = computed(() => {
   return unref(generateData).type === 'auto' ? {
@@ -74,14 +78,28 @@ const rules = computed(() => {
 const { resetFields, validate, validateInfos } = useForm(generateData, rules);
 
 const handleOk = () => {
-  console.log('autoGenCaseModal handleOk');
   validate()
-    .then(res => {
-      let data = {}
+    .then(async () => {
+      let data: any = {}
       if (generateData.type === 'auto') {
         data = {type: 'auto', name: generateData.name, endpointInterfaceId: generateData.interfaceId}
       } else {
         data = {baseCaseId: generateData.caseId}
+        store.commit('Endpoint/setEndpointCaseDetail', caseList.value.find(e => e.id === generateData.caseId));
+      }
+      loading.value = true;
+      try {
+        const result = await store.dispatch('Endpoint/createBenchmarkCase', data);
+        loading.value = false;
+        if (data.type === 'auto') {
+          store.commit('Endpoint/setEndpointCaseDetail', result);
+        } 
+        notifySuccess('自动生成用例成功');
+        emits('confirm');
+      } catch(err: any) {
+        loading.value = false;
+        console.log('自动生成用例error', err);
+        err?.msg && notifyError(err.msg);
       }
 
       emits('confirm', data)

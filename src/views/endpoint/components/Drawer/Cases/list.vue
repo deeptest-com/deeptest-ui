@@ -49,19 +49,23 @@
         </template>
 
         <template #action="{ record }">
-          <!--
-          <a-button type="link" @click="() => generate(record)">
-            <AppstoreAddOutlined title="备选用例" />
-          </a-button>
-        -->
+          <a-tooltip title="备选用例" placement="top">
+            <a-button v-if="record.caseType === 'benchmark'" type="link" @click="() => props.showBenchMark(record)">
+              <AppstoreAddOutlined />
+            </a-button>
+          </a-tooltip>
 
-          <a-button type="link" @click="() => copy(record)">
-            <CopyOutlined title="复制" />
+          <a-tooltip title="复制" placement="top">
+            <a-button type="link" @click="() => copy(record)">
+            <CopyOutlined />
           </a-button>
+          </a-tooltip>
 
-          <a-button type="link" @click="() => remove(record)">
-            <DeleteOutlined title="删除" />
+          <a-tooltip title="删除" placement="top">
+            <a-button type="link" @click="() => remove(record)">
+            <DeleteOutlined />
           </a-button>
+          </a-tooltip>
         </template>
 
       </a-table>
@@ -127,7 +131,7 @@ const props = defineProps({
     type: Function,
     required: true,
   },
-  createBenchmarkCase: {
+  showBenchMark: {
     type: Function,
     required: true,
   },
@@ -254,8 +258,7 @@ const columns = [
 const showAutoGenCaseModal = ref(false);
 
 const handleAutoGenCaseConfirm = (evt) => {
-  console.log(evt);
-  props.createBenchmarkCase(evt);
+  props.showBenchMark();
   showAutoGenCaseModal.value = false;
 };
 

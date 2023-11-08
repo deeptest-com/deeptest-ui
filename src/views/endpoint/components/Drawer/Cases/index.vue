@@ -3,7 +3,7 @@
     <CaseList
         v-if="show === 'list'"
         :onDesign="design"
-        :createBenchmarkCase="createBenchmarkCase"/>
+        :show-bench-mark="showBenchMark"/>
 
     <CaseDesign
         v-if="show === 'design'"
@@ -11,7 +11,6 @@
 
     <AlternativeCase
         v-if="show === 'showAlternativeCases'"
-        :record="alternativeRecord"
         :onBack="back" />
   </div>
 </template>
@@ -53,22 +52,18 @@ const design = (record) => {
   console.log('design', record)
   show.value = 'design'
   emit('update:showList', false)
-
   store.commit('Endpoint/setEndpointCaseDetail', record);
 }
 
-const createBenchmarkCase = async (data) => {
-  console.log('createBenchmarkCase')
-  const result = await store.dispatch('Endpoint/createBenchmarkCase', data);
-
-  if (result) {
-    show.value = 'showAlternativeCases';
-    emit('update:showList', false);
+const showBenchMark = async (record?: any) => {
+  if (record) {
+    await store.commit('Endpoint/setEndpointCaseDetail', record);
   }
+  show.value = 'showAlternativeCases';
+  emit('update:showList', false);
 }
 
 const back = () => {
-  console.log('back')
   show.value = 'list'
 }
 
