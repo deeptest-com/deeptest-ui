@@ -4,7 +4,9 @@
       <div class="indexlayout-top-menu">
         <DetailBreadCrumb  v-if="isDetailPage"/>
         <RightTopProject v-if="!isDetailPage"/>
+        <!--
         <RightTopServer v-if="showServerSelector && !isDetailPage" />
+        -->
       </div>
       <div class="indexlayout-top-menu-right">
         <RightTopSettings/>
@@ -20,7 +22,7 @@ import {useI18n} from "vue-i18n";
 import {useRouter} from "vue-router";
 import {BreadcrumbType, RoutesDataItem} from '@/utils/routes';
 import RightTopProject from './RightTopProject.vue';
-import RightTopServer from "./RightTopServer.vue";
+//import RightTopServer from "./RightTopServer.vue";
 import RightTopSettings from './RightTopSettings.vue';
 import RightTopWebsocket from './RightTopWebsocket.vue';
 import RightTopUpdate from './RightTopUpdate.vue';
@@ -34,7 +36,7 @@ export default defineComponent({
     RightTopSettings,
     RightTopWebsocket,
     RightTopUpdate,
-    RightTopServer,
+    //RightTopServer,
     DetailBreadCrumb,
   },
   props: {

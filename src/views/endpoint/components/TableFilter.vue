@@ -1,6 +1,14 @@
 <template>
   <a-form :layout="'inline'" ref="tagFormRef" :model="tagFormRef">
     <a-space :size="16">
+      <a-form-item>
+        <SelectServe 
+          @change="(e) => {
+                  handleFilterChange('serveId',e);
+                  }"
+          :style="'width:180px'"        
+        />
+        </a-form-item>
       <a-form-item :label="null"  style="margin-bottom: 0;">
         <Select
         :placeholder="'请选择创建人'"
@@ -60,15 +68,13 @@ import {
   onMounted, computed, watch, Ref
 } from 'vue';
 import Select from '@/components/Select/index.vue';
+import SelectServe from './SelectServe/index.vue';
+import {useStore} from "vuex";
 
-const store = useStore<{ Endpoint, ProjectGlobal, Project }>();
-const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
+const store = useStore<{ Endpoint, ProjectGlobal, Project,ServeGlobal }>();
 let userList = computed<any>(() => store.state.Project.userList);
 let filterState = computed<any>(() => store.state.Endpoint.filterState);
 const tagList: any = computed(()=>store.state.Endpoint.tagList);
-
-import {useStore} from "vuex";
-
 
 const emit = defineEmits(['filter']);
 
@@ -78,7 +84,9 @@ const formState: Ref<filterFormState> = ref({
   "title": "",
   "categoryId":"",
   "tagNames":[],
+  "serveId":"",
 });
+
 
 async function handleFilterChange(type, e) {
   if (type === 'status') {
@@ -97,6 +105,11 @@ async function handleFilterChange(type, e) {
     formState.value.title = e.target.value;
     // await handleFilter();
   }
+  if (type === 'serveId') {
+    formState.value.serveId = e;
+    await handleFilter();
+  }
+
 }
 
 async function handleFilter() {
@@ -128,7 +141,6 @@ watch(() => {
 onMounted(async () => {
   await store.dispatch('Project/getUserList');
 })
-
 
 </script>
 

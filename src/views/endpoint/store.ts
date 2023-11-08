@@ -313,7 +313,8 @@ const initState: StateType = {
         "createUser": null,
         "title": null,
         categoryId: null,
-        tagNames: []
+        tagNames: [],
+        serveId:null,
     },
     endpointDetail: null,
     srcEndpointDetail: null,

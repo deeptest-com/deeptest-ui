@@ -30,6 +30,14 @@
           :show-search="true"
           @update="handleChangeCategory"/>
     </a-descriptions-item>
+    <a-descriptions-item label="所属服务">
+      <SelectServe
+      :serveId="endpointDetail?.serveId" 
+      :disabled="true" 
+      size="small"
+      style="width:100px"   
+      />
+    </a-descriptions-item>
     <a-descriptions-item label="创建时间">{{ endpointDetail?.createdAt }}</a-descriptions-item>
     <a-descriptions-item label="最近更新">{{ endpointDetail?.updatedAt }}</a-descriptions-item>
   </a-descriptions>
@@ -50,9 +58,12 @@ import EditAndShowField from '@/components/EditAndShow/index.vue';
 import EditAndShowSelect from '@/components/EditAndShowSelect/index.vue';
 import EditAndShowTreeSelect from '@/components/EditAndShowTreeSelect/index.vue';
 import Tags from '../Tags/index.vue';
+import SelectServe from '../SelectServe/index.vue';
 
-const store = useStore<{ Endpoint, Project }>();
+const store = useStore<{ Endpoint, Project,ServeGlobal }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
+const serves = computed<any>(() => store.state.ServeGlobal.serves);
+
 const tagList: any = computed(()=>store.state.Endpoint.tagList);
 //  const tagList = ref(["aabdd","sddsd"])
 const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
