@@ -24,7 +24,7 @@
         :showOperation="false"
         :urlDisabled="false" />
       <!-- :::: 基准用例 -->
-      <CaseHeader>
+      <CaseLayout>
         <template #header>
           <div class="case-title">
             <span class="name">基准用例</span>
@@ -52,10 +52,10 @@
             <DebugConfig />
           </div>
         </template>
-      </CaseHeader>
+      </CaseLayout>
 
       <!-- :::: 用例因子 -->
-      <CaseHeader>
+      <CaseLayout @open="handleOpen">
         <template #header>
           <div class="case-title">
             <span class="name">用例生成因子</span>
@@ -96,7 +96,7 @@
 
           </a-tabs>
         </template>
-      </CaseHeader> 
+      </CaseLayout> 
     </template>
     
     <!-- :::: 其他弹窗展示 -->
@@ -115,7 +115,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineProps, provide, ref, watch, unref} from "vue";
+import {computed, defineProps, provide, ref, watch, unref, onMounted} from "vue";
 import {ResultStatus, UsedBy} from "@/utils/enum";
 import {useStore} from "vuex";
 import cloneDeep from "lodash/cloneDeep";
@@ -131,7 +131,7 @@ import PreCondition from "@/views/component/debug/request/config/ConditionPre.vu
 import PostCondition from "@/views/component/debug/request/config/ConditionPost.vue";
 import Assertion from "@/views/component/debug/request/config/Assertion.vue";
 
-import { CaseHeader, CaseFactor, CaseTips, SaveAlternative } from "./alternative";
+import { CaseLayout, CaseFactor, CaseTips, SaveAlternative } from "./alternative";
 
 import useCaseExecution from "./alternative/exec-alternative-cases";
 import EditAndShowField from "@/components/EditAndShow/index.vue";
@@ -149,6 +149,10 @@ const props = defineProps({
     type: Function,
     required: true,
   },
+  baseCaseId: {
+    type: String,
+    required: true,
+  },
 });
 
 const store = useStore<{ Debug: Debug, Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType, ProjectGlobal: ProjectStateType }>();
@@ -160,7 +164,7 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 
 const activeKey = ref('paths');
 const treeDataMap = ref({});
-const loadingAlternativeCase = ref(false);
+const loadingAlternativeCase = ref(true);
 
 const modelRef = ref({
   baseId: 0,
@@ -175,13 +179,13 @@ const loadDebugData = async (data) => {
     await store.dispatch('Debug/loadDataAndInvocations', data);
     loadingAlternativeCase.value = false;
   } catch (err) { 
-    console.error('加载备选用例数据出错:', err);
+    console.log('加载备选用例数据出错:', err);
   }
 }
 
 
 watch(endpointCase, async (newVal) => {
-  if (!endpointCase.value) return
+  if (!endpointCase.value?.id) return
   await loadDebugData({
     caseInterfaceId: endpointCase.value.id,
     usedBy: usedBy,
@@ -329,6 +333,18 @@ const caseFactorActionList = [
 const updateTitle = (v) => {
   console.log('更新用例标题', v);
 };
+
+const handleOpen = () => {
+  // setTimeout(() => {
+  //   caseFactor.value.loadCaseTree();
+  // }, 500);
+}
+
+onMounted(() => {
+  if (props.baseCaseId) {
+    store.dispatch('Endpoint/getCase', props.baseCaseId);
+  }
+})
 </script>
 
 <style lang="less">

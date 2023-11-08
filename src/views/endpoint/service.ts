@@ -466,6 +466,15 @@ export async function loadAlternativeCase(payload: { method: string, endpointId:
         params: payload,
     })
 }
+
+export async function loadAlternativeCaseFactor(payload: { caseId: number | string }): Promise<any> {
+    return request({
+        url: `${apiAlternativeCase}/loadFactor`,
+        method: 'GET',
+        params: payload,
+    })
+}
+
 export async function loadAlternativeCaseSaved(baseId: number): Promise<any> {
     const params = {baseId}
     return request({
@@ -494,6 +503,14 @@ export async function saveAlternativeCase(data: any): Promise<any> {
         url: `/${apiAlternativeCase}/saveCase`,
         method: 'POST',
         data
+    })
+}
+
+export async function listForBenchMark(payload: any): Promise<any> {
+    return request({
+        url: 'endpoints/cases/listForBenchmark',
+        method: 'get',
+        params: payload,
     })
 }
 

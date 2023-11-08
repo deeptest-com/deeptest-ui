@@ -11,12 +11,13 @@
 
     <AlternativeCase
         v-if="show === 'showAlternativeCases'"
+        :baseCaseId="alternativeRecord.id"
         :onBack="back" />
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref, computed, defineProps, defineEmits, watch} from "vue";
+import {ref, computed, defineProps, defineEmits, watch, nextTick} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import CaseList from "./list.vue";
@@ -27,7 +28,7 @@ const {t} = useI18n()
 
 const store = useStore<{ Endpoint }>();
 const endpoint = computed<any>(() => store.state.Endpoint.endpointDetail);
-const alternativeRecord = ref({});
+const alternativeRecord = ref<any>({});
 
 const emit = defineEmits(['update:showList'])
 
@@ -57,8 +58,9 @@ const design = (record) => {
 
 const showBenchMark = async (record?: any) => {
   if (record) {
-    await store.commit('Endpoint/setEndpointCaseDetail', record);
+    alternativeRecord.value = record;
   }
+  await nextTick();
   show.value = 'showAlternativeCases';
   emit('update:showList', false);
 }

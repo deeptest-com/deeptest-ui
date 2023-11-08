@@ -1,5 +1,5 @@
 <template>
-  <a-collapse class="case-header">
+  <a-collapse class="case-header" @change="handleChange">
     <a-collapse-panel key="1">
       <slot name="content" />
       <template #header>
@@ -11,6 +11,17 @@
     </a-collapse-panel>
   </a-collapse>
 </template>
+<script setup lang="ts">
+import { defineEmits } from 'vue';
+
+const emits = defineEmits(['open']);
+
+const handleChange = e => {
+  if (e.length > 0) {
+    emits('open');
+  }
+}
+</script>
 <style scoped lang="less">
 .case-header {
   margin-bottom: 20px;

@@ -53,7 +53,7 @@ const props = defineProps({
     type: String,
   },
   placeholder: {
-    required: true,
+    required: false,
     type: String,
   },
   customClass: {

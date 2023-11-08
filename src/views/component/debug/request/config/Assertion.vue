@@ -136,7 +136,6 @@ const list = async () => {
   })
 }
 watch(debugData, async (newVal) => {
-  console.error('初始化断言的信息 watch debugData');
   await list();
 }, {immediate: true, deep: true});
 
