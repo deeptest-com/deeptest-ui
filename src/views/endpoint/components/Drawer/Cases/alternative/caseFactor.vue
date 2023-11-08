@@ -23,15 +23,15 @@
         <a-button class="case-exec-detail" type="link" @click.stop="queryDetail()">详情</a-button>
       </span>
     </div>
-    
-    <a-tree 
+
+    <a-tree
       v-if="!loading"
       class="case-tree"
-      :replaceFields="replaceFields" 
-      :tree-data="treeData" 
-      :expandedKeys="expandedKeys" 
+      :replaceFields="replaceFields"
+      :tree-data="treeData"
+      :expandedKeys="expandedKeys"
       :checkable="true"
-      v-model:checkedKeys="checkedKeys" 
+      v-model:checkedKeys="checkedKeys"
       @check="onChecked"
       :checkStrictly="executionType === 'multiple'"
       :show-icon="true">
@@ -45,7 +45,7 @@
           <span class="case-tree-name">{{ nodeProps.title }}</span>
           <template v-if="nodeProps.category === 'case'">
             <span>: &nbsp;&nbsp;&nbsp;</span>
-            <EditAndShowField 
+            <EditAndShowField
               placeholder="修改标题"
               :value="nodeProps.sample"
               @update="v => editFinish(nodeProps.key, v)"/>
@@ -60,7 +60,7 @@
 
               <!-- 运行详情查看 -->
               <a-button class="case-exec-detail" type="link" @click.stop="queryDetail(nodeProps)">详情</a-button>
-            </span>  
+            </span>
           </template>
         </span>
       </template>
@@ -122,16 +122,12 @@ const treeData = computed(() => {
         return node;
       })
     }
-    
+
     return cloneDeep(originalCasesData);
   };
-  return unref(executionType) === 'single' ? cloneDeep(unref(alternativeCases)) : setDisabledIfDir(cloneDeep(unref(alternativeCases))); 
+  return unref(executionType) === 'single' ? cloneDeep(unref(alternativeCases)) : setDisabledIfDir(cloneDeep(unref(alternativeCases)));
 })
 
-const modelRef = ref({
-  baseId: 0,
-  prefix: '异常路径',
-});
 const replaceFields = {key: 'key'};
 const expandedKeys = ref<string[]>([]);
 const checkedKeys = ref<any>([] as any[]);
@@ -182,7 +178,7 @@ function getAllKeys(arr: any, keys: any[]) {
   arr.forEach((item, index) => {
     if (executionType.value === 'single' || (executionType.value === 'multiple' && item.isDir)) {
       keys.push(item.key);
-    }   
+    }
     if (Array.isArray(item.children)) {
       getAllKeys(item.children, keys)
     }
@@ -193,9 +189,9 @@ const editFinish = async (key, v) => {
   console.log('editFinish', key, treeDataMap.value[key])
 
   const item = treeDataMap.value[key]
-  const data = {baseId: modelRef.value.baseId, path: item.path}
+  const data = {caseId: endpointCase.value.id, path: item.path, value: item.sample}
 
-  await store.dispatch('Endpoint/saveAlternativeCase', data)
+  await store.dispatch('Endpoint/saveAlternativeFactor', data)
 }
 
 function getNodeMap(treeNode: any, mp: any) {
@@ -252,7 +248,7 @@ const onChecked = (keys, treeNode) => {
         // 反选
         checkedKeys.value = {
           ...keys,
-        } 
+        }
       }
     }
   }
@@ -337,5 +333,5 @@ defineExpose({ getSelectedNodes });
     align-items: center;
     justify-content: center;
   }
-} 
+}
 </style>

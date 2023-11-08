@@ -481,9 +481,17 @@ export async function createBenchmarkCase(data: any): Promise<any> {
         data
     })
 }
+
+export async function saveAlternativeFactor(data: any): Promise<any> {
+    return request({
+        url: `/${apiAlternativeCase}/saveFactor`,
+        method: 'POST',
+        data
+    })
+}
 export async function saveAlternativeCase(data: any): Promise<any> {
     return request({
-        url: `/${apiAlternativeCase}/save`,
+        url: `/${apiAlternativeCase}/saveCase`,
         method: 'POST',
         data
     })
