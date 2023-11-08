@@ -51,6 +51,7 @@ import {
     generateSchemaByResponse,
     loadAlternativeCase,
     loadAlternativeCaseSaved,
+    saveAlternativeFactor,
     saveAlternativeCase,
     queryEndpointCase,
     listAlternativeCaseAssertion,
@@ -280,6 +281,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         loadAlternativeCase: Action<StateType, StateType>;
         loadAlternativeCaseSaved: Action<StateType, StateType>;
         createBenchmarkCase: Action<StateType, StateType>;
+        saveAlternativeFactor: Action<StateType, StateType>;
         saveAlternativeCase: Action<StateType, StateType>;
         listAlternativeCaseAssertion: Action<StateType, StateType>;
         createBenchmarkCaseAssertion: Action<StateType, StateType>;
@@ -1505,6 +1507,15 @@ const StoreModel: ModuleType = {
         },
         async createBenchmarkCase({ commit, state, dispatch }, data: any) {
             const jsn = await createBenchmarkCase(data)
+            if (jsn.code === 0) {
+                return true;
+            } else {
+                return false
+            }
+        },
+
+        async saveAlternativeFactor({ commit, state, dispatch }, data: any) {
+            const jsn = await saveAlternativeFactor(data)
             if (jsn.code === 0) {
                 return true;
             } else {
