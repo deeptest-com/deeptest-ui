@@ -189,7 +189,7 @@ const editFinish = async (key, v) => {
   console.log('editFinish', key, treeDataMap.value[key])
 
   const item = treeDataMap.value[key]
-  const data = {caseId: endpointCase.value.id, path: item.path}
+  const data = {caseId: endpointCase.value.id, path: item.path, value: item.sample}
 
   await store.dispatch('Endpoint/saveAlternativeFactor', data)
 }
