@@ -79,11 +79,11 @@
 
     </div>
 
-    <AutoGenCaseModal 
-      v-if="showAutoGenCaseModal" 
-      :show="showAutoGenCaseModal" 
-      @close="showAutoGenCaseModal = false" 
-      @confirm="handleConfirm" />
+    <AutoGenCaseModal
+      v-if="showAutoGenCaseModal"
+      :show="showAutoGenCaseModal"
+      @close="showAutoGenCaseModal = false"
+      @confirm="handleAutoGenCaseConfirm" />
   </div>
 </template>
 
@@ -127,7 +127,7 @@ const props = defineProps({
     type: Function,
     required: true,
   },
-  openAlternativeCase: {
+  createBenchmarkCase: {
     type: Function,
     required: true,
   },
@@ -253,9 +253,9 @@ const columns = [
  */
 const showAutoGenCaseModal = ref(false);
 
-const handleConfirm = (evt) => {
+const handleAutoGenCaseConfirm = (evt) => {
   console.log(evt);
-  props.openAlternativeCase(evt);
+  props.createBenchmarkCase(evt);
   showAutoGenCaseModal.value = false;
 };
 

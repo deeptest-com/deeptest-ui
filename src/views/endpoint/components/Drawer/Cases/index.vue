@@ -3,7 +3,7 @@
     <CaseList
         v-if="show === 'list'"
         :onDesign="design"
-        :open-alternative-case="showAlternativeCases"/>
+        :createBenchmarkCase="createBenchmarkCase"/>
 
     <CaseDesign
         v-if="show === 'design'"
@@ -57,15 +57,14 @@ const design = (record) => {
   store.commit('Endpoint/setEndpointCaseDetail', record);
 }
 
-const showAlternativeCases = (record) => {
-  if (record?.type === 'auto') {
-    alternativeRecord.value = record;
-  } else {
-    alternativeRecord.value = {};
-    store.commit('Endpoint/setEndpointCaseDetail', record);
+const createBenchmarkCase = async (data) => {
+  console.log('createBenchmarkCase')
+  const result = await store.dispatch('Endpoint/createBenchmarkCase', data);
+
+  if (result) {
+    show.value = 'showAlternativeCases';
+    emit('update:showList', false);
   }
-  show.value = 'showAlternativeCases';
-  emit('update:showList', false);
 }
 
 const back = () => {

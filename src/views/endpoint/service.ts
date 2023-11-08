@@ -142,8 +142,8 @@ export async function saveEndpoint(data: any): Promise<any> {
 
 /**
  * 更新接口名称
- * @param data  { id, name } 
- * @returns 
+ * @param data  { id, name }
+ * @returns
  */
 export async function updateName(data: any): Promise<any> {
     return request({
@@ -472,6 +472,13 @@ export async function loadAlternativeCaseSaved(baseId: number): Promise<any> {
         url: `/${apiAlternativeCase}/loadSaved`,
         method: 'POST',
         params,
+    })
+}
+export async function createBenchmarkCase(data: any): Promise<any> {
+    return request({
+        url: `/${apiAlternativeCase}/createBenchmark`,
+        method: 'POST',
+        data
     })
 }
 export async function saveAlternativeCase(data: any): Promise<any> {

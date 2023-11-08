@@ -1,9 +1,9 @@
 <!-- 自动生成用例的modal弹窗 -->
 <template>
-  <a-modal 
-    v-model:visible="visible" 
-    title="自动生成用例（Beta）- 选择基准用例" 
-    @ok="handleOk" 
+  <a-modal
+    v-model:visible="visible"
+    title="自动生成用例（Beta）- 选择基准用例"
+    @ok="handleOk"
     @cancel="handleCancel">
     <p style="padding: 0 11px;">
       生成用例功能需要基于一个正向基准用例，针对请求参数的各种边界异常场景生成负向用例。
@@ -74,12 +74,17 @@ const rules = computed(() => {
 const { resetFields, validate, validateInfos } = useForm(generateData, rules);
 
 const handleOk = () => {
-  console.log('确认');
+  console.log('autoGenCaseModal handleOk');
   validate()
     .then(res => {
-      emits('confirm', generateData.type === 'auto' 
-        ? { endpointInterfaceId: generateData.interfaceId, name: generateData.name, type: 'auto' } 
-        : caseList.value.find(e => e.id === generateData.caseId));
+      let data = {}
+      if (generateData.type === 'auto') {
+        data = {type: 'auto', name: generateData.name, endpointInterfaceId: generateData.interfaceId}
+      } else {
+        data = {baseCaseId: generateData.caseId}
+      }
+
+      emits('confirm', data)
     })
     .catch(err => {
       console.log(err);

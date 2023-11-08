@@ -58,7 +58,7 @@ import {
     disableAlternativeCaseAssertion,
     removeAlternativeCaseAssertion,
     moveAlternativeCaseAssertion,
-    updateName,
+    updateName, createBenchmarkCase,
 } from './service';
 
 import {
@@ -279,9 +279,10 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         loadAlternativeCase: Action<StateType, StateType>;
         loadAlternativeCaseSaved: Action<StateType, StateType>;
+        createBenchmarkCase: Action<StateType, StateType>;
         saveAlternativeCase: Action<StateType, StateType>;
         listAlternativeCaseAssertion: Action<StateType, StateType>;
-        createAlternativeCaseAssertion: Action<StateType, StateType>;
+        createBenchmarkCaseAssertion: Action<StateType, StateType>;
         saveAlternativeCaseAssertion: Action<StateType, StateType>;
         removeAlternativeCaseAssertion: Action<StateType, StateType>;
         disableAlternativeCaseAssertion: Action<StateType, StateType>;
@@ -1502,6 +1503,14 @@ const StoreModel: ModuleType = {
                 return false
             }
         },
+        async createBenchmarkCase({ commit, state, dispatch }, data: any) {
+            const jsn = await createBenchmarkCase(data)
+            if (jsn.code === 0) {
+                return true;
+            } else {
+                return false
+            }
+        },
         async saveAlternativeCase({ commit, state, dispatch }, data: any) {
             const jsn = await saveAlternativeCase(data)
             if (jsn.code === 0) {
@@ -1523,7 +1532,7 @@ const StoreModel: ModuleType = {
                 return false
             }
         },
-        async createAlternativeCaseAssertion({commit, dispatch, state}, payload: any) {
+        async createBenchmarkCaseAssertion({commit, dispatch, state}, payload: any) {
             try {
                 payload.alternativeCaseId = state.baseCaseId
                 await saveAlternativeCaseAssertion(payload);
