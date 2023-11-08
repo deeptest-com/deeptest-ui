@@ -123,7 +123,6 @@ const operatorsForCode = getCompareOptsForRespCode()
 const extractorTypeOptions = getEnumSelectItems(ExtractorType)
 
 const load = () => {
-  console.log('load', props.condition)
   if (props.condition.entityId) {
     store.dispatch('Debug/getCheckpoint', props.condition.entityId)
   }

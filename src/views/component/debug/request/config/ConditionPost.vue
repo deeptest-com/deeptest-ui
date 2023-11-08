@@ -23,12 +23,12 @@
 
     <div class="content">
       <draggable tag="div" item-key="name" class="collapse-list"
-                 :list="isAlternativeCase ? postConditionList : (postConditions || [])"
+                 :list="postConditions || []"
                  handle=".handle"
                  @end="move">
         <template #item="{ element }">
 
-          <div :class="[currPostConditionId === +element.id ? 'active' : '']" class="collapse-item">
+          <div :class="[activePostCondition.id === +element.id ? 'active' : '']" class="collapse-item">
             <div class="header">
               <div @click.stop="expand(element)" class="title dp-link dp-ellipsis">
                 <icon-svg class="handle dp-drag icon" type="move" />
@@ -46,9 +46,9 @@
                 <span v-html="element.desc || t(element.entityType)"></span>
               </div>
               <div class="buttons">
-                <a-button size="small" type="primary" v-if="currPostConditionId === element.id" @click.stop="save(element)">保存</a-button>
+                <a-button size="small" type="primary" v-if="activePostCondition.id === element.id" @click.stop="save(element)">保存</a-button>
 
-                <ClearOutlined v-if="currPostConditionId === +element.id && element.entityType === ConditionType.script"
+                <ClearOutlined v-if="activePostCondition.id === +element.id && element.entityType === ConditionType.script"
                                @click.stop="format(element)"
                                class="dp-icon-btn dp-trans-80"
                                title="格式化"/>&nbsp;
@@ -60,11 +60,11 @@
                 <DeleteOutlined @click.stop="remove(element)"
                                 class="dp-icon-btn dp-trans-80" title="删除" />
 
-                <FullscreenOutlined v-if="currPostConditionId === element.id"
+                <FullscreenOutlined v-if="activePostCondition.id === element.id"
                                     @click.stop="openFullscreen(element)"
                                     class="dp-icon-btn dp-trans-80" title="全屏" />
 
-                <RightOutlined v-if="currPostConditionId !== element.id"
+                <RightOutlined v-if="activePostCondition.id !== element.id"
                                @click.stop="expand(element)"
                                class="dp-icon-btn dp-trans-80" />
                 <DownOutlined v-if="activePostCondition.id === element.id"
@@ -73,18 +73,20 @@
               </div>
             </div>
 
-            <div class="content" v-if="currPostConditionId === +element.id">
-              <Extractor v-if="element.entityType === ConditionType.extractor"
-                         :condition="isAlternativeCase ? selectedPostCondition : activePostCondition"
-                          :finish="list"/>
+            <div class="content" v-if="activePostCondition.id === +element.id">
+              <Extractor 
+                v-if="element.entityType === ConditionType.extractor"
+                :condition="activePostCondition"
+                :finish="list"/>
 
-              <Checkpoint v-if="element.entityType === ConditionType.checkpoint"
-                          :condition="isAlternativeCase ? selectedPostCondition : activePostCondition"
-                          :finish="list"/>
+              <Checkpoint 
+                v-if="element.entityType === ConditionType.checkpoint"
+                :condition="activePostCondition"
+                :finish="list"/>
 
               <Script 
                 v-if="element.entityType === ConditionType.script"
-                :condition="isAlternativeCase ? selectedPostCondition : activePostCondition"
+                :condition="activePostCondition"
                 :finish="list"/>
             </div>
           </div>
@@ -130,13 +132,17 @@ import Script from "./conditions-post/Script.vue";
 import FullScreenPopup from "./ConditionPopup.vue";
 
 const props = defineProps<{
-  isAlternativeCase?: boolean;
+  isForBenchMarkCase?: boolean;
 }>();
 const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
-const postConditions = computed<any>(() => store.state.Debug.postConditions);
-const activePostCondition = computed<any>(() => store.state.Debug.activePostCondition);
+const postConditions = computed<any>(() => {
+  return props.isForBenchMarkCase ? store.state.Debug.benchMarkCase.postConditions : store.state.Debug.postConditions;
+});
+const activePostCondition = computed<any>(() => {
+  return props.isForBenchMarkCase ? store.state.Debug.benchMarkCase.activePostCondition : store.state.Debug.activePostCondition;
+});
 
 provide('usedWith', UsedWith.PostCondition)
 // const extractorData = computed<any>(() => store.state.Debug.extractorData);
@@ -151,105 +157,31 @@ const fullscreen = ref(false)
 const conditionType = ref(ConditionType.extractor)
 const conditionTypes = ref(getEnumSelectItems(ConditionType))
 
-/**
- * 备选用例 这里后置处理修改等都不会影响到 基准用例，因此这里备选用例单独使用 自己的data，保证不污染store数据
- */
-const postConditionList = ref<any[]>([]);
-const selectedPostCondition = ref<any>({});
-
-const currPostConditionId = computed(() => {
-  return props.isAlternativeCase ? unref(selectedPostCondition).id : unref(activePostCondition).id;
-});
-
 const expand = (item) => {
-  console.log('expand', item)
-  if (props.isAlternativeCase) {
-    selectedPostCondition.value = unref(selectedPostCondition).id === item.id ? {} : item;
-    return;
-  }
-  store.commit('Debug/setActivePostCondition', item)
+  console.log('expand', item) 
+  store.commit('Debug/setActivePostCondition', Object.assign(item, {
+    isForBenchMarkCase: props.isForBenchMarkCase,
+  }));
 }
 
 const list = async () => {
   console.log('list')
-  await store.dispatch('Debug/listPostCondition')
+  await store.dispatch('Debug/listPostCondition', {
+    isForBenchMarkCase: props.isForBenchMarkCase
+  })
 }
 
 watch(debugData, async (newVal) => {
-  console.log('watch debugData')
+  console.error('初始化后置处理模块的信息 watch debugData')
   await list();
-  postConditionList.value = unref(postConditions).map((e, index) => ({
-    ...e,
-    id: index + 1,
-  }));
 }, {immediate: true, deep: true});
-
-// watch(() => {
-//   return activePostCondition.value
-// },(newVal,oldValue) => {
-//
-// },{
-//   deep:true
-// })
-
-// watch(() => {
-//   return activePostCondition.value
-// },(newVal,oldValue) => {
-//   console.log('watch postConditions 8322222111',newVal,oldValue);
-//   // 清空
-//   // store.dispatch('Debug/setCheckpoint',{})
-//   // store.dispatch('Debug/setExtractor',{})
-//   // store.dispatch('Debug/setScript',{})
-// },{
-//   deep:true
-// })
-//
-// watch(() => {
-//   return extractorData.value
-// },(newVal,oldValue) => {
-//   console.log('watch postConditions 8322222111 22222',newVal,oldValue);
-// },{
-//   deep:true
-// })
-//
-// watch(() => {
-//   return checkpointData.value
-// },(newVal,oldValue) => {
-//   console.log('watch postConditions 8322222111 33333',newVal,oldValue);
-// },{
-//   deep:true
-// })
-//
-// watch(() => {
-//   return scriptData.value
-// },(newVal,oldValue) => {
-//   console.log('watch postConditions 8322222111 44444',newVal,oldValue);
-// },{
-//   deep:true
-// })
 
 const create = () => {
   console.log('create', conditionType.value)
-  if (props.isAlternativeCase) {
-    const condition = {
-      "id": unref(postConditionList).length + 1,
-      "createdAt": "",
-      "updatedAt": "",
-      "debugInterfaceId": 0,
-      "endpointInterfaceId": 0,
-      "entityType": unref(conditionType),
-      "entityId": 0,
-      "usedBy": "alternative_case_debug",
-      "name": "",
-      "desc": "",
-      "ordr": 0
-    };
-    postConditionList.value.push(condition);
-    return;
-  }
   store.dispatch('Debug/createPostCondition', {
     entityType: conditionType.value,
     ...debugInfo.value,
+    isForBenchMarkCase: props.isForBenchMarkCase
   })
 }
 
@@ -259,35 +191,29 @@ const format = (item) => {
 }
 const disable = (item) => {
   console.log('disable', item)
-  if (props.isAlternativeCase) {
-    Object.assign(postConditionList.value.find(e => e.id === item.id), {
-      disabled: item.disabled === undefined ? false : !item.disabled
-    });
-    return;
-  }
-  store.dispatch('Debug/disablePostCondition', item)
+  store.dispatch('Debug/disablePostCondition', {
+    ...item,
+    isForBenchMarkCase: props.isForBenchMarkCase
+  })
 }
 const remove = (item) => {
   console.log('remove', item)
   
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
-    if (props.isAlternativeCase) {
-      postConditionList.value.splice(postConditionList.value.findIndex(e => e.id === item.id), 1);
-      return;
-    }
-    store.dispatch('Debug/removePostCondition', item)
+    store.dispatch('Debug/removePostCondition', {
+      ...item,
+      isForBenchMarkCase: props.isForBenchMarkCase
+    })
   })
 }
 function move(_e: any) {
   const envIdList = postConditions.value.map((e: EnvDataItem) => {
     return e.id;
   })
-  if (props.isAlternativeCase) {
-    return;
-  }
   store.dispatch('Debug/movePostCondition', {
     data: envIdList,
     info: debugInfo.value,
+    isForBenchMarkCase: props.isForBenchMarkCase,
     entityType: '',
   })
 }
@@ -306,7 +232,7 @@ const closeFullScreen = (item) => {
   fullscreen.value = false
 }
 
-provide('isAlternativeCase', props.isAlternativeCase || false);
+provide('isForBenchMarkCase', props.isForBenchMarkCase || false);
 
 </script>
 

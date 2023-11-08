@@ -243,9 +243,7 @@ export async function movePreConditions(data): Promise<any> {
     });
 }
 
-export async function listPostConditions(debugInterfaceId, endpointInterfaceId: number, category: ConditionCategory, usedBy: string): Promise<any> {
-    const params = {debugInterfaceId, endpointInterfaceId, category, usedBy}
-
+export async function listPostConditions(params: {debugInterfaceId, endpointInterfaceId: number, category: ConditionCategory, usedBy: string, isForBenchMarkCase?: boolean}): Promise<any> {
     return request({
         url: `/${apiPostConditions}`,
         method: 'GET',
