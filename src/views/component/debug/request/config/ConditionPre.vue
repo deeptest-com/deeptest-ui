@@ -51,7 +51,7 @@ const props = defineProps<{
 const store = useStore<{  Debug: Debug }>()
 const debugData = computed<any>(() => store.state.Debug.debugData)
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo)
-const scriptData = computed<any>(() => store.state.Debug.scriptData);
+const scriptData = computed<any>(() => props.isAlternativeCase ? store.state.Debug.alternativeCase.scriptData : store.state.Debug.scriptData);
 const debugChange = computed<any>(() => store.state.Debug.debugChange);
 
 watch(() => {
@@ -77,7 +77,7 @@ const {t} = useI18n();
 const fullscreen = ref(false)
 
 const getPreConditionScript = () => {
-console.log('getPreConditionScript')
+  console.log('getPreConditionScript')
   store.dispatch('Debug/getPreConditionScript')
   store.commit('Debug/setDebugChange',{
     preScript:false,

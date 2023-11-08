@@ -278,10 +278,19 @@ const StoreModel: ModuleType = {
         },
 
         setPostConditions(state, payload) {
-            state.postConditions = payload;
+            if (payload.usedBy === UsedBy.AlternativeCaseDebug) {
+                state.alternativeCase.assertionConditions = payload.data;
+            } else {
+                state.assertionConditions = payload.data;
+            }
         },
         setAssertionConditions(state, payload) {
-            state.assertionConditions = payload;
+            if (payload.usedBy === UsedBy.AlternativeCaseDebug) {
+                state.alternativeCase.assertionConditions = payload.data;
+            } else {
+                state.assertionConditions = payload.data;
+            }
+            
         },
 
         setActiveAssertion(state, payload) {
@@ -292,10 +301,10 @@ const StoreModel: ModuleType = {
             }
         },
         setActivePostCondition(state, payload) {
-            if (state.activePostCondition.id === payload.id) {
-                state.activePostCondition = {}
+            if (payload.isAlternativeCase) {
+                state.alternativeCase.activePostCondition = state.alternativeCase.activePostCondition.id === payload.id ? {} : payload;
             } else {
-                state.activePostCondition = payload;
+                state.activePostCondition = state.activePostCondition.id === payload.id ? {} : payload;
             }
         },
 
@@ -563,24 +572,30 @@ const StoreModel: ModuleType = {
             }
         },
 
-        async listPostCondition({commit, state}) {
+        async listPostCondition({commit, state}, payload?: { usedBy: string }) {
             try {
                 const resp = await listPostConditions(state.debugInfo.debugInterfaceId, state.debugData.endpointInterfaceId,
-                    ConditionCategory.console, state.debugInfo.usedBy);
+                    ConditionCategory.console, payload?.usedBy || state.debugInfo.usedBy);
                 const {data} = resp;
-                commit('setPostConditions', data);
+                commit('setPostConditions', {
+                    usedBy: payload?.usedBy || state.debugInfo.usedBy,
+                    data
+                });
                 return true;
             } catch (error) {
                 return false;
             }
         },
-        async listAssertionCondition({commit, state}) {
+        async listAssertionCondition({commit, state}, payload?: { usedBy: string }) {
             try {
                 const resp = await listPostConditions(state.debugInfo.debugInterfaceId, state.debugData.endpointInterfaceId,
-                    ConditionCategory.assert, state.debugInfo.usedBy);
+                    ConditionCategory.assert, payload?.usedBy || state.debugInfo.usedBy);
 
                 const {data} = resp;
-                commit('setAssertionConditions', data);
+                commit('setAssertionConditions', {
+                    usedBy: payload?.usedBy || state.debugInfo.usedBy,
+                    data
+                });
                 return true;
             } catch (error) {
                 return false;
@@ -591,7 +606,7 @@ const StoreModel: ModuleType = {
                 await createPostConditions(payload);
 
                 if (payload.entityType === ConditionType.checkpoint) {
-                    await dispatch('listAssertionCondition');
+                    await dispatch('listAssertionCondition', { usedBy: payload.usedBy });
 
                     const len = state.assertionConditions.length
                     if (len > 0) {
@@ -599,7 +614,7 @@ const StoreModel: ModuleType = {
                     }
 
                 } else {
-                    await dispatch('listPostCondition');
+                    await dispatch('listPostCondition', { usedBy: payload.usedBy });
 
                     const len = state.postConditions.length
                     if (len > 0) {
@@ -615,9 +630,9 @@ const StoreModel: ModuleType = {
             try {
                 await disablePostConditions(payload.id);
                 if (payload.entityType === ConditionType.checkpoint) {
-                    dispatch('listAssertionCondition');
+                    dispatch('listAssertionCondition', { usedBy: payload.usedBy });
                 } else {
-                    dispatch('listPostCondition');
+                    dispatch('listPostCondition', { usedBy: payload.usedBy });
                 }
                 return true;
             } catch (error) {
@@ -628,9 +643,9 @@ const StoreModel: ModuleType = {
             try {
                 await removePostConditions(payload.id);
                 if (payload.entityType === ConditionType.checkpoint) {
-                    dispatch('listAssertionCondition');
+                    dispatch('listAssertionCondition', { usedBy: payload.usedBy });
                 } else {
-                    dispatch('listPostCondition');
+                    dispatch('listPostCondition', { usedBy: payload.usedBy });
                 }
                 return true;
             } catch (error) {
@@ -641,9 +656,9 @@ const StoreModel: ModuleType = {
             try {
                 await movePostConditions(payload);
                 if (payload.entityType === ConditionType.checkpoint) {
-                    dispatch('listAssertionCondition');
+                    dispatch('listAssertionCondition', { usedBy: payload.info.usedBy });
                 } else {
-                    dispatch('listPostCondition');
+                    dispatch('listPostCondition', { usedBy: payload.info.usedBy });
                 }
                 return true;
             } catch (error) {
