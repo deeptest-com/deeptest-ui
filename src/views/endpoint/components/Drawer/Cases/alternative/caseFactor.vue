@@ -128,10 +128,6 @@ const treeData = computed(() => {
   return unref(executionType) === 'single' ? cloneDeep(unref(alternativeCases)) : setDisabledIfDir(cloneDeep(unref(alternativeCases)));
 })
 
-const modelRef = ref({
-  baseId: 0,
-  prefix: '异常路径',
-});
 const replaceFields = {key: 'key'};
 const expandedKeys = ref<string[]>([]);
 const checkedKeys = ref<any>([] as any[]);
@@ -193,9 +189,9 @@ const editFinish = async (key, v) => {
   console.log('editFinish', key, treeDataMap.value[key])
 
   const item = treeDataMap.value[key]
-  const data = {baseId: modelRef.value.baseId, path: item.path}
+  const data = {caseId: endpointCase.value.id, path: item.path}
 
-  await store.dispatch('Endpoint/updateAlternativeFactor', data)
+  await store.dispatch('Endpoint/saveAlternativeFactor', data)
 }
 
 function getNodeMap(treeNode: any, mp: any) {
