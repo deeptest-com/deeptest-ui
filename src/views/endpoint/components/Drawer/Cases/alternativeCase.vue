@@ -81,17 +81,17 @@
 
             <a-tab-pane key="pre-condition" tab="预处理">
               <CaseTips type="pre-condition" @reset="onReset" />
-              <PreCondition :isAlternativeCase="true" />
+              <PreCondition :isForBenchMarkCase="true" />
             </a-tab-pane>
 
             <a-tab-pane key="post-condition" tab="后置处理">
               <CaseTips type="post-condition" @reset="onReset" />
-              <PostCondition :isAlternativeCase="true" />
+              <PostCondition :isForBenchMarkCase="true" />
             </a-tab-pane>
 
             <a-tab-pane key="assertion" tab="断言">
               <CaseTips type="assertion" @reset="onReset" />
-              <Assertion :isAlternativeCase="true" />
+              <Assertion :isForBenchMarkCase="true" />
             </a-tab-pane>
 
           </a-tabs>
@@ -141,7 +141,7 @@ import EnvSelector from "@/views/component/EnvSelector/index.vue";
 import { prepareDataForRequest } from "@/views/component/debug/service";
 import { notifyError, notifySuccess } from "@/utils/notify";
 
-const usedBy = UsedBy.AlternativeCaseDebug
+const usedBy = UsedBy.CaseDebug
 provide('usedBy', usedBy)
 
 const props = defineProps({

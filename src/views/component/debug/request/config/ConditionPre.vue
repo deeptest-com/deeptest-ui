@@ -6,7 +6,7 @@
         <span>JavaScript代码</span>
       </div> 
       <div class="right">
-        <a-button v-if="!isAlternativeCase" size="small" type="primary" @click.stop="save" style="margin-right: 4px" :disabled="!debugChange?.preScript">保存</a-button>
+        <a-button v-if="!isForBenchMarkCase" size="small" type="primary" @click.stop="save" style="margin-right: 4px" :disabled="!debugChange?.preScript">保存</a-button>
 
         <Tips :section="'pre-condition'" :title="'请求前的预处理脚本'" />
 
@@ -45,13 +45,13 @@ import Script from "./conditions-pre/Script.vue";
 import FullScreenPopup from "./ConditionPopup.vue";
 
 const props = defineProps<{
-  isAlternativeCase?: boolean;
+  isForBenchMarkCase?: boolean;
 }>();
 
 const store = useStore<{  Debug: Debug }>()
 const debugData = computed<any>(() => store.state.Debug.debugData)
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo)
-const scriptData = computed<any>(() => props.isAlternativeCase ? store.state.Debug.alternativeCase.scriptData : store.state.Debug.scriptData);
+const scriptData = computed<any>(() => props.isForBenchMarkCase ? store.state.Debug.benchMarkCase.scriptData : store.state.Debug.scriptData);
 const debugChange = computed<any>(() => store.state.Debug.debugChange);
 
 watch(() => {
@@ -111,7 +111,7 @@ const format = (item) => {
   bus.emit(settings.eventEditorAction, {act: settings.eventTypeFormat})
 }
 
-provide('isAlternativeCase', props.isAlternativeCase || false);
+provide('isForBenchMarkCase', props.isForBenchMarkCase || false);
 </script>
 
 <style lang="less">

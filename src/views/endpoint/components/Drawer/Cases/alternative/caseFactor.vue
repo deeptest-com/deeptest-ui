@@ -91,7 +91,7 @@ import {StateType as ProjectStateType} from "@/store/project";
 
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 
-const usedBy = UsedBy.AlternativeCaseDebug
+const usedBy = UsedBy.CaseDebug
 provide('usedBy', usedBy)
 
 const store = useStore<{ Debug: Debug, Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType, ProjectGlobal: ProjectStateType }>();

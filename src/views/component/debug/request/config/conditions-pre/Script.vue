@@ -73,7 +73,7 @@ const props = defineProps({
   }
 })
 
-const isAlternativeCase = inject('isAlternativeCase', false);
+const isForBenchMarkCase = inject('isForBenchMarkCase', false);
 const {t} = useI18n();
 
 const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet: Snippet }>();
@@ -82,8 +82,8 @@ const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const scriptData = computed<any>(() => {
-  console.log('alternativeCase', store.state.Debug.alternativeCase);
-  return isAlternativeCase ? store.state.Debug.alternativeCase.scriptData : store.state.Debug.scriptData
+  console.log('isForBenchMarkCase', store.state.Debug.benchMarkCase);
+  return isForBenchMarkCase ? store.state.Debug.benchMarkCase.scriptData : store.state.Debug.scriptData
 });
 const jslibNames = computed<any>(() => store.state.Snippet.jslibNames);
 
@@ -106,7 +106,7 @@ const editorOptions = ref(Object.assign({
 }, MonacoOptions));
 
 const addSnippet = async (snippetName) => {
-  store.dispatch('Debug/addSnippet', { name: snippetName, isAlternativeCase })
+  store.dispatch('Debug/addSnippet', { name: snippetName, isForBenchMarkCase })
 }
 const editorChange = (newScriptCode) => {
   scriptData.value.content = newScriptCode;
@@ -128,9 +128,9 @@ const save = async () => {
 }
 
 onMounted(async () => {
-  if (isAlternativeCase && !props.fullScreen) {
+  if (isForBenchMarkCase && !props.fullScreen) {
     await store.dispatch('Debug/getPreConditionScript');
-    store.commit('Debug/setAlternativeCase', {
+    store.commit('Debug/setBenchMarkCase', {
       scriptData: cloneDeep(store.state.Debug.scriptData),
     })
   }
@@ -150,9 +150,9 @@ onBeforeUnmount( () => {
 })
 
 watch(() => {
-  return isAlternativeCase;
+  return isForBenchMarkCase;
 }, val => {
-  console.error('isAlternativeCase', val);
+  console.error('isForBenchMarkCase', val);
 }, {
   immediate: true,
 })

@@ -132,16 +132,16 @@ import Script from "./conditions-post/Script.vue";
 import FullScreenPopup from "./ConditionPopup.vue";
 
 const props = defineProps<{
-  isAlternativeCase?: boolean;
+  isForBenchMarkCase?: boolean;
 }>();
 const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const postConditions = computed<any>(() => {
-  return props.isAlternativeCase ? store.state.Debug.alternativeCase.postConditions : store.state.Debug.postConditions;
+  return props.isForBenchMarkCase ? store.state.Debug.benchMarkCase.postConditions : store.state.Debug.postConditions;
 });
 const activePostCondition = computed<any>(() => {
-  return props.isAlternativeCase ? store.state.Debug.alternativeCase.activePostCondition : store.state.Debug.activePostCondition;
+  return props.isForBenchMarkCase ? store.state.Debug.benchMarkCase.activePostCondition : store.state.Debug.activePostCondition;
 });
 
 provide('usedWith', UsedWith.PostCondition)
@@ -160,14 +160,14 @@ const conditionTypes = ref(getEnumSelectItems(ConditionType))
 const expand = (item) => {
   console.log('expand', item) 
   store.commit('Debug/setActivePostCondition', Object.assign(item, {
-    isAlternativeCase: props.isAlternativeCase,
+    isForBenchMarkCase: props.isForBenchMarkCase,
   }));
 }
 
 const list = async () => {
   console.log('list')
   await store.dispatch('Debug/listPostCondition', {
-    isAlternativeCase: props.isAlternativeCase
+    isForBenchMarkCase: props.isForBenchMarkCase
   })
 }
 
@@ -181,7 +181,7 @@ const create = () => {
   store.dispatch('Debug/createPostCondition', {
     entityType: conditionType.value,
     ...debugInfo.value,
-    usedBy: props.isAlternativeCase ? UsedBy.AlternativeCaseDebug : debugInfo.value.usedBy
+    isForBenchMarkCase: props.isForBenchMarkCase
   })
 }
 
@@ -193,7 +193,7 @@ const disable = (item) => {
   console.log('disable', item)
   store.dispatch('Debug/disablePostCondition', {
     ...item,
-    usedBy: props.isAlternativeCase ? UsedBy.AlternativeCaseDebug : debugInfo.value.usedBy
+    isForBenchMarkCase: props.isForBenchMarkCase
   })
 }
 const remove = (item) => {
@@ -202,7 +202,7 @@ const remove = (item) => {
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
     store.dispatch('Debug/removePostCondition', {
       ...item,
-      usedBy: props.isAlternativeCase ? UsedBy.AlternativeCaseDebug : debugInfo.value.usedBy
+      isForBenchMarkCase: props.isForBenchMarkCase
     })
   })
 }
@@ -212,10 +212,8 @@ function move(_e: any) {
   })
   store.dispatch('Debug/movePostCondition', {
     data: envIdList,
-    info: {
-      ...debugInfo.value,
-      usedBy: props.isAlternativeCase ? UsedBy.AlternativeCaseDebug : debugInfo.value.usedBy
-    },
+    info: debugInfo.value,
+    isForBenchMarkCase: props.isForBenchMarkCase,
     entityType: '',
   })
 }
@@ -234,7 +232,7 @@ const closeFullScreen = (item) => {
   fullscreen.value = false
 }
 
-provide('isAlternativeCase', props.isAlternativeCase || false);
+provide('isForBenchMarkCase', props.isForBenchMarkCase || false);
 
 </script>
 
