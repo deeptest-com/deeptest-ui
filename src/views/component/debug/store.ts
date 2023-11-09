@@ -59,8 +59,10 @@ export interface StateType {
     preConditions: any[];
     postConditions: any[];
     postConditionsDataObj: any;
-    postConditionsSrcDataObj: any;
+    srcPostConditionsDataObj: any;
     assertionConditions: any[];
+    assertionConditionsDataObj: any;
+    srcAssertionConditionsDataObj: any;
     activeAssertion: any;
     activePostCondition: any;
 
@@ -89,7 +91,9 @@ const initState: StateType = {
     preConditions: [],
     postConditions: [],
     postConditionsDataObj: {},
-    postConditionsSrcDataObj: {},
+    srcPostConditionsDataObj: {},
+    assertionConditionsDataObj: {},
+    srcAssertionConditionsDataObj: {},
     assertionConditions: [],
     activeAssertion: [],
     activePostCondition: [],
@@ -155,7 +159,10 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setDebugChange: Mutation<StateType>;
 
         setPostConditionsDataObj: Mutation<StateType>;
-        setPostConditionsSrcDataObj: Mutation<StateType>;
+        setSrcPostConditionsDataObj: Mutation<StateType>;
+        setAssertionConditionsObj: Mutation<StateType>;
+        setSrcAssertionConditionsObj: Mutation<StateType>;
+        clearPostConditionsDataObj: Mutation<StateType>;
     };
     actions: {
         loadDataAndInvocations: Action<StateType, StateType>;
@@ -216,6 +223,10 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         listServes: Action<StateType, StateType>;
         getEnvVarsByEnv: Action<StateType, StateType>;
+
+        leaveSaveExtractor: Action<StateType, StateType>;
+        leaveSaveScript: Action<StateType, StateType>;
+        leaveSaveCheckpoint: Action<StateType, StateType>;
     };
 }
 
@@ -356,8 +367,20 @@ const StoreModel: ModuleType = {
         setPostConditionsDataObj(state, payload){
             state.postConditionsDataObj[payload.id] = payload.value
         },
-        setPostConditionsSrcDataObj(state, payload){
-            state.postConditionsSrcDataObj[payload.id] = payload.value
+        setSrcPostConditionsDataObj(state, payload){
+            state.srcPostConditionsDataObj[payload.id] = payload.value
+        },
+        setAssertionConditionsObj(state, payload){
+            state.assertionConditionsDataObj[payload.id] = payload.value
+        },
+        setSrcAssertionConditionsObj(state, payload){
+            state.srcAssertionConditionsDataObj[payload.id] = payload.value
+        },
+        clearPostConditionsDataObj(state){
+            state.postConditionsDataObj = {}
+            state.srcPostConditionsDataObj = {}
+            state.assertionConditionsDataObj = {}
+            state.srcAssertionConditionsDataObj = {}
         },
     },
     actions: {
@@ -529,7 +552,7 @@ const StoreModel: ModuleType = {
         async removeInvocation({commit, dispatch, state}, id: number) {
             try {
                 await removeInvocation(id);
-                dispatch('listInvocation', {
+                await dispatch('listInvocation', {
                     endpointInterfaceId: state.debugInfo.endpointInterfaceId,
                 });
                 return true;
@@ -615,10 +638,16 @@ const StoreModel: ModuleType = {
         async removePostCondition({commit, dispatch, state}, payload: any) {
             try {
                 await removePostConditions(payload.id);
+                // 删除具体的数据
+                // 不需要，异步请求了
+                // commit('setPostConditionsDataObj',{
+                //     id: payload.id,
+                //     value:{}
+                // })
                 if (payload.entityType === ConditionType.checkpoint) {
-                    dispatch('listAssertionCondition');
+                    await dispatch('listAssertionCondition');
                 } else {
-                    dispatch('listPostCondition');
+                  await  dispatch('listPostCondition');
                 }
                 return true;
             } catch (error) {
@@ -648,7 +677,7 @@ const StoreModel: ModuleType = {
                     id: data.id,
                     value:data
                 })
-                commit('setPostConditionsSrcDataObj',{
+                commit('setSrcPostConditionsDataObj',{
                     id: data.id,
                     value:cloneDeep(data)
                 })
@@ -662,6 +691,14 @@ const StoreModel: ModuleType = {
             try {
                 await saveExtractor(payload);
                 dispatch('listPostCondition');
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
+        async leaveSaveExtractor({commit, dispatch, state}, payload: any) {
+            try {
+                await saveExtractor(payload);
                 return true;
             } catch (error) {
                 return false;
@@ -734,11 +771,11 @@ const StoreModel: ModuleType = {
             try {
                 const response = await getCheckpoint(id);
                 const {data} = response;
-                commit('setPostConditionsDataObj',{
+                commit('setAssertionConditionsObj',{
                     id: data.id,
                     value:data
                 });
-                commit('setPostConditionsSrcDataObj',{
+                commit('setSrcAssertionConditionsObj',{
                     id: data.id,
                     value:cloneDeep(data)
                 });
@@ -752,6 +789,14 @@ const StoreModel: ModuleType = {
             try {
                 await saveCheckpoint(payload);
                 dispatch('listPostCondition', UsedBy.InterfaceDebug);
+                return true
+            } catch (error) {
+                return false;
+            }
+        },
+        async leaveSaveCheckpoint({commit, dispatch, state}, payload: any) {
+            try {
+                await saveCheckpoint(payload);
                 return true
             } catch (error) {
                 return false;
@@ -780,7 +825,8 @@ const StoreModel: ModuleType = {
                     id: data.id,
                     value:data
                 });
-                commit('setPostConditionsSrcDataObj',{
+
+                commit('setSrcPostConditionsDataObj',{
                     id: data.id,
                     value:cloneDeep(data)
                 })
@@ -791,10 +837,17 @@ const StoreModel: ModuleType = {
         },
         async saveScript({commit, dispatch, state}, payload: any) {
             try {
-                // debugger;
                 await saveScript(payload);
-                await commit('setSrcScript',cloneDeep(payload));
+                // await commit('setSrcScript',cloneDeep(payload));
                 await dispatch('listPostCondition', UsedBy.InterfaceDebug);
+                return true
+            } catch (error) {
+                return false;
+            }
+        },
+        async leaveSaveScript({commit, dispatch, state}, payload: any) {
+            try {
+                await saveScript(payload);
                 return true
             } catch (error) {
                 return false;

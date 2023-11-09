@@ -15,6 +15,7 @@ import { StateType as UserStateType, CurrentUser } from "@/store/user";
 import settings from "@/config/settings";
 import {isElectronEnv} from "@/utils/agentEnv";
 import {isLeyan} from "@/utils/comm";
+import useIMLeaveTip   from "@/composables/useIMLeaveTip";
 import {Cache_Key_Agent_Local_Port, Cache_Key_Server_Url} from "@/utils/const";
 
 export default defineComponent({
@@ -28,8 +29,6 @@ export default defineComponent({
     // NOTICE: 以下代码仅适用于ly环境，其他环境删除即可
     const store = useStore<{User: UserStateType,Endpoint,Debug}>();
     const currentUser = computed<CurrentUser>(()=> store.state.User.currentUser);
-    const isDefineChange: any = computed<any>(() => store.state.Endpoint.isDefineChange);
-    const debugChangeBase: any = computed<any>(() => store.state.Debug.debugChange?.base);
 
     watch(() => {
       return currentUser.value
@@ -65,11 +64,12 @@ export default defineComponent({
       setHtmlLang(locale.value);
     })
 
+    const {isDefineChange,isDebugChange} =  useIMLeaveTip();
     /**
      * 监听页面关闭的时候对用户进行提醒
      * */
     function onbeforeunloadCallback(e:any) {
-      if(isDefineChange.value || debugChangeBase.value){
+      if(isDefineChange.value || isDebugChange.value){
         e.preventDefault();
         e.returnValue = "系统可能不会保存您所做的更改";
         return '系统可能不会保存您所做的更改';

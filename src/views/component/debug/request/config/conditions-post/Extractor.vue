@@ -110,7 +110,8 @@ import {NotificationKeyCommon} from "@/utils/const";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import {notifyError, notifySuccess} from "@/utils/notify";
-
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
+const {srcPostConditionsDataObj,postConditionsDataObj} = useIMLeaveTip();
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
@@ -156,7 +157,7 @@ const rules = computed(() => { return {
 
 // const model = computed<any>(() => store.state.Debug.extractorData);
 const model = computed<any>(() => {
-  return store.state.Debug.postConditionsDataObj?.[props?.condition?.entityId] || {}
+  return postConditionsDataObj?.value?.[props?.condition?.entityId] || {}
 });
 
 watch(model, (newVal) => {
@@ -174,16 +175,6 @@ watch(model, (newVal) => {
   }, {immediate: true, deep: true}
 )
 
-// watch(() => {
-//   return model.value
-// },(newVal,oldValue) => {
-//   console.log('model.value222 提取器',newVal,oldValue);
-// },{
-//   deep:true
-// })
-
-
-
 const types = getEnumSelectItems(CheckpointType)
 const operators = getEnumSelectItems(ComparisonOperator)
 const srcOptions = getEnumSelectItems(ExtractorSrc)
@@ -194,7 +185,7 @@ const load = () => {
   store.dispatch('Debug/getExtractor', props.condition.entityId)
 }
 onMounted(() => {
-  if(!store.state.Debug.postConditionsDataObj?.[props?.condition?.entityId]){
+  if(!postConditionsDataObj.value?.[props?.condition?.entityId]){
     load();
   }
 })
@@ -207,7 +198,6 @@ const save = () => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
     model.value.projectId = debugData.value.projectId
-
     store.dispatch('Debug/saveExtractor', model.value).then((result) => {
       if (result) {
         notifySuccess(`保存成功`);

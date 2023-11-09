@@ -46,7 +46,7 @@
 <script setup lang="ts">
 import {computed, inject, ref, watch, onMounted,onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
-import {Methods, UsedBy} from "@/utils/enum";
+import {ConditionType, Methods, UsedBy} from "@/utils/enum";
 import {StateType as Debug} from "@/views/component/debug/store";
 
 import QueryParameters from "./config/QueryParameters.vue";
@@ -60,6 +60,10 @@ import PreCondition from "./config/ConditionPre.vue";
 import PostCondition from "./config/ConditionPost.vue";
 import Assertion from "./config/Assertion.vue";
 import {useStore} from "vuex";
+import bus from "@/utils/eventBus";
+import settings from "@/config/settings";
+import {notifySuccess} from "@/utils/notify";
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
 
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
@@ -114,13 +118,58 @@ watch(() => {
 });
 
 
-onUnmounted(() => {
-  store.commit('Debug/setDebugChange',{
-    preScript:false,
-    postScript:false,
-    assertionScript:false,
+
+
+/**
+ * 离开提示保存: 后置处理器 + 断言
+ * */
+const {postConditionsList,postConditionsDataObj,debugInfo,
+  assertionConditionsDataObj,debugChangePostScript,
+  debugChangeCheckpoint}  = useIMLeaveTip();
+const getEntityType = (id) => {
+  const cur = postConditionsList?.value?.find((item) => {
+    return item.entityId === id
   })
-  store.commit('Debug/setpostConditionsDataObj',{})
+  return cur?.entityType;
+}
+const leaveSave =  (event) => {
+  console.log(postConditions,assertionConditions);
+  // 后置处理器缓存的数据 - 保存
+  if(Object.keys(postConditionsDataObj.value)?.length && debugChangePostScript.value){
+    Object.values(postConditionsDataObj.value).map(async (item:any) => {
+      item.debugInterfaceId = debugInfo.value.debugInterfaceId;
+      item.endpointInterfaceId = debugInfo.value.endpointInterfaceId;
+      item.projectId = debugData.value.projectId;
+      const entityType = getEntityType(item.id);
+      if(entityType === ConditionType.script){
+        await store.dispatch('Debug/leaveSaveScript', item)
+      }
+      if(entityType === ConditionType.extractor){
+        await store.dispatch('Debug/leaveSaveExtractor', item)
+      }
+    })
+    // 断言缓存的数据 - 保存
+    if(Object.keys(assertionConditionsDataObj.value)?.length && debugChangeCheckpoint.value){
+      Object.values(assertionConditionsDataObj.value).map(async (item:any) => {
+        item.debugInterfaceId = debugInfo.value.debugInterfaceId;
+        item.endpointInterfaceId = debugInfo.value.endpointInterfaceId;
+        item.projectId = debugData.value.projectId;
+        await store.dispatch('Debug/leaveSaveCheckpoint', item);
+      })
+    }
+  }
+  notifySuccess(`保存成功`);
+  store.commit('Debug/clearPostConditionsDataObj',{})
+}
+
+
+onMounted( () => {
+  bus.on(settings.eventPostConditionSave, leaveSave);
+})
+
+onUnmounted( () => {
+  bus.off(settings.eventPostConditionSave, leaveSave);
+  store.commit('Debug/clearPostConditionsDataObj',{})
 })
 
 </script>

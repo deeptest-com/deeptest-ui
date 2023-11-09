@@ -82,7 +82,7 @@ const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 
-const store = useStore<{  Debug: Debug }>();
+const store = useStore<{  Debug: any }>();
 
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
@@ -110,10 +110,10 @@ const load = () => {
 }
 
 const model = computed<any>(() => {
-  return store.state.Debug.postConditionsDataObj?.[props?.condition?.entityId] || {}
+  return store.state.Debug.assertionConditionsDataObj?.[props?.condition?.entityId] || {}
 });
 onMounted(() => {
-  if(!store.state.Debug.postConditionsDataObj?.[props?.condition?.entityId]){
+  if(!store.state.Debug.assertionConditionsDataObj?.[props?.condition?.entityId]){
     load();
   }
 })
@@ -167,13 +167,6 @@ const cancel = () => {
     props.finish()
   }
 }
-// watch(() => {
-//   return model.value
-// },(newVal,oldVal) => {
-//   console.log('model.value222 checkpoiont：',newVal,oldVal)
-// },{
-//   deep:true
-// })
 onMounted(() => {
   console.log('onMounted')
   bus.on(settings.eventConditionSave, save);

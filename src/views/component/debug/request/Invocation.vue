@@ -45,7 +45,7 @@
       <div class="save">
         <a-button trigger="click" class="dp-bg-light"
                   @click="save"
-                  :disabled="!isPathValid || (!debugChangeBase && checkDataChange)">
+                  :disabled="!isPathValid || (!isDebugChange && checkDataChange)">
           <icon-svg class="icon dp-icon-with-text" type="save" />
           保存
         </a-button>
@@ -105,14 +105,15 @@ import EnvSelector from "./config/EnvSelector.vue";
 import {handlePathLinkParams} from "@/utils/dom";
 import {syncSourceMapToText} from "@/views/scenario/components/Design/config"
 import {notifyWarn} from "@/utils/notify";
-
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
+const {isDebugChange} = useIMLeaveTip();
 const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const servers = computed<any[]>(() => store.state.Debug.serves);
 const currService = computed(() => store.state.ServeGlobal.currServe);
 const currServe = computed(() => store.state.Debug.currServe);
-const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
+
 const props = defineProps({
   onSave: {
     type: Function as PropType<(data) => void>,
@@ -217,6 +218,7 @@ const save = (e) => {
   }
 
   bus.emit(settings.eventConditionSave, {});
+  bus.emit(settings.eventPostConditionSave, {});
 }
 const saveAsCase = () => {
   console.log('saveAsCase')
@@ -282,23 +284,6 @@ function validatePath() {
   return isMatch
 }
 
-// const showContextMenu = ref(false)
-// const clearMenu = () => {
-//   console.log('clearMenu')
-//   showContextMenu.value = false
-// }
-//
-// let contextTarget = {} as any
-// const contextMenuStyle = ref({} as any)
-//
-// const onMenuClick = (key) => {
-//   console.log('onMenuClick', key)
-//
-//   if (key === 'use-variable') {
-//     bus.emit(settings.eventVariableSelectionStatus, {src: 'url', data: contextTarget});
-//   }
-//   showContextMenu.value = false
-// }
 
 watch(() => {
   return currServe.value;
@@ -321,9 +306,11 @@ watch(() => {
 
 onMounted(() => {
   // 离开前保存数据
-  bus.on(settings.eventLeaveDebugSaveData, (data) => {
-   save(data);
-  })
+  bus.on(settings.eventLeaveDebugSaveData, save);
+})
+
+onUnmounted(() => {
+  bus.off(settings.eventLeaveDebugSaveData, save)
 })
 
 </script>

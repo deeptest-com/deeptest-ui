@@ -214,6 +214,7 @@ import Swal from "sweetalert2";
 import cloneDeep from "lodash/cloneDeep";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
 
 
 const {share} = useSharePage();
@@ -607,32 +608,41 @@ const username = (user: string) => {
 /*************************************************
  * ::::离开保存代码逻辑部分start
  ************************************************/
+const {
+  isLeaveTip,
+  isDefineChange,
+  isMockChange,
+  debugChange,
+  debugChangeBase,
+  debugChangePostScript,
+  debugChangeCheckpoint,
+  debugChangePreScript,
+  debugData,
+  debugInfo,
+  srcDebugData,
+  srcEndpointDetail,
+  endpointDetail,
+  isDebugChange,
+  resetDebugChange,
+} = useIMLeaveTip();
 
-const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
-const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
-const debugChange: any = computed<Endpoint>(() => store.state.Debug.debugChange);
-const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
-const srcEndpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.srcEndpointDetail);
-const debugData = computed<any>(() => store.state.Debug.debugData);
-const srcDebugData: any = computed<Endpoint>(() => store.state.Debug.srcDebugData);
-const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
-const isMockChange = computed<any>(() => store.state.Endpoint.isMockChange);
-
+// 接口定义 - 调试模块是否改变了 - 用于离开提示
 watch(() => {
   return [debugData.value,srcDebugData.value]
 }, () => {
   const cur = debugData.value;
   const src = srcDebugData.value;
+  if(!src?.usedBy || !cur?.usedBy){
+    return;
+  }
   // 处理格式化的数据
   const isChange = !equalObjectByLodash(src, cur);
-  console.log('832222调试信息2',cur,src,isChange);
   store.commit('Debug/setDebugChange', {base:isChange});
 },{
   deep: true
 })
 
-
-// 接口信息改变了
+//  接口定义 - 接口信息改变了 - 用于离开提示
 watch(() => {
   return [endpointDetail.value,srcEndpointDetail.value]
 }, (newVal, oldValue) => {
@@ -640,7 +650,6 @@ watch(() => {
   const cur = endpointDetail.value;
   const isInit = cur?.id && src?.id;
   const isChange = !equalObjectByLodash(cur, src);
-  console.log('832222调试信息1',cur,src,isChange);
   if(isInit){
     store.commit('Endpoint/setIsDefineChange', isChange);
   }else {
@@ -651,9 +660,6 @@ watch(() => {
 });
 
 const drawerRef:any = ref(null);
-const isLeaveTip = computed(() => {
-  return isDefineChange.value || isMockChange.value || debugChangeBase.value;
-});
 // 关闭弹框时，如果接口信息改变了，弹出提示
 async function closeDrawer() {
   // 不需要提示
@@ -683,17 +689,17 @@ async function closeDrawer() {
     }
   }
   // 调试模块数据有变化，需要提示用户是否要保存调试数据
-  else if(debugChangeBase.value){
+  else if(isDebugChange.value){
     // isConfirmed: true,  保存并离开
     if (result.isConfirmed) {
       drawerVisible.value = false;
       bus.emit(settings.eventLeaveDebugSaveData, {});
-      store.commit('Debug/setDebugChange', {base:false});
+      resetDebugChange();
     }
     // isDenied: false,  不保存，并离开
     else if (result.isDenied) {
       drawerVisible.value = false;
-      store.commit('Debug/setDebugChange', {base:false});
+      resetDebugChange();
     }
     // isDismissed: false 取消,即什么也不做
     else if (result.isDismissed) {
@@ -715,10 +721,9 @@ async function closeDrawer() {
       console.log('isDismissed', result.isDismissed)
     }
   }
-
 }
 
-// 与 beforeRouteLeave 相同，无法访问 `this`
+// 与 beforeRouteLeave
 onBeforeRouteLeave(async (to, from,next) => {
   if(!isLeaveTip.value){
     next();
@@ -745,13 +750,15 @@ onBeforeRouteLeave(async (to, from,next) => {
     }
   }
   // 调试模块数据有变化，需要提示用户是否要保存调试数据
-  else if(debugChangeBase.value){
+  else if(isDebugChange.value){
     if (result.isConfirmed) {
       bus.emit(settings.eventLeaveDebugSaveData, {});
+      resetDebugChange();
       next()
     }
-    // isDenied: false,  不保存，并离开
+    // isDenied: false,  不保存，并离开 ,需要重置调试数据
     else if (result.isDenied) {
+      resetDebugChange();
       next()
     }
     // isDismissed: false 取消,即什么也不做
@@ -772,7 +779,6 @@ onBeforeRouteLeave(async (to, from,next) => {
       return false;
     }
   }
-
 })
 
 /*************************************************

@@ -8,7 +8,7 @@
         </a-col>
 
         <a-col flex="100px" class="dp-right">
-          <a-button size="small" type="primary" @click.stop="save" style="margin-right: 4px" :disabled="debugChange?.preScript">保存</a-button>
+          <a-button size="small" type="primary" @click.stop="save" style="margin-right: 4px" :disabled="!debugChange?.preScript">保存</a-button>
           <Tips section="pre-condition" title="请求前的预处理脚本" />
 
           <a-tooltip overlayClassName="dp-tip-small">
@@ -54,12 +54,6 @@ const srcScriptData = computed<any>(() => store.state.Debug.srcScriptData);
 const debugChange = computed<any>(() => store.state.Debug.debugChange);
 
 
-watch(() => {
-return debugChange.value
-},() => {
-  console.log('8322222debugChange',debugChange.value.preScript)
-})
-
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 
@@ -68,7 +62,6 @@ const fullscreen = ref(false)
 const getPreConditionScript = () => {
   console.log('getPreConditionScript')
   store.dispatch('Debug/getPreConditionScript')
-
 }
 
 watch(debugData, (newVal) => {
@@ -101,9 +94,11 @@ const format = (item) => {
 watch(() => {
   return [scriptData.value?.content,srcScriptData.value?.content]
 },(newVal,oldValue) => {
-  console.log('8322222scriptData',newVal,oldValue)
+  const src = srcScriptData.value?.content?.replace(/\s|\n/g, '') || ''
+  const cur = scriptData.value?.content?.replace(/\s|\n/g, '') || ''
+  const isChange = !(src === cur)
   store.commit('Debug/setDebugChange',{
-    preScript:scriptData.value?.content?.replace(/\s|\n/g, '') === srcScriptData.value?.content?.replace(/\s|\n/g, ''),
+    preScript:isChange,
   })
 },{
   deep:true

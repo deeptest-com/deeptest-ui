@@ -47,7 +47,7 @@
               </div>
               <div class="buttons">
                 <a-button size="small" type="primary"
-                          :disabled="saveDisabled"
+                          :disabled="getSaveBtnDisabled(element?.entityId)"
                           v-if="activePostCondition.id === element.id"
                           @click.stop="save(element)">保存</a-button>
 
@@ -104,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch, getCurrentInstance, ComponentInternalInstance,onUnmounted} from "vue";
+import {computed, inject, ref, watch, getCurrentInstance, ComponentInternalInstance, onUnmounted, onMounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import { CheckCircleOutlined, DeleteOutlined,
@@ -120,22 +120,19 @@ import {confirmToDelete} from "@/utils/confirm";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {getEnumSelectItems} from "@/views/scenario/service";
 import IconSvg from "@/components/IconSvg";
-
+import useIMLeaveTip   from "@/composables/useIMLeaveTip";
 import Extractor from "./conditions-post/Extractor.vue";
 import Checkpoint from "./conditions-post/Checkpoint.vue";
 import Script from "./conditions-post/Script.vue";
 import Cookie from "./conditions-post/Cookie.vue";
 import FullScreenPopup from "./ConditionPopup.vue";
+import {equalObjectByLodash} from "@/utils/object";
 
 const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const postConditions = computed<any>(() => store.state.Debug.postConditions);
 const activePostCondition:any = computed<any>(() => store.state.Debug.activePostCondition);
-
-// const extractorData = computed<any>(() => store.state.Debug.extractorData);
-// const checkpointData = computed<any>(() => store.state.Debug.checkpointData);
-// const scriptData = computed<any>(() => store.state.Debug.scriptData);
 
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
@@ -213,75 +210,28 @@ const closeFullScreen = (item) => {
 
 
 /*************************************************
- * ::::前置处理器保存提示
+ * ::::后置处理器提示
  ************************************************/
-//TODO 以为代码有重复，需要抽出来hooks
-const scriptData = computed<any>(() => store.state.Debug.scriptData);
-const srcScriptData = computed<any>(() => store.state.Debug.srcScriptData);
-const debugChange = computed<any>(() => store.state.Debug.debugChange);
-const postConditionsDataObj = computed<any>(() => store.state.Debug.postConditionsDataObj);
-const postConditionsSrcDataObj = computed<any>(() => store.state.Debug.postConditionsSrcDataObj);
-const saveDisabled = computed(() => {
-  if(activePostCondition.value?.entityType === ConditionType.script){
-    return debugChange.value.preScript
-  }
-  return false;
-})
+const {srcPostConditionsDataObj,postConditionsDataObj} = useIMLeaveTip();
+const getSaveBtnDisabled = (id) => {
+  const cur =  postConditionsDataObj.value?.[id] || {};
+  const src =  srcPostConditionsDataObj.value?.[id] || {};
+  return equalObjectByLodash(cur, src);
+}
+
 watch(() => {
-  return [postConditions.value,postConditionsDataObj.value,postConditionsSrcDataObj.value]
+  return [postConditions.value,postConditionsDataObj.value,srcPostConditionsDataObj.value]
 },(newVal,oldValue) => {
-  // todo 统一处理，变化的情况下，清空
-  console.log('8322222scriptData2222222233',newVal,oldValue);
+  const cur =  postConditionsDataObj.value;
+  const src =  srcPostConditionsDataObj.value;
+  const isChange = !equalObjectByLodash(cur, src);
   store.commit('Debug/setDebugChange',{
-    preScript:scriptData.value?.content?.replace(/\s|\n/g, '') === srcScriptData.value?.content?.replace(/\s|\n/g, ''),
+    postScript:isChange,
   })
 },{
   deep:true
 })
 
-// watch(() => {
-//   return activePostCondition.value
-// },(newVal,oldValue) => {
-//
-// },{
-//   deep:true
-// })
-
-// watch(() => {
-//   return activePostCondition.value
-// },(newVal,oldValue) => {
-//   console.log('watch postConditions 8322222111',newVal,oldValue);
-//   // 清空
-//   // store.dispatch('Debug/setCheckpoint',{})
-//   // store.dispatch('Debug/setExtractor',{})
-//   // store.dispatch('Debug/setScript',{})
-// },{
-//   deep:true
-// })
-//
-// watch(() => {
-//   return extractorData.value
-// },(newVal,oldValue) => {
-//   console.log('watch postConditions 8322222111 22222',newVal,oldValue);
-// },{
-//   deep:true
-// })
-//
-// watch(() => {
-//   return checkpointData.value
-// },(newVal,oldValue) => {
-//   console.log('watch postConditions 8322222111 33333',newVal,oldValue);
-// },{
-//   deep:true
-// })
-//
-// watch(() => {
-//   return scriptData.value
-// },(newVal,oldValue) => {
-//   console.log('watch postConditions 8322222111 44444',newVal,oldValue);
-// },{
-//   deep:true
-// })
 
 </script>
 

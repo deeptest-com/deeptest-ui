@@ -156,13 +156,6 @@ const cancel = () => {
     props.finish()
   }
 }
-// watch(() => {
-//   return model.value
-// },(newVal,oldVal) => {
-//   console.log('model.value222 script：',newVal,oldVal)
-// },{
-//   deep:true
-// })
 
 onMounted(() => {
   console.log('onMounted')
@@ -193,11 +186,7 @@ watch(() => {
 },{
   deep:true
 })
-onUnmounted(() => {
-  store.commit('Debug/setDebugChange',{
-    preScript:false,
-  })
-})
+
 
 </script>
 

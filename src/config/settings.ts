@@ -58,6 +58,7 @@ export interface SettingsType {
     eventTypeFormat: string,
 
     eventConditionSave: string,
+    eventPostConditionSave: string,
 
     eventVariableSelectionStatus: string,
     eventLeaveDebugSaveData: string,
@@ -134,6 +135,7 @@ const settings: SettingsType = {
     eventTypeFormat: 'format',
 
     eventConditionSave: '',
+    eventPostConditionSave: 'eventPostConditionSave',
 
     eventVariableSelectionStatus: 'eventVariableSelectionStatus',
     eventVariableSelectionResult: 'eventVariableSelectionResult',
