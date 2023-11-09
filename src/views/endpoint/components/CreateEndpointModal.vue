@@ -28,6 +28,9 @@
             placeholder="请选择所属分类"
             allow-clear/>
       </a-form-item>
+      <a-form-item label="所属服务" name="serverId">
+        <SelectServe @change="change"/>
+      </a-form-item>
       <a-form-item label="描述" name="description">
         <a-textarea
             v-model:value="formState.description"
@@ -63,6 +66,7 @@ import {
 } from 'vue';
 import {useStore} from "vuex";
 import {NewEndpointFormState} from "@/views/Endpoint/data";
+import SelectServe from './SelectServe/index.vue';
 
 const store = useStore<{ Endpoint }>();
 const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
@@ -112,6 +116,7 @@ const formState: UnwrapRef<NewEndpointFormState> = reactive({
   categoryId: null,
   description: '',
   curl:'',
+  serveId:'',
 });
 
 const showError = ref(false)
@@ -149,6 +154,10 @@ const rules = {
   ],
 };
 
+
+const change = (val)=>{
+  formState.serveId = val
+}
 
 </script>
 
