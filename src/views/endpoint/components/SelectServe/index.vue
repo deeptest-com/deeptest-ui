@@ -29,7 +29,7 @@ const serveId = ref()
 
 onMounted(async () => {
   await getServeList();
-  serveId.value = props.serveId? props.serveId : serves.value[0].id;
+  serveId.value = props.serveId? props.serveId : currServe.value.id? currServe.value.id: serves.value[0].id;
   change(serveId.value);
 })
 
