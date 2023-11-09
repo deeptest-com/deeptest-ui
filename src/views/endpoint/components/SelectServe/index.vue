@@ -28,8 +28,9 @@ const props = defineProps(['serveId','disabled','size','style'])
 const serveId = ref()
 
 onMounted(async () => {
-  await store.dispatch("ServeGlobal/fetchServe");
-  serveId.value = props.serveId? props.serveId : serves.value[0].id
+  await getServeList();
+  serveId.value = props.serveId? props.serveId : serves.value[0].id;
+  change(serveId.value);
 })
 
 const change = (e: any)=>{
