@@ -844,7 +844,7 @@ const StoreModel: ModuleType = {
                         })
                     })
                 }catch (e){
-                    console.error(e)
+                    console.log(e)
                 }
 
                 await commit('setEndpointDetail', res.data || null);
@@ -872,7 +872,7 @@ const StoreModel: ModuleType = {
                 await dispatch("getEndpointDetail", {id: payload.id})
                 await dispatch('loadList', {projectId: payload.projectId});
             }catch (e){
-                console.error(e)
+                console.log(e)
             }
 
             // debugger

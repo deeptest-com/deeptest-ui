@@ -307,7 +307,6 @@ const StoreModel: ModuleType = {
             }
         },
         setActivePostCondition(state, payload) {
-            console.error(`当前选中的 ${payload.isForBenchmarkCase ? '用例因子' : '基准用例'} post condition`, payload);
             if (payload.isForBenchmarkCase) {
                 state.benchMarkCase.activePostCondition = state.benchMarkCase.activePostCondition.id === payload.id ? {} : payload;
             } else {

@@ -170,7 +170,6 @@ const list = async () => {
 }
 
 watch(debugData, async (newVal) => {
-  console.error('初始化后置处理模块的信息 watch debugData')
   await list();
 }, {immediate: true, deep: true});
 
