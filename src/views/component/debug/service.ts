@@ -207,9 +207,7 @@ export function getCodeLangByType(type) {
 }
 
 // conditions
-export async function getPreConditionScript(debugInterfaceId, endpointInterfaceId: number, usedBy: string): Promise<any> {
-    const params = {debugInterfaceId, endpointInterfaceId, usedBy}
-
+export async function getPreConditionScript(params:{ debugInterfaceId, endpointInterfaceId: number, usedBy: string, isForBenchmarkCase?: boolean;}): Promise<any> {
     return request({
         url: `/${apiPreConditions}/getScript`,
         method: 'GET',
@@ -243,7 +241,7 @@ export async function movePreConditions(data): Promise<any> {
     });
 }
 
-export async function listPostConditions(params: {debugInterfaceId, endpointInterfaceId: number, category: ConditionCategory, usedBy: string, isForBenchMarkCase?: boolean}): Promise<any> {
+export async function listPostConditions(params: {debugInterfaceId, endpointInterfaceId: number, category: ConditionCategory, usedBy: string, isForBenchmarkCase?: boolean}): Promise<any> {
     return request({
         url: `/${apiPostConditions}`,
         method: 'GET',

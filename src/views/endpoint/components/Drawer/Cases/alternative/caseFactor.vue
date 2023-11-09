@@ -151,11 +151,13 @@ const loadCaseTree = async (needLoading?: boolean) => {
   })
 }
 
-watch(endpointCase, async () => {
-  if (!endpointCase.value) return
+watch(() => {
+  return endpointCase.value.id;
+}, (val) => {
+  if (!val) return
   loading.value = true;
   loadCaseTree()
-}, {immediate: true, deep: true})
+}, {immediate: true})
 
 watch(alternativeCases, (newVal) => {
   getNodeMap({key: '', children: newVal}, treeDataMap.value)

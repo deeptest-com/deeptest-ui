@@ -21,7 +21,7 @@
       </a-row>
     </div>
 
-    <div class="content">
+    <div :class="['content', isForBenchmarkCase && 'benchmark-condition-content']">
       <draggable tag="div" item-key="name" class="collapse-list"
                  :list="postConditions || []"
                  handle=".handle"
@@ -132,16 +132,16 @@ import Script from "./conditions-post/Script.vue";
 import FullScreenPopup from "./ConditionPopup.vue";
 
 const props = defineProps<{
-  isForBenchMarkCase?: boolean;
+  isForBenchmarkCase?: boolean;
 }>();
 const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const postConditions = computed<any>(() => {
-  return props.isForBenchMarkCase ? store.state.Debug.benchMarkCase.postConditions : store.state.Debug.postConditions;
+  return props.isForBenchmarkCase ? store.state.Debug.benchMarkCase.postConditions : store.state.Debug.postConditions;
 });
 const activePostCondition = computed<any>(() => {
-  return props.isForBenchMarkCase ? store.state.Debug.benchMarkCase.activePostCondition : store.state.Debug.activePostCondition;
+  return props.isForBenchmarkCase ? store.state.Debug.benchMarkCase.activePostCondition : store.state.Debug.activePostCondition;
 });
 
 provide('usedWith', UsedWith.PostCondition)
@@ -159,15 +159,13 @@ const conditionTypes = ref(getEnumSelectItems(ConditionType))
 
 const expand = (item) => {
   console.log('expand', item) 
-  store.commit('Debug/setActivePostCondition', Object.assign(item, {
-    isForBenchMarkCase: props.isForBenchMarkCase,
-  }));
+  store.commit('Debug/setActivePostCondition', item);
 }
 
 const list = async () => {
   console.log('list')
   await store.dispatch('Debug/listPostCondition', {
-    isForBenchMarkCase: props.isForBenchMarkCase
+    isForBenchmarkCase: props.isForBenchmarkCase
   })
 }
 
@@ -181,7 +179,7 @@ const create = () => {
   store.dispatch('Debug/createPostCondition', {
     entityType: conditionType.value,
     ...debugInfo.value,
-    isForBenchMarkCase: props.isForBenchMarkCase
+    isForBenchmarkCase: props.isForBenchmarkCase
   })
 }
 
@@ -191,19 +189,13 @@ const format = (item) => {
 }
 const disable = (item) => {
   console.log('disable', item)
-  store.dispatch('Debug/disablePostCondition', {
-    ...item,
-    isForBenchMarkCase: props.isForBenchMarkCase
-  })
+  store.dispatch('Debug/disablePostCondition', item)
 }
 const remove = (item) => {
   console.log('remove', item)
   
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
-    store.dispatch('Debug/removePostCondition', {
-      ...item,
-      isForBenchMarkCase: props.isForBenchMarkCase
-    })
+    store.dispatch('Debug/removePostCondition', item)
   })
 }
 function move(_e: any) {
@@ -213,7 +205,7 @@ function move(_e: any) {
   store.dispatch('Debug/movePostCondition', {
     data: envIdList,
     info: debugInfo.value,
-    isForBenchMarkCase: props.isForBenchMarkCase,
+    isForBenchmarkCase: props.isForBenchmarkCase,
     entityType: '',
   })
 }
@@ -232,7 +224,7 @@ const closeFullScreen = (item) => {
   fullscreen.value = false
 }
 
-provide('isForBenchMarkCase', props.isForBenchMarkCase || false);
+provide('isForBenchmarkCase', props.isForBenchmarkCase || false);
 
 </script>
 
@@ -262,8 +254,12 @@ provide('isForBenchMarkCase', props.isForBenchMarkCase || false);
     height: calc(100% - 30px);
     margin-bottom: 8px;
     overflow-y: auto;
-
     display: flex;
+
+    &.benchmark-condition-content {
+      height: unset;
+    }
+
     &>div {
       height: 100%;
     }

@@ -74,13 +74,14 @@ import {StateType as ProjectStateType} from "@/store/project";
 
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
+const isForBenchmarkCase = inject('isForBenchmarkCase');
 const {t} = useI18n();
 const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet: Snippet }>();
 
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
-const model = computed<any>(() => store.state.Debug.scriptData);
+const model = computed<any>(() => isForBenchmarkCase ? store.state.Debug.benchMarkCase.scriptData : store.state.Debug.scriptData);
 const jslibNames = computed<any>(() => store.state.Snippet.jslibNames);
 
 const props = defineProps({
@@ -96,7 +97,7 @@ const props = defineProps({
 
 const load = () => {
   console.log('load script ...', props.condition)
-  store.dispatch('Debug/getScript', props.condition.entityId)
+  store.dispatch('Debug/getScript', props.condition)
   store.dispatch('Snippet/listJslibNames')
 
 }

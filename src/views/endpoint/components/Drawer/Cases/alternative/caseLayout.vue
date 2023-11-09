@@ -1,5 +1,5 @@
 <template>
-  <a-collapse class="case-header" @change="handleChange">
+  <a-collapse v-model:activeKey="collapseActiveKey" class="case-header" @change="handleChange">
     <a-collapse-panel key="1">
       <slot name="content" />
       <template #header>
@@ -12,9 +12,13 @@
   </a-collapse>
 </template>
 <script setup lang="ts">
-import { defineEmits } from 'vue';
+import { defineEmits, defineProps, ref } from 'vue';
 
+const props = defineProps<{
+  activeKey?: any[];
+}>();
 const emits = defineEmits(['open']);
+const collapseActiveKey = ref(props.activeKey || []);
 
 const handleChange = e => {
   if (e.length > 0) {

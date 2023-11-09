@@ -73,7 +73,7 @@ const props = defineProps({
   }
 })
 
-const isForBenchMarkCase = inject('isForBenchMarkCase', false);
+const isForBenchmarkCase = inject('isForBenchmarkCase', false);
 const {t} = useI18n();
 
 const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet: Snippet }>();
@@ -82,8 +82,8 @@ const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const scriptData = computed<any>(() => {
-  console.log('isForBenchMarkCase', store.state.Debug.benchMarkCase);
-  return isForBenchMarkCase ? store.state.Debug.benchMarkCase.scriptData : store.state.Debug.scriptData
+  console.log('isForBenchmarkCase', store.state.Debug.benchMarkCase);
+  return isForBenchmarkCase ? store.state.Debug.benchMarkCase.scriptData : store.state.Debug.scriptData
 });
 const jslibNames = computed<any>(() => store.state.Snippet.jslibNames);
 
@@ -106,7 +106,7 @@ const editorOptions = ref(Object.assign({
 }, MonacoOptions));
 
 const addSnippet = async (snippetName) => {
-  store.dispatch('Debug/addSnippet', { name: snippetName, isForBenchMarkCase })
+  store.dispatch('Debug/addSnippet', { name: snippetName, isForBenchmarkCase })
 }
 const editorChange = (newScriptCode) => {
   scriptData.value.content = newScriptCode;
@@ -128,12 +128,6 @@ const save = async () => {
 }
 
 onMounted(async () => {
-  if (isForBenchMarkCase && !props.fullScreen) {
-    await store.dispatch('Debug/getPreConditionScript');
-    store.commit('Debug/setBenchMarkCase', {
-      scriptData: cloneDeep(store.state.Debug.scriptData),
-    })
-  }
   bus.on(settings.eventConditionSave, save);
   bus.on(settings.paneResizeTop, () => {
     monacoEditor.value?.resizeIt({
@@ -147,14 +141,6 @@ onMounted(async () => {
 onBeforeUnmount( () => {
   console.log('onBeforeUnmount')
   bus.off(settings.eventConditionSave, save);
-})
-
-watch(() => {
-  return isForBenchMarkCase;
-}, val => {
-  console.error('isForBenchMarkCase', val);
-}, {
-  immediate: true,
 })
 
 </script>

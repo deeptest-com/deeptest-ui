@@ -6,7 +6,7 @@
         <span>JavaScript代码</span>
       </div> 
       <div class="right">
-        <a-button v-if="!isForBenchMarkCase" size="small" type="primary" @click.stop="save" style="margin-right: 4px" :disabled="!debugChange?.preScript">保存</a-button>
+        <a-button size="small" type="primary" @click.stop="save" style="margin-right: 4px" :disabled="!debugChange?.preScript">保存</a-button>
 
         <Tips :section="'pre-condition'" :title="'请求前的预处理脚本'" />
 
@@ -45,13 +45,13 @@ import Script from "./conditions-pre/Script.vue";
 import FullScreenPopup from "./ConditionPopup.vue";
 
 const props = defineProps<{
-  isForBenchMarkCase?: boolean;
+  isForBenchmarkCase?: boolean;
 }>();
 
 const store = useStore<{  Debug: Debug }>()
 const debugData = computed<any>(() => store.state.Debug.debugData)
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo)
-const scriptData = computed<any>(() => props.isForBenchMarkCase ? store.state.Debug.benchMarkCase.scriptData : store.state.Debug.scriptData);
+const scriptData = computed<any>(() => props.isForBenchmarkCase ? store.state.Debug.benchMarkCase.scriptData : store.state.Debug.scriptData);
 const debugChange = computed<any>(() => store.state.Debug.debugChange);
 
 watch(() => {
@@ -65,12 +65,6 @@ watch(() => {
   deep:true
 })
 
-watch(() => {
-return debugChange.value
-},() => {
-  console.log('8322222debugChange',debugChange.value.preScript)
-})
-
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 
@@ -78,7 +72,9 @@ const fullscreen = ref(false)
 
 const getPreConditionScript = () => {
   console.log('getPreConditionScript')
-  store.dispatch('Debug/getPreConditionScript')
+  store.dispatch('Debug/getPreConditionScript', {
+    isForBenchmarkCase: props.isForBenchmarkCase
+  })
   store.commit('Debug/setDebugChange',{
     preScript:false,
   })
@@ -111,7 +107,7 @@ const format = (item) => {
   bus.emit(settings.eventEditorAction, {act: settings.eventTypeFormat})
 }
 
-provide('isForBenchMarkCase', props.isForBenchMarkCase || false);
+provide('isForBenchmarkCase', props.isForBenchmarkCase || false);
 </script>
 
 <style lang="less">

@@ -113,6 +113,7 @@ import {notifyError, notifySuccess} from "@/utils/notify";
 
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
+const isForBenchmarkCase = inject('isForBenchmarkCase');
 const {t} = useI18n();
 
 const store = useStore<{ Debug: Debug }>();
@@ -120,7 +121,7 @@ const store = useStore<{ Debug: Debug }>();
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const responseData = computed<any>(() => store.state.Debug.responseData);
-const model = computed<any>(() => store.state.Debug.extractorData);
+const model = computed<any>(() => isForBenchmarkCase ? store.state.Debug.benchMarkCase.extractorData : store.state.Debug.extractorData);
 
 const typeRequired = [{required: true, message: '请选择类型', trigger: 'change'}]
 const expressionRequired = [{required: true, message: '请输入元素路径', trigger: 'blur'}]
@@ -186,7 +187,7 @@ const typeOptions = getEnumSelectItems(ExtractorType)
 
 const load = () => {
   console.log('load', props.condition)
-  store.dispatch('Debug/getExtractor', props.condition.entityId)
+  store.dispatch('Debug/getExtractor', props.condition)
 }
 load()
 
