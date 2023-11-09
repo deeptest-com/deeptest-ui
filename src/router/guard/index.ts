@@ -24,7 +24,7 @@ function createProjectGuard(router) {
             }
           })
         } else {
-          notifyError(result.msg);
+          notifyError(result.code === 401 ? '登录态失效，请重新登录' : result.msg);
           return next({
             path: '/',
           })
