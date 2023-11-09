@@ -3,7 +3,6 @@
                 :value="serveId"
                 :placeholder="'请选择服务'"
                 :style="style"
-                @focus="getServeList"
                 @change="change"
                 :size="size"
                 :disabled="disabled"
