@@ -18,10 +18,14 @@
         <RequestBody v-if="activeKey === 'body'" />
       </a-tab-pane>
 
-
       <a-tab-pane key="header" :tab="getTabTitle('headers')">
         <GlobalParameters :in="'header'" />
         <RequestHeaders v-if="activeKey === 'header'" />
+      </a-tab-pane>
+
+      <a-tab-pane key="cookie" :tab="getTabTitle('cookies')">
+        <GlobalParameters :in="'cookie'" />
+        <Cookie v-if="activeKey === 'cookie'" />
       </a-tab-pane>
 
       <a-tab-pane key="auth" tab="授权">
@@ -52,6 +56,7 @@ import {StateType as Debug} from "@/views/component/debug/store";
 import QueryParameters from "./config/QueryParameters.vue";
 import PathParameters from "./config/PathParameters.vue";
 import GlobalParameters from "./config/GlobalParameters.vue";
+import Cookie from "./config/Cookie.vue";
 
 import RequestBody from "./config/Body.vue";
 import RequestHeaders from "./config/Headers.vue";
@@ -76,12 +81,13 @@ const getTabTitle = computed(() => {
     queryParams: '查询参数',
     pathParams: '路径参数',
     headers: '请求头',
+    cookies: 'Cookie',
     postConditions: '后置处理',
     assertionConditions: '断言',
   }
   return type => {
     const sourceData = type === 'postConditions' ? (postConditions.value || []) : type === 'assertionConditions' ? (assertionConditions.value || []) : (debugData.value[type] || []).filter(e => e.name);
-    const globalParamsType = type === 'queryParams' ? 'query' : type === 'pathParams' ? 'path' : type === 'headers' ? 'header' : '';
+    const globalParamsType = type === 'queryParams' ? 'query' : type === 'pathParams' ? 'path' : type === 'headers' ? 'header' : type === "cookies"? 'cookie': '';
     let globalParamsLength = 0;
     if (globalParamsType) {
       const globalParams = (debugData.value.globalParams|| []).filter( item => item.in === globalParamsType);
