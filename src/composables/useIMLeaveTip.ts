@@ -6,6 +6,7 @@ import { ComputedRef, onMounted, Ref, watch,computed } from 'vue';
 import {Endpoint} from "@/views/endpoint/data";
 import {useStore} from "vuex";
 import {StateType as ServeStateType} from "@/store/serve";
+import cloneDeep from "lodash/cloneDeep";
 
 export default function useIMLeaveTip()  {
     const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal: ServeStateType, Global ,Debug}>();
@@ -43,6 +44,7 @@ export default function useIMLeaveTip()  {
             postScript: false,
             checkpoint:false
         });
+        store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
         store.commit('Debug/clearPostConditionsDataObj');
     }
 

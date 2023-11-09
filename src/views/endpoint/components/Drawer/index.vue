@@ -93,15 +93,11 @@ import cloneDeep from "lodash/cloneDeep";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
-const {isLeaveTip} = useIMLeaveTip();
+
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal, Global,Debug }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
 const debugData: any = computed<Endpoint>(() => store.state.Debug.debugData);
-const isMockChange = computed<any>(() => store.state.Endpoint.isMockChange);
-// 调试基本信息是否有变化，因为检查点等单独保存
-const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
-const debugChangePostScript: any = computed<Endpoint>(() => store.state.Debug.debugChange?.postScript);
 const props = defineProps({
   visible: {
     required: true,
@@ -125,6 +121,8 @@ const stickyKey = ref(0);
 
 const endpointDebugRef:any = ref(null);
 
+
+const {isLeaveTip,isDebugChange,resetDebugChange,isMockChange} = useIMLeaveTip();
 async function changeTab(value) {
   console.log('changeTab', value);
   if(!isLeaveTip.value) {
@@ -170,11 +168,11 @@ async function changeTab(value) {
     }
   }
   // 调试模块数据有变化，需要提示用户是否要保存调试数据
-  else if(debugChangeBase.value){
+  else if(isDebugChange.value){
     // isConfirmed: true,  保存并离开
     if (result.isConfirmed) {
       bus.emit(settings.eventLeaveDebugSaveData, {});
-      store.commit('Debug/setDebugChange', {base:false});
+      resetDebugChange();
       // 保存成功后，切换tab
       activeTabKey.value = value;
       stickyKey.value++;
@@ -183,7 +181,7 @@ async function changeTab(value) {
     else if (result.isDenied) {
       activeTabKey.value = value;
       stickyKey.value++;
-      store.commit('Debug/setDebugChange', {base:false});
+      resetDebugChange();
     }
     // isDismissed: false 取消,即什么也不做
     else if (result.isDismissed) {
