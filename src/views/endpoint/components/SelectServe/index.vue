@@ -23,7 +23,7 @@ const store = useStore<{ ServeGlobal: { currServe: any; serves: any; } }>();
 const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
 const emit = defineEmits(['change']);
-const props = defineProps(['serveId','disabled','size','style'])
+const props = defineProps(['serveId','disabled','changeServe','size','style'])
 
 const serveId = ref()
 
@@ -35,7 +35,10 @@ onMounted(async () => {
 
 const change = (e: any)=>{
     emit("change",e)
-    store.dispatch('ServeGlobal/changeServe', serveId.value);
+    if (props.changeServe) {
+      store.dispatch('ServeGlobal/changeServe', serveId.value);
+    }
+    
 }
 
 
