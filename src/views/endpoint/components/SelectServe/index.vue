@@ -33,10 +33,10 @@ onMounted(async () => {
   change(serveId.value);
 })
 
-const change = (e: any)=>{
-    emit("change",e)
+const change = (val: number)=>{
+    emit("change",val)
     if (props.changeServe) {
-      store.dispatch('ServeGlobal/changeServe', serveId.value);
+      store.dispatch('ServeGlobal/changeServe', val);
     }
     
 }
