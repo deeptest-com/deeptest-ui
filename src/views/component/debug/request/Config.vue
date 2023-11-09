@@ -123,9 +123,14 @@ watch(() => {
 /**
  * 离开提示保存: 后置处理器 + 断言
  * */
-const {postConditionsList,postConditionsDataObj,debugInfo,
-  assertionConditionsDataObj,debugChangePostScript,
-  debugChangeCheckpoint}  = useIMLeaveTip();
+const {
+  postConditionsList,
+  postConditionsDataObj,
+  debugInfo,
+  assertionConditionsDataObj,
+  debugChangePostScript,
+  debugChangeCheckpoint
+}  = useIMLeaveTip();
 const getEntityType = (id) => {
   const cur = postConditionsList?.value?.find((item) => {
     return item.entityId === id
@@ -133,7 +138,6 @@ const getEntityType = (id) => {
   return cur?.entityType;
 }
 const leaveSave =  (event) => {
-  console.log(postConditions,assertionConditions);
   // 后置处理器缓存的数据 - 保存
   if(Object.keys(postConditionsDataObj.value)?.length && debugChangePostScript.value){
     Object.values(postConditionsDataObj.value).map(async (item:any) => {
@@ -148,19 +152,20 @@ const leaveSave =  (event) => {
         await store.dispatch('Debug/leaveSaveExtractor', item)
       }
     })
-    // 断言缓存的数据 - 保存
-    if(Object.keys(assertionConditionsDataObj.value)?.length && debugChangeCheckpoint.value){
-      Object.values(assertionConditionsDataObj.value).map(async (item:any) => {
-        item.debugInterfaceId = debugInfo.value.debugInterfaceId;
-        item.endpointInterfaceId = debugInfo.value.endpointInterfaceId;
-        item.projectId = debugData.value.projectId;
-        await store.dispatch('Debug/leaveSaveCheckpoint', item);
-      })
-    }
+  }
+  // 断言缓存的数据 - 保存
+  if(Object.keys(assertionConditionsDataObj.value)?.length && debugChangeCheckpoint.value){
+    Object.values(assertionConditionsDataObj.value).map(async (item:any) => {
+      item.debugInterfaceId = debugInfo.value.debugInterfaceId;
+      item.endpointInterfaceId = debugInfo.value.endpointInterfaceId;
+      item.projectId = debugData.value.projectId;
+      await store.dispatch('Debug/leaveSaveCheckpoint', item);
+    })
   }
   notifySuccess(`保存成功`);
   store.commit('Debug/clearPostConditionsDataObj',{})
 }
+
 
 
 onMounted( () => {

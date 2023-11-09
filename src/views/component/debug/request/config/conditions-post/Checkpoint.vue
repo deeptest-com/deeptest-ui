@@ -57,7 +57,19 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, inject, onBeforeUnmount, onMounted, PropType, reactive, Ref, ref, watch} from "vue";
+import {
+  computed,
+  defineProps,
+  inject,
+  onBeforeUnmount,
+  onMounted,
+  onUnmounted,
+  PropType,
+  reactive,
+  Ref,
+  ref,
+  watch
+} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import {message, Form, notification} from 'ant-design-vue';
@@ -77,7 +89,7 @@ import {NotificationKeyCommon} from "@/utils/const";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import {notifyError, notifySuccess} from "@/utils/notify";
-
+import useIMLeaveTip   from "@/composables/useIMLeaveTip";
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
@@ -109,14 +121,19 @@ const load = () => {
   store.dispatch('Debug/getCheckpoint', props.condition.entityId)
 }
 
+
+const {assertionConditionsDataObj} = useIMLeaveTip();
 const model = computed<any>(() => {
-  return store.state.Debug.assertionConditionsDataObj?.[props?.condition?.entityId] || {}
+  return assertionConditionsDataObj.value?.[props?.condition?.entityId] || {}
 });
+
 onMounted(() => {
-  if(!store.state.Debug.assertionConditionsDataObj?.[props?.condition?.entityId]){
+  if(!model?.value?.id){
     load();
   }
 })
+
+
 
 const variables = ref([])
 
@@ -176,6 +193,7 @@ onMounted(() => {
 onBeforeUnmount( () => {
   console.log('onBeforeUnmount')
   bus.off(settings.eventConditionSave, save);
+
 })
 
 const selectType = () => {

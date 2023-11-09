@@ -111,7 +111,6 @@ import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
-const {srcPostConditionsDataObj,postConditionsDataObj} = useIMLeaveTip();
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
@@ -137,6 +136,17 @@ const keyRequired = [{required: true, message: '请输入键值', trigger: 'blur
 const boundaryStartRequired = [{required: true, message: '请输入边界开始字符串', trigger: 'blur'}]
 const boundaryEndRequired = [{required: true, message: '请输入边界结束字符串', trigger: 'blur'}]
 
+const {postConditionsDataObj} = useIMLeaveTip();
+const model = computed<any>(() => {
+  return postConditionsDataObj.value?.[props?.condition?.entityId] || {}
+});
+
+onMounted(() => {
+  if(!model?.value?.id){
+    load();
+  }
+})
+
 const isInit = ref(true)
 const rules = computed(() => { return {
   src: [
@@ -155,10 +165,6 @@ const rules = computed(() => { return {
 }})
 
 
-// const model = computed<any>(() => store.state.Debug.extractorData);
-const model = computed<any>(() => {
-  return postConditionsDataObj?.value?.[props?.condition?.entityId] || {}
-});
 
 watch(model, (newVal) => {
   if (!isInit.value) return
@@ -184,11 +190,8 @@ const load = () => {
   console.log('load', props.condition)
   store.dispatch('Debug/getExtractor', props.condition.entityId)
 }
-onMounted(() => {
-  if(!postConditionsDataObj.value?.[props?.condition?.entityId]){
-    load();
-  }
-})
+
+
 
 let {resetFields, validate, validateInfos} = useForm(model, rules);
 

@@ -52,7 +52,7 @@ import {Form} from 'ant-design-vue';
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import {ConditionType, UsedBy} from "@/utils/enum";
-
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {StateType as Snippet} from "@/store/snippet";
 
@@ -68,13 +68,19 @@ const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet: Snippet }>();
-
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
-const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
-const debugData = computed<any>(() => store.state.Debug.debugData);
+
+
+const {postConditionsDataObj,debugData,debugInfo} = useIMLeaveTip();
 const model = computed<any>(() => {
-  return store.state.Debug.postConditionsDataObj?.[props?.condition?.entityId] || {}
+  return postConditionsDataObj.value?.[props?.condition?.entityId] || {}
 });
+
+onMounted(() => {
+  if(!model?.value?.id){
+    load();
+  }
+})
 const jslibNames = computed<any>(() => store.state.Snippet.jslibNames);
 
 const props = defineProps({
@@ -93,11 +99,6 @@ const load = () => {
   store.dispatch('Debug/getScript', props.condition.entityId)
   store.dispatch('Snippet/listJslibNames');
 }
-onMounted(() => {
-  if(!store.state.Debug.postConditionsDataObj?.[props?.condition?.entityId]){
-    load();
-  }
-})
 
 
 const timestamp = ref('')
@@ -179,7 +180,6 @@ const debugChange = computed<any>(() => store.state.Debug.debugChange);
 watch(() => {
   return [scriptData.value?.content,srcScriptData.value?.content]
 },(newVal,oldValue) => {
-  console.log('8322222scriptData',newVal,oldValue);
   store.commit('Debug/setDebugChange',{
     preScript:scriptData.value?.content?.replace(/\s|\n/g, '') === srcScriptData.value?.content?.replace(/\s|\n/g, ''),
   })
