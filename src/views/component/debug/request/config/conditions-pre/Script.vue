@@ -124,6 +124,7 @@ const save = async () => {
 onMounted(() => {
   console.log('onMounted')
   bus.on(settings.eventConditionSave, save);
+  bus.on(settings.eventPreConditionSave, save);
   bus.on(settings.paneResizeTop, () => {
     monacoEditor.value?.resizeIt({
         act: 'heightChanged',

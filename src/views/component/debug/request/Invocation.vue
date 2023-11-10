@@ -106,7 +106,7 @@ import {handlePathLinkParams} from "@/utils/dom";
 import {syncSourceMapToText} from "@/views/scenario/components/Design/config"
 import {notifyWarn} from "@/utils/notify";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
-const {isDebugChange} = useIMLeaveTip();
+const {isDebugChange,debugChangePreScript,debugChangePostScript,debugChangeCheckpoint} = useIMLeaveTip();
 const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
@@ -218,7 +218,9 @@ const save = (e) => {
   }
 
   bus.emit(settings.eventConditionSave, {});
-  bus.emit(settings.eventPostConditionSave, {});
+  // 后置处理器 和 断言
+  debugChangePostScript.value && bus.emit(settings.eventPostConditionSave, {});
+  debugChangePreScript.value && bus.emit(settings.eventPreConditionSave, {});
 }
 const saveAsCase = () => {
   console.log('saveAsCase')

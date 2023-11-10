@@ -103,6 +103,7 @@ export interface SettingsType {
      * */
     lyElectronUserInfo: string;
     SwalLeaveSetting: any;
+    eventPreConditionSave: string;
 }
 
 const settings: SettingsType = {
@@ -182,7 +183,8 @@ const settings: SettingsType = {
             cancelButton: 'btn btn-normal btn-cancel',
             denyButton: 'btn btn-normal btn-deny',
         },
-    }
+    },
+    eventPreConditionSave:'eventPreConditionSave',
 
 };
 
