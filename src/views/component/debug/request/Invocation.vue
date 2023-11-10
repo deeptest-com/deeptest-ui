@@ -105,14 +105,16 @@ import EnvSelector from "./config/EnvSelector.vue";
 import {handlePathLinkParams} from "@/utils/dom";
 import {syncSourceMapToText} from "@/views/scenario/components/Design/config"
 import {notifyWarn} from "@/utils/notify";
+import {StateType as UserStateType} from "@/store/user";
 
-const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal }>();
+const store = useStore<{ User: UserStateType, Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal }>();
+const currUser = computed(() => store.state.User.currentUser);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
-const servers = computed<any[]>(() => store.state.Debug.serves);
 const currService = computed(() => store.state.ServeGlobal.currServe);
 const currServe = computed(() => store.state.Debug.currServe);
 const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
+
 const props = defineProps({
   onSave: {
     type: Function as PropType<(data) => void>,
@@ -201,7 +203,8 @@ const send = async (e) => {
     store.commit("Global/setSpinning",true)
 
     const callData = {
-      serverUrl: process.env.VUE_APP_API_SERVER, // used by agent to submit result to server
+      userId: currUser.value.id,
+      serverUrl: process.env.VUE_APP_API_SERVER,
       token: await getToken(),
       data: data
     }

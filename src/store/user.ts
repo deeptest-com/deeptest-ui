@@ -12,6 +12,7 @@ export interface CurrentUser {
   sysRoles: string[];
   projectRoles: any;
   name?: string;
+  roles: string[];
 }
 
 export interface StateType {
@@ -45,6 +46,7 @@ const initState: StateType = {
     email: '',
     avatar: '',
     sysRoles: [],
+    roles: [],
     projectRoles: {},
   },
   message: 0,
