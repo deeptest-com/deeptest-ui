@@ -15,7 +15,7 @@
         </a-select>
       </div>
       <div id="env-selector">
-        <EnvSelector :show="showBaseUrl()" :server-id="serverId" @change="changeServer" :disabled="usedBy === UsedBy.ScenarioDebug" />
+        <EnvSelector :show="showBaseUrl()" :server-id="serverId" :serveId="debugData.serveId" @change="changeServer" :disabled="usedBy === UsedBy.ScenarioDebug" />
       </div>
       <div v-if="showBaseUrl()" class="base-url">
         <a-input placeholder="请输入地址"
@@ -178,7 +178,7 @@ watch(debugData, (newVal) => {
     debugData.value.url = debugData?.value.url || endpointDetail.value?.path || ''
   }
   debugData.value.baseUrl = currServe.value.url;
-  debugData.value.serveId = currServe.value.serveId;
+  //debugData.value.serveId = currServe.value.serveId;
 }, {immediate: true, deep: true});
 
 const serverId = computed(() => {
@@ -186,7 +186,7 @@ const serverId = computed(() => {
 });
 
 function changeServer(id) {
-  store.dispatch('Debug/changeServer', { serverId: id,serveId:currService.value.id, requestEnvVars: false })
+  store.dispatch('Debug/changeServer', { serverId: id,serveId:debugData.value.serveId, requestEnvVars: false })
 }
 
 const send = async (e) => {
@@ -294,8 +294,9 @@ watch(() => {
   immediate: true,
 })
 
+
 watch(() => {
-  return currService.value.id;
+  return debugData.value.serveId;
 }, async (val) => {
   if (val) {
     await store.dispatch('Debug/listServes', {serveId: val});
@@ -303,6 +304,7 @@ watch(() => {
 }, {
   immediate: true
 })
+
 
 onMounted(() => {
   // 离开前保存数据

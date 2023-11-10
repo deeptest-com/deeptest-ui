@@ -103,11 +103,13 @@ async function getServeServers() {
     })
 }
 
+/*
 onMounted(async () => {
   await store.dispatch('Debug/listServes', {
     serveId: currServe.value.id,
   })
 })
+*/
 
 /**
  * 添加路径参数
