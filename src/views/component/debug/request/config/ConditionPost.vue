@@ -233,6 +233,10 @@ watch(() => {
 })
 
 
+onUnmounted(() => {
+  store.commit('Debug/setActivePostCondition', {});
+})
+
 </script>
 
 <style lang="less">

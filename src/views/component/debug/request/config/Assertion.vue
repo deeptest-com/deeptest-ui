@@ -85,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch} from "vue";
+import {computed, inject, ref, watch,onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import { QuestionCircleOutlined, CheckCircleOutlined, DeleteOutlined,
@@ -105,7 +105,6 @@ import TooltipCell from "@/components/Table/tooltipCell.vue";
 import draggable from 'vuedraggable'
 import Tips from "@/components/Tips/index.vue";
 import {equalObjectByLodash} from "@/utils/object";
-import {onMounted, onUnmounted} from "vue/dist/vue";
 
 const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
@@ -205,6 +204,9 @@ watch(() => {
   deep:true
 })
 
+onUnmounted(() => {
+  store.commit('Debug/setActiveAssertion', {});
+})
 
 
 

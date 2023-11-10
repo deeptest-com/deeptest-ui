@@ -81,7 +81,6 @@ import {
     getSchemaList, getSchemaDetail
 } from "@/views/project-settings/service";
 import { changeServe } from '../project-settings/service';
-import {ref} from "vue/dist/vue";
 
 export interface StateType {
     endpointId: number;

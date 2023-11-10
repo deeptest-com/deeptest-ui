@@ -95,8 +95,8 @@ const initState: StateType = {
     assertionConditionsDataObj: {},
     srcAssertionConditionsDataObj: {},
     assertionConditions: [],
-    activeAssertion: [],
-    activePostCondition: [],
+    activeAssertion: {},
+    activePostCondition: {},
 
     extractorData: {} as Extractor,
     checkpointData: {} as Checkpoint,
@@ -282,14 +282,14 @@ const StoreModel: ModuleType = {
         },
 
         setActiveAssertion(state, payload) {
-            if (state.activeAssertion.id === payload.id) {
+            if (state.activeAssertion?.id === payload?.id) {
                 state.activeAssertion = {}
             } else {
                 state.activeAssertion = payload;
             }
         },
         setActivePostCondition(state, payload) {
-            if (state.activePostCondition.id === payload.id) {
+            if (state.activePostCondition?.id === payload?.id) {
                 state.activePostCondition = {}
             } else {
                 state.activePostCondition = payload;
