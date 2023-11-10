@@ -24,7 +24,7 @@
         :showOperation="false"
         :urlDisabled="false" />
       <!-- :::: 基准用例 -->
-      <CaseHeader>
+      <CaseLayout>
         <template #header>
           <div class="case-title">
             <span class="name">基准用例</span>
@@ -52,10 +52,10 @@
             <DebugConfig />
           </div>
         </template>
-      </CaseHeader>
+      </CaseLayout>
 
       <!-- :::: 用例因子 -->
-      <CaseHeader>
+      <CaseLayout :activeKey="['1']" @open="handleOpen">
         <template #header>
           <div class="case-title">
             <span class="name">用例生成因子</span>
@@ -81,22 +81,22 @@
 
             <a-tab-pane key="pre-condition" tab="预处理">
               <CaseTips type="pre-condition" @reset="onReset" />
-              <PreCondition :isForBenchMarkCase="true" />
+              <PreCondition v-if="activeKey === 'pre-condition'" :isForBenchmarkCase="true" />
             </a-tab-pane>
 
-            <a-tab-pane key="post-condition" tab="后置处理">
+            <a-tab-pane key="post-condition" :tab="getTabTtitle('post-condition')">
               <CaseTips type="post-condition" @reset="onReset" />
-              <PostCondition :isForBenchMarkCase="true" />
+              <PostCondition v-if="activeKey === 'post-condition'" :isForBenchmarkCase="true" />
             </a-tab-pane>
 
-            <a-tab-pane key="assertion" tab="断言">
+            <a-tab-pane key="assertion" :tab="getTabTtitle('assertion')">
               <CaseTips type="assertion" @reset="onReset" />
-              <Assertion :isForBenchMarkCase="true" />
+              <Assertion v-if="activeKey === 'assertion'" :isForBenchmarkCase="true" />
             </a-tab-pane>
 
           </a-tabs>
         </template>
-      </CaseHeader> 
+      </CaseLayout> 
     </template>
     
     <!-- :::: 其他弹窗展示 -->
@@ -115,11 +115,11 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineProps, provide, ref, watch, unref} from "vue";
+import {computed, defineProps, provide, ref, watch, unref, onMounted} from "vue";
 import {ResultStatus, UsedBy} from "@/utils/enum";
 import {useStore} from "vuex";
 import cloneDeep from "lodash/cloneDeep";
-import { message } from "ant-design-vue";
+import { message, Modal } from "ant-design-vue";
 
 import IconSvg from "@/components/IconSvg";
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
@@ -131,7 +131,7 @@ import PreCondition from "@/views/component/debug/request/config/ConditionPre.vu
 import PostCondition from "@/views/component/debug/request/config/ConditionPost.vue";
 import Assertion from "@/views/component/debug/request/config/Assertion.vue";
 
-import { CaseHeader, CaseFactor, CaseTips, SaveAlternative } from "./alternative";
+import { CaseLayout, CaseFactor, CaseTips, SaveAlternative } from "./alternative";
 
 import useCaseExecution from "./alternative/exec-alternative-cases";
 import EditAndShowField from "@/components/EditAndShow/index.vue";
@@ -149,6 +149,10 @@ const props = defineProps({
     type: Function,
     required: true,
   },
+  baseCaseId: {
+    type: [Number, String],
+    required: true,
+  },
 });
 
 const store = useStore<{ Debug: Debug, Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType, ProjectGlobal: ProjectStateType }>();
@@ -158,9 +162,21 @@ const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const endpointCase = computed<any>(() => store.state.Endpoint.caseDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 
+// 备选用例因子的condition相关 用来显示tab上显示数量
+const postConditions = computed<any>(() => store.state.Debug.benchMarkCase.postConditions);
+const assertionConditions = computed<any>(() => store.state.Debug.benchMarkCase.assertionConditions);
+
+const getTabTtitle = computed(() => {
+  return type => {
+    const numbers = type === 'post-condition' ? unref(postConditions).length : unref(assertionConditions).length;
+    const title = type === 'post-condition' ? '后置处理' : '断言';
+    return `${title}${numbers > 0 ? `(${numbers})` : ''}`;
+  }
+})
+
 const activeKey = ref('paths');
 const treeDataMap = ref({});
-const loadingAlternativeCase = ref(false);
+const loadingAlternativeCase = ref(true);
 
 const modelRef = ref({
   baseId: 0,
@@ -175,18 +191,20 @@ const loadDebugData = async (data) => {
     await store.dispatch('Debug/loadDataAndInvocations', data);
     loadingAlternativeCase.value = false;
   } catch (err) { 
-    console.error('加载备选用例数据出错:', err);
+    console.log('加载备选用例数据出错:', err);
   }
 }
 
 
-watch(endpointCase, async (newVal) => {
-  if (!endpointCase.value) return
+watch(() => {
+  return endpointCase.value.id;
+}, async (newVal) => {
+  if (!newVal) return
   await loadDebugData({
-    caseInterfaceId: endpointCase.value.id,
+    caseInterfaceId: newVal,
     usedBy: usedBy,
   })
-}, {immediate: true, deep: true})
+}, {immediate: true})
 
 watch(alternativeCases, (newVal) => {
   getNodeMap({key: '', children: newVal}, treeDataMap.value)
@@ -194,6 +212,10 @@ watch(alternativeCases, (newVal) => {
 
 const saveAsVisible = ref(false)
 const saveAsModel = ref({} as any)
+
+/**
+ * 用例因子 - 生成用例
+ */
 const saveAsCase = () => {
   console.log('saveAsCase', checkedKeys.value)
   saveAsVisible.value = true
@@ -283,6 +305,21 @@ const saveAsNewCase = async () => {
 // 恢复默认
 const onReset = (type) => {
   console.log('恢复默认：', type);
+  const caseTipsType = {
+    'pre-condition': '预处理',
+    'post-condition': '后置处理',
+    'assertion': '断言',
+  };
+
+  Modal.confirm({
+    title: '确定要恢复默认吗',
+    content: `恢复默认将从基准用例中同步${caseTipsType[type]}定义，当前修改将被覆盖`,
+    onOk() {
+      console.log('确认恢复默认');
+    },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onCancel() {},
+  });
 };
 
 const baseCaseActionList = computed(() => {
@@ -297,13 +334,13 @@ const baseCaseActionList = computed(() => {
       type: 'default',
       action: saveBaseCase,
     },
-    unref(endpointCase).id && {
-      text: '另存为',
-      type: 'default',
-      action: saveAsNewCase,
-    }
+    // unref(endpointCase).id && {
+    //   text: '另存为',
+    //   type: 'default',
+    //   action: saveAsNewCase,
+    // }
   ];
-  return [...arr].filter(e => ![undefined, null, false].includes(e));
+  return [...arr];
 });
 
 /**
@@ -327,14 +364,37 @@ const caseFactorActionList = [
  * @param v 更新以后的值
  */
 const updateTitle = (v) => {
-  console.log('更新用例标题', v);
+  endpointCase.value.name = v;
+  store.dispatch('Endpoint/updateCaseName', endpointCase.value)
 };
+
+const handleOpen = () => {
+  // setTimeout(() => {
+  //   caseFactor.value.loadCaseTree();
+  // }, 500);
+}
+
+onMounted(async () => {
+  if (props.baseCaseId) {
+    await store.dispatch('Endpoint/getCase', props.baseCaseId);
+
+    setTimeout(() => {
+      store.dispatch('Debug/listPostCondition', { isForBenchmarkCase: true });
+      store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
+    }, 500);
+  }
+  
+})
 </script>
 
 <style lang="less">
 .case-generate-main {
   padding-top: 16px;
   overflow-y: scroll;
+
+  :deep(.post-condition-main .content) {
+    height: unset !important;
+  }
 
   .alternative-case-loading {
     width: 100%;
@@ -386,7 +446,7 @@ const updateTitle = (v) => {
     flex: 1;
 
     span {
-      margin-right: 6px;
+      margin-right: 14px;
 
       &.name {
         font-weight: bold;

@@ -33,7 +33,7 @@
   </a-modal>
 </template>
 <script setup lang="ts">
-import { defineProps, ref, watch, defineEmits, reactive, computed, unref } from "vue";
+import { defineProps, ref, watch, defineEmits, reactive, computed, unref, onMounted } from "vue";
 import { Form } from 'ant-design-vue';
 import { useStore } from "vuex";
 import {notifyError, notifySuccess} from "@/utils/notify";
@@ -46,8 +46,9 @@ const props = defineProps<{
 const emits = defineEmits(['close', 'confirm']);
 const store = useStore<{ Endpoint }>();
 const caseList = computed(() => (store.state.Endpoint.caseList.list || []));
-const caseOptions = computed<any[]>(() => (store.state.Endpoint.caseList.list || []).filter(e => e.caseType === 'default').map(e => ({ value: e.id, label: e.name })));
+const caseOptions = computed<any[]>(() => (store.state.Endpoint.benchMarkList || []));
 const interfacesOptions = computed<any[]>(() => (store.state.Endpoint.endpointDetail.interfaces || []).map(e => ({ value: e.id, label: e.method })))
+const endpointDetail = computed(() => store.state.Endpoint.endpointDetail);
 
 const visible = ref(props.show || false);
 // 自动生成 备选用例 的 信息
@@ -85,24 +86,18 @@ const handleOk = () => {
         data = {type: 'auto', name: generateData.name, endpointInterfaceId: generateData.interfaceId}
       } else {
         data = {baseCaseId: generateData.caseId}
-        store.commit('Endpoint/setEndpointCaseDetail', caseList.value.find(e => e.id === generateData.caseId));
       }
       loading.value = true;
       try {
         const result = await store.dispatch('Endpoint/createBenchmarkCase', data);
         loading.value = false;
-        if (data.type === 'auto') {
-          store.commit('Endpoint/setEndpointCaseDetail', result);
-        } 
         notifySuccess('自动生成用例成功');
-        emits('confirm');
+        emits('confirm', { id: data.type === 'auto' ? result.id : generateData.caseId });
       } catch(err: any) {
         loading.value = false;
         console.log('自动生成用例error', err);
         err?.msg && notifyError(err.msg);
       }
-
-      emits('confirm', data)
     })
     .catch(err => {
       console.log(err);
@@ -113,12 +108,11 @@ const handleCancel = () => {
   emits('close');
 };
 
-watch(() => {
-  return props.show;
-}, val => {
-  visible.value = val;
+onMounted(() => {
   resetFields();
+  store.dispatch('Endpoint/listForBenchMark', { endpointId: endpointDetail.value.id });
 })
+
 </script>
 
 <style scoped lang="less">

@@ -50,10 +50,10 @@ const editor = ref(null);
 const props = defineProps({
   value: {
     required: true,
-    type: String,
+    type: [String, Number],
   },
   placeholder: {
-    required: true,
+    required: false,
     type: String,
   },
   customClass: {

@@ -110,13 +110,13 @@ import draggable from 'vuedraggable'
 import Tips from "@/components/Tips/index.vue";
 
 const props = defineProps<{
-  isForBenchMarkCase?: boolean;
+  isForBenchmarkCase?: boolean;
 }>();
 const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
-const assertionConditions = computed<any>(() => props.isForBenchMarkCase ? store.state.Debug.benchMarkCase.assertionConditions : store.state.Debug.assertionConditions);
-const activeAssertion = computed<any>(() => props.isForBenchMarkCase ? store.state.Debug.benchMarkCase.activeAssertion : store.state.Debug.activeAssertion);
+const assertionConditions = computed<any>(() => props.isForBenchmarkCase ? store.state.Debug.benchMarkCase.assertionConditions : store.state.Debug.assertionConditions);
+const activeAssertion = computed<any>(() => props.isForBenchmarkCase ? store.state.Debug.benchMarkCase.activeAssertion : store.state.Debug.activeAssertion);
 
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
@@ -126,17 +126,16 @@ const fullscreen = ref(false);
 const expand = (item) => {
   console.log('expand', item)
   store.commit('Debug/setActiveAssertion', Object.assign(item, {
-    isForBenchMarkCase: props.isForBenchMarkCase,
+    isForBenchmarkCase: props.isForBenchmarkCase,
   }))
 }
 
 const list = async () => {
   await store.dispatch('Debug/listAssertionCondition', {
-    isForBenchMarkCase: props.isForBenchMarkCase
+    isForBenchmarkCase: props.isForBenchmarkCase
   })
 }
 watch(debugData, async (newVal) => {
-  console.error('初始化断言的信息 watch debugData');
   await list();
 }, {immediate: true, deep: true});
 
@@ -145,7 +144,7 @@ const create = () => {
   store.dispatch('Debug/createPostCondition', {
     entityType: ConditionType.checkpoint,
     ...debugInfo.value,
-    isForBenchMarkCase: props.isForBenchMarkCase,
+    isForBenchmarkCase: props.isForBenchmarkCase,
   })
 }
 
@@ -157,7 +156,7 @@ const disable = (item) => {
   console.log('disable', item)
   store.dispatch('Debug/disablePostCondition', {
     ...item,
-    isForBenchMarkCase: props.isForBenchMarkCase
+    isForBenchmarkCase: props.isForBenchmarkCase
   })
 }
 const remove = (item) => {
@@ -166,7 +165,7 @@ const remove = (item) => {
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
     store.dispatch('Debug/removePostCondition', {
       ...item,
-      isForBenchMarkCase: props.isForBenchMarkCase
+      isForBenchmarkCase: props.isForBenchmarkCase
     })
   })
 }
@@ -176,7 +175,7 @@ function move(_e: any) {
   })
   store.dispatch('Debug/movePostCondition', {
     data: envIdList,
-    isForBenchMarkCase: props.isForBenchMarkCase,
+    isForBenchmarkCase: props.isForBenchmarkCase,
     info: debugInfo.value,
     entityType: ConditionType.checkpoint,
   })
@@ -196,7 +195,7 @@ const closeFullScreen = (item) => {
   fullscreen.value = false
 }
 
-provide('isForBenchMarkCase', props.isForBenchMarkCase || false);
+provide('isForBenchmarkCase', props.isForBenchmarkCase || false);
 </script>
 
 <style lang="less">

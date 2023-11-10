@@ -59,7 +59,9 @@ import {
     disableAlternativeCaseAssertion,
     removeAlternativeCaseAssertion,
     moveAlternativeCaseAssertion,
-    updateName, createBenchmarkCase,
+    updateName, createBenchmarkCase, 
+    listForBenchMark,
+    loadAlternativeCaseFactor,
 } from './service';
 
 import {
@@ -141,8 +143,11 @@ export interface StateType {
     alternativeCasesSaved:any;
     alternativeCaseAssertions: any[];
     activeAlternativeCaseAssertion:any;
+    alternativeCaseFactor: any;
     // 记录接口定义是否有变更
     isDefineChange: boolean;
+
+    benchMarkList: any[];
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -203,8 +208,10 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setAlternativeCasesSaved:Mutation<StateType>;
         setAlternativeCaseAssertions:Mutation<StateType>;
         setActiveAlternativeCaseAssertion:Mutation<StateType>;
+        setAlternativeCaseFactor: Mutation<StateType>;
 
         setIsDefineChange:Mutation<StateType>;
+        setBenchMarkList: Mutation<StateType>;
     };
     actions: {
         listEndpoint: Action<StateType, StateType>;
@@ -289,6 +296,9 @@ export interface ModuleType extends StoreModuleType<StateType> {
         removeAlternativeCaseAssertion: Action<StateType, StateType>;
         disableAlternativeCaseAssertion: Action<StateType, StateType>;
         moveAlternativeCaseAssertion: Action<StateType, StateType>;
+        loadAlternativeFactor: Action<StateType, StateType>;
+
+        listForBenchMark: Action<StateType, StateType>;
 
     }
 }
@@ -365,8 +375,11 @@ const initState: StateType = {
     alternativeCasesSaved: [],
     alternativeCaseAssertions: [],
     activeAlternativeCaseAssertion: {},
+    alternativeCaseFactor: {},
 
     isDefineChange: false,
+
+    benchMarkList: [],
 };
 
 const StoreModel: ModuleType = {
@@ -568,10 +581,17 @@ const StoreModel: ModuleType = {
                 state.activeAlternativeCaseAssertion = payload;
             }
         },
+        setAlternativeCaseFactor(state, payload) {
+            state.alternativeCaseFactor = payload;
+        },
 
         setIsDefineChange(state, payload){
             state.isDefineChange = payload
         },
+        
+        setBenchMarkList(state, payload) {
+            state.benchMarkList = payload;
+        }
     },
     actions: {
         async listEndpoint({commit, dispatch, state}, params: QueryParams) {
@@ -824,7 +844,7 @@ const StoreModel: ModuleType = {
                         })
                     })
                 }catch (e){
-                    console.error(e)
+                    console.log(e)
                 }
 
                 await commit('setEndpointDetail', res.data || null);
@@ -852,7 +872,7 @@ const StoreModel: ModuleType = {
                 await dispatch("getEndpointDetail", {id: payload.id})
                 await dispatch('loadList', {projectId: payload.projectId});
             }catch (e){
-                console.error(e)
+                console.log(e)
             }
 
             // debugger
@@ -1046,7 +1066,7 @@ const StoreModel: ModuleType = {
         async getEndpointList({ commit }, payload: any) {
             const resp = await getEndpointList(payload)
             if (resp.code === 0) {
-                commit('setEndpointCaseDetail', resp.data);
+                // commit('setEndpointCaseDetail', resp.data);
             } else {
                 return false
             }
@@ -1423,7 +1443,7 @@ const StoreModel: ModuleType = {
             const resp: ResponseData = await getEndpointCase(id);
 
             if (resp.code === 0) {
-                commit('setEndpointCaseDetail', resp.data);
+                commit('setEndpointCaseDetail', { ...resp.data, id });
                 return true;
             } else {
                 return false
@@ -1519,13 +1539,32 @@ const StoreModel: ModuleType = {
         },
 
         async saveAlternativeFactor({ commit, state, dispatch }, data: any) {
-            const jsn = await saveAlternativeFactor(data)
-            if (jsn.code === 0) {
-                return true;
-            } else {
-                return false
+            try {
+                const jsn = await saveAlternativeFactor(data)
+                if (jsn.code === 0) {
+                    return jsn.data;
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch(err) {
+                return Promise.reject(err);
             }
         },
+
+        async loadAlternativeFactor({ commit }, data: any) {
+            try {
+                const jsn = await loadAlternativeCaseFactor(data)
+                if (jsn.code === 0) {
+                    commit('setAlternativeCaseFactor', jsn.data);
+                    return true;
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch(err) {
+                return Promise.reject(err);
+            }
+        },
+
         async saveAlternativeCase({ commit, state, dispatch }, data: any) {
             const jsn = await saveAlternativeCase(data)
             if (jsn.code === 0) {
@@ -1600,6 +1639,20 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
+
+        async listForBenchMark({ commit }, payload: any) {
+            try {
+                const jsn = await listForBenchMark(payload);
+                if (jsn.code === 0) {
+                    commit('setBenchMarkList', (jsn.data || []).map(e => ({ value: e.id, label: e.name })));
+                    return true;
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch (error) {
+                return Promise.reject(error);
+            }
+        }
     },
 };
 

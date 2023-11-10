@@ -47,12 +47,11 @@
             <span>: &nbsp;&nbsp;&nbsp;</span>
             <EditAndShowField
               placeholder="修改标题"
-              :value="nodeProps.sample"
+              :value="alternativeCaseFactor[nodeProps.path]?.value || nodeProps.sample"
               @update="v => editFinish(nodeProps.key, v)"/>
-            <span class="case-exec-result" v-if="executionType === 'single'">
+            <span class="case-exec-result" v-if="executionType === 'single' && nodeProps.execStatus">
               <!-- 运行结果 -->
               <span :class="[getDpResultClass(nodeProps.execStatus), 'case-exec-status']">
-              <!-- <span v-if="nodeProps.execStatus"> -->
                 <span>
                   {{ nodeProps.execStatus === ResultStatus.Pass ? '通过' : '失败' }}
                 </span>
@@ -99,6 +98,7 @@ const alternativeCases = computed<any>(() => store.state.Endpoint.alternativeCas
 const endpointDetail = computed<any>(() => store.state.Endpoint.endpointDetail);
 const endpointCase = computed<any>(() => store.state.Endpoint.caseDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
+const alternativeCaseFactor = computed<any>(() => store.state.Endpoint.alternativeCaseFactor);
 
 const allSelected = ref(false);
 const treeDataMap = ref({});
@@ -134,23 +134,30 @@ const checkedKeys = ref<any>([] as any[]);
 const executionType = ref('single'); // single: 单参数异常  multiple: 多参数异常
 const loading = ref(true);
 
-const loadCaseTree = async () => {
-  loading.value = true;
+const loadCaseTree = async (needLoading?: boolean) => {
+  await store.dispatch('Endpoint/loadAlternativeFactor', {
+    caseId: endpointCase.value.id,
+  });
   store.dispatch('Endpoint/loadAlternativeCase', {
     method: debugData.value.method,
     endpointId: endpointDetail.value.id
-  }).then((result) => {
+  }).then(() => {
     loading.value = false;
-    expandAll()
+    if (expandedKeys.value.length === 0) {
+      expandAll()
+    }
   }).catch(() => {
     loading.value = false;
   })
 }
 
-watch(endpointCase, async () => {
-  if (!endpointCase.value) return
+watch(() => {
+  return endpointCase.value.id;
+}, (val) => {
+  if (!val) return
+  loading.value = true;
   loadCaseTree()
-}, {immediate: true, deep: true})
+}, {immediate: true})
 
 watch(alternativeCases, (newVal) => {
   getNodeMap({key: '', children: newVal}, treeDataMap.value)
@@ -187,11 +194,12 @@ function getAllKeys(arr: any, keys: any[]) {
 
 const editFinish = async (key, v) => {
   console.log('editFinish', key, treeDataMap.value[key])
-
   const item = treeDataMap.value[key]
-  const data = {caseId: endpointCase.value.id, path: item.path, value: item.sample}
-
-  await store.dispatch('Endpoint/saveAlternativeFactor', data)
+  try {
+    await store.dispatch('Endpoint/saveAlternativeFactor', {caseId: endpointCase.value.id, path: item.path, value: v})
+  } catch(err) {
+    console.log(`修改 ${item.path} 值出错`, err);
+  }
 }
 
 function getNodeMap(treeNode: any, mp: any) {
@@ -277,7 +285,7 @@ const getSelectedNodes = () => {
   return ret
 }
 
-defineExpose({ getSelectedNodes });
+defineExpose({ getSelectedNodes, loadCaseTree });
 
 </script>
 

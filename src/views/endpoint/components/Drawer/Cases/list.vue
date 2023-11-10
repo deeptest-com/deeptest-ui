@@ -258,7 +258,7 @@ const columns = [
 const showAutoGenCaseModal = ref(false);
 
 const handleAutoGenCaseConfirm = (evt) => {
-  props.showBenchMark();
+  props.showBenchMark(evt);
   showAutoGenCaseModal.value = false;
 };
 
