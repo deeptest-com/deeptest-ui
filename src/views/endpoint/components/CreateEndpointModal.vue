@@ -157,6 +157,7 @@ const rules = {
 
 const change = (val)=>{
   formState.serveId = val
+  console.log(122332,formState)
 }
 
 </script>
