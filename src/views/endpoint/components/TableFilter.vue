@@ -6,7 +6,8 @@
           @change="(e) => {
                   handleFilterChange('serveId',e);
                   }"
-          :style="'width:180px'"        
+          :style="'width:180px'"
+          :changeServe=true        
         />
         </a-form-item>
       <a-form-item :label="null"  style="margin-bottom: 0;">

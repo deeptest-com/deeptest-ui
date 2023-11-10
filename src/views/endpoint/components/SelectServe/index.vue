@@ -3,7 +3,6 @@
                 :value="serveId"
                 :placeholder="'请选择服务'"
                 :style="style"
-                @focus="getServeList"
                 @change="change"
                 :size="size"
                 :disabled="disabled"
@@ -23,18 +22,22 @@ const store = useStore<{ ServeGlobal: { currServe: any; serves: any; } }>();
 const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
 const emit = defineEmits(['change']);
-const props = defineProps(['serveId','disabled','size','style'])
+const props = defineProps(['serveId','disabled','changeServe','size','style'])
 
 const serveId = ref()
 
 onMounted(async () => {
-  await store.dispatch("ServeGlobal/fetchServe");
-  serveId.value = props.serveId? props.serveId : serves.value[0].id
+  await getServeList();
+  serveId.value = props.serveId? props.serveId : currServe.value.id? currServe.value.id: serves.value[0].id;
+  change(serveId.value);
 })
 
-const change = (e: any)=>{
-    emit("change",e)
-    store.dispatch('ServeGlobal/changeServe', serveId.value);
+const change = (val: number)=>{
+    emit("change",val)
+    if (props.changeServe) {
+      store.dispatch('ServeGlobal/changeServe', val);
+    }
+    
 }
 
 

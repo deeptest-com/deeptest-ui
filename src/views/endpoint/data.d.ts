@@ -98,7 +98,7 @@ interface NewEndpointFormState {
     categoryId: string | null | number;
     description: string | undefined;
     curl:string;
-    serveId:number
+    serveId:string |null;
 }
 
 export interface QueryCaseTreeParams {
