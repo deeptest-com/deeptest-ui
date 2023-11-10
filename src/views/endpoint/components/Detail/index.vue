@@ -191,6 +191,7 @@ const {
   debugChangePostScript,
   debugChangeCheckpoint,
   debugChangePreScript,
+  resetDefineChange,
   debugData,
   debugInfo,
   srcDebugData,
@@ -265,7 +266,7 @@ async function changeTab(value) {
     // isConfirmed: true,  保存并离开
     if (result.isConfirmed) {
       await save();
-      store.commit('Endpoint/setIsDefineChange', false);
+      resetDefineChange();
       // 保存成功后，切换tab
       activeTabKey.value = value;
       stickyKey.value++;
@@ -274,7 +275,7 @@ async function changeTab(value) {
     else if (result.isDenied) {
       activeTabKey.value = value;
       stickyKey.value++;
-      store.commit('Endpoint/setIsDefineChange', false);
+      resetDefineChange()
     }
     // isDismissed: false 取消,即什么也不做
     else if (result.isDismissed) {
@@ -379,6 +380,12 @@ onBeforeRouteLeave(async (to, from,next) => {
       return false;
     }
   }
+})
+
+// 离开页面时，重置数据
+onUnmounted(() => {
+  resetDefineChange();
+  resetDebugChange();
 })
 
 /*************************************************

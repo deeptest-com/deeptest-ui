@@ -617,6 +617,7 @@ const {
   debugChangePostScript,
   debugChangeCheckpoint,
   debugChangePreScript,
+  resetDefineChange,
   debugData,
   debugInfo,
   srcDebugData,
@@ -676,12 +677,12 @@ async function closeDrawer() {
     if (result.isConfirmed) {
       drawerRef.value?.save();
       drawerVisible.value = false;
-      store.commit('Endpoint/setIsDefineChange', false);
+      resetDefineChange()
     }
     // isDenied: false,  不保存，并离开
     else if (result.isDenied) {
       drawerVisible.value = false;
-      store.commit('Endpoint/setIsDefineChange', false);
+      resetDefineChange()
     }
     // isDismissed: false 取消,即什么也不做
     else if (result.isDismissed) {

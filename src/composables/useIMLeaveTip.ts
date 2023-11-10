@@ -48,6 +48,11 @@ export default function useIMLeaveTip()  {
         store.commit('Debug/clearPostConditionsDataObj');
     }
 
+    const resetDefineChange = () => {
+        store.commit('Endpoint/setIsDefineChange', false);
+        store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value));
+    }
+
     return {
         isLeaveTip,
         isDefineChange,
@@ -69,8 +74,8 @@ export default function useIMLeaveTip()  {
         postConditionsList,
         assertionConditionsList,
         assertionConditionsDataObj,
-        srcAssertionConditionsDataObj
-
+        srcAssertionConditionsDataObj,
+        resetDefineChange
     }
 
 }

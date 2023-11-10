@@ -122,7 +122,7 @@ const stickyKey = ref(0);
 const endpointDebugRef:any = ref(null);
 
 
-const {isLeaveTip,isDebugChange,resetDebugChange,isMockChange} = useIMLeaveTip();
+const {isLeaveTip,isDebugChange,resetDebugChange,isMockChange,resetDefineChange} = useIMLeaveTip();
 async function changeTab(value) {
   console.log('changeTab', value);
   if(!isLeaveTip.value) {
@@ -151,7 +151,7 @@ async function changeTab(value) {
     // isConfirmed: true,  保存并离开
     if (result.isConfirmed) {
       await save();
-      store.commit('Endpoint/setIsDefineChange', false);
+      resetDefineChange()
       // 保存成功后，切换tab
       activeTabKey.value = value;
       stickyKey.value++;
@@ -160,7 +160,7 @@ async function changeTab(value) {
     else if (result.isDenied) {
       activeTabKey.value = value;
       stickyKey.value++;
-      store.commit('Endpoint/setIsDefineChange', false);
+      resetDefineChange()
     }
     // isDismissed: false 取消,即什么也不做
     else if (result.isDismissed) {
@@ -299,8 +299,8 @@ provide('notScrollIntoView', true);
 
 onUnmounted(() => {
   // 重置接口定义变化状态 、调试变化状态，避免影响其他模块
-  store.commit('Endpoint/setIsDefineChange', false);
-  store.commit('Debug/setDebugChange', {base: false});
+  resetDefineChange()
+  resetDebugChange();
 })
 
 
