@@ -103,7 +103,9 @@
     <SaveAlternative
       v-if="saveAsVisible"
       :visible="saveAsVisible"
-      :onClose="saveAsClosed"
+      :confirm-loading="confirmLoading"
+      @close="saveAsVisible = false"
+      @confirm="saveAsNewCase"
       :model="saveAsModel"/>
 
     <EnvSelector
@@ -178,13 +180,6 @@ const activeKey = ref('paths');
 const treeDataMap = ref({});
 const loadingAlternativeCase = ref(true);
 
-const modelRef = ref({
-  baseId: 0,
-  prefix: '异常路径',
-});
-
-const checkedKeys = ref<string[]>([] as any[])
-
 const loadDebugData = async (data) => {
   try {
     loadingAlternativeCase.value = true;
@@ -210,24 +205,10 @@ watch(alternativeCases, (newVal) => {
   getNodeMap({key: '', children: newVal}, treeDataMap.value)
 }, {deep: true, immediate: true});
 
-const saveAsVisible = ref(false)
-const saveAsModel = ref({} as any)
+const saveAsVisible = ref(false);
+const saveAsModel = ref({} as any);
+const confirmLoading = ref(false);
 
-/**
- * 用例因子 - 生成用例
- */
-const saveAsCase = () => {
-  console.log('saveAsCase', checkedKeys.value)
-  saveAsVisible.value = true
-
-  const selectedNodes = caseFactor.value.getSelectedNodes();
-  const baseId = modelRef.value.baseId
-  saveAsModel.value = {selectedNodes, baseId}
-}
-const saveAsClosed = () => {
-  saveAsVisible.value = false
-  saveAsModel.value = {}
-}
 
 function getNodeMap(treeNode: any, mp: any) {
   if (!treeNode) return
@@ -293,18 +274,29 @@ const saveBaseCase = async () => {
 };
 
 // 另存为
-const saveAsNewCase = async () => {
-  const res = await store.dispatch('Endpoint/copyCase', debugData.value.id);
-  if (res?.id) {
-    notifySuccess('复制成功');
-  } else {
-    notifyError('复制失败');
+const saveAsNewCase = async (model) => {
+  const selectedNodes = caseFactor.value.getSelectedNodes();
+  const type = unref(caseFactor.value.executionType);
+  const params = {
+    prefix: model.prefix || '',
+    baseId: endpointCase.value.id,
+    type,
+    values: selectedNodes.filter(e => e.category === 'case'),
+  };
+  confirmLoading.value = true;
+  try {
+    await store.dispatch('Endpoint/saveAlternativeCase', params);
+    notifySuccess('生成用例成功，可返回列表查看');
+    confirmLoading.value = false;
+    saveAsVisible.value = false;
+  } catch(err: any) {
+    message.error(err.msg);
+    confirmLoading.value = false;
   }
 };
 
 // 恢复默认
-const onReset = (type) => {
-  console.log('恢复默认：', type);
+const onReset = ({ type, params }: { type: string, params: any }) => {
   const caseTipsType = {
     'pre-condition': '预处理',
     'post-condition': '后置处理',
@@ -315,10 +307,18 @@ const onReset = (type) => {
     title: '确定要恢复默认吗',
     content: `恢复默认将从基准用例中同步${caseTipsType[type]}定义，当前修改将被覆盖`,
     onOk() {
-      console.log('确认恢复默认');
+      store.dispatch(`Endpoint/${type === 'pre-condition' ? 'resetPreConditions' : 'resetPostConditions'}`, params).then(() => {
+        if (type === 'pre-condition') {
+          store.dispatch('Debug/getPreConditionScript', { isForBenchmarkCase: true })
+        } else if (type === 'post-condition' ) {
+          store.dispatch('Debug/listPostCondition', { isForBenchmarkCase: true });
+        } else {
+          store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
+        }
+      }).catch(err => {
+        notifyError(err);
+      })
     },
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    onCancel() {},
   });
 };
 
@@ -355,7 +355,14 @@ const caseFactorActionList = [
   {
     text: '生成用例',
     type: 'default',
-    action: saveAsNewCase,
+    action: () => {
+      const selectedNodes = caseFactor.value.getSelectedNodes();
+      if (selectedNodes.length === 0) {
+        message.error('请先选择用例');
+        return;
+      }
+      saveAsVisible.value = true;
+    },
   },
 ];
 

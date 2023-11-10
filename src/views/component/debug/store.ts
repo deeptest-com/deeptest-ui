@@ -648,18 +648,19 @@ const StoreModel: ModuleType = {
 
                 if (payload.entityType === ConditionType.checkpoint) {
                     await dispatch('listAssertionCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
-
-                    const len = state.assertionConditions.length
+                    const assertConditions = payload.isForBenchmarkCase ? state.benchMarkCase.assertionConditions : state.assertionConditions;
+                    const len = assertConditions.length
                     if (len > 0) {
-                        commit('setActiveAssertion', state.assertionConditions[len-1]);
+                        commit('setActiveAssertion', assertConditions[len-1]);
                     }
 
                 } else {
                     await dispatch('listPostCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
 
-                    const len = state.postConditions.length
+                    const postConditions = payload.isForBenchmarkCase ? state.benchMarkCase.postConditions : state.postConditions;
+                    const len = postConditions.length
                     if (len > 0) {
-                        commit('setActivePostCondition', state.postConditions[len-1]);
+                        commit('setActivePostCondition', postConditions[len-1]);
                     }
                 }
                 return true;

@@ -1,6 +1,7 @@
 <template>
   <a-modal width="600px"
            :visible="visible"
+           :confirmLoading="confirmLoading"
            @ok="submit"
            @cancel="cancel"
            title="另存为用例">
@@ -25,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineProps, inject, reactive, ref, watch} from 'vue';
+import {computed, defineProps, inject, reactive, ref, watch, defineEmits} from 'vue';
 import {Methods, UsedBy} from "@/utils/enum";
 import {Form} from "ant-design-vue";
 import {useStore} from "vuex";
@@ -48,9 +49,15 @@ const props = defineProps({
   },
   onClose: {
     type: Function,
-    required: true,
+    required: false,
   },
-})
+  confirmLoading: {
+    type: Boolean,
+    required: false,
+  }
+});
+
+const emits = defineEmits(['confirm', 'close']);
 
 const modelRef = ref({
   prefix: '',
@@ -78,19 +85,15 @@ const rulesRef = reactive({
 const {resetFields, validate, validateInfos} = useForm(modelRef, rulesRef);
 
 const submit = () => {
-  console.log('submit', modelRef.value)
   validate().then(async () => {
-    await store.dispatch('Endpoint/saveAlternativeCase', modelRef.value)
-
+    emits('confirm', modelRef.value);
     resetFields();
-    props.onClose()
   }).catch((error) => console.log('error', error))
 }
 
 const cancel = () => {
-  console.log('cancel')
   resetFields()
-  props.onClose()
+  emits('close');
 }
 
 </script>

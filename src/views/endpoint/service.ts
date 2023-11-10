@@ -546,6 +546,24 @@ export async function moveAlternativeCaseAssertion(data): Promise<any> {
     return request({
         url: `/${apiAlternativeCaseAssertions}/move`,
         method: 'POST',
-        data: data,
+        data,
     });
+}
+
+// 重置用例因子- 后置处理器包含断言
+export async function resetPostConditions(data: { debugInterfaceId: number, endpointInterfaceId: number, category: string }): Promise<any> {
+    return request({
+        url: '/postConditions/resetForCase',
+        method: 'get',
+        params: data,
+    })
+}
+
+// 重置用例因子-预处理
+export async function resetPreConditions(data: { debugInterfaceId: number, endpointInterfaceId: number }): Promise<any> {
+    return request({
+        url: '/preConditions/resetForCase',
+        method: 'get',
+        params: data,
+    })
 }

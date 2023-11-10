@@ -11,14 +11,14 @@
             <QuestionCircleOutlined />
           </a-tooltip>
         </a-radio>
-        <a-radio :value="'multiple'">多参数异常
+        <a-radio :value="'multi'">多参数异常
           <a-tooltip placement="top" title="使用多个异常参数值组合替换基准用例相应请求参数，形成一个新的测试用例">
             <QuestionCircleOutlined />
           </a-tooltip>
         </a-radio>
       </a-radio-group>
 
-      <span class="multiple-execution-result" v-if="executionType === 'multiple'">
+      <span class="multiple-execution-result" v-if="executionType === 'multi'">
         <span>通过</span>
         <a-button class="case-exec-detail" type="link" @click.stop="queryDetail()">详情</a-button>
       </span>
@@ -33,7 +33,7 @@
       :checkable="true"
       v-model:checkedKeys="checkedKeys"
       @check="onChecked"
-      :checkStrictly="executionType === 'multiple'"
+      :checkStrictly="executionType === 'multi'"
       :show-icon="true">
       <template #title="nodeProps">
         <span class="case-tree-title">
@@ -183,7 +183,7 @@ function getAllKeys(arr: any, keys: any[]) {
     return;
   }
   arr.forEach((item, index) => {
-    if (executionType.value === 'single' || (executionType.value === 'multiple' && item.isDir)) {
+    if (executionType.value === 'single' || (executionType.value === 'multi' && item.isDir)) {
       keys.push(item.key);
     }
     if (Array.isArray(item.children)) {
@@ -243,7 +243,7 @@ const onChecked = (keys, treeNode) => {
   const siblingNodes = parentTreeNode.children; // 所选case的兄弟节点。这里对应的是 case对应的 参数 所有的 其他约束条件
   const currentChecked = keys.checked;
   // 多参数异常情况下： 参属下的约束条件只能选择一个，为单选的状态。
-  if (unref(executionType) === 'multiple') {
+  if (unref(executionType) === 'multi') {
     if (currentNode.category === 'case') {
       if (currentChecked.includes(currentNode.key)) {
         // 选中当前case
@@ -269,23 +269,14 @@ const getSelectedNodes = () => {
   (executionType.value === 'single' ? checkedKeys.value : (checkedKeys.value.checked || [])).forEach((key) => {
     if (treeDataMap.value[key]) {
       const item = treeDataMap.value[key]
-      const val = {
-        key: item.key,
-        path: item.path,
-        sample: item.sample,
-        fieldType: item.fieldType,
-        Category: item.category,
-        Type: item.type,
-        Rule: item.rule,
-      }
-      ret.push(val)
+      ret.push(item)
     }
   })
 
   return ret
 }
 
-defineExpose({ getSelectedNodes, loadCaseTree });
+defineExpose({ getSelectedNodes, loadCaseTree, executionType: computed(() => executionType.value) });
 
 </script>
 

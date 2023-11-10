@@ -62,6 +62,8 @@ import {
     updateName, createBenchmarkCase, 
     listForBenchMark,
     loadAlternativeCaseFactor,
+    resetPostConditions,
+    resetPreConditions,
 } from './service';
 
 import {
@@ -299,6 +301,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
         loadAlternativeFactor: Action<StateType, StateType>;
 
         listForBenchMark: Action<StateType, StateType>;
+        resetPostConditions: Action<StateType, StateType>;
+        resetPreConditions: Action<StateType, StateType>;
 
     }
 }
@@ -1640,12 +1644,60 @@ const StoreModel: ModuleType = {
             }
         },
 
+        /**
+         * 自动生成用例中  可选的 用例列表 【其中仅包含 caseType = default 类型的用例】
+         * @param param0 store context
+         * @param payload request params
+         * @returns 
+         */
         async listForBenchMark({ commit }, payload: any) {
             try {
                 const jsn = await listForBenchMark(payload);
                 if (jsn.code === 0) {
                     commit('setBenchMarkList', (jsn.data || []).map(e => ({ value: e.id, label: e.name })));
                     return true;
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch (error) {
+                return Promise.reject(error);
+            }
+        },
+
+        /**
+         * 备选用例- 用例因子 恢复默认【针对 后置处理，断言】
+         * @returns 
+         */
+        async resetPostConditions({ rootState }: any, payload: any) {
+            try {
+                const jsn = await resetPostConditions({ 
+                    ...payload, 
+                    endpointInterfaceId: rootState.Debug.debugData.endpointInterfaceId, 
+                    debugInterfaceId: rootState.Debug.debugInfo.debugInterfaceId 
+                });
+                if (jsn.code === 0) {
+                    return Promise.resolve();
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch (error) {
+                return Promise.reject(error);
+            }
+        },
+
+        /**
+         * 备选用例- 用例因子 恢复默认【针对 预处理】
+         * @returns 
+         */
+        async resetPreConditions({ rootState }: any, payload: any) {
+            try {
+                const jsn = await resetPreConditions({
+                    ...payload, 
+                    endpointInterfaceId: rootState.Debug.debugData.endpointInterfaceId, 
+                    debugInterfaceId: rootState.Debug.debugInfo.debugInterfaceId 
+                });
+                if (jsn.code === 0) {
+                    return Promise.resolve();
                 } else {
                     return Promise.reject(jsn);
                 }
