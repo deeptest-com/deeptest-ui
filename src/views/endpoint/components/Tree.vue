@@ -251,6 +251,7 @@ async function deleteCategorie(node) {
         projectId: await getCache(settings.currProjectId)
       });
       if (res) {
+        emit('select', node.parentId);//选中删除分类的父类
         notifySuccess('删除成功');
       } else {
         notifyError('删除失败');
