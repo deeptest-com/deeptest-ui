@@ -93,7 +93,10 @@ const editorOptions = ref(Object.assign({
       },
     }, MonacoOptions
 ))
-
+const getPreConditionScript = () => {
+  console.log('getPreConditionScript')
+  store.dispatch('Debug/getPreConditionScript')
+}
 const addSnippet = (snippetName) => {
   console.log('addSnippet', snippetName)
   store.dispatch('Debug/addSnippet', snippetName)
@@ -111,7 +114,8 @@ const save = async () => {
 
   const result = await store.dispatch('Debug/saveScript', scriptData.value)
   if (result) {
-    notifySuccess(`保存成功`)
+    notifySuccess(`保存成功`);
+    getPreConditionScript()
   } else {
     notifyError(`保存失败`);
   }
