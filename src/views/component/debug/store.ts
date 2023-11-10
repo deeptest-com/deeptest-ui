@@ -840,7 +840,8 @@ const StoreModel: ModuleType = {
             const { serverId, requestEnvVars = true } = payload;
             const res = await changeServe({ serverId });
             if (res.code === 0) {
-                commit('setCurrServe', res.data);
+                const currServer = state.serves.find(item => item.environmentId == serverId)
+                commit('setCurrServe', currServer);
             }
             if (requestEnvVars) {
                 const json = await listEnvVarByServer(serverId)
