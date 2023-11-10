@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, inject, onUnmounted, ref, watch} from "vue";
+import {computed, inject, onMounted, onUnmounted, ref, watch} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import { FullscreenOutlined } from '@ant-design/icons-vue';
@@ -64,10 +64,17 @@ const getPreConditionScript = () => {
   store.dispatch('Debug/getPreConditionScript')
 }
 
-watch(debugData, (newVal) => {
-  console.log('watch debugData')
-  getPreConditionScript()
-}, {immediate: true, deep: true});
+// watch(debugData, (newVal) => {
+//   console.log('watch debugData',newVal);
+//   getPreConditionScript()
+// }, {immediate: true, deep: true});
+
+
+onMounted(() => {
+  if(!srcScriptData.value.id){
+    getPreConditionScript();
+  }
+})
 
 const save = () => {
   console.log('save')

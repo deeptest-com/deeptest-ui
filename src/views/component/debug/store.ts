@@ -141,6 +141,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setScript: Mutation<StateType>;
         setSrcScript: Mutation<StateType>;
         setScriptContent: Mutation<StateType>;
+        setPostScriptContent: Mutation<StateType>;
         setCookie: Mutation<StateType>;
 
         setPathParams: Mutation<StateType>;
@@ -208,6 +209,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         saveScript: Action<StateType, StateType>;
         removeScript: Action<StateType, StateType>;
         addSnippet: Action<StateType, StateType>;
+        addSnippetForPost: Action<StateType, StateType>;
 
         listShareVar: Action<StateType, StateType>;
         removeShareVar: Action<StateType, StateType>;
@@ -312,8 +314,14 @@ const StoreModel: ModuleType = {
             state.cookieData = payload;
         },
         setScriptContent(state, content) {
-            console.log('setScriptContent', content)
             state.scriptData.content = content;
+        },
+
+        setPostScriptContent(state, {id,content}) {
+            const data = state.postConditionsDataObj?.[id];
+            if(data){
+                data.content = content;
+            }
         },
 
         setPathParams(state, payload) {
@@ -381,6 +389,8 @@ const StoreModel: ModuleType = {
             state.srcPostConditionsDataObj = {}
             state.assertionConditionsDataObj = {}
             state.srcAssertionConditionsDataObj = {}
+            state.srcScriptData = {};
+            state.scriptData = {};
         },
     },
     actions: {
@@ -883,6 +893,34 @@ const StoreModel: ModuleType = {
             let script = (state.scriptData.content ? state.scriptData.content: '') + '\n' + line
             script = script.trim()
             commit('setScriptContent', script);
+
+            return true;
+        },
+
+        async addSnippetForPost({commit, dispatch, state}, {name, data}) {
+            let line = ''
+            if (name === 'log') {
+                line = "log('test');"
+            } else if (name === 'set_mock_resp_code') {
+                line = "dt.response.statusCode = 404;"
+            } else if (name === 'set_mock_resp_field') {
+                line = "dt.response.data.field1 = 'val';"
+            } else if (name === 'set_mock_resp_text') {
+                line = "dt.response.data = dt.response.data.replace('old', 'new');"
+            } else {
+                const json = await getSnippet(name)
+                if (json.code === 0) {
+                    line = json.data.script
+                }
+            }
+            // const scriptData = state.srcPostConditionsDataObj?.
+            const {id,content} = data?.value || {};
+            let script = (content ? content: '') + '\n' + line
+            script = script.trim()
+            commit('setPostScriptContent', {
+                id:id,
+                content:script
+            });
 
             return true;
         },

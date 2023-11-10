@@ -117,7 +117,10 @@ const editorOptions = ref(Object.assign({
 ))
 
 const addSnippet = (snippetName) => {
-  store.dispatch('Debug/addSnippet', snippetName)
+  store.dispatch('Debug/addSnippetForPost', {
+    name:snippetName,
+    data:model
+  })
 }
 const editorChange = (newScriptCode) => {
   console.log('editorChange', newScriptCode)
@@ -145,6 +148,8 @@ const save = () => {
         if (props.finish) {
           props.finish()
         }
+        // 重新拉取一下最新的数据
+        load();
       } else {
         notifyError(`保存失败`);
       }

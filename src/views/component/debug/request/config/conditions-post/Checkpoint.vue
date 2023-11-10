@@ -172,10 +172,13 @@ const save = () => {
         if (props.finish) {
           props.finish()
         }
+        // 重新拉取一下最新的数据
+        load();
       } else {
         notifyError(`保存失败`);
       }
     })
+
   })
 }
 const cancel = () => {
