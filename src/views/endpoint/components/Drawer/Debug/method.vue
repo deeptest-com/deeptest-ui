@@ -70,7 +70,6 @@ const changeMethodCallback = async (e) => {
   // sync with / to define page
   if (endpointInterface?.id) {
     await store.commit('Endpoint/setSelectedMethodDetail', endpointInterface);
-    resetDebugChange()
     await store.dispatch('Debug/loadDataAndInvocations', {
       endpointInterfaceId: endpointInterface.id,
       usedBy: usedBy,
@@ -78,6 +77,7 @@ const changeMethodCallback = async (e) => {
   } else {
     await store.commit('Endpoint/setSelectedMethodDetail', {});
   }
+  resetDebugChange()
 }
 
 const initMethod = async () => {
