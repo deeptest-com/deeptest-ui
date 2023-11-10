@@ -460,7 +460,7 @@ async function handleCreateApi(data) {
   await store.dispatch('Endpoint/createApi', {
     "title": data.title,
     "projectId": currProject.value.id,
-    "serveId": currServe.value.id,
+    "serveId": data.serveId,
     "description": data.description || null,
     "categoryId": data.categoryId || null,
     "curl": data.curl || null,
@@ -490,7 +490,6 @@ async function handleImport(data, callback) {
   const res = await store.dispatch('Endpoint/importEndpointData', {
     ...data,
     "sourceType": 2,
-    "serveId": currServe.value.id,
   });
 
   // 导入成功，重新拉取列表 ，并且关闭弹窗
@@ -540,6 +539,7 @@ async function handleTableFilter(state) {
 const filter = ref()
 
 // 实时监听项目/服务 ID，如果项目切换了则重新请求数据
+/*
 watch(() => [currProject.value.id, currServe.value.id], async (newVal, oldVal) => {
   const [newProjectId, newServeId] = newVal;
   const [oldProjectId, oldServeId] = oldVal || [];
@@ -554,6 +554,22 @@ watch(() => [currProject.value.id, currServe.value.id], async (newVal, oldVal) =
       // 获取授权列表
       await store.dispatch('Endpoint/getSecurityList', {id: newServeId});
     }
+    store.commit('Endpoint/clearFilterState');
+    //filter.value.resetFields()
+  }
+}, {
+  immediate: true
+})
+*/
+watch(() => currProject.value.id, async (newVal, oldVal) => {
+  const newProjectId = newVal
+  const oldProjectId = oldVal
+  if (newProjectId !== undefined && oldProjectId !== undefined && newProjectId !== oldProjectId) {
+    selectedCategoryId.value = "";
+  }
+  if (newProjectId !== undefined) {
+    await loadList(1, pagination.value.pageSize);
+    await store.dispatch('Endpoint/getEndpointTagList');
     store.commit('Endpoint/clearFilterState');
     filter.value.resetFields()
   }
