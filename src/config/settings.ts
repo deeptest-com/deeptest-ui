@@ -58,9 +58,11 @@ export interface SettingsType {
     eventTypeFormat: string,
 
     eventConditionSave: string,
+    eventPostConditionSave: string,
 
     eventVariableSelectionStatus: string,
     eventLeaveDebugSaveData: string,
+    eventLeaveMockSaveData: string,
     eventVariableSelectionResult: any,
     webSocketRoom: string,
     electronMsg: string,
@@ -133,11 +135,14 @@ const settings: SettingsType = {
     eventTypeFormat: 'format',
 
     eventConditionSave: '',
+    eventPostConditionSave: 'eventPostConditionSave',
 
     eventVariableSelectionStatus: 'eventVariableSelectionStatus',
     eventVariableSelectionResult: 'eventVariableSelectionResult',
     // 调试页面离开时保存数据
     eventLeaveDebugSaveData: 'eventLeaveDebugSaveData',
+    // mock页面离开时保存数据
+    eventLeaveMockSaveData: 'eventLeaveMockSaveData',
     webSocketRoom: 'webSocketRoom',
     electronMsg: 'electronMsg',
     electronMsgUsePort: 'electronMsgUsePort',

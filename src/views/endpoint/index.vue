@@ -178,7 +178,7 @@ import {
   computed, ref, onMounted,
   watch, createVNode, onUnmounted
 } from 'vue';
-import {useRouter} from 'vue-router';
+import {onBeforeRouteLeave, useRouter} from 'vue-router';
 import {useStore} from "vuex";
 import debounce from "lodash.debounce";
 import {ColumnProps} from 'ant-design-vue/es/table/interface';
@@ -214,6 +214,8 @@ import Swal from "sweetalert2";
 import cloneDeep from "lodash/cloneDeep";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
+
 
 const {share} = useSharePage();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project }>();
@@ -622,36 +624,42 @@ const username = (user: string) => {
 /*************************************************
  * ::::离开保存代码逻辑部分start
  ************************************************/
-const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
-const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
-const debugChange: any = computed<Endpoint>(() => store.state.Debug.debugChange);
-const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
-const srcEndpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.srcEndpointDetail);
-const debugData = computed<any>(() => store.state.Debug.debugData);
-const srcDebugData: any = computed<Endpoint>(() => store.state.Debug.srcDebugData);
-const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
+const {
+  isLeaveTip,
+  isDefineChange,
+  isMockChange,
+  debugChange,
+  debugChangeBase,
+  debugChangePostScript,
+  debugChangeCheckpoint,
+  debugChangePreScript,
+  resetDefineChange,
+  debugData,
+  debugInfo,
+  srcDebugData,
+  srcEndpointDetail,
+  endpointDetail,
+  isDebugChange,
+  resetDebugChange,
+} = useIMLeaveTip();
 
+// 接口定义 - 调试模块是否改变了 - 用于离开提示
 watch(() => {
   return [debugData.value,srcDebugData.value]
 }, () => {
   const cur = debugData.value;
   const src = srcDebugData.value;
+  if(!src?.usedBy || !cur?.usedBy){
+    return;
+  }
   // 处理格式化的数据
   const isChange = !equalObjectByLodash(src, cur);
-  const isInit = cur?.endpointInterfaceId && src?.endpointInterfaceId;
-  console.log('832222调试信息2',cur,src,isChange);
-  if(isInit){
-    store.commit('Debug/setDebugChange', {base:isChange});
-  }else {
-    store.commit('Debug/setDebugChange', {base:false});
-  }
-
+  store.commit('Debug/setDebugChange', {base:isChange});
 },{
   deep: true
 })
 
-
-// 接口信息改变了
+//  接口定义 - 接口信息改变了 - 用于离开提示
 watch(() => {
   return [endpointDetail.value,srcEndpointDetail.value]
 }, (newVal, oldValue) => {
@@ -659,7 +667,6 @@ watch(() => {
   const cur = endpointDetail.value;
   const isInit = cur?.id && src?.id;
   const isChange = !equalObjectByLodash(cur, src);
-  console.log('832222调试信息1',cur,src,isChange);
   if(isInit){
     store.commit('Endpoint/setIsDefineChange', isChange);
   }else {
@@ -671,57 +678,126 @@ watch(() => {
 
 const drawerRef:any = ref(null);
 // 关闭弹框时，如果接口信息改变了，弹出提示
-function closeDrawer() {
+async function closeDrawer() {
+  // 不需要提示
+  if(!isLeaveTip.value){
+    drawerVisible.value = false;
+    return;
+  }
+  const result = await Swal.fire({
+    ...settings.SwalLeaveSetting
+  });
   // 如果接口定义有变化，需要提示用户保存
   if (isDefineChange.value) {
-    Swal.fire({
-      ...settings.SwalLeaveSetting
-    }).then((result) => {
-      // isConfirmed: true,  保存并离开
-      if (result.isConfirmed) {
-        drawerRef.value?.save();
-        drawerVisible.value = false;
-        store.commit('Endpoint/setIsDefineChange', false);
-      }
-      // isDenied: false,  不保存，并离开
-      else if (result.isDenied) {
-        drawerVisible.value = false;
-        store.commit('Endpoint/setIsDefineChange', false);
-      }
-      // isDismissed: false 取消,即什么也不做
-      else if (result.isDismissed) {
-        console.log('isDismissed', result.isDismissed)
-      }
-    })
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      drawerRef.value?.save();
+      drawerVisible.value = false;
+      resetDefineChange()
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      drawerVisible.value = false;
+      resetDefineChange()
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('isDismissed', result.isDismissed)
+    }
   }
   // 调试模块数据有变化，需要提示用户是否要保存调试数据
-  else if(debugChangeBase.value){
-    Swal.fire({
-      ...settings.SwalLeaveSetting
-    }).then((result) => {
-      // isConfirmed: true,  保存并离开
-      if (result.isConfirmed) {
-        drawerVisible.value = false;
-        bus.emit(settings.eventLeaveDebugSaveData, {});
-        store.commit('Debug/setDebugChange', {base:false});
-      }
-      // isDenied: false,  不保存，并离开
-      else if (result.isDenied) {
-        drawerVisible.value = false;
-        store.commit('Debug/setDebugChange', {base:false});
-      }
-      // isDismissed: false 取消,即什么也不做
-      else if (result.isDismissed) {
-        console.log('isDismissed', result.isDismissed)
-      }
-    })
-  }
-  else {
-    drawerVisible.value = false;
-    store.commit('Debug/setDebugChange', {base:false});
-    store.commit('Endpoint/setIsDefineChange', false);
+  else if(isDebugChange.value){
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      drawerVisible.value = false;
+      bus.emit(settings.eventLeaveDebugSaveData, {});
+      resetDebugChange();
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      drawerVisible.value = false;
+      resetDebugChange();
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('isDismissed', result.isDismissed)
+    }
+  }// mock 数据变化了，需要提示保存
+  else if(isMockChange.value){
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      bus.emit(settings.eventLeaveMockSaveData, {});
+      drawerVisible.value = false;
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      drawerVisible.value = false;
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('isDismissed', result.isDismissed)
+    }
   }
 }
+
+// 与 beforeRouteLeave
+onBeforeRouteLeave(async (to, from,next) => {
+  if(!isLeaveTip.value){
+    next();
+    return false;
+  }
+  const result = await Swal.fire({
+    ...settings.SwalLeaveSetting
+  });
+  // 如果接口定义有变化，需要提示用户保存
+  if (isDefineChange.value) {
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      await drawerRef.value?.save();
+      next();
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      next();
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('保留');
+      return false;
+    }
+  }
+  // 调试模块数据有变化，需要提示用户是否要保存调试数据
+  else if(isDebugChange.value){
+    if (result.isConfirmed) {
+      bus.emit(settings.eventLeaveDebugSaveData, {});
+      resetDebugChange();
+      next()
+    }
+    // isDenied: false,  不保存，并离开 ,需要重置调试数据
+    else if (result.isDenied) {
+      resetDebugChange();
+      next()
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      return false;
+    }
+  }else if(isMockChange.value){
+    if (result.isConfirmed) {
+      bus.emit(settings.eventLeaveMockSaveData, {});
+      next()
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      next()
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      return false;
+    }
+  }
+})
+
 /*************************************************
  * ::::离开保存代码逻辑部分end
  ************************************************/

@@ -44,16 +44,15 @@ import cloneDeep from "lodash/cloneDeep";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import {Endpoint} from "@/views/endpoint/data";
-
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
 provide('usedBy', UsedBy.CaseDebug)
 const usedBy = UsedBy.CaseDebug
 
 const store = useStore<{ Debug: Debug, Endpoint: EndpointStateType, DiagnoseInterface: DiagnoseInterfaceStateType }>();
 const endpointCase = computed<any>(() => store.state.Endpoint.caseDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
-const isDefineChange: any = computed<any>(() => store.state.Endpoint.isDefineChange);
-// 调试基本信息是否有变化，因为检查点等单独保存
-const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
+
+const {debugChangeBase,resetDebugChange} = useIMLeaveTip();
 const props = defineProps({
   onBack: {
     type: Function,
@@ -67,7 +66,7 @@ const loadDebugData = debounce(async () => {
     caseInterfaceId: endpointCase.value.id,
     usedBy: usedBy,
   });
-  resetDebugData();
+  resetDebugChange();
 }, 300)
 
 watch(endpointCase, (newVal) => {
@@ -87,7 +86,7 @@ const saveCaseInterface = async (e) => {
 
   const res = await store.dispatch('Endpoint/saveCaseDebugData', data)
 
-  resetDebugData();
+  resetDebugChange();
 
   if (res === true) {
     notifySuccess(`保存成功`);
@@ -133,18 +132,13 @@ const back = () => {
 }
 
 onMounted(async () => {
-  resetDebugData();
+  resetDebugChange();
 })
 
 onUnmounted(() => {
-  store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
-  store.commit('Debug/setDebugChange', {base:false});
+  resetDebugChange();
 })
 
-const resetDebugData = () => {
-  store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
-  store.commit('Debug/setDebugChange', {base:false});
-}
 
 </script>
 

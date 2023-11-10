@@ -1,14 +1,13 @@
 <template>
   <div class="endpoint-mock-main">
-    <a-tabs type="card" v-model:activeKey="activeKey" class="tabs">
+    <a-tabs type="card" :activeKey="activeKey"  @change="changeActiveKey"  class="tabs">
       <a-tab-pane key="expect" tab="期望" />
       <a-tab-pane key="script" tab="脚本" />
     </a-tabs>
 
     <div class="content">
       <EndpointMockExpect v-if="activeKey==='expect'" />
-
-      <EndpointMockScript v-if="activeKey==='script'" />
+      <EndpointMockScript v-if="activeKey==='script'" ref="mockScriptRef"/>
     </div>
 
   </div>
@@ -22,13 +21,35 @@ import {ExclamationCircleOutlined} from "@ant-design/icons-vue";
 import {getUrls} from "@/utils/request";
 import EndpointMockExpect from './mock-expect.vue';
 import EndpointMockScript from './mock-script.vue';
-
+import Swal from "sweetalert2";
+import settings from "@/config/settings";
+import bus from "@/utils/eventBus";
 const {t} = useI18n()
 
 const store = useStore<{ Endpoint }>();
 const endpoint = computed<any>(() => store.state.Endpoint.endpointDetail);
+const isMockChange = computed<any>(() => store.state.Endpoint.isMockChange);
 
 const activeKey = ref('expect')
+const mockScriptRef:any = ref(null)
+async function changeActiveKey(key) {
+  if(!isMockChange.value){
+    activeKey.value = key
+    return
+  }
+  const result = await Swal.fire({
+    ...settings.SwalLeaveSetting
+  });
+  if(result.isConfirmed) {
+    activeKey.value = key;
+    bus.emit(settings.eventLeaveMockSaveData, {});
+  }else if(result.isDenied) {
+    activeKey.value = key
+    //  取消
+  }else {
+    return
+  }
+}
 
 </script>
 

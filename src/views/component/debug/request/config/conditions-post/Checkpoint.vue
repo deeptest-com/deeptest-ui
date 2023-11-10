@@ -57,7 +57,19 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, inject, onBeforeUnmount, onMounted, PropType, reactive, Ref, ref, watch} from "vue";
+import {
+  computed,
+  defineProps,
+  inject,
+  onBeforeUnmount,
+  onMounted,
+  onUnmounted,
+  PropType,
+  reactive,
+  Ref,
+  ref,
+  watch
+} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import {message, Form, notification} from 'ant-design-vue';
@@ -77,16 +89,16 @@ import {NotificationKeyCommon} from "@/utils/const";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import {notifyError, notifySuccess} from "@/utils/notify";
-
+import useIMLeaveTip   from "@/composables/useIMLeaveTip";
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 
-const store = useStore<{  Debug: Debug }>();
+const store = useStore<{  Debug: any }>();
 
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
-const model = computed<any>(() => store.state.Debug.checkpointData);
+// const model = computed<any>(() => store.state.Debug.checkpointData);
 
 const props = defineProps({
   condition: {
@@ -108,7 +120,20 @@ const load = () => {
   console.log('load', props.condition)
   store.dispatch('Debug/getCheckpoint', props.condition.entityId)
 }
-load()
+
+
+const {assertionConditionsDataObj} = useIMLeaveTip();
+const model = computed<any>(() => {
+  return assertionConditionsDataObj.value?.[props?.condition?.entityId] || {}
+});
+
+onMounted(() => {
+  if(!model?.value?.id){
+    load();
+  }
+})
+
+
 
 const variables = ref([])
 
@@ -159,13 +184,6 @@ const cancel = () => {
     props.finish()
   }
 }
-// watch(() => {
-//   return model.value
-// },(newVal,oldVal) => {
-//   console.log('model.value222 checkpoiont：',newVal,oldVal)
-// },{
-//   deep:true
-// })
 onMounted(() => {
   console.log('onMounted')
   bus.on(settings.eventConditionSave, save);
@@ -175,6 +193,7 @@ onMounted(() => {
 onBeforeUnmount( () => {
   console.log('onBeforeUnmount')
   bus.off(settings.eventConditionSave, save);
+
 })
 
 const selectType = () => {

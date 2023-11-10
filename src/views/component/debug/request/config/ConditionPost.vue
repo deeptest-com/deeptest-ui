@@ -46,7 +46,11 @@
                 <span v-html="element.desc || t(element.entityType)"></span>
               </div>
               <div class="buttons">
-                <a-button size="small" type="primary" v-if="activePostCondition.id === element.id" @click.stop="save(element)">保存</a-button>
+                <a-button size="small" type="primary"
+                          :disabled="getSaveBtnDisabled(element?.entityId)"
+                          v-if="activePostCondition.id === element.id"
+                          @click.stop="save(element)">保存</a-button>
+
 
                 <ClearOutlined v-if="activePostCondition.id === +element.id && element.entityType === ConditionType.script"
                                @click.stop="format(element)"
@@ -100,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch, getCurrentInstance, ComponentInternalInstance} from "vue";
+import {computed, inject, ref, watch, getCurrentInstance, ComponentInternalInstance, onUnmounted, onMounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import { CheckCircleOutlined, DeleteOutlined,
@@ -116,22 +120,19 @@ import {confirmToDelete} from "@/utils/confirm";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {getEnumSelectItems} from "@/views/scenario/service";
 import IconSvg from "@/components/IconSvg";
-
+import useIMLeaveTip   from "@/composables/useIMLeaveTip";
 import Extractor from "./conditions-post/Extractor.vue";
 import Checkpoint from "./conditions-post/Checkpoint.vue";
 import Script from "./conditions-post/Script.vue";
 import Cookie from "./conditions-post/Cookie.vue";
 import FullScreenPopup from "./ConditionPopup.vue";
+import {equalObjectByLodash} from "@/utils/object";
 
 const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const postConditions = computed<any>(() => store.state.Debug.postConditions);
-const activePostCondition = computed<any>(() => store.state.Debug.activePostCondition);
-
-// const extractorData = computed<any>(() => store.state.Debug.extractorData);
-// const checkpointData = computed<any>(() => store.state.Debug.checkpointData);
-// const scriptData = computed<any>(() => store.state.Debug.scriptData);
+const activePostCondition:any = computed<any>(() => store.state.Debug.activePostCondition);
 
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
@@ -144,8 +145,6 @@ const conditionTypes = ref(getEnumSelectItems(ConditionType))
 const expand = (item) => {
   console.log('expand', item)
   store.commit('Debug/setActivePostCondition', item);
-
-
 }
 
 const list = () => {
@@ -158,49 +157,7 @@ watch(debugData, (newVal) => {
   list()
 }, {immediate: true, deep: true});
 
-// watch(() => {
-//   return activePostCondition.value
-// },(newVal,oldValue) => {
-//
-// },{
-//   deep:true
-// })
 
-// watch(() => {
-//   return activePostCondition.value
-// },(newVal,oldValue) => {
-//   console.log('watch postConditions 8322222111',newVal,oldValue);
-//   // 清空
-//   // store.dispatch('Debug/setCheckpoint',{})
-//   // store.dispatch('Debug/setExtractor',{})
-//   // store.dispatch('Debug/setScript',{})
-// },{
-//   deep:true
-// })
-//
-// watch(() => {
-//   return extractorData.value
-// },(newVal,oldValue) => {
-//   console.log('watch postConditions 8322222111 22222',newVal,oldValue);
-// },{
-//   deep:true
-// })
-//
-// watch(() => {
-//   return checkpointData.value
-// },(newVal,oldValue) => {
-//   console.log('watch postConditions 8322222111 33333',newVal,oldValue);
-// },{
-//   deep:true
-// })
-//
-// watch(() => {
-//   return scriptData.value
-// },(newVal,oldValue) => {
-//   console.log('watch postConditions 8322222111 44444',newVal,oldValue);
-// },{
-//   deep:true
-// })
 
 const create = () => {
   console.log('create', conditionType.value)
@@ -250,6 +207,35 @@ const closeFullScreen = (item) => {
   console.log('closeFullScreen', item)
   fullscreen.value = false
 }
+
+
+/*************************************************
+ * ::::后置处理器提示
+ ************************************************/
+const {srcPostConditionsDataObj,postConditionsDataObj} = useIMLeaveTip();
+const getSaveBtnDisabled = (id) => {
+  const cur =  postConditionsDataObj.value?.[id] || {};
+  const src =  srcPostConditionsDataObj.value?.[id] || {};
+  return equalObjectByLodash(cur, src);
+}
+
+watch(() => {
+  return [postConditions.value,postConditionsDataObj.value,srcPostConditionsDataObj.value]
+},(newVal,oldValue) => {
+  const cur =  postConditionsDataObj.value;
+  const src =  srcPostConditionsDataObj.value;
+  const isChange = !equalObjectByLodash(cur, src);
+  store.commit('Debug/setDebugChange',{
+    postScript:isChange,
+  })
+},{
+  deep:true
+})
+
+
+onUnmounted(() => {
+  store.commit('Debug/setActivePostCondition', {});
+})
 
 </script>
 

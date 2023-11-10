@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch} from "vue";
+import {computed, inject, onUnmounted, ref, watch} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import { FullscreenOutlined } from '@ant-design/icons-vue';
@@ -50,24 +50,9 @@ const store = useStore<{  Debug: Debug }>()
 const debugData = computed<any>(() => store.state.Debug.debugData)
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo)
 const scriptData = computed<any>(() => store.state.Debug.scriptData);
+const srcScriptData = computed<any>(() => store.state.Debug.srcScriptData);
 const debugChange = computed<any>(() => store.state.Debug.debugChange);
 
-watch(() => {
-  return scriptData.value?.content
-},(newVal,oldValue) => {
-  console.log('8322222scriptData',newVal,oldValue)
-  store.commit('Debug/setDebugChange',{
-    preScript:true,
-  })
-},{
-  deep:true
-})
-
-watch(() => {
-return debugChange.value
-},() => {
-  console.log('8322222debugChange',debugChange.value.preScript)
-})
 
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
@@ -77,9 +62,6 @@ const fullscreen = ref(false)
 const getPreConditionScript = () => {
   console.log('getPreConditionScript')
   store.dispatch('Debug/getPreConditionScript')
-  store.commit('Debug/setDebugChange',{
-    preScript:false,
-  })
 }
 
 watch(debugData, (newVal) => {
@@ -90,9 +72,6 @@ watch(debugData, (newVal) => {
 const save = () => {
   console.log('save')
   bus.emit(settings.eventConditionSave, {});
-  store.commit('Debug/setDebugChange',{
-    preScript:false,
-  })
 }
 
 const openFullscreen = () => {
@@ -108,6 +87,22 @@ const format = (item) => {
   console.log('format', item)
   bus.emit(settings.eventEditorAction, {act: settings.eventTypeFormat})
 }
+
+/*************************************************
+ * ::::前置处理器保存提示
+ ************************************************/
+watch(() => {
+  return [scriptData.value?.content,srcScriptData.value?.content]
+},(newVal,oldValue) => {
+  const src = srcScriptData.value?.content?.replace(/\s|\n/g, '') || ''
+  const cur = scriptData.value?.content?.replace(/\s|\n/g, '') || ''
+  const isChange = !(src === cur)
+  store.commit('Debug/setDebugChange',{
+    preScript:isChange,
+  })
+},{
+  deep:true
+})
 
 </script>
 

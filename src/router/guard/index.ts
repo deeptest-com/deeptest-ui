@@ -30,12 +30,11 @@ function createProjectGuard(router) {
           })
         }
       } else {
-        store.dispatch('Global/getPermissionList', { projectId: result.id });
+        await store.dispatch('Global/getPermissionList', { projectId: result.id });
       }
       return next();
     }
     next();
   });
 }
-
 
