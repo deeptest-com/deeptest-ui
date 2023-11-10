@@ -934,12 +934,12 @@ const StoreModel: ModuleType = {
             return true;
         },
 
-        async changeServer({commit, dispatch, state}, payload: {serverId: number, requestEnvVars: boolean}) {
+        async changeServer({commit, dispatch, state}, payload: {serverId: number,serveId:number, requestEnvVars: boolean}) {
             const { serverId, requestEnvVars = true } = payload;
-            const res = await changeServe({ serverId });
+            const res = await changeServe(payload);
             if (res.code === 0) {
-                const currServer = state.serves.find(item => item.environmentId == serverId)
-                commit('setCurrServe', currServer);
+                //const currServer = state.serves.find(item => item.environmentId == serverId)
+                commit('setCurrServe', res.data);
             }
             if (requestEnvVars) {
                 const json = await listEnvVarByServer(serverId)

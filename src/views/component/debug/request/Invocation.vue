@@ -186,7 +186,7 @@ const serverId = computed(() => {
 });
 
 function changeServer(id) {
-  store.dispatch('Debug/changeServer', { serverId: id, requestEnvVars: false })
+  store.dispatch('Debug/changeServer', { serverId: id,serveId:currService.value.id, requestEnvVars: false })
 }
 
 const send = async (e) => {
