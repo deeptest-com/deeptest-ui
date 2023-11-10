@@ -29,6 +29,9 @@ export default function useIMLeaveTip()  {
     const postConditionsList = computed<any>(() => store.state.Debug.postConditions);
     const assertionConditionsList = computed<any>(() => store.state.Debug.assertionConditions);
 
+    const mockScript = computed<any>(() => store.state.Endpoint.mockScript);
+    const srcMockScript = computed<any>(() => store.state.Endpoint.srcMockScript);
+
     const isLeaveTip = computed(() => {
         return isDefineChange.value || isMockChange.value || isDebugChange.value;
     });
@@ -53,6 +56,12 @@ export default function useIMLeaveTip()  {
         store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value));
     }
 
+    const resetMockChange = () => {
+        store.commit('Endpoint/setIsMockChange', false);
+        store.commit('Endpoint/setMockScript', {});
+        store.commit('Endpoint/setSrcMockScript',  cloneDeep(mockScript.value));
+    }
+
     return {
         isLeaveTip,
         isDefineChange,
@@ -75,7 +84,10 @@ export default function useIMLeaveTip()  {
         assertionConditionsList,
         assertionConditionsDataObj,
         srcAssertionConditionsDataObj,
-        resetDefineChange
+        resetDefineChange,
+        resetMockChange,
+        mockScript,
+        srcMockScript
     }
 
 }

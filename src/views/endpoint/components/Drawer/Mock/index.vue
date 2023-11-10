@@ -25,10 +25,10 @@ import Swal from "sweetalert2";
 import settings from "@/config/settings";
 import bus from "@/utils/eventBus";
 const {t} = useI18n()
-
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
 const store = useStore<{ Endpoint }>();
 const endpoint = computed<any>(() => store.state.Endpoint.endpointDetail);
-const isMockChange = computed<any>(() => store.state.Endpoint.isMockChange);
+const {isMockChange,resetMockChange} = useIMLeaveTip();
 
 const activeKey = ref('expect')
 const mockScriptRef:any = ref(null)
@@ -43,8 +43,10 @@ async function changeActiveKey(key) {
   if(result.isConfirmed) {
     activeKey.value = key;
     bus.emit(settings.eventLeaveMockSaveData, {});
+    resetMockChange();
   }else if(result.isDenied) {
-    activeKey.value = key
+    activeKey.value = key;
+    resetMockChange();
     //  取消
   }else {
     return

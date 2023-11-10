@@ -112,7 +112,7 @@ const saveAsCancel = () => {
 }
 
 onMounted(() => {
-  resetDebugChange();
+
 })
 
 

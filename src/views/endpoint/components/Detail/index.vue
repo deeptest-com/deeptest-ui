@@ -191,6 +191,7 @@ const {
   debugChangePostScript,
   debugChangeCheckpoint,
   debugChangePreScript,
+  resetMockChange,
   resetDefineChange,
   debugData,
   debugInfo,
@@ -308,6 +309,7 @@ async function changeTab(value) {
     // isConfirmed: true,  保存并离开
     if (result.isConfirmed) {
       bus.emit(settings.eventLeaveMockSaveData, {});
+      resetMockChange();
       // 保存成功后，切换tab
       activeTabKey.value = value;
       stickyKey.value++;
@@ -316,6 +318,7 @@ async function changeTab(value) {
     else if (result.isDenied) {
       activeTabKey.value = value;
       stickyKey.value++;
+      resetMockChange();
     }
     // isDismissed: false 取消,即什么也不做
     else if (result.isDismissed) {
@@ -369,10 +372,12 @@ onBeforeRouteLeave(async (to, from,next) => {
   }else if(isMockChange.value){
     if (result.isConfirmed) {
       bus.emit(settings.eventLeaveMockSaveData, {});
+      resetMockChange();
       next()
     }
     // isDenied: false,  不保存，并离开
     else if (result.isDenied) {
+      resetMockChange();
       next()
     }
     // isDismissed: false 取消,即什么也不做

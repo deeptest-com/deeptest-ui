@@ -633,6 +633,7 @@ const {
   debugChangePostScript,
   debugChangeCheckpoint,
   debugChangePreScript,
+  resetMockChange,
   resetDefineChange,
   debugData,
   debugInfo,
@@ -727,11 +728,13 @@ async function closeDrawer() {
     // isConfirmed: true,  保存并离开
     if (result.isConfirmed) {
       bus.emit(settings.eventLeaveMockSaveData, {});
+      resetMockChange();
       drawerVisible.value = false;
     }
     // isDenied: false,  不保存，并离开
     else if (result.isDenied) {
       drawerVisible.value = false;
+      resetMockChange();
     }
     // isDismissed: false 取消,即什么也不做
     else if (result.isDismissed) {
@@ -785,11 +788,13 @@ onBeforeRouteLeave(async (to, from,next) => {
   }else if(isMockChange.value){
     if (result.isConfirmed) {
       bus.emit(settings.eventLeaveMockSaveData, {});
+      resetMockChange();
       next()
     }
     // isDenied: false,  不保存，并离开
     else if (result.isDenied) {
-      next()
+      next();
+      resetMockChange();
     }
     // isDismissed: false 取消,即什么也不做
     else if (result.isDismissed) {

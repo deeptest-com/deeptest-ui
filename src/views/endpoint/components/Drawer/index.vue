@@ -122,7 +122,7 @@ const stickyKey = ref(0);
 const endpointDebugRef:any = ref(null);
 
 
-const {isLeaveTip,isDebugChange,resetDebugChange,isMockChange,resetDefineChange} = useIMLeaveTip();
+const {isLeaveTip,isDebugChange,resetDebugChange,isMockChange,resetDefineChange,resetMockChange} = useIMLeaveTip();
 async function changeTab(value) {
   console.log('changeTab', value);
   if(!isLeaveTip.value) {
@@ -193,6 +193,7 @@ async function changeTab(value) {
     // isConfirmed: true,  保存并离开
     if (result.isConfirmed) {
       bus.emit(settings.eventLeaveMockSaveData, {});
+      resetMockChange();
       // 保存成功后，切换tab
       activeTabKey.value = value;
       stickyKey.value++;
@@ -201,6 +202,7 @@ async function changeTab(value) {
     else if (result.isDenied) {
       activeTabKey.value = value;
       stickyKey.value++;
+      resetMockChange();
     }
     // isDismissed: false 取消,即什么也不做
     else if (result.isDismissed) {
@@ -298,9 +300,10 @@ provide('notScrollIntoView', true);
 
 
 onUnmounted(() => {
-  // 重置接口定义变化状态 、调试变化状态，避免影响其他模块
+  // 重置接口定义变化状态 、调试及 高级Mock变化状态，避免影响其他模块
   resetDefineChange()
   resetDebugChange();
+  resetMockChange();
 })
 
 

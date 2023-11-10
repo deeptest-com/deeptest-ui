@@ -86,6 +86,10 @@ const initMethod = async () => {
     selectedMethod.value = interfaceDetail.value?.method
   }
   await changeMethod()
+
+  setTimeout(() => {
+    resetDebugChange();
+  }, 500);
 }
 initMethod()
 

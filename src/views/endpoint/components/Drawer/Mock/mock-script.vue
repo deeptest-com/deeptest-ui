@@ -6,7 +6,8 @@
         <span>自定义JavaScript代码</span>
       </div>
       <div class="right">
-        <a-button size="small" type="primary" :disabled="!isMockChange"  @click.stop="updateMockScript" style="margin-right: 4px;">保存</a-button>
+        <a-button size="small" type="primary" :disabled="!isMockChange"
+                  @click.stop="updateMockScript" style="margin-right: 4px;">保存</a-button>
 
         <a-tooltip overlayClassName="dp-tip-small">
           <template #title>帮助</template>
@@ -50,15 +51,15 @@ import {UsedBy} from "@/utils/enum";
 import {disableScriptMock} from "@/views/endpoint/service";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import cloneDeep from "lodash/cloneDeep";
-
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
+import {equalObjectByLodash} from "@/utils/object";
 const {t} = useI18n()
 provide('usedBy', UsedBy.MockData)
 
 const store = useStore<{ Endpoint }>();
 const endpoint = computed<any>(() => store.state.Endpoint.endpointDetail);
-const mockScript = computed<any>(() => store.state.Endpoint.mockScript);
-const isMockChange = computed<any>(() => store.state.Endpoint.isMockChange);
-const srcMockScript = computed<any>(() => store.state.Endpoint.srcMockScript);
+
+const {mockScript,isMockChange,srcMockScript,resetMockChange} = useIMLeaveTip();
 
 const scriptMockEnabled = ref(true)
 watch(() => endpoint.value.scriptMockDisabled, (newVal, oldVal) => {
@@ -109,29 +110,27 @@ const format = (item) => {
   bus.emit(settings.eventEditorAction, {act: settings.eventTypeFormat})
 }
 watch(() => {
-  return mockScript?.value?.content
+  return [mockScript?.value,srcMockScript?.value]
 },(newVal) => {
-  const src = srcMockScript?.value.content;
-  store.commit('Endpoint/setIsMockChange', src !== newVal)
+  const src = srcMockScript?.value;
+  const cur = mockScript?.value;
+  const isChange = equalObjectByLodash(src,cur);
+  store.commit('Endpoint/setIsMockChange', !isChange)
+},{
+  deep:true
 })
 
 onMounted(() => {
   // 离开前保存数据
-  bus.on(settings.eventLeaveMockSaveData, updateMockScript)
+  bus.on(settings.eventLeaveMockSaveData, updateMockScript);
 })
 
 // 销毁时，处理数据和解除数据绑定
 onUnmounted(() => {
   bus.off(settings.eventLeaveMockSaveData, updateMockScript)
-  store.commit('Endpoint/setIsMockChange', false);
-  store.commit('Endpoint/setMockScript', {});
-  store.commit('Endpoint/setSrcMockScript',  {});
 })
 
 
-defineExpose({
-  updateMockScript: updateMockScript
-})
 </script>
 
 <style lang="less">
