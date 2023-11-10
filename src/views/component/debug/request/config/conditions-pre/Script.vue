@@ -107,11 +107,11 @@ const editorChange = (newScriptCode) => {
 }
 
 const save = async () => {
+
   console.log('save', scriptData.value)
   scriptData.value.debugInterfaceId = debugInfo.value.debugInterfaceId
   scriptData.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
   scriptData.value.projectId = debugData.value.projectId
-
   const result = await store.dispatch('Debug/saveScript', scriptData.value)
   if (result) {
     notifySuccess(`保存成功`);
@@ -123,7 +123,7 @@ const save = async () => {
 
 onMounted(() => {
   console.log('onMounted')
-  bus.on(settings.eventConditionSave, save);
+  // bus.on(settings.eventConditionSave, save);
   bus.on(settings.eventPreConditionSave, save);
   bus.on(settings.paneResizeTop, () => {
     monacoEditor.value?.resizeIt({

@@ -164,6 +164,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setAssertionConditionsObj: Mutation<StateType>;
         setSrcAssertionConditionsObj: Mutation<StateType>;
         clearPostConditionsDataObj: Mutation<StateType>;
+        clearPreCondition: Mutation<StateType>;
     };
     actions: {
         loadDataAndInvocations: Action<StateType, StateType>;
@@ -389,9 +390,14 @@ const StoreModel: ModuleType = {
             state.srcPostConditionsDataObj = {}
             state.assertionConditionsDataObj = {}
             state.srcAssertionConditionsDataObj = {}
+            // state.srcScriptData = {};
+            // state.scriptData = {};
+        },
+        clearPreCondition(state){
             state.srcScriptData = {};
             state.scriptData = {};
         },
+        // clear
     },
     actions: {
         // debug

@@ -64,21 +64,15 @@ const getPreConditionScript = () => {
   store.dispatch('Debug/getPreConditionScript')
 }
 
-// watch(debugData, (newVal) => {
-//   console.log('watch debugData',newVal);
-//   getPreConditionScript()
-// }, {immediate: true, deep: true});
-
 
 onMounted(() => {
-  if(!srcScriptData.value.id){
+  if(!scriptData.value.id){
     getPreConditionScript();
   }
 })
 
 const save = () => {
-  console.log('save')
-  bus.emit(settings.eventConditionSave, {});
+  bus.emit(settings.eventPreConditionSave, {});
 }
 
 const openFullscreen = () => {
@@ -99,7 +93,7 @@ const format = (item) => {
  * ::::前置处理器保存提示
  ************************************************/
 watch(() => {
-  return [scriptData.value?.content,srcScriptData.value?.content]
+  return [scriptData.value,srcScriptData.value]
 },(newVal,oldValue) => {
   const src = srcScriptData.value?.content?.replace(/\s|\n/g, '') || ''
   const cur = scriptData.value?.content?.replace(/\s|\n/g, '') || ''

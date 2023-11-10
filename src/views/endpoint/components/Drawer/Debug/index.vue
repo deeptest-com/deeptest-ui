@@ -55,7 +55,7 @@ const endpointDetail = computed<any>(() => store.state.Endpoint.endpointDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 
-const {resetDebugChange}= useIMLeaveTip();
+const {resetDebugChange,resetDebugChangeBase}= useIMLeaveTip();
 provide('usedBy', UsedBy.InterfaceDebug)
 const useForm = Form.useForm;
 const {t} = useI18n();
@@ -71,7 +71,7 @@ const saveDebugInterface = async (data) => {
   const res = await store.dispatch('Debug/save', data)
   store.commit("Global/setSpinning",false)
 
-  resetDebugChange();
+  resetDebugChangeBase();
 
 
   if (res === true) {

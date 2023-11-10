@@ -49,6 +49,15 @@ export default function useIMLeaveTip()  {
         });
         store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
         store.commit('Debug/clearPostConditionsDataObj');
+        store.commit('Debug/clearPreCondition');
+    }
+
+
+    const resetDebugChangeBase = () => {
+        store.commit('Debug/setDebugChange',{
+            base: false,
+        });
+        store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
     }
 
     const resetDefineChange = () => {
@@ -87,7 +96,8 @@ export default function useIMLeaveTip()  {
         resetDefineChange,
         resetMockChange,
         mockScript,
-        srcMockScript
+        srcMockScript,
+        resetDebugChangeBase
     }
 
 }
