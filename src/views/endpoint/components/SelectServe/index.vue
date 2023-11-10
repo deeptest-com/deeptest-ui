@@ -8,11 +8,6 @@
                 :disabled="disabled"
                 >
                 <a-select-option v-for="item in serves" :key="item.id" :value="item.id">
-                  <template #title>
-                  <a-tooltip :title="item.name" :visible="shouldShowTooltip(item.name)">
-                    <span>{{ item.name }}</span>
-                  </a-tooltip>
-                </template>
                 {{ item.name }}
                 </a-select-option>
             </a-select>
@@ -52,11 +47,5 @@ async function getServeList() {
   // 需要重新更新可选服务列表
   await store.dispatch("ServeGlobal/fetchServe");
 }
-
-function shouldShowTooltip(label) {
-      const selectWidth = parseInt('100'); // 获取Select组件的宽度
-      const labelWidth = parseInt(getComputedStyle(document.createElement('span')).width); // 获取字段内容的宽度
-      return label.length * labelWidth > selectWidth; // 根据宽度判断是否显示Tooltip
-    }
 
 </script>
