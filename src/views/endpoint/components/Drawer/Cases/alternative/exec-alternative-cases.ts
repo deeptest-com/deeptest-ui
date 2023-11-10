@@ -54,13 +54,14 @@ function useCaseExecution(): CaseExecution {
         }
     }
 
-    const execStart = async (projectId, baseCaseId, cases, environmentId, treeDataMap, usedBy) => {
-        console.log('=== execStart', projectId, baseCaseId, cases, environmentId, usedBy)
+    const execStart = async (userId, projectId, baseCaseId, cases, environmentId, treeDataMap, usedBy) => {
+        console.log('=== execStart', userId, projectId, baseCaseId, cases, environmentId, usedBy)
         treeData.value = treeDataMap
 
         execUuid.value = getUuid()
         const data = {
-            serverUrl: process.env.VUE_APP_API_SERVER, // used by agent to submit result to server
+            userId: userId,
+            serverUrl: process.env.VUE_APP_API_SERVER,
             token: await getToken(),
 
             projectId: projectId,

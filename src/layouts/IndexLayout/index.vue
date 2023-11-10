@@ -29,6 +29,8 @@
         <permission :roles="routeItem.roles">
           <router-view></router-view>
         </permission>
+
+        <div @click="sendMsg" class="hide-btn"></div>
       </div>
     </div>
   </div>
@@ -56,6 +58,7 @@ import IndexLayoutRoutes from './routes';
 import Permission from '@/components/Permission/index.vue';
 import Left from '@/layouts/IndexLayout/components/Left.vue';
 import RightTop from '@/layouts/IndexLayout/components/RightTop.vue';
+import {ScopeDeeptest} from "@/utils/const";
 
 export default defineComponent({
   name: 'IndexLayout',
@@ -142,6 +145,18 @@ export default defineComponent({
     // 设置title
     useTitle(routeItem);
 
+    const sendMsg = () => {
+      console.log('sendMsg')
+      const data = {
+        scope: ScopeDeeptest,
+        content: {
+          act: 'recordStart'
+        }
+      }
+
+      window.postMessage(data, '*')
+    }
+
     return {
       collapsed,
       toggleCollapsed,
@@ -155,7 +170,8 @@ export default defineComponent({
       permissionMenuData,
       version,
       onOpenChange,
-      routeItem
+      routeItem,
+      sendMsg,
     }
   }
 })
@@ -184,6 +200,14 @@ export default defineComponent({
       min-width: 1217px;
       overflow: hidden;
       padding: 16px;
+
+      .hide-btn {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        width: 20px;
+        height: 20px;
+      }
     }
   }
 }

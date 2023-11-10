@@ -18,7 +18,7 @@
         </div>
       </div>
       <!-- :::: 用例路径，方法展示区域 -->
-      <Invocation 
+      <Invocation
         :showMethodSelection = "true"
         :baseUrlDisabled="true"
         :showOperation="false"
@@ -29,7 +29,7 @@
           <div class="case-title">
             <span class="name">基准用例</span>
             <span class="serial-number">{{ endpointCase.serialNumber }}</span>
-            <EditAndShowField 
+            <EditAndShowField
               placeholder="修改标题"
               :value="endpointCase.name"
               @update="updateTitle"/>
@@ -37,10 +37,10 @@
         </template>
         <template #extra>
           <div class="case-operation">
-            <a-button 
-              v-for="(item, index) in baseCaseActionList" 
-              :key="index" 
-              :type="item.type" 
+            <a-button
+              v-for="(item, index) in baseCaseActionList"
+              :key="index"
+              :type="item.type"
               size="small"
               @click.stop="item.action()">
               {{ item.text }}
@@ -63,10 +63,10 @@
         </template>
         <template #extra>
           <div class="case-operation">
-            <a-button 
-              v-for="(item, index) in caseFactorActionList" 
-              :key="index" 
-              :type="item.type" 
+            <a-button
+              v-for="(item, index) in caseFactorActionList"
+              :key="index"
+              :type="item.type"
               size="small"
               @click.stop="item.action()">
               {{ item.text }}
@@ -96,9 +96,9 @@
 
           </a-tabs>
         </template>
-      </CaseLayout> 
+      </CaseLayout>
     </template>
-    
+
     <!-- :::: 其他弹窗展示 -->
     <SaveAlternative
       v-if="saveAsVisible"
@@ -142,6 +142,7 @@ import DebugConfig  from "@/views/component/debug/config.vue";
 import EnvSelector from "@/views/component/EnvSelector/index.vue";
 import { prepareDataForRequest } from "@/views/component/debug/service";
 import { notifyError, notifySuccess } from "@/utils/notify";
+import {StateType as UserStateType} from "@/store/user";
 
 const usedBy = UsedBy.CaseDebug
 provide('usedBy', usedBy)
@@ -157,7 +158,8 @@ const props = defineProps({
   },
 });
 
-const store = useStore<{ Debug: Debug, Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType, ProjectGlobal: ProjectStateType }>();
+const store = useStore<{ User: UserStateType, Debug: Debug, Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType, ProjectGlobal: ProjectStateType }>();
+const currUser = computed(() => store.state.User.currentUser);
 const alternativeCases = computed<any>(() => store.state.Endpoint.alternativeCases);
 const currEnvId = computed(() => store.state.ProjectSetting.selectEnvId);
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -185,7 +187,7 @@ const loadDebugData = async (data) => {
     loadingAlternativeCase.value = true;
     await store.dispatch('Debug/loadDataAndInvocations', data);
     loadingAlternativeCase.value = false;
-  } catch (err) { 
+  } catch (err) {
     console.log('加载备选用例数据出错:', err);
   }
 }
@@ -249,7 +251,7 @@ async function onSelectExecEnvFinish() {
   selectEnvVisible.value = false;
   execVisible.value = true;
   const selectedNodes = caseFactor.value.getSelectedNodes();
-  execStart(currProject.value.id, endpointCase.value.id, selectedNodes, currEnvId.value, treeDataMap.value, usedBy)
+  execStart(currUser.value.id, currProject.value.id, endpointCase.value.id, selectedNodes, currEnvId.value, treeDataMap.value, usedBy)
 }
 async function onSelectExecEnvCancel() {
   console.log('onSelectExecEnvCancel')
@@ -390,7 +392,7 @@ onMounted(async () => {
       store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
     }, 500);
   }
-  
+
 })
 </script>
 
