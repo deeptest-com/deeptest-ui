@@ -95,8 +95,8 @@ const format = (item) => {
 watch(() => {
   return [scriptData.value,srcScriptData.value]
 },(newVal,oldValue) => {
-  const src = srcScriptData.value?.content?.replace(/\s|\n/g, '') || ''
-  const cur = scriptData.value?.content?.replace(/\s|\n/g, '') || ''
+  const src = srcScriptData.value;
+  const cur = scriptData.value;
   const isChange = !(src === cur)
   store.commit('Debug/setDebugChange',{
     preScript:isChange,

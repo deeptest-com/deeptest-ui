@@ -65,6 +65,7 @@ import settings from "@/config/settings";
 import Tips from "@/components/Tips/index.vue";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import {StateType as ProjectStateType} from "@/store/project";
+import cloneDeep from "lodash/cloneDeep";
 
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
@@ -141,12 +142,13 @@ let { resetFields, validate, validateInfos } = useForm(model, rules);
 const save = () => {
 
     console.log('save', model.value)
-    validate().then(() => {
-      model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
-      model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
-      model.value.projectId = debugData.value.projectId
+    // validate().then(() => {
+      const data = cloneDeep(model.value);
+      data.debugInterfaceId = debugInfo.value.debugInterfaceId
+      data.endpointInterfaceId = debugInfo.value.endpointInterfaceId
+      data.projectId = debugData.value.projectId
 
-      store.dispatch('Debug/saveScript', model.value).then((result) => {
+      store.dispatch('Debug/saveScript', data).then((result) => {
         if (result) {
           notifySuccess(`保存成功`);
           if (props.finish) {
@@ -158,7 +160,7 @@ const save = () => {
           notifyError(`保存失败`);
         }
       })
-    })
+    // })
 }
 
 const cancel = () => {
@@ -177,22 +179,6 @@ onBeforeUnmount( () => {
 const labelCol = { span: 0 }
 const wrapperCol = { span: 24 }
 
-/*************************************************
- * ::::后置处理器保存提示
- ************************************************/
-const scriptData = computed<any>(() => store.state.Debug.scriptData);
-const srcScriptData = computed<any>(() => store.state.Debug.srcScriptData);
-const debugChange = computed<any>(() => store.state.Debug.debugChange);
-
-watch(() => {
-  return [scriptData.value?.content,srcScriptData.value?.content]
-},(newVal,oldValue) => {
-  store.commit('Debug/setDebugChange',{
-    preScript:scriptData.value?.content?.replace(/\s|\n/g, '') === srcScriptData.value?.content?.replace(/\s|\n/g, ''),
-  })
-},{
-  deep:true
-})
 
 
 </script>

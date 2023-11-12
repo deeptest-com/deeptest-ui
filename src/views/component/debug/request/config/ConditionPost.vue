@@ -212,7 +212,7 @@ const closeFullScreen = (item) => {
 /*************************************************
  * ::::后置处理器提示
  ************************************************/
-const {srcPostConditionsDataObj,postConditionsDataObj} = useIMLeaveTip();
+const {srcPostConditionsDataObj,postConditionsDataObj,debugChange} = useIMLeaveTip();
 const getSaveBtnDisabled = (id) => {
   const cur =  postConditionsDataObj.value?.[id] || {};
   const src =  srcPostConditionsDataObj.value?.[id] || {};
@@ -224,7 +224,10 @@ watch(() => {
 },(newVal,oldValue) => {
   const cur =  postConditionsDataObj.value;
   const src =  srcPostConditionsDataObj.value;
+  // debugger;
+
   const isChange = !equalObjectByLodash(cur, src);
+  console.log(83222,cur,src,isChange,debugChange.value)
   store.commit('Debug/setDebugChange',{
     postScript:isChange,
   })

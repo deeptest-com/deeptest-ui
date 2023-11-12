@@ -63,6 +63,7 @@ import settings from "@/config/settings";
 import Tips from "@/components/Tips/index.vue";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import {StateType as ProjectStateType} from "@/store/project";
+import cloneDeep from "lodash/cloneDeep";
 
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
@@ -110,10 +111,12 @@ const editorChange = (newScriptCode) => {
 const save = async () => {
   try {
     console.log('save', scriptData.value)
-    scriptData.value.debugInterfaceId = debugInfo.value.debugInterfaceId
-    scriptData.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
-    scriptData.value.projectId = debugData.value.projectId
-    const result = await store.dispatch('Debug/saveScript', scriptData.value)
+    const data = cloneDeep(scriptData.value);
+    data.debugInterfaceId = debugInfo.value.debugInterfaceId
+    data.endpointInterfaceId = debugInfo.value.endpointInterfaceId
+    data.projectId = debugData.value.projectId
+    const result = await store.dispatch('Debug/saveScript', data)
+
     if (result) {
       notifySuccess(`保存成功`);
       getPreConditionScript()
