@@ -76,8 +76,8 @@ export default function useIMLeaveTip()  {
     }
 
     const resetDefineChange = () => {
-        store.commit('Endpoint/setIsDefineChange', false);
         store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value));
+        store.commit('Endpoint/setIsDefineChange', false);
     }
 
     const clearDefineChange = ()=>{

@@ -33,10 +33,11 @@ const debugData: any = computed<Endpoint>(() => store.state.Debug.debugData);
 const {isDebugChange,resetDebugChange} = useIMLeaveTip();
 const selectedMethod = ref('GET');
 
-const changeMethod = async (e?:any) => {
+const changeMethod = async (e?:any,init?:boolean) => {
   // 切换方法时，如果有变化，需要提示用户保存
   // 调试模块数据有变化，需要提示用户是否要保存调试数据
-  if(isDebugChange.value){
+  // debugger;
+  if(isDebugChange.value && !init){
     const result =  await  Swal.fire({
       ...settings.SwalLeaveSetting
     })
@@ -85,7 +86,7 @@ const initMethod = async () => {
   if (interfaceDetail.value?.method) {
     selectedMethod.value = interfaceDetail.value?.method
   }
-  await changeMethod()
+  await changeMethod({},true)
 
   setTimeout(() => {
     resetDebugChange();
