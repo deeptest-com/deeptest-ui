@@ -130,6 +130,8 @@ const save = async () => {
 }
 
 onMounted(() => {
+  // todo 太多地方使用这个事件，需要梳理下或者改下名字 eventConditionSave
+  // TODO 有重复触发的情况，需要优化
   bus.on(settings.eventConditionSave, save);
   bus.on(settings.eventPreConditionSave, save);
   bus.on(settings.paneResizeTop, () => {
