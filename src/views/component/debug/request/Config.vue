@@ -67,8 +67,9 @@ import Assertion from "./config/Assertion.vue";
 import {useStore} from "vuex";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
-import {notifySuccess} from "@/utils/notify";
+import {notifyError, notifySuccess} from "@/utils/notify";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
+import cloneDeep from "lodash/cloneDeep";
 
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
@@ -135,7 +136,11 @@ const {
   debugInfo,
   assertionConditionsDataObj,
   debugChangePostScript,
-  debugChangeCheckpoint
+  debugChangeCheckpoint,
+    debugChangePreScript,
+  resetDebugChange,
+    resetMockChange,
+  scriptData,
 }  = useIMLeaveTip();
 const getEntityType = (id) => {
   const cur = postConditionsList?.value?.find((item) => {
@@ -143,7 +148,7 @@ const getEntityType = (id) => {
   })
   return cur?.entityType;
 }
-const leaveSave =  (event) => {
+const leaveSave =  async (event) => {
   // 后置处理器缓存的数据 - 保存
   if(Object.keys(postConditionsDataObj.value)?.length && debugChangePostScript.value){
     Object.values(postConditionsDataObj.value).map(async (item:any) => {
@@ -168,9 +173,18 @@ const leaveSave =  (event) => {
       await store.dispatch('Debug/leaveSaveCheckpoint', item);
     })
   }
+  // 前置处理器保存
+  if(debugChangePreScript.value && scriptData.value?.id){
+    const data = cloneDeep(scriptData.value)
+    data.debugInterfaceId = debugInfo.value.debugInterfaceId
+    data.endpointInterfaceId = debugInfo.value.endpointInterfaceId
+    data.projectId = debugData.value.projectId;
+    await store.dispatch('Debug/savePreConditionScript', data)
+  }
+  resetDebugChange();
   notifySuccess(`保存成功`);
-  store.commit('Debug/clearPostConditionsDataObj',{})
 }
+
 
 
 
@@ -180,7 +194,7 @@ onMounted( () => {
 
 onUnmounted( () => {
   bus.off(settings.eventPostConditionSave, leaveSave);
-  store.commit('Debug/clearPostConditionsDataObj',{})
+  resetDebugChange();
 })
 
 </script>

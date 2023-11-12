@@ -164,6 +164,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setAssertionConditionsObj: Mutation<StateType>;
         setSrcAssertionConditionsObj: Mutation<StateType>;
         clearPostConditionsDataObj: Mutation<StateType>;
+        resetPostConditionsDataObj: Mutation<StateType>;
         clearPreCondition: Mutation<StateType>;
     };
     actions: {
@@ -184,6 +185,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         removeInvocation: Action<StateType, StateType>;
 
         getPreConditionScript: Action<StateType, StateType>;
+        savePreConditionScript: Action<StateType, StateType>;
 
         listPostCondition: Action<StateType, StateType>;
         listAssertionCondition: Action<StateType, StateType>;
@@ -393,10 +395,15 @@ const StoreModel: ModuleType = {
             // state.srcScriptData = {};
             // state.scriptData = {};
         },
+        resetPostConditionsDataObj(state){
+            state.srcPostConditionsDataObj = cloneDeep(state.postConditionsDataObj)
+            state.srcAssertionConditionsDataObj = cloneDeep(state.assertionConditionsDataObj)
+        },
         clearPreCondition(state){
             state.srcScriptData = {};
             state.scriptData = {};
         },
+
         // clear
     },
     actions: {
@@ -589,6 +596,17 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
+
+        async savePreConditionScript({commit, dispatch, state}, payload: any) {
+            try {
+                await saveScript(payload);
+                await dispatch('getPreConditionScript');
+                return true
+            } catch (error) {
+                return false;
+            }
+        },
+
 
         async listPostCondition({commit, state}) {
             try {
@@ -869,6 +887,7 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
+
         async removeScript({commit, dispatch, state}, id: number) {
             try {
                 await removeScript(id);

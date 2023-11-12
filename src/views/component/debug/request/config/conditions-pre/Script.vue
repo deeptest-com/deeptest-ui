@@ -4,6 +4,7 @@
         <div class="codes">
           <MonacoEditor
             ref="monacoEditor"
+            v-if="scriptData?.id"
             theme="vs" language="typescript" class="editor"
             customId="pre-script-main-codes"
             :value="scriptData.content"
@@ -107,23 +108,26 @@ const editorChange = (newScriptCode) => {
 }
 
 const save = async () => {
-
-  console.log('save', scriptData.value)
-  scriptData.value.debugInterfaceId = debugInfo.value.debugInterfaceId
-  scriptData.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
-  scriptData.value.projectId = debugData.value.projectId
-  const result = await store.dispatch('Debug/saveScript', scriptData.value)
-  if (result) {
-    notifySuccess(`保存成功`);
-    getPreConditionScript()
-  } else {
-    notifyError(`保存失败`);
+  try {
+    console.log('save', scriptData.value)
+    scriptData.value.debugInterfaceId = debugInfo.value.debugInterfaceId
+    scriptData.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
+    scriptData.value.projectId = debugData.value.projectId
+    const result = await store.dispatch('Debug/saveScript', scriptData.value)
+    if (result) {
+      notifySuccess(`保存成功`);
+      getPreConditionScript()
+    } else {
+      notifyError(`保存失败`);
+    }
+  }catch (e){
+    console.log('有可能组件已经卸载了，但是还是会触发事件回调，所以报错：',e);
   }
+
 }
 
 onMounted(() => {
-  console.log('onMounted')
-  // bus.on(settings.eventConditionSave, save);
+  bus.on(settings.eventConditionSave, save);
   bus.on(settings.eventPreConditionSave, save);
   bus.on(settings.paneResizeTop, () => {
     monacoEditor.value?.resizeIt({
@@ -136,7 +140,7 @@ onMounted(() => {
 })
 onBeforeUnmount( () => {
   console.log('onBeforeUnmount')
-  bus.off(settings.eventConditionSave, save);
+  bus.off(settings.eventPreConditionSave, save);
 })
 
 const labelCol = { span: 0 }

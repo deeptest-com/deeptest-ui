@@ -71,7 +71,7 @@ const saveDebugInterface = async (data) => {
   const res = await store.dispatch('Debug/save', data)
   store.commit("Global/setSpinning",false)
 
-  resetDebugChangeBase();
+  resetDebugChange();
 
 
   if (res === true) {

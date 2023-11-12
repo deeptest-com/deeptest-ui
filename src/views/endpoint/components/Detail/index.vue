@@ -200,6 +200,9 @@ const {
   endpointDetail,
   isDebugChange,
   resetDebugChange,
+  clearMockChange,
+  clearDefineChange,
+  clearDebugChange,
 } = useIMLeaveTip();
 
 // 接口定义 - 调试模块是否改变了 - 用于离开提示
@@ -389,8 +392,9 @@ onBeforeRouteLeave(async (to, from,next) => {
 
 // 离开页面时，重置数据
 onUnmounted(() => {
-  resetDefineChange();
-  resetDebugChange();
+  clearDefineChange();
+  clearMockChange();
+  clearDebugChange();
 })
 
 /*************************************************

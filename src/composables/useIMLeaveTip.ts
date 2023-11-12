@@ -13,6 +13,7 @@ export default function useIMLeaveTip()  {
     const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
     const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
     const debugChange: any = computed<Endpoint>(() => store.state.Debug.debugChange);
+    const scriptData: any = computed<Endpoint>(() => store.state.Debug.scriptData);
     const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
     const debugChangePreScript: any = computed<Endpoint>(() => store.state.Debug.debugChange?.preScript);
     const debugChangePostScript: any = computed<Endpoint>(() => store.state.Debug.debugChange?.postScript);
@@ -41,15 +42,29 @@ export default function useIMLeaveTip()  {
     });
 
     const resetDebugChange = () => {
+        store.commit('Debug/setSrcDebugData')
+        store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
+        store.commit('Debug/setSrcScript', cloneDeep(scriptData.value));
+        store.commit('Debug/resetPostConditionsDataObj');
         store.commit('Debug/setDebugChange',{
             base: false,
             preScript: false,
             postScript: false,
             checkpoint:false
         });
-        store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
+    }
+
+    const clearDebugChange = () => {
+        store.commit('Debug/setDebugData', {});
+        store.commit('Debug/setSrcDebugData',{});
         store.commit('Debug/clearPostConditionsDataObj');
         store.commit('Debug/clearPreCondition');
+        store.commit('Debug/setDebugChange',{
+            base: false,
+            preScript: false,
+            postScript: false,
+            checkpoint:false
+        });
     }
 
 
@@ -65,10 +80,22 @@ export default function useIMLeaveTip()  {
         store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value));
     }
 
+    const clearDefineChange = ()=>{
+        store.commit('Endpoint/setIsDefineChange', false);
+        store.commit('Endpoint/initEndpointDetail',{});
+        store.commit('Endpoint/setEndpointDetail',{});
+    }
+
     const resetMockChange = () => {
         store.commit('Endpoint/setIsMockChange', false);
         store.commit('Endpoint/setMockScript', {});
         store.commit('Endpoint/setSrcMockScript',  cloneDeep(mockScript.value));
+    }
+
+    const clearMockChange = ()=>{
+        store.commit('Endpoint/setIsMockChange', false);
+        store.commit('Endpoint/setMockScript', {});
+        store.commit('Endpoint/setSrcMockScript',  {});
     }
 
     return {
@@ -97,7 +124,11 @@ export default function useIMLeaveTip()  {
         resetMockChange,
         mockScript,
         srcMockScript,
-        resetDebugChangeBase
+        resetDebugChangeBase,
+        clearDebugChange,
+        scriptData,
+        clearDefineChange,
+        clearMockChange
     }
 
 }

@@ -122,7 +122,7 @@ const stickyKey = ref(0);
 const endpointDebugRef:any = ref(null);
 
 
-const {isLeaveTip,isDebugChange,resetDebugChange,isMockChange,resetDefineChange,resetMockChange} = useIMLeaveTip();
+const {isLeaveTip,isDebugChange,resetDebugChange,isMockChange,resetDefineChange,resetMockChange,clearDebugChange,clearDefineChange,clearMockChange} = useIMLeaveTip();
 async function changeTab(value) {
   console.log('changeTab', value);
   if(!isLeaveTip.value) {
@@ -301,9 +301,9 @@ provide('notScrollIntoView', true);
 
 onUnmounted(() => {
   // 重置接口定义变化状态 、调试及 高级Mock变化状态，避免影响其他模块
-  resetDefineChange()
-  resetDebugChange();
-  resetMockChange();
+  clearDefineChange();
+  clearMockChange();
+  clearDebugChange();
 })
 
 

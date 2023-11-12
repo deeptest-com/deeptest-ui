@@ -2,7 +2,9 @@
   <div class="post-script-main">
     <div class="content">
       <div class="codes">
-        <MonacoEditor theme="vs" language="typescript" class="editor"
+        <MonacoEditor theme="vs" language="typescript"
+                      v-if="model?.id"
+                      class="editor"
                       :value="model.content"
                       :options="editorOptions"
                       :timestamp="timestamp"
@@ -102,6 +104,7 @@ const load = () => {
 
 
 const timestamp = ref('')
+
 watch(model, (newVal) => {
   timestamp.value = Date.now() + ''
 }, {immediate: true, deep: true})
@@ -136,39 +139,38 @@ const rules = reactive({
 let { resetFields, validate, validateInfos } = useForm(model, rules);
 
 const save = () => {
-  console.log('save', model.value)
-  validate().then(() => {
-    model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
-    model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
-    model.value.projectId = debugData.value.projectId
 
-    store.dispatch('Debug/saveScript', model.value).then((result) => {
-      if (result) {
-        notifySuccess(`保存成功`);
-        if (props.finish) {
-          props.finish()
+    console.log('save', model.value)
+    validate().then(() => {
+      model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
+      model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
+      model.value.projectId = debugData.value.projectId
+
+      store.dispatch('Debug/saveScript', model.value).then((result) => {
+        if (result) {
+          notifySuccess(`保存成功`);
+          if (props.finish) {
+            props.finish()
+          }
+          // 重新拉取一下最新的数据
+          load();
+        } else {
+          notifyError(`保存失败`);
         }
-        // 重新拉取一下最新的数据
-        load();
-      } else {
-        notifyError(`保存失败`);
-      }
+      })
     })
-  })
 }
+
 const cancel = () => {
-  console.log('cancel')
   if (props.finish) {
     props.finish()
   }
 }
 
 onMounted(() => {
-  console.log('onMounted')
   bus.on(settings.eventConditionSave, save);
 })
 onBeforeUnmount( () => {
-  console.log('onBeforeUnmount')
   bus.off(settings.eventConditionSave, save);
 })
 
