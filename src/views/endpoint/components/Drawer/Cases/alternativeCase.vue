@@ -286,7 +286,7 @@ const saveBaseCase = async () => {
 
 // 另存为
 const saveAsNewCase = async (model) => {
-  const selectedNodes = caseFactor.value.getSelectedNodes();
+  const selectedNodes = caseFactor.value.getSelectedTreeNodes();
   const type = unref(caseFactor.value.executionType);
   const params = {
     prefix: model.prefix || '',
