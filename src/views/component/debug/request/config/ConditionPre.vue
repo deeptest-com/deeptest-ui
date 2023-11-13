@@ -66,9 +66,7 @@ const getPreConditionScript = () => {
 
 
 onMounted(() => {
-  if(!scriptData.value.id){
-    getPreConditionScript();
-  }
+  getPreConditionScript();
 })
 
 const save = () => {
