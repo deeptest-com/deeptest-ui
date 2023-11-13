@@ -109,9 +109,11 @@ const format = (item) => {
   console.log('format', item)
   bus.emit(settings.eventEditorAction, {act: settings.eventTypeFormat})
 }
+
 watch(() => {
   return [mockScript?.value,srcMockScript?.value]
 },(newVal) => {
+  // debugger;
   const src = srcMockScript?.value;
   const cur = mockScript?.value;
   const isChange = equalObjectByLodash(src,cur);
