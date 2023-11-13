@@ -10,6 +10,8 @@
     <div class="content">
       <a-table v-if="list.length > 0"
                 :data-source="list"
+                :expandIconAsCell="false"
+                :expandIconColumnIndex="1"
                 :pagination="{
                     ...pagination,
                     onChange: (page) => {
@@ -29,11 +31,15 @@
                 class="dp-table">
 
         <template #name="{ record, text }">
-          <EditAndShowField placeholder="名称"
-                            :custom-class="'custom-endpoint show-on-hover'"
-                            :value="text || ''"
-                            @update="(val) => updateName(val, record)"
-                            @edit="design(record)"/>
+          <div class="case-title" style="display: inline-block;">
+            <EditAndShowField
+              placeholder="名称"
+              :custom-class="'custom-endpoint show-on-hover'"
+              :value="text || ''"
+              @update="(val) => updateName(val, record)"
+              @edit="design(record)"/>
+          </div>
+          
         </template>
 
         <template #createdAt="{ record }">

@@ -1446,7 +1446,7 @@ const StoreModel: ModuleType = {
 
                 commit('setEndpointCaseList', {
                     ...initState.listResult,
-                    list: data.result || [],
+                    list: (data.result || []).map(e => ({ ...e, children: e.children.length > 0 ? e.children : null })),
                     pagination: {
                         ...initState.listResult.pagination,
                         current: params.page,
