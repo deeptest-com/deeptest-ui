@@ -66,7 +66,9 @@ const getPreConditionScript = () => {
 
 
 onMounted(() => {
-  getPreConditionScript();
+  if(!scriptData.value.id){
+    getPreConditionScript();
+  }
 })
 
 const save = () => {
@@ -102,6 +104,7 @@ watch(() => {
 },{
   deep:true
 })
+
 
 </script>
 

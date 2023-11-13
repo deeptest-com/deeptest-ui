@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineEmits, nextTick, onMounted, provide, ref,defineExpose} from "vue";
+import {computed, defineEmits, nextTick, onMounted, provide, ref, defineExpose, onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {Form, notification} from 'ant-design-vue';
 import {useStore} from "vuex";
@@ -55,7 +55,7 @@ const endpointDetail = computed<any>(() => store.state.Endpoint.endpointDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 
-const {resetDebugChange,resetDebugChangeBase}= useIMLeaveTip();
+const {resetDebugChange,resetDebugChangeBase,clearDebugChange}= useIMLeaveTip();
 provide('usedBy', UsedBy.InterfaceDebug)
 const useForm = Form.useForm;
 const {t} = useI18n();
@@ -113,6 +113,13 @@ const saveAsCancel = () => {
 
 onMounted(() => {
 
+})
+
+onUnmounted(() => {
+  // console.log('onUnmounted in debug-index')
+  // resetDebugChange();
+  clearDebugChange();
+  // store.dispatch('Debug/resetDataAndInvocations');
 })
 
 

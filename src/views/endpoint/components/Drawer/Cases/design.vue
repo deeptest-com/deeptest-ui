@@ -52,7 +52,7 @@ const store = useStore<{ Debug: Debug, Endpoint: EndpointStateType, DiagnoseInte
 const endpointCase = computed<any>(() => store.state.Endpoint.caseDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 
-const {debugChangeBase,resetDebugChange} = useIMLeaveTip();
+const {debugChangeBase,resetDebugChange,isDebugChange} = useIMLeaveTip();
 const props = defineProps({
   onBack: {
     type: Function,
@@ -104,7 +104,7 @@ const updateName = (val) => {
 const back = () => {
   console.log('back');
   // 调试模块数据有变化，需要提示用户是否要保存调试数据
-  if(debugChangeBase.value){
+  if(isDebugChange.value){
     Swal.fire({
       ...settings.SwalLeaveSetting
     }).then((result) => {

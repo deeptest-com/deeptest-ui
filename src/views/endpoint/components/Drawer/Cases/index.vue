@@ -17,13 +17,14 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed, defineProps, defineEmits, watch} from "vue";
+import {ref, computed, defineProps, defineEmits, watch,onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import CaseList from "./list.vue";
 import CaseDesign from "./design.vue";
 import CaseGenerate from "./generate.vue";
-
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
+const {clearDebugChange}= useIMLeaveTip();
 const {t} = useI18n()
 
 const store = useStore<{ Endpoint }>();
@@ -68,6 +69,10 @@ const back = () => {
   console.log('back')
   show.value = 'list'
 }
+
+onUnmounted(() => {
+  clearDebugChange()
+})
 
 </script>
 
