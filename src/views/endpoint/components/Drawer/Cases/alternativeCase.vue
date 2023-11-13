@@ -48,9 +48,11 @@
           </div>
         </template>
         <template #content>
-          <div class="case-config">
-            <DebugConfig />
-          </div>
+          <a-spin tip="loading..." :spinning="baseCaseSending">
+            <div class="case-config">
+              <DebugConfig />
+            </div>
+          </a-spin>
         </template>
       </CaseLayout>
 
@@ -113,6 +115,12 @@
       @on-ok="onSelectExecEnvFinish"
       @on-cancel="onSelectExecEnvCancel" />
 
+    <Exec 
+      v-if="execDrawerVisible"
+      :exec-drawer-visible="execDrawerVisible" 
+      :case-id="endpointCase.id" 
+      :cases="execCases" 
+      @close="onClose"/>
   </div>
 </template>
 
@@ -132,6 +140,7 @@ import {StateType as ProjectStateType} from "@/store/project";
 import PreCondition from "@/views/component/debug/request/config/ConditionPre.vue";
 import PostCondition from "@/views/component/debug/request/config/ConditionPost.vue";
 import Assertion from "@/views/component/debug/request/config/Assertion.vue";
+import Exec from "./alternative/exec.vue";
 
 import { CaseLayout, CaseFactor, CaseTips, SaveAlternative } from "./alternative";
 
@@ -143,6 +152,7 @@ import EnvSelector from "@/views/component/EnvSelector/index.vue";
 import { prepareDataForRequest } from "@/views/component/debug/service";
 import { notifyError, notifySuccess } from "@/utils/notify";
 import {StateType as UserStateType} from "@/store/user";
+import {getToken} from "@/utils/localToken";
 
 const usedBy = UsedBy.CaseDebug
 provide('usedBy', usedBy)
@@ -231,32 +241,31 @@ function getNodeMap(treeNode: any, mp: any) {
 /**
  * :::: 执行 execution
  */
-const execVisible = ref<boolean>(false);
 const selectEnvVisible = ref<boolean>(false);
+const execDrawerVisible = ref(false);
+const execCases = ref({});
 
-const {progressStatus, execStart, execStop} = useCaseExecution();
 const caseFactor = ref();
 
 const selectExecEnv = () => {
-  const selectedNodes = caseFactor.value.getSelectedNodes();
-  if (selectedNodes.length === 0) {
+  const selectedTreeNode = caseFactor.value.getSelectedTreeNodes();
+  if (selectedTreeNode.children.length === 0) {
     message.error('请选择调试参数');
     return;
   }
-  console.log('selectExecEnv')
   selectEnvVisible.value = true;
+  store.commit('Endpoint/setAlternativeExecStatusMap', {});
+  store.commit('Endpoint/setAlternativeExecResults', []);
 }
 async function onSelectExecEnvFinish() {
-  console.log('onSelectExecEnvFinish')
   selectEnvVisible.value = false;
-  execVisible.value = true;
-  const selectedNodes = caseFactor.value.getSelectedNodes();
-  execStart(currUser.value.id, currProject.value.id, endpointCase.value.id, selectedNodes, currEnvId.value, treeDataMap.value, usedBy)
+  execCases.value = caseFactor.value.getSelectedTreeNodes();
+  execDrawerVisible.value = true;
 }
 async function onSelectExecEnvCancel() {
-  console.log('onSelectExecEnvCancel')
   selectEnvVisible.value = false;
 }
+
 
 const back = () => {
   console.log('back')
@@ -277,15 +286,15 @@ const saveBaseCase = async () => {
 
 // 另存为
 const saveAsNewCase = async (model) => {
-  const selectedNodes = caseFactor.value.getSelectedNodes();
+  const selectedNodes = caseFactor.value.getSelectedTreeNodes();
   const type = unref(caseFactor.value.executionType);
   const params = {
     prefix: model.prefix || '',
     baseId: endpointCase.value.id,
     type,
-    values: selectedNodes.filter(e => e.category === 'case'),
+    values: selectedNodes,
   };
-  confirmLoading.value = true;
+  
   try {
     await store.dispatch('Endpoint/saveAlternativeCase', params);
     notifySuccess('生成用例成功，可返回列表查看');
@@ -324,12 +333,35 @@ const onReset = ({ type, params }: { type: string, params: any }) => {
   });
 };
 
+/**
+ * 调试基准用例
+ * @param e 
+ */
+const baseCaseSending = ref(false);
+
+const send = async () => {
+  baseCaseSending.value = true;
+  const data = prepareDataForRequest(debugData.value)
+
+  const callData = {
+    userId: currUser.value.id,
+    serverUrl: process.env.VUE_APP_API_SERVER,
+    token: await getToken(),
+    data: data
+  }
+  await store.dispatch('Debug/call', callData).finally(()=>{
+    baseCaseSending.value = false;
+  })
+
+  baseCaseSending.value = false;
+}
+
 const baseCaseActionList = computed(() => {
   const arr = [
     {
       text: '调试',
       type: 'primary',
-      action: selectExecEnv,
+      action: send,
     },
     {
       text: '保存',
@@ -394,6 +426,11 @@ onMounted(async () => {
   }
 
 })
+
+const onClose = () => {
+  execDrawerVisible.value = false;
+}
+
 </script>
 
 <style lang="less">

@@ -4,7 +4,8 @@
       :visible="responseDrawerVisible"
       :closable="true"
       :width="1000"
-      :bodyStyle="{ padding: '24px', height: '100%' }"
+      :bodyStyle="{ padding: '24px' }"
+      style="z-index: 1003;"
       @close="onClose"
     >
       <template #title>

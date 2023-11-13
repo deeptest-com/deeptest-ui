@@ -146,6 +146,9 @@ export interface StateType {
     alternativeCaseAssertions: any[];
     activeAlternativeCaseAssertion:any;
     alternativeCaseFactor: any;
+    alternativeTreeData: any;
+    alternativeExecStatusMap: any;
+    alternativeExecResults: any;
     // 记录接口定义是否有变更
     isDefineChange: boolean;
 
@@ -207,10 +210,13 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setBaseCaseId:Mutation<StateType>;
         setAlternativeCases:Mutation<StateType>;
+        setAlternativeTreeData: Mutation<StateType>;
         setAlternativeCasesSaved:Mutation<StateType>;
         setAlternativeCaseAssertions:Mutation<StateType>;
         setActiveAlternativeCaseAssertion:Mutation<StateType>;
         setAlternativeCaseFactor: Mutation<StateType>;
+        setAlternativeExecStatusMap: Mutation<StateType>;
+        setAlternativeExecResults: Mutation<StateType>;
 
         setIsDefineChange:Mutation<StateType>;
         setBenchMarkList: Mutation<StateType>;
@@ -380,6 +386,9 @@ const initState: StateType = {
     alternativeCaseAssertions: [],
     activeAlternativeCaseAssertion: {},
     alternativeCaseFactor: {},
+    alternativeTreeData: {},
+    alternativeExecResults: [],
+    alternativeExecStatusMap: [],
 
     isDefineChange: false,
 
@@ -572,6 +581,9 @@ const StoreModel: ModuleType = {
         setAlternativeCases(state, payload){
             state.alternativeCases = payload
         },
+        setAlternativeTreeData(state, payload) {
+            state.alternativeTreeData = payload;
+        },
         setAlternativeCasesSaved(state, payload){
             state.alternativeCasesSaved = payload
         },
@@ -592,9 +604,14 @@ const StoreModel: ModuleType = {
         setIsDefineChange(state, payload){
             state.isDefineChange = payload
         },
-        
         setBenchMarkList(state, payload) {
             state.benchMarkList = payload;
+        },
+        setAlternativeExecResults(state, payload) {
+            state.alternativeExecResults = payload;
+        },
+        setAlternativeExecStatusMap(state, payload) {
+            state.alternativeExecStatusMap = payload;
         }
     },
     actions: {
@@ -1514,6 +1531,7 @@ const StoreModel: ModuleType = {
             const jsn = await loadAlternativeCase(payload)
             if (jsn.code === 0) {
                 commit('setAlternativeCases', jsn.data.children || []);
+                commit('setAlternativeTreeData', jsn.data);
                 return true;
             } else {
                 return false
@@ -1704,7 +1722,8 @@ const StoreModel: ModuleType = {
             } catch (error) {
                 return Promise.reject(error);
             }
-        }
+        },
+
     },
 };
 

@@ -217,7 +217,7 @@ function getRightTabTop() {
     return 100
 }
 
-export const getMethodColor = (method, disabled) => {
+export const getMethodColor = (method, disabled?: any) => {
     if (disabled) {
         return 'default'
     }

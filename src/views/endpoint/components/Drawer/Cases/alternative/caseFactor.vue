@@ -18,9 +18,9 @@
         </a-radio>
       </a-radio-group>
 
-      <span class="multiple-execution-result" v-if="executionType === 'multi'">
+      <span class="multiple-execution-result" v-if="executionType === 'multi' && reportTreeData.length > 0">
         <span>通过</span>
-        <a-button class="case-exec-detail" type="link" @click.stop="queryDetail()">详情</a-button>
+        <a-button class="case-exec-detail" type="link" @click.stop="queryMultiDetail()">详情</a-button>
       </span>
     </div>
 
@@ -49,16 +49,16 @@
               placeholder="修改标题"
               :value="alternativeCaseFactor[nodeProps.path]?.value || nodeProps.sample"
               @update="v => editFinish(nodeProps.key, v)"/>
-            <span class="case-exec-result" v-if="executionType === 'single' && nodeProps.execStatus">
+            <span class="case-exec-result" v-if="executionType === 'single' && execStatusMap[nodeProps.key]?.status">
               <!-- 运行结果 -->
-              <span :class="[getDpResultClass(nodeProps.execStatus), 'case-exec-status']">
+              <span :class="[getDpResultClass(execStatusMap[nodeProps.key]?.status), 'case-exec-status']">
                 <span>
-                  {{ nodeProps.execStatus === ResultStatus.Pass ? '通过' : '失败' }}
+                  {{ execStatusMap[nodeProps.key]?.status === ResultStatus.Pass ? '通过' : '失败' }}
                 </span>
               </span>
 
               <!-- 运行详情查看 -->
-              <a-button class="case-exec-detail" type="link" @click.stop="queryDetail(nodeProps)">详情</a-button>
+              <a-button class="case-exec-detail" type="link" @click.stop="queryDetail(execStatusMap[nodeProps.key])">详情</a-button>
             </span>
           </template>
         </span>
@@ -68,10 +68,33 @@
       <a-spin tip="loading..."></a-spin>
     </div>
   </div>
+
+  <ResponseDrawer
+    v-if="logResponseDetailVisible"
+    :data="currRespDetail"
+    :response-drawer-visible="logResponseDetailVisible"
+    @onClose="logResponseDetailVisible = false" />
+
+  <a-drawer
+    :placement="'right'"
+    :width="1000"
+    :closable="true"
+    :visible="execDrawerVisible"
+    :title="'用例调试'"
+    class="drawer"
+    style="z-index: 1002;"
+    wrapClassName="drawer-exec"
+    @close="execDrawerVisible = false">
+    <div class="scenario-exec-info-main" v-if="execDrawerVisible">
+      <LogTreeView
+        class="scenario-exec-log-tree"
+        :treeData="reportTreeData || []" />
+    </div>
+  </a-drawer>  
 </template>
 
 <script lang="ts" setup>
-import {computed, provide, ref, watch, unref, defineExpose} from 'vue';
+import {computed, provide, ref, watch, unref, defineExpose, defineProps, reactive, defineEmits} from 'vue';
 import {ResultStatus, UsedBy} from "@/utils/enum";
 import {useStore} from "vuex";
 import {
@@ -85,23 +108,32 @@ import cloneDeep from "lodash/cloneDeep";
 import {getDpResultClass} from "@/utils/dom";
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
 import {StateType as Debug} from "@/views/component/debug/store";
+import EditAndShowField from '@/components/EditAndShow/index.vue';
+import ResponseDrawer from '@/views/component/Report/Response/index.vue';
+import {LogTreeView} from '@/views/component/Report/components';
 import { StateType as ProjectSettingStateType } from "@/views/project-settings/store";
 import {StateType as ProjectStateType} from "@/store/project";
 
-import EditAndShowField from '@/components/EditAndShow/index.vue';
 
 const usedBy = UsedBy.CaseDebug
 provide('usedBy', usedBy)
 
 const store = useStore<{ Debug: Debug, Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType, ProjectGlobal: ProjectStateType }>();
 const alternativeCases = computed<any>(() => store.state.Endpoint.alternativeCases);
+const alternativeTreeData = computed<any>(() => store.state.Endpoint.alternativeTreeData);
 const endpointDetail = computed<any>(() => store.state.Endpoint.endpointDetail);
 const endpointCase = computed<any>(() => store.state.Endpoint.caseDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const alternativeCaseFactor = computed<any>(() => store.state.Endpoint.alternativeCaseFactor);
+const execStatusMap = computed(() => store.state.Endpoint.alternativeExecStatusMap);
+const reportTreeData = computed(() => store.state.Endpoint.alternativeExecResults);
+// 获取执行结果的map
 
 const allSelected = ref(false);
 const treeDataMap = ref({});
+const currRespDetail = reactive({});
+const logResponseDetailVisible = ref(false);
+const execDrawerVisible = ref(false);
 
 const treeData = computed(() => {
 
@@ -217,9 +249,18 @@ function getNodeMap(treeNode: any, mp: any) {
   return
 }
 
+const queryMultiDetail = () => {
+  execDrawerVisible.value = true;
+}
 
-const queryDetail = (node?: any) => {
-  console.log('查看执行详情：', node || '多因子参数异常的结果');
+const queryDetail = (reportInfo?: any) => {
+  console.log('查看执行详情：', reportInfo || '多因子参数异常的结果');
+  Object.assign(currRespDetail, {
+    reqContent: JSON.parse(reportInfo.reqContent || '{}') ,
+    resContent: JSON.parse(reportInfo.respContent || '{}') ,
+    invokeId: reportInfo.response.invokeId
+  });
+  logResponseDetailVisible.value = true;
 }
 
 const handleExecTypeChange = evt => {
@@ -229,6 +270,8 @@ const handleExecTypeChange = evt => {
     halfChecked: [],
   };
   allSelected.value = false;
+  store.commit('Endpoint/setAlternativeExecStatusMap', {});
+  store.commit('Endpoint/setAlternativeExecResults', []);
 }
 
 const handleSelect = evt => {
@@ -263,6 +306,9 @@ const onChecked = (keys, treeNode) => {
   console.log('当前选中的参数:', unref(checkedKeys));
 }
 
+/**
+ * 获取仅选中的case
+ */
 const getSelectedNodes = () => {
   const ret: any[] = [];
 
@@ -276,7 +322,26 @@ const getSelectedNodes = () => {
   return ret
 }
 
-defineExpose({ getSelectedNodes, loadCaseTree, executionType: computed(() => executionType.value) });
+/**
+ * 原始树结构 调整为： 每个节点添加 needExec ，后端通过该参数过滤需要  执行的节点
+ */
+const getSelectedTreeNodes = () => {
+  const setNodesChecked = (data: any[]) => {
+    const array = cloneDeep(data);
+    array.forEach(e => {
+      if (e.category === 'case') {
+        e.needExec = (executionType.value === 'single' ? unref(checkedKeys) : (unref(checkedKeys).checked || [])).includes(e.key);
+      } else if (e.children && e.children.length > 0) {
+        e.children = setNodesChecked(e.children);
+        e.needExec = e.children.some(child => child.needExec);
+      }
+    })
+    return cloneDeep(array);
+  };
+  return { ...unref(alternativeTreeData), children: unref(checkedKeys).length === 0 ? [] : setNodesChecked(cloneDeep(unref(alternativeCases))) };
+}
+
+defineExpose({ getSelectedTreeNodes, getSelectedNodes, loadCaseTree, executionType: computed(() => executionType.value) });
 
 </script>
 
