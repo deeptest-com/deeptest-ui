@@ -51,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, inject, onBeforeUnmount, onMounted, reactive, ref, watch} from "vue";
+import {computed, defineProps, inject, onBeforeUnmount, onMounted, reactive, ref, watch,onUnmounted} from "vue";
 import {message, Form, notification} from 'ant-design-vue';
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
@@ -82,6 +82,8 @@ const timestamp = ref('')
 watch(mockScript, (newVal) => {
   timestamp.value = Date.now() + ''
 }, {immediate: true, deep: true})
+
+
 
 const editorOptions = ref(Object.assign({
       usedWith: 'request',

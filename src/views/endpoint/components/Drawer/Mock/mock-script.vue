@@ -6,7 +6,8 @@
         <span>自定义JavaScript代码</span>
       </div>
       <div class="right">
-        <a-button size="small" type="primary" @click.stop="updateMockScript" style="margin-right: 4px;">保存</a-button>
+        <a-button size="small" type="primary" :disabled="!isMockChange"
+                  @click.stop="updateMockScript" style="margin-right: 4px;">保存</a-button>
 
         <a-tooltip overlayClassName="dp-tip-small">
           <template #title>帮助</template>
@@ -37,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed, watch, provide} from "vue";
+import {ref, computed, watch, provide,onUnmounted,defineExpose,onMounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import { QuestionCircleOutlined, FullscreenOutlined } from '@ant-design/icons-vue';
@@ -49,13 +50,16 @@ import MockScript from "./script/Script.vue";
 import {UsedBy} from "@/utils/enum";
 import {disableScriptMock} from "@/views/endpoint/service";
 import {notifyError, notifySuccess} from "@/utils/notify";
-
+import cloneDeep from "lodash/cloneDeep";
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
+import {equalObjectByLodash} from "@/utils/object";
 const {t} = useI18n()
 provide('usedBy', UsedBy.MockData)
 
 const store = useStore<{ Endpoint }>();
 const endpoint = computed<any>(() => store.state.Endpoint.endpointDetail);
-const mockScript = computed<any>(() => store.state.Endpoint.mockScript);
+
+const {mockScript,isMockChange,srcMockScript,resetMockChange} = useIMLeaveTip();
 
 const scriptMockEnabled = ref(true)
 watch(() => endpoint.value.scriptMockDisabled, (newVal, oldVal) => {
@@ -75,8 +79,11 @@ watch(() => endpoint.value.id, (newVal) => {
 
 const updateMockScript = async () => {
   console.log('updateMockScript')
-  const result = await store.dispatch('Endpoint/updateMockScript', mockScript.value)
+  const result = await store.dispatch('Endpoint/updateMockScript', mockScript.value);
+
   if (result) {
+    // 保存完后重新拉取最新的 Mock 脚本信息
+    getMockScript();
     notifySuccess(`保存成功`);
   } else {
     notifyError(`保存失败`);
@@ -102,6 +109,29 @@ const format = (item) => {
   console.log('format', item)
   bus.emit(settings.eventEditorAction, {act: settings.eventTypeFormat})
 }
+
+watch(() => {
+  return [mockScript?.value,srcMockScript?.value]
+},(newVal) => {
+  // debugger;
+  const src = srcMockScript?.value;
+  const cur = mockScript?.value;
+  const isChange = equalObjectByLodash(src,cur);
+  store.commit('Endpoint/setIsMockChange', !isChange)
+},{
+  deep:true
+})
+
+onMounted(() => {
+  // 离开前保存数据
+  bus.on(settings.eventLeaveMockSaveData, updateMockScript);
+})
+
+// 销毁时，处理数据和解除数据绑定
+onUnmounted(() => {
+  bus.off(settings.eventLeaveMockSaveData, updateMockScript)
+})
+
 
 </script>
 

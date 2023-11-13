@@ -21,7 +21,7 @@
             <span class="title">智能合并</span><br>
             已存在的文件夹不再重复创建。<br>
             相同接口如果在平台上做了修改，则不导入。<br>
-            相同接口在平台上没有做过修改，则不覆盖。<br>
+            相同接口在平台上没有做过修改，则覆盖。<br>
             新增接口导入<br>
          </template>
         <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)" />

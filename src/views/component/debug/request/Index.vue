@@ -7,6 +7,7 @@
 <script setup lang="ts">
 import RequestConfig from './Config.vue';
 
+
 </script>
 
 <style lang="less" scoped>

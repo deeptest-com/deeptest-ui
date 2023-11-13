@@ -24,18 +24,17 @@ function createProjectGuard(router) {
             }
           })
         } else {
-          notifyError(result.msg);
+          notifyError(result.code === 401 ? '登录态失效，请重新登录' : result.msg);
           return next({
             path: '/',
           })
         }
       } else {
-        store.dispatch('Global/getPermissionList', { projectId: result.id });
+        await store.dispatch('Global/getPermissionList', { projectId: result.id });
       }
       return next();
     }
     next();
   });
 }
-
 

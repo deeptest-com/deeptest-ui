@@ -2,7 +2,9 @@
   <div class="post-script-main">
     <div class="content">
       <div class="codes">
-        <MonacoEditor theme="vs" language="typescript" class="editor"
+        <MonacoEditor theme="vs" language="typescript"
+                      v-if="model?.id"
+                      class="editor"
                       :value="model.content"
                       :options="editorOptions"
                       :timestamp="timestamp"
@@ -47,12 +49,12 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, inject, onBeforeUnmount, onMounted, reactive, ref, watch} from "vue";
+import {computed, defineProps, inject, onBeforeUnmount, onMounted, reactive, ref, watch,onUnmounted} from "vue";
 import {Form} from 'ant-design-vue';
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import {UsedBy} from "@/utils/enum";
-
+import {ConditionType, UsedBy} from "@/utils/enum";
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {StateType as Snippet} from "@/store/snippet";
 
@@ -63,16 +65,25 @@ import settings from "@/config/settings";
 import Tips from "@/components/Tips/index.vue";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import {StateType as ProjectStateType} from "@/store/project";
+import cloneDeep from "lodash/cloneDeep";
 
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet: Snippet }>();
-
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
-const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
-const debugData = computed<any>(() => store.state.Debug.debugData);
-const model = computed<any>(() => store.state.Debug.scriptData);
+
+
+const {postConditionsDataObj,debugData,debugInfo} = useIMLeaveTip();
+const model = computed<any>(() => {
+  return postConditionsDataObj.value?.[props?.condition?.entityId] || {}
+});
+
+onMounted(() => {
+  if(!model?.value?.id){
+    load();
+  }
+})
 const jslibNames = computed<any>(() => store.state.Snippet.jslibNames);
 
 const props = defineProps({
@@ -89,12 +100,12 @@ const props = defineProps({
 const load = () => {
   console.log('load script ...', props.condition)
   store.dispatch('Debug/getScript', props.condition.entityId)
-  store.dispatch('Snippet/listJslibNames')
-
+  store.dispatch('Snippet/listJslibNames');
 }
-load()
+
 
 const timestamp = ref('')
+
 watch(model, (newVal) => {
   timestamp.value = Date.now() + ''
 }, {immediate: true, deep: true})
@@ -110,7 +121,10 @@ const editorOptions = ref(Object.assign({
 ))
 
 const addSnippet = (snippetName) => {
-  store.dispatch('Debug/addSnippet', snippetName)
+  store.dispatch('Debug/addSnippetForPost', {
+    name:snippetName,
+    data:model
+  })
 }
 const editorChange = (newScriptCode) => {
   console.log('editorChange', newScriptCode)
@@ -126,49 +140,46 @@ const rules = reactive({
 let { resetFields, validate, validateInfos } = useForm(model, rules);
 
 const save = () => {
-  console.log('save', model.value)
-  validate().then(() => {
-    model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
-    model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
-    model.value.projectId = debugData.value.projectId
 
-    store.dispatch('Debug/saveScript', model.value).then((result) => {
-      if (result) {
-        notifySuccess(`保存成功`);
-        if (props.finish) {
-          props.finish()
+    console.log('save', model.value)
+    // validate().then(() => {
+      const data = cloneDeep(model.value);
+      data.debugInterfaceId = debugInfo.value.debugInterfaceId
+      data.endpointInterfaceId = debugInfo.value.endpointInterfaceId
+      data.projectId = debugData.value.projectId
+
+      store.dispatch('Debug/saveScript', data).then((result) => {
+        if (result) {
+          notifySuccess(`保存成功`);
+          if (props.finish) {
+            props.finish()
+          }
+          // 重新拉取一下最新的数据
+          load();
+        } else {
+          notifyError(`保存失败`);
         }
-      } else {
-        notifyError(`保存失败`);
-      }
-    })
-  })
+      })
+    // })
 }
+
 const cancel = () => {
-  console.log('cancel')
   if (props.finish) {
     props.finish()
   }
 }
-// watch(() => {
-//   return model.value
-// },(newVal,oldVal) => {
-//   console.log('model.value222 script：',newVal,oldVal)
-// },{
-//   deep:true
-// })
 
 onMounted(() => {
-  console.log('onMounted')
   bus.on(settings.eventConditionSave, save);
 })
 onBeforeUnmount( () => {
-  console.log('onBeforeUnmount')
   bus.off(settings.eventConditionSave, save);
 })
 
 const labelCol = { span: 0 }
 const wrapperCol = { span: 24 }
+
+
 
 </script>
 

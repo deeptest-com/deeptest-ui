@@ -58,9 +58,11 @@ export interface SettingsType {
     eventTypeFormat: string,
 
     eventConditionSave: string,
+    eventPostConditionSave: string,
 
     eventVariableSelectionStatus: string,
     eventLeaveDebugSaveData: string,
+    eventLeaveMockSaveData: string,
     eventVariableSelectionResult: any,
     webSocketRoom: string,
     electronMsg: string,
@@ -101,6 +103,7 @@ export interface SettingsType {
      * */
     lyElectronUserInfo: string;
     SwalLeaveSetting: any;
+    eventPreConditionSave: string;
 }
 
 const settings: SettingsType = {
@@ -133,11 +136,14 @@ const settings: SettingsType = {
     eventTypeFormat: 'format',
 
     eventConditionSave: '',
+    eventPostConditionSave: 'eventPostConditionSave',
 
     eventVariableSelectionStatus: 'eventVariableSelectionStatus',
     eventVariableSelectionResult: 'eventVariableSelectionResult',
     // 调试页面离开时保存数据
     eventLeaveDebugSaveData: 'eventLeaveDebugSaveData',
+    // mock页面离开时保存数据
+    eventLeaveMockSaveData: 'eventLeaveMockSaveData',
     webSocketRoom: 'webSocketRoom',
     electronMsg: 'electronMsg',
     electronMsgUsePort: 'electronMsgUsePort',
@@ -177,7 +183,8 @@ const settings: SettingsType = {
             cancelButton: 'btn btn-normal btn-cancel',
             denyButton: 'btn btn-normal btn-deny',
         },
-    }
+    },
+    eventPreConditionSave:'eventPreConditionSave',
 
 };
 

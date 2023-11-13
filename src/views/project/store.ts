@@ -132,11 +132,15 @@ const StoreModel: ModuleType = {
             }
         },
         async saveProject({ commit }, payload: Pick<Project, "name" | "desc"> ) {
-            const response: ResponseData =await save(payload);
-            if (response.code === 0) {
-                return true;
-            } else {
-                return response.msg
+            try {
+                const response: ResponseData =await save(payload);
+                if (response.code === 0) {
+                    return Promise.resolve(true);
+                } else {
+                    return Promise.reject(response);
+                }
+            } catch(e) {
+                return Promise.reject(e);
             }
         },
         async removeProject({ commit, dispatch, state }, payload: number ) {

@@ -62,6 +62,12 @@ export interface Header {
     disabled: boolean;
 }
 
+export interface Cookie {
+    name: string;
+    value: any;
+    disabled: boolean;
+}
+
 export interface BasicAuth {
     username: string;
     password: string;

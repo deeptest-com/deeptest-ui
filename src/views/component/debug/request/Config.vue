@@ -18,10 +18,14 @@
         <RequestBody v-if="activeKey === 'body'" />
       </a-tab-pane>
 
-
       <a-tab-pane key="header" :tab="getTabTitle('headers')">
         <GlobalParameters :in="'header'" />
         <RequestHeaders v-if="activeKey === 'header'" />
+      </a-tab-pane>
+
+      <a-tab-pane key="cookie" :tab="getTabTitle('cookies')">
+        <GlobalParameters :in="'cookie'" />
+        <Cookie v-if="activeKey === 'cookie'" />
       </a-tab-pane>
 
       <a-tab-pane key="auth" tab="授权">
@@ -44,14 +48,15 @@
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch, onMounted} from "vue";
+import {computed, inject, ref, watch, onMounted,onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
-import {Methods, UsedBy} from "@/utils/enum";
+import {ConditionType, Methods, UsedBy} from "@/utils/enum";
 import {StateType as Debug} from "@/views/component/debug/store";
 
 import QueryParameters from "./config/QueryParameters.vue";
 import PathParameters from "./config/PathParameters.vue";
 import GlobalParameters from "./config/GlobalParameters.vue";
+import Cookie from "./config/Cookie.vue";
 
 import RequestBody from "./config/Body.vue";
 import RequestHeaders from "./config/Headers.vue";
@@ -60,6 +65,11 @@ import PreCondition from "./config/ConditionPre.vue";
 import PostCondition from "./config/ConditionPost.vue";
 import Assertion from "./config/Assertion.vue";
 import {useStore} from "vuex";
+import bus from "@/utils/eventBus";
+import settings from "@/config/settings";
+import {notifyError, notifySuccess} from "@/utils/notify";
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
+import cloneDeep from "lodash/cloneDeep";
 
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
@@ -76,12 +86,13 @@ const getTabTitle = computed(() => {
     queryParams: '查询参数',
     pathParams: '路径参数',
     headers: '请求头',
+    cookies: 'Cookie',
     postConditions: '后置处理',
     assertionConditions: '断言',
   }
   return type => {
     const sourceData = type === 'postConditions' ? (postConditions.value || []) : type === 'assertionConditions' ? (assertionConditions.value || []) : (debugData.value[type] || []).filter(e => e.name);
-    const globalParamsType = type === 'queryParams' ? 'query' : type === 'pathParams' ? 'path' : type === 'headers' ? 'header' : '';
+    const globalParamsType = type === 'queryParams' ? 'query' : type === 'pathParams' ? 'path' : type === 'headers' ? 'header' : type === "cookies"? 'cookie': '';
     let globalParamsLength = 0;
     if (globalParamsType) {
       const globalParams = (debugData.value.globalParams|| []).filter( item => item.in === globalParamsType);
@@ -112,6 +123,85 @@ watch(() => {
 }, {
   immediate: true,
 });
+
+
+
+
+/**
+ * 离开提示保存: 后置处理器 + 断言
+ * */
+const {
+  postConditionsList,
+  postConditionsDataObj,
+  debugInfo,
+  assertionConditionsDataObj,
+  debugChangePostScript,
+  debugChangeCheckpoint,
+    debugChangePreScript,
+  resetDebugChange,
+    resetMockChange,
+  scriptData,
+}  = useIMLeaveTip();
+const getEntityType = (id) => {
+  const cur = postConditionsList?.value?.find((item) => {
+    return item.entityId === id
+  })
+  return cur?.entityType;
+}
+const leaveSave =  async (event) => {
+  // 后置处理器缓存的数据 - 保存
+  if(Object.keys(postConditionsDataObj.value)?.length && debugChangePostScript.value){
+    Object.values(postConditionsDataObj.value).map(async (item:any) => {
+      item.debugInterfaceId = debugInfo.value.debugInterfaceId;
+      item.endpointInterfaceId = debugInfo.value.endpointInterfaceId;
+      item.projectId = debugData.value.projectId;
+      const entityType = getEntityType(item.id);
+      if(entityType === ConditionType.script){
+        await store.dispatch('Debug/leaveSaveScript', item)
+      }
+      if(entityType === ConditionType.extractor){
+        await store.dispatch('Debug/leaveSaveExtractor', item)
+      }
+    })
+  }
+  // 断言缓存的数据 - 保存
+  if(Object.keys(assertionConditionsDataObj.value)?.length && debugChangeCheckpoint.value){
+    Object.values(assertionConditionsDataObj.value).map(async (item:any) => {
+      item.debugInterfaceId = debugInfo.value.debugInterfaceId;
+      item.endpointInterfaceId = debugInfo.value.endpointInterfaceId;
+      item.projectId = debugData.value.projectId;
+      await store.dispatch('Debug/leaveSaveCheckpoint', item);
+    })
+  }
+  // 前置处理器保存
+  if(debugChangePreScript.value && scriptData.value?.id){
+    const data = cloneDeep(scriptData.value)
+    data.debugInterfaceId = debugInfo.value.debugInterfaceId
+    data.endpointInterfaceId = debugInfo.value.endpointInterfaceId
+    data.projectId = debugData.value.projectId;
+    await store.dispatch('Debug/savePreConditionScript', data)
+  }
+  resetDebugChange();
+  if(event?.callback){
+    event?.callback?.();
+  }else {
+    notifySuccess(`保存成功`);
+  }
+
+}
+
+
+
+
+onMounted( () => {
+  bus.on(settings.eventPostConditionSave, leaveSave);
+})
+
+onUnmounted( () => {
+  bus.off(settings.eventPostConditionSave, leaveSave);
+  resetDebugChange();
+})
+
 </script>
 
 <style lang="less">
