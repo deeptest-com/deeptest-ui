@@ -6,19 +6,19 @@
       </span>
 
       <a-radio-group v-model:value="executionType" @change="handleExecTypeChange">
-        <a-radio :value="'single'">单参数异常
+        <a-radio :value="'multi'">单参数异常
           <a-tooltip placement="top" title="使用单一异常参数值替换基准用例相应请求参数，可形成多个新的测试用例">
             <QuestionCircleOutlined />
           </a-tooltip>
         </a-radio>
-        <a-radio :value="'multi'">多参数异常
+        <a-radio :value="'single'">多参数异常
           <a-tooltip placement="top" title="使用多个异常参数值组合替换基准用例相应请求参数，形成一个新的测试用例">
             <QuestionCircleOutlined />
           </a-tooltip>
         </a-radio>
       </a-radio-group>
 
-      <span class="multiple-execution-result" v-if="executionType === 'multi' && reportTreeData.length > 0">
+      <span class="multiple-execution-result" v-if="executionType === 'single' && reportTreeData.length > 0">
         <span>通过</span>
         <a-button class="case-exec-detail" type="link" @click.stop="queryMultiDetail()">详情</a-button>
       </span>
@@ -33,7 +33,7 @@
       :checkable="true"
       v-model:checkedKeys="checkedKeys"
       @check="onChecked"
-      :checkStrictly="executionType === 'multi'"
+      :checkStrictly="executionType === 'single'"
       :show-icon="true">
       <template #title="nodeProps">
         <span class="case-tree-title">
@@ -49,7 +49,7 @@
               placeholder="修改标题"
               :value="alternativeCaseFactor[nodeProps.path]?.value || nodeProps.sample"
               @update="v => editFinish(nodeProps.key, v)"/>
-            <span class="case-exec-result" v-if="executionType === 'single' && execStatusMap[nodeProps.key]?.status">
+            <span class="case-exec-result" v-if="executionType === 'multi' && execStatusMap[nodeProps.key]?.status">
               <!-- 运行结果 -->
               <span :class="[getDpResultClass(execStatusMap[nodeProps.key]?.status), 'case-exec-status']">
                 <span>
@@ -157,13 +157,13 @@ const treeData = computed(() => {
 
     return cloneDeep(originalCasesData);
   };
-  return unref(executionType) === 'single' ? cloneDeep(unref(alternativeCases)) : setDisabledIfDir(cloneDeep(unref(alternativeCases)));
+  return unref(executionType) === 'multi' ? cloneDeep(unref(alternativeCases)) : setDisabledIfDir(cloneDeep(unref(alternativeCases)));
 })
 
 const replaceFields = {key: 'key'};
 const expandedKeys = ref<string[]>([]);
 const checkedKeys = ref<any>([] as any[]);
-const executionType = ref('single'); // single: 单参数异常  multiple: 多参数异常
+const executionType = ref('multi'); // multi: 单参数异常  single: 多参数异常
 const loading = ref(true);
 
 const loadCaseTree = async (needLoading?: boolean) => {
@@ -200,7 +200,7 @@ function selectAll() {
 
   if (allSelected.value) {
     getAllKeys(alternativeCases.value, keys);
-    checkedKeys.value = executionType.value === 'single' ? keys : { checked: keys, halfChecked: [] };
+    checkedKeys.value = executionType.value === 'multi' ? keys : { checked: keys, halfChecked: [] };
   } else {
     checkedKeys.value = []
   }
@@ -215,7 +215,7 @@ function getAllKeys(arr: any, keys: any[]) {
     return;
   }
   arr.forEach((item, index) => {
-    if (executionType.value === 'single' || (executionType.value === 'multi' && item.isDir)) {
+    if (executionType.value === 'multi' || (executionType.value === 'single' && item.isDir)) {
       keys.push(item.key);
     }
     if (Array.isArray(item.children)) {
@@ -265,7 +265,7 @@ const queryDetail = (reportInfo?: any) => {
 
 const handleExecTypeChange = evt => {
   console.log('当前执行类型:', evt.target.value);
-  checkedKeys.value = evt === 'single' ? [] : {
+  checkedKeys.value = evt === 'multi' ? [] : {
     checked: [],
     halfChecked: [],
   };
@@ -286,7 +286,7 @@ const onChecked = (keys, treeNode) => {
   const siblingNodes = parentTreeNode.children; // 所选case的兄弟节点。这里对应的是 case对应的 参数 所有的 其他约束条件
   const currentChecked = keys.checked;
   // 多参数异常情况下： 参属下的约束条件只能选择一个，为单选的状态。
-  if (unref(executionType) === 'multi') {
+  if (unref(executionType) === 'single') {
     if (currentNode.category === 'case') {
       if (currentChecked.includes(currentNode.key)) {
         // 选中当前case
@@ -312,7 +312,7 @@ const onChecked = (keys, treeNode) => {
 const getSelectedNodes = () => {
   const ret: any[] = [];
 
-  (executionType.value === 'single' ? checkedKeys.value : (checkedKeys.value.checked || [])).forEach((key) => {
+  (executionType.value === 'multi' ? checkedKeys.value : (checkedKeys.value.checked || [])).forEach((key) => {
     if (treeDataMap.value[key]) {
       const item = treeDataMap.value[key]
       ret.push(item)
@@ -330,7 +330,7 @@ const getSelectedTreeNodes = () => {
     const array = cloneDeep(data);
     array.forEach(e => {
       if (e.category === 'case') {
-        e.needExec = (executionType.value === 'single' ? unref(checkedKeys) : (unref(checkedKeys).checked || [])).includes(e.key);
+        e.needExec = (executionType.value === 'multi' ? unref(checkedKeys) : (unref(checkedKeys).checked || [])).includes(e.key);
       } else if (e.children && e.children.length > 0) {
         e.children = setNodesChecked(e.children);
         e.needExec = e.children.some(child => child.needExec);
