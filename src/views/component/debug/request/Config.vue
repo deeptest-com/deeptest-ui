@@ -182,7 +182,12 @@ const leaveSave =  async (event) => {
     await store.dispatch('Debug/savePreConditionScript', data)
   }
   resetDebugChange();
-  notifySuccess(`保存成功`);
+  if(event?.callback){
+    event?.callback?.();
+  }else {
+    notifySuccess(`保存成功`);
+  }
+
 }
 
 

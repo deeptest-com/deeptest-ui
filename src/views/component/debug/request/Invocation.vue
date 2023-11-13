@@ -36,7 +36,7 @@
 
       <div class="send">
         <a-button type="primary" trigger="click"
-                  @click="send"
+                  @click="confirmSend"
                   :disabled="!isPathValid">
           <span>发送</span>
         </a-button>
@@ -106,9 +106,14 @@ import {handlePathLinkParams} from "@/utils/dom";
 import {syncSourceMapToText} from "@/views/scenario/components/Design/config"
 import {notifyWarn} from "@/utils/notify";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
-const {isDebugChange,debugChangePreScript,debugChangePostScript,debugChangeCheckpoint} = useIMLeaveTip();
+const {
+  isDebugChange,
+  debugChangePreScript,
+  debugChangePostScript,
+  debugChangeCheckpoint} = useIMLeaveTip();
 const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
+
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const servers = computed<any[]>(() => store.state.Debug.serves);
 const currService = computed(() => store.state.ServeGlobal.currServe);
@@ -189,13 +194,14 @@ function changeServer(id) {
   store.dispatch('Debug/changeServer', { serverId: id,serveId:debugData.value.serveId, requestEnvVars: false })
 }
 
+
+
 const send = async (e) => {
   const data = prepareDataForRequest(debugData.value)
-  console.log('sendRequest', data)
+  console.log('sendRequest', data);
 
   if (validateInfo()) {
     store.commit("Global/setSpinning",true)
-
     const callData = {
       serverUrl: process.env.VUE_APP_API_SERVER, // used by agent to submit result to server
       token: await getToken(),
@@ -209,9 +215,24 @@ const send = async (e) => {
   }
 }
 
+const confirmSend = async (e)=>{
+  if(debugChangePreScript.value || debugChangePostScript.value || debugChangeCheckpoint.value){
+    store.commit("Global/setSpinning",true)
+    bus.emit(settings.eventPostConditionSave, {
+      callback:async () => {
+        await send(e)
+        store.commit("Global/setSpinning",false)
+      }
+    });
+  }else {
+    await send(e)
+  }
+}
+
 const save = (e) => {
   let data = JSON.parse(JSON.stringify(debugData.value))
   data = prepareDataForRequest(data)
+
 
   if (validateInfo()) {
      props.onSave(data)
