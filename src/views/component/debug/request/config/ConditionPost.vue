@@ -46,7 +46,11 @@
                 <span v-html="element.desc || t(element.entityType)"></span>
               </div>
               <div class="buttons">
-                <a-button size="small" type="primary" v-if="activePostCondition.id === element.id" @click.stop="save(element)">保存</a-button>
+                <a-button size="small" type="primary"
+                          :disabled="getSaveBtnDisabled(element?.entityId)"
+                          v-if="activePostCondition.id === element.id"
+                          @click.stop="save(element)">保存</a-button>
+
 
                 <ClearOutlined v-if="activePostCondition.id === +element.id && element.entityType === ConditionType.script"
                                @click.stop="format(element)"
@@ -104,7 +108,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch, provide, unref, defineProps} from "vue";
+import {computed, inject, ref, watch, getCurrentInstance, ComponentInternalInstance, onUnmounted, onMounted, provide, defineProps} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import { 
@@ -125,11 +129,12 @@ import {confirmToDelete} from "@/utils/confirm";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {getEnumSelectItems} from "@/views/scenario/service";
 import IconSvg from "@/components/IconSvg";
-
+import useIMLeaveTip   from "@/composables/useIMLeaveTip";
 import Extractor from "./conditions-post/Extractor.vue";
 import Checkpoint from "./conditions-post/Checkpoint.vue";
 import Script from "./conditions-post/Script.vue";
 import FullScreenPopup from "./ConditionPopup.vue";
+import {equalObjectByLodash} from "@/utils/object";
 
 const props = defineProps<{
   isForBenchmarkCase?: boolean;
@@ -145,9 +150,7 @@ const activePostCondition = computed<any>(() => {
 });
 
 provide('usedWith', UsedWith.PostCondition)
-// const extractorData = computed<any>(() => store.state.Debug.extractorData);
-// const checkpointData = computed<any>(() => store.state.Debug.checkpointData);
-// const scriptData = computed<any>(() => store.state.Debug.scriptData);
+
 
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
@@ -224,6 +227,36 @@ const closeFullScreen = (item) => {
 }
 
 provide('isForBenchmarkCase', props.isForBenchmarkCase || false);
+/*************************************************
+ * ::::后置处理器提示
+ ************************************************/
+const {srcPostConditionsDataObj,postConditionsDataObj,debugChange} = useIMLeaveTip();
+const getSaveBtnDisabled = (id) => {
+  const cur =  postConditionsDataObj.value?.[id] || {};
+  const src =  srcPostConditionsDataObj.value?.[id] || {};
+  return equalObjectByLodash(cur, src);
+}
+
+watch(() => {
+  return [postConditions.value,postConditionsDataObj.value,srcPostConditionsDataObj.value]
+},(newVal,oldValue) => {
+  const cur =  postConditionsDataObj.value;
+  const src =  srcPostConditionsDataObj.value;
+  // debugger;
+
+  const isChange = !equalObjectByLodash(cur, src);
+  console.log(83222,cur,src,isChange,debugChange.value)
+  store.commit('Debug/setDebugChange',{
+    postScript:isChange,
+  })
+},{
+  deep:true
+})
+
+
+onUnmounted(() => {
+  store.commit('Debug/setActivePostCondition', {});
+})
 
 </script>
 

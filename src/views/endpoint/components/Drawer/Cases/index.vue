@@ -17,15 +17,16 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed, defineProps, defineEmits, watch, nextTick} from "vue";
+import {ref, computed, defineProps, defineEmits, watch, nextTick, onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import CaseList from "./list.vue";
 import CaseDesign from "./design.vue";
 import AlternativeCase from "./alternativeCase.vue";
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
 
+const {clearDebugChange}= useIMLeaveTip();
 const {t} = useI18n()
-
 const store = useStore<{ Endpoint }>();
 const endpoint = computed<any>(() => store.state.Endpoint.endpointDetail);
 const alternativeRecord = ref<any>({});
@@ -68,6 +69,10 @@ const showBenchMark = async (record?: any) => {
 const back = () => {
   show.value = 'list'
 }
+
+onUnmounted(() => {
+  clearDebugChange()
+})
 
 </script>
 

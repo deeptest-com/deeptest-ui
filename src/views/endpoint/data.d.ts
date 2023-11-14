@@ -88,7 +88,8 @@ export interface filterFormState {
     createUser: [] | null,
     title: string | null,
     categoryId: string | null,
-    tagNames:[]|[]
+    tagNames:[]|[],
+    serveId:string |null
 }
 
 
@@ -97,6 +98,7 @@ interface NewEndpointFormState {
     categoryId: string | null | number;
     description: string | undefined;
     curl:string;
+    serveId:string |null;
 }
 
 export interface QueryCaseTreeParams {

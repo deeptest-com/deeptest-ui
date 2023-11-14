@@ -110,24 +110,44 @@ import {NotificationKeyCommon} from "@/utils/const";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import {notifyError, notifySuccess} from "@/utils/notify";
-
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
 const isForBenchmarkCase = inject('isForBenchmarkCase');
 const {t} = useI18n();
-
+const props = defineProps({
+  condition: {
+    type: Object,
+    required: true,
+  },
+  finish: {
+    type: Function,
+    required: false,
+  },
+})
 const store = useStore<{ Debug: Debug }>();
 
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const responseData = computed<any>(() => store.state.Debug.responseData);
-const model = computed<any>(() => isForBenchmarkCase ? store.state.Debug.benchMarkCase.extractorData : store.state.Debug.extractorData);
+// const model = computed<any>(() => isForBenchmarkCase ? store.state.Debug.benchMarkCase.extractorData : store.state.Debug.extractorData);
 
 const typeRequired = [{required: true, message: '请选择类型', trigger: 'change'}]
 const expressionRequired = [{required: true, message: '请输入元素路径', trigger: 'blur'}]
 const keyRequired = [{required: true, message: '请输入键值', trigger: 'blur'}]
 const boundaryStartRequired = [{required: true, message: '请输入边界开始字符串', trigger: 'blur'}]
 const boundaryEndRequired = [{required: true, message: '请输入边界结束字符串', trigger: 'blur'}]
+
+const {postConditionsDataObj} = useIMLeaveTip();
+const model = computed<any>(() => {
+  return postConditionsDataObj.value?.[props?.condition?.entityId] || {}
+});
+
+onMounted(() => {
+  if(!model?.value?.id){
+    load();
+  }
+})
 
 const isInit = ref(true)
 const rules = computed(() => { return {
@@ -146,6 +166,8 @@ const rules = computed(() => { return {
   ],
 }})
 
+
+
 watch(model, (newVal) => {
       if (!isInit.value) return
 
@@ -161,25 +183,6 @@ watch(model, (newVal) => {
     }, {immediate: true, deep: true}
 )
 
-// watch(() => {
-//   return model.value
-// },(newVal,oldValue) => {
-//   console.log('model.value222 提取器',newVal,oldValue);
-// },{
-//   deep:true
-// })
-
-const props = defineProps({
-  condition: {
-    type: Object,
-    required: true,
-  },
-  finish: {
-    type: Function,
-    required: false,
-  },
-})
-
 const types = getEnumSelectItems(CheckpointType)
 const operators = getEnumSelectItems(ComparisonOperator)
 const srcOptions = getEnumSelectItems(ExtractorSrc)
@@ -189,7 +192,8 @@ const load = () => {
   console.log('load', props.condition)
   store.dispatch('Debug/getExtractor', props.condition)
 }
-load()
+
+
 
 let {resetFields, validate, validateInfos} = useForm(model, rules);
 
@@ -199,17 +203,20 @@ const save = () => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
     model.value.projectId = debugData.value.projectId
-
     store.dispatch('Debug/saveExtractor', model.value).then((result) => {
       if (result) {
         notifySuccess(`保存成功`);
         if (props.finish) {
           props.finish()
         }
+        // 重新拉取一下最新的数据
+        load();
       } else {
         notifyError(`保存失败`);
       }
+
     })
+
   })
 }
 const cancel = () => {

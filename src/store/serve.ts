@@ -47,7 +47,9 @@ const StoreModel: ModuleType = {
         const response: ResponseData = await listServe();
         const { data } = response;
         let currServe = {};
-        if (data && data.serves && data.serves.length > 0) {
+        if (data.currServe.id ){
+          currServe = data.currServe
+        }else if (data && data.serves && data.serves.length > 0) {
           currServe = data.serves[0];
         }
         const payload = { currServe, serves: (data && data.serves) || [] };

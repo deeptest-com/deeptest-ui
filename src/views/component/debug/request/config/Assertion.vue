@@ -42,7 +42,9 @@
                 </div>
               </div>
               <div class="buttons">
-                <a-button size="small" type="primary" v-if="activeAssertion.id === element.id" @click.stop="save(element)" style="margin-right: 4px;">保存</a-button>          
+                <a-button size="small" type="primary" v-if="activeAssertion.id === element.id"
+                          :disabled="getSaveBtnDisabled(element?.entityId)"
+                          @click.stop="save(element)" style="margin-right: 4px;">保存</a-button>
 
                 <ClearOutlined v-if="activeAssertion.id === +element.id && element.entityType === ConditionType.script"
                                @click.stop="format(element)"  class="dp-icon-btn dp-trans-80" />&nbsp;
@@ -84,7 +86,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch, defineProps, provide} from "vue";
+import {computed, inject, ref, watch, defineProps, provide, onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import { 
@@ -102,12 +104,13 @@ import settings from "@/config/settings";
 import {confirmToDelete} from "@/utils/confirm";
 import {StateType as Debug} from "@/views/component/debug/store";
 import IconSvg from "@/components/IconSvg";
-
+import useIMLeaveTip   from "@/composables/useIMLeaveTip";
 import Checkpoint from "./conditions-post/Checkpoint.vue";
 import FullScreenPopup from "./ConditionPopup.vue";
 import TooltipCell from "@/components/Table/tooltipCell.vue";
 import draggable from 'vuedraggable'
 import Tips from "@/components/Tips/index.vue";
+import {equalObjectByLodash} from "@/utils/object";
 
 const props = defineProps<{
   isForBenchmarkCase?: boolean;
@@ -195,7 +198,35 @@ const closeFullScreen = (item) => {
   fullscreen.value = false
 }
 
+/*************************************************
+ * ::::后置处理器+断言保存提示
+ ************************************************/
+const {srcAssertionConditionsDataObj,assertionConditionsDataObj} = useIMLeaveTip();
+const getSaveBtnDisabled = (id) => {
+  const cur =  assertionConditionsDataObj.value?.[id] || {};
+  const src =  srcAssertionConditionsDataObj.value?.[id] || {};
+  return equalObjectByLodash(cur, src);
+}
+
+watch(() => {
+  return [assertionConditions.value,srcAssertionConditionsDataObj.value,assertionConditionsDataObj.value]
+},(newVal,oldValue) => {
+  const cur =  assertionConditionsDataObj.value;
+  const src =  srcAssertionConditionsDataObj.value;
+  const isChange = !equalObjectByLodash(cur, src);
+  store.commit('Debug/setDebugChange',{
+    checkpoint:isChange,
+  })
+},{
+  deep:true
+})
+
+onUnmounted(() => {
+  store.commit('Debug/setActiveAssertion', {});
+})
+
 provide('isForBenchmarkCase', props.isForBenchmarkCase || false);
+
 </script>
 
 <style lang="less" scoped>

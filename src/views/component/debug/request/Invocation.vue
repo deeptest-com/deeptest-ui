@@ -15,7 +15,7 @@
         </a-select>
       </div>
       <div id="env-selector">
-        <EnvSelector :show="showBaseUrl()" :server-id="serverId" @change="changeServer" :disabled="usedBy === UsedBy.ScenarioDebug" />
+        <EnvSelector :show="showBaseUrl()" :server-id="serverId" :serveId="debugData.serveId" @change="changeServer" :disabled="usedBy === UsedBy.ScenarioDebug" />
       </div>
       <div v-if="showBaseUrl()" class="base-url">
         <a-input placeholder="请输入地址"
@@ -36,7 +36,7 @@
 
       <div class="send" v-if="showOperation">
         <a-button type="primary" trigger="click"
-                  @click="send"
+                  @click="confirmSend"
                   :disabled="!isPathValid">
           <span>发送</span>
         </a-button>
@@ -45,7 +45,7 @@
       <div class="save" v-if="showOperation">
         <a-button trigger="click" class="dp-bg-light"
                   @click="save"
-                  :disabled="!isPathValid || (!debugChangeBase && checkDataChange)">
+                  :disabled="!isPathValid || (!isDebugChange && checkDataChange)">
           <icon-svg class="icon dp-icon-with-text" type="save" />
           保存
         </a-button>
@@ -105,15 +105,18 @@ import EnvSelector from "./config/EnvSelector.vue";
 import {handlePathLinkParams} from "@/utils/dom";
 import {syncSourceMapToText} from "@/views/scenario/components/Design/config"
 import {notifyWarn} from "@/utils/notify";
-import {StateType as UserStateType} from "@/store/user";
-
-const store = useStore<{ User: UserStateType, Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal }>();
-const currUser = computed(() => store.state.User.currentUser);
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
+const {
+  isDebugChange,
+  debugChangePreScript,
+  debugChangePostScript,
+  debugChangeCheckpoint} = useIMLeaveTip();
+const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal, User }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
+const currUser = computed(() => store.state.User.currentUser);
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const currService = computed(() => store.state.ServeGlobal.currServe);
 const currServe = computed(() => store.state.Debug.currServe);
-const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
 
 const props = defineProps({
   onSave: {
@@ -184,7 +187,7 @@ watch(debugData, (newVal) => {
     debugData.value.url = debugData?.value.url || endpointDetail.value?.path || ''
   }
   debugData.value.baseUrl = currServe.value.url;
-  debugData.value.serveId = currServe.value.serveId;
+  //debugData.value.serveId = currServe.value.serveId;
 }, {immediate: true, deep: true});
 
 const serverId = computed(() => {
@@ -192,16 +195,17 @@ const serverId = computed(() => {
 });
 
 function changeServer(id) {
-  store.dispatch('Debug/changeServer', { serverId: id, requestEnvVars: false })
+  store.dispatch('Debug/changeServer', { serverId: id,serveId:debugData.value.serveId, requestEnvVars: false })
 }
+
+
 
 const send = async (e) => {
   const data = prepareDataForRequest(debugData.value)
-  console.log('sendRequest', data)
+  console.log('sendRequest', data);
 
   if (validateInfo()) {
     store.commit("Global/setSpinning",true)
-
     const callData = {
       userId: currUser.value.id,
       serverUrl: process.env.VUE_APP_API_SERVER,
@@ -216,15 +220,33 @@ const send = async (e) => {
   }
 }
 
+const confirmSend = async (e)=>{
+  if(debugChangePreScript.value || debugChangePostScript.value || debugChangeCheckpoint.value){
+    store.commit("Global/setSpinning",true)
+    bus.emit(settings.eventPostConditionSave, {
+      callback:async () => {
+        await send(e)
+        store.commit("Global/setSpinning",false)
+      }
+    });
+  }else {
+    await send(e)
+  }
+}
+
 const save = (e) => {
   let data = JSON.parse(JSON.stringify(debugData.value))
   data = prepareDataForRequest(data)
 
+
   if (validateInfo()) {
-     props.onSave(data)
+    props.onSave && props.onSave(data)
   }
 
   bus.emit(settings.eventConditionSave, {});
+  // 后置处理器 和 断言
+  debugChangePostScript.value && bus.emit(settings.eventPostConditionSave, {});
+  debugChangePreScript.value && bus.emit(settings.eventPreConditionSave, {});
 }
 const saveAsCase = () => {
   console.log('saveAsCase')
@@ -290,23 +312,6 @@ function validatePath() {
   return isMatch
 }
 
-// const showContextMenu = ref(false)
-// const clearMenu = () => {
-//   console.log('clearMenu')
-//   showContextMenu.value = false
-// }
-//
-// let contextTarget = {} as any
-// const contextMenuStyle = ref({} as any)
-//
-// const onMenuClick = (key) => {
-//   console.log('onMenuClick', key)
-//
-//   if (key === 'use-variable') {
-//     bus.emit(settings.eventVariableSelectionStatus, {src: 'url', data: contextTarget});
-//   }
-//   showContextMenu.value = false
-// }
 
 watch(() => {
   return currServe.value;
@@ -317,8 +322,9 @@ watch(() => {
   immediate: true,
 })
 
+
 watch(() => {
-  return currService.value.id;
+  return debugData.value.serveId;
 }, async (val) => {
   if (val) {
     await store.dispatch('Debug/listServes', {serveId: val});
@@ -327,11 +333,14 @@ watch(() => {
   immediate: true
 })
 
+
 onMounted(() => {
   // 离开前保存数据
-  bus.on(settings.eventLeaveDebugSaveData, (data) => {
-   save(data);
-  })
+  bus.on(settings.eventLeaveDebugSaveData, save);
+})
+
+onUnmounted(() => {
+  bus.off(settings.eventLeaveDebugSaveData, save)
 })
 
 </script>

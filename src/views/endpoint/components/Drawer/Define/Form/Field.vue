@@ -317,6 +317,8 @@ watch(() => {
 <style lang="less" scoped>
 .main {
   margin: 16px auto;
+  display: flex;
+  align-items: center;
 }
 
 .requireActived {

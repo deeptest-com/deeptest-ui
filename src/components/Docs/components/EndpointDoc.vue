@@ -3,14 +3,9 @@
 -->
 <template>
   <div class="doc-content" v-if="info?.name" :key="info?.id">
-    <!--    <a-breadcrumb v-if="isInterface" style="margin-bottom: 12px;">-->
-    <!--      <a-breadcrumb-item>{{isInterface ? info?.serveInfo?.name : info?.name}}</a-breadcrumb-item>-->
-    <!--      <a-breadcrumb-item ><a href="javascript:void (0)">{{info?.name}}</a></a-breadcrumb-item>-->
-    <!--    </a-breadcrumb>-->
     <!-- 服务信息 -->
     <div class="serve-info" v-if="!isInterface">
       <h1>{{ info.name }}</h1>
-      <!--      <a-tag>v1.0</a-tag>-->
       <div class="serve-info-block">
         <div class="title"><strong>服务信息</strong></div>
         <div class="items">
@@ -33,7 +28,7 @@
           <span><strong>{{ path.name }}：</strong></span>
           <a-tag class="method-tag" :color="getMethodColor(info.method)">{{ info.method }}</a-tag>
           <span class="request-uri">
-            <span class="ant-typography ant-typography-secondary">{{ handlePathStr(path.url + path.path) }}</span>
+            <span class="ant-typography ant-typography-secondary doc-value" :title="handlePathStr(path.url + path.path)">{{ handlePathStr(path.url + path.path) }}</span>
             <CopyOutlined class="copy-icon" @click="copyURL(handlePathStr(path.url + path.path))"/>
           </span>
         </div>
@@ -46,7 +41,7 @@
             <span><strong>{{ mock.name }}：</strong></span>
             <a-tag class="method-tag" :color="getMethodColor(info.method)">{{ info.method }}</a-tag>
             <span class="request-uri">
-            <span class="ant-typography ant-typography-secondary">{{ mock.url }}</span>
+            <span class="ant-typography ant-typography-secondary  doc-value" :title="mock.url">{{ mock.url }}</span>
             <CopyOutlined class="copy-icon" @click="copyURL(handlePathStr(mock.url))"/>
           </span>
           </div>
@@ -144,9 +139,9 @@
       </div>
     </div>
   </div>
-  <GenerateCode 
+  <GenerateCode
   v-if="genCodeVisible"
-  :visible="genCodeVisible" 
+  :visible="genCodeVisible"
   @close="close"
   :contentStr="contentStr"
   :serveId="info?.serveId"
@@ -413,6 +408,7 @@ function close (){
 .request-uri {
   display: flex;
   align-items: center;
+  flex:1;
 
   .copy-icon {
     //display: none;
@@ -429,6 +425,12 @@ function close (){
   }
 
 
+}
+.doc-value{
+  white-space: nowrap;         /* 防止文本换行 */
+  overflow: hidden;           /* 隐藏溢出的文本 */
+  text-overflow: ellipsis;    /* 显示省略号 */
+  max-width: 90%;
 }
 
 </style>

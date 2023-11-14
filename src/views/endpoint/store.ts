@@ -86,7 +86,6 @@ import {
     getSchemaList, getSchemaDetail
 } from "@/views/project-settings/service";
 import { changeServe } from '../project-settings/service';
-import {ref} from "vue/dist/vue";
 
 export interface StateType {
     endpointId: number;
@@ -120,6 +119,7 @@ export interface StateType {
     selectMockExpect: any;
     mockExpectLoading: boolean;
     mockScript:any;
+    srcMockScript:any; // 检测是否有变更
 
     //生成代码
     code:string;
@@ -153,6 +153,8 @@ export interface StateType {
     isDefineChange: boolean;
 
     benchMarkList: any[];
+    // mock表达式是否有变更
+    isMockChange: boolean;
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -204,6 +206,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setSelectedMockExpect: Mutation<StateType>;
         setMockExpectLoading: Mutation<StateType>;
         setMockScript:Mutation<StateType>;
+        setSrcMockScript:Mutation<StateType>;
 
         setCode:Mutation<StateType>;
         setGlobalActiveTab:Mutation<StateType>;
@@ -220,6 +223,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setIsDefineChange:Mutation<StateType>;
         setBenchMarkList: Mutation<StateType>;
+        setIsMockChange:Mutation<StateType>;
     };
     actions: {
         listEndpoint: Action<StateType, StateType>;
@@ -336,7 +340,8 @@ const initState: StateType = {
         "createUser": null,
         "title": null,
         categoryId: null,
-        tagNames: []
+        tagNames: [],
+        serveId:null,
     },
     endpointDetail: null,
     srcEndpointDetail: null,
@@ -375,6 +380,7 @@ const initState: StateType = {
     selectMockExpect: {},
     mockExpectLoading: false,
     mockScript: {},
+    srcMockScript:{},
 
     code: "",
     globalActiveTab: '',
@@ -393,6 +399,7 @@ const initState: StateType = {
     isDefineChange: false,
 
     benchMarkList: [],
+    isMockChange: false,
 };
 
 const StoreModel: ModuleType = {
@@ -568,6 +575,10 @@ const StoreModel: ModuleType = {
             state.mockScript = payload
         },
 
+        setSrcMockScript(state,payload){
+            state.srcMockScript = payload
+        },
+
         setCode(state, payload){
             state.code = payload
         },
@@ -612,7 +623,10 @@ const StoreModel: ModuleType = {
         },
         setAlternativeExecStatusMap(state, payload) {
             state.alternativeExecStatusMap = payload;
-        }
+        },
+        setIsMockChange(state, payload){
+            state.isMockChange = payload
+        },
     },
     actions: {
         async listEndpoint({commit, dispatch, state}, params: QueryParams) {
@@ -1359,6 +1373,7 @@ const StoreModel: ModuleType = {
             try {
                 const res = await getMockScript(endpointId);
                 commit('setMockScript', res.data);
+                commit('setSrcMockScript',  cloneDeep(res.data));
                 return true;
             } catch (error) {
                 return false;

@@ -56,7 +56,7 @@
   </a-row>
   <!-- 请求参数展示：headers、cookies、query params等 -->
   <a-row class="form-item-request-item-con" v-if="collapse">
-    <a-col :span="3"></a-col>
+    <a-col class="form-label form-label-first"></a-col>
     <a-col :span="21">
       <div class="params-defined">
         <div class="params-defined-content">

@@ -34,7 +34,9 @@
             placeholder="请选择所属分类"
             allow-clear/>
       </a-form-item>
-
+      <a-form-item label="所属服务" name="serverId">
+        <SelectServe @change="change"/>
+      </a-form-item>
       <a-form-item name="dataSyncType">
         <template v-slot:label>
         数据合并策略
@@ -43,7 +45,7 @@
             <span class="title">智能合并</span><br>
             已存在的文件夹不再重复创建。<br>
             相同接口如果在平台上做了修改，则不导入。<br>
-            相同接口在平台上没有做过修改，则不覆盖。<br>
+            相同接口在平台上没有做过修改，则覆盖。<br>
             新增接口导入<br>
          </template>
         <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)" />
@@ -94,6 +96,7 @@ import {
 import {useStore} from "vuex";
 import {UploadOutlined,QuestionCircleOutlined} from '@ant-design/icons-vue';
 import {notifyWarn} from "@/utils/notify";
+import SelectServe from './SelectServe/index.vue';
 
 const store = useStore<{ Endpoint }>();
 const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
@@ -250,9 +253,10 @@ function handleRemove() {
 const formState = ref({
   categoryId: null as any,
   driverType: null,
-  "dataSyncType": null,   //数据同步方式 枚举值 full_cover：完全覆盖 copy_add：复制新增
-  "openUrlImport": false,  //开启url导入
-  "filePath": null, //文件路径
+  dataSyncType: null,   //数据同步方式 枚举值 full_cover：完全覆盖 copy_add：复制新增
+  openUrlImport: false,  //开启url导入
+  filePath: null, //文件路径
+  serveId:null,
 });
 
 watch(() => {
@@ -280,6 +284,11 @@ const rules = {
 const disabled = computed(()=>{
   return formState.value.driverType != "swagger"
 })
+
+const change = (val)=>{
+  formState.value.serveId = val
+  console.log(formState.value.serveId,"282832838")
+}
 
 
 

@@ -59,6 +59,7 @@ const props = defineProps<{
   serverId: any;
   show: boolean;
   disabled: boolean;
+  serveId:any
 }>();
 
 const emits = defineEmits(["change"]);
@@ -117,7 +118,7 @@ const handleRedirectEnv = (e) => {
 
 const handleFocus = () => {
   store.dispatch('Debug/listServes', {
-    serveId: currServe.value.id,
+    serveId: props.serveId? props.serveId :currServe.value.id,
   })
 };
 

@@ -4,6 +4,7 @@
         <div class="codes">
           <MonacoEditor
             ref="monacoEditor"
+            v-if="scriptData?.id"
             theme="vs" language="typescript" class="editor"
             customId="pre-script-main-codes"
             :value="scriptData.content"
@@ -98,37 +99,51 @@ watch(scriptData, (newVal) => {
 const editorOptions = ref(Object.assign({
   usedWith: 'request',
   initTsModules: true,
-
   allowNonTsExtensions: true,
   minimap: {
     enabled: false
   },
-}, MonacoOptions));
-
-const addSnippet = async (snippetName) => {
-  store.dispatch('Debug/addSnippet', { name: snippetName, isForBenchmarkCase })
+}, MonacoOptions
+))
+const getPreConditionScript = () => {
+  console.log('getPreConditionScript')
+  store.dispatch('Debug/getPreConditionScript')
+}
+const addSnippet = (snippetName) => {
+  console.log('addSnippet', snippetName)
+  store.dispatch('Debug/addSnippet', snippetName)
+  // store.dispatch('Debug/addSnippet', { name: snippetName, isForBenchmarkCase })
 }
 const editorChange = (newScriptCode) => {
   scriptData.value.content = newScriptCode;
 }
 
 const save = async () => {
-  console.log('save', scriptData.value)
+  try {
+    console.log('save', scriptData.value)
+    const data = cloneDeep(scriptData.value);
+    data.debugInterfaceId = debugInfo.value.debugInterfaceId
+    data.endpointInterfaceId = debugInfo.value.endpointInterfaceId
+    data.projectId = debugData.value.projectId
+    const result = await store.dispatch('Debug/saveScript', data)
 
-  scriptData.value.debugInterfaceId = debugInfo.value.debugInterfaceId
-  scriptData.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
-  scriptData.value.projectId = debugData.value.projectId
-
-  const result = await store.dispatch('Debug/saveScript', scriptData.value)
-  if (result) {
-    notifySuccess(`保存成功`)
-  } else {
-    notifyError(`保存失败`);
+    if (result) {
+      notifySuccess(`保存成功`);
+      getPreConditionScript()
+    } else {
+      notifyError(`保存失败`);
+    }
+  }catch (e){
+    console.log('有可能组件已经卸载了，但是还是会触发事件回调，所以报错：',e);
   }
+
 }
 
-onMounted(async () => {
+onMounted(() => {
+  // todo 太多地方使用这个事件，需要梳理下或者改下名字 eventConditionSave
+  // TODO 有重复触发的情况，需要优化
   bus.on(settings.eventConditionSave, save);
+  bus.on(settings.eventPreConditionSave, save);
   bus.on(settings.paneResizeTop, () => {
     monacoEditor.value?.resizeIt({
         act: 'heightChanged',
@@ -140,7 +155,7 @@ onMounted(async () => {
 })
 onBeforeUnmount( () => {
   console.log('onBeforeUnmount')
-  bus.off(settings.eventConditionSave, save);
+  bus.off(settings.eventPreConditionSave, save);
 })
 
 </script>

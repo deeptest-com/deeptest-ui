@@ -334,7 +334,7 @@ const getSelectedTreeNodes = () => {
     array.forEach(e => {
       if (e.category === 'case') {
         e.needExec = (executionType.value === 'multi' ? unref(checkedKeys) : (unref(checkedKeys).checked || [])).includes(e.key);
-        e.sample = alternativeCaseFactor.value[e.path].value || e.sample;
+        e.sample = unref(alternativeCaseFactor)[e.path]?.value || e.sample;
       } else if (e.children && e.children.length > 0) {
         e.children = setNodesChecked(e.children);
         e.needExec = e.children.some(child => child.needExec);
