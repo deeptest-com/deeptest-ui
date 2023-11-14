@@ -6,7 +6,7 @@
         <span>JavaScript代码</span>
       </div> 
       <div class="right">
-        <a-button size="small" type="primary" @click.stop="save" style="margin-right: 4px" :disabled="!debugChange?.preScript">保存</a-button>
+        <a-button size="small" type="primary" @click.stop="save" style="margin-right: 4px" :disabled="!isForBenchmarkCase && !debugChange?.preScript">保存</a-button>
 
         <Tips :section="'pre-condition'" :title="'请求前的预处理脚本'" />
 

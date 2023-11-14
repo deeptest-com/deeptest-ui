@@ -123,6 +123,7 @@ function useCaseExecution(): CaseExecution {
             cases,
             environmentId: currEnvId.value,
         }
+        console.log('===== websocket data =====', data);
         WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify({act: 'execCases', casesExecReq: data}))
     }
     const execStop = () => {

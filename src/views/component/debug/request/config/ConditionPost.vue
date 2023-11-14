@@ -232,6 +232,9 @@ provide('isForBenchmarkCase', props.isForBenchmarkCase || false);
  ************************************************/
 const {srcPostConditionsDataObj,postConditionsDataObj,debugChange} = useIMLeaveTip();
 const getSaveBtnDisabled = (id) => {
+  if (props.isForBenchmarkCase) {
+    return false;
+  }
   const cur =  postConditionsDataObj.value?.[id] || {};
   const src =  srcPostConditionsDataObj.value?.[id] || {};
   return equalObjectByLodash(cur, src);
