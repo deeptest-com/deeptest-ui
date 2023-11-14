@@ -106,7 +106,7 @@ const editorOptions = ref(Object.assign({
 ))
 const getPreConditionScript = () => {
   console.log('getPreConditionScript')
-  store.dispatch('Debug/getPreConditionScript')
+  store.dispatch('Debug/getPreConditionScript', { isForBenchmarkCase });
 }
 const addSnippet = (snippetName) => {
   console.log('addSnippet', snippetName)
@@ -154,6 +154,7 @@ onMounted(() => {
 onBeforeUnmount( () => {
   console.log('onBeforeUnmount')
   bus.off(settings.eventPreConditionSave, save);
+  bus.off(settings.eventConditionSave, save);
 })
 
 </script>

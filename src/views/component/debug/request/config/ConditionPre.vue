@@ -69,6 +69,10 @@ const getPreConditionScript = () => {
 }
 
 onMounted(() => {
+  if (props.isForBenchmarkCase) {
+    getPreConditionScript();
+    return;
+  }
   if(!scriptData.value.id){
     getPreConditionScript();
   }

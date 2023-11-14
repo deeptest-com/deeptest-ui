@@ -91,6 +91,10 @@ const model = computed<any>(() => {
 });
 
 onMounted(() => {
+  if (isForBenchmarkCase) {
+    load();
+    return;
+  }
   if(!model?.value?.id){
     load();
   }
@@ -154,28 +158,31 @@ const rules = reactive({
 
 let { resetFields, validate, validateInfos } = useForm(model, rules);
 
-const save = () => {
+const save = (item) => {
+  console.error('script item changed', item);
+  if (item && item.id !==  model.value.conditionId) {
+    return;
+  }
+  console.log('save', model.value)
+  // validate().then(() => {
+  const data = cloneDeep(model.value);
+  data.debugInterfaceId = debugInfo.value.debugInterfaceId
+  data.endpointInterfaceId = debugInfo.value.endpointInterfaceId
+  data.projectId = debugData.value.projectId
 
-    console.log('save', model.value)
-    // validate().then(() => {
-      const data = cloneDeep(model.value);
-      data.debugInterfaceId = debugInfo.value.debugInterfaceId
-      data.endpointInterfaceId = debugInfo.value.endpointInterfaceId
-      data.projectId = debugData.value.projectId
-
-      store.dispatch('Debug/saveScript', data).then((result) => {
-        if (result) {
-          notifySuccess(`保存成功`);
-          if (props.finish) {
-            props.finish()
-          }
-          // 重新拉取一下最新的数据
-          load();
-        } else {
-          notifyError(`保存失败`);
-        }
-      })
-    // })
+  store.dispatch('Debug/saveScript', data).then((result) => {
+    if (result) {
+      notifySuccess(`保存成功`);
+      if (props.finish) {
+        props.finish()
+      }
+      // 重新拉取一下最新的数据
+      load();
+    } else {
+      notifyError(`保存失败`);
+    }
+  })
+  // })
 }
 
 const cancel = () => {

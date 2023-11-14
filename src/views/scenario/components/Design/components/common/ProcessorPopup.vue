@@ -45,7 +45,7 @@ const emits = defineEmits(['updateScreen']);
 
 const save = (item) => {
   console.log('save', item)
-  bus.emit(settings.eventConditionSave, {});
+  bus.emit(settings.eventConditionSave, item);
 }
 
 const cancel = () => {

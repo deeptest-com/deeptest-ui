@@ -186,7 +186,7 @@ function move(_e: any) {
 
 const save = (item) => {
   console.log('save', item)
-  bus.emit(settings.eventConditionSave, {});
+  bus.emit(settings.eventConditionSave, item);
 }
 
 const openFullscreen = (item) => {
