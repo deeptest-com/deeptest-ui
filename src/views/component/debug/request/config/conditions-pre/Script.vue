@@ -83,7 +83,6 @@ const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const scriptData = computed<any>(() => {
-  console.log('isForBenchmarkCase', store.state.Debug.benchMarkCase);
   return isForBenchmarkCase ? store.state.Debug.benchMarkCase.scriptData : store.state.Debug.scriptData
 });
 const jslibNames = computed<any>(() => store.state.Snippet.jslibNames);
@@ -111,8 +110,7 @@ const getPreConditionScript = () => {
 }
 const addSnippet = (snippetName) => {
   console.log('addSnippet', snippetName)
-  store.dispatch('Debug/addSnippet', snippetName)
-  // store.dispatch('Debug/addSnippet', { name: snippetName, isForBenchmarkCase })
+  store.dispatch('Debug/addSnippet', { name: snippetName, isForBenchmarkCase })
 }
 const editorChange = (newScriptCode) => {
   scriptData.value.content = newScriptCode;

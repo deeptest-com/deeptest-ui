@@ -85,10 +85,9 @@ const {t} = useI18n();
 const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet: Snippet }>();
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 
-// const model = computed<any>(() => isForBenchmarkCase ? store.state.Debug.benchMarkCase.scriptData : store.state.Debug.scriptData);
 const {postConditionsDataObj, debugData, debugInfo} = useIMLeaveTip();
 const model = computed<any>(() => {
-  return postConditionsDataObj.value?.[props?.condition?.entityId] || {}
+  return isForBenchmarkCase ? store.state.Debug.benchMarkCase.scriptData : (postConditionsDataObj.value?.[props?.condition?.entityId] || {})
 });
 
 onMounted(() => {
@@ -132,11 +131,15 @@ const editorOptions = ref(Object.assign({
 ))
 
 const addSnippet = (snippetName) => {
+  // 备选用例暂时先用旧的逻辑
+  if (props.condition.isForBenchmarkCase) {
+    store.dispatch('Debug/addSnippet', { name: snippetName, isForBenchmarkCase: props.condition.isForBenchmarkCase });
+    return;
+  }
   store.dispatch('Debug/addSnippetForPost', {
     name:snippetName,
-    data:model
+    data:model,
   })
-  // store.dispatch('Debug/addSnippet', { name: snippetName, isForBenchmarkCase: props.condition.isForBenchmarkCase });
 }
 const editorChange = (newScriptCode) => {
   console.log('editorChange', newScriptCode)
@@ -206,13 +209,6 @@ const wrapperCol = { span: 24 }
 
     .codes {
       flex: 1;
-      // height: 100%;
-      // min-height: 160px;
-
-      .editor {
-        // height: 100%;
-        // min-height: 160px;
-      }
     }
 
     .refer {
@@ -224,14 +220,8 @@ const wrapperCol = { span: 24 }
       .title {
         margin-top: 12px;
       }
-      .desc {
-      }
     }
   }
-  .footer {
-
-  }
-
 
 }
 </style>

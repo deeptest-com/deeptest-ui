@@ -144,7 +144,6 @@ import Exec from "./alternative/exec.vue";
 
 import { CaseLayout, CaseFactor, CaseTips, SaveAlternative } from "./alternative";
 
-import useCaseExecution from "./alternative/exec-alternative-cases";
 import EditAndShowField from "@/components/EditAndShow/index.vue";
 import Invocation from "@/views/component/debug/request/Invocation.vue";
 import DebugConfig  from "@/views/component/debug/config.vue";

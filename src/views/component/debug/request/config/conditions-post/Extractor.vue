@@ -140,7 +140,7 @@ const boundaryEndRequired = [{required: true, message: '请输入边界结束字
 
 const {postConditionsDataObj} = useIMLeaveTip();
 const model = computed<any>(() => {
-  return postConditionsDataObj.value?.[props?.condition?.entityId] || {}
+  return isForBenchmarkCase ? store.state.Debug.benchMarkCase.extractorData : (postConditionsDataObj.value?.[props?.condition?.entityId] || {})
 });
 
 onMounted(() => {

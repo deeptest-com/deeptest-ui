@@ -144,7 +144,7 @@ const load = () => {
 
 const {assertionConditionsDataObj} = useIMLeaveTip();
 const model = computed<any>(() => {
-  return assertionConditionsDataObj.value?.[props?.condition?.entityId] || {}
+  return isForBenchmarkCase ? store.state.Debug.benchMarkCase.checkpointData : (assertionConditionsDataObj.value?.[props?.condition?.entityId] || {})
 });
 
 onMounted(() => {
@@ -152,8 +152,6 @@ onMounted(() => {
     load();
   }
 })
-
-
 
 const variables = ref([])
 
