@@ -909,11 +909,12 @@ const StoreModel: ModuleType = {
                     id: data.id,
                     value:cloneDeep(data)
                 });
-                commit('setCheckpoint', {
-                    info: data,
-                    isForBenchmarkCase: checkpointData.isForBenchmarkCase,
-                });
-                // commit('setCheckpoint', data);
+                if (checkpointData.isForBenchmarkCase) {
+                    commit('setCheckpoint', {
+                        info: data,
+                        isForBenchmarkCase: checkpointData.isForBenchmarkCase,
+                    });
+                }
                 return true;
             } catch (error) {
                 return false;
@@ -964,8 +965,9 @@ const StoreModel: ModuleType = {
                     id: data.id,
                     value:cloneDeep(data)
                 })
-
-                commit('setScript', { data, isForBenchmarkCase: scriptData.isForBenchmarkCase });
+                if (scriptData.isForBenchmarkCase) {
+                    commit('setScript', { data, isForBenchmarkCase: true });
+                }
                 return true;
             } catch (error) {
                 return false;

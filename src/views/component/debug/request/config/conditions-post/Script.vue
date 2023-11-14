@@ -159,7 +159,6 @@ const rules = reactive({
 let { resetFields, validate, validateInfos } = useForm(model, rules);
 
 const save = (item) => {
-  console.error('script item changed', item);
   if (item && item.id !==  model.value.conditionId) {
     return;
   }

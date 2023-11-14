@@ -183,8 +183,11 @@ const rulesRef = computed(() => { return {
 
 let { resetFields, validate, validateInfos } = useForm(model, rulesRef);
 
-const save = () => {
+const save = (item) => {
   console.log('save', model.value)
+  if (item && item.id !== model.value.conditionId) {
+    return;
+  }
   validate().then(() => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
