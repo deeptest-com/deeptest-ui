@@ -838,7 +838,7 @@ const StoreModel: ModuleType = {
                 const response = await getScript(scriptData.entityId);
                 const {data} = response;
 
-                commit('setScript', { data });
+                commit('setScript', { data, isForBenchmarkCase: scriptData.isForBenchmarkCase });
                 return true;
             } catch (error) {
                 return false;

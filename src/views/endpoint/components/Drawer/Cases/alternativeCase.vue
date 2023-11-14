@@ -285,11 +285,11 @@ const saveBaseCase = async () => {
 };
 
 // 另存为
-const saveAsNewCase = async (model) => {
+const saveAsNewCase = async () => {
   const selectedNodes = caseFactor.value.getSelectedTreeNodes();
   const type = unref(caseFactor.value.executionType);
   const params = {
-    prefix: model.prefix || '',
+    prefix: '',
     baseId: endpointCase.value.id,
     type,
     values: selectedNodes,
@@ -299,7 +299,7 @@ const saveAsNewCase = async (model) => {
     await store.dispatch('Endpoint/saveAlternativeCase', params);
     notifySuccess('生成用例成功，可返回列表查看');
     confirmLoading.value = false;
-    saveAsVisible.value = false;
+    // saveAsVisible.value = false;
   } catch(err: any) {
     message.error(err.msg);
     confirmLoading.value = false;
@@ -395,7 +395,8 @@ const caseFactorActionList = [
         message.error('请先选择用例');
         return;
       }
-      saveAsVisible.value = true;
+      saveAsNewCase();
+      // saveAsVisible.value = true;
     },
   },
 ];

@@ -198,20 +198,6 @@ const closeFullScreen = (item) => {
 provide('isForBenchmarkCase', props.isForBenchmarkCase || false);
 </script>
 
-<style lang="less">
-.post-condition-main {
-  .codes {
-    height: 100%;
-    min-height: 160px;
-
-    .editor {
-      height: 100%;
-      min-height: 160px;
-    }
-  }
-}
-</style>
-
 <style lang="less" scoped>
 .post-condition-main {
   height: 100%;
@@ -225,22 +211,6 @@ provide('isForBenchmarkCase', props.isForBenchmarkCase || false);
   .content {
     flex: 1;
     overflow-y: scroll;
-
-    .codes {
-      flex: 1;
-    }
-    .refer {
-      width: 260px;
-      padding: 10px;
-      overflow-y: auto;
-
-      .title {
-        margin-top: 12px;
-      }
-      .desc {
-
-      }
-    }
 
     .collapse-list {
       width: 100%;

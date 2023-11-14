@@ -2,11 +2,15 @@
   <div class="post-script-main">
     <div class="content">
       <div class="codes">
-        <MonacoEditor theme="vs" language="typescript" class="editor"
-                      :value="model.content"
-                      :options="editorOptions"
-                      :timestamp="timestamp"
-                      @change="editorChange" />
+        <MonacoEditor 
+          :customId="`post-script-${condition.entityId}`"
+          theme="vs" 
+          language="typescript" 
+          class="editor"
+          :value="model.content"
+          :options="editorOptions"
+          :timestamp="timestamp"
+          @change="editorChange" />
       </div>
 
       <div class="refer">
@@ -119,7 +123,7 @@ const editorOptions = ref(Object.assign({
 ))
 
 const addSnippet = (snippetName) => {
-  store.dispatch('Debug/addSnippet', { name: snippetName });
+  store.dispatch('Debug/addSnippet', { name: snippetName, isForBenchmarkCase: props.condition.isForBenchmarkCase });
 }
 const editorChange = (newScriptCode) => {
   console.log('editorChange', newScriptCode)
@@ -190,17 +194,14 @@ const wrapperCol = { span: 24 }
     display: flex;
     height: calc(100% - 32px);
 
-    &>div {
-      height: 100%;
-    }
     .codes {
       flex: 1;
-      height: 100%;
-      min-height: 160px;
+      // height: 100%;
+      // min-height: 160px;
 
       .editor {
-        height: 100%;
-        min-height: 160px;
+        // height: 100%;
+        // min-height: 160px;
       }
     }
 
