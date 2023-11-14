@@ -268,7 +268,7 @@ const queryDetail = (reportInfo?: any) => {
 
 const handleExecTypeChange = evt => {
   console.log('当前执行类型:', evt.target.value);
-  checkedKeys.value = evt === 'multi' ? [] : {
+  checkedKeys.value = evt.target.value === 'multi' ? [] : {
     checked: [],
     halfChecked: [],
   };

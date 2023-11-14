@@ -247,6 +247,14 @@ const execCases = ref({});
 const caseFactor = ref();
 
 const selectExecEnv = () => {
+  const executionType = caseFactor.value.executionType;
+  if (executionType === 'single') {
+    const checkedNodes = caseFactor.value.getSelectedNodes();
+    if (checkedNodes.length === 0) {
+      message.error('请选择调试参数');
+      return;
+    }
+  }
   const selectedTreeNode = caseFactor.value.getSelectedTreeNodes();
   if (selectedTreeNode.children.length === 0) {
     message.error('请选择调试参数');
