@@ -52,6 +52,7 @@ import {
   execLogs, execResults, updateExecLogs, updateExecResult, statInfo
   , statisticData, initData, progressStatus, progressValue, updatePlanRes, updateStatFromLog,
 } from '@/composables/useExecLogs';
+import {getUuid} from "@/utils/string";
 
 const props = defineProps<{
   drawerVisible: boolean
@@ -106,7 +107,7 @@ const execStart = async () => {
   resetData();
   const token = await getToken();
   const data = {
-    userId: currUser.value.id,
+    execUuid: currUser.value.id + '@' + getUuid(),
     serverUrl: process.env.VUE_APP_API_SERVER,
     token: token,
     planId: currPlan.value && currPlan.value.id,

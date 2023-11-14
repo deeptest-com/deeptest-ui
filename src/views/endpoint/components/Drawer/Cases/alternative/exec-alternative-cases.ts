@@ -60,14 +60,14 @@ function useCaseExecution(): CaseExecution {
 
         execUuid.value = getUuid()
         const data = {
-            userId: userId,
+            execUuid: userId + '@' + getUuid(),
+
             serverUrl: process.env.VUE_APP_API_SERVER,
             token: await getToken(),
 
             projectId: projectId,
             baseCaseId,
             usedBy,
-            execUuid: execUuid.value,
             cases,
             environmentId,
         }
@@ -92,6 +92,7 @@ function useCaseExecution(): CaseExecution {
     })
 
     return {
+        execUuid,
         progressStatus,
         execStart, execStop,
     } as CaseExecution

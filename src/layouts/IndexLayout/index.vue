@@ -29,10 +29,9 @@
         <permission :roles="routeItem.roles">
           <router-view></router-view>
         </permission>
-
-        <div @click="sendMsg" class="hide-btn"></div>
       </div>
     </div>
+
   </div>
 </template>
 <script lang="ts">
@@ -145,12 +144,16 @@ export default defineComponent({
     // 设置title
     useTitle(routeItem);
 
+    const onChromeExtEvent =() => {
+      console.log('onChromeExtEvent')
+    }
     const sendMsg = () => {
       console.log('sendMsg')
       const data = {
         scope: ScopeDeeptest,
         content: {
-          act: 'recordStart'
+          act: 'recordStart',
+          url: 'http://111.231.16.35:9000/forms/post'
         }
       }
 
@@ -171,6 +174,8 @@ export default defineComponent({
       version,
       onOpenChange,
       routeItem,
+
+      onChromeExtEvent,
       sendMsg,
     }
   }

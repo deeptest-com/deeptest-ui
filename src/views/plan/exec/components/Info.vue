@@ -95,6 +95,7 @@ import { momentShort } from "@/utils/datetime";
 import {useI18n} from "vue-i18n";
 import {getToken} from "@/utils/localToken";
 import {StateType as UserStateType} from "@/store/user";
+import {getUuid} from "@/utils/string";
 const { t } = useI18n();
 
 const router = useRouter();
@@ -111,7 +112,7 @@ const execStart = async () => {
   logTreeData.value = []
 
   const data = {
-    userId: currUser.value.id,
+    execUuid: currUser.value.id + '@' + getUuid(),
     serverUrl: process.env.VUE_APP_API_SERVER,
     token: await getToken(),
     planId: planId.value,

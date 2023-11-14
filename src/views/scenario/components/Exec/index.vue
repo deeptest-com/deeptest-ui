@@ -59,6 +59,7 @@ import {
 import {momentUtc} from "@/utils/datetime";
 import {CurrentUser, StateType as UserStateType} from "@/store/user";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import {getUuid} from "@/utils/string";
 
 const props = defineProps<{
   execDrawerVisible: boolean;
@@ -99,7 +100,7 @@ const execStart = async () => {
   resetData();
   progressKey.value += 1;
   const data = {
-    userId: currUser.value.id,
+    execUuid: currUser.value.id + '@' + getUuid(),
     serverUrl: process.env.VUE_APP_API_SERVER,
     token: await getToken(),
     scenarioId: scenarioId.value,

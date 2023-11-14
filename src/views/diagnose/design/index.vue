@@ -27,6 +27,14 @@
         </a-tabs>
         <div  v-else style="margin-top: 36px;">
           <a-empty  :description="'请先在左侧目录上选择需要调试的接口'"/>
+
+          <div>
+            <div id="deeptest-event-node"
+                 @deeptest-event-from-chrome-ext="onChromeExtEvent"
+                 stype="word-break: break-all;height: 30px;"></div>
+
+            <div @click="sendMsg" class="hide-btn"></div>
+          </div>
         </div>
       </div>
 

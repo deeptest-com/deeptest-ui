@@ -106,6 +106,7 @@ import {handlePathLinkParams} from "@/utils/dom";
 import {syncSourceMapToText} from "@/views/scenario/components/Design/config"
 import {notifyWarn} from "@/utils/notify";
 import {StateType as UserStateType} from "@/store/user";
+import {getUuid} from "@/utils/string";
 
 const store = useStore<{ User: UserStateType, Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal }>();
 const currUser = computed(() => store.state.User.currentUser);
@@ -203,7 +204,7 @@ const send = async (e) => {
     store.commit("Global/setSpinning",true)
 
     const callData = {
-      userId: currUser.value.id,
+      execUuid: currUser.value.id + '@' + getUuid(),
       serverUrl: process.env.VUE_APP_API_SERVER,
       token: await getToken(),
       data: data
