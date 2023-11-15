@@ -804,11 +804,6 @@ const StoreModel: ModuleType = {
                     id: data.id,
                     value:cloneDeep(data)
                 })
-                commit('setExtractor', {
-                    info: data,
-                    isForBenchmarkCase: extarctorData.isForBenchmarkCase,
-                });
-                // commit('setExtractor', data);
                 return true;
             } catch (error) {
                 return false;
@@ -953,8 +948,6 @@ const StoreModel: ModuleType = {
             try {
                 const response = await getScript(scriptData.entityId);
                 const {data} = response;
-                // commit('setScript', data);
-
                 // 缓存当前数据
                 commit('setPostConditionsDataObj',{
                     id: data.id,
@@ -965,9 +958,6 @@ const StoreModel: ModuleType = {
                     id: data.id,
                     value:cloneDeep(data)
                 })
-                if (scriptData.isForBenchmarkCase) {
-                    commit('setScript', { data, isForBenchmarkCase: true });
-                }
                 return true;
             } catch (error) {
                 return false;

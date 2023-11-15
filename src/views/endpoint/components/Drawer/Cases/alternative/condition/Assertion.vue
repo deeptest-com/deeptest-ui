@@ -43,7 +43,6 @@
               </div>
               <div class="buttons">
                 <a-button size="small" type="primary" v-if="activeAssertion.id === element.id"
-                          :disabled="getSaveBtnDisabled(element?.entityId)"
                           @click.stop="save(element)" style="margin-right: 4px;">保存</a-button>
 
                 <ClearOutlined v-if="activeAssertion.id === +element.id && element.entityType === ConditionType.script"
@@ -86,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch, defineProps, provide, onUnmounted} from "vue";
+import {computed, inject, ref, watch, provide, onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import { 
@@ -97,6 +96,7 @@ import {
   DownOutlined, 
   CloseCircleOutlined, 
   FullscreenOutlined } from '@ant-design/icons-vue';
+import draggable from 'vuedraggable';
 import {ConditionType, UsedBy} from "@/utils/enum";
 import {EnvDataItem} from "@/views/project-settings/data";
 import bus from "@/utils/eventBus";
@@ -104,19 +104,16 @@ import settings from "@/config/settings";
 import {confirmToDelete} from "@/utils/confirm";
 import {StateType as Debug} from "@/views/component/debug/store";
 import IconSvg from "@/components/IconSvg";
-import useIMLeaveTip   from "@/composables/useIMLeaveTip";
-import Checkpoint from "./conditions-post/Checkpoint.vue";
-import FullScreenPopup from "./ConditionPopup.vue";
+import Checkpoint from "@/views/component/debug/request/config/conditions-post/Checkpoint.vue";
+import FullScreenPopup from "@/views/component/debug/request/config/ConditionPopup.vue";
 import TooltipCell from "@/components/Table/tooltipCell.vue";
-import draggable from 'vuedraggable'
 import Tips from "@/components/Tips/index.vue";
-import {equalObjectByLodash} from "@/utils/object";
 
 const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
-const assertionConditions = computed<any>(() => store.state.Debug.assertionConditions);
-const activeAssertion = computed<any>(() => store.state.Debug.activeAssertion);
+const assertionConditions = computed<any>(() => store.state.Debug.benchMarkCase.assertionConditions);
+const activeAssertion = computed<any>(() => store.state.Debug.benchMarkCase.activeAssertion);
 
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
@@ -126,13 +123,13 @@ const fullscreen = ref(false);
 const expand = (item) => {
   console.log('expand', item)
   store.commit('Debug/setActiveAssertion', Object.assign(item, {
-    isForBenchmarkCase: false,
+    isForBenchmarkCase: true,
   }))
 }
 
 const list = async () => {
   await store.dispatch('Debug/listAssertionCondition', {
-    isForBenchmarkCase: false
+    isForBenchmarkCase: true
   })
 }
 watch(debugData, async (newVal) => {
@@ -144,7 +141,7 @@ const create = () => {
   store.dispatch('Debug/createPostCondition', {
     entityType: ConditionType.checkpoint,
     ...debugInfo.value,
-    isForBenchmarkCase: false,
+    isForBenchmarkCase: true,
   })
 }
 
@@ -156,7 +153,7 @@ const disable = (item) => {
   console.log('disable', item)
   store.dispatch('Debug/disablePostCondition', {
     ...item,
-    isForBenchmarkCase: false
+    isForBenchmarkCase: true
   })
 }
 const remove = (item) => {
@@ -165,7 +162,7 @@ const remove = (item) => {
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
     store.dispatch('Debug/removePostCondition', {
       ...item,
-      isForBenchmarkCase: false
+      isForBenchmarkCase: true
     })
   })
 }
@@ -175,7 +172,7 @@ function move(_e: any) {
   })
   store.dispatch('Debug/movePostCondition', {
     data: envIdList,
-    isForBenchmarkCase: false,
+    isForBenchmarkCase: true,
     info: debugInfo.value,
     entityType: ConditionType.checkpoint,
   })
@@ -195,34 +192,11 @@ const closeFullScreen = (item) => {
   fullscreen.value = false
 }
 
-/*************************************************
- * ::::后置处理器+断言保存提示
- ************************************************/
-const {srcAssertionConditionsDataObj,assertionConditionsDataObj} = useIMLeaveTip();
-const getSaveBtnDisabled = (id) => {
-  const cur =  assertionConditionsDataObj.value?.[id] || {};
-  const src =  srcAssertionConditionsDataObj.value?.[id] || {};
-  return equalObjectByLodash(cur, src);
-}
-
-watch(() => {
-  return [assertionConditions.value,srcAssertionConditionsDataObj.value,assertionConditionsDataObj.value]
-},(newVal,oldValue) => {
-  const cur =  assertionConditionsDataObj.value;
-  const src =  srcAssertionConditionsDataObj.value;
-  const isChange = !equalObjectByLodash(cur, src);
-  store.commit('Debug/setDebugChange',{
-    checkpoint:isChange,
-  })
-},{
-  deep:true
-})
-
 onUnmounted(() => {
   store.commit('Debug/setActiveAssertion', {});
 })
 
-provide('isForBenchmarkCase', false);
+provide('isForBenchmarkCase', true);
 
 </script>
 

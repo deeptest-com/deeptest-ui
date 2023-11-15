@@ -73,9 +73,8 @@ const props = defineProps({
 })
 
 const save = (item) => {
-  console.log('save', item)
-  bus.emit(settings.eventConditionSave, item);
-}
+  bus.emit(settings.eventConditionSave, props.model);
+};
 
 const cancel = () => {
   console.log('cancel')

@@ -87,14 +87,10 @@ const currProject = computed(() => store.state.ProjectGlobal.currProject);
 
 const {postConditionsDataObj, debugData, debugInfo} = useIMLeaveTip();
 const model = computed<any>(() => {
-  return isForBenchmarkCase ? store.state.Debug.benchMarkCase.scriptData : (postConditionsDataObj.value?.[props?.condition?.entityId] || {})
+  return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
 });
 
 onMounted(() => {
-  if (isForBenchmarkCase) {
-    load();
-    return;
-  }
   if(!model?.value?.id){
     load();
   }
@@ -135,11 +131,6 @@ const editorOptions = ref(Object.assign({
 ))
 
 const addSnippet = (snippetName) => {
-  // 备选用例暂时先用旧的逻辑
-  if (props.condition.isForBenchmarkCase) {
-    store.dispatch('Debug/addSnippet', { name: snippetName, isForBenchmarkCase: props.condition.isForBenchmarkCase });
-    return;
-  }
   store.dispatch('Debug/addSnippetForPost', {
     name:snippetName,
     data:model,
@@ -159,7 +150,7 @@ const rules = reactive({
 let { resetFields, validate, validateInfos } = useForm(model, rules);
 
 const save = (item) => {
-  if (item && item.id !==  model.value.conditionId) {
+  if (item && item.entityId !==  model.value.id) {
     return;
   }
   console.log('save', model.value)

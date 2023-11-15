@@ -21,7 +21,7 @@
       </a-row>
     </div>
 
-    <div class="content">
+    <div :class="['content', 'benchmark-condition-content']">
       <draggable tag="div" item-key="name" class="collapse-list"
                  :list="postConditions || []"
                  handle=".handle"
@@ -47,7 +47,6 @@
               </div>
               <div class="buttons">
                 <a-button size="small" type="primary"
-                          :disabled="getSaveBtnDisabled(element?.entityId)"
                           v-if="activePostCondition.id === element.id"
                           @click.stop="save(element)">保存</a-button>
 
@@ -108,7 +107,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch, getCurrentInstance, ComponentInternalInstance, onUnmounted, onMounted, provide, defineProps} from "vue";
+import {computed, inject, ref, watch, onUnmounted, provide} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import { 
@@ -119,7 +118,7 @@ import {
   DownOutlined, 
   CloseCircleOutlined, 
   FullscreenOutlined } from '@ant-design/icons-vue';
-import draggable from 'vuedraggable'
+import draggable from 'vuedraggable';
 import Tips from "@/components/Tips/index.vue";
 import {ConditionType, UsedBy, UsedWith} from "@/utils/enum";
 import {EnvDataItem} from "@/views/project-settings/data";
@@ -129,18 +128,20 @@ import {confirmToDelete} from "@/utils/confirm";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {getEnumSelectItems} from "@/views/scenario/service";
 import IconSvg from "@/components/IconSvg";
-import useIMLeaveTip   from "@/composables/useIMLeaveTip";
-import Extractor from "./conditions-post/Extractor.vue";
-import Checkpoint from "./conditions-post/Checkpoint.vue";
-import Script from "./conditions-post/Script.vue";
-import FullScreenPopup from "./ConditionPopup.vue";
-import {equalObjectByLodash} from "@/utils/object";
+import Extractor from "@/views/component/debug/request/config/conditions-post/Extractor.vue";
+import Checkpoint from "@/views/component/debug/request/config/conditions-post/Checkpoint.vue";
+import Script from "@/views/component/debug/request/config/conditions-post/Script.vue";
+import FullScreenPopup from "@/views/component/debug/request/config/ConditionPopup.vue";
 
 const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
-const postConditions = computed<any>(() => store.state.Debug.postConditions);
-const activePostCondition = computed<any>(() => store.state.Debug.activePostCondition);
+const postConditions = computed<any>(() => {
+  return store.state.Debug.benchMarkCase.postConditions;
+});
+const activePostCondition = computed<any>(() => {
+  return store.state.Debug.benchMarkCase.activePostCondition;
+});
 
 provide('usedWith', UsedWith.PostCondition)
 
@@ -161,7 +162,7 @@ const expand = (item) => {
 const list = async () => {
   console.log('list')
   await store.dispatch('Debug/listPostCondition', {
-    isForBenchmarkCase: false
+    isForBenchmarkCase: true
   })
 }
 
@@ -174,7 +175,7 @@ const create = () => {
   store.dispatch('Debug/createPostCondition', {
     entityType: conditionType.value,
     ...debugInfo.value,
-    isForBenchmarkCase: false
+    isForBenchmarkCase: true
   })
 }
 
@@ -200,7 +201,7 @@ function move(_e: any) {
   store.dispatch('Debug/movePostCondition', {
     data: envIdList,
     info: debugInfo.value,
-    isForBenchmarkCase: false,
+    isForBenchmarkCase: true,
     entityType: '',
   })
 }
@@ -219,33 +220,7 @@ const closeFullScreen = (item) => {
   fullscreen.value = false
 }
 
-provide('isForBenchmarkCase', false);
-/*************************************************
- * ::::后置处理器提示
- ************************************************/
-const {srcPostConditionsDataObj,postConditionsDataObj,debugChange} = useIMLeaveTip();
-const getSaveBtnDisabled = (id) => {
-  const cur =  postConditionsDataObj.value?.[id] || {};
-  const src =  srcPostConditionsDataObj.value?.[id] || {};
-  return equalObjectByLodash(cur, src);
-}
-
-watch(() => {
-  return [postConditions.value,postConditionsDataObj.value,srcPostConditionsDataObj.value]
-},(newVal,oldValue) => {
-  const cur =  postConditionsDataObj.value;
-  const src =  srcPostConditionsDataObj.value;
-  // debugger;
-
-  const isChange = !equalObjectByLodash(cur, src);
-  console.log(83222,cur,src,isChange,debugChange.value)
-  store.commit('Debug/setDebugChange',{
-    postScript:isChange,
-  })
-},{
-  deep:true
-})
-
+provide('isForBenchmarkCase', true);
 
 onUnmounted(() => {
   store.commit('Debug/setActivePostCondition', {});

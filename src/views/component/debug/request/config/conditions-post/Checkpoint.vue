@@ -185,7 +185,7 @@ let { resetFields, validate, validateInfos } = useForm(model, rulesRef);
 
 const save = (item) => {
   console.log('save', model.value)
-  if (item && item.id !== model.value.conditionId) {
+  if (item && item.entityId !== model.value.id) {
     return;
   }
   validate().then(() => {

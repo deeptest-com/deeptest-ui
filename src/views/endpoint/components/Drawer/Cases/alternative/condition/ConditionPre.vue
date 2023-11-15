@@ -6,7 +6,7 @@
         <span>JavaScript代码</span>
       </div> 
       <div class="right">
-        <a-button size="small" type="primary" @click.stop="save" style="margin-right: 4px" :disabled="!debugChange?.preScript">保存</a-button>
+        <a-button size="small" type="primary" @click.stop="save" style="margin-right: 4px">保存</a-button>
 
         <Tips :section="'pre-condition'" :title="'请求前的预处理脚本'" />
 
@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch, defineProps, provide, onMounted, onUnmounted} from "vue";
+import {computed, inject, ref, provide, onMounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import { FullscreenOutlined } from '@ant-design/icons-vue';
@@ -41,15 +41,11 @@ import IconSvg from "@/components/IconSvg";
 import Tips from "@/components/Tips/index.vue";
 
 import {StateType as Debug} from "@/views/component/debug/store";
-import Script from "./conditions-pre/Script.vue";
-import FullScreenPopup from "./ConditionPopup.vue";
+import Script from "@/views/component/debug/request/config/conditions-pre/Script.vue";
+import FullScreenPopup from "@/views/component/debug/request/config/ConditionPopup.vue";
 
-const store = useStore<{  Debug: Debug }>()
-const debugData = computed<any>(() => store.state.Debug.debugData)
-const debugInfo = computed<any>(() => store.state.Debug.debugInfo)
-const scriptData = computed<any>(() => store.state.Debug.scriptData);
-const srcScriptData = computed<any>(() => store.state.Debug.srcScriptData);
-const debugChange = computed<any>(() => store.state.Debug.debugChange);
+const store = useStore<{ Debug: Debug }>();
+const scriptData = computed<any>(() => store.state.Debug.benchMarkCase.scriptData);
 
 
 const usedBy = inject('usedBy') as UsedBy
@@ -60,7 +56,7 @@ const fullscreen = ref(false)
 const getPreConditionScript = () => {
   console.log('getPreConditionScript')
   store.dispatch('Debug/getPreConditionScript', {
-    isForBenchmarkCase: false
+    isForBenchmarkCase: true
   })
 }
 
@@ -88,23 +84,7 @@ const format = (item) => {
   bus.emit(settings.eventEditorAction, {act: settings.eventTypeFormat})
 }
 
-provide('isForBenchmarkCase', false);
-/*************************************************
- * ::::前置处理器保存提示
- ************************************************/
-watch(() => {
-  return [scriptData.value,srcScriptData.value]
-},(newVal,oldValue) => {
-  const src = srcScriptData.value?.content?.replace(/\s|\n/g, '') || ''
-  const cur = scriptData.value?.content?.replace(/\s|\n/g, '') || ''
-  const isChange = !(src === cur)
-  store.commit('Debug/setDebugChange',{
-    preScript:isChange,
-  })
-},{
-  deep:true
-})
-
+provide('isForBenchmarkCase', true);
 
 </script>
 

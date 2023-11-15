@@ -130,7 +130,6 @@ const store = useStore<{ Debug: Debug }>();
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const responseData = computed<any>(() => store.state.Debug.responseData);
-// const model = computed<any>(() => isForBenchmarkCase ? store.state.Debug.benchMarkCase.extractorData : store.state.Debug.extractorData);
 
 const typeRequired = [{required: true, message: '请选择类型', trigger: 'change'}]
 const expressionRequired = [{required: true, message: '请输入元素路径', trigger: 'blur'}]
@@ -140,7 +139,7 @@ const boundaryEndRequired = [{required: true, message: '请输入边界结束字
 
 const {postConditionsDataObj} = useIMLeaveTip();
 const model = computed<any>(() => {
-  return isForBenchmarkCase ? store.state.Debug.benchMarkCase.extractorData : (postConditionsDataObj.value?.[props?.condition?.entityId] || {})
+  return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
 });
 
 onMounted(() => {
@@ -197,8 +196,12 @@ const load = () => {
 
 let {resetFields, validate, validateInfos} = useForm(model, rules);
 
-const save = () => {
-  console.log('save')
+const save = (item) => {
+  console.error('save', model.value, item);
+  if (item && item.entityId !== model.value.id) {
+    return;
+  }
+  console.log('save', model.value, item);
   validate().then(() => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId

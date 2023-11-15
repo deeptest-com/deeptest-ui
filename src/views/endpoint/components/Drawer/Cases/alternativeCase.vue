@@ -86,17 +86,17 @@
 
             <a-tab-pane key="pre-condition" tab="预处理">
               <CaseTips type="pre-condition" @reset="onReset" />
-              <PreCondition v-if="activeKey === 'pre-condition'" :isForBenchmarkCase="true" />
+              <ConditionPre v-if="activeKey === 'pre-condition'" />
             </a-tab-pane>
 
             <a-tab-pane key="post-condition" :tab="getTabTtitle('post-condition')">
               <CaseTips type="post-condition" @reset="onReset" />
-              <PostCondition v-if="activeKey === 'post-condition'" :isForBenchmarkCase="true" />
+              <ConditionPost v-if="activeKey === 'post-condition'" />
             </a-tab-pane>
 
             <a-tab-pane key="assertion" :tab="getTabTtitle('assertion')">
               <CaseTips type="assertion" @reset="onReset" />
-              <Assertion v-if="activeKey === 'assertion'" :isForBenchmarkCase="true" />
+              <Assertion v-if="activeKey === 'assertion'" />
             </a-tab-pane>
 
           </a-tabs>
@@ -140,13 +140,15 @@ import {StateType as Debug} from "@/views/component/debug/store";
 import { StateType as ProjectSettingStateType } from "@/views/project-settings/store";
 import {StateType as ProjectStateType} from "@/store/project";
 
-import PreCondition from "@/views/component/debug/request/config/ConditionPre.vue";
-import PostCondition from "@/views/component/debug/request/config/ConditionPost.vue";
-import Assertion from "@/views/component/debug/request/config/Assertion.vue";
 import Exec from "./alternative/exec.vue";
-
-import { CaseLayout, CaseFactor, CaseTips, SaveAlternative } from "./alternative";
-
+import { 
+  CaseLayout, 
+  CaseFactor, 
+  CaseTips, 
+  SaveAlternative, 
+  ConditionPost, 
+  ConditionPre, 
+  Assertion } from "./alternative";
 import EditAndShowField from "@/components/EditAndShow/index.vue";
 import Invocation from "@/views/component/debug/request/Invocation.vue";
 import DebugConfig  from "@/views/component/debug/config.vue";
