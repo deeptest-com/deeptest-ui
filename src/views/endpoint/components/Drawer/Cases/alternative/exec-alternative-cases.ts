@@ -66,11 +66,10 @@ function useCaseExecution(): CaseExecution {
                 name: log.title, 
                 processorType: log.category !== 'case' ? 'processor_group_default' : 'processor_interface', 
                 processorCategory: log.category !== 'case' ? 'processor_group_default' : 'processor_interface',
-                detail: log.category === 'case' ? JSON.stringify({...log}): '{}',
+                detail: item.detail || '{}',
                 showMoreInfo: log.category === 'case' ? true : false,
             };
             if (item.category === 'case') {
-                item.detail =  JSON.stringify({ ...item });
                 item.respContent = JSON.stringify({ ...item.response, cookies: item.response.cookies || [] });
                 item.reqContent = JSON.stringify({ ...item.request.debugData, ...item.request });
             }
