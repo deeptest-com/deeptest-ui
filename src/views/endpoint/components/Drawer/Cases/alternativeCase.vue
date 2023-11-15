@@ -65,14 +65,17 @@
         </template>
         <template #extra>
           <div class="case-operation">
-            <a-button
-              v-for="(item, index) in caseFactorActionList"
-              :key="index"
-              :type="item.type"
-              size="small"
-              @click.stop="item.action()">
-              {{ item.text }}
-            </a-button>
+            <div v-for="(item, index) in caseFactorActionList" :key="index">
+              <a-tooltip :title="clickDisabled ? '请先选择异常参数' : undefined" placement="top">
+                <a-button
+                  :type="item.type"
+                  :disabled="clickDisabled"
+                  size="small"
+                  @click.stop="item.action()">
+                  {{ item.text }}
+                </a-button>
+              </a-tooltip>
+            </div>
           </div>
         </template>
         <template #content>
@@ -185,6 +188,10 @@ const getTabTtitle = computed(() => {
     const title = type === 'post-condition' ? '后置处理' : '断言';
     return `${title}${numbers > 0 ? `(${numbers})` : ''}`;
   }
+});
+
+const clickDisabled = computed(() => {
+  return unref(caseFactor)?.getSelectedNodes().filter(e => e.category === 'case').length === 0;
 })
 
 const activeKey = ref('paths');
@@ -247,19 +254,6 @@ const execCases = ref({});
 const caseFactor = ref();
 
 const selectExecEnv = () => {
-  const executionType = caseFactor.value.executionType;
-  if (executionType === 'single') {
-    const checkedNodes = caseFactor.value.getSelectedNodes();
-    if (checkedNodes.length === 0) {
-      message.error('请选择调试参数');
-      return;
-    }
-  }
-  const selectedTreeNode = caseFactor.value.getSelectedTreeNodes();
-  if (selectedTreeNode.children.length === 0) {
-    message.error('请选择调试参数');
-    return;
-  }
   selectEnvVisible.value = true;
   store.commit('Endpoint/setAlternativeExecStatusMap', {});
   store.commit('Endpoint/setAlternativeExecResults', []);
@@ -396,15 +390,7 @@ const caseFactorActionList = [
   {
     text: '生成用例',
     type: 'default',
-    action: () => {
-      const selectedNodes = caseFactor.value.getSelectedNodes();
-      if (selectedNodes.length === 0) {
-        message.error('请先选择用例');
-        return;
-      }
-      saveAsNewCase();
-      // saveAsVisible.value = true;
-    },
+    action: saveAsNewCase,
   },
 ];
 
