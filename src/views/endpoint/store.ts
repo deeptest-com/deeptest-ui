@@ -59,6 +59,8 @@ import {
     removeAlternativeCaseAssertion,
     moveAlternativeCaseAssertion,
     updateName,
+    getEndpointDiff,
+    saveEndpointDiff
 } from './service';
 
 import {
@@ -144,6 +146,7 @@ export interface StateType {
     isDefineChange: boolean;
     // mock表达式是否有变更
     isMockChange: boolean;
+
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -290,7 +293,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
         removeAlternativeCaseAssertion: Action<StateType, StateType>;
         disableAlternativeCaseAssertion: Action<StateType, StateType>;
         moveAlternativeCaseAssertion: Action<StateType, StateType>;
-
+        getEndPointDiff: Action<StateType, StateType>;
+        saveEndPointDiff: Action<StateType, StateType>;
     }
 }
 
@@ -1588,6 +1592,23 @@ const StoreModel: ModuleType = {
             try {
                 await moveAlternativeCaseAssertion(payload);
                 dispatch('listAlternativeCaseAssertion', 0);
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
+        async getEndPointDiff({commit, dispatch, state}, payload: any) {
+            const res = await getEndpointDiff(payload)
+            if (res.code === 0) {
+                return res.data;
+            } else {
+                return {}
+            }
+        },
+        async saveEndPointDiff({commit, dispatch, state}, payload: any) {
+            try {
+                await saveEndpointDiff(payload);
+                await dispatch('listEndpoint', state.queryParams)
                 return true;
             } catch (error) {
                 return false;

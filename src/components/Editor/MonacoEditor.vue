@@ -147,7 +147,7 @@ export default defineComponent({
       //   console.log(this.selection)
       // });
 
-      editor.onDidChangeModelContent(event => {
+      editor?.onDidChangeModelContent(event => {
         const value = editor.getValue()
         if (this.value !== value) {
           // 添加最后最后一个参数，标识是否有语法错误
@@ -176,13 +176,13 @@ export default defineComponent({
 
     formatDocInit: (editor) => {
       nextTick(() => {
-        editor.getAction('editor.action.formatDocument')?.run()
+        editor?.getAction('editor.action.formatDocument')?.run()
       })
     },
 
     formatDocUpdate: debounce((editor) => {
       nextTick(() => {
-        editor.getAction('editor.action.formatDocument')?.run()
+        editor?.getAction('editor.action.formatDocument')?.run()
       })
     }, 1000),
 

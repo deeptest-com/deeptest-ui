@@ -71,6 +71,14 @@
                        :data-source="list">
                 <template #colTitle="{record}">
                   <div class="customTitleColRender">
+                    <div class="notice-icon">
+                      <a-tooltip v-if="record.isChanged">       
+                        <template #title>
+                        <span>自动同步更新内容待确认，点此<a @click="showDiff(record.id)">查看详情</a></span>
+                        </template>
+                        <ExclamationCircleFilled :style="{color: '#fb8b06'}" />
+                      </a-tooltip>
+                  </div>
                     <EditAndShowField
                         :custom-class="'custom-endpoint show-on-hover'"
                         :value="record.title"
@@ -160,6 +168,7 @@
         :endpointIds='selectedRowIds'
         @cancal="showPublishDocsModal = false;"
         @ok="publishDocs"/>
+    <Diff :visible="showDiffModal" :endpointId="endpointId" @cancel="showDiffModal = false;" />    
     <!-- 编辑接口时，展开抽屉：外层再包一层 div, 保证每次打开弹框都重新渲染   -->
     <div v-if="drawerVisible">
       <Drawer
@@ -182,7 +191,7 @@ import {onBeforeRouteLeave, useRouter} from 'vue-router';
 import {useStore} from "vuex";
 import debounce from "lodash.debounce";
 import {ColumnProps} from 'ant-design-vue/es/table/interface';
-import {ExclamationCircleOutlined} from '@ant-design/icons-vue';
+import {ExclamationCircleOutlined,ExclamationCircleFilled } from '@ant-design/icons-vue';
 import {Modal} from 'ant-design-vue';
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import {endpointStatusOpts, endpointStatus} from '@/config/constant';
@@ -215,6 +224,7 @@ import cloneDeep from "lodash/cloneDeep";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
+import Diff from "./components/Drawer/Define/Diff/index.vue";
 
 
 const {share} = useSharePage();
@@ -807,6 +817,13 @@ onBeforeRouteLeave(async (to, from,next) => {
  * ::::离开保存代码逻辑部分end
  ************************************************/
 
+const showDiffModal = ref(false);
+const endpointId = ref(0)
+function showDiff(id: number) {
+  endpointId.value = id;
+  showDiffModal.value = true;
+}
+
 </script>
 <style scoped lang="less">
 
@@ -902,6 +919,10 @@ onBeforeRouteLeave(async (to, from,next) => {
   text-overflow: ellipsis;
   white-space: nowrap;
   color: #447DFD;
+  display: flex;
+  .notice-icon {
+    margin-right: 2px;
+  }
 }
 
 .customPathColRender {

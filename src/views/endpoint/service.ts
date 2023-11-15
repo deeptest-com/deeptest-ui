@@ -518,3 +518,27 @@ export async function moveAlternativeCaseAssertion(data): Promise<any> {
         data: data,
     });
 }
+
+/**
+ * 获取差异
+ * */
+export async function getEndpointDiff(endpointId: number): Promise<any> {
+    const params = {endpointId}
+    return request({
+        url: `/endpoint/diff`,
+        method: 'GET',
+        params
+    });
+}
+
+/**
+ * 保存差异
+ * @param data 差异数据
+ */
+export async function saveEndpointDiff(data:any): Promise<any> {
+    return request({
+        url: `/endpoint/diff`,
+        method: 'POST',
+        data: data,
+    });
+}
