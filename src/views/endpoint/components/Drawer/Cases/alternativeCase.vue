@@ -19,10 +19,10 @@
       </div>
       <!-- :::: 用例路径，方法展示区域 -->
       <Invocation
-        :showMethodSelection = "true"
-        :baseUrlDisabled="true"
-        :showOperation="false"
-        :urlDisabled="false" />
+          :showMethodSelection = "true"
+          :baseUrlDisabled="true"
+          :showOperation="false"
+          :urlDisabled="false" />
       <!-- :::: 基准用例 -->
       <CaseLayout>
         <template #header>
@@ -30,19 +30,19 @@
             <span class="name">基准用例</span>
             <span class="serial-number">{{ endpointCase.serialNumber }}</span>
             <EditAndShowField
-              placeholder="修改标题"
-              :value="endpointCase.name"
-              @update="updateTitle"/>
+                placeholder="修改标题"
+                :value="endpointCase.name"
+                @update="updateTitle"/>
           </div>
         </template>
         <template #extra>
           <div class="case-operation">
             <a-button
-              v-for="(item, index) in baseCaseActionList"
-              :key="index"
-              :type="item.type"
-              size="small"
-              @click.stop="item.action()">
+                v-for="(item, index) in baseCaseActionList"
+                :key="index"
+                :type="item.type"
+                size="small"
+                @click.stop="item.action()">
               {{ item.text }}
             </a-button>
           </div>
@@ -65,14 +65,17 @@
         </template>
         <template #extra>
           <div class="case-operation">
-            <a-button
-              v-for="(item, index) in caseFactorActionList"
-              :key="index"
-              :type="item.type"
-              size="small"
-              @click.stop="item.action()">
-              {{ item.text }}
-            </a-button>
+            <div v-for="(item, index) in caseFactorActionList" :key="index">
+              <a-tooltip :title="clickDisabled ? '请先选择异常参数' : undefined" placement="top">
+                <a-button
+                    :type="item.type"
+                    :disabled="clickDisabled"
+                    size="small"
+                    @click.stop="item.action()">
+                  {{ item.text }}
+                </a-button>
+              </a-tooltip>
+            </div>
           </div>
         </template>
         <template #content>
@@ -103,24 +106,24 @@
 
     <!-- :::: 其他弹窗展示 -->
     <SaveAlternative
-      v-if="saveAsVisible"
-      :visible="saveAsVisible"
-      :confirm-loading="confirmLoading"
-      @close="saveAsVisible = false"
-      @confirm="saveAsNewCase"
-      :model="saveAsModel"/>
+        v-if="saveAsVisible"
+        :visible="saveAsVisible"
+        :confirm-loading="confirmLoading"
+        @close="saveAsVisible = false"
+        @confirm="saveAsNewCase"
+        :model="saveAsModel"/>
 
     <EnvSelector
-      :env-select-drawer-visible="selectEnvVisible"
-      @on-ok="onSelectExecEnvFinish"
-      @on-cancel="onSelectExecEnvCancel" />
+        :env-select-drawer-visible="selectEnvVisible"
+        @on-ok="onSelectExecEnvFinish"
+        @on-cancel="onSelectExecEnvCancel" />
 
     <Exec
-      v-if="execDrawerVisible"
-      :exec-drawer-visible="execDrawerVisible"
-      :case-id="endpointCase.id"
-      :cases="execCases"
-      @close="onClose"/>
+        v-if="execDrawerVisible"
+        :exec-drawer-visible="execDrawerVisible"
+        :case-id="endpointCase.id"
+        :cases="execCases"
+        @close="onClose"/>
   </div>
 </template>
 
@@ -185,6 +188,10 @@ const getTabTtitle = computed(() => {
     const title = type === 'post-condition' ? '后置处理' : '断言';
     return `${title}${numbers > 0 ? `(${numbers})` : ''}`;
   }
+});
+
+const clickDisabled = computed(() => {
+  return unref(caseFactor)?.getSelectedNodes().filter(e => e.category === 'case').length === 0;
 })
 
 const activeKey = ref('paths');
@@ -247,19 +254,6 @@ const execCases = ref({});
 const caseFactor = ref();
 
 const selectExecEnv = () => {
-  const executionType = caseFactor.value.executionType;
-  if (executionType === 'single') {
-    const checkedNodes = caseFactor.value.getSelectedNodes();
-    if (checkedNodes.length === 0) {
-      message.error('请选择调试参数');
-      return;
-    }
-  }
-  const selectedTreeNode = caseFactor.value.getSelectedTreeNodes();
-  if (selectedTreeNode.children.length === 0) {
-    message.error('请选择调试参数');
-    return;
-  }
   selectEnvVisible.value = true;
   store.commit('Endpoint/setAlternativeExecStatusMap', {});
   store.commit('Endpoint/setAlternativeExecResults', []);
@@ -396,15 +390,7 @@ const caseFactorActionList = [
   {
     text: '生成用例',
     type: 'default',
-    action: () => {
-      const selectedNodes = caseFactor.value.getSelectedNodes();
-      if (selectedNodes.length === 0) {
-        message.error('请先选择备选路径');
-        return;
-      }
-      saveAsNewCase();
-      // saveAsVisible.value = true;
-    },
+    action: saveAsNewCase,
   },
 ];
 
