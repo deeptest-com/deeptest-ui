@@ -19,10 +19,10 @@
       </div>
       <!-- :::: 用例路径，方法展示区域 -->
       <Invocation
-        :showMethodSelection = "true"
-        :baseUrlDisabled="true"
-        :showOperation="false"
-        :urlDisabled="false" />
+          :showMethodSelection = "true"
+          :baseUrlDisabled="true"
+          :showOperation="false"
+          :urlDisabled="false" />
       <!-- :::: 基准用例 -->
       <CaseLayout>
         <template #header>
@@ -30,19 +30,19 @@
             <span class="name">基准用例</span>
             <span class="serial-number">{{ endpointCase.serialNumber }}</span>
             <EditAndShowField
-              placeholder="修改标题"
-              :value="endpointCase.name"
-              @update="updateTitle"/>
+                placeholder="修改标题"
+                :value="endpointCase.name"
+                @update="updateTitle"/>
           </div>
         </template>
         <template #extra>
           <div class="case-operation">
             <a-button
-              v-for="(item, index) in baseCaseActionList"
-              :key="index"
-              :type="item.type"
-              size="small"
-              @click.stop="item.action()">
+                v-for="(item, index) in baseCaseActionList"
+                :key="index"
+                :type="item.type"
+                size="small"
+                @click.stop="item.action()">
               {{ item.text }}
             </a-button>
           </div>
@@ -68,10 +68,10 @@
             <div v-for="(item, index) in caseFactorActionList" :key="index">
               <a-tooltip :title="clickDisabled ? '请先选择异常参数' : undefined" placement="top">
                 <a-button
-                  :type="item.type"
-                  :disabled="clickDisabled"
-                  size="small"
-                  @click.stop="item.action()">
+                    :type="item.type"
+                    :disabled="clickDisabled"
+                    size="small"
+                    @click.stop="item.action()">
                   {{ item.text }}
                 </a-button>
               </a-tooltip>
@@ -106,24 +106,24 @@
 
     <!-- :::: 其他弹窗展示 -->
     <SaveAlternative
-      v-if="saveAsVisible"
-      :visible="saveAsVisible"
-      :confirm-loading="confirmLoading"
-      @close="saveAsVisible = false"
-      @confirm="saveAsNewCase"
-      :model="saveAsModel"/>
+        v-if="saveAsVisible"
+        :visible="saveAsVisible"
+        :confirm-loading="confirmLoading"
+        @close="saveAsVisible = false"
+        @confirm="saveAsNewCase"
+        :model="saveAsModel"/>
 
     <EnvSelector
-      :env-select-drawer-visible="selectEnvVisible"
-      @on-ok="onSelectExecEnvFinish"
-      @on-cancel="onSelectExecEnvCancel" />
+        :env-select-drawer-visible="selectEnvVisible"
+        @on-ok="onSelectExecEnvFinish"
+        @on-cancel="onSelectExecEnvCancel" />
 
-    <Exec 
-      v-if="execDrawerVisible"
-      :exec-drawer-visible="execDrawerVisible" 
-      :case-id="endpointCase.id" 
-      :cases="execCases" 
-      @close="onClose"/>
+    <Exec
+        v-if="execDrawerVisible"
+        :exec-drawer-visible="execDrawerVisible"
+        :case-id="endpointCase.id"
+        :cases="execCases"
+        @close="onClose"/>
   </div>
 </template>
 
@@ -297,7 +297,7 @@ const saveAsNewCase = async () => {
     type,
     values: selectedNodes,
   };
-  
+
   try {
     await store.dispatch('Endpoint/saveAlternativeCase', params);
     notifySuccess('生成用例成功，可返回列表查看');
@@ -338,7 +338,7 @@ const onReset = ({ type, params }: { type: string, params: any }) => {
 
 /**
  * 调试基准用例
- * @param e 
+ * @param e
  */
 const baseCaseSending = ref(false);
 

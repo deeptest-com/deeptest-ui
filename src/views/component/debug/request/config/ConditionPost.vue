@@ -78,20 +78,25 @@
             </div>
 
             <div class="content" v-if="activePostCondition.id === +element.id">
-              <Extractor 
+              <Extractor
                 v-if="element.entityType === ConditionType.extractor"
                 :condition="activePostCondition"
                 :finish="list"/>
 
-              <Checkpoint 
+              <Checkpoint
                 v-if="element.entityType === ConditionType.checkpoint"
                 :condition="activePostCondition"
                 :finish="list"/>
 
-              <Script 
+              <Script
                 v-if="element.entityType === ConditionType.script"
                 :condition="activePostCondition"
                 :finish="list"/>
+
+              <DatabaseOpt
+                  v-if="element.entityType === ConditionType.databaseOpt"
+                  :condition="activePostCondition"
+                  :finish="list"/>
             </div>
           </div>
 
@@ -99,7 +104,7 @@
       </draggable>
     </div>
 
-    <FullScreenPopup 
+    <FullScreenPopup
       v-if="fullscreen"
       :visible="fullscreen"
       :model="activePostCondition"
@@ -111,13 +116,13 @@
 import {computed, inject, ref, watch, getCurrentInstance, ComponentInternalInstance, onUnmounted, onMounted, provide, defineProps} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import { 
-  CheckCircleOutlined, 
+import {
+  CheckCircleOutlined,
   DeleteOutlined,
-  ClearOutlined, 
+  ClearOutlined,
   RightOutlined,
-  DownOutlined, 
-  CloseCircleOutlined, 
+  DownOutlined,
+  CloseCircleOutlined,
   FullscreenOutlined } from '@ant-design/icons-vue';
 import draggable from 'vuedraggable'
 import Tips from "@/components/Tips/index.vue";
@@ -133,6 +138,7 @@ import useIMLeaveTip   from "@/composables/useIMLeaveTip";
 import Extractor from "./conditions-post/Extractor.vue";
 import Checkpoint from "./conditions-post/Checkpoint.vue";
 import Script from "./conditions-post/Script.vue";
+import DatabaseOpt from "./conditions-post/DatabaseOpt.vue";
 import FullScreenPopup from "./ConditionPopup.vue";
 import {equalObjectByLodash} from "@/utils/object";
 
@@ -154,7 +160,7 @@ const conditionType = ref(ConditionType.extractor)
 const conditionTypes = ref(getEnumSelectItems(ConditionType))
 
 const expand = (item) => {
-  console.log('expand', item) 
+  console.log('expand', item)
   store.commit('Debug/setActivePostCondition', item);
 }
 
@@ -188,7 +194,7 @@ const disable = (item) => {
 }
 const remove = (item) => {
   console.log('remove', item)
-  
+
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
     store.dispatch('Debug/removePostCondition', item)
   })
@@ -274,7 +280,7 @@ onUnmounted(() => {
     &>div {
       height: 100%;
     }
-    
+
     .collapse-list {
       height: 100%;
       width: 100%;

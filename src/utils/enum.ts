@@ -180,9 +180,11 @@ export enum ConditionType {
     checkpoint = 'checkpoint',
     script = 'script',
     cookie = 'cookie',
+    databaseOpt= 'databaseOpt'
 }
 export enum PreConditionType {
     script = 'script',
+    databaseOpt= 'databaseOpt'
 }
 
 export enum ExtractorSrc {

@@ -88,6 +88,7 @@ export default {
     'responseBody': '响应体内容',
     'cookie': 'Cookie',
     'checkpoint': '断言',
+    'databaseOpt': '数据库操作',
     'script': '定制代码',
     'judgement': '表达式',
     'extractor': '提取器',
