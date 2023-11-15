@@ -115,11 +115,11 @@
       @on-ok="onSelectExecEnvFinish"
       @on-cancel="onSelectExecEnvCancel" />
 
-    <Exec 
+    <Exec
       v-if="execDrawerVisible"
-      :exec-drawer-visible="execDrawerVisible" 
-      :case-id="endpointCase.id" 
-      :cases="execCases" 
+      :exec-drawer-visible="execDrawerVisible"
+      :case-id="endpointCase.id"
+      :cases="execCases"
       @close="onClose"/>
   </div>
 </template>
@@ -301,7 +301,7 @@ const saveAsNewCase = async () => {
     type,
     values: selectedNodes,
   };
-  
+
   try {
     await store.dispatch('Endpoint/saveAlternativeCase', params);
     notifySuccess('生成用例成功，可返回列表查看');
@@ -342,7 +342,7 @@ const onReset = ({ type, params }: { type: string, params: any }) => {
 
 /**
  * 调试基准用例
- * @param e 
+ * @param e
  */
 const baseCaseSending = ref(false);
 
@@ -399,7 +399,7 @@ const caseFactorActionList = [
     action: () => {
       const selectedNodes = caseFactor.value.getSelectedNodes();
       if (selectedNodes.length === 0) {
-        message.error('请先选择用例');
+        message.error('请先选择备选路径');
         return;
       }
       saveAsNewCase();

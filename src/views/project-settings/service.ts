@@ -446,3 +446,92 @@ export async function getVarsByEnv(envId: number): Promise<any> {
         method: 'get'
     })
 }
+
+const apiPathJslib = 'jslib';
+
+export async function listJslib(params): Promise<any> {
+    return request({
+        url: `/${apiPathJslib}`,
+        method: 'get',
+        params
+    });
+}
+export async function getJslib(id): Promise<any> {
+    const params = {id}
+    return request({
+        url: `/${apiPathJslib}/${id}`,
+        method: 'get',
+        params
+    });
+}
+export async function saveJslib(data): Promise<any> {
+    return request({
+        url: `/${apiPathJslib}`,
+        method: 'post',
+        data
+    });
+}
+export async function updateJslibName(data): Promise<any> {
+    return request({
+        url: `/${apiPathJslib}/updateName`,
+        method: 'put',
+        data
+    });
+}
+export async function deleteJslib(id): Promise<any> {
+    return request({
+        url: `/${apiPathJslib}/${id}`,
+        method: 'delete',
+    });
+}
+export async function disableJslib(id): Promise<any> {
+    return request({
+        url: `/${apiPathJslib}/${id}/disable`,
+        method: 'put',
+    });
+}
+
+const apiPathDbConn = 'dbconns';
+
+export async function listDbConn(params): Promise<any> {
+    return request({
+        url: `/${apiPathDbConn}`,
+        method: 'get',
+        params
+    });
+}
+export async function getDbConn(id): Promise<any> {
+    const params = {id}
+    return request({
+        url: `/${apiPathDbConn}/${id}`,
+        method: 'get',
+        params
+    });
+}
+export async function saveDbConn(data): Promise<any> {
+    return request({
+        url: `/${apiPathDbConn}`,
+        method: 'post',
+        data
+    });
+}
+export async function updateDbConnName(data): Promise<any> {
+    return request({
+        url: `/${apiPathDbConn}/updateName`,
+        method: 'put',
+        data
+    });
+}
+export async function deleteDbConn(id): Promise<any> {
+    return request({
+        url: `/${apiPathDbConn}/${id}`,
+        method: 'delete',
+    });
+}
+export async function disableDbConn(id): Promise<any> {
+    return request({
+        url: `/${apiPathDbConn}/${id}/disable`,
+        method: 'put',
+    });
+}
+
