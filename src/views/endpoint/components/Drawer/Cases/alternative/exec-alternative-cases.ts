@@ -66,7 +66,7 @@ function useCaseExecution(): CaseExecution {
                 name: log.title, 
                 processorType: log.category !== 'case' ? 'processor_group_default' : 'processor_interface', 
                 processorCategory: log.category !== 'case' ? 'processor_group_default' : 'processor_interface',
-                detail: item.detail || '{}',
+                detail: log.detail || '{}',
                 showMoreInfo: log.category === 'case' ? true : false,
             };
             if (item.category === 'case') {
