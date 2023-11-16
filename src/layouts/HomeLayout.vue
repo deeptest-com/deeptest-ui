@@ -1,6 +1,6 @@
 <template>
   <div class="home-wrap">
-    <div class="home-header">
+    <div class="home-header" v-if="!isWujieEnv">
       <div class="home-header-left" :class="{'leyan-logo':isLeyanEnv}" @click="handleRedirect">
       </div>
       <div class="home-header-right">
@@ -21,7 +21,7 @@ import UserSetting from './IndexLayout/components/RightTopSettings.vue';
 import RightTopUpdate from './IndexLayout/components/RightTopUpdate.vue';
 import settings from '@/config/settings';
 import {isLeyan} from "@/utils/comm";
-
+import {useWujie} from "@/composables/useWujie";
 export default defineComponent({
   name: 'HomeLayout',
   components: {
@@ -31,6 +31,7 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     let isLeyanEnv = isLeyan();
+    const { isWujieEnv } = useWujie();
 
     watch(() => {
       return router.currentRoute.value;
@@ -48,9 +49,12 @@ export default defineComponent({
       router.push('/');
     }
 
+
+
     return {
       handleRedirect,
-      isLeyanEnv
+      isLeyanEnv,
+      isWujieEnv
     }
   }
 })

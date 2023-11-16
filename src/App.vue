@@ -17,7 +17,7 @@ import settings from "@/config/settings";
 import {isElectronEnv} from "@/utils/agentEnv";
 import {isLeyan} from "@/utils/comm";
 import {Cache_Key_Agent_Local_Port, Cache_Key_Server_Url} from "@/utils/const";
-
+import {useRoute, useRouter} from "vue-router";
 export default defineComponent({
   name: 'App',
   setup() {
@@ -59,8 +59,19 @@ export default defineComponent({
       })
     }
 
+    const bus = window?.$wujie?.bus;
+    const propsFormParentApp: any = window?.$wujie?.props;
+
+    const router = useRouter();
+
     onMounted(() => {
       setHtmlLang(locale.value);
+
+      bus?.$on('changeRouterForLeyan', (path: string) => {
+        console.log('changeRouterForLeyan333', path);
+        router.push(path);
+      })
+
     })
 
     return {

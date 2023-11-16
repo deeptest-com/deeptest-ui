@@ -1,6 +1,7 @@
 <template>
   <div id="indexlayout">
     <left
+        v-if="!isWujieEnv"
         :collapsed="collapsed"
         :topNavEnable="topNavEnable"
         :belongTopMenu="belongTopMenu"
@@ -16,6 +17,7 @@
         :class="{'fiexd-header': headFixed}">
       <right-top
           :collapsed="collapsed"
+          v-if="!isWujieEnv"
           :tabNavEnable="tabNavEnable"
           :topNavEnable="topNavEnable"
           :belongTopMenu="belongTopMenu"
@@ -56,7 +58,7 @@ import IndexLayoutRoutes from './routes';
 import Permission from '@/components/Permission/index.vue';
 import Left from '@/layouts/IndexLayout/components/Left.vue';
 import RightTop from '@/layouts/IndexLayout/components/RightTop.vue';
-
+import {useWujie} from "@/composables/useWujie";
 export default defineComponent({
   name: 'IndexLayout',
   components: {
@@ -69,6 +71,8 @@ export default defineComponent({
     const route = useRoute();
 
     const version = ref('')
+
+    const {isWujieEnv} = useWujie();
 
     onMounted(() => {
       console.log('onMounted')
@@ -142,6 +146,7 @@ export default defineComponent({
     // 设置title
     useTitle(routeItem);
 
+
     return {
       collapsed,
       toggleCollapsed,
@@ -155,7 +160,8 @@ export default defineComponent({
       permissionMenuData,
       version,
       onOpenChange,
-      routeItem
+      routeItem,
+      isWujieEnv
     }
   }
 })

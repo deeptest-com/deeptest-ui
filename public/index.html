@@ -17,9 +17,6 @@
         <%= process.env.VUE_APP_DEPLOY_ENV_TITLE %>
     </title>
     <% } %>
-    <script>
-        const env = '<%= process.env.VUE_APP_DEPLOY_ENV%>';
-    </script>
     <style>
         * {
             margin: 0px;
@@ -27,13 +24,13 @@
         }
 
         .app-loading {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             bottom: 0;
             right: 0;
             background-color: #fff;
-            z-index: 999999999;
+            z-index: 999;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -157,7 +154,7 @@
         Please enable it to continue.</strong>
 </noscript>
 <div id="app"></div>
-<div class="app-loading">
+<div class="app-loading" style="display: none">
     <% if (process.env.VUE_APP_DEPLOY_ENV ==='ly' ) { %>
     <img src="<%= process.env.VUE_APP_DEPLOY_ENV_LOADING_ICON %>" class="app-loading-logo" alt="Logo"/>
     <% } %>
@@ -167,7 +164,7 @@
     <div class="app-loading-title"></div>
     <script>
         const titleEl = document.getElementsByClassName('app-loading-title');
-        if (titleEl[0] && env === 'ly') {
+        if (titleEl[0] && "<%= process.env.VUE_APP_DEPLOY_ENV%>" === 'ly') {
             titleEl[0].innerHTML =!!window.require ? "<%= process.env.VUE_APP_DEPLOY_ENV_TITLE %>" : location.host;
         } else {
             titleEl[0].innerHTML = 'DeepTest.com';
