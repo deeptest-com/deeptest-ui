@@ -9,7 +9,7 @@
 
     <div class="content">
       <div class="processor-form">
-        <ProcessorCustomCodeEdit 
+        <ProcessorCustomCodeEdit
           v-if="model.processorType === ProcessorCategory.ProcessorCustomCode"
           :processor="model"
           @cancel="cancel"

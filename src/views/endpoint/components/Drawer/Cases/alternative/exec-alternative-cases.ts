@@ -26,7 +26,7 @@ function useCaseExecution(): CaseExecution {
     const execUuid = ref('');
     const progressStatus = ref({} as any);
     const execStatusMap = ref<any>({});
-    // 执行结果的map 
+    // 执行结果的map
     const execResults = ref<any[]>([]);
     // 执行结果
     const execResultMap = ref<any>({});
@@ -58,13 +58,13 @@ function useCaseExecution(): CaseExecution {
             if (execResultMap.value[log.caseUuid]) {
                 return;
             }
-            
+
             log.logs = [];
-            const item = { 
-                ...log, 
-                id: log.caseUuid, 
-                name: log.title, 
-                processorType: log.category !== 'case' ? 'processor_group_default' : 'processor_interface', 
+            const item = {
+                ...log,
+                id: log.caseUuid,
+                name: log.title,
+                processorType: log.category !== 'case' ? 'processor_group_default' : 'processor_interface',
                 processorCategory: log.category !== 'case' ? 'processor_group_default' : 'processor_interface',
                 detail: log.detail || '{}',
                 showMoreInfo: log.category === 'case' ? true : false,
@@ -132,7 +132,7 @@ function useCaseExecution(): CaseExecution {
 
     return {
         progressStatus,
-        execStart, 
+        execStart,
         execStop,
         OnWebSocketMsg,
         execStatusMap,

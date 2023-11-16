@@ -67,7 +67,7 @@
             </div>
 
             <div class="content" v-if="activeAssertion.id === +element.id">
-              <Checkpoint 
+              <Checkpoint
                 v-if="element.entityType === ConditionType.checkpoint"
                 :condition="activeAssertion"
                 :finish="list" />
@@ -77,7 +77,7 @@
       </draggable>
     </div>
 
-    <FullScreenPopup 
+    <FullScreenPopup
       v-if="fullscreen"
       :visible="fullscreen"
       :model="activeAssertion"
@@ -89,13 +89,13 @@
 import {computed, inject, ref, watch, defineProps, provide, onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import { 
-  CheckCircleOutlined, 
+import {
+  CheckCircleOutlined,
   DeleteOutlined,
-  ClearOutlined, 
+  ClearOutlined,
   RightOutlined,
-  DownOutlined, 
-  CloseCircleOutlined, 
+  DownOutlined,
+  CloseCircleOutlined,
   FullscreenOutlined } from '@ant-design/icons-vue';
 import {ConditionType, UsedBy} from "@/utils/enum";
 import {EnvDataItem} from "@/views/project-settings/data";

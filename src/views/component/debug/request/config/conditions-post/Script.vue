@@ -2,11 +2,11 @@
   <div class="post-script-main">
     <div class="content">
       <div class="codes">
-        <MonacoEditor 
+        <MonacoEditor
           v-if="model?.id"
           :customId="`post-script-${condition.entityId}`"
-          theme="vs" 
-          language="typescript" 
+          theme="vs"
+          language="typescript"
           class="editor"
           :value="model.content"
           :options="editorOptions"
