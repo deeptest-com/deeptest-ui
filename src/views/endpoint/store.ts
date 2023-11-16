@@ -1615,6 +1615,7 @@ const StoreModel: ModuleType = {
         async saveEndPointDiff({commit, dispatch, state}, payload: any) {
             try {
                 await saveEndpointDiff(payload);
+                await dispatch("getEndpointDetail", {id: payload.endpointId})
                 await dispatch('loadList', {projectId: payload.projectId});
                 return true;
             } catch (error) {

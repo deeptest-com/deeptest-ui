@@ -24,12 +24,13 @@
     :detail-link="detailLink"/>       
 </template>
 <script setup lang="ts">
-import { defineProps, defineEmits, ref } from "vue";
+import { defineProps, defineEmits, computed } from "vue";
 import {ExclamationCircleFilled } from '@ant-design/icons-vue';
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import { DrawerAction } from "@/views/component/DrawerLayout/drawerAction";
 import {useStore} from "vuex";
-const store = useStore<{ Endpoint }>();
+const store = useStore<{ Endpoint,ProjectGlobal }>();
+const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 
 const props = defineProps({
   name: {
@@ -92,7 +93,7 @@ const updateTitle = v => {
 
 
 function showDiff() {
-  store.commit('Endpoint/setDiffModalVisible', {endpointId:props.endpointId,visible:true});
+  store.commit('Endpoint/setDiffModalVisible', {endpointId:props.endpointId,visible:true,projectId:currProject.value.id});
 }
 
 
