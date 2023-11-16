@@ -29,12 +29,36 @@
           </a-form-item>
 
           <a-form-item label="数据库类型" v-bind="validateInfos.type" required>
-            <a-select v-model:value="model.type">
+            <a-select v-model:value="model.type" @change="onTypeChanged">
               <a-select-option v-for="(item, idx) in dbTypes" :key="idx"
                                :value="item.code">
                 {{ item.name }}
               </a-select-option>
             </a-select>
+          </a-form-item>
+
+          <a-form-item label="地址" v-bind="validateInfos.host" required>
+            <a-input v-model:value="model.host"
+                     @blur="validate('host', { trigger: 'blur' }).catch(() => {})"/>
+          </a-form-item>
+
+          <a-form-item label="端口" v-bind="validateInfos.port" required>
+            <a-input v-model:value="model.port"
+                     @blur="validate('port', { trigger: 'blur' }).catch(() => {})" />
+          </a-form-item>
+
+          <a-form-item :label="model.type === 'oracle' ? '服务名' : '数据库名'" v-bind="validateInfos.dbName" required>
+            <a-input v-model:value="model.dbName"
+                     @blur="validate('dbName', { trigger: 'blur' }).catch(() => {})"/>
+          </a-form-item>
+
+          <a-form-item label="用户名" v-bind="validateInfos.username" required>
+            <a-input v-model:value="model.username"
+                     @blur="validate('username', { trigger: 'blur' }).catch(() => {})"/>
+          </a-form-item>
+
+          <a-form-item label="密码" v-bind="validateInfos.password">
+            <a-input v-model:value="model.password" />
           </a-form-item>
 
           <a-form-item label="描述">
@@ -70,6 +94,7 @@ import {addSepIfNeeded} from "@/utils/url";
 import ALink from "@/components/ALink/index.vue";
 import {getFileName} from "@/utils/dom";
 import {useI18n} from "vue-i18n";
+import {dbPortsDef, dbTypesDef} from "@/views/project-settings/components/DbConn/config";
 const {t} = useI18n();
 const useForm = Form.useForm;
 
@@ -78,24 +103,7 @@ const model = computed<any>(() => store.state.ProjectSetting.dbConnModel);
 
 const isLy = isLeyan()
 
-const dbTypes = [
-  {
-    code: 'mysql',
-    name: 'MySQL'
-  },
-  {
-    code: 'sqlserver',
-    name: 'SQLServer'
-  },
-  {
-    code: 'postgreSql',
-    name: 'PostgreSQL'
-  },
-  {
-    code: 'oracle',
-    name: 'Oracle'
-  }
-]
+const dbTypes = dbTypesDef
 
 const props = defineProps({
   visible: {
@@ -105,6 +113,7 @@ const props = defineProps({
   modelId: {
     type: Number,
     required: true,
+    default: 0
   },
   onClose: {
     type: Function,
@@ -123,6 +132,18 @@ const rulesRef = reactive({
   type: [
     {required: true, message: '请选择数据库类型', trigger: 'blur'},
   ],
+  host: [
+    {required: true, message: '请输入主机地址', trigger: 'blur'},
+  ],
+  port: [
+    {required: true, message: '请输入服务端口', trigger: 'blur'},
+  ],
+  dbName: [
+    {required: true, message: '请输入数据库名称', trigger: 'blur'},
+  ],
+  username: [
+    {required: true, message: '请输入访问用户名', trigger: 'blur'},
+  ],
 });
 
 const {resetFields, validate, validateInfos} = useForm(model, rulesRef);
@@ -131,7 +152,10 @@ watch(props, () => {
   console.log('editId', props)
 
   if (props.modelId === 0) {
-    store.commit('ProjectSetting/setDbConn', {name: '', type: 'mysql'});
+    store.commit('ProjectSetting/setDbConn', {
+      name: '', type: 'mysql',
+      host: 'localhost', port: '3306', dbName: 'test',
+      username: 'root', password: ''});
   } else {
     store.dispatch('ProjectSetting/getDbConn', props.modelId);
   }
@@ -147,6 +171,11 @@ const onSubmit = async () => {
   }).catch(err => {
     console.log(err)
   })
+}
+
+const onTypeChanged = async () => {
+  console.log('onTypeChanged', model.value.type)
+  model.value.port = dbPortsDef[model.value.type]
 }
 
 const labelCol = {span: 5}

@@ -1,3 +1,29 @@
+export const dbTypesDef = [
+    {
+        code: 'mysql',
+        name: 'MySQL'
+    },
+    {
+        code: 'sqlserver',
+        name: 'SQLServer'
+    },
+    {
+        code: 'postgreSql',
+        name: 'PostgreSQL'
+    },
+    {
+        code: 'oracle',
+        name: 'Oracle'
+    }
+]
+
+export const dbPortsDef = {
+    mysql: 3306,
+    sqlserver: 1433,
+    postgreSql: 5432,
+    oracle: 1521
+}
+
 export const dbConnColumns = [
     {
         title: '名称',
