@@ -33,7 +33,7 @@
     </div>
 
     <div class="body">
-      <MonacoEditor 
+      <MonacoEditor
         ref="monacoEditor"
         customId="json-lens-main"
         class="editor"
@@ -56,8 +56,8 @@
         :onCancel="responseExtractorCancel"
     />
   </div>
-  <GenerateFromResponse  
-  v-if="generateFromResponseVisible" 
+  <GenerateFromResponse
+  v-if="generateFromResponseVisible"
   :contentStr="contentStr"
   :serveId="debugData.serveId"
   :interfaceId="debugData.endpointInterfaceId"
@@ -186,7 +186,7 @@ watch (()=>{return language.value} ,(val)=>{
   }
   console.log(content.value)
 
-}, {immediate: true}) 
+}, {immediate: true})
 
 const contentStr = ref('')
 const generateFromResponseVisible = ref(false)

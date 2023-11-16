@@ -1,4 +1,4 @@
-export const jslibColumns = [
+export const dbConnColumns = [
     {
         title: '名称',
         width: '200px',

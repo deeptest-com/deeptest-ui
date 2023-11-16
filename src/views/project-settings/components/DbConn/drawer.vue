@@ -1,6 +1,6 @@
 <!-- 本页面是数据池编辑页面的抽屉 -->
 <template>
-  <div class="jslib-edit-main">
+  <div class="dbConn-edit-main">
     <a-drawer :width="1000" :bodyStyle="{padding:'16px'}"
               :closable="true"
               :key="modelId"
@@ -14,11 +14,11 @@
       </template>
 
       <div v-if="visible">
-        <div class="jslib-tips-container">
+        <div class="dbConn-tips-container">
           <span v-if="isLy">
             <ExclamationCircleOutlined />
           </span>
-          <a v-else href="https://deeptest.com/jslib.html" target="_blank">
+          <a v-else href="https://deeptest.com/dbConn.html" target="_blank">
             <QuestionCircleOutlined class="dp-icon-btn dp-trans-80"/>
           </a>
         </div>
@@ -74,7 +74,7 @@ const {t} = useI18n();
 const useForm = Form.useForm;
 
 const store = useStore<{ ProjectSetting: ProjectSettingStateType }>();
-const model = computed<any>(() => store.state.ProjectSetting.jslibModel);
+const model = computed<any>(() => store.state.ProjectSetting.dbConnModel);
 
 const isLy = isLeyan()
 
@@ -131,9 +131,9 @@ watch(props, () => {
   console.log('editId', props)
 
   if (props.modelId === 0) {
-    store.commit('ProjectSetting/setJslib', {name: '', type: 'mysql'});
+    store.commit('ProjectSetting/setDbConn', {name: '', type: 'mysql'});
   } else {
-    store.dispatch('ProjectSetting/getJslib', props.modelId);
+    store.dispatch('ProjectSetting/getDbConn', props.modelId);
   }
 }, {deep: true, immediate: true})
 
@@ -141,7 +141,7 @@ const onSubmit = async () => {
   console.log('onSubmit', model.value)
 
   validate().then(async () => {
-    store.dispatch('ProjectSetting/saveJslib', model.value).then(() => {
+    store.dispatch('ProjectSetting/saveDbConn', model.value).then(() => {
       props.onClose();
     })
   }).catch(err => {
@@ -155,11 +155,11 @@ const wrapperCol = {span: 18}
 </script>
 
 <style lang="less" scoped>
-.jslib-tips-container {
+.dbConn-tips-container {
   display: flex;
   margin-bottom: 20px;
 
-  .jslib-tip {
+  .dbConn-tip {
     margin-left: 6px;
   }
 }

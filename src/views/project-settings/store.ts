@@ -853,13 +853,15 @@ const StoreModel: ModuleType = {
             }
         },
         async saveDbConn({ dispatch }, data) {
+            console.log('888')
             const res = await saveDbConn(data);
+            console.log('999')
 
             if (res.code === 0) {
                 notifySuccess('保存成功');
                 dispatch('listDbConn')
             } else {
-                notifyError('删除自定义脚本库失败');
+                notifyError(res.msg);
             }
             return res.msgKey
         },

@@ -1,6 +1,8 @@
 <template>
     <a-config-provider :locale="antdLocales">
       <router-view></router-view>
+
+      <Notification></Notification>
     </a-config-provider>
 </template>
 <script lang="ts">
@@ -8,7 +10,7 @@ import {defineComponent, computed, onMounted, watch, ref,onUnmounted} from "vue"
 import { antdMessages } from "@/config/i18n";
 import { setHtmlLang } from "@/utils/i18n";
 import { useI18n } from "vue-i18n";
-// import Notification from "./components/others/Notification.vue";
+import Notification from "./components/others/Notification.vue";
 import renderfeedback from "@/utils/feedback";
 import {useStore} from "vuex";
 import { StateType as UserStateType, CurrentUser } from "@/store/user";
@@ -20,6 +22,9 @@ import {Cache_Key_Agent_Local_Port, Cache_Key_Server_Url} from "@/utils/const";
 
 export default defineComponent({
   name: 'App',
+  components: {
+    Notification,
+  },
   setup() {
     const { locale } = useI18n();
     const antdLocales = computed(()=> antdMessages[locale.value]);

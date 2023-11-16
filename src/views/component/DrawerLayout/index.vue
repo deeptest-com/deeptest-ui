@@ -92,7 +92,7 @@ const setFullScreen = (value: boolean) => {
   setTimeout(() => {
     bus.emit(settings.paneResizeTop);
   }, 300);
-  
+
 };
 const toDetail = (url: string) => {
   console.log('查看详情', url);

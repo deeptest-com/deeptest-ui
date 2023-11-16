@@ -16,7 +16,7 @@
       <EmptyComp>
         <template #content>
           <a-table class="dp-table"
-                    :data-source="models" :columns="jslibColumns" :rowKey="(_record, index) => _record.id"
+                    :data-source="models" :columns="dbConnColumns" :rowKey="(_record, index) => _record.id"
                    :pagination="{
                       showTotal: (total) => {
                          return `共 ${total} 条数据`;
@@ -98,7 +98,7 @@ import {Modal} from "ant-design-vue";
 import {momentUtc} from '@/utils/datetime';
 import {downloadFile} from "@/utils/link";
 
-import {jslibColumns} from './config';
+import {dbConnColumns} from './config';
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import EmptyComp from '@/components/TableEmpty/index.vue';
 import EditDrawer from './drawer.vue';
