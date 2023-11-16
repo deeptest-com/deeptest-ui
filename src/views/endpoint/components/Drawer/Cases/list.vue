@@ -12,13 +12,14 @@
                 :data-source="list"
                 :expandIconAsCell="false"
                 :expandIconColumnIndex="1"
+                :expandedRowKeys="expandKeys"
                 :pagination="{
                     ...pagination,
                     onChange: (page) => {
-                      query(page,pagination.pageSize);
+                      query(page,pagination.pageSize, 'page');
                     },
                     onShowSizeChange: (_page, size) => {
-                      query(1,size);
+                      query(1,size, 'pageSize');
                     },
                     showTotal: (total) => {
                       return `共 ${total} 条数据`;
@@ -27,8 +28,9 @@
 
                 :columns="columns"
                 :loading="loading"
-                row-key="id"
-                class="dp-table">
+                :row-key="record => record.id"
+                class="dp-table"
+                @expandedRowsChange="expandedRowsChange">
 
         <template #name="{ record, text }">
           <div class="case-title" style="display: inline-block;">
@@ -97,7 +99,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script lang="tsx" setup>
 import {computed, defineProps, provide, ref} from "vue";
 import {UsedBy} from "@/utils/enum";
 import {Empty} from "ant-design-vue";
@@ -117,6 +119,7 @@ import {PaginationConfig} from "@/views/endpoint/data";
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import CaseEdit from "./edit.vue";
 import AutoGenCaseModal from "./alternative/autoGenCaseModal.vue";
+import TableExpandIconVue from "@/components/Table/TableExpandIcon.vue";
 
 provide('usedBy', UsedBy.InterfaceDebug)
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
@@ -145,7 +148,7 @@ const props = defineProps({
 
 const loading = ref<boolean>(true);
 
-const query = debounce(async (page, size): Promise<void> => {
+const query = debounce(async (page, size, type?: string): Promise<void> => {
   console.log('getList')
 
   loading.value = true;
@@ -155,7 +158,16 @@ const query = debounce(async (page, size): Promise<void> => {
     pageSize: size,
   });
   loading.value = false
-}, 300)
+  // 重新获取列表时 更新当前展开的行
+  if (type === 'page' && expandKeys.value.length > 0) {
+    // 跳转页 且 是一键展开
+    expandAll();
+  }
+  if (type === 'pageSize' && expandKeys.value.length > 0) {
+    collapseAll();
+    expandAll();
+  }
+}, 300);
 query(1, pagination.value.pageSize)
 
 const editVisible = ref(false)
@@ -217,6 +229,31 @@ const username = (user:string)=>{
   return result?.label || '-'
 }
 
+/**
+ * 表格表头 展开所有 /  收起所有
+ */
+const expandKeys = ref<any[]>([]);
+
+const expandedRowsChange = keys => {
+  expandKeys.value = keys;
+}
+
+const expandAll = () => {
+  expandKeys.value = expandKeys.value.concat((list.value || []).filter(e => e.children?.length > 0).map(e => {
+    if (e.children?.length > 0) {
+      return e.id;
+    }
+  })); 
+}
+
+const collapseAll = () => {
+  expandKeys.value = [];
+}
+
+const toggleExpandedAll = (expand: boolean) => {
+  expand ? expandAll() : collapseAll();
+}
+
 const columns = [
   {
     title: '编号',
@@ -224,7 +261,13 @@ const columns = [
     width: 120,
   },
   {
-    title: '名称',
+    title: () => {
+      return (
+        <TableExpandIconVue isExpanded={expandKeys.value.length > 0} onChange={(expand) => toggleExpandedAll(expand)}>
+          <span>标题</span>
+        </TableExpandIconVue>
+      )
+    },
     dataIndex: 'name',
     slots: {customRender: 'name'},
   },

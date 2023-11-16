@@ -14,7 +14,7 @@
             </template>
             返回
           </a-button>
-          <span class="case-name">{{ endpointCase.name }}</span>
+          <span class="case-name">自动生成用例（Beta）</span>
         </div>
       </div>
       <!-- :::: 用例路径，方法展示区域 -->
@@ -57,7 +57,7 @@
       </CaseLayout>
 
       <!-- :::: 用例因子 -->
-      <CaseLayout :activeKey="['1']" @open="handleOpen">
+      <CaseLayout :activeKey="['1']">
         <template #header>
           <div class="case-title">
             <span class="name">用例生成因子</span>
@@ -66,7 +66,7 @@
         <template #extra>
           <div class="case-operation">
             <div v-for="(item, index) in caseFactorActionList" :key="index">
-              <a-tooltip :title="clickDisabled ? '请先选择异常参数' : undefined" placement="top">
+              <a-tooltip :title="clickDisabled ? '请先选择要生成用例的参数' : undefined" placement="top">
                 <a-button
                     :type="item.type"
                     :disabled="clickDisabled"
@@ -80,7 +80,7 @@
         </template>
         <template #content>
           <a-tabs v-model:activeKey="activeKey">
-            <a-tab-pane key="paths" tab="备选路径">
+            <a-tab-pane key="paths" tab="异常参数">
               <CaseFactor ref="caseFactor" />
             </a-tab-pane>
 
@@ -128,11 +128,12 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineProps, provide, ref, watch, unref, onMounted} from "vue";
-import {ResultStatus, UsedBy} from "@/utils/enum";
+import {computed, defineProps, provide, ref, watch, unref, onMounted, onUnmounted} from "vue";
+import {UsedBy} from "@/utils/enum";
 import {useStore} from "vuex";
 import cloneDeep from "lodash/cloneDeep";
 import { message, Modal } from "ant-design-vue";
+import Swal from "sweetalert2";
 
 import IconSvg from "@/components/IconSvg";
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
@@ -157,9 +158,15 @@ import { prepareDataForRequest } from "@/views/component/debug/service";
 import { notifyError, notifySuccess } from "@/utils/notify";
 import {StateType as UserStateType} from "@/store/user";
 import {getToken} from "@/utils/localToken";
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
+import settings from "@/config/settings";
+import bus from "@/utils/eventBus";
+import { saveInterface } from "@/views/scenario/service";
 
 const usedBy = UsedBy.CaseDebug
 provide('usedBy', usedBy)
+
+const {isDebugChange, resetDebugChange} = useIMLeaveTip();
 
 const props = defineProps({
   onBack: {
@@ -175,8 +182,6 @@ const props = defineProps({
 const store = useStore<{ User: UserStateType, Debug: Debug, Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType, ProjectGlobal: ProjectStateType }>();
 const currUser = computed(() => store.state.User.currentUser);
 const alternativeCases = computed<any>(() => store.state.Endpoint.alternativeCases);
-const currEnvId = computed(() => store.state.ProjectSetting.selectEnvId);
-const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const endpointCase = computed<any>(() => store.state.Endpoint.caseDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 
@@ -205,6 +210,7 @@ const loadDebugData = async (data) => {
     loadingAlternativeCase.value = true;
     await store.dispatch('Debug/loadDataAndInvocations', data);
     loadingAlternativeCase.value = false;
+    resetDebugChange();
   } catch (err) {
     console.log('加载备选用例数据出错:', err);
   }
@@ -269,10 +275,52 @@ async function onSelectExecEnvCancel() {
   selectEnvVisible.value = false;
 }
 
+const saveCaseInterface = async () => {
+  console.log('saveCaseInterface')
+
+  let data = JSON.parse(JSON.stringify(debugData.value))
+  data = prepareDataForRequest(data)
+
+  Object.assign(data, {shareVars: null, envVars: null, globalEnvVars: null, globalParamVars: null})
+
+  const res = await store.dispatch('Endpoint/saveCaseDebugData', data)
+
+  resetDebugChange();
+
+  if (res === true) {
+    notifySuccess(`保存成功`);
+  } else {
+    notifyError(`保存失败`);
+  }
+}
 
 const back = () => {
-  console.log('back')
-  props.onBack()
+  // 调试模块数据有变化，需要提示用户是否要保存调试数据
+  if(isDebugChange.value){
+    Swal.fire({
+      ...settings.SwalLeaveSetting
+    }).then((result) => {
+      // isConfirmed: true,  保存并离开
+      if (result.isConfirmed) {
+        saveCaseInterface();
+        store.commit('Debug/setDebugChange', {base:false});
+        // 保存成功后，切换tab
+        props.onBack();
+      }
+      // isDenied: false,  不保存，并离开
+      else if (result.isDenied) {
+        props.onBack();
+        store.commit('Debug/setDebugChange', {base:false});
+      }
+      // isDismissed: false 取消,即什么也不做
+      else if (result.isDismissed) {
+        console.log('isDismissed', result.isDismissed)
+      }
+    })
+  }
+  else {
+    props.onBack()
+  }
 }
 
 /**
@@ -289,6 +337,7 @@ const saveBaseCase = async () => {
 
 // 另存为
 const saveAsNewCase = async () => {
+  store.commit('Global/setSpinning', true);
   const selectedNodes = caseFactor.value.getSelectedTreeNodes();
   const type = unref(caseFactor.value.executionType);
   const params = {
@@ -301,11 +350,10 @@ const saveAsNewCase = async () => {
   try {
     await store.dispatch('Endpoint/saveAlternativeCase', params);
     notifySuccess('生成用例成功，可返回列表查看');
-    confirmLoading.value = false;
-    // saveAsVisible.value = false;
+    store.commit('Global/setSpinning', false);
   } catch(err: any) {
     message.error(err.msg);
-    confirmLoading.value = false;
+    store.commit('Global/setSpinning', false);
   }
 };
 
@@ -405,12 +453,6 @@ const updateTitle = (v) => {
   store.dispatch('Endpoint/updateCaseName', endpointCase.value)
 };
 
-const handleOpen = () => {
-  // setTimeout(() => {
-  //   caseFactor.value.loadCaseTree();
-  // }, 500);
-}
-
 onMounted(async () => {
   if (props.baseCaseId) {
     await store.dispatch('Endpoint/getCase', props.baseCaseId);
@@ -421,6 +463,10 @@ onMounted(async () => {
     }, 500);
   }
 
+})
+
+onUnmounted(() => {
+  resetDebugChange();
 })
 
 const onClose = () => {

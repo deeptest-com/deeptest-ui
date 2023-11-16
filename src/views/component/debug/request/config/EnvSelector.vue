@@ -76,6 +76,9 @@ const selectEnvTopPosition = ref("0px");
 const selectEnvLeftPosition = ref("0px");
 
 onMounted(() => {
+  store.dispatch('Debug/listServes', {
+    serveId: props.serveId? props.serveId :currServe.value.id,
+  })
   selectEnvTopPosition.value = getSelectEnvTopPosition();
   selectEnvLeftPosition.value = getSelectEnvLeftPosition();
 });
@@ -143,6 +146,7 @@ watch(
     }
   }
 );
+
 </script>
 <style lang="less">
 .select-env-container { // related to body
