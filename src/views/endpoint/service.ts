@@ -12,8 +12,8 @@ const apiAlternativeCaseAssertions = 'endpoints/cases/alternatives/assertions';
 
 export async function query(params?: QueryParams): Promise<any> {
     return request({
-        url: `/${apiPath}`,
-        method: 'get',
+        url: `/endpoint/index`,
+        method: 'post',
         params,
     });
 }

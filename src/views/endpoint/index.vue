@@ -72,7 +72,7 @@
                 <template #colTitle="{record}">
                   <div class="customTitleColRender">
                     <div class="notice-icon">
-                      <a-tooltip v-if="record.isChanged">       
+                      <a-tooltip v-if="record.isChanged" :overlayClassName="'diff-custom-tooltip'">       
                         <template #title>
                         <span>自动同步更新内容待确认，点此<a @click="showDiff(record.id)">查看详情</a></span>
                         </template>
@@ -818,7 +818,7 @@ onBeforeRouteLeave(async (to, from,next) => {
  ************************************************/
 
 function showDiff(id: number) {
-  store.commit('Endpoint/setDiffModalVisible', {endpointId:id,visible:true});
+  store.commit('Endpoint/setDiffModalVisible', {endpointId:id,visible:true,projectId:currProject.value.id});
 }
 
 </script>
@@ -938,5 +938,10 @@ function showDiff(id: number) {
       cursor: pointer;
     }
   }
+}
+</style>
+<style lang="less">
+.diff-custom-tooltip {
+  max-width: 300px;
 }
 </style>

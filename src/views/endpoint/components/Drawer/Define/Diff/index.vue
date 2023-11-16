@@ -34,7 +34,7 @@
 
 import MonacoEditor from "@/components/Editor/MonacoEditor.vue";
 import { MonacoOptions } from '@/utils/const';
-import { watch, ref, onMounted, computed,provide } from 'vue';
+import { watch, ref, onMounted, computed } from 'vue';
 import { useStore } from "vuex";
 import { confirmToDo } from "@/utils/confirm";
 
@@ -67,15 +67,13 @@ const getEndPointDiff = async (endpointId: number) => {
 
 const saveDiff = async (title: string,isChanged: boolean) => {
   confirmToDo(`确定${title}？`, '', () => {
-    store.dispatch('Endpoint/saveEndPointDiff', {
-      endpointId: diffModalVisible.value.endpointId,
-      isChanged: isChanged,
-    })
+    store.dispatch('Endpoint/saveEndPointDiff', {...diffModalVisible.value,isChanged:isChanged});
+    cancel();
   })
 }
 
 const cancel = () => {
-  store.commit('Endpoint/setDiffModalVisible', { endpointId: diffModalVisible.value.endpointId, visible: false });
+  store.commit('Endpoint/setDiffModalVisible', { ...diffModalVisible.value, visible: false});
 }
 
 

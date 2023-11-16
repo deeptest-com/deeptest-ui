@@ -597,6 +597,7 @@ const StoreModel: ModuleType = {
     actions: {
         async listEndpoint({commit, dispatch, state}, params: QueryParams) {
             try {
+                debugger
                 const response: ResponseData = await query(params);
                 if (response.code != 0) return;
 
@@ -1614,7 +1615,7 @@ const StoreModel: ModuleType = {
         async saveEndPointDiff({commit, dispatch, state}, payload: any) {
             try {
                 await saveEndpointDiff(payload);
-                await dispatch('listEndpoint', state.queryParams)
+                await dispatch('loadList', {projectId: payload.projectId});
                 return true;
             } catch (error) {
                 return false;
