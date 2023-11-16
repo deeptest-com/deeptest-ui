@@ -7,6 +7,13 @@
       :can-edit="canEdit"
       :value="name || ''"
       @update="updateTitle"/>
+      <div class="diff-tag" v-if="isChanged">
+        <a-tag color="warning">
+          <template #icon>
+            <ExclamationCircleFilled :style="{color: '#fb8b06'}" />
+        </template>
+          自动同步更新内容待确认，点此<a style="color:#427EE6;" @click="showDiff">查看详情</a></a-tag>
+      </div>
   </div>
   <DrawerAction
     v-if="showAction"
@@ -14,15 +21,17 @@
     :show-share="showShare"
     :share-link="shareLink"
     :show-detail="showDetail" 
-    :detail-link="detailLink"/>
+    :detail-link="detailLink"/>       
 </template>
 <script setup lang="ts">
-import { defineProps, defineEmits } from "vue";
-
+import { defineProps, defineEmits, ref } from "vue";
+import {ExclamationCircleFilled } from '@ant-design/icons-vue';
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import { DrawerAction } from "@/views/component/DrawerLayout/drawerAction";
+import {useStore} from "vuex";
+const store = useStore<{ Endpoint }>();
 
-defineProps({
+const props = defineProps({
   name: {
     type: String,
     default: '',
@@ -63,6 +72,16 @@ defineProps({
     default: '',
     required: false,
   },
+  endpointId: {
+    type: Number,
+    default: 0,
+    required: false,
+  },
+  isChanged: {
+    type: Boolean,
+    default: false,
+    required: false,
+  },
 });
 
 const emits = defineEmits(['updateTitle']);
@@ -70,4 +89,11 @@ const emits = defineEmits(['updateTitle']);
 const updateTitle = v => {
   emits('updateTitle', v);
 };
+
+
+function showDiff() {
+  store.commit('Endpoint/setDiffModalVisible', {endpointId:props.endpointId,visible:true});
+}
+
+
 </script>

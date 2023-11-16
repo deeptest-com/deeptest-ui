@@ -276,6 +276,8 @@ export default defineComponent({
 
     original() {
       this._setOriginal()
+      this.value !== this._getValue() && this._setValue(this.value);
+      this._setModel(this.value, this.original)
     },
 
     language() {

@@ -146,6 +146,8 @@ export interface StateType {
     isDefineChange: boolean;
     // mock表达式是否有变更
     isMockChange: boolean;
+    //diff弹框信息
+    diffModalVisible:any;
 
 }
 
@@ -211,6 +213,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setIsDefineChange:Mutation<StateType>;
         setIsMockChange:Mutation<StateType>;
+        setDiffModalVisible:Mutation<StateType>;
     };
     actions: {
         listEndpoint: Action<StateType, StateType>;
@@ -375,6 +378,7 @@ const initState: StateType = {
 
     isDefineChange: false,
     isMockChange: false,
+    diffModalVisible: {},
 };
 
 const StoreModel: ModuleType = {
@@ -580,12 +584,14 @@ const StoreModel: ModuleType = {
                 state.activeAlternativeCaseAssertion = payload;
             }
         },
-
         setIsDefineChange(state, payload){
             state.isDefineChange = payload
         },
         setIsMockChange(state, payload){
             state.isMockChange = payload
+        },
+        setDiffModalVisible(state, payload){
+            state.diffModalVisible = payload
         },
     },
     actions: {

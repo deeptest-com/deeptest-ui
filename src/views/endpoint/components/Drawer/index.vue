@@ -10,6 +10,8 @@
         :share-link="detailLink"
         :show-detail="true"
         :show-share="true"
+        :endpoint-id="endpointDetail.id"
+        :is-changed="endpointDetail.isChanged"
         @update-title="updateTitle"/>
     </template>
     <template #basicInfo>
@@ -311,6 +313,7 @@ const isInit = ref(true);
 onMounted(() => {
   isInit.value = false;
 })
+
 
 </script>
 

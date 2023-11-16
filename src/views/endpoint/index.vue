@@ -76,7 +76,7 @@
                         <template #title>
                         <span>自动同步更新内容待确认，点此<a @click="showDiff(record.id)">查看详情</a></span>
                         </template>
-                        <ExclamationCircleFilled :style="{color: '#fb8b06'}" />
+                        <ExclamationCircleFilled @click="showDiff(record.id)" :style="{color: '#fb8b06'}" />
                       </a-tooltip>
                   </div>
                     <EditAndShowField
@@ -168,7 +168,7 @@
         :endpointIds='selectedRowIds'
         @cancal="showPublishDocsModal = false;"
         @ok="publishDocs"/>
-    <Diff :visible="showDiffModal" :endpointId="endpointId" @cancel="showDiffModal = false;" />    
+    <Diff/>
     <!-- 编辑接口时，展开抽屉：外层再包一层 div, 保证每次打开弹框都重新渲染   -->
     <div v-if="drawerVisible">
       <Drawer
@@ -817,11 +817,8 @@ onBeforeRouteLeave(async (to, from,next) => {
  * ::::离开保存代码逻辑部分end
  ************************************************/
 
-const showDiffModal = ref(false);
-const endpointId = ref(0)
 function showDiff(id: number) {
-  endpointId.value = id;
-  showDiffModal.value = true;
+  store.commit('Endpoint/setDiffModalVisible', {endpointId:id,visible:true});
 }
 
 </script>
