@@ -66,9 +66,15 @@ const getEndPointDiff = async (endpointId: number) => {
 }
 
 const saveDiff = async (title: string,isChanged: boolean) => {
-  confirmToDo(`确定${title}？`, '', () => {
-    store.dispatch('Endpoint/saveEndPointDiff', {...diffModalVisible.value,isChanged:isChanged});
+  confirmToDo(`确定${title}？`, '', async () => {
+   await store.dispatch('Endpoint/saveEndPointDiff', {...diffModalVisible.value,isChanged:isChanged});
     cancel();
+    if (diffModalVisible.value.callPlace == 'detail') {
+      await store.dispatch('Endpoint/getEndpointDetail', {id:diffModalVisible.value.endpointId});
+      const selectedMethodDetail =  store.state.Endpoint.endpointDetail.interfaces.find(arrItem => arrItem.method == store.state.Endpoint.selectedMethodDetail.method)
+      store.commit('Endpoint/setSelectedMethodDetail', selectedMethodDetail);
+
+    }
   })
 }
 

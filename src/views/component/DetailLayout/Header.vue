@@ -93,7 +93,7 @@ const updateTitle = v => {
 
 
 function showDiff() {
-  store.commit('Endpoint/setDiffModalVisible', {endpointId:props.endpointId,visible:true,projectId:currProject.value.id});
+  store.commit('Endpoint/setDiffModalVisible', {endpointId:props.endpointId,visible:true,projectId:currProject.value.id,callPlace:"detail"});
 }
 
 

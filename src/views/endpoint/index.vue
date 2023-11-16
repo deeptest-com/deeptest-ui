@@ -818,7 +818,7 @@ onBeforeRouteLeave(async (to, from,next) => {
  ************************************************/
 
 function showDiff(id: number) {
-  store.commit('Endpoint/setDiffModalVisible', {endpointId:id,visible:true,projectId:currProject.value.id});
+  store.commit('Endpoint/setDiffModalVisible', {endpointId:id,visible:true,projectId:currProject.value.id,callPlace:'list'});
 }
 
 </script>

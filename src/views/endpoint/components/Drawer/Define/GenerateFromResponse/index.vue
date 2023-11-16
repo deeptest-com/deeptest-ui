@@ -94,9 +94,7 @@ const onFinish = (values: any) => {
 const onFinishFailed = (errorInfo: any) => {
   console.log('Failed:', errorInfo);
 };
-const disabled = computed(() => {
-  return !(formState.username && formState.password);
-});
+
 
 function onCancel() {
     emits("close");
