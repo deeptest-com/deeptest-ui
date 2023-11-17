@@ -67,14 +67,25 @@ export default defineComponent({
   },
 
   beforeUnmount() {
-    console.log('editor beforeUnmount')
-
-    this.editor && this.editor.dispose();
-    bus.off(settings.eventEditorAction)
+    try {   
+      console.log('editor beforeUnmount')
+      this.editor && this.editor.dispose();
+      bus.off(settings.eventEditorAction)
+      
+    } catch (error) {
+      console.log('editor beforeUnmount',error)
+    }
+ 
   },
   unmounted() {
-    this.editor && this.editor.dispose();
-    bus.off(settings.eventEditorAction)
+    try {   
+      console.log('editor unmounted')
+      this.editor && this.editor.dispose();
+      bus.off(settings.eventEditorAction)
+    } catch (error) {
+      console.log('editor unmounted',error)
+    }
+ 
   },
 
   methods: {
