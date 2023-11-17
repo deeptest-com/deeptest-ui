@@ -54,7 +54,7 @@ onMounted(async () => {
 
   watch(() => diffModalVisible.value.endpointId, async (newVal) => {
     if (newVal) {
-      getEndPointDiff(newVal)
+      await getEndPointDiff(newVal)
     }
   }
 

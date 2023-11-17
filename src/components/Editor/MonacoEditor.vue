@@ -199,6 +199,8 @@ export default defineComponent({
 
     _setValue(value) {
       let editor = this._getEditor();
+      const { modified } = this.editor.getModel()
+      modified.setValue(value)
       if(editor) return editor.setValue(value);
     },
 
@@ -269,15 +271,13 @@ export default defineComponent({
       console.log('watch timestamp');
       this.value !== this._getValue() && this._setValue(this.value);
     },
-    // value() {
-    //   console.log('watch value', this.value);
-    //   this.value !== this._getValue() && this._setValue(this.value);
-    // },
+     value() {
+       //console.log('watch value', this.value);
+       this.value !== this._getValue() && this._setValue(this.value);
+     },
 
     original() {
       this._setOriginal()
-      this.value !== this._getValue() && this._setValue(this.value);
-      this._setModel(this.value, this.original)
     },
 
     language() {
