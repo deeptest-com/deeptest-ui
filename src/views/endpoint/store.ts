@@ -1456,12 +1456,12 @@ const StoreModel: ModuleType = {
 
                 const response: ResponseData = await queryEndpointCase(params);
                 if (response.code != 0) return false;
-
+                
                 const data = response.data;
 
                 commit('setEndpointCaseList', {
                     ...initState.listResult,
-                    list: (data.result || []).map(e => ({ ...e, children: e.children.length > 0 ? e.children : null })),
+                    list: (data.result || []).map(e => ({ ...e, children: e.children?.length > 0 ? e.children : null })),
                     pagination: {
                         ...initState.listResult.pagination,
                         current: params.page,

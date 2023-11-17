@@ -8,30 +8,29 @@
     </div>
 
     <div class="content">
-      <a-table v-if="list.length > 0"
-                :data-source="list"
-                :expandIconAsCell="false"
-                :expandIconColumnIndex="1"
-                :expandedRowKeys="expandKeys"
-                :pagination="{
-                    ...pagination,
-                    onChange: (page) => {
-                      query(page,pagination.pageSize, 'page');
-                    },
-                    onShowSizeChange: (_page, size) => {
-                      query(1,size, 'pageSize');
-                    },
-                    showTotal: (total) => {
-                      return `共 ${total} 条数据`;
-                    },
-                }"
+      <a-table
+        :data-source="list"
+        :expandIconAsCell="false"
+        :expandIconColumnIndex="1"
+        :expandedRowKeys="expandKeys"
+        :pagination="{
+            ...pagination,
+            onChange: (page) => {
+              query(page,pagination.pageSize, 'page');
+            },
+            onShowSizeChange: (_page, size) => {
+              query(1,size, 'pageSize');
+            },
+            showTotal: (total) => {
+              return `共 ${total} 条数据`;
+            },
+        }"
 
-                :columns="columns"
-                :loading="loading"
-                :row-key="record => record.id"
-                class="dp-table"
-                @expandedRowsChange="expandedRowsChange">
-
+        :columns="columns"
+        :loading="loading"
+        :row-key="record => record.id"
+        class="dp-table"
+        @expandedRowsChange="expandedRowsChange">
         <template #name="{ record, text }">
           <div class="case-title" style="display: inline-block;">
             <EditAndShowField
@@ -78,10 +77,6 @@
 
       </a-table>
 
-      <a-empty class="dp-empty-no-margin"
-               v-if="list.length === 0"
-               :image="simpleImage"/>
-
       <CaseEdit
           v-if="editVisible"
           :visible="editVisible"
@@ -102,7 +97,6 @@
 <script lang="tsx" setup>
 import {computed, defineProps, provide, ref} from "vue";
 import {UsedBy} from "@/utils/enum";
-import {Empty} from "ant-design-vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import {DeleteOutlined, CopyOutlined, AppstoreAddOutlined} from '@ant-design/icons-vue';
@@ -122,7 +116,6 @@ import AutoGenCaseModal from "./alternative/autoGenCaseModal.vue";
 import TableExpandIconVue from "@/components/Table/TableExpandIcon.vue";
 
 provide('usedBy', UsedBy.InterfaceDebug)
-const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 const {t} = useI18n();
 
 const store = useStore<{ Endpoint: Endpoint, Debug: Debug, Project: Project }>();
@@ -338,6 +331,11 @@ const autoGenAlternativeCase = () => {
 
   .content {
     height: 100%;
+
+    :deep(.ant-table-column-title) {
+      display: flex;
+      align-items: center;
+    }
   }
 }
 
