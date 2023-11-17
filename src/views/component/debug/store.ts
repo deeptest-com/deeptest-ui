@@ -26,9 +26,11 @@ import {
     listShareVar,
     getSnippet,
     listPostConditions,
+
     getScript,
     saveScript,
     removeScript,
+
     createPostConditions,
     removePostConditions,
     movePostConditions,
@@ -38,7 +40,10 @@ import {
     getInvocationLog,
     getPreConditionScript,
     saveResponseDefine, removeCookie, quickCreateCookie, saveCookie, getCookie,
+
+    getDbOpt, saveDbOpt, removeDbOpt,
 } from './service';
+
 import { serverList, changeServe, getVarsByEnv } from '@/views/project-settings/service';
 import {Checkpoint, Cookie, DebugInfo, Extractor, Interface, Response, Script} from "./data";
 import {ConditionCategory, ConditionType, UsedBy} from "@/utils/enum";
@@ -74,6 +79,7 @@ export interface StateType {
     extractorData: any;
     checkpointData: any;
     scriptData: any;
+    dbOptData: any;
     srcScriptData: any;
     cookieData: any;
     debugChange: any;
@@ -86,6 +92,7 @@ export interface StateType {
         activePostCondition: any;
         activeAssertion: any;
         scriptData: any;
+        dbOptData: any;
         extractorData: any;
         cookieData: any;
         checkpointData: any;
@@ -116,6 +123,7 @@ const initState: StateType = {
 
     extractorData: {} as Extractor,
     checkpointData: {} as Checkpoint,
+    dbOptData: {},
     scriptData: {} as Script,
     srcScriptData: {} as Script,
     cookieData: {} as Cookie,
@@ -135,6 +143,7 @@ const initState: StateType = {
         activePostCondition: {},
         activeAssertion: {},
         scriptData: {} as Script,
+        dbOptData: {},
         extractorData: {},
         cookieData: {},
         checkpointData: {},
@@ -226,7 +235,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         getExtractor: Action<StateType, StateType>;
         saveExtractor: Action<StateType, StateType>;
-        quickCreateExtractor: Action<StateType, StateType>;
+        quickCreateExtractor: Action<StateType, StateType>; // usedBy code editor
         removeExtractor: Action<StateType, StateType>;
 
         getCookie: Action<StateType, StateType>;
@@ -243,6 +252,10 @@ export interface ModuleType extends StoreModuleType<StateType> {
         removeScript: Action<StateType, StateType>;
         addSnippet: Action<StateType, StateType>;
         addSnippetForPost: Action<StateType, StateType>;
+
+        getDbOpt: Action<StateType, StateType>;
+        saveDbOpt: Action<StateType, StateType>;
+        removeDbOpt: Action<StateType, StateType>;
 
         listShareVar: Action<StateType, StateType>;
         removeShareVar: Action<StateType, StateType>;
@@ -262,6 +275,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         leaveSaveExtractor: Action<StateType, StateType>;
         leaveSaveScript: Action<StateType, StateType>;
         leaveSaveCheckpoint: Action<StateType, StateType>;
+        leaveSaveDbOpt: Action<StateType, StateType>;
     };
 }
 
@@ -322,7 +336,7 @@ const StoreModel: ModuleType = {
             } else {
                 state.assertionConditions = (payload.data || []).filter(e => e.isForBenchmarkCase === false);
             }
-            
+
         },
 
         setActiveAssertion(state, payload) {
@@ -685,9 +699,9 @@ const StoreModel: ModuleType = {
         async listPostCondition({commit, state}, payload?: { isForBenchmarkCase: boolean }) {
             try {
                 const resp = await listPostConditions({
-                    debugInterfaceId: state.debugInfo.debugInterfaceId, 
+                    debugInterfaceId: state.debugInfo.debugInterfaceId,
                     endpointInterfaceId: state.debugData.endpointInterfaceId,
-                    category: ConditionCategory.console, 
+                    category: ConditionCategory.console,
                     usedBy: state.debugInfo.usedBy,
                 });
                 const {data} = resp;
@@ -703,9 +717,9 @@ const StoreModel: ModuleType = {
         async listAssertionCondition({commit, state}, payload?: { isForBenchmarkCase: boolean }) {
             try {
                 const resp = await listPostConditions({
-                    debugInterfaceId: state.debugInfo.debugInterfaceId, 
+                    debugInterfaceId: state.debugInfo.debugInterfaceId,
                     endpointInterfaceId: state.debugData.endpointInterfaceId,
-                    category: ConditionCategory.assert, 
+                    category: ConditionCategory.assert,
                     usedBy: state.debugInfo.usedBy
                 });
 
@@ -792,9 +806,9 @@ const StoreModel: ModuleType = {
         },
 
         // extractor
-        async getExtractor({commit}, extarctorData: any) {
+        async getExtractor({commit}, extractorData: any) {
             try {
-                const response = await getExtractor(extarctorData.entityId);
+                const response = await getExtractor(extractorData.entityId);
                 const {data} = response;
                 commit('setPostConditionsDataObj',{
                     id: data.id,
@@ -981,7 +995,6 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
-
         async removeScript({commit, dispatch, state}, id: number) {
             try {
                 await removeScript(id);
@@ -992,6 +1005,54 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
+
+        // dbOpt
+        async getDbOpt({commit}, dbConnData: any) {
+            try {
+                const response = await getDbOpt(dbConnData.entityId);
+                const {data} = response;
+                commit('setPostConditionsDataObj',{
+                    id: data.id,
+                    value:data
+                })
+                commit('setSrcPostConditionsDataObj',{
+                    id: data.id,
+                    value:cloneDeep(data)
+                })
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
+        async saveDbOpt({commit, dispatch, state}, payload: any) {
+            try {
+                await saveDbOpt(payload);
+                dispatch('listPostCondition');
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
+        async leaveSaveDbOpt({commit, dispatch, state}, payload: any) {
+            try {
+                await saveDbOpt(payload);
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
+        async removeDbOpt({commit, dispatch, state}, payload) {
+            try {
+                await removeDbOpt(payload.id);
+
+                dispatch('listPostCondition');
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
+
+        // snippets
         async addSnippet({commit, dispatch, state}, { name, isForBenchmarkCase }: { name: string, isForBenchmarkCase?: boolean }) {
             let line = ''
             if (name === 'log') {
@@ -1025,7 +1086,7 @@ const StoreModel: ModuleType = {
             const lastScriptData = isForBenchmarkCase ? state.benchMarkCase.scriptData : state.scriptData;
             let script = (lastScriptData.content ? lastScriptData.content: '') + '\n' + line
             script = script.trim()
-            
+
             if (isForBenchmarkCase) {
                 commit('setBenchMarkCase', {
                     scriptData: {

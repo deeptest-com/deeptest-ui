@@ -43,6 +43,10 @@
                           type="script"
                           class="icon"  />
 
+                <icon-svg v-if="element.entityType === ConditionType.databaseOpt"
+                          type="db-opt"
+                          class="icon"  />
+
                 <span v-html="element.desc || t(element.entityType)"></span>
               </div>
               <div class="buttons">

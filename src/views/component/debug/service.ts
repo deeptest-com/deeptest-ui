@@ -23,6 +23,7 @@ const apiExtractor = 'extractors'
 const apiCookie = 'cookies'
 const apiCheckpoint = 'checkpoints'
 const apiScript = 'scripts'
+const apiDatabaseOpts = 'databaseOpts'
 
 const apiParser = 'parser'
 
@@ -382,6 +383,27 @@ export async function saveScript(data): Promise<any> {
 export async function removeScript(id: number): Promise<any> {
     return request({
         url: `/${apiScript}/${id}`,
+        method: 'DELETE',
+    });
+}
+
+// dbConn
+export async function getDbOpt(id: number): Promise<any> {
+    return request({
+        url: `/${apiDatabaseOpts}/${id}`,
+        method: 'GET',
+    });
+}
+export async function saveDbOpt(data): Promise<any> {
+    return request({
+        url: `/${apiDatabaseOpts}`,
+        method: data.id ? 'PUT' : 'POST',
+        data: data,
+    });
+}
+export async function removeDbOpt(id: number): Promise<any> {
+    return request({
+        url: `/${apiDatabaseOpts}/${id}`,
         method: 'DELETE',
     });
 }

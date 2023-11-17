@@ -1,52 +1,39 @@
 <template>
   <div class="response-extractor-main">
     <a-form :label-col="{ style: { width: '120px' } }" :wrapper-col="wrapperCol">
-      <a-form-item label="数据来源" v-bind="validateInfos.src" required>
-        <a-radio-group name="srcGroup" v-model:value="model.src"
-                       @blur="validate('src', { trigger: 'change' }).catch(() => {})">
-          <a-radio v-for="(item, idx) in srcOptions" :key="idx" :value="item.value">
-            {{ t(item.label) }}
-          </a-radio>
-        </a-radio-group>
+
+      <a-form-item label="数据库连接" v-bind="validateInfos.dbConnId" required>
+
+        <a-row type="flex">
+          <a-col flex="auto">
+            <a-select v-model:value="model.dbConnId"
+                      @blur="validate('dbConnId', { trigger: 'change' }).catch(() => {})">
+
+              <a-select-option :value="0">请选择</a-select-option>
+
+              <a-select-option v-for="(item, idx) in dbConns" :key="idx" :value="item.id">
+                {{ item.name }}
+              </a-select-option>
+            </a-select>
+          </a-col>
+
+          <a-col flex="100px" class="dp-formitem-suffix">
+            <router-link :to="'/'+currProject.shortName+'/project-setting/dbconn'"
+                         target="_blank" class="dp-link-primary">
+              前往添加
+            </router-link>
+          </a-col>
+        </a-row>
       </a-form-item>
 
-      <!-- for body -->
-      <a-form-item v-if="model.src === 'body'" label="提取方法" v-bind="validateInfos.type" required>
-        <a-select v-model:value="model.type"
-                  @blur="validate('type', { trigger: 'change' }).catch(() => {})">
-          <a-select-option v-for="(item, idx) in typeOptions" :key="idx" :value="item.value">
-            {{ t(item.label) }}
-          </a-select-option>
-        </a-select>
+      <a-form-item label="SQL语句" v-bind="validateInfos.sql" required>
+        <a-textarea v-model:value="model.sql"
+                 @blur="validate('sql', { trigger: 'blur' }).catch(() => {})"/>
       </a-form-item>
 
-      <!-- for header -->
-      <a-form-item v-if="model.src === 'header'" label="键值" v-bind="validateInfos.key" required>
-        <a-input v-model:value="model.key"
-                 @blur="validate('key', { trigger: 'blur' }).catch(() => {})"/>
-      </a-form-item>
-
-      <template v-if="model.src === 'body' && model.type === 'boundary'">
-        <a-form-item label="边界开始" v-bind="validateInfos.boundaryStart" required>
-          <a-input v-model:value="model.boundaryStart"
-                   @blur="validate('boundaryStart', { trigger: 'blur' }).catch(() => {})"/>
-        </a-form-item>
-        <a-form-item label="边界结束" v-bind="validateInfos.boundaryEnd" required>
-          <a-input v-model:value="model.boundaryEnd"
-                   @blur="validate('boundaryEnd', { trigger: 'blur' }).catch(() => {})"/>
-        </a-form-item>
-        <a-form-item label="索引值">
-          <a-input-number v-model:value="model.boundaryIndex"/>
-        </a-form-item>
-        <a-form-item label="是否包含边界">
-          <a-switch v-model:checked="model.boundaryIncluded"/>
-        </a-form-item>
-      </template>
-
-      <a-form-item v-if="model.src === 'body' && model.type !== 'boundary'"
-                   :label="model.type==='regx' ? '表达式': (model.type==='jsonpath' ? t('jsonpath') : 'XPath')" v-bind="validateInfos.expression" required>
-        <a-input v-model:value="model.expression"
-                 @blur="validate('expression', { trigger: 'blur' }).catch(() => {})"/>
+      <a-form-item label="JSONPath" v-bind="validateInfos.jsonPath" required>
+        <a-input v-model:value="model.jsonPath"
+                 @blur="validate('jsonPath', { trigger: 'blur' }).catch(() => {})"/>
       </a-form-item>
 
       <a-form-item label="变量名称" v-bind="validateInfos.variable" required>
@@ -59,9 +46,7 @@
           <a-select v-model:value="model.code"
                     @change="onVarSelected"
                     style="width: 28%">
-            <a-select-option value="">
-              选择变量
-            </a-select-option>
+            <a-select-option value="">请选择</a-select-option>
 
             <a-select-option v-for="(item, idx) in debugData.shareVars"
                              :key="idx"
@@ -71,18 +56,6 @@
           </a-select>
         </a-input-group>
       </a-form-item>
-
-      <template v-if="model.src === 'cookie'">
-        <a-form-item label="Cookie名称" v-bind="validateInfos.key" required>
-          <a-input v-model:value="model.key"
-                   @blur="validate('key', { trigger: 'blur' }).catch(() => {})" />
-        </a-form-item>
-
-        <a-form-item label="默认值">
-          <a-input v-model:value="model.default" />
-          <div class="dp-input-tip">Cookie不存时的默认值</div>
-        </a-form-item>
-      </template>
 
       <a-form-item label="变量作用域">
         <a-radio-group v-model:value="model.scope">
@@ -110,64 +83,36 @@ import {NotificationKeyCommon} from "@/utils/const";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import {listDbConn} from "@/views/project-settings/service";
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
 
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
 const isForBenchmarkCase = inject('isForBenchmarkCase');
 const {t} = useI18n();
 
-const store = useStore<{ Debug: Debug }>();
+const store = useStore<{ Debug: Debug, ProjectGlobal }>();
 
+const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const responseData = computed<any>(() => store.state.Debug.responseData);
-const model = computed<any>(() => isForBenchmarkCase ? store.state.Debug.benchMarkCase.extractorData : store.state.Debug.extractorData);
 
-const typeRequired = [{required: true, message: '请选择类型', trigger: 'change'}]
-const expressionRequired = [{required: true, message: '请输入元素路径', trigger: 'blur'}]
-const keyRequired = [{required: true, message: '请输入键值', trigger: 'blur'}]
-const boundaryStartRequired = [{required: true, message: '请输入边界开始字符串', trigger: 'blur'}]
-const boundaryEndRequired = [{required: true, message: '请输入边界结束字符串', trigger: 'blur'}]
+const {postConditionsDataObj} = useIMLeaveTip();
+const model = computed<any>(() => {
+  return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
+});
 
-const isInit = ref(true)
+
 const rules = computed(() => { return {
   src: [
     {required: true, message: '请选择来源', trigger: 'change'},
   ],
-  type: model.value.src === ExtractorSrc.header ? [] : typeRequired,
-  key: model.value.src === ExtractorSrc.header || model.value.src === ExtractorSrc.cookie ? keyRequired : [],
-
-  expression: model.value.src === ExtractorSrc.header || model.value.type === ExtractorType.boundary ? [] : expressionRequired,
-  boundaryStart: model.value.src !== ExtractorSrc.header && model.value.type === ExtractorType.boundary ? boundaryStartRequired : [],
-  boundaryEnd: model.value.src !== ExtractorSrc.header && model.value.type === ExtractorType.boundary ? boundaryEndRequired : [],
 
   variable: [
     {required: true, message: '请输入变量名', trigger: 'blur'},
   ],
 }})
-
-watch(model, (newVal) => {
-      if (!isInit.value) return
-
-      isInit.value = false
-
-      if (responseData.value.contentLang === 'json') {
-        model.value.type = ExtractorType.jsonquery
-      } else if (responseData.value.contentLang === 'xml') {
-        model.value.type = ExtractorType.xmlquery
-      } else if (responseData.value.contentLang === 'html') {
-        model.value.type = ExtractorType.htmlquery
-      }
-    }, {immediate: true, deep: true}
-)
-
-// watch(() => {
-//   return model.value
-// },(newVal,oldValue) => {
-//   console.log('model.value222 提取器',newVal,oldValue);
-// },{
-//   deep:true
-// })
 
 const props = defineProps({
   condition: {
@@ -180,16 +125,19 @@ const props = defineProps({
   },
 })
 
-const types = getEnumSelectItems(CheckpointType)
-const operators = getEnumSelectItems(ComparisonOperator)
-const srcOptions = getEnumSelectItems(ExtractorSrc)
-const typeOptions = getEnumSelectItems(ExtractorType)
-
 const load = () => {
   console.log('load', props.condition)
-  store.dispatch('Debug/getExtractor', props.condition)
+  store.dispatch('Debug/getDbOpt', props.condition)
 }
 load()
+
+const dbConns = ref([])
+const loadDbConns = async () => {
+  console.log('loadDbConns')
+  const resp = await listDbConn({})
+  dbConns.value = resp.data
+}
+loadDbConns()
 
 let {resetFields, validate, validateInfos} = useForm(model, rules);
 
@@ -200,7 +148,7 @@ const save = () => {
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
     model.value.projectId = debugData.value.projectId
 
-    store.dispatch('Debug/saveExtractor', model.value).then((result) => {
+    store.dispatch('Debug/saveDbOpt', model.value).then((result) => {
       if (result) {
         notifySuccess(`保存成功`);
         if (props.finish) {

@@ -21,6 +21,10 @@
         <icon-svg v-if="item.conditionEntityType === ConditionType.script"
                   type="script"
                   class="icon"  />
+
+        <icon-svg v-if="item.conditionEntityType === ConditionType.databaseOpt"
+                  type="db-opt"
+                  class="icon"  />
       </span>
       &nbsp;
       <span v-html="item.resultMsg"></span>
