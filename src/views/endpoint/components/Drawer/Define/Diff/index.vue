@@ -53,7 +53,6 @@ onMounted(async () => {
 
 
   watch(() => diffModalVisible.value.endpointId, async (newVal) => {
-    console.log(newVal)
     if (newVal) {
       getEndPointDiff(newVal)
     }
@@ -79,7 +78,7 @@ const saveDiff = async (title: string,isChanged: boolean) => {
 }
 
 const cancel = () => {
-  store.commit('Endpoint/setDiffModalVisible', { ...diffModalVisible.value, visible: false});
+  store.commit('Endpoint/setDiffModalVisible', { ...diffModalVisible.value, visible: false,endpointId:0});
 }
 
 
