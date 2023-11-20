@@ -90,7 +90,7 @@
         class="scenario-exec-log-tree"
         :treeData="reportTreeData || []" />
     </div>
-  </a-drawer>  
+  </a-drawer>
 </template>
 
 <script lang="ts" setup>
@@ -326,7 +326,7 @@ const getSelectedNodes = () => {
 }
 
 /**
- * 原始树结构 调整为： 每个节点添加 needExec ，后端通过该参数过滤需要  执行的节点
+ * 原始树结构 调整为： 每个节点添加 needExec，后端通过该参数过滤需要 执行的节点
  */
 const getSelectedTreeNodes = () => {
   const setNodesChecked = (data: any[]) => {
@@ -342,7 +342,9 @@ const getSelectedTreeNodes = () => {
     })
     return cloneDeep(array);
   };
-  return { ...unref(alternativeTreeData), children: unref(checkedKeys).length === 0 ? [] : setNodesChecked(cloneDeep(unref(alternativeCases))) };
+
+  const root = { ...unref(alternativeTreeData), needExec: true, children: unref(checkedKeys).length === 0 ? [] : setNodesChecked(cloneDeep(unref(alternativeCases))) };
+  return root
 }
 
 defineExpose({ getSelectedTreeNodes, getSelectedNodes, loadCaseTree, executionType: computed(() => executionType.value) });

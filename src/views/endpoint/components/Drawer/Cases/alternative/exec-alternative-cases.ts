@@ -108,7 +108,7 @@ function useCaseExecution(): CaseExecution {
         }
     }
 
-    const execStart = async ({ baseCaseId, usedBy, cases }) => {
+    const execStart = async ({ baseCaseId, usedBy, cases, type }) => {
         execUuid.value = getUuid();
         execStatusMap.value = {};
         const data = {
@@ -120,6 +120,7 @@ function useCaseExecution(): CaseExecution {
             usedBy,
             execUuid: execUuid.value,
             cases,
+            type,
             environmentId: currEnvId.value,
         }
         console.log('===== websocket data =====', data);
