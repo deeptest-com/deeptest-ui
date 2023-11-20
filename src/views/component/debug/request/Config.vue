@@ -77,7 +77,7 @@ const {t} = useI18n();
 
 const store = useStore<{  Debug: Debug }>()
 const debugData = computed<any>(() => store.state.Debug.debugData);
-const postConditions = computed<any>(() => store.state.Debug.postConditions);
+const conditions = computed<any>(() => store.state.Debug.conditions);
 const assertionConditions = computed<any>(() => store.state.Debug.assertionConditions);
 
 const activeKey = ref('query-param');
@@ -93,7 +93,7 @@ const getTabTitle = computed(() => {
     assertionConditions: '断言',
   }
   return type => {
-    const sourceData = type === 'postConditions' ? (postConditions.value || []) : type === 'assertionConditions' ? (assertionConditions.value || []) : (debugData.value[type] || []).filter(e => e.name);
+    const sourceData = type === 'conditions' ? (conditions.value || []) : type === 'assertionConditions' ? (assertionConditions.value || []) : (debugData.value[type] || []).filter(e => e.name);
     const globalParamsType = type === 'queryParams' ? 'query' : type === 'pathParams' ? 'path' : type === 'headers' ? 'header' : type === "cookies"? 'cookie': '';
     let globalParamsLength = 0;
     if (globalParamsType) {
@@ -135,8 +135,8 @@ watch(() => {
  * 离开提示保存: 后置处理器 + 断言
  * */
 const {
-  postConditionsList,
-  postConditionsDataObj,
+  conditionsList,
+  conditionsDataObj,
   debugInfo,
   assertionConditionsDataObj,
   debugChangePostScript,
@@ -147,15 +147,15 @@ const {
   scriptData,
 }  = useIMLeaveTip();
 const getEntityType = (id) => {
-  const cur = postConditionsList?.value?.find((item) => {
+  const cur = conditionsList?.value?.find((item) => {
     return item.entityId === id
   })
   return cur?.entityType;
 }
 const leaveSave =  async (event) => {
   // 后置处理器缓存的数据 - 保存
-  if(Object.keys(postConditionsDataObj.value)?.length && debugChangePostScript.value){
-    Object.values(postConditionsDataObj.value).map(async (item:any) => {
+  if(Object.keys(conditionsDataObj.value)?.length && debugChangePostScript.value){
+    Object.values(conditionsDataObj.value).map(async (item:any) => {
       item.debugInterfaceId = debugInfo.value.debugInterfaceId;
       item.endpointInterfaceId = debugInfo.value.endpointInterfaceId;
       item.projectId = debugData.value.projectId;
