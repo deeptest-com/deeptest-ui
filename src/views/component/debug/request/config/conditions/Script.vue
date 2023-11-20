@@ -24,19 +24,20 @@
           <div @click="addSnippet('variables_clear')" class="dp-link-primary">清除变量</div>
 
           <div @click="addSnippet('datapool_get')" class="dp-link-primary">获取数据池变量</div>
-
           <div @click="addSnippet('log')" class="dp-link-primary">打印日志</div>
 
           <div @click="addSnippet('send_request_get')" class="dp-link-primary">发送GET请求</div>
           <div @click="addSnippet('send_request_post')" class="dp-link-primary">发送POST请求</div>
 
-          <div @click="addSnippet('set_mock_resp_code')" class="dp-link-primary">设置响应码</div>
-          <div @click="addSnippet('set_mock_resp_field')" class="dp-link-primary">修改JSON响应对象</div>
-          <div @click="addSnippet('set_mock_resp_text')" class="dp-link-primary">修改字符串响应内容</div>
+          <template v-if="usedWith==='post'">
+            <div @click="addSnippet('set_mock_resp_code')" class="dp-link-primary">设置响应码</div>
+            <div @click="addSnippet('set_mock_resp_field')" class="dp-link-primary">修改JSON响应对象</div>
+            <div @click="addSnippet('set_mock_resp_text')" class="dp-link-primary">修改字符串响应内容</div>
 
-          <div @click="addSnippet('assert_resp_status_Code')" class="dp-link-primary">断言响应状态码为200</div>
-          <div @click="addSnippet('assert_resp_json_field')" class="dp-link-primary">断言JSON响应字段取值</div>
-          <div @click="addSnippet('assert_resp_content_contain')" class="dp-link-primary">断言HTML响应内容包含</div>
+            <div @click="addSnippet('assert_resp_status_Code')" class="dp-link-primary">断言响应状态码为200</div>
+            <div @click="addSnippet('assert_resp_json_field')" class="dp-link-primary">断言JSON响应字段取值</div>
+            <div @click="addSnippet('assert_resp_content_contain')" class="dp-link-primary">断言HTML响应内容包含</div>
+          </template>
         </div>
 
         <div class="title">
@@ -64,7 +65,7 @@ import {computed, defineProps, inject, onBeforeUnmount, onMounted, reactive, ref
 import {Form} from 'ant-design-vue';
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import {ConditionType, UsedBy} from "@/utils/enum";
+import {ConditionSrc, ConditionType, UsedBy} from "@/utils/enum";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {StateType as Snippet} from "@/store/snippet";
@@ -79,8 +80,11 @@ import {StateType as ProjectStateType} from "@/store/project";
 import cloneDeep from "lodash/cloneDeep";
 
 const useForm = Form.useForm;
+
+const usedWith = inject('usedWith') as ConditionSrc
 const usedBy = inject('usedBy') as UsedBy
 const isForBenchmarkCase = inject('isForBenchmarkCase');
+
 const {t} = useI18n();
 const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet: Snippet }>();
 const currProject = computed(() => store.state.ProjectGlobal.currProject);

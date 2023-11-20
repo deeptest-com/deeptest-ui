@@ -11,7 +11,7 @@ import debounce from "lodash.debounce";
 import {addExtractAction, addReplaceAction} from "@/components/Editor/service";
 import {getJslibs, getSnippet} from "@/views/component/debug/service";
 
-import {UsedBy, UsedWith} from "@/utils/enum";
+import {UsedBy, ConditionSrc} from "@/utils/enum";
 
 export default defineComponent({
   name: "MonacoEditor",
@@ -99,7 +99,7 @@ export default defineComponent({
         const loadJsLibs = async () => {
           const typeFiles = []
 
-          if (usedWith === UsedWith.PostCondition) {
+          if (usedWith === ConditionSrc.PostCondition) {
             const chaiDeclareSnippet = 'chai.d'
             const chaiDeclareJson = await getSnippet(chaiDeclareSnippet)
             if (chaiDeclareJson.code === 0 && !!chaiDeclareJson.data?.script) {
@@ -108,7 +108,7 @@ export default defineComponent({
           }
 
           const declareSnippet = usedBy == UsedBy.MockData ?
-              'mock.d' : usedWith === UsedWith.PostCondition ? 'deeptest-post.d' : 'deeptest.d'
+              'mock.d' : usedWith === ConditionSrc.PostCondition ? 'deeptest-post.d' : 'deeptest.d'
 
           const defaultDeclareJson = await getSnippet(declareSnippet)
           if (defaultDeclareJson.code === 0 && !!defaultDeclareJson.data?.script) {

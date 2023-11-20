@@ -66,7 +66,7 @@
             </div>
 
             <div class="content" v-if="activeAssertion.id === +element.id">
-              <Checkpoint 
+              <Checkpoint
                 v-if="element.entityType === ConditionType.checkpoint"
                 :condition="activeAssertion"
                 :finish="list" />
@@ -76,7 +76,7 @@
       </draggable>
     </div>
 
-    <FullScreenPopup 
+    <FullScreenPopup
       v-if="fullscreen"
       :visible="fullscreen"
       :model="activeAssertion"
@@ -88,13 +88,13 @@
 import {computed, inject, ref, watch, provide, onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import { 
-  CheckCircleOutlined, 
+import {
+  CheckCircleOutlined,
   DeleteOutlined,
-  ClearOutlined, 
+  ClearOutlined,
   RightOutlined,
-  DownOutlined, 
-  CloseCircleOutlined, 
+  DownOutlined,
+  CloseCircleOutlined,
   FullscreenOutlined } from '@ant-design/icons-vue';
 import draggable from 'vuedraggable';
 import {ConditionType, UsedBy} from "@/utils/enum";
@@ -104,7 +104,7 @@ import settings from "@/config/settings";
 import {confirmToDelete} from "@/utils/confirm";
 import {StateType as Debug} from "@/views/component/debug/store";
 import IconSvg from "@/components/IconSvg";
-import Checkpoint from "@/views/component/debug/request/config/conditions-post/Checkpoint.vue";
+import Checkpoint from "@/views/component/debug/request/config/conditions/Checkpoint.vue";
 import FullScreenPopup from "@/views/component/debug/request/config/ConditionPopup.vue";
 import TooltipCell from "@/components/Table/tooltipCell.vue";
 import Tips from "@/components/Tips/index.vue";

@@ -21,14 +21,13 @@
                     :condition="model"
                     :finish="onCancel" />
 
-        <PreScript v-if="model.conditionEntityType === ConditionType.script"
-                :condition="model"
-                :fullScreen="true"
-                :finish="onCancel" />
-
-        <PostScript v-if="model.entityType === ConditionType.script"
+        <Script v-if="model.entityType === ConditionType.script"
                     :condition="model"
                     :finish="onCancel" />
+
+        <DatabaseOpt v-if="model.entityType === ConditionType.databaseOpt"
+                :condition="model"
+                :finish="onCancel" />
       </div>
 
       <div class="buttons">
@@ -47,13 +46,14 @@ import {computed, defineProps, inject, ref} from "vue";
 import {useI18n} from "vue-i18n";
 
 import {ConditionType} from "@/utils/enum";
-import Extractor from "./conditions-post/Extractor.vue";
-import Cookie from "./conditions-post/Cookie.vue";
-import Checkpoint from "./conditions-post/Checkpoint.vue";
-import PreScript from "./conditions-pre/Script.vue";
-import PostScript from "./conditions-post/Script.vue";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
+
+import Extractor from "./conditions/Extractor.vue";
+import Cookie from "./conditions/Cookie.vue";
+import Checkpoint from "./conditions/Checkpoint.vue";
+import Script from "./conditions/Script.vue";
+import DatabaseOpt from "./conditions/DatabaseOpt.vue";
 
 const {t} = useI18n();
 

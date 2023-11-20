@@ -23,8 +23,10 @@ export default function useIMLeaveTip()  {
     const srcDebugData: any = computed<Endpoint>(() => store.state.Debug.srcDebugData);
     const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
     const isMockChange = computed<any>(() => store.state.Endpoint.isMockChange);
-    const srcPostConditionsDataObj = computed<any>(() => store.state.Debug.srcPostConditionsDataObj);
-    const postConditionsDataObj = computed<any>(() => store.state.Debug.postConditionsDataObj);
+
+    const srcConditionsDataObj = computed<any>(() => store.state.Debug.srcConditionsDataObj);
+    const conditionsDataObj = computed<any>(() => store.state.Debug.conditionsDataObj);
+
     const assertionConditionsDataObj = computed<any>(() => store.state.Debug.srcAssertionConditionsDataObj);
     const srcAssertionConditionsDataObj = computed<any>(() => store.state.Debug.assertionConditionsDataObj);
     const postConditionsList = computed<any>(() => store.state.Debug.postConditions);
@@ -111,8 +113,10 @@ export default function useIMLeaveTip()  {
         srcEndpointDetail,
         endpointDetail,
         isDebugChange,
-        srcPostConditionsDataObj,
-        postConditionsDataObj,
+
+        srcConditionsDataObj,
+        conditionsDataObj,
+
         resetDebugChange,
         debugChangeCheckpoint,
         debugChangePreScript,

@@ -2,12 +2,23 @@ import request from '@/utils/request';
 import {QueryParams} from "./data";
 
 import {
-    ProcessorCookie, ProcessorData,
+    ProcessorCookie,
+    ProcessorData,
     ProcessorExtractor,
     ProcessorLogic,
-    ProcessorLoop, ProcessorGroup, ProcessorTimer, ProcessorPrint,
+    ProcessorLoop,
+    ProcessorGroup,
+    ProcessorTimer,
+    ProcessorPrint,
     ProcessorCategory,
-    ProcessorVariable, ProcessorAssertion, RequestBodyType, UsedBy, ProcessorAction, ProcessorInterface
+    ProcessorVariable,
+    ProcessorAssertion,
+    RequestBodyType,
+    UsedBy,
+    ProcessorAction,
+    ProcessorInterface,
+    ConditionSrc,
+    ConditionType
 } from "@/utils/enum";
 import {Interface} from "@/views/component/debug/data";
 import {isInArray} from "@/utils/array";

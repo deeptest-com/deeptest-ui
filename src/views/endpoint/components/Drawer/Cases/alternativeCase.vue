@@ -86,12 +86,14 @@
 
             <a-tab-pane key="pre-condition" tab="预处理">
               <CaseTips type="pre-condition" @reset="onReset" />
-              <ConditionPre v-if="activeKey === 'pre-condition'" />
+              <Condition v-if="activeKey === 'pre-condition'"
+                         :conditionSrc="ConditionSrc.PreCondition"/>
             </a-tab-pane>
 
             <a-tab-pane key="post-condition" :tab="getTabTtitle('post-condition')">
               <CaseTips type="post-condition" @reset="onReset" />
-              <ConditionPost v-if="activeKey === 'post-condition'" />
+              <Condition v-if="activeKey === 'post-condition'"
+                         :conditionSrc="ConditionSrc.PostCondition"/>
             </a-tab-pane>
 
             <a-tab-pane key="assertion" :tab="getTabTtitle('assertion')">
@@ -139,7 +141,7 @@ import Swal from "sweetalert2";
 import IconSvg from "@/components/IconSvg";
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
 import {StateType as Debug} from "@/views/component/debug/store";
-import { StateType as ProjectSettingStateType } from "@/views/project-settings/store";
+import {StateType as ProjectSettingStateType } from "@/views/project-settings/store";
 import {StateType as ProjectStateType} from "@/store/project";
 
 import Exec from "./alternative/exec.vue";
@@ -148,9 +150,10 @@ import {
   CaseFactor,
   CaseTips,
   SaveAlternative,
-  ConditionPost,
-  ConditionPre,
   Assertion } from "./alternative";
+
+import Condition from "@/views/component/debug/request/config/Condition.vue";
+
 import EditAndShowField from "@/components/EditAndShow/index.vue";
 import Invocation from "@/views/component/debug/request/Invocation.vue";
 import DebugConfig  from "@/views/component/debug/config.vue";
@@ -161,11 +164,10 @@ import {StateType as UserStateType} from "@/store/user";
 import {getToken} from "@/utils/localToken";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import settings from "@/config/settings";
-import bus from "@/utils/eventBus";
-import { saveInterface } from "@/views/scenario/service";
 
 const usedBy = UsedBy.CaseDebug
 provide('usedBy', usedBy)
+provide('isForBenchmarkCase', true)
 
 const {isDebugChange, resetDebugChange} = useIMLeaveTip();
 

@@ -105,7 +105,7 @@ import {confirmToDelete} from "@/utils/confirm";
 import {StateType as Debug} from "@/views/component/debug/store";
 import IconSvg from "@/components/IconSvg";
 import useIMLeaveTip   from "@/composables/useIMLeaveTip";
-import Checkpoint from "./conditions-post/Checkpoint.vue";
+import Checkpoint from "./conditions/Checkpoint.vue";
 import FullScreenPopup from "./ConditionPopup.vue";
 import TooltipCell from "@/components/Table/tooltipCell.vue";
 import draggable from 'vuedraggable'

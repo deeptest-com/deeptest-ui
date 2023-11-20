@@ -84,7 +84,7 @@ import {computed, defineProps, inject, onBeforeUnmount, onMounted, reactive, wat
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import {Form, notification} from 'ant-design-vue';
-import {CheckpointType, ComparisonOperator, ExtractorSrc, ExtractorType, UsedBy} from "@/utils/enum";
+import {CheckpointType, ComparisonOperator, ConditionSrc, ExtractorSrc, ExtractorType, UsedBy} from "@/utils/enum";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {getEnumSelectItems} from "@/utils/comm";
 import {NotificationKeyCommon} from "@/utils/const";
@@ -96,6 +96,7 @@ import {listDbConn} from "@/views/project-settings/service";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 
 const useForm = Form.useForm;
+const usedWith = inject('usedWith') as ConditionSrc
 const usedBy = inject('usedBy') as UsedBy
 const isForBenchmarkCase = inject('isForBenchmarkCase');
 const {t} = useI18n();

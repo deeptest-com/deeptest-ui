@@ -32,12 +32,14 @@
         <Authorization v-if="activeKey === 'auth'" />
       </a-tab-pane>
 
-      <a-tab-pane key="pre-condition" tab="预处理">
-        <PreCondition v-if="activeKey === 'pre-condition'" />
+      <a-tab-pane key="pre-condition" :tab="getTabTitle('preConditions')">
+        <Condition v-if="activeKey === 'pre-condition'"
+                   :conditionSrc="ConditionSrc.PreCondition" />
       </a-tab-pane>
 
       <a-tab-pane key="post-condition" :tab="getTabTitle('postConditions')">
-        <PostCondition v-if="activeKey === 'post-condition'" />
+        <Condition v-if="activeKey === 'post-condition'"
+                   :conditionSrc="ConditionSrc.PostCondition" />
       </a-tab-pane>
 
       <a-tab-pane key="assertion" :tab="getTabTitle('assertionConditions')">
@@ -50,7 +52,7 @@
 <script setup lang="ts">
 import {computed, inject, ref, watch, onMounted,onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
-import {ConditionType, Methods, UsedBy} from "@/utils/enum";
+import {ConditionType, ConditionSrc, UsedBy} from "@/utils/enum";
 import {StateType as Debug} from "@/views/component/debug/store";
 
 import QueryParameters from "./config/QueryParameters.vue";
@@ -61,13 +63,12 @@ import Cookie from "./config/Cookie.vue";
 import RequestBody from "./config/Body.vue";
 import RequestHeaders from "./config/Headers.vue";
 import Authorization from "./config/Authorization.vue";
-import PreCondition from "./config/ConditionPre.vue";
-import PostCondition from "./config/ConditionPost.vue";
+import Condition from "./config/Condition.vue";
 import Assertion from "./config/Assertion.vue";
 import {useStore} from "vuex";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
-import {notifyError, notifySuccess} from "@/utils/notify";
+import {notifySuccess} from "@/utils/notify";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import cloneDeep from "lodash/cloneDeep";
 
@@ -87,6 +88,7 @@ const getTabTitle = computed(() => {
     pathParams: '路径参数',
     headers: '请求头',
     cookies: 'Cookie',
+    preConditions: '前置处理',
     postConditions: '后置处理',
     assertionConditions: '断言',
   }

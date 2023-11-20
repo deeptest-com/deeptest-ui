@@ -17,7 +17,8 @@ export enum UsedBy {
     OpenAPIYaml = "openapi_yaml",
 }
 
-export enum UsedWith {
+export enum ConditionSrc {
+    PreCondition = "pre_condition",
     PostCondition = "post_condition",
 }
 
