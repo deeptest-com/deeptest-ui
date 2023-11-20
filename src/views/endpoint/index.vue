@@ -74,7 +74,7 @@
                     <div class="notice-icon">
                       <a-tooltip v-if="record.changedStatus > ChangedStatus.NoChanged" :overlayClassName="'diff-custom-tooltip'">       
                         <template #title>
-                        <span>{{ record.changedStatus == ChangedStatus.Changed?'自动同步更新内容待确认':'平台修改和自动同步内容不一致'}}，点此<a @click="showDiff(record.id)">查看详情</a></span>
+                        <span>更新内容不一致，点此<a @click="showDiff(record.id)">查看详情</a></span>
                         </template>
                         <WarningFilled v-if="record.changedStatus == ChangedStatus.Changed"  @click="showDiff(record.id)" :style="{color: '#fb8b06'}" />
                         <InfoCircleOutlined  v-if="record.changedStatus == ChangedStatus.IgnoreChanged"  @click="showDiff(record.id)" :style="{color: '#c6c6c6'}" />

@@ -18,7 +18,7 @@
               <WarningFilled v-if="endpointDetail.changedStatus == ChangedStatus.Changed"  @click="showDiff(endpointDetail.id)" :style="{color: '#fb8b06'}" />
               <InfoCircleOutlined  v-if="endpointDetail.changedStatus == ChangedStatus.IgnoreChanged"  @click="showDiff(endpointDetail.id)" :style="{color: '#c6c6c6'}" />
           </template>
-          {{ endpointDetail.changedStatus == ChangedStatus.Changed?'自动同步更新内容待确认':'平台修改和自动同步内容不一致'}}，点此<a style="color:#427EE6;" @click="showDiff(endpointDetail.id)">查看详情</a></a-tag>
+          更新内容不一致，点此<a style="color:#427EE6;" @click="showDiff(endpointDetail.id)">查看详情</a></a-tag>
         </div>
        </template>
       </DetailHeader>
