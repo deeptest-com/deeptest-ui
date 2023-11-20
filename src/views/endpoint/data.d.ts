@@ -1,11 +1,11 @@
 
 export interface Endpoints {
-  "responseBodies": any[],
-  "requestBody": any,
-  params: any[],
-  headers: any[],
-  cookies: any[],
-  method: string |undefined,
+    "responseBodies": any[],
+    "requestBody": any,
+    params: any[],
+    headers: any[],
+    cookies: any[],
+    method: string | undefined,
 }
 
 export interface Endpoint {
@@ -88,8 +88,8 @@ export interface filterFormState {
     createUser: [] | null,
     title: string | null,
     categoryId: string | null,
-    tagNames:[]|[],
-    serveId:string |null
+    tagNames: [] | [],
+    serveId: string | null
 }
 
 
@@ -97,18 +97,26 @@ interface NewEndpointFormState {
     title: string;
     categoryId: string | null | number;
     description: string | undefined;
-    curl:string;
-    serveId:string |null;
+    curl: string;
+    serveId: string | null;
 }
 
 export interface QueryCaseTreeParams {
-    currentProjectId:number
-    serveId:number
-  }
+    currentProjectId: number
+    serveId: number
+}
 
 export interface GenerateFromResponseParams {
     code: string;
     contentType: string;
     description: string;
-    interfaceId:number;
+    interfaceId: number;
+}
+
+export interface EndpointDiffRes {
+    current: string
+    latest: string
+    CurrentDesc: string
+    latestDesc: string
+    changedStatus: string
 }

@@ -920,7 +920,7 @@ function showDiff(id: number) {
   color: #447DFD;
   display: flex;
   .notice-icon {
-    margin-right: 2px;
+    margin: 1px 2px 0px 0px;
   }
 }
 

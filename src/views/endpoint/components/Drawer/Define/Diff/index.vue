@@ -8,7 +8,8 @@
             <span>{{ res.currentDesc }}</span>
           </div>
           <div class="header-button">
-            <a-button @click="saveDiff(title.left, false)">{{ title.left }}</a-button>
+            <a-button @click="saveDiff(title.left, false)" :disabled="res.changedStatus == ChangedStatus.IgnoreChanged">{{
+              title.left }}</a-button>
           </div>
         </div>
         <div class="header-right">
@@ -37,22 +38,24 @@ import { MonacoOptions } from '@/utils/const';
 import { watch, ref, onMounted, computed } from 'vue';
 import { useStore } from "vuex";
 import { confirmToDo } from "@/utils/confirm";
+import { ChangedStatus } from "@/utils/enum";
+import { EndpointDiffRes } from '@view/endpoint/data.d.ts';
 
 const store = useStore<{ Endpoint }>();
 
 const diffModalVisible = computed(() => store.state.Endpoint.diffModalVisible);
 
-const res = ref({ current: '', latest: '', currentDesc: '', latestDesc: '' });
+const res = ref<EndpointDiffRes>({ current: '', latest: '', currentDesc: '', latestDesc: '', changedStatus: 1 });
 
 const title = ref({ left: "保留手动更新", right: "更新为同步版本" })
 
 onMounted(async () => {
-  console.log(diffModalVisible.value.endpointId,"onMounted")
+ // console.log(diffModalVisible.value.endpointId, "onMounted")
   await getEndPointDiff(diffModalVisible.value.endpointId)
 })
 
 watch(() => diffModalVisible.value.endpointId, async (newVal) => {
-  console.log(diffModalVisible.value.endpointId,"watch")
+  //console.log(diffModalVisible.value.endpointId, "watch")
   if (newVal) {
     await getEndPointDiff(newVal)
   }
@@ -64,16 +67,19 @@ const getEndPointDiff = async (endpointId: number) => {
 }
 
 const saveDiff = async (title: string, isChanged: boolean) => {
-  confirmToDo(`确定${title}？`, '', async () => {
-    await store.dispatch('Endpoint/saveEndPointDiff', { ...diffModalVisible.value, isChanged: isChanged });
-    cancel();
-    if (diffModalVisible.value.callPlace == 'detail') {
-      await store.dispatch('Endpoint/getEndpointDetail', { id: diffModalVisible.value.endpointId });
-      const selectedMethodDetail = store.state.Endpoint.endpointDetail.interfaces.find(arrItem => arrItem.method == store.state.Endpoint.selectedMethodDetail.method)
-      store.commit('Endpoint/setSelectedMethodDetail', selectedMethodDetail);
+  if (isChanged) {
+    confirmToDo('将覆盖系统中的手动更新内容', `确定${title}？`, async () => {
+      await store.dispatch('Endpoint/saveEndPointDiff', { ...diffModalVisible.value, isChanged: isChanged });
+      if (diffModalVisible.value.callPlace == 'detail') {
+        await store.dispatch('Endpoint/getEndpointDetail', { id: diffModalVisible.value.endpointId });
+        const selectedMethodDetail = store.state.Endpoint.endpointDetail.interfaces.find(arrItem => arrItem.method == store.state.Endpoint.selectedMethodDetail.method)
+        store.commit('Endpoint/setSelectedMethodDetail', selectedMethodDetail);
 
-    }
-  })
+      }
+    })
+  } else {
+    await store.dispatch('Endpoint/saveEndPointDiff', { ...diffModalVisible.value, isChanged: isChanged });
+  }
 }
 
 const cancel = () => {
@@ -118,6 +124,17 @@ const cancel = () => {
         color: #4096ff;
         background: #fff;
         border-color: #4096ff;
+      }
+
+      .ant-btn[disabled],
+      .ant-btn[disabled]:hover,
+      .ant-btn[disabled]:focus,
+      .ant-btn[disabled]:active {
+        color: rgba(0, 0, 0, 0.25);
+        background: #f5f5f5;
+        border-color: #d9d9d9;
+        text-shadow: none;
+        box-shadow: none;
       }
     }
 
