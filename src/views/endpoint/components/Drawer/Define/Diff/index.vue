@@ -1,6 +1,6 @@
 <template>
   <a-modal :visible="diffModalVisible.visible" title="接口定义更新版本对比" :width="1200" @cancel="cancel" :footer="null">
-    <div class="container" v-if="res.current">
+    <div class="container">
       <div class="header">
         <div class="header-left">
           <div class="header-text">
@@ -8,7 +8,7 @@
             <span>{{ res.currentDesc }}</span>
           </div>
           <div class="header-button">
-            <a-button @click="saveDiff(title.left,false)">{{title.left}}</a-button>
+            <a-button @click="saveDiff(title.left, false)">{{ title.left }}</a-button>
           </div>
         </div>
         <div class="header-right">
@@ -17,7 +17,7 @@
             <span>{{ res.latestDesc }}</span>
           </div>
           <div class="header-button">
-            <a-button @click="saveDiff(title.right,true)">{{title.right}}</a-button>
+            <a-button @click="saveDiff(title.right, true)">{{ title.right }}</a-button>
           </div>
         </div>
       </div>
@@ -44,33 +44,32 @@ const diffModalVisible = computed(() => store.state.Endpoint.diffModalVisible);
 
 const res = ref({ current: '', latest: '', currentDesc: '', latestDesc: '' });
 
-const title = ref({left:"保留手动更新",right:"更新为同步版本"})
+const title = ref({ left: "保留手动更新", right: "更新为同步版本" })
 
 onMounted(async () => {
-  console.log(diffModalVisible.value.endpointId)
+  console.log(diffModalVisible.value.endpointId,"onMounted")
   await getEndPointDiff(diffModalVisible.value.endpointId)
-}),
+})
 
-
-  watch(() => diffModalVisible.value.endpointId, async (newVal) => {
-    if (newVal) {
-      await getEndPointDiff(newVal)
-    }
+watch(() => diffModalVisible.value.endpointId, async (newVal) => {
+  console.log(diffModalVisible.value.endpointId,"watch")
+  if (newVal) {
+    await getEndPointDiff(newVal)
   }
-
-  )
+}
+)
 
 const getEndPointDiff = async (endpointId: number) => {
   res.value = await store.dispatch('Endpoint/getEndPointDiff', endpointId);
 }
 
-const saveDiff = async (title: string,isChanged: boolean) => {
+const saveDiff = async (title: string, isChanged: boolean) => {
   confirmToDo(`确定${title}？`, '', async () => {
-   await store.dispatch('Endpoint/saveEndPointDiff', {...diffModalVisible.value,isChanged:isChanged});
+    await store.dispatch('Endpoint/saveEndPointDiff', { ...diffModalVisible.value, isChanged: isChanged });
     cancel();
     if (diffModalVisible.value.callPlace == 'detail') {
-      await store.dispatch('Endpoint/getEndpointDetail', {id:diffModalVisible.value.endpointId});
-      const selectedMethodDetail =  store.state.Endpoint.endpointDetail.interfaces.find(arrItem => arrItem.method == store.state.Endpoint.selectedMethodDetail.method)
+      await store.dispatch('Endpoint/getEndpointDetail', { id: diffModalVisible.value.endpointId });
+      const selectedMethodDetail = store.state.Endpoint.endpointDetail.interfaces.find(arrItem => arrItem.method == store.state.Endpoint.selectedMethodDetail.method)
       store.commit('Endpoint/setSelectedMethodDetail', selectedMethodDetail);
 
     }
@@ -78,7 +77,7 @@ const saveDiff = async (title: string,isChanged: boolean) => {
 }
 
 const cancel = () => {
-  store.commit('Endpoint/setDiffModalVisible', { ...diffModalVisible.value, visible: false,endpointId:0});
+  store.commit('Endpoint/setDiffModalVisible', { ...diffModalVisible.value, visible: false, endpointId: 0 });
 }
 
 

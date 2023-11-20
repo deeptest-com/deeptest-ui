@@ -241,3 +241,10 @@ export enum DataFileExt {
     CSV = '.csv',
 //    TXT = '.txt'
 }
+
+
+export enum ChangedStatus {
+    NoChanged = 1,
+    Changed = 2,
+    IgnoreChanged = 3
+}

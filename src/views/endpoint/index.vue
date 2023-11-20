@@ -72,11 +72,12 @@
                 <template #colTitle="{record}">
                   <div class="customTitleColRender">
                     <div class="notice-icon">
-                      <a-tooltip v-if="record.isChanged" :overlayClassName="'diff-custom-tooltip'">       
+                      <a-tooltip v-if="record.changedStatus > ChangedStatus.NoChanged" :overlayClassName="'diff-custom-tooltip'">       
                         <template #title>
-                        <span>自动同步更新内容待确认，点此<a @click="showDiff(record.id)">查看详情</a></span>
+                        <span>{{ record.changedStatus == ChangedStatus.Changed?'自动同步更新内容待确认':'平台修改和自动同步内容不一致'}}，点此<a @click="showDiff(record.id)">查看详情</a></span>
                         </template>
-                        <ExclamationCircleFilled @click="showDiff(record.id)" :style="{color: '#fb8b06'}" />
+                        <WarningFilled v-if="record.changedStatus == ChangedStatus.Changed"  @click="showDiff(record.id)" :style="{color: '#fb8b06'}" />
+                        <InfoCircleOutlined  v-if="record.changedStatus == ChangedStatus.IgnoreChanged"  @click="showDiff(record.id)" :style="{color: '#c6c6c6'}" />
                       </a-tooltip>
                   </div>
                     <EditAndShowField
@@ -191,7 +192,7 @@ import {onBeforeRouteLeave, useRouter} from 'vue-router';
 import {useStore} from "vuex";
 import debounce from "lodash.debounce";
 import {ColumnProps} from 'ant-design-vue/es/table/interface';
-import {ExclamationCircleOutlined,ExclamationCircleFilled } from '@ant-design/icons-vue';
+import {ExclamationCircleOutlined,WarningFilled,InfoCircleOutlined } from '@ant-design/icons-vue';
 import {Modal} from 'ant-design-vue';
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import {endpointStatusOpts, endpointStatus} from '@/config/constant';
@@ -225,6 +226,7 @@ import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import Diff from "./components/Drawer/Define/Diff/index.vue";
+import {ChangedStatus} from "@/utils/enum";
 
 
 const {share} = useSharePage();
@@ -942,6 +944,6 @@ function showDiff(id: number) {
 </style>
 <style lang="less">
 .diff-custom-tooltip {
-  max-width: 300px;
+  max-width: 320px;
 }
 </style>
