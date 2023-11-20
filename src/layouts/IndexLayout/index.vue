@@ -27,7 +27,7 @@
           :routeItem="routeItem">
       </right-top>
 
-      <div class="indexlayout-right-main">
+      <div class="indexlayout-right-main" :class="{'wujie-main':isWujieEnv,'workspace-main':isWorkSpacePage}">
         <permission :roles="routeItem.roles">
           <router-view></router-view>
         </permission>
@@ -38,7 +38,7 @@
 <script lang="ts">
 import {computed, defineComponent, nextTick, onMounted, ref, watch} from "vue";
 import {useStore} from 'vuex';
-import {useRoute} from 'vue-router';
+import {useRoute, useRouter} from "vue-router";
 import {StateType as GlobalStateType} from '@/store/global';
 import {StateType as UserStateType} from "@/store/user";
 import {
@@ -69,6 +69,8 @@ export default defineComponent({
   setup() {
     const store = useStore<{ Global: GlobalStateType; User: UserStateType; }>();
     const route = useRoute();
+    const router = useRouter();
+    const path: any = router.currentRoute.value.path;
 
     const version = ref('')
 
@@ -146,6 +148,8 @@ export default defineComponent({
     // 设置title
     useTitle(routeItem);
 
+    const isWorkSpacePage =  path.includes('/workspace');
+
 
     return {
       collapsed,
@@ -161,7 +165,8 @@ export default defineComponent({
       version,
       onOpenChange,
       routeItem,
-      isWujieEnv
+      isWujieEnv,
+      isWorkSpacePage
     }
   }
 })
@@ -189,7 +194,15 @@ export default defineComponent({
       flex: 1;
       min-width: 1217px;
       overflow: hidden;
-      padding: 16px;
+      //padding: 16px;
+      &.wujie-main{
+        padding: 0;
+        position: relative;
+        //top: -18px;
+      }
+      &.workspace-main{
+        padding: 0;
+      }
     }
   }
 }

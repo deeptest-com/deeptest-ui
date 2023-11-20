@@ -56,5 +56,6 @@ watch(
 .workbench {
   height: 100%;
   overflow-y: scroll;
+  padding: 16px 12px 16px 16px;
 }
 </style>
