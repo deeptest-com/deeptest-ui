@@ -248,3 +248,9 @@ export enum ChangedStatus {
     Changed = 2,
     IgnoreChanged = 3
 }
+
+export enum SourceType {
+    SwaggerSync = 1,
+    SwaggerImport = 2,
+    ThirdPartySync = 3
+}

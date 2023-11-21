@@ -18,7 +18,7 @@
               <WarningFilled v-if="endpointDetail.changedStatus == ChangedStatus.Changed"  @click="showDiff(endpointDetail.id)" :style="{color: '#fb8b06'}" />
               <InfoCircleOutlined  v-if="endpointDetail.changedStatus == ChangedStatus.IgnoreChanged"  @click="showDiff(endpointDetail.id)" :style="{color: '#c6c6c6'}" />
           </template>
-          更新内容不一致，点此<a style="color:#427EE6;" @click="showDiff(endpointDetail.id)">查看详情</a></a-tag>
+          {{endpointDetail.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a style="color:#427EE6;" @click="showDiff(endpointDetail.id)">查看详情</a></a-tag>
         </div>
        </template>
       </DetailHeader>
@@ -105,7 +105,7 @@ import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import {WarningFilled,InfoCircleOutlined } from '@ant-design/icons-vue';
-import {ChangedStatus} from "@/utils/enum";
+import {ChangedStatus,SourceType} from "@/utils/enum";
 
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal, Global,Debug }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
