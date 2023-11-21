@@ -31,16 +31,14 @@
         :row-key="record => record.id"
         class="dp-table"
         @expandedRowsChange="expandedRowsChange">
-        <template #name="{ record, text }">
-          <div class="case-title" style="display: inline-block;">
-            <EditAndShowField
-              placeholder="名称"
-              :custom-class="'custom-endpoint show-on-hover'"
-              :value="text || ''"
-              @update="(val) => updateName(val, record)"
-              @edit="design(record)"/>
-          </div>
-          
+        <template #name="{ record, text, column }">
+          <EditAndShowField
+            placeholder="名称"
+            :custom-class="'custom-endpoint show-on-hover'"
+            :style="{width: `${column.width}px`}"
+            :value="text || ''"
+            @update="(val) => updateName(val, record)"
+            @edit="design(record)"/>
         </template>
 
         <template #createdAt="{ record }">
@@ -263,27 +261,28 @@ const columns = [
     },
     dataIndex: 'name',
     slots: {customRender: 'name'},
+    width: 200,
   },
   {
     title: '创建人',
     dataIndex: 'createUserName',
     slots: {customRender: 'createUserName'},
     ellipsis: true,
-    width: '100px',
+    width: 100,
   },
   {
     title: '创建时间',
     dataIndex: 'createdAt',
     slots: {customRender: 'createdAt'},
     ellipsis: true,
-    width: '190px',
+    width: 190,
   },
   {
     title: '更新时间',
     dataIndex: 'updatedAt',
     slots: {customRender: 'updatedAt'},
     ellipsis: true,
-    width: '190px',
+    width: 190,
   },
   {
     title: '操作',

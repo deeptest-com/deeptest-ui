@@ -19,8 +19,8 @@
   </div>
 
   <div :class="['editor','show-on-hover', customClass]" v-else>
-    <span class="title" :title="fieldValue" @click.stop="handleClick">
-      {{ fieldValue || emptyValue }}
+    <span class="title" @click.stop="handleClick">
+      <TooltipCell :text="fieldValue || emptyValue"/>
     </span> &nbsp;&nbsp;
 
     <span class="edit-icon">
@@ -44,6 +44,7 @@ import {
 } from '@ant-design/icons-vue';
 import { vOnClickOutside } from '@vueuse/components';
 import {notifyWarn} from "@/utils/notify";
+import TooltipCell from '../Table/tooltipCell.vue';
 const isEditing = ref(false);
 const fieldValue = ref('');
 const editor = ref(null);
