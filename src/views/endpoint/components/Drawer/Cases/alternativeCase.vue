@@ -29,10 +29,12 @@
           <div class="case-title">
             <span class="name">基准用例</span>
             <span class="serial-number">{{ endpointCase.serialNumber }}</span>
-            <EditAndShowField
+            <div class="title" :title="endpointCase.name">
+              <EditAndShowField
                 placeholder="修改标题"
                 :value="endpointCase.name"
                 @update="updateTitle"/>
+            </div>    
           </div>
         </template>
         <template #extra>
@@ -210,6 +212,8 @@ const loadDebugData = async (data) => {
   try {
     loadingAlternativeCase.value = true;
     await store.dispatch('Debug/loadDataAndInvocations', data);
+    store.dispatch('Debug/listPostCondition', { isForBenchmarkCase: true });
+    store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
     loadingAlternativeCase.value = false;
     resetDebugChange();
   } catch (err) {
@@ -332,10 +336,13 @@ const back = () => {
 
 // 保存基准用例
 const saveBaseCase = async () => {
+  store.commit('Global/setSpinning', true);
   let data = prepareDataForRequest(cloneDeep(debugData.value));
-  Object.assign(data, {shareVars: null, envVars: null, globalEnvVars: null, globalParamVars: null})
-  const res = await store.dispatch('Endpoint/saveCaseDebugData', data)
+  Object.assign(data, {shareVars: null, envVars: null, globalEnvVars: null, globalParamVars: null});
+  const res = await store.dispatch('Endpoint/saveCaseDebugData', data);
+  resetDebugChange();
   res ? notifySuccess('保存成功') : notifyError('保存失败');
+  store.commit('Global/setSpinning', false);
 };
 
 // 另存为
@@ -459,11 +466,6 @@ const updateTitle = (v) => {
 onMounted(async () => {
   if (props.baseCaseId) {
     await store.dispatch('Endpoint/getCase', props.baseCaseId);
-
-    setTimeout(() => {
-      store.dispatch('Debug/listPostCondition', { isForBenchmarkCase: true });
-      store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
-    }, 500);
   }
 
 })
@@ -474,6 +476,11 @@ onUnmounted(() => {
 
 const onClose = () => {
   execDrawerVisible.value = false;
+}
+
+const handleOpen = () => {
+  store.dispatch('Debug/listPostCondition', { isForBenchmarkCase: true });
+  store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
 }
 
 </script>
@@ -542,6 +549,10 @@ const onClose = () => {
       &.name {
         font-weight: bold;
       }
+    }
+
+    .title {
+      max-width: 200px;
     }
   }
 

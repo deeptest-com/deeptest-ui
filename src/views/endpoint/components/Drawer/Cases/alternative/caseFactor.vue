@@ -2,7 +2,7 @@
   <div class="case-tree">
     <div class="case-tree-toolbar">
       <span class="dp-link-primary">
-        <a-checkbox v-model:checked="allSelected" @change="handleSelect">全选</a-checkbox>
+        <a-checkbox :disabled="executionType === 'single'" v-model:checked="allSelected" @change="handleSelect">全选</a-checkbox>
       </span>
 
       <a-radio-group v-model:value="executionType" @change="handleExecTypeChange">
