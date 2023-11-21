@@ -68,7 +68,6 @@ export default defineComponent({
       setHtmlLang(locale.value);
 
       bus?.$on('changeRouterForLeyan', (path: string) => {
-        console.log('changeRouterForLeyan333', path);
         router.push(path);
       })
 

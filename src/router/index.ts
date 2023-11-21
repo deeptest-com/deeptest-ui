@@ -18,6 +18,7 @@ import IndexLayout from '@/layouts/IndexLayout/index.vue';
 import UserLayoutRoutes from '@/layouts/UserLayout/routes';
 import UserLayout from '@/layouts/UserLayout/index.vue';
 import BlankLayout from "@/layouts/BlankLayout.vue";
+import {useWujie} from "@/composables/useWujie";
 
 export const routes: RoutesDataItem[] = [
   {
@@ -192,12 +193,19 @@ const router = createRouter({
 
 router.beforeEach((/* to, from */) => {
   // start progress bar
-  NProgress.start();
+  const {isWujieEnv} = useWujie();
+  if(!isWujieEnv){
+    NProgress.start();
+  }
+
 });
 
 router.afterEach(() => {
   // finish progress bar
-  NProgress.done();
+  const {isWujieEnv} = useWujie();
+  if(!isWujieEnv){
+    NProgress.done();
+  }
 });
 
 export default router;
