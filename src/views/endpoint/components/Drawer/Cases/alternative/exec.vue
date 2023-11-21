@@ -38,6 +38,7 @@ import useCaseExecution from './exec-alternative-cases';
 const props = defineProps<{
   execDrawerVisible: boolean;
   cases: any;
+  type: string;
   caseId: string | number | undefined;
 }>();
 
@@ -51,12 +52,13 @@ const execUuid = ref('');
 // 每次重新渲染
 const progressKey = ref(0);
 
-const execstart = async () => {
+const execBegin = async () => {
   execUuid.value = getUuid()
   execStart({
     baseCaseId: props.caseId,
     usedBy: UsedBy.CaseDebug,
     cases: props.cases,
+    type: props.type,
   });
 }
 
@@ -70,7 +72,7 @@ watch(() => {
 }, async val => {
   if (val) {
     progressStatus.value = 'in_progress';
-    await execstart();
+    await execBegin();
     bus.on(settings.eventWebSocketMsg, OnWebSocketMsg);
     bus.on(settings.eventWebSocketConnStatus, onWebSocketConnStatusMsg);
   } else {

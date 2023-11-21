@@ -123,6 +123,7 @@
         :exec-drawer-visible="execDrawerVisible"
         :case-id="endpointCase.id"
         :cases="execCases"
+        :type="execType"
         @close="onClose"/>
   </div>
 </template>
@@ -142,13 +143,13 @@ import { StateType as ProjectSettingStateType } from "@/views/project-settings/s
 import {StateType as ProjectStateType} from "@/store/project";
 
 import Exec from "./alternative/exec.vue";
-import { 
-  CaseLayout, 
-  CaseFactor, 
-  CaseTips, 
-  SaveAlternative, 
-  ConditionPost, 
-  ConditionPre, 
+import {
+  CaseLayout,
+  CaseFactor,
+  CaseTips,
+  SaveAlternative,
+  ConditionPost,
+  ConditionPre,
   Assertion } from "./alternative";
 import EditAndShowField from "@/components/EditAndShow/index.vue";
 import Invocation from "@/views/component/debug/request/Invocation.vue";
@@ -258,6 +259,7 @@ function getNodeMap(treeNode: any, mp: any) {
 const selectEnvVisible = ref<boolean>(false);
 const execDrawerVisible = ref(false);
 const execCases = ref({});
+const execType = ref('multi')
 
 const caseFactor = ref();
 
@@ -269,6 +271,7 @@ const selectExecEnv = () => {
 async function onSelectExecEnvFinish() {
   selectEnvVisible.value = false;
   execCases.value = caseFactor.value.getSelectedTreeNodes();
+  execType.value = unref(caseFactor.value.executionType);
   execDrawerVisible.value = true;
 }
 async function onSelectExecEnvCancel() {

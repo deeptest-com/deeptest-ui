@@ -34,6 +34,14 @@
       <a-form-item label="JSONPath" v-bind="validateInfos.jsonPath" required>
         <a-input v-model:value="model.jsonPath"
                  @blur="validate('jsonPath', { trigger: 'blur' }).catch(() => {})"/>
+
+        <div class="tips">
+          <div>数据查询返回的结果是个数组，可使用表达式$[0].name读取第一行记录的name属性。</div>
+<!--          <div @click="openHelp()" class="dp-link-primary">
+            了解更多 <ArrowRightOutlined/>
+          </div>-->
+        </div>
+
       </a-form-item>
 
       <a-form-item label="变量名称" v-bind="validateInfos.variable" required>
@@ -82,6 +90,7 @@ import {getEnumSelectItems} from "@/utils/comm";
 import {NotificationKeyCommon} from "@/utils/const";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
+import Tips from "@/components/Tips/index.vue";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import {listDbConn} from "@/views/project-settings/service";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
