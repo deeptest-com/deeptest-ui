@@ -89,9 +89,9 @@ const {t} = useI18n();
 const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet: Snippet }>();
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 
-const {postConditionsDataObj, debugData, debugInfo} = useIMLeaveTip();
+const {conditionsDataObj, debugData, debugInfo} = useIMLeaveTip();
 const model = computed<any>(() => {
-  return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
+  return conditionsDataObj.value?.[props?.condition?.entityId] || {};
 });
 
 onMounted(() => {

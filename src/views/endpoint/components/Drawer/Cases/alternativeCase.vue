@@ -87,12 +87,14 @@
             <a-tab-pane key="pre-condition" tab="预处理">
               <CaseTips type="pre-condition" @reset="onReset" />
               <Condition v-if="activeKey === 'pre-condition'"
+                         :isForBenchmarkCase="true"
                          :conditionSrc="ConditionSrc.PreCondition"/>
             </a-tab-pane>
 
             <a-tab-pane key="post-condition" :tab="getTabTtitle('post-condition')">
               <CaseTips type="post-condition" @reset="onReset" />
               <Condition v-if="activeKey === 'post-condition'"
+                         :isForBenchmarkCase="true"
                          :conditionSrc="ConditionSrc.PostCondition"/>
             </a-tab-pane>
 
@@ -132,7 +134,7 @@
 
 <script lang="ts" setup>
 import {computed, defineProps, provide, ref, watch, unref, onMounted, onUnmounted} from "vue";
-import {UsedBy} from "@/utils/enum";
+import {ConditionSrc, UsedBy} from "@/utils/enum";
 import {useStore} from "vuex";
 import cloneDeep from "lodash/cloneDeep";
 import { message, Modal } from "ant-design-vue";
@@ -189,12 +191,12 @@ const endpointCase = computed<any>(() => store.state.Endpoint.caseDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 
 // 备选用例因子的condition相关 用来显示tab上显示数量
-const postConditions = computed<any>(() => store.state.Debug.benchMarkCase.postConditions);
+const conditions = computed<any>(() => store.state.Debug.benchMarkCase.conditions);
 const assertionConditions = computed<any>(() => store.state.Debug.benchMarkCase.assertionConditions);
 
 const getTabTtitle = computed(() => {
   return type => {
-    const numbers = type === 'post-condition' ? unref(postConditions).length : unref(assertionConditions).length;
+    const numbers = type === 'post-condition' ? unref(conditions).length : unref(assertionConditions).length;
     const title = type === 'post-condition' ? '后置处理' : '断言';
     return `${title}${numbers > 0 ? `(${numbers})` : ''}`;
   }
@@ -374,14 +376,11 @@ const onReset = ({ type, params }: { type: string, params: any }) => {
     title: '确定要恢复默认吗',
     content: `恢复默认将从基准用例中同步${caseTipsType[type]}定义，当前修改将被覆盖`,
     onOk() {
-      store.dispatch(`Endpoint/${type === 'pre-condition' ? 'resetPreConditions' : 'resetPostConditions'}`, params).then(() => {
-        if (type === 'pre-condition') {
-          store.dispatch('Debug/getPreConditionScript', { isForBenchmarkCase: true })
-        } else if (type === 'post-condition' ) {
-          store.dispatch('Debug/listPostCondition', { isForBenchmarkCase: true });
-        } else {
-          store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
-        }
+      store.dispatch(`Endpoint/resetConditions`, params).then(() => {
+        store.dispatch('Debug/listCondition', { src: ConditionSrc.PreCondition,  isForBenchmarkCase: true });
+        store.dispatch('Debug/listCondition', { src: ConditionSrc.PostCondition,  isForBenchmarkCase: true });
+
+        store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
       }).catch(err => {
         notifyError(err);
       })

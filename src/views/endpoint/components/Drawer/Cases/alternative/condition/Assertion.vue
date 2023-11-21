@@ -138,7 +138,7 @@ watch(debugData, async (newVal) => {
 
 const create = () => {
   console.log('create', ConditionType.checkpoint);
-  store.dispatch('Debug/createPostCondition', {
+  store.dispatch('Debug/createCondition', {
     entityType: ConditionType.checkpoint,
     ...debugInfo.value,
     isForBenchmarkCase: true,
@@ -151,7 +151,7 @@ const format = (item) => {
 }
 const disable = (item) => {
   console.log('disable', item)
-  store.dispatch('Debug/disablePostCondition', {
+  store.dispatch('Debug/disableCondition', {
     ...item,
     isForBenchmarkCase: true
   })
@@ -160,7 +160,7 @@ const remove = (item) => {
   console.log('remove', item)
 
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
-    store.dispatch('Debug/removePostCondition', {
+    store.dispatch('Debug/removeCondition', {
       ...item,
       isForBenchmarkCase: true
     })
@@ -170,7 +170,7 @@ function move(_e: any) {
   const envIdList = assertionConditions.value.map((e: EnvDataItem) => {
     return e.id;
   })
-  store.dispatch('Debug/movePostCondition', {
+  store.dispatch('Debug/moveCondition', {
     data: envIdList,
     isForBenchmarkCase: true,
     info: debugInfo.value,

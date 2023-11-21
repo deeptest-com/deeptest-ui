@@ -158,17 +158,20 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  isForBenchmarkCase: {
+    type: Boolean,
+    required: true,
+  },
 })
 
 provide('usedWith', props.conditionSrc)
 
 const usedBy = inject('usedBy') as UsedBy
-const isForBenchmarkCase = false //inject('isForBenchmarkCase')
 const {t} = useI18n();
 
 const fullscreen = ref(false)
 
-const conditionType = ref(ConditionType.extractor)
+const conditionType = ref(props.conditionSrc === ConditionSrc.PreCondition ? ConditionType.script : ConditionType.extractor)
 const conditionTypes = ref(getConditionTypes())
 
 function getConditionTypes() {
@@ -178,7 +181,7 @@ function getConditionTypes() {
   let ret = items.filter(item => ![ConditionType.checkpoint,ConditionType.cookie].includes(item.value))
 
   if (props.conditionSrc === ConditionSrc.PreCondition) {
-    ret = ret.filter(item => ![ConditionType.script,ConditionType.databaseOpt].includes(item.value))
+    ret = ret.filter(item => [ConditionType.script,ConditionType.databaseOpt].includes(item.value))
   }
 
   return ret
@@ -192,8 +195,8 @@ const expand = (item) => {
 const list = async () => {
   console.log('list')
   await store.dispatch('Debug/listCondition', {
-    conditionSrc: props.conditionSrc,
-    isForBenchmarkCase: false
+    src: props.conditionSrc,
+    isForBenchmarkCase: props.isForBenchmarkCase,
   })
 }
 
@@ -207,19 +210,21 @@ const create = () => {
     conditionSrc: props.conditionSrc,
     entityType: conditionType.value,
     ...debugInfo.value,
-    isForBenchmarkCase: isForBenchmarkCase.value
+    isForBenchmarkCase: props.isForBenchmarkCase,
   })
 }
 
-const format = (item) => {
-  console.log('format', item)
-  bus.emit(settings.eventEditorAction, {act: settings.eventTypeFormat})
-}
 const disable = (item) => {
+  item.conditionSrc = props.conditionSrc
+  item.isForBenchmarkCase = props.isForBenchmarkCase
+
   console.log('disable', item)
   store.dispatch('Debug/disableCondition', item)
 }
 const remove = (item) => {
+  item.conditionSrc = props.conditionSrc
+  item.isForBenchmarkCase = props.isForBenchmarkCase
+
   console.log('remove', item)
 
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
@@ -233,9 +238,15 @@ function move(_e: any) {
   store.dispatch('Debug/moveCondition', {
     data: envIdList,
     info: debugInfo.value,
-    isForBenchmarkCase: false,
+    conditionSrc: props.conditionSrc,
+    isForBenchmarkCase: props.isForBenchmarkCase,
     entityType: '',
   })
+}
+
+const format = (item) => {
+  console.log('format', item)
+  bus.emit(settings.eventEditorAction, {act: settings.eventTypeFormat})
 }
 
 const save = (item) => {

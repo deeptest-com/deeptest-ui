@@ -56,7 +56,7 @@ import {
 
 import { serverList, changeServe, getVarsByEnv } from '@/views/project-settings/service';
 import {Checkpoint, Cookie, DebugInfo, Extractor, Interface, Response, Script} from "./data";
-import {ConditionCategory, ConditionType, UsedBy} from "@/utils/enum";
+import {ConditionCategory, ConditionSrc, ConditionType, UsedBy} from "@/utils/enum";
 import {ResponseData} from "@/utils/request";
 import {listEnvVarByServer} from "@/services/environment";
 import {getResponseKey} from "@/utils/comm";
@@ -659,13 +659,14 @@ const StoreModel: ModuleType = {
         },
 
         // conditions
-        async listCondition({commit, state}, payload?: { isForBenchmarkCase: boolean }) {
+        async listCondition({commit, state}, payload?: { isForBenchmarkCase: boolean, src: ConditionSrc }) {
             try {
                 const resp = await listConditions({
                     debugInterfaceId: state.debugInfo.debugInterfaceId,
                     endpointInterfaceId: state.debugData.endpointInterfaceId,
                     category: ConditionCategory.console,
                     usedBy: state.debugInfo.usedBy,
+                    src: payload?.src,
                 });
                 const {data} = resp;
                 commit('setConditions', {
@@ -709,7 +710,7 @@ const StoreModel: ModuleType = {
                     }
 
                 } else {
-                    await dispatch('listCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
+                    await dispatch('listCondition', {src: payload.conditionSrc, isForBenchmarkCase: payload.isForBenchmarkCase });
 
                     const conditions = payload.isForBenchmarkCase ? state.benchMarkCase.conditions : state.conditions;
                     const len = conditions.length
@@ -728,7 +729,7 @@ const StoreModel: ModuleType = {
                 if (payload.entityType === ConditionType.checkpoint) {
                     dispatch('listAssertionCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
                 } else {
-                    dispatch('listCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
+                    dispatch('listCondition', {src: payload.conditionSrc, isForBenchmarkCase: payload.isForBenchmarkCase });
                 }
                 return true;
             } catch (error) {
@@ -747,7 +748,7 @@ const StoreModel: ModuleType = {
                 if (payload.entityType === ConditionType.checkpoint) {
                     dispatch('listAssertionCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
                 } else {
-                    dispatch('listCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
+                    dispatch('listCondition', {src: payload.conditionSrc, isForBenchmarkCase: payload.isForBenchmarkCase });
                 }
                 return true;
             } catch (error) {
@@ -760,7 +761,7 @@ const StoreModel: ModuleType = {
                 if (payload.entityType === ConditionType.checkpoint) {
                     dispatch('listAssertionCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
                 } else {
-                    dispatch('listCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
+                    dispatch('listCondition', {src: payload.conditionSrc, isForBenchmarkCase: payload.isForBenchmarkCase });
                 }
                 return true;
             } catch (error) {

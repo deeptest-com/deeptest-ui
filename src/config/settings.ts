@@ -58,7 +58,6 @@ export interface SettingsType {
     eventTypeFormat: string,
 
     eventConditionSave: string,
-    eventPostConditionSave: string,
 
     eventVariableSelectionStatus: string,
     eventLeaveDebugSaveData: string,
@@ -103,7 +102,6 @@ export interface SettingsType {
      * */
     lyElectronUserInfo: string;
     SwalLeaveSetting: any;
-    eventPreConditionSave: string;
 }
 
 const settings: SettingsType = {
@@ -135,8 +133,7 @@ const settings: SettingsType = {
     eventTypeContainerHeightChanged: 'heightChanged',
     eventTypeFormat: 'format',
 
-    eventConditionSave: '',
-    eventPostConditionSave: 'eventPostConditionSave',
+    eventConditionSave: 'eventConditionSave',
 
     eventVariableSelectionStatus: 'eventVariableSelectionStatus',
     eventVariableSelectionResult: 'eventVariableSelectionResult',
@@ -184,8 +181,6 @@ const settings: SettingsType = {
             denyButton: 'btn btn-normal btn-deny',
         },
     },
-    eventPreConditionSave:'eventPreConditionSave',
-
 };
 
 export default settings;

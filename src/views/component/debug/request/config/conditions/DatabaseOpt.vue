@@ -108,11 +108,10 @@ const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const responseData = computed<any>(() => store.state.Debug.responseData);
 
-const {postConditionsDataObj} = useIMLeaveTip();
+const {conditionsDataObj} = useIMLeaveTip();
 const model = computed<any>(() => {
-  return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
+  return conditionsDataObj.value?.[props?.condition?.entityId] || {};
 });
-
 
 const rules = computed(() => { return {
   src: [

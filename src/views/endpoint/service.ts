@@ -551,9 +551,9 @@ export async function moveAlternativeCaseAssertion(data): Promise<any> {
 }
 
 // 重置用例因子- 后置处理器包含断言
-export async function resetPostConditions(data: { debugInterfaceId: number, endpointInterfaceId: number, category: string }): Promise<any> {
+export async function resetConditions(data: { debugInterfaceId: number, endpointInterfaceId: number, category: string }): Promise<any> {
     return request({
-        url: '/postConditions/resetForCase',
+        url: '/conditions/resetForCase',
         method: 'get',
         params: data,
     })

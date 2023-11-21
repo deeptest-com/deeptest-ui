@@ -47,7 +47,7 @@ export default function useIMLeaveTip()  {
         store.commit('Debug/setSrcDebugData')
         store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
         store.commit('Debug/setSrcScript', cloneDeep(scriptData.value));
-        store.commit('Debug/resetPostConditionsDataObj');
+        store.commit('Debug/resetConditionsDataObj');
         store.commit('Debug/setDebugChange',{
             base: false,
             preScript: false,
@@ -59,8 +59,7 @@ export default function useIMLeaveTip()  {
     const clearDebugChange = () => {
         store.commit('Debug/setDebugData', {});
         store.commit('Debug/setSrcDebugData',{});
-        store.commit('Debug/clearPostConditionsDataObj');
-        store.commit('Debug/clearPreCondition');
+        store.commit('Debug/clearConditionsDataObj');
         store.commit('Debug/setDebugChange',{
             base: false,
             preScript: false,

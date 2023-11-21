@@ -3,7 +3,7 @@ import request from '@/utils/request';
 import {requestToAgent} from '@/utils/request';
 import {DebugInfo, Interface, OAuth20} from "./data";
 import {isInArray} from "@/utils/array";
-import {ConditionCategory, UsedBy} from "@/utils/enum";
+import {ConditionCategory, ConditionSrc, UsedBy} from "@/utils/enum";
 import {getToken} from "@/utils/localToken";
 import {getAgentUrl} from '@/utils/agentEnv';
 const apiPath = 'debugs';
@@ -213,7 +213,7 @@ export function getCodeLangByType(type) {
 }
 
 // conditions
-export async function listConditions(params: {debugInterfaceId, endpointInterfaceId: number, category: ConditionCategory, usedBy: string, isForBenchmarkCase?: boolean}): Promise<any> {
+export async function listConditions(params: {debugInterfaceId, endpointInterfaceId: number, category: ConditionCategory, usedBy: string, src?: ConditionSrc, isForBenchmarkCase?: boolean}): Promise<any> {
     return request({
         url: `/${apiConditions}`,
         method: 'GET',

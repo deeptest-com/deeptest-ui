@@ -34,11 +34,13 @@
 
       <a-tab-pane key="pre-condition" :tab="getTabTitle('preConditions')">
         <Condition v-if="activeKey === 'pre-condition'"
+                   :isForBenchmarkCase="false"
                    :conditionSrc="ConditionSrc.PreCondition" />
       </a-tab-pane>
 
       <a-tab-pane key="post-condition" :tab="getTabTitle('postConditions')">
         <Condition v-if="activeKey === 'post-condition'"
+                   :isForBenchmarkCase="false"
                    :conditionSrc="ConditionSrc.PostCondition" />
       </a-tab-pane>
 
@@ -73,6 +75,7 @@ import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import cloneDeep from "lodash/cloneDeep";
 
 const usedBy = inject('usedBy') as UsedBy
+
 const {t} = useI18n();
 
 const store = useStore<{  Debug: Debug }>()
@@ -120,8 +123,13 @@ watch(() => debugData.value.debugInterfaceId, (newVal) => {
 watch(() => {
   return debugData.value;
 }, (val) => {
+  console.log('watch debugData')
   if (val.method) {
-    store.dispatch('Debug/listPostCondition');
+    store.dispatch('Debug/listCondition', {
+      src: activeKey.value === 'post-condition' ? ConditionSrc.PreCondition : ConditionSrc.PostCondition,
+      isForBenchmarkCase: false,
+    });
+
     store.dispatch('Debug/listAssertionCondition');
   }
 }, {
@@ -198,11 +206,11 @@ const leaveSave =  async (event) => {
 
 
 onMounted( () => {
-  bus.on(settings.eventPostConditionSave, leaveSave);
+  bus.on(settings.eventConditionSave, leaveSave);
 })
 
 onUnmounted( () => {
-  bus.off(settings.eventPostConditionSave, leaveSave);
+  bus.off(settings.eventConditionSave, leaveSave);
   resetDebugChange();
 })
 

@@ -137,9 +137,9 @@ const keyRequired = [{required: true, message: '请输入键值', trigger: 'blur
 const boundaryStartRequired = [{required: true, message: '请输入边界开始字符串', trigger: 'blur'}]
 const boundaryEndRequired = [{required: true, message: '请输入边界结束字符串', trigger: 'blur'}]
 
-const {postConditionsDataObj} = useIMLeaveTip();
+const {conditionsDataObj} = useIMLeaveTip();
 const model = computed<any>(() => {
-  return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
+  return conditionsDataObj.value?.[props?.condition?.entityId] || {};
 });
 
 onMounted(() => {

@@ -223,7 +223,7 @@ const send = async (e) => {
 const confirmSend = async (e)=>{
   if(debugChangePreScript.value || debugChangePostScript.value || debugChangeCheckpoint.value){
     store.commit("Global/setSpinning",true)
-    bus.emit(settings.eventPostConditionSave, {
+    bus.emit(settings.eventConditionSave, {
       callback:async () => {
         await send(e)
         store.commit("Global/setSpinning",false)
@@ -245,7 +245,7 @@ const save = (e) => {
 
   bus.emit(settings.eventConditionSave, {});
   // 后置处理器 和 断言
-  debugChangePostScript.value && bus.emit(settings.eventPostConditionSave, {});
+  debugChangePostScript.value && bus.emit(settings.eventConditionSave, {});
   debugChangePreScript.value && bus.emit(settings.eventPreConditionSave, {});
 }
 const saveAsCase = () => {
