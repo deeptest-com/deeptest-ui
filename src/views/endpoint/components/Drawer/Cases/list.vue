@@ -251,7 +251,7 @@ const columns = [
   {
     title: '编号',
     dataIndex: 'serialNumber',
-    width: 120,
+    width: 180,
   },
   {
     title: () => {

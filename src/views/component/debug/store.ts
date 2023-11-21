@@ -325,16 +325,16 @@ const StoreModel: ModuleType = {
 
         setPostConditions(state, payload) {
             if (payload.isForBenchmarkCase) {
-                state.benchMarkCase.postConditions = (payload.data || []).filter(e => e.isForBenchmarkCase === true);
+                state.benchMarkCase.postConditions = (payload.data || []).filter(e => !!e.isForBenchmarkCase);
             } else {
-                state.postConditions = (payload.data || []).filter(e => e.isForBenchmarkCase === false);
+                state.postConditions = (payload.data || []).filter(e => !e.isForBenchmarkCase);
             }
         },
         setAssertionConditions(state, payload) {
             if (payload.isForBenchmarkCase) {
-                state.benchMarkCase.assertionConditions = (payload.data || []).filter(e => e.isForBenchmarkCase === true);
+                state.benchMarkCase.assertionConditions = (payload.data || []).filter(e => !!e.isForBenchmarkCase);
             } else {
-                state.assertionConditions = (payload.data || []).filter(e => e.isForBenchmarkCase === false);
+                state.assertionConditions = (payload.data || []).filter(e => !e.isForBenchmarkCase);
             }
 
         },
