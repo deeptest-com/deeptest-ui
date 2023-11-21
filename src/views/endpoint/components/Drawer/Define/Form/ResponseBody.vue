@@ -35,8 +35,8 @@
           :contentStr="contentStr"
           :exampleStr="exampleStr"
           @generateExample="handleGenerateExample"
-          :tab-content-style="{width:'800px'}"
-          :value="activeResBodySchema"/>
+          :tab-content-style="{width:'800px'}"/>
+          
     </a-col>
   </a-row>
 </template>
