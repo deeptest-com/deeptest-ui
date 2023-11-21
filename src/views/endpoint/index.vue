@@ -74,7 +74,7 @@
                     <div class="notice-icon">
                       <a-tooltip v-if="record.changedStatus > ChangedStatus.NoChanged" :overlayClassName="'diff-custom-tooltip'">       
                         <template #title>
-                        <span>{{record.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a @click="showDiff(record.id)">查看详情</a></span>
+                        <span>{{record.changedStatus == ChangedStatus.Changed?'待处理':'已处理'}}，{{record.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a @click="showDiff(record.id)">查看详情</a></span>
                         </template>
                         <WarningFilled v-if="record.changedStatus == ChangedStatus.Changed"  @click="showDiff(record.id)" :style="{color: '#fb8b06'}" />
                         <InfoCircleOutlined  v-if="record.changedStatus == ChangedStatus.IgnoreChanged"  @click="showDiff(record.id)" :style="{color: '#c6c6c6'}" />
