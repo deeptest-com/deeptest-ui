@@ -32,13 +32,14 @@
         class="dp-table"
         @expandedRowsChange="expandedRowsChange">
         <template #name="{ record, text, column }">
-          <EditAndShowField
-            placeholder="名称"
-            :custom-class="'custom-endpoint show-on-hover'"
-            :style="{width: `${column.width}px`}"
-            :value="text || ''"
-            @update="(val) => updateName(val, record)"
-            @edit="design(record)"/>
+          <div class="case-title"  :style="{width: `${column.width}px`, display: 'inline-block'}">
+            <EditAndShowField
+              placeholder="名称"
+              :custom-class="'custom-endpoint show-on-hover'"
+              :value="text || ''"
+              @update="(val) => updateName(val, record)"
+              @edit="design(record)"/>
+          </div>
         </template>
 
         <template #createdAt="{ record }">
