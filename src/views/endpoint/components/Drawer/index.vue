@@ -11,7 +11,7 @@
         :show-detail="true"
         :show-share="true"
         @update-title="updateTitle" >
-        <template #custom> {{endpointDetail.changedStatus}}{{ ChangedStatus.NoChanged }}
+        <template #custom>
           <div class="diff-tag" v-if="endpointDetail.changedStatus > ChangedStatus.NoChanged" >   
           <a-tag color="warning">
             <template #icon>

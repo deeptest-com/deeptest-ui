@@ -1616,6 +1616,7 @@ const StoreModel: ModuleType = {
             try {
                 await saveEndpointDiff(payload);
                 await dispatch('loadList', {projectId: payload.projectId});
+                commit('setDiffModalVisible', {...state.diffModalVisible,visible: false, endpointId: 0});
                 return true;
             } catch (error) {
                 return false;

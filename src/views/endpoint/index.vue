@@ -169,7 +169,7 @@
         :endpointIds='selectedRowIds'
         @cancal="showPublishDocsModal = false;"
         @ok="publishDocs"/>
-    <Diff/>
+    <Diff @callback="editEndpoint"/>
     <!-- 编辑接口时，展开抽屉：外层再包一层 div, 保证每次打开弹框都重新渲染   -->
     <div v-if="drawerVisible">
       <Drawer
@@ -185,7 +185,7 @@
 </template>
 <script setup lang="ts">
 import {
-  computed, ref, onMounted,
+  computed, ref,
   watch, createVNode, onUnmounted
 } from 'vue';
 import {onBeforeRouteLeave, useRouter} from 'vue-router';

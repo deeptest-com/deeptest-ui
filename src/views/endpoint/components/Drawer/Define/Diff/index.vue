@@ -8,7 +8,7 @@
             <span>{{ res.currentDesc }}</span>
           </div>
           <div class="header-button">
-            <a-button @click="saveDiff(title.left, false)" :disabled="res.changedStatus == ChangedStatus.IgnoreChanged">{{
+            <a-button @click="saveDiff(title.left, false)" >{{
               title.left }}</a-button>
           </div>
         </div>
@@ -35,7 +35,7 @@
 
 import MonacoEditor from "@/components/Editor/MonacoEditor.vue";
 import { MonacoOptions } from '@/utils/const';
-import { watch, ref, onMounted, computed } from 'vue';
+import { watch, ref, onMounted, computed,defineEmits } from 'vue';
 import { useStore } from "vuex";
 import { confirmToDo } from "@/utils/confirm";
 import { ChangedStatus } from "@/utils/enum";
@@ -67,23 +67,32 @@ const getEndPointDiff = async (endpointId: number) => {
 }
 
 const saveDiff = async (title: string, isChanged: boolean) => {
+  const id = diffModalVisible.value.endpointId
   if (isChanged) {
     confirmToDo('将覆盖系统中的手动更新内容', `确定${title}？`, async () => {
       await store.dispatch('Endpoint/saveEndPointDiff', { ...diffModalVisible.value, isChanged: isChanged });
       if (diffModalVisible.value.callPlace == 'detail') {
-        await store.dispatch('Endpoint/getEndpointDetail', { id: diffModalVisible.value.endpointId });
+        await store.dispatch('Endpoint/getEndpointDetail', { id: id });
         const selectedMethodDetail = store.state.Endpoint.endpointDetail.interfaces.find(arrItem => arrItem.method == store.state.Endpoint.selectedMethodDetail.method)
         store.commit('Endpoint/setSelectedMethodDetail', selectedMethodDetail);
-
+      }else {
+        callback(id);
       }
     })
   } else {
     await store.dispatch('Endpoint/saveEndPointDiff', { ...diffModalVisible.value, isChanged: isChanged });
+    callback(id);
   }
 }
 
-const cancel = () => {
+const cancel = async() => {
   store.commit('Endpoint/setDiffModalVisible', { ...diffModalVisible.value, visible: false, endpointId: 0 });
+}
+
+
+const emits = defineEmits(['callback'])
+function callback(id:number){
+     emits('callback',{id:id})
 }
 
 
