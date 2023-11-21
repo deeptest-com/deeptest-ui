@@ -341,5 +341,14 @@ function showDiff(id:number) {
     margin-right: 6px;
   }
 }
+
 </style>
+
+<style lang="less" >
+
+.diff-tag .ant-tag span {
+    margin-left: 0px;
+}
+</style>
+
 
