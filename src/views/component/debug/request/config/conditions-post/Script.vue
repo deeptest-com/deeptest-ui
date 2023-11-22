@@ -3,6 +3,7 @@
     <div class="content">
       <div class="codes">
         <MonacoEditor
+          ref="monacoEditor"
           v-if="model?.id"
           :customId="`post-script-${condition.entityId}`"
           theme="vs"
@@ -96,6 +97,7 @@ onMounted(() => {
   }
 })
 const jslibNames = computed<any>(() => store.state.Snippet.jslibNames);
+const monacoEditor = ref();
 
 const props = defineProps({
   condition: {
@@ -183,6 +185,14 @@ const cancel = () => {
 
 onMounted(() => {
   bus.on(settings.eventConditionSave, save);
+  bus.on(settings.paneResizeTop, () => {
+    monacoEditor.value?.resizeIt({
+        act: 'heightChanged',
+        container: 'codes',
+        id: `post-script-${props.condition.entityId}`,
+        mixedHeight: 1,
+      })
+    })
 })
 onBeforeUnmount( () => {
   bus.off(settings.eventConditionSave, save);
@@ -202,7 +212,7 @@ const wrapperCol = { span: 24 }
 
   .content {
     display: flex;
-    height: calc(100% - 32px);
+    height: calc(100% - 10px);
 
     .codes {
       flex: 1;
