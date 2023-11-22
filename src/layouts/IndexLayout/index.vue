@@ -30,7 +30,13 @@
           <router-view></router-view>
         </permission>
 
-        <div @click="sendMsg" class="hide-btn"></div>
+<!--        <div style="position: fixed; right: 16px; bottom: -16px; z-index: 999999;">
+          <div @click="sendMsg" class="dp-link-primary">Open Record Window</div>
+          <br />
+          <div id="deeptest-event-node" style="word-wrap: break-word;"
+               @deeptest-event-from-chrome-ext="onChromeExtEvent"></div>
+        </div>-->
+
       </div>
     </div>
   </div>
@@ -156,6 +162,9 @@ export default defineComponent({
 
       window.postMessage(data, '*')
     }
+    const onChromeExtEvent =() => {
+      console.log('onChromeExtEvent')
+    }
 
     return {
       collapsed,
@@ -172,6 +181,7 @@ export default defineComponent({
       onOpenChange,
       routeItem,
       sendMsg,
+      onChromeExtEvent,
     }
   }
 })

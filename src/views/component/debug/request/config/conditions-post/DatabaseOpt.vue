@@ -9,6 +9,7 @@
             <a-select v-model:value="model.dbConnId"
                       @blur="validate('dbConnId', { trigger: 'change' }).catch(() => {})">
 
+              <a-select-option key="0" :value="0" >请选择</a-select-option>
               <a-select-option v-for="(item, idx) in dbConns" :key="idx" :value="item.id">
                 {{ item.name }}
               </a-select-option>
@@ -26,7 +27,7 @@
 
       <a-form-item label="SQL语句" v-bind="validateInfos.sql" required>
         <a-textarea v-model:value="model.sql"
-                 @blur="validate('sql', { trigger: 'blur' }).catch(() => {})"/>
+                    @blur="validate('sql', { trigger: 'blur' }).catch(() => {})"/>
       </a-form-item>
 
       <a-form-item label="JSONPath" v-bind="validateInfos.jsonPath" required>
@@ -35,9 +36,9 @@
 
         <div class="tips">
           <div>数据查询返回的结果是个数组，可使用表达式$[0].name读取第一行记录的name属性。</div>
-<!--          <div @click="openHelp()" class="dp-link-primary">
-            了解更多 <ArrowRightOutlined/>
-          </div>-->
+          <!--          <div @click="openHelp()" class="dp-link-primary">
+                      了解更多 <ArrowRightOutlined/>
+                    </div>-->
         </div>
 
       </a-form-item>
@@ -141,7 +142,7 @@ load()
 const dbConns = ref([])
 const loadDbConns = async () => {
   console.log('loadDbConns')
-  const resp = await listDbConn({})
+  const resp = await listDbConn({ignoreDisabled: true})
   dbConns.value = resp.data
 }
 loadDbConns()
