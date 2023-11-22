@@ -248,3 +248,16 @@ export enum DataFileExt {
     CSV = '.csv',
 //    TXT = '.txt'
 }
+
+
+export enum ChangedStatus {
+    NoChanged = 1,
+    Changed = 2,
+    IgnoreChanged = 3
+}
+
+export enum SourceType {
+    SwaggerSync = 1,
+    SwaggerImport = 2,
+    ThirdPartySync = 3
+}

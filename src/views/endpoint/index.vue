@@ -71,6 +71,15 @@
                        :data-source="list">
                 <template #colTitle="{record}">
                   <div class="customTitleColRender">
+                    <div class="notice-icon">
+                      <a-tooltip v-if="record.changedStatus > ChangedStatus.NoChanged" :overlayClassName="'diff-custom-tooltip'">       
+                        <template #title>
+                        <span>{{record.changedStatus == ChangedStatus.Changed?'待处理':'已处理'}}，{{record.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a @click="showDiff(record.id)">查看详情</a></span>
+                        </template>
+                        <WarningFilled v-if="record.changedStatus == ChangedStatus.Changed"  @click="showDiff(record.id)" :style="{color: '#fb8b06'}" />
+                        <InfoCircleOutlined  v-if="record.changedStatus == ChangedStatus.IgnoreChanged"  @click="showDiff(record.id)" :style="{color: '#c6c6c6'}" />
+                      </a-tooltip>
+                  </div>
                     <EditAndShowField
                         :custom-class="'custom-endpoint show-on-hover'"
                         :value="record.title"
@@ -160,6 +169,7 @@
         :endpointIds='selectedRowIds'
         @cancal="showPublishDocsModal = false;"
         @ok="publishDocs"/>
+    <Diff @callback="editEndpoint"/>
     <!-- 编辑接口时，展开抽屉：外层再包一层 div, 保证每次打开弹框都重新渲染   -->
     <div v-if="drawerVisible">
       <Drawer
@@ -175,14 +185,14 @@
 </template>
 <script setup lang="ts">
 import {
-  computed, ref, onMounted,
+  computed, ref,
   watch, createVNode, onUnmounted
 } from 'vue';
 import {onBeforeRouteLeave, useRouter} from 'vue-router';
 import {useStore} from "vuex";
 import debounce from "lodash.debounce";
 import {ColumnProps} from 'ant-design-vue/es/table/interface';
-import {ExclamationCircleOutlined} from '@ant-design/icons-vue';
+import {ExclamationCircleOutlined,WarningFilled,InfoCircleOutlined } from '@ant-design/icons-vue';
 import {Modal} from 'ant-design-vue';
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import {endpointStatusOpts, endpointStatus} from '@/config/constant';
@@ -215,6 +225,8 @@ import cloneDeep from "lodash/cloneDeep";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
+import Diff from "./components/Drawer/Define/Diff/index.vue";
+import {ChangedStatus,SourceType} from "@/utils/enum";
 
 
 const {share} = useSharePage();
@@ -807,6 +819,10 @@ onBeforeRouteLeave(async (to, from,next) => {
  * ::::离开保存代码逻辑部分end
  ************************************************/
 
+function showDiff(id: number) {
+  store.commit('Endpoint/setDiffModalVisible', {endpointId:id,visible:true,projectId:currProject.value.id,callPlace:'list'});
+}
+
 </script>
 <style scoped lang="less">
 
@@ -898,10 +914,16 @@ onBeforeRouteLeave(async (to, from,next) => {
 }
 
 .customTitleColRender {
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   color: #447DFD;
+  display: flex;
+  position: relative;
+  .notice-icon {
+   position: absolute;
+   left:-16px;
+   top:1px;
+  }
 }
 
 .customPathColRender {
@@ -920,5 +942,10 @@ onBeforeRouteLeave(async (to, from,next) => {
       cursor: pointer;
     }
   }
+}
+</style>
+<style lang="less">
+.diff-custom-tooltip {
+  max-width: 320px;
 }
 </style>
