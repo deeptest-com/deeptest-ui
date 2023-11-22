@@ -163,13 +163,19 @@ function hasDefinedCode(code: string) {
 }
 
 const selectedCodes: any = computed(() => {
-  const codes = ((selectedMethodDetail?.value?.responseCodes || '').split(',') || []).filter((item) => {
+  let codes = ((selectedMethodDetail?.value?.responseCodes || '').split(',') || []).filter((item) => {
     return !!item;
   });
   // 如果没有定义响应码,则默认返回默认的 codes 枚举
   if (!codes.length) {
-    return cloneDeep(defaultResponseCodes);
+    codes = cloneDeep(defaultResponseCodes);
   }
+  
+  selectedMethodDetail?.value?.responseBodies.forEach((item) => {
+    if (codes.indexOf(item.code) == -1 ){
+      codes.push(item.code);
+    }
+  })
   return codes;
 })
 

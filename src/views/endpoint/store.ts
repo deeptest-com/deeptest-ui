@@ -64,6 +64,8 @@ import {
     loadAlternativeCaseFactor,
     resetPostConditions,
     resetPreConditions,
+    getEndpointDiff,
+    saveEndpointDiff
 } from './service';
 
 import {
@@ -155,6 +157,9 @@ export interface StateType {
     benchMarkList: any[];
     // mock表达式是否有变更
     isMockChange: boolean;
+    //diff弹框信息
+    diffModalVisible:any;
+
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -224,6 +229,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setIsDefineChange:Mutation<StateType>;
         setBenchMarkList: Mutation<StateType>;
         setIsMockChange:Mutation<StateType>;
+        setDiffModalVisible:Mutation<StateType>;
     };
     actions: {
         listEndpoint: Action<StateType, StateType>;
@@ -314,6 +320,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
         resetPostConditions: Action<StateType, StateType>;
         resetPreConditions: Action<StateType, StateType>;
 
+        getEndPointDiff: Action<StateType, StateType>;
+        saveEndPointDiff: Action<StateType, StateType>;
     }
 }
 
@@ -400,6 +408,7 @@ const initState: StateType = {
 
     benchMarkList: [],
     isMockChange: false,
+    diffModalVisible: {},
 };
 
 const StoreModel: ModuleType = {
@@ -627,10 +636,14 @@ const StoreModel: ModuleType = {
         setIsMockChange(state, payload){
             state.isMockChange = payload
         },
+        setDiffModalVisible(state, payload){
+            state.diffModalVisible = payload
+        },
     },
     actions: {
         async listEndpoint({commit, dispatch, state}, params: QueryParams) {
             try {
+                debugger
                 const response: ResponseData = await query(params);
                 if (response.code != 0) return;
 
@@ -1738,6 +1751,24 @@ const StoreModel: ModuleType = {
             }
         },
 
+        async getEndPointDiff({commit, dispatch, state}, payload: any) {
+            const res = await getEndpointDiff(payload)
+            if (res.code === 0) {
+                return res.data;
+            } else {
+                return {}
+            }
+        },
+        async saveEndPointDiff({commit, dispatch, state}, payload: any) {
+            try {
+                await saveEndpointDiff(payload);
+                await dispatch('loadList', {projectId: payload.projectId});
+                commit('setDiffModalVisible', {...state.diffModalVisible,visible: false, endpointId: 0});
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
     },
 };
 
