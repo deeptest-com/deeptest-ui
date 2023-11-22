@@ -2,20 +2,20 @@
   <a-spin :spinning="spinning">
   <div class="diagnose-interface-design-main">
       <div id="diagnose-interface-debug-panel">
-        <a-tabs
-          class="dp-tabs-full-height"
-          type="editable-card"
-          :hideAdd="true"
-          :closable="true"
-          v-if="interfaceTabs?.length"
-          :activeKey="activeTabKey"
-          @edit="onTabEdit"
-          @change="changeTab">
-          <a-tab-pane
-            v-for="tab in interfaceTabs"
-            :title="tab.title"
-            :key="''+tab.id"
-            class="dp-relative">
+
+        <a-tabs v-if="interfaceTabs?.length"
+                class="dp-tabs-full-height"
+                type="editable-card"
+                :hideAdd="true"
+                :closable="true"
+                :activeKey="activeTabKey"
+                @edit="onTabEdit"
+                @change="changeTab">
+
+          <a-tab-pane v-for="tab in interfaceTabs"
+                      :title="tab.title"
+                      :key="''+tab.id"
+                      class="dp-relative">
             <template #tab>
               <span :title="tab.title">{{ getTitle(tab.title) }}</span>
             </template>
@@ -25,6 +25,7 @@
             </template>
           </a-tab-pane>
         </a-tabs>
+
         <div  v-else style="margin-top: 36px;">
           <a-empty  :description="'请先在左侧目录上选择需要调试的接口'"/>
         </div>
@@ -67,6 +68,8 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 const interfaceId = computed<any>(() => store.state.DiagnoseInterface.interfaceId);
 const interfaceData = computed<any>(() => store.state.DiagnoseInterface.interfaceData);
 const interfaceTabs = computed<any>(() => store.state.DiagnoseInterface.interfaceTabs);
+const recordTab = computed<any>(() => store.state.DiagnoseInterface.recordTab);
+
 const activeTabKey = ref('0')
 const spinning = computed(()=> store.state.Global.spinning )
 

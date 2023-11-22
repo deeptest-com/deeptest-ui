@@ -16,6 +16,7 @@ export interface StateType {
     interfaceId: number;
     interfaceData: any;
     interfaceTabs: any[];
+    recordTab: any,
 
     queryParams: any;
     serveServers: [],
@@ -65,6 +66,7 @@ const initState: StateType = {
     interfaceId: 0,
     interfaceData: null,
     interfaceTabs: [],
+    recordTab: {},
 
     queryParams: {},
     serveServers: [],

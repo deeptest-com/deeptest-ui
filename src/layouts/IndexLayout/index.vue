@@ -30,12 +30,12 @@
           <router-view></router-view>
         </permission>
 
-<!--        <div style="position: fixed; right: 16px; bottom: -16px; z-index: 999999;">
+        <div style="position: fixed; right: 16px; bottom: -16px; z-index: 999999;">
           <div @click="sendMsg" class="dp-link-primary">Open Record Window</div>
           <br />
           <div id="deeptest-event-node" style="word-wrap: break-word;"
                @deeptest-event-from-chrome-ext="onChromeExtEvent"></div>
-        </div>-->
+        </div>
 
       </div>
     </div>
