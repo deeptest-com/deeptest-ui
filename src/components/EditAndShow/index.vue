@@ -20,7 +20,7 @@
 
   <div :class="['editor','show-on-hover', customClass]" v-else>
     <span class="title" @click.stop="handleClick">
-      <TooltipCell :text="fieldValue || emptyValue"/>
+      {{fieldValue === 0 ? '0' : (fieldValue === '' ? '空' : fieldValue)}}
     </span> &nbsp;&nbsp;
 
     <span class="edit-icon">
