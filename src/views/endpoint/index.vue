@@ -914,13 +914,15 @@ function showDiff(id: number) {
 }
 
 .customTitleColRender {
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   color: #447DFD;
   display: flex;
+  position: relative;
   .notice-icon {
-    margin: 1px 2px 0px 0px;
+   position: absolute;
+   left:-16px;
+   top:1px;
   }
 }
 
