@@ -211,7 +211,7 @@ export default defineComponent({
     _setValue(value) {
       let editor = this._getEditor();
       const { modified } = this.editor.getModel()
-      modified.setValue(value)
+      if (modified) modified.setValue(value)
       if(editor) return editor.setValue(value);
     },
 
