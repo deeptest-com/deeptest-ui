@@ -3,7 +3,6 @@
     <a-form :label-col="{ style: { width: '120px' } }" :wrapper-col="wrapperCol">
 
       <a-form-item label="数据库连接" v-bind="validateInfos.dbConnId" required>
-
         <a-row type="flex">
           <a-col flex="auto">
             <a-select v-model:value="model.dbConnId"
@@ -111,12 +110,17 @@ const model = computed<any>(() => {
   return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
 });
 
-
+const checkConn = async (rule: any, value: number) => {
+  if (+value < 1) {
+    return Promise.reject('请选择数据库连接');
+  } else {
+    return Promise.resolve();
+  }
+};
 const rules = computed(() => { return {
-  src: [
-    {required: true, message: '请选择来源', trigger: 'change'},
+  dbConnId: [
+    { validator: checkConn, trigger: 'change' },
   ],
-
   variable: [
     {required: true, message: '请输入变量名', trigger: 'blur'},
   ],

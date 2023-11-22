@@ -1,6 +1,7 @@
 <template>
   <div class="response-checkpoint-main">
     <a-form :label-col="{ style: { width: '86px' } }" :wrapper-col="wrapperCol">
+
       <a-form-item label="类型" v-bind="validateInfos.type">
         <a-select v-model:value="model.type"
                   @change="selectType"
@@ -47,6 +48,7 @@
       <a-form-item v-if="model.type !== 'judgement'" label="运算符" v-bind="validateInfos.operator" required>
         {{ void (options = model.type === 'responseStatus' ? operatorsForCode :
           isInArray(model.type, ['responseHeader', 'responseBody']) ? operatorsForString : operators) }}
+
         <a-select v-model:value="model.operator"
                   @blur="validate('operator', { trigger: 'change' }).catch(() => {})">
 
@@ -162,24 +164,26 @@ const expressionRequired = [{ required: true, message: '请输入表达式', tri
 const operatorRequired = [{ required: true, message: '请选择操作', trigger: 'change' }]
 const valueRequired = [{ required: true, message: '请输入数值', trigger: 'blur' }]
 
-const rulesRef = computed(() => { return {
-  type: [
-    { required: true, message: '请选择类型', trigger: 'blur' },
-  ],
+const rulesRef = computed(() => {
+  const ret = {
+    type: [
+      { required: true, message: '请选择类型', trigger: 'blur' },
+    ],
 
-  extractorVariable: model.value.type === CheckpointType.extractorVari ? extractorVariableRequired : [],
-  extractorType:  model.value.type === CheckpointType.extractor ? extractorTypeRequired : [],
-  extractorExpression: model.value.type === CheckpointType.extractor ? extractorExpressionRequired : [],
+    extractorVariable: model.value.type === CheckpointType.extractorVari ? extractorVariableRequired : [],
+    extractorType:  model.value.type === CheckpointType.extractor ? extractorTypeRequired : [],
+    extractorExpression: model.value.type === CheckpointType.extractor ? extractorExpressionRequired : [],
 
-  expression: model.value.type === CheckpointType.responseHeader || model.value.type === CheckpointType.judgement ?
-      expressionRequired : [],
-  operator: [
-    model.value.type === CheckpointType.judgement ? [] : operatorRequired,
-  ],
-  value: [
-    model.value.type === CheckpointType.judgement ? [] : valueRequired,
-  ],
-}})
+    expression: model.value.type === CheckpointType.responseHeader || model.value.type === CheckpointType.judgement ?
+        expressionRequired : [],
+    operator: model.value.type === CheckpointType.judgement ? [] : operatorRequired,
+    value: model.value.type === CheckpointType.judgement ? [] : valueRequired,
+  }
+
+  console.log('===', ret)
+
+  return ret
+})
 
 let { resetFields, validate, validateInfos } = useForm(model, rulesRef);
 
@@ -188,6 +192,9 @@ const save = (item) => {
   if (item && item.entityId !== model.value.id) {
     return;
   }
+
+  console.log('---', rulesRef.value)
+
   validate().then(() => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId

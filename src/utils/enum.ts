@@ -153,7 +153,7 @@ export const Methods = [
 ]
 
 export enum ComparisonOperator {
-    empty = 'empty',
+    // empty = 'empty',
     equal = 'equal',
     notEqual = 'notEqual',
     greaterThan = 'greaterThan',
