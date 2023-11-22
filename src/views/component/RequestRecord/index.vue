@@ -8,7 +8,9 @@
       </a-form-item>
 
       <a-form-item>
-        <a-button type="primary" @click="startRecord" class="dp-btn-gap">开始录制</a-button> &nbsp;
+        <a-button type="primary" class="dp-btn-gap"
+                  @click="startRecord"
+                  :disabled="!model.url">开始录制</a-button> &nbsp;
         <a-button @click="stopRecord" class="dp-btn-gap">停止录制</a-button>
       </a-form-item>
     </a-form>
@@ -26,7 +28,7 @@ import {ScopeDeeptest} from "@/utils/const";
 import {Form} from "ant-design-vue";
 
 const useForm = Form.useForm;
-const model = ref({url: ''})
+const model = ref({url: 'http://111.231.16.35:9000/forms/post'})
 const rules = ref({
   url: [
     {required: true, message: '请输入站点URL地址', trigger: 'blur'},

@@ -1,5 +1,5 @@
 <template>
-  <div class="response-extractor-main">
+  <div class="response-dbopt-main">
     <a-form :label-col="{ style: { width: '120px' } }" :wrapper-col="wrapperCol">
 
       <a-form-item label="数据库连接" v-bind="validateInfos.dbConnId" required>
@@ -73,6 +73,7 @@
           公有变量在接口所在服务及场景下有效。
         </div>
       </a-form-item>
+      <br />
 
     </a-form>
   </div>
@@ -223,7 +224,7 @@ const wrapperCol = { span: 18 }
 </script>
 
 <style lang="less" scoped>
-.response-extractor-main {
+.response-dbopt-main {
   height: 100%;
   width: 100%;
 
