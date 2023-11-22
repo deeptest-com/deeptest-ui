@@ -42,11 +42,14 @@
         数据合并策略
         <a-tooltip placement="topLeft" arrow-point-at-center overlayClassName="memo-tooltip">
           <template v-slot:title>
-            <span class="title">智能合并</span><br>
-            已存在的文件夹不再重复创建。<br>
-            相同接口如果在平台上做了修改，则不导入。<br>
-            相同接口在平台上没有做过修改，则覆盖。<br>
-            新增接口导入<br>
+            当存在相同接口（方法和路径相同）定义时，可采用不同的策略：<br>
+            <span class="title">智能合并（推荐）</span><br>
+            自上次导入之后，接口在平台上没有做过修改，则覆盖。<br>
+            自上次导入之后，接口在平台做过修改，本次导入定义无变更，保留平台修改。<br>
+            自上次导入之后，接口在平台做过修改、本次导入定义也有变更，则提示不一致，用户手动处理。<br>
+            接口所属分类目录保留平台的修改。<br>
+            <span class="title">新增</span><br>
+            全新导入，即使存在相同接口，也创建新的接口定义。<br>
          </template>
         <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)" />
         </a-tooltip>
@@ -121,12 +124,12 @@ const driverTypeOpts = [
 
 const dataSyncTypeOpts = [
   {
-    label: '新增',
-    value: 3,
+    label: '智能合并（推荐）',
+    value: 2,
   },
   {
-    label: '智能合并',
-    value: 2,
+    label: '新增',
+    value: 3,
   },
   /*
   {
@@ -306,6 +309,11 @@ const change = (val)=>{
 <style lang="less">
 .memo-tooltip {
   min-width:500px;
+  .title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
 }
 </style>
 
