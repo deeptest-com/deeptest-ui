@@ -38,7 +38,6 @@ import { MonacoOptions } from '@/utils/const';
 import { watch, ref, onMounted, computed,defineEmits } from 'vue';
 import { useStore } from "vuex";
 import { confirmToDo } from "@/utils/confirm";
-import { ChangedStatus } from "@/utils/enum";
 import { EndpointDiffRes } from '@view/endpoint/data.d.ts';
 
 const store = useStore<{ Endpoint }>();
@@ -49,10 +48,6 @@ const res = ref<EndpointDiffRes>({ current: '', latest: '', currentDesc: '', lat
 
 const title = ref({ left: "保留手动更新", right: "更新为同步版本" })
 
-onMounted(async () => {
- // console.log(diffModalVisible.value.endpointId, "onMounted")
-  await getEndPointDiff(diffModalVisible.value.endpointId)
-})
 
 watch(() => diffModalVisible.value.endpointId, async (newVal) => {
   //console.log(diffModalVisible.value.endpointId, "watch")
