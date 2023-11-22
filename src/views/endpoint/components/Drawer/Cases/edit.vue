@@ -1,14 +1,14 @@
 <template>
   <a-modal width="600px"
            :visible="visible"
+           :confirmLoading="loading"
            @ok="finish"
            @cancel="cancel"
            :title="(!model.id ? '新建' : '修改') + '用例'">
     <a-form class="custom-center-form" :wrapper-col="{ span: 14 }">
 
       <a-form-item label="名称" v-bind="validateInfos.name">
-        <a-input v-model:value="modelRef.name"
-                 @blur="validate('name', { trigger: 'blur' }).catch(() => {})" />
+        <a-input v-model:value="modelRef.name" placeholder="请输入用例名称" />
       </a-form-item>
 
       <a-form-item label="请求方法" v-bind="validateInfos.method">
@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineProps, inject, reactive, ref, watch} from 'vue';
+import {computed, defineProps, inject, reactive, ref, watch, defineEmits} from 'vue';
 import {Methods, UsedBy} from "@/utils/enum";
 import {Form} from "ant-design-vue";
 import {useStore} from "vuex";
@@ -37,6 +37,7 @@ import {StateType as EndpointStateType} from "@/views/endpoint/store";
 
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
+const emits = defineEmits(['finish']);
 
 const store = useStore<{ Endpoint: EndpointStateType }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
@@ -49,10 +50,6 @@ const props = defineProps({
   model: {
     required: true,
     type: Object,
-  },
-  onFinish: {
-    type: Function,
-    required: true,
   },
   onCancel: {
     type: Function,
@@ -70,7 +67,6 @@ const modelRef = ref({
 });
 
 watch(() => props.visible, () => {
-  console.log('watch props.visible', props?.visible)
   modelRef.value = {
     id: props?.model?.id,
     name: props?.model?.name,
@@ -88,19 +84,22 @@ const rulesRef = reactive({
   ],
 });
 
-const {resetFields, validate, validateInfos} = useForm(modelRef, rulesRef);
+const {validate, validateInfos} = useForm(modelRef, rulesRef);
+const loading = ref(false);
 
 const finish = () => {
   console.log('finish', modelRef.value)
-  validate().then(() => {
-    props.onFinish(modelRef.value)
-    resetFields();
+  validate().then(async () => {
+    loading.value = true;
+    const result = await store.dispatch('Endpoint/saveCase', modelRef.value);
+    loading.value = false;
+    if (result) {
+      emits('finish');
+    }
   }).catch((error) => console.log('error', error))
 }
 
 const cancel = () => {
-  console.log('cancel')
-  resetFields()
   props.onCancel()
 }
 

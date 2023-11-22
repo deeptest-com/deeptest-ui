@@ -1488,7 +1488,6 @@ const StoreModel: ModuleType = {
         async saveCase({state, dispatch}, payload: any) {
             const jsn = await saveEndpointCase(payload)
             if (jsn.code === 0) {
-                dispatch('listCase', state.caseQueryParams);
                 return true;
             } else {
                 return false

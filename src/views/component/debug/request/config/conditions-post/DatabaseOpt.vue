@@ -9,8 +9,6 @@
             <a-select v-model:value="model.dbConnId"
                       @blur="validate('dbConnId', { trigger: 'change' }).catch(() => {})">
 
-              <a-select-option :value="0">请选择</a-select-option>
-
               <a-select-option v-for="(item, idx) in dbConns" :key="idx" :value="item.id">
                 {{ item.name }}
               </a-select-option>

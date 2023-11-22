@@ -80,7 +80,7 @@
           v-if="editVisible"
           :visible="editVisible"
           :model="editModel"
-          :onFinish="createFinish"
+          @finish="onFinish"
           :onCancel="createCancel"/>
 
     </div>
@@ -170,17 +170,12 @@ const create = () => {
   editVisible.value = true
   editModel.value = {title: ''}
 }
-const createFinish = (data) => {
-  console.log('createFinish', data)
 
-  data.endpointId = endpoint.value.id
-
-  store.dispatch('Endpoint/saveCase', data).then((result) => {
-    console.log('saveCase', result)
-
-    editVisible.value = false
-  })
+const onFinish = () => {
+  query(1, pagination.value.pageSize);
+  editVisible.value = false;
 }
+
 const createCancel = () => {
   console.log('createVisible')
   editVisible.value = false
