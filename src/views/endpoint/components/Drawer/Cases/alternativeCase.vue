@@ -163,8 +163,6 @@ import {StateType as UserStateType} from "@/store/user";
 import {getToken} from "@/utils/localToken";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import settings from "@/config/settings";
-import bus from "@/utils/eventBus";
-import { saveInterface } from "@/views/scenario/service";
 
 const usedBy = UsedBy.CaseDebug
 provide('usedBy', usedBy)
@@ -223,9 +221,10 @@ const loadDebugData = async (data) => {
 
 
 watch(() => {
-  return endpointCase.value.id;
+  return props.baseCaseId;
 }, async (newVal) => {
-  if (!newVal) return
+  if (!newVal) return;
+  await store.dispatch('Endpoint/getCase', newVal);
   await loadDebugData({
     caseInterfaceId: newVal,
     usedBy: usedBy,
@@ -462,13 +461,6 @@ const updateTitle = (v) => {
   endpointCase.value.name = v;
   store.dispatch('Endpoint/updateCaseName', endpointCase.value)
 };
-
-onMounted(async () => {
-  if (props.baseCaseId) {
-    await store.dispatch('Endpoint/getCase', props.baseCaseId);
-  }
-
-})
 
 onUnmounted(() => {
   resetDebugChange();
