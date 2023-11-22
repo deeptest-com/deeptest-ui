@@ -212,10 +212,10 @@ const loadDebugData = async (data) => {
   try {
     loadingAlternativeCase.value = true;
     await store.dispatch('Debug/loadDataAndInvocations', data);
-    store.dispatch('Debug/listPostCondition', { isForBenchmarkCase: true });
-    store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
-    loadingAlternativeCase.value = false;
     resetDebugChange();
+    await store.dispatch('Debug/listPostCondition', { isForBenchmarkCase: true });
+    await store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
+    loadingAlternativeCase.value = false;
   } catch (err) {
     console.log('加载备选用例数据出错:', err);
   }
