@@ -91,7 +91,10 @@ const finish = () => {
   console.log('finish', modelRef.value)
   validate().then(async () => {
     loading.value = true;
-    const result = await store.dispatch('Endpoint/saveCase', modelRef.value);
+    const result = await store.dispatch('Endpoint/saveCase', {
+      ...modelRef.value,
+      endpointId: endpointDetail?.value.id
+    });
     loading.value = false;
     if (result) {
       emits('finish');
