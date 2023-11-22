@@ -42,6 +42,9 @@
                 <icon-svg v-if="element.entityType === ConditionType.script"
                           type="script"
                           class="icon"  />
+                <icon-svg v-if="element.entityType === ConditionType.databaseOpt"
+                          type="db-opt"
+                          class="icon"  />
 
                 <span v-html="element.desc || t(element.entityType)"></span>
               </div>
@@ -91,6 +94,11 @@
                 v-if="element.entityType === ConditionType.script"
                 :condition="activePostCondition"
                 :finish="list"/>
+
+              <DatabaseOpt
+                v-if="element.entityType === ConditionType.databaseOpt"
+                :condition="activePostCondition"
+                :finish="list"/>
             </div>
           </div>
 
@@ -131,6 +139,7 @@ import IconSvg from "@/components/IconSvg";
 import Extractor from "@/views/component/debug/request/config/conditions-post/Extractor.vue";
 import Checkpoint from "@/views/component/debug/request/config/conditions-post/Checkpoint.vue";
 import Script from "@/views/component/debug/request/config/conditions-post/Script.vue";
+import DatabaseOpt from "@/views/component/debug/request/config/conditions-post/DatabaseOpt.vue";
 import FullScreenPopup from "@/views/component/debug/request/config/ConditionPopup.vue";
 
 const store = useStore<{  Debug: Debug }>();
