@@ -10,7 +10,18 @@
         :share-link="detailLink"
         :show-detail="true"
         :show-share="true"
-        @update-title="updateTitle"/>
+        @update-title="updateTitle" >
+        <template #custom>
+          <div class="diff-tag" v-if="endpointDetail.changedStatus > ChangedStatus.NoChanged" >   
+          <a-tag :color="endpointDetail.changedStatus == ChangedStatus.Changed?'warning':''">
+            <template #icon>
+              <WarningFilled v-if="endpointDetail.changedStatus == ChangedStatus.Changed"  @click="showDiff(endpointDetail.id)" :style="{color: '#fb8b06'}" />
+              <InfoCircleOutlined  v-if="endpointDetail.changedStatus == ChangedStatus.IgnoreChanged"  @click="showDiff(endpointDetail.id)" :style="{color: '#c6c6c6'}" />
+          </template>
+          {{endpointDetail.changedStatus == ChangedStatus.Changed?'待处理':'已处理'}}，{{endpointDetail.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a style="color:#427EE6;" @click="showDiff(endpointDetail.id)">查看详情</a></a-tag>
+        </div>
+       </template>
+      </DetailHeader>
     </template>
     <template #basicInfo>
       <!-- 基本信息 -->
@@ -93,6 +104,8 @@ import cloneDeep from "lodash/cloneDeep";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
+import {WarningFilled,InfoCircleOutlined } from '@ant-design/icons-vue';
+import {ChangedStatus,SourceType} from "@/utils/enum";
 
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal, Global,Debug }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
@@ -312,6 +325,11 @@ onMounted(() => {
   isInit.value = false;
 })
 
+function showDiff(id:number) {
+  store.commit('Endpoint/setDiffModalVisible', {endpointId:id,visible:true,projectId:endpointDetail.value.projectId,callPlace:"detail"});
+}
+
+
 </script>
 
 <style lang="less" scoped>
@@ -323,5 +341,14 @@ onMounted(() => {
     margin-right: 6px;
   }
 }
+
 </style>
+
+<style lang="less" >
+
+.diff-tag .ant-tag span {
+    margin-left: 0px;
+}
+</style>
+
 

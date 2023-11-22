@@ -103,9 +103,13 @@ export function equalObjectByLodash(obj1: Object, obj2: Object,): boolean {
     delete o1?.['baseUrl'];
     delete o2?.['baseUrl'];
 
-    // 需要不需要检测 advancedMockDisabled
+    // 不需要检测 advancedMockDisabled
     delete o1?.['advancedMockDisabled'];
     delete o2?.['advancedMockDisabled'];
+
+    // 不需要检测 scriptMockEnabled
+    delete o1?.['scriptMockDisabled'];
+    delete o2?.['scriptMockDisabled'];
 
     // 编辑器会做格式化，所以需要去除空格和换行符
     if (o1?.body && typeof o1.body === 'string') {
