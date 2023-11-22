@@ -7,6 +7,7 @@
       :can-edit="canEdit"
       :value="name || ''"
       @update="updateTitle"/>
+      <slot name='custom'></slot>
   </div>
   <DrawerAction
     v-if="showAction"
@@ -14,15 +15,14 @@
     :show-share="showShare"
     :share-link="shareLink"
     :show-detail="showDetail" 
-    :detail-link="detailLink"/>
+    :detail-link="detailLink"/>       
 </template>
 <script setup lang="ts">
-import { defineProps, defineEmits } from "vue";
-
+import { defineProps, defineEmits, computed } from "vue";
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import { DrawerAction } from "@/views/component/DrawerLayout/drawerAction";
 
-defineProps({
+ defineProps({
   name: {
     type: String,
     default: '',
@@ -63,11 +63,25 @@ defineProps({
     default: '',
     required: false,
   },
+  endpointId: {
+    type: Number,
+    default: 0,
+    required: false,
+  },
+  isChanged: {
+    type: Boolean,
+    default: false,
+    required: false,
+  },
 });
+
+
+
 
 const emits = defineEmits(['updateTitle']);
 
 const updateTitle = v => {
   emits('updateTitle', v);
 };
+
 </script>
