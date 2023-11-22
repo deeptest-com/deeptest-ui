@@ -89,7 +89,6 @@ import {DatapoolDetail} from '../../data';
 import {uploadRequest} from "@/utils/upload";
 import {notifyWarn} from "@/utils/notify";
 
-const useForm = Form.useForm;
 const store = useStore<{ ProjectGlobal: ProjectStateType, ProjectSetting: ProjectSettingStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const formState = computed<DatapoolDetail>(() => store.state.ProjectSetting.datapoolDetail);
@@ -113,6 +112,7 @@ const rulesRef = reactive({
   ],
 });
 
+const useForm = Form.useForm;
 const {resetFields, validate, validateInfos} = useForm(formState, rulesRef);
 
 watch(props, () => {

@@ -56,12 +56,18 @@
                           <a-menu-item v-if="nodeProps.dataRef.id !== -1" key="3" @click="deleteNode(nodeProps.dataRef)">
                             {{'删除' + (nodeProps.dataRef.type === 'interface' ? '接口' : '目录')}}
                           </a-menu-item>
-                          <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="4" @click="importInterfaces(nodeProps.dataRef)">
-                             导入接口
-                          </a-menu-item>
-                          <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="5" @click="importCurl(nodeProps.dataRef)">
-                             导入cURL
-                          </a-menu-item>
+
+                          <template v-if="nodeProps.dataRef.type === 'dir'">
+                            <a-menu-item key="4" @click="importInterfaces(nodeProps.dataRef)">
+                               导入接口
+                            </a-menu-item>
+                            <a-menu-item key="5" @click="importCurl(nodeProps.dataRef)">
+                               导入cURL
+                            </a-menu-item>
+                            <a-menu-item key="6" @click="recordRequest(nodeProps.dataRef)">
+                               录制请求
+                            </a-menu-item>
+                          </template>
                         </a-menu>
                       </template>
                     </a-dropdown>
@@ -352,6 +358,10 @@ const importCurlFinish = (model) => {
 const importCurlCancel = () => {
   console.log('importCurlCancel')
   curlImportVisible.value = false
+}
+const recordRequest = () => {
+  console.log('recordRequest')
+  store.dispatch('DiagnoseInterface/openRecordConf')
 }
 
 async function onDrop(info: DropEvent) {

@@ -24,9 +24,17 @@
                          :baseUrlDisabled="false" />
             </template>
           </a-tab-pane>
+
+          <a-tab-pane v-if="recordConf" key="record" class="dp-relative">
+            <template #tab>
+              <span>请求录制</span>
+            </template>
+            <RequestRecord />
+          </a-tab-pane>
+
         </a-tabs>
 
-        <div  v-else style="margin-top: 36px;">
+        <div v-else style="margin-top: 36px;">
           <a-empty  :description="'请先在左侧目录上选择需要调试的接口'"/>
         </div>
       </div>
@@ -49,14 +57,10 @@ import DebugComp from '@/views/component/debug/index.vue';
 import {StateType as ProjectStateType} from "@/store/project";
 import {StateType as DiagnoseInterfaceStateType} from '../store';
 import {StateType as ServeStateType} from "@/store/serve";
-import {notification} from "ant-design-vue";
-import {NotificationKeyCommon} from "@/utils/const";
 import {prepareDataForRequest} from "@/views/component/debug/service";
-import openModal from "@/components/OpenModal/modal";
 import {StateType as Debug} from "@/views/component/debug/store";
-import ConfirmSave from "@/components/ConfirmSave/index.vue";
-import {confirmToSave} from "@/utils/confirm";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import RequestRecord from "@/views/component/RequestRecord/index.vue";
 
 provide('usedBy', UsedBy.DiagnoseDebug)
 
@@ -68,7 +72,7 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 const interfaceId = computed<any>(() => store.state.DiagnoseInterface.interfaceId);
 const interfaceData = computed<any>(() => store.state.DiagnoseInterface.interfaceData);
 const interfaceTabs = computed<any>(() => store.state.DiagnoseInterface.interfaceTabs);
-const recordTab = computed<any>(() => store.state.DiagnoseInterface.recordTab);
+const recordConf = computed<any>(() => store.state.DiagnoseInterface.recordConf);
 
 const activeTabKey = ref('0')
 const spinning = computed(()=> store.state.Global.spinning )
@@ -92,6 +96,15 @@ const loadDebugData = debounce(async () => {
     usedBy: usedBy,
   });
 }, 300)
+
+watch((recordConf), async (newVal) => {
+  console.log('watch recordConf')
+
+  if (recordConf.value) {
+    activeTabKey.value = 'record'
+    return
+  }
+}, { immediate: true, deep: true })
 
 watch((interfaceData), async (newVal) => {
   console.log('watch interfaceData', interfaceData?.value)
@@ -133,6 +146,17 @@ const saveDiagnoseInterface = async (e) => {
 
 const onTabEdit = (key, action) => {
   console.log('onTabEdit', key, action)
+
+  if (key === 'record') {
+    if (action === 'remove') {
+      store.commit('DiagnoseInterface/setRecordConf', null);
+      if (interfaceTabs.value.length > 0) {
+        store.dispatch('DiagnoseInterface/openInterfaceTab', interfaceTabs.value[0]);
+      }
+    }
+    return
+  }
+
   if (action === 'remove') {
     store.dispatch('DiagnoseInterface/removeInterfaceTab', +key);
   }

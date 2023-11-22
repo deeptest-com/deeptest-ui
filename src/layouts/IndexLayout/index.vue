@@ -29,14 +29,6 @@
         <permission :roles="routeItem.roles">
           <router-view></router-view>
         </permission>
-
-        <div style="position: fixed; right: 16px; bottom: -16px; z-index: 999999;">
-          <div @click="sendMsg" class="dp-link-primary">Open Record Window</div>
-          <br />
-          <div id="deeptest-event-node" style="word-wrap: break-word;"
-               @deeptest-event-from-chrome-ext="onChromeExtEvent"></div>
-        </div>
-
       </div>
     </div>
   </div>
@@ -151,21 +143,6 @@ export default defineComponent({
     // 设置title
     useTitle(routeItem);
 
-    const sendMsg = () => {
-      console.log('sendMsg')
-      const data = {
-        scope: ScopeDeeptest,
-        content: {
-          act: 'recordStart'
-        }
-      }
-
-      window.postMessage(data, '*')
-    }
-    const onChromeExtEvent =() => {
-      console.log('onChromeExtEvent')
-    }
-
     return {
       collapsed,
       toggleCollapsed,
@@ -180,8 +157,6 @@ export default defineComponent({
       version,
       onOpenChange,
       routeItem,
-      sendMsg,
-      onChromeExtEvent,
     }
   }
 })

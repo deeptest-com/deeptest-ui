@@ -16,7 +16,7 @@ export interface StateType {
     interfaceId: number;
     interfaceData: any;
     interfaceTabs: any[];
-    recordTab: any,
+    recordConf: any,
 
     queryParams: any;
     serveServers: [],
@@ -40,6 +40,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         changeTreeDataMapItemProp: Mutation<StateType>;
 
         setInterfaceTabs: Mutation<StateType>;
+        setRecordConf: Mutation<StateType>;
         updateTabName: Mutation<StateType>;
     };
     actions: {
@@ -52,6 +53,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         importInterfaces: Action<StateType, StateType>;
         importCurl: Action<StateType, StateType>;
+        openRecordConf: Action<StateType, StateType>;
 
         openInterfaceTab: Action<StateType, StateType>;
         removeInterfaceTab: Action<StateType, StateType>;
@@ -66,7 +68,7 @@ const initState: StateType = {
     interfaceId: 0,
     interfaceData: null,
     interfaceTabs: [],
-    recordTab: {},
+    recordConf: null,
 
     queryParams: {},
     serveServers: [],
@@ -113,6 +115,11 @@ const StoreModel: ModuleType = {
         setInterfaceTabs(state, payload) {
             state.interfaceTabs = payload;
         },
+
+        setRecordConf(state, payload) {
+            state.recordConf = payload;
+        },
+
         updateTabName(state, payload) {
             state.interfaceTabs.forEach(function(item) {
                 console.log(item)
@@ -227,6 +234,9 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
+        async openRecordConf({commit, dispatch, state}, payload: any) {
+            commit('setRecordConf', {})
+        },
 
         async getServeServers({commit}, payload: any) {
             const res = await serverList({
@@ -287,12 +297,11 @@ const StoreModel: ModuleType = {
                 commit('setInterfaceId', openTab.id)
             }
 
-            if (needReload && openTab.id) {
-                dispatch('openInterfaceTab', openTab);
-            }
-
-            if (needReload && !openTab.id) {
-                commit('setInterfaceId', 0);
+            if (needReload) {
+                if (openTab.id)
+                    dispatch('openInterfaceTab', openTab);
+                else
+                    commit('setInterfaceId', 0);
             }
         },
         async removeInterfaceTabs({commit, dispatch, state}, id: number) {
