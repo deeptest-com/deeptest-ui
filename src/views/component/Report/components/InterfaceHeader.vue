@@ -9,17 +9,12 @@
 
     <div class="summary">
       <div class="left">
-        <a-tooltip :title="reqContent.url">
-          <a class="endpoint-url" href="javascript:void (0)">
-            {{ reqContent.url }}
-          </a>
-        </a-tooltip>
-
-        <a-tooltip :title="`${endpointData.name}`">
-          <span class="endpoint-name">
-            {{ endpointData.name || '' }}
-          </span>
-        </a-tooltip>
+        <span class="endpoint-url">
+          <TooltipCell :text="reqContent.url || ''" />
+        </span>
+        <span class="endpoint-name">
+          <TooltipCell :text="endpointData.name || ''" />
+        </span>
       </div>
       <div class="right">
         <span class="endpoint-code" v-if="endpointData.resultStatus !== 'loading'">
@@ -69,6 +64,7 @@ import {formatWithSeconds} from '@/utils/datetime';
 import ResponseDrawer from '@/views/component/Report/Response/index.vue';
 import { getMethodColor } from '@/utils/interface';
 import {watch} from "vue/dist/vue";
+import TooltipCell from '@/components/Table/tooltipCell.vue';
 
 
 enum StatusMap {
@@ -188,6 +184,7 @@ function handleQueryDetail() {
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: left;
+    color: #447DFD;
   }
 
   .endpoint-url,
