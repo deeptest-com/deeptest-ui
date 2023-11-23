@@ -91,7 +91,7 @@ import {EndpointTabsList} from '@/config/constant';
 import cloneDeep from "lodash/cloneDeep";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
-
+import {useWujie} from "@/composables/useWujie";
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal, Global,Debug }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
@@ -268,8 +268,14 @@ async function save() {
   }, 200);
 }
 
+
+const {projectName,parentOrigin,isWujieEnv} = useWujie();
 const detailLink = computed(() => {
   const {params: {projectNameAbbr = ''}} = router.currentRoute.value;
+  // 无界环境，使用父级域名跳转
+  if(isWujieEnv && parentOrigin && projectName){
+    return `${parentOrigin}/dev/${projectName}/API/IM/${endpointDetail.value?.serialNumber}`;
+  }
   return `${window.location.origin}/${projectNameAbbr}/IM/${endpointDetail.value?.serialNumber}`;
 })
 
