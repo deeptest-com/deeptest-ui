@@ -5,6 +5,7 @@ import settings from "@/config/settings";
 import {WebSocket} from "@/services/websocket";
 import {getToken} from "@/utils/localToken";
 import {getUuid} from "@/utils/string";
+import { ConditionType } from '@/utils/enum';
 
 interface CaseExecution {
     progressStatus: Ref<any>;
@@ -85,6 +86,10 @@ function useCaseExecution(): CaseExecution {
             if (item.category === 'case') {
                 item.respContent = JSON.stringify({ ...item.response, cookies: item.response.cookies || [] });
                 item.reqContent = JSON.stringify({ ...item.request.debugData, ...item.request });
+                item.detail = JSON.stringify({
+                    responseDefine: (item.response.consoleLogs || []).find(e => e.conditionEntityType === ""),
+                    checkpoint: (item.response.consoleLogs || []).filter(e => e.conditionEntityType === ConditionType.checkpoint),
+                });
             }
             if (item.category === 'case' && !execStatusMap.value[item.caseUuid]) {
                 execStatusMap.value[item.caseUuid] = cloneDeep(item);
