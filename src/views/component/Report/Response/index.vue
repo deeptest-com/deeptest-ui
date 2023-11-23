@@ -29,10 +29,6 @@
           <a-tab-pane key="console" tab="控制台">
             <ResponseConsole :data="interfaceResDetail" />
           </a-tab-pane>
-          <a-tab-pane v-if="interfaceResDetail.assertionLogs"
-                      key="assertion" tab="断言">
-            <ResultMsg :responseData="interfaceResDetail"/>
-          </a-tab-pane>
 
           <a-tab-pane key="info" tab="实际请求">
             <ResponseInfo :data="interfaceResDetail.requestData" />

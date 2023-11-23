@@ -248,7 +248,7 @@ const columns = [
   {
     title: '编号',
     dataIndex: 'serialNumber',
-    width: 180,
+    width: 150,
   },
   {
     title: () => {
@@ -260,7 +260,6 @@ const columns = [
     },
     dataIndex: 'name',
     slots: {customRender: 'name'},
-    // width: 200,
   },
   {
     title: '创建人',
@@ -268,13 +267,6 @@ const columns = [
     slots: {customRender: 'createUserName'},
     ellipsis: true,
     width: 100,
-  },
-  {
-    title: '创建时间',
-    dataIndex: 'createdAt',
-    slots: {customRender: 'createdAt'},
-    ellipsis: true,
-    width: 190,
   },
   {
     title: '更新时间',
