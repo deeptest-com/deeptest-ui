@@ -1,7 +1,6 @@
-import { ref, onMounted, onUnmounted, Ref, computed } from 'vue';
+import { ref, Ref, computed } from 'vue';
 import { useStore } from 'vuex';
 import cloneDeep from "lodash/cloneDeep";
-import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import {WebSocket} from "@/services/websocket";
 import {getToken} from "@/utils/localToken";
@@ -11,8 +10,6 @@ interface CaseExecution {
     progressStatus: Ref<any>;
     execStart: Function;
     execStop: Function;
-    execStatusMap: any;
-    execResults: Ref<any[]>;
     OnWebSocketMsg: (data: any) => void;
     onWebSocketConnStatusMsg: (data: any) => void;
 }
@@ -30,6 +27,24 @@ function useCaseExecution(): CaseExecution {
     const execResults = ref<any[]>([]);
     // 执行结果
     const execResultMap = ref<any>({});
+
+    const updateExeclogs = (log: any) => {
+        execResultMap[log.caseUuid] = log;
+        if (log.category === 'root') {
+            const findIndex = execResults.value.findIndex(e => e.caseUuid === log.caseUuid);
+            findIndex > 0 ? execResults.value.splice(findIndex, 1, log) : execResults.value.push(log);
+            return;
+        }
+        if (execResultMap[log.parentUuid]) {
+            if (!execResultMap[log.parentUuid].logs) {
+                execResultMap[log.parentUuid].logs = [];
+            }
+            const findIndex = execResultMap[log.parentUuid].logs.findIndex(e => e.caseUuid === log.caseUuid);
+            findIndex > 0 ? execResultMap[log.parentUuid].logs.splice(findIndex, 1, log) : execResultMap[log.parentUuid].logs.push(log);
+        }
+        store.commit('Endpoint/setAlternativeExecResults', execResults.value);
+        store.commit('Endpoint/setAlternativeExecStatusMap', execStatusMap.value);
+    };
 
     const onWebSocketConnStatusMsg = (data: any) => {
         if (!data.msg) {
@@ -55,11 +70,6 @@ function useCaseExecution(): CaseExecution {
         }
         // 更新结果
         else if (wsMsg.category === 'result') {
-            if (execResultMap.value[log.caseUuid]) {
-                return;
-            }
-
-            log.logs = [];
             const item = {
                 ...log,
                 id: log.caseUuid,
@@ -76,26 +86,9 @@ function useCaseExecution(): CaseExecution {
             if (item.category === 'case' && !execStatusMap.value[item.caseUuid]) {
                 execStatusMap.value[item.caseUuid] = cloneDeep(item);
             }
-            execResultMap.value[log.caseUuid] = cloneDeep(item);
-            const updateExecLogs = (logs) => {
-                return cloneDeep(logs).map(parentNode => {
-                    if (parentNode.caseUuid === log.parentUuid) {
-                        parentNode.logs.push(item);
-                    } else {
-                        parentNode.logs = updateExecLogs(parentNode.logs);
-                    }
-                    return cloneDeep(parentNode);
-                })
-            };
+            
+            updateExeclogs(item);
 
-            if (!log.parentUuid) {
-                execResults.value.push(item)
-            } else {
-                execResults.value = updateExecLogs(execResults.value);
-            }
-
-            store.commit('Endpoint/setAlternativeExecResults', execResults.value);
-            store.commit('Endpoint/setAlternativeExecStatusMap', execStatusMap.value);
         }
         // 执行异常
         else if (wsMsg.category === "exception") {
@@ -111,6 +104,7 @@ function useCaseExecution(): CaseExecution {
     const execStart = async ({ baseCaseId, usedBy, cases, type }) => {
         execUuid.value = getUuid();
         execStatusMap.value = {};
+        execResults.value = [];
         const data = {
             userId: currUser.value.id,
             serverUrl: process.env.VUE_APP_API_SERVER,
@@ -136,9 +130,7 @@ function useCaseExecution(): CaseExecution {
         execStart,
         execStop,
         OnWebSocketMsg,
-        execStatusMap,
         onWebSocketConnStatusMsg,
-        execResults
     } as CaseExecution
 }
 
