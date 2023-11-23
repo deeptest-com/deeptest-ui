@@ -105,6 +105,8 @@ function useCaseExecution(): CaseExecution {
         execUuid.value = getUuid();
         execStatusMap.value = {};
         execResults.value = [];
+        store.commit('Endpoint/setAlternativeExecResults', []);
+        store.commit('Endpoint/setAlternativeExecStatusMap', {});
         const data = {
             userId: currUser.value.id,
             serverUrl: process.env.VUE_APP_API_SERVER,
