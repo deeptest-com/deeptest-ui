@@ -29,8 +29,8 @@
       class="case-tree"
       :replaceFields="replaceFields"
       :tree-data="treeData"
-      :expandedKeys="expandedKeys"
       :checkable="true"
+      v-model:expandedKeys="expandedKeys"
       v-model:checkedKeys="checkedKeys"
       @check="onChecked"
       :checkStrictly="executionType === 'single'"
@@ -227,7 +227,6 @@ function getAllKeys(arr: any, keys: any[]) {
 }
 
 const editFinish = async (key, v) => {
-  console.log('editFinish', key, treeDataMap.value[key])
   const item = treeDataMap.value[key]
   try {
     await store.dispatch('Endpoint/saveAlternativeFactor', {caseId: endpointCase.value.id, path: item.path, value: v})
@@ -259,7 +258,6 @@ const queryMultiDetail = () => {
 }
 
 const queryDetail = (reportInfo?: any) => {
-  console.log('查看执行详情：', reportInfo || '多因子参数异常的结果');
   Object.assign(currRespDetail, {
     reqContent: JSON.parse(reportInfo.reqContent || '{}') ,
     resContent: JSON.parse(reportInfo.respContent || '{}') ,
@@ -269,7 +267,6 @@ const queryDetail = (reportInfo?: any) => {
 }
 
 const handleExecTypeChange = evt => {
-  console.log('当前执行类型:', evt.target.value);
   checkedKeys.value = evt.target.value === 'multi' ? [] : {
     checked: [],
     halfChecked: [],
@@ -280,7 +277,6 @@ const handleExecTypeChange = evt => {
 }
 
 const handleSelect = evt => {
-  console.log('当前是否全选', evt.target.checked);
   allSelected.value = evt.target.checked;
   selectAll();
 }
@@ -308,7 +304,6 @@ const onChecked = (keys, treeNode) => {
       }
     }
   }
-  console.log('当前选中的参数:', unref(checkedKeys));
 }
 
 /**
