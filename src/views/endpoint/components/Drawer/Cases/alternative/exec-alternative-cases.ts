@@ -42,7 +42,7 @@ function useCaseExecution(): CaseExecution {
             const findIndex = execResultMap[log.parentUuid].logs.findIndex(e => e.caseUuid === log.caseUuid);
             findIndex > 0 ? execResultMap[log.parentUuid].logs.splice(findIndex, 1, log) : execResultMap[log.parentUuid].logs.push(log);
         }
-        store.commit('Endpoint/setAlternativeExecResults', execResults.value);
+        store.commit('Endpoint/setAlternativeExecResults', JSON.parse(JSON.stringify(execResults.value)));
         store.commit('Endpoint/setAlternativeExecStatusMap', execStatusMap.value);
     };
 
@@ -70,6 +70,9 @@ function useCaseExecution(): CaseExecution {
         }
         // 更新结果
         else if (wsMsg.category === 'result') {
+            if (execResultMap[log.caseUuid]) {
+                return;
+            }
             const item = {
                 ...log,
                 id: log.caseUuid,
