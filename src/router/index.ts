@@ -200,4 +200,8 @@ router.afterEach(() => {
   NProgress.done();
 });
 
+router.onError(err => {
+  console.error('routerPageLoad failed', err);
+})
+
 export default router;

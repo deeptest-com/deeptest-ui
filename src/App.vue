@@ -9,7 +9,6 @@
 import {defineComponent, computed, onMounted, watch, ref,onUnmounted} from "vue";
 import { useI18n } from "vue-i18n";
 import {useStore} from "vuex";
-import { useRouter } from "vue-router";
 import { antdMessages } from "@/config/i18n";
 import { setHtmlLang } from "@/utils/i18n";
 import Notification from "./components/others/Notification.vue";
@@ -34,7 +33,6 @@ export default defineComponent({
     // NOTICE: 以下代码仅适用于ly环境，其他环境删除即可
     const store = useStore<{User: UserStateType,Endpoint,Debug}>();
     const currentUser = computed<CurrentUser>(()=> store.state.User.currentUser);
-    const router = useRouter();
 
     watch(() => {
       return currentUser.value
@@ -68,9 +66,6 @@ export default defineComponent({
 
     onMounted(() => {
       setHtmlLang(locale.value);
-      router.onError(err => {
-        console.log('routerErrorCaptured', err);
-      })
     })
 
     const {isDefineChange,isDebugChange} =  useIMLeaveTip();
