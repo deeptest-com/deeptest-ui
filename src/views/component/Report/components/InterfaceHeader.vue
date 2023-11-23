@@ -195,7 +195,7 @@ function handleQueryDetail() {
 
   .endpoint-name {
     margin-right: 16px;
-    max-width: 150px;
+    max-width: 260px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
