@@ -32,7 +32,9 @@
         class="dp-table"
         @expandedRowsChange="expandedRowsChange">
         <template #name="{ record, text }">
-          <div class="case-title" :style="{ width: record.caseType === 'alternative' ? 'calc(100% - 60px)' : 'calc(100% - 32px)' }">
+          <div class="case-title"
+               :style="{ width: record.caseType === 'alternative' ? 'calc(100% - 60px)' : 'calc(100% - 32px)' }"
+                :title="text">
             <EditAndShowField
               placeholder="名称"
               :custom-class="'custom-endpoint show-on-hover'"
@@ -122,7 +124,7 @@ const endpoint = computed<any>(() => store.state.Endpoint.endpointDetail);
 const userList = computed<any>(() => store.state.Project.userList);
 
 const list = computed<any[]>(() => store.state.Endpoint.caseList.list);
-const hasChildrenNode = computed(() => (list.value || []).some(e => e.children !== null)); 
+const hasChildrenNode = computed(() => (list.value || []).some(e => e.children !== null));
 let pagination = computed<PaginationConfig>(() => store.state.Endpoint.caseList.pagination);
 
 const debugData = computed<any>(() => store.state.Debug.debugData);
@@ -231,7 +233,7 @@ const expandAll = () => {
     if (e.children?.length > 0) {
       return e.id;
     }
-  })); 
+  }));
 }
 
 const collapseAll = () => {
