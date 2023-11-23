@@ -2,17 +2,17 @@
   <div class="response-result">
     <div class="row status">
       <span class="col">
-        状态: 
+        状态:
         <a-tooltip :title="responseData.statusContent">
           <span :style="{ cursor: 'pointer', color: getStatusCodeColor(responseData.statusCode) }">{{ responseData.statusCode }}</span>
         </a-tooltip>
       </span>
       <span class="col">
-        耗时: 
+        耗时:
         <span style="color: rgb(4, 196, 149)">{{ responseData.time }} ms</span>
       </span>
       <span class="col">
-        大小: 
+        大小:
         <span style="color: rgb(4, 196, 149)">{{ responseData.contentLength }} B</span>
       </span>
     </div>
@@ -25,6 +25,7 @@
         @change="change"
         />
       <ResultMsg :responseData="responseDataForDefine"/>
+
       <div class="title" v-if="responseDataForAssert.length > 0">断言结果</div>
       <ResultMsg :responseData="responseDataForAssert"/>
     </template>
