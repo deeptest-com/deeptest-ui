@@ -29,6 +29,10 @@
         <PostScript v-if="model.entityType === ConditionType.script"
                     :condition="model"
                     :finish="onCancel" />
+
+        <DatabaseOpt v-if="model.entityType === ConditionType.databaseOpt"
+                    :condition="model"
+                    :finish="onCancel" />
       </div>
 
       <div class="buttons">
@@ -52,6 +56,7 @@ import Cookie from "./conditions-post/Cookie.vue";
 import Checkpoint from "./conditions-post/Checkpoint.vue";
 import PreScript from "./conditions-pre/Script.vue";
 import PostScript from "./conditions-post/Script.vue";
+import DatabaseOpt from "./conditions-post/DatabaseOpt.vue";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 

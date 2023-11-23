@@ -45,10 +45,12 @@
           <span class="case-tree-name">{{ nodeProps.title }}</span>
           <template v-if="nodeProps.category === 'case'">
             <span>: &nbsp;&nbsp;&nbsp;</span>
+
             <EditAndShowField
               placeholder="修改标题"
               :value="alternativeCaseFactor[nodeProps.path]?.value || nodeProps.sample"
               @update="v => editFinish(nodeProps.key, v)"/>
+
             <span class="case-exec-result" v-if="executionType === 'multi' && execStatusMap[nodeProps.key]?.status">
               <!-- 运行结果 -->
               <span :class="[getDpResultClass(execStatusMap[nodeProps.key]?.status), 'case-exec-status']">
