@@ -17,7 +17,7 @@
         @exec-cancel="execCancel" />
       <LogTreeView
         class="scenario-exec-log-tree"
-        :treeData="execResults || []" />
+        :treeData="reports || []" />
     </div>
   </a-drawer>
 </template>
@@ -45,7 +45,8 @@ const props = defineProps<{
 const emits = defineEmits(['close'])
 
 const store = useStore();
-const { execStart, execStop, OnWebSocketMsg, onWebSocketConnStatusMsg, execResults, progressStatus, execStatusMap } = useCaseExecution();
+const reports = computed(() => store.state.Endpoint.alternativeExecResults);
+const { execStart, execStop, OnWebSocketMsg, onWebSocketConnStatusMsg, progressStatus } = useCaseExecution();
 
 const progressValue = ref(10);
 const execUuid = ref('');

@@ -7,7 +7,7 @@
     <router-view v-if="isLogin" />
 </template>
 <script lang="ts">
-import { computed, ComputedRef, defineComponent, onMounted, Ref, ref, unref, watch, onErrorCaptured } from "vue";
+import { computed, ComputedRef, defineComponent, onMounted, Ref, ref, unref, watch } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { StateType as UserStateType, CurrentUser } from "@/store/user";
@@ -70,11 +70,6 @@ export default defineComponent({
                     document.body?.removeChild(appLoadingEl[0]);
                 }, 600);
             }
-        })
-
-        onErrorCaptured((err) => {
-            console.log('App load Error', err);
-            return false;
         })
 
         return {
