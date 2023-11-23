@@ -28,7 +28,7 @@
           }}</span>
           </span>
 
-        <span 
+        <span
           class="endpoint-time"
           v-if="endpointData.resultStatus !== 'loading'">
           耗时:
@@ -37,7 +37,7 @@
           </a-tooltip>
         </span>
 
-        <span 
+        <span
           class="endpoint-time"
           v-if="endpointData.resultStatus !== 'loading'">
           大小: &nbsp;<span style="color: rgb(4, 196, 149)">{{ resContent.contentLength }} B</span>
@@ -68,6 +68,7 @@ import {responseCodes} from '@/config/constant';
 import {formatWithSeconds} from '@/utils/datetime';
 import ResponseDrawer from '@/views/component/Report/Response/index.vue';
 import { getMethodColor } from '@/utils/interface';
+import {watch} from "vue/dist/vue";
 
 
 enum StatusMap {

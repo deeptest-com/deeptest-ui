@@ -53,6 +53,7 @@ export default defineComponent({
             function renderHeader(log) {
                 // 接口场景
                 if (log.processorCategory === 'processor_interface') {
+                    console.log('render InterfaceHeader')
                     return <InterfaceHeader endpointData={log}/>
                 }
                 // 其他场景
@@ -61,7 +62,8 @@ export default defineComponent({
 
             function renderContent(log) {
                 if (log.processorCategory === 'processor_interface' && log.detail !== undefined && log.detail !== '{}') {
-                    return <InterfaceContent endpointData={log}/>
+                    console.log('render InterfaceContent')
+                    return <InterfaceContent endpointData={log} />
                 }
                 // 场景中的叶子节点不再渲染
                 if (!showArrowScenarioType.includes(log.processorType)) {

@@ -1,6 +1,6 @@
 <template>
-  <div class="response-console-main" v-if="consoleData && consoleData.length">
-    <div v-for="(item, index) in consoleData"
+  <div class="response-console-main" v-if="consoleLogs && consoleLogs.length">
+    <div v-for="(item, index) in consoleLogs"
          :key="index"
          :class="getResultClass(item.resultStatus)" class="item">
 
@@ -54,8 +54,12 @@ const store = useStore<{  Debug: Debug }>();
 const responseData = computed<any>(() => props.data || store.state.Debug.responseData);
 const consoleData = computed<any>(() => store.state.Debug.consoleData);
 
+const consoleLogs = computed<any>(() => {
+  return responseData.value.consoleLogs ? responseData.value.consoleLogs : consoleData.value
+});
+
 watch(responseData, (newVal) => {
-  console.log('watch responseData', responseData.value.invokeId)
+  console.log('watch responseData in console tab, invokeId = ', responseData.value.invokeId)
   if (responseData.value.invokeId)
     store.dispatch("Debug/getInvocationLog", responseData.value.invokeId)
 }, {deep: true, immediate: true})
