@@ -20,6 +20,8 @@
         :loading="loading"
         :pagination="{
           ...pagination,
+          showSizeChanger: false,
+          showQuickJumper: false,
           onChange: (page) => {
             getList(page);
           },
