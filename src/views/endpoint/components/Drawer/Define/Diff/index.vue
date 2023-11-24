@@ -23,9 +23,12 @@
         </div>
       </div>
 
-      <MonacoEditor theme="vs" language="yaml" :height="800" :options="{
-        ...MonacoOptions,
-        readOnly: true
+      <MonacoEditor theme="vs" language="yaml" :height="800"
+                    class="ly-opanapi3-schema-yaml-diff-monaco-editor"
+                    :options="{
+          ...MonacoOptions,
+        readOnly: true,
+         renderOverviewRuler:false
       }" :diffEditor="true" :original="res.current" v-model:value="res.latest"></MonacoEditor>
 
     </div>
@@ -155,4 +158,20 @@ function callback(id:number){
 </style>
 
 
-  
+<style  lang="less">
+.ly-opanapi3-schema-yaml-diff-monaco-editor{
+  // ++ -- 不需要展示
+  .codicon-diff-remove{
+    display: none!important;
+  }
+  .codicon-diff-insert{
+    display: none!important;
+  }
+  // 不区分删除或添加的背景色
+  .line-insert, .line-delete,.char-delete, .char-insert{
+    // 黄色
+    background: #feffe6!important;
+  }
+}
+</style>
+
