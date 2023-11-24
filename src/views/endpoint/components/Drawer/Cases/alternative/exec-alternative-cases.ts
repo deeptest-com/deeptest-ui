@@ -18,7 +18,6 @@ interface CaseExecution {
 function useCaseExecution(): CaseExecution {
     const store = useStore();
     const currUser = computed(() => store.state.User.currentUser);
-    const currEnvId = computed(() => store.state.ProjectSetting.selectEnvId);
     const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 
     const execUuid = ref('');
@@ -94,7 +93,7 @@ function useCaseExecution(): CaseExecution {
             if (item.category === 'case' && !execStatusMap.value[item.caseUuid]) {
                 execStatusMap.value[item.caseUuid] = cloneDeep(item);
             }
-            
+
             updateExeclogs(item);
 
         }
@@ -109,7 +108,7 @@ function useCaseExecution(): CaseExecution {
         }
     }
 
-    const execStart = async ({ baseCaseId, usedBy, cases, type }) => {
+    const execStart = async ({ environmentId, baseCaseId, usedBy, cases, type }) => {
         execUuid.value = getUuid();
         execStatusMap.value = {};
         execResults.value = [];
@@ -125,7 +124,7 @@ function useCaseExecution(): CaseExecution {
             execUuid: execUuid.value,
             cases,
             type,
-            environmentId: currEnvId.value,
+            environmentId: environmentId,
         }
         console.log('===== websocket data =====', data);
         WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify({act: 'execCases', casesExecReq: data}))

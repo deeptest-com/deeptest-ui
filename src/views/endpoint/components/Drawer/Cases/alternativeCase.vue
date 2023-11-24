@@ -115,11 +115,6 @@
         @confirm="saveAsNewCase"
         :model="saveAsModel"/>
 
-    <EnvSelector
-        :env-select-drawer-visible="selectEnvVisible"
-        @on-ok="onSelectExecEnvFinish"
-        @on-cancel="onSelectExecEnvCancel" />
-
     <Exec
         v-if="execDrawerVisible"
         :exec-drawer-visible="execDrawerVisible"
@@ -259,7 +254,6 @@ function getNodeMap(treeNode: any, mp: any) {
 /**
  * :::: 执行 execution
  */
-const selectEnvVisible = ref<boolean>(false);
 const execDrawerVisible = ref(false);
 const execCases = ref({});
 const execType = ref('multi')
@@ -267,18 +261,12 @@ const execType = ref('multi')
 const caseFactor = ref();
 
 const selectExecEnv = () => {
-  selectEnvVisible.value = true;
   store.commit('Endpoint/setAlternativeExecStatusMap', {});
   store.commit('Endpoint/setAlternativeExecResults', []);
-}
-async function onSelectExecEnvFinish() {
-  selectEnvVisible.value = false;
+
   execCases.value = caseFactor.value.getSelectedTreeNodes();
   execType.value = unref(caseFactor.value.executionType);
   execDrawerVisible.value = true;
-}
-async function onSelectExecEnvCancel() {
-  selectEnvVisible.value = false;
 }
 
 const saveCaseInterface = async () => {

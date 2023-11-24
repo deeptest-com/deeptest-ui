@@ -83,7 +83,7 @@ export interface StateType {
     srcScriptData: any;
     cookieData: any;
     debugChange: any;
-    serves: any[];
+    environmentsFromServers: any[];
     currServe: any;
 
     benchMarkCase: {
@@ -133,7 +133,7 @@ const initState: StateType = {
         postCondition: false,
         checkpoint: false,
     },
-    serves: [],
+    environmentsFromServers: [],
     currServe: [],
 
     // 备选用例临时数据存储
@@ -190,7 +190,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setBaseUrl: Mutation<StateType>;
         setBody: Mutation<StateType>;
 
-        setServes: Mutation<StateType>; // 获取环境列表
+        setEnvironmentsFromServers: Mutation<StateType>; // 获取环境列表
         setCurrServe: Mutation<StateType>; // 设置当前所选环境
 
         setGlobalParams: Mutation<StateType>;
@@ -429,8 +429,8 @@ const StoreModel: ModuleType = {
             console.log('set debugData body')
             state.debugData.body = payload;
         },
-        setServes(state, payload) {
-            state.serves = payload || [];
+        setEnvironmentsFromServers(state, payload) {
+            state.environmentsFromServers = payload || [];
         },
         setCurrServe(state, payload) {
             state.currServe = payload;
@@ -1188,7 +1188,7 @@ const StoreModel: ModuleType = {
             const { serverId, requestEnvVars = true } = payload;
             const res = await changeServe(payload);
             if (res.code === 0) {
-                //const currServer = state.serves.find(item => item.environmentId == serverId)
+                //const currServer = state.environmentsFromServers.find(item => item.environmentId == serverId)
                 commit('setCurrServe', res.data);
             }
             if (requestEnvVars) {
@@ -1219,7 +1219,7 @@ const StoreModel: ModuleType = {
                     item.value = item.environmentId;
                     return item;
                 })
-                commit('setServes', servers);
+                commit('setEnvironmentsFromServers', servers);
                 commit('setCurrServe', res.data.currServer);
             }
         },
