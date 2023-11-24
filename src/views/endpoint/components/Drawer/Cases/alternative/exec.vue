@@ -34,6 +34,9 @@ import {UsedBy} from "@/utils/enum";
 
 import {getUuid} from "@/utils/string";
 import useCaseExecution from './exec-alternative-cases';
+import {StateType as DebugStateType} from "@/views/component/debug/store";
+import {StateType as EndpointStateType} from "@/views/endpoint/store";
+import {StateType as GlobalStateType} from "@/store/global";
 
 const props = defineProps<{
   execDrawerVisible: boolean;
@@ -44,8 +47,10 @@ const props = defineProps<{
 
 const emits = defineEmits(['close'])
 
-const store = useStore();
+const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType }>();
+const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 const reports = computed(() => store.state.Endpoint.alternativeExecResults);
+
 const { execStart, execStop, OnWebSocketMsg, onWebSocketConnStatusMsg, progressStatus } = useCaseExecution();
 
 const progressValue = ref(10);
@@ -54,8 +59,11 @@ const execUuid = ref('');
 const progressKey = ref(0);
 
 const execBegin = async () => {
+  console.log('999', environmentId.value)
+
   execUuid.value = getUuid()
   execStart({
+    environmentId: environmentId.value,
     baseCaseId: props.caseId,
     usedBy: UsedBy.CaseDebug,
     cases: props.cases,

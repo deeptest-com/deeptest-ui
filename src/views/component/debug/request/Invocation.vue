@@ -112,11 +112,11 @@ const {
   debugChangePostScript,
   debugChangeCheckpoint} = useIMLeaveTip();
 const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal, User }>();
-const debugData = computed<any>(() => store.state.Debug.debugData);
 const currUser = computed(() => store.state.User.currentUser);
-const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
-const currService = computed(() => store.state.ServeGlobal.currServe);
 const currServe = computed(() => store.state.Debug.currServe);
+const debugData = computed<any>(() => store.state.Debug.debugData);
+const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
+const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 
 const props = defineProps({
   onSave: {
@@ -199,15 +199,15 @@ function changeServer(id) {
 }
 
 
-
 const send = async (e) => {
   const data = prepareDataForRequest(debugData.value)
   console.log('sendRequest', data);
 
   if (validateInfo()) {
     store.commit("Global/setSpinning",true)
+
+    data.environmentId = environmentId.value
     const callData = {
-      userId: currUser.value.id,
       serverUrl: process.env.VUE_APP_API_SERVER,
       token: await getToken(),
       data: data
