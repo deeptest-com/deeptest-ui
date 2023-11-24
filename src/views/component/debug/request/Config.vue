@@ -95,7 +95,7 @@ const getTabTitle = computed(() => {
     const globalParamsType = type === 'queryParams' ? 'query' : type === 'pathParams' ? 'path' : type === 'headers' ? 'header' : type === "cookies"? 'cookie': '';
     let globalParamsLength = 0;
     if (globalParamsType) {
-      const globalParams = (debugData.value.globalParams|| []).filter( item => item.in === globalParamsType);
+      const globalParams = (debugData.value.envDataToView.globalParams|| []).filter( item => item.in === globalParamsType);
       globalParamsLength = globalParams.length;
     }
     const numbers = sourceData.length + globalParamsLength;

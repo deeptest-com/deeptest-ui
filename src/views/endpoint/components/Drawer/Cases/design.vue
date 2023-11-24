@@ -82,7 +82,7 @@ const saveCaseInterface = async (e) => {
   let data = JSON.parse(JSON.stringify(debugData.value))
   data = prepareDataForRequest(data)
 
-  Object.assign(data, {shareVars: null, envVars: null, globalEnvVars: null, globalParamVars: null})
+  Object.assign(data, {envDataToView: null})
 
   const res = await store.dispatch('Endpoint/saveCaseDebugData', data)
 

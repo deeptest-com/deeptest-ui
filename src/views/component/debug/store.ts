@@ -406,15 +406,15 @@ const StoreModel: ModuleType = {
         },
         setShareVars(state, payload) {
             console.log('set debugData shareVars')
-            state.debugData.shareVars = payload;
+            state.debugData.envDataToView.shareVars = payload;
         },
         setEnvVars(state, payload) {
             console.log('set debugData envVars')
-            state.debugData.envVars = payload;
+            state.debugData.envDataToView.envVars = payload;
         },
         setGlobalVars(state, payload) {
             console.log('set debugData globalVars')
-            state.debugData.globalVars = payload;
+            state.debugData.envDataToView.globalVars = payload;
         },
 
         setBaseUrl(state, payload) {

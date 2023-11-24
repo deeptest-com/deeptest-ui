@@ -54,7 +54,7 @@
                     style="width: 28%">
             <a-select-option value="">请选择</a-select-option>
 
-            <a-select-option v-for="(item, idx) in debugData.shareVars"
+            <a-select-option v-for="(item, idx) in debugData.envDataToView.shareVars"
                              :key="idx"
                              :value="item.id + '-' + item.name">
               {{ item.name }}
@@ -199,8 +199,8 @@ const onVarChanged = (e) => {
   }
 
   let found = false
-  for (let i in debugData.value.shareVars) {
-    const item = debugData.value.shareVars[i]
+  for (let i in debugData.value.envDataToView.shareVars) {
+    const item = debugData.value.envDataToView.shareVars[i]
 
     if (value === item.name) {
       model.value.code = item.id + '-' + item.name

@@ -58,10 +58,7 @@ function loadData() {
 
 const saveScenarioInterface = async (data) => {
   const obj = Object.assign({}, data)
-  delete obj.shareVars
-  delete obj.envVars
-  delete obj.globalEnvVars
-  delete obj.globalParamVars
+  delete obj.envDataToView
 
   const res = await store.dispatch('Scenario/saveDebugData', obj);
 

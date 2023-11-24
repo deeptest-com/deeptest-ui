@@ -34,7 +34,7 @@
                 placeholder="修改标题"
                 :value="endpointCase.name"
                 @update="updateTitle"/>
-            </div>    
+            </div>
           </div>
         </template>
         <template #extra>
@@ -287,7 +287,7 @@ const saveCaseInterface = async () => {
   let data = JSON.parse(JSON.stringify(debugData.value))
   data = prepareDataForRequest(data)
 
-  Object.assign(data, {shareVars: null, envVars: null, globalEnvVars: null, globalParamVars: null})
+  Object.assign(data, {envDataToView: null})
 
   const res = await store.dispatch('Endpoint/saveCaseDebugData', data)
 
@@ -337,7 +337,7 @@ const back = () => {
 const saveBaseCase = async () => {
   store.commit('Global/setSpinning', true);
   let data = prepareDataForRequest(cloneDeep(debugData.value));
-  Object.assign(data, {shareVars: null, envVars: null, globalEnvVars: null, globalParamVars: null});
+  Object.assign(data, {envDataToView: null});
   const res = await store.dispatch('Endpoint/saveCaseDebugData', data);
   resetDebugChange();
   res ? notifySuccess('保存成功') : notifyError('保存失败');
