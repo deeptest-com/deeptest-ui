@@ -12,7 +12,7 @@
       <a-row>
         <a-col flex="100px" class="dp-border">共享变量</a-col>
       </a-row>
-      <a-row v-for="(item, idx) in debugData.envDataToView.shareVars" :key="idx" type="flex">
+      <a-row v-for="(item, idx) in debugData.envDataToView?.shareVars" :key="idx" type="flex">
         <a-col flex="100px">{{item.name}}</a-col>
         <a-col :flex="3">{{item.rightValue==='extractor_err'? t(item.rightValue+'_short') : item.value}}</a-col>
 
@@ -25,7 +25,7 @@
       <a-row>
         <a-col flex="100px" class="dp-border">环境变量</a-col>
       </a-row>
-      <a-row v-for="(item, idx) in debugData.envDataToView.envVars" :key="idx" type="flex">
+      <a-row v-for="(item, idx) in debugData.envDataToView?.envVars" :key="idx" type="flex">
         <a-col flex="100px">{{item.name}}</a-col>
         <a-col :flex="3">{{item.rightValue}}</a-col>
 
@@ -38,7 +38,7 @@
       <a-row>
         <a-col flex="100px" class="dp-border">全局变量</a-col>
       </a-row>
-      <a-row v-for="(item, idx) in debugData.envDataToView.globalVars" :key="idx" type="flex">
+      <a-row v-for="(item, idx) in debugData.envDataToView?.globalVars" :key="idx" type="flex">
         <a-col flex="100px">{{item.name}}</a-col>
         <a-col :flex="3">{{item.rightValue}}</a-col>
 

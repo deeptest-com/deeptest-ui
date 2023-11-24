@@ -34,7 +34,7 @@
               </div>
             </div>
 
-            <div v-for="(item, idx) in debugData.envDataToView.shareVars" :key="idx" class="env">
+            <div v-for="(item, idx) in debugData.envDataToView?.shareVars" :key="idx" class="env">
               <div class="left">
                 <div class="name" :title="item.name">
                   {{item.name}}
@@ -49,7 +49,7 @@
                 <DeleteOutlined @click="removeShareVar(item)"  class="dp-icon-btn dp-trans-80" />
               </div>
             </div>
-            <div v-if="!debugData.envDataToView.shareVars || debugData.envDataToView.shareVars.length===0" class="env">空</div>
+            <div v-if="!debugData.envDataToView?.shareVars || debugData.envDataToView?.shareVars.length===0" class="env">空</div>
           </div>
 
         </div>
@@ -113,7 +113,7 @@
               </div>
             </div>
 
-            <div v-for="(item, idx) in debugData.envDataToView.globalVars" :key="idx" class="env">
+            <div v-for="(item, idx) in debugData.envDataToView?.globalVars" :key="idx" class="env">
               <div class="left">
                 <div class="name">
                   <a-tooltip overlayClassName="dp-tip-small">
@@ -132,7 +132,7 @@
 
               <div class="right"></div>
             </div>
-            <div v-if="!debugData.envDataToView.globalVars || debugData.envDataToView.globalVars.length===0" class="env">空</div>
+            <div v-if="!debugData.envDataToView?.globalVars || debugData.envDataToView?.globalVars.length===0" class="env">空</div>
           </div>
 
         </div>
@@ -155,7 +155,7 @@
               </div>
             </div>
 
-            <div v-for="(item, idx) in debugData.envDataToView.globalParams" :key="idx" class="env">
+            <div v-for="(item, idx) in debugData.envDataToView?.globalParams" :key="idx" class="env">
               <div class="left">
                 <div class="name">
                   <a-tooltip overlayClassName="dp-tip-small">
@@ -174,7 +174,7 @@
 
               <div class="right"></div>
             </div>
-            <div v-if="!debugData.envDataToView.globalParams || debugData.envDataToView.globalParams.length===0" class="env">空</div>
+            <div v-if="!debugData.envDataToView?.globalParams || debugData.envDataToView?.globalParams.length===0" class="env">空</div>
           </div>
 
         </div>

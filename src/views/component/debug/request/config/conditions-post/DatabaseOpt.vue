@@ -54,7 +54,7 @@
                     style="width: 28%">
             <a-select-option value="">请选择</a-select-option>
 
-            <a-select-option v-for="(item, idx) in debugData.envDataToView.shareVars"
+            <a-select-option v-for="(item, idx) in debugData.envDataToView?.shareVars"
                              :key="idx"
                              :value="item.id + '-' + item.name">
               {{ item.name }}
