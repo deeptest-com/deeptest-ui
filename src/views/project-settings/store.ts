@@ -442,8 +442,8 @@ const StoreModel: ModuleType = {
             const res = await getUserList();
             if (res.code === 0) {
                 res.data.result.forEach((item) => {
-                    item.label = item.username;
-                    item.value = item.username
+                    item.label = item.name;
+                    item.value = item.username;
                 })
                 commit('setUserList', res.data.result);
             }

@@ -123,8 +123,15 @@ let formConfig = ref([
     type: 'select',
     modelName: 'username',
     placeholder: '负责人(默认创建人)',
-    options: [],
+    options: computed(() => userListOptions.value),
     valueType: 'string',
+    showSearch: true,
+    filterOptions: (value: string, option: any) => {
+      const valueSplitArray = (value || '').split('');
+      const nameSplitArray = (option.name || '').split('');
+      const usernameSplitArray = (option.username || '').split('');
+      return valueSplitArray.every(e => nameSplitArray.includes(e) || usernameSplitArray.includes(e));
+    } 
   },
   {
     type: 'input',
@@ -257,26 +264,9 @@ watch(() => {
     await initDrawer();
   });
 }, {
-  immediate: false
-})
-
-
-
-watch(() => {
-  return userListOptions.value;
-}, (val: any) => {
-  if (val && val.length > 0) {
-    const config = JSON.parse(JSON.stringify(formConfig.value));
-    config.forEach((e: any) => {
-      if (e.type === 'select') {
-        e.options = [...val];
-      }
-    })
-    formConfig.value = config;
-  }
-}, {
   immediate: true
 })
+
 
 // 判断是否携带参数，用于security模块
 async function initDrawer() {
@@ -306,9 +296,16 @@ const username = (user:string)=>{
 
   .header {
     display: flex;
-    align-items: center;
     justify-content: space-between;
     margin-bottom: 8px;
+
+    :deep(.ant-form.ant-form-inline) {
+      height: 52px;
+    }
+
+    :deep(.ant-input-search) {
+      height: 32px;
+    }
   }
 }
 
