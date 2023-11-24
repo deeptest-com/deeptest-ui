@@ -4,14 +4,14 @@
                   class="scenario-interface-design">
       <!-- 头部信息  -->
       <template #header>
-        <DetailHeader 
+        <DetailHeader
           :serial-number="detailResult.serialNumber"
-          :show-action="true" 
-          :show-detail="true" 
+          :show-action="true"
+          :show-detail="true"
           :show-share="true"
           :share-link="detailLink"
-          :name="detailResult?.name || ''" 
-          @update-title="updateTitle" 
+          :name="detailResult?.name || ''"
+          @update-title="updateTitle"
           :detail-link="detailLink"  />
       </template>
 
@@ -20,8 +20,8 @@
         <BasicInfo />
       </template>
       <template #tabHeader>
-        <DetailTabHeader 
-          :tab-list="ScenarioTabList" 
+        <DetailTabHeader
+          :tab-list="ScenarioTabList"
           :showBtn="activeKey === '1' ? true : false"
           :active-key="activeKey"
           @change-tab="changeTab">
@@ -72,7 +72,7 @@ import DrawerLayout from "@/views/component/DrawerLayout/index.vue";
 import { DetailHeader, DetailTabHeader } from "@/views/component/DetailLayout";
 import {ProcessorInterfaceSrc} from "@/utils/enum";
 import { ScenarioTabList } from '../../config';
-
+import {useWujie} from "@/composables/useWujie";
 const store = useStore<{ Debug: Debug, Scenario: ScenarioStateType, ProjectGlobal, ServeGlobal, Report }>();
 const detailResult: any = computed<Scenario>(() => store.state.Scenario.detailResult);
 const debugData = computed<any>(() => store.state.Debug.debugData);
@@ -92,9 +92,15 @@ const emit = defineEmits(['ok', 'close', 'refreshList', 'closeExecDrawer']);
 const router = useRouter();
 const activeKey = ref('1');
 const stickyKey = ref(0);
-
+const {projectName,parentOrigin,isWujieEnv} = useWujie();
 const detailLink = computed(() => {
   const { params: { projectNameAbbr } } = router.currentRoute.value;
+
+  // 无界环境，使用父级域名跳转
+  if(isWujieEnv && parentOrigin && projectName){
+    return `${parentOrigin}/dev/${projectName}/testing/TS/${detailResult.value?.serialNumber}`;
+  }
+
   return `${window.location.origin}/${projectNameAbbr}/TS/${detailResult.value.serialNumber}`;
 })
 
