@@ -26,45 +26,16 @@
             </div>
           </template>
           <template #customServers="{ record }">
-            <span v-if="record?.servers.length > 0">
-              <a-tag v-for="server in record.servers" :key="server.id">
-                {{ server.name || server.description }}
-              </a-tag>
-            </span>
+            <template v-if="record?.servers.length > 0">
+              <PopoverTagCell :data="record.servers" />
+            </template>
             <span v-else>---</span>
           </template>
           <template #customStatus="{ text, record }">
             <a-tag :color="record.statusTag">{{ text }}</a-tag>
           </template>
           <template #operation="{ record }">
-            <a-dropdown>
-              <MoreOutlined />
-              <template #overlay>
-                <a-menu>
-                  <a-menu-item key="1">
-                    <a class="operation-a" href="javascript:void (0)" @click="onOpenComponent(record)">服务组件</a>
-                  </a-menu-item>
-                  <a-menu-item key="2">
-                    <a class="operation-a" href="javascript:void (0)" @click="onOpenVersion(record)">服务版本</a>
-                  </a-menu-item>
-                  <a-menu-item key="3">
-                    <a class="operation-a" href="javascript:void (0)" @click="onOpenSecurity(record)">security</a>
-                  </a-menu-item>
-                  <a-menu-item key="4">
-                    <a class="operation-a" href="javascript:void (0)" @click="onDisabled(record)">禁用</a>
-                  </a-menu-item>
-                  <a-menu-item key="5">
-                    <a class="operation-a" href="javascript:void (0)" @click="onCopy(record)">复制</a>
-                  </a-menu-item>
-                  <a-menu-item key="6">
-                    <a class="operation-a" href="javascript:void (0)" @click="onDelete(record)">删除</a>
-                  </a-menu-item>
-                  <a-menu-item key="7">
-                    <a class="operation-a" href="javascript:void (0)" @click="goDocs(record)">查看文档</a>
-                  </a-menu-item>
-                </a-menu>
-              </template>
-            </a-dropdown>
+            <DropdownActionMenu :dropdown-list="dropMenuList" :record="record" />
           </template>
         </a-table>
       </template>
@@ -91,6 +62,8 @@ import { ExclamationCircleOutlined, MoreOutlined } from '@ant-design/icons-vue';
 import CustomForm from '../common/CustomForm.vue';
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import EmptyCom from '@/components/TableEmpty/index.vue';
+import { DropdownActionMenu } from '@/components/DropDownMenu';
+import { PopoverTagCell } from '@/components/Table/PopoverTagCell';
 import Drawer from './Drawer.vue';
 import { StateType as ProjectStateType } from "@/store/project";
 import { StateType as ProjectSettingStateType } from '../../store';
@@ -153,6 +126,52 @@ const rules = {
     }
   ]
 };
+
+const dropMenuList = [
+{
+    key: '1',
+    auth: 'ENDPOINT-COPY',
+    label: '服务组件',
+    action: (record: any) => onOpenComponent(record)
+  },
+  {
+    key: '2',
+    auth: '',
+    label: '服务版本',
+    action: (record: any) => onOpenVersion(record)
+  },
+
+  {
+    key: '3',
+    auth: '',
+    label: 'Security',
+    action: (record: any) => onOpenSecurity(record)
+  },
+  {
+    key: '4',
+    auth: '',
+    label: '禁用',
+    action: (record: any) => onDisabled(record)
+  },
+  {
+    key: '5',
+    auth: '',
+    label: '复制',
+    action: (record: any) => onCopy(record)
+  },
+  {
+    key: '6',
+    auth: '',
+    label: '删除',
+    action: (record: any) => onDelete(record)
+  },
+  {
+    key: '7',
+    auth: '',
+    label: '查看文档',
+    action: (record: any) => goDocs(record)
+  },
+];
 
 async function handleAdd(formData: any) {
   const { name, username, description } = formData;
