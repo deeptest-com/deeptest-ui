@@ -59,7 +59,7 @@ const execUuid = ref('');
 const progressKey = ref(0);
 
 const execBegin = async () => {
-  console.log('999', environmentId.value)
+  console.log('execBegin', environmentId.value)
 
   execUuid.value = getUuid()
   execStart({
