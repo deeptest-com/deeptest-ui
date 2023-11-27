@@ -104,7 +104,7 @@
           allow-clear/>
       </a-form-item>
       <a-form-item label="所属服务" name="serveId">
-        <SelectServe @change="change"/>
+        <SelectServe v-if="visible" @change="change"/>
       </a-form-item>
       <a-form-item name="dataSyncType">
         <template v-slot:label>
@@ -165,16 +165,16 @@ const emit = defineEmits(['ok', 'cancal']);
 
 const driverTypeOpts = [
   {
+    label: 'Swagger(OpenAPI)',
+    value: 'swagger',
+  },
+  {
     label: 'Postman',
     value: 'postman',
   },
   {
     label: '智能体厂',
     value: 'lzos',
-  },
-  {
-    label: 'Swagger(OpenAPI)',
-    value: 'swagger',
   },
 ];
 
