@@ -27,14 +27,18 @@
                       </a-button>
                     </a-menu-item>
                     <a-menu-item key="1">
+                      <a-button type="link" :size="'small'" href="javascript:void (0)" @click="syncLzos">lzos数据同步
+                      </a-button>
+                    </a-menu-item>
+                    <a-menu-item key="2">
                       <a-button :disabled="!hasSelected" :size="'small'" type="link" @click="goDocs">查看文档</a-button>
                     </a-menu-item>
-                    <a-menu-item key="1">
+                    <a-menu-item key="3">
                       <a-button :disabled="!hasSelected" :size="'small'" type="link"
                                 @click="showPublishDocsModal = true">发布文档
                       </a-button>
                     </a-menu-item>
-                    <a-menu-item key="0">
+                    <a-menu-item key="4">
                       <a-button :disabled="!hasSelected" type="link" :size="'small'" @click="batchUpdate">批量修改
                       </a-button>
                     </a-menu-item>
@@ -181,6 +185,9 @@
             closeDrawer();
           }"/>
     </div>
+
+    <!-- lzos 数据同步 -->
+    <SyncLzosModal :visible="syncLzosVisible" @close="syncLzosVisible = false" @ok="handleSyncLzosSuccess" />
   </a-spin>
 </template>
 <script setup lang="ts">
@@ -194,6 +201,8 @@ import debounce from "lodash.debounce";
 import {ColumnProps} from 'ant-design-vue/es/table/interface';
 import {ExclamationCircleOutlined,WarningFilled,InfoCircleOutlined } from '@ant-design/icons-vue';
 import {Modal} from 'ant-design-vue';
+import _ from "lodash";
+
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import {endpointStatusOpts, endpointStatus} from '@/config/constant';
 import ContentPane from '@/views/component/ContentPane/index.vue';
@@ -214,7 +223,7 @@ import LeavePrompt from './components/LeavePrompt.vue';
 import Tags from './components/Tags/index.vue';
 import TooltipCell from '@/components/Table/tooltipCell.vue';
 import {DropdownActionMenu} from '@/components/DropDownMenu/index';
-import _ from "lodash";
+import SyncLzosModal from './components/SyncLzosModal.vue';
 
 import {getMethodColor} from '@/utils/interface';
 import {notifyError, notifySuccess} from "@/utils/notify";
@@ -387,6 +396,19 @@ const showImportModal = ref(false);
 
 function inportApi() {
   showImportModal.value = true;
+}
+
+/**
+ * lzos 数据同步
+ */
+const syncLzosVisible = ref(false);
+function syncLzos() {
+  syncLzosVisible.value = true;
+}
+
+function handleSyncLzosSuccess() {
+  syncLzosVisible.value = false;
+  refreshList('reset');
 }
 
 /**
