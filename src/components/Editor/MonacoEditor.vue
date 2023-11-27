@@ -67,14 +67,25 @@ export default defineComponent({
   },
 
   beforeUnmount() {
-    console.log('editor beforeUnmount')
-
-    this.editor && this.editor.dispose();
-    bus.off(settings.eventEditorAction)
+    try {   
+      console.log('editor beforeUnmount')
+      this.editor && this.editor.dispose();
+      bus.off(settings.eventEditorAction)
+      
+    } catch (error) {
+      console.log('editor beforeUnmount',error)
+    }
+ 
   },
   unmounted() {
-    this.editor && this.editor.dispose();
-    bus.off(settings.eventEditorAction)
+    try {   
+      console.log('editor unmounted')
+      this.editor && this.editor.dispose();
+      bus.off(settings.eventEditorAction)
+    } catch (error) {
+      console.log('editor unmounted',error)
+    }
+ 
   },
 
   methods: {
@@ -147,7 +158,7 @@ export default defineComponent({
       //   console.log(this.selection)
       // });
 
-      editor.onDidChangeModelContent(event => {
+      editor?.onDidChangeModelContent(event => {
         const value = editor.getValue()
         if (this.value !== value) {
           // 添加最后最后一个参数，标识是否有语法错误
@@ -176,13 +187,13 @@ export default defineComponent({
 
     formatDocInit: (editor) => {
       nextTick(() => {
-        editor.getAction('editor.action.formatDocument')?.run()
+        editor?.getAction('editor.action.formatDocument')?.run()
       })
     },
 
     formatDocUpdate: debounce((editor) => {
       nextTick(() => {
-        editor.getAction('editor.action.formatDocument')?.run()
+        editor?.getAction('editor.action.formatDocument')?.run()
       })
     }, 1000),
 
@@ -199,6 +210,8 @@ export default defineComponent({
 
     _setValue(value) {
       let editor = this._getEditor();
+      const { modified } = this.editor.getModel()
+      if (modified) modified.setValue(value)
       if(editor) return editor.setValue(value);
     },
 
@@ -269,10 +282,10 @@ export default defineComponent({
       console.log('watch timestamp');
       this.value !== this._getValue() && this._setValue(this.value);
     },
-    // value() {
-    //   console.log('watch value', this.value);
-    //   this.value !== this._getValue() && this._setValue(this.value);
-    // },
+     value() {
+       //console.log('watch value', this.value);
+       this.value !== this._getValue() && this._setValue(this.value);
+     },
 
     original() {
       this._setOriginal()

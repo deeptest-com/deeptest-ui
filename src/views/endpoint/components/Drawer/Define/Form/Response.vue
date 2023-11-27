@@ -53,22 +53,22 @@
         <div v-if="selectedCodeDetail">
           <!-- Description -->
           <a-row class="form-item-response-item">
-            <a-col :span="3" class="form-label">
+            <a-col class="form-label">
               描述
             </a-col>
-            <a-col :span="21">
+            <a-col :span="16">
               <a-input @change="handleResDescriptionChange" :placeholder="'请输入描述信息'"
                        :value="selectedCodeDetail.description"/>
             </a-col>
           </a-row>
           <!-- 增加响应头 -->
           <a-row class="form-item-response-item">
-            <a-col :span="3" class="form-label form-label-header">
+            <a-col class="form-label form-label-header">
               <RightOutlined v-if="!resHeaderCollapse" @click="resHeaderCollapse = !resHeaderCollapse"/>
               <DownOutlined v-if="resHeaderCollapse" @click="resHeaderCollapse = !resHeaderCollapse"/>
               <span class="label-name">增加响应头</span>
             </a-col>
-            <a-col :span="21">
+            <a-col :span="16">
               <div class="params-defined-btns">
                 <a-button @click="addResponseHeader">
                   <template #icon>
@@ -83,7 +83,7 @@
           <a-row class="form-item-response-item form-item-response-item-header" style="margin-top: 0px;"
                  v-if="resHeaderCollapse">
             <a-col :span="3"></a-col>
-            <a-col :span="21">
+            <a-col :span="16">
               <div class="params-defined">
                 <div class="params-defined-content">
                   <div class="params-defined-item" v-if="selectedCodeDetail?.headers?.length">
@@ -163,13 +163,19 @@ function hasDefinedCode(code: string) {
 }
 
 const selectedCodes: any = computed(() => {
-  const codes = ((selectedMethodDetail?.value?.responseCodes || '').split(',') || []).filter((item) => {
+  let codes = ((selectedMethodDetail?.value?.responseCodes || '').split(',') || []).filter((item) => {
     return !!item;
   });
   // 如果没有定义响应码,则默认返回默认的 codes 枚举
   if (!codes.length) {
-    return cloneDeep(defaultResponseCodes);
+    codes = cloneDeep(defaultResponseCodes);
   }
+  
+  selectedMethodDetail?.value?.responseBodies.forEach((item) => {
+    if (codes.indexOf(item.code) == -1 ){
+      codes.push(item.code);
+    }
+  })
   return codes;
 })
 

@@ -58,13 +58,18 @@ export interface StateType {
 
     preConditions: any[];
     postConditions: any[];
+    postConditionsDataObj: any;
+    srcPostConditionsDataObj: any;
     assertionConditions: any[];
+    assertionConditionsDataObj: any;
+    srcAssertionConditionsDataObj: any;
     activeAssertion: any;
     activePostCondition: any;
 
     extractorData: any;
     checkpointData: any;
     scriptData: any;
+    srcScriptData: any;
     cookieData: any;
     debugChange: any;
     serves: any[];
@@ -85,13 +90,18 @@ const initState: StateType = {
 
     preConditions: [],
     postConditions: [],
+    postConditionsDataObj: {},
+    srcPostConditionsDataObj: {},
+    assertionConditionsDataObj: {},
+    srcAssertionConditionsDataObj: {},
     assertionConditions: [],
-    activeAssertion: [],
-    activePostCondition: [],
+    activeAssertion: {},
+    activePostCondition: {},
 
     extractorData: {} as Extractor,
     checkpointData: {} as Checkpoint,
     scriptData: {} as Script,
+    srcScriptData: {} as Script,
     cookieData: {} as Cookie,
     debugChange: {
         base: false,
@@ -129,7 +139,9 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setExtractor: Mutation<StateType>;
         setCheckpoint: Mutation<StateType>;
         setScript: Mutation<StateType>;
+        setSrcScript: Mutation<StateType>;
         setScriptContent: Mutation<StateType>;
+        setPostScriptContent: Mutation<StateType>;
         setCookie: Mutation<StateType>;
 
         setPathParams: Mutation<StateType>;
@@ -146,6 +158,14 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setGlobalParams: Mutation<StateType>;
         setDebugChange: Mutation<StateType>;
+
+        setPostConditionsDataObj: Mutation<StateType>;
+        setSrcPostConditionsDataObj: Mutation<StateType>;
+        setAssertionConditionsObj: Mutation<StateType>;
+        setSrcAssertionConditionsObj: Mutation<StateType>;
+        clearPostConditionsDataObj: Mutation<StateType>;
+        resetPostConditionsDataObj: Mutation<StateType>;
+        clearPreCondition: Mutation<StateType>;
     };
     actions: {
         loadDataAndInvocations: Action<StateType, StateType>;
@@ -165,6 +185,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         removeInvocation: Action<StateType, StateType>;
 
         getPreConditionScript: Action<StateType, StateType>;
+        savePreConditionScript: Action<StateType, StateType>;
 
         listPostCondition: Action<StateType, StateType>;
         listAssertionCondition: Action<StateType, StateType>;
@@ -191,6 +212,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         saveScript: Action<StateType, StateType>;
         removeScript: Action<StateType, StateType>;
         addSnippet: Action<StateType, StateType>;
+        addSnippetForPost: Action<StateType, StateType>;
 
         listShareVar: Action<StateType, StateType>;
         removeShareVar: Action<StateType, StateType>;
@@ -206,6 +228,10 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         listServes: Action<StateType, StateType>;
         getEnvVarsByEnv: Action<StateType, StateType>;
+
+        leaveSaveExtractor: Action<StateType, StateType>;
+        leaveSaveScript: Action<StateType, StateType>;
+        leaveSaveCheckpoint: Action<StateType, StateType>;
     };
 }
 
@@ -261,14 +287,14 @@ const StoreModel: ModuleType = {
         },
 
         setActiveAssertion(state, payload) {
-            if (state.activeAssertion.id === payload.id) {
+            if (state.activeAssertion?.id === payload?.id) {
                 state.activeAssertion = {}
             } else {
                 state.activeAssertion = payload;
             }
         },
         setActivePostCondition(state, payload) {
-            if (state.activePostCondition.id === payload.id) {
+            if (state.activePostCondition?.id === payload?.id) {
                 state.activePostCondition = {}
             } else {
                 state.activePostCondition = payload;
@@ -284,12 +310,21 @@ const StoreModel: ModuleType = {
         setScript(state, payload) {
             state.scriptData = payload;
         },
+        setSrcScript(state, payload) {
+            state.srcScriptData = payload;
+        },
         setCookie(state, payload) {
             state.cookieData = payload;
         },
         setScriptContent(state, content) {
-            console.log('setScriptContent', content)
             state.scriptData.content = content;
+        },
+
+        setPostScriptContent(state, {id,content}) {
+            const data = state.postConditionsDataObj?.[id];
+            if(data){
+                data.content = content;
+            }
         },
 
         setPathParams(state, payload) {
@@ -339,7 +374,37 @@ const StoreModel: ModuleType = {
                 ...state.debugChange,
                 ...payload
             }
-        }
+        },
+        setPostConditionsDataObj(state, payload){
+            state.postConditionsDataObj[payload.id] = payload.value
+        },
+        setSrcPostConditionsDataObj(state, payload){
+            state.srcPostConditionsDataObj[payload.id] = payload.value
+        },
+        setAssertionConditionsObj(state, payload){
+            state.assertionConditionsDataObj[payload.id] = payload.value
+        },
+        setSrcAssertionConditionsObj(state, payload){
+            state.srcAssertionConditionsDataObj[payload.id] = payload.value
+        },
+        clearPostConditionsDataObj(state){
+            state.postConditionsDataObj = {}
+            state.srcPostConditionsDataObj = {}
+            state.assertionConditionsDataObj = {}
+            state.srcAssertionConditionsDataObj = {}
+            // state.srcScriptData = {};
+            // state.scriptData = {};
+        },
+        resetPostConditionsDataObj(state){
+            state.srcPostConditionsDataObj = cloneDeep(state.postConditionsDataObj)
+            state.srcAssertionConditionsDataObj = cloneDeep(state.assertionConditionsDataObj)
+        },
+        clearPreCondition(state){
+            state.srcScriptData = {};
+            state.scriptData = {};
+        },
+
+        // clear
     },
     actions: {
         // debug
@@ -510,7 +575,7 @@ const StoreModel: ModuleType = {
         async removeInvocation({commit, dispatch, state}, id: number) {
             try {
                 await removeInvocation(id);
-                dispatch('listInvocation', {
+                await dispatch('listInvocation', {
                     endpointInterfaceId: state.debugInfo.endpointInterfaceId,
                 });
                 return true;
@@ -525,11 +590,23 @@ const StoreModel: ModuleType = {
                 const resp = await getPreConditionScript(state.debugInfo.debugInterfaceId, state.debugData.endpointInterfaceId);
                 const {data} = resp;
                 commit('setScript', data);
+                commit('setSrcScript',cloneDeep(data));
                 return true;
             } catch (error) {
                 return false;
             }
         },
+
+        async savePreConditionScript({commit, dispatch, state}, payload: any) {
+            try {
+                await saveScript(payload);
+                await dispatch('getPreConditionScript');
+                return true
+            } catch (error) {
+                return false;
+            }
+        },
+
 
         async listPostCondition({commit, state}) {
             try {
@@ -595,10 +672,16 @@ const StoreModel: ModuleType = {
         async removePostCondition({commit, dispatch, state}, payload: any) {
             try {
                 await removePostConditions(payload.id);
+                // 删除具体的数据
+                // 不需要，异步请求了
+                // commit('setPostConditionsDataObj',{
+                //     id: payload.id,
+                //     value:{}
+                // })
                 if (payload.entityType === ConditionType.checkpoint) {
-                    dispatch('listAssertionCondition');
+                    await dispatch('listAssertionCondition');
                 } else {
-                    dispatch('listPostCondition');
+                  await  dispatch('listPostCondition');
                 }
                 return true;
             } catch (error) {
@@ -624,8 +707,15 @@ const StoreModel: ModuleType = {
             try {
                 const response = await getExtractor(id);
                 const {data} = response;
-
-                commit('setExtractor', data);
+                commit('setPostConditionsDataObj',{
+                    id: data.id,
+                    value:data
+                })
+                commit('setSrcPostConditionsDataObj',{
+                    id: data.id,
+                    value:cloneDeep(data)
+                })
+                // commit('setExtractor', data);
                 return true;
             } catch (error) {
                 return false;
@@ -635,6 +725,14 @@ const StoreModel: ModuleType = {
             try {
                 await saveExtractor(payload);
                 dispatch('listPostCondition');
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
+        async leaveSaveExtractor({commit, dispatch, state}, payload: any) {
+            try {
+                await saveExtractor(payload);
                 return true;
             } catch (error) {
                 return false;
@@ -707,8 +805,15 @@ const StoreModel: ModuleType = {
             try {
                 const response = await getCheckpoint(id);
                 const {data} = response;
-
-                commit('setCheckpoint', data);
+                commit('setAssertionConditionsObj',{
+                    id: data.id,
+                    value:data
+                });
+                commit('setSrcAssertionConditionsObj',{
+                    id: data.id,
+                    value:cloneDeep(data)
+                });
+                // commit('setCheckpoint', data);
                 return true;
             } catch (error) {
                 return false;
@@ -718,6 +823,14 @@ const StoreModel: ModuleType = {
             try {
                 await saveCheckpoint(payload);
                 dispatch('listPostCondition', UsedBy.InterfaceDebug);
+                return true
+            } catch (error) {
+                return false;
+            }
+        },
+        async leaveSaveCheckpoint({commit, dispatch, state}, payload: any) {
+            try {
+                await saveCheckpoint(payload);
                 return true
             } catch (error) {
                 return false;
@@ -739,8 +852,18 @@ const StoreModel: ModuleType = {
             try {
                 const response = await getScript(id);
                 const {data} = response;
+                // commit('setScript', data);
 
-                commit('setScript', data);
+                // 缓存当前数据
+                commit('setPostConditionsDataObj',{
+                    id: data.id,
+                    value:data
+                });
+
+                commit('setSrcPostConditionsDataObj',{
+                    id: data.id,
+                    value:cloneDeep(data)
+                })
                 return true;
             } catch (error) {
                 return false;
@@ -749,12 +872,22 @@ const StoreModel: ModuleType = {
         async saveScript({commit, dispatch, state}, payload: any) {
             try {
                 await saveScript(payload);
-                dispatch('listPostCondition', UsedBy.InterfaceDebug);
+                // await commit('setSrcScript',cloneDeep(payload));
+                await dispatch('listPostCondition', UsedBy.InterfaceDebug);
                 return true
             } catch (error) {
                 return false;
             }
         },
+        async leaveSaveScript({commit, dispatch, state}, payload: any) {
+            try {
+                await saveScript(payload);
+                return true
+            } catch (error) {
+                return false;
+            }
+        },
+
         async removeScript({commit, dispatch, state}, id: number) {
             try {
                 await removeScript(id);
@@ -785,6 +918,34 @@ const StoreModel: ModuleType = {
             let script = (state.scriptData.content ? state.scriptData.content: '') + '\n' + line
             script = script.trim()
             commit('setScriptContent', script);
+
+            return true;
+        },
+
+        async addSnippetForPost({commit, dispatch, state}, {name, data}) {
+            let line = ''
+            if (name === 'log') {
+                line = "log('test');"
+            } else if (name === 'set_mock_resp_code') {
+                line = "dt.response.statusCode = 404;"
+            } else if (name === 'set_mock_resp_field') {
+                line = "dt.response.data.field1 = 'val';"
+            } else if (name === 'set_mock_resp_text') {
+                line = "dt.response.data = dt.response.data.replace('old', 'new');"
+            } else {
+                const json = await getSnippet(name)
+                if (json.code === 0) {
+                    line = json.data.script
+                }
+            }
+            // const scriptData = state.srcPostConditionsDataObj?.
+            const {id,content} = data?.value || {};
+            let script = (content ? content: '') + '\n' + line
+            script = script.trim()
+            commit('setPostScriptContent', {
+                id:id,
+                content:script
+            });
 
             return true;
         },
@@ -836,10 +997,11 @@ const StoreModel: ModuleType = {
             return true;
         },
 
-        async changeServer({commit, dispatch, state}, payload: {serverId: number, requestEnvVars: boolean}) {
+        async changeServer({commit, dispatch, state}, payload: {serverId: number,serveId:number, requestEnvVars: boolean}) {
             const { serverId, requestEnvVars = true } = payload;
-            const res = await changeServe({ serverId });
+            const res = await changeServe(payload);
             if (res.code === 0) {
+                //const currServer = state.serves.find(item => item.environmentId == serverId)
                 commit('setCurrServe', res.data);
             }
             if (requestEnvVars) {

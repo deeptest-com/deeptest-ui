@@ -147,14 +147,13 @@ const submitForm = async () => {
   loading.value = true;
   validate()
       .then(() => {
-        store.dispatch("Project/saveProject", {...formStateRef}).then((res) => {
+        store.dispatch("Project/saveProject", {...formStateRef}).then(() => {
           loading.value = false;
-          if (res === true) {
-            notifySuccess("保存成功");
-            emits("handleSuccess");
-          } else {
-            notifyError("保存失败");
-          }
+          notifySuccess("保存成功");
+          emits("handleSuccess");
+        }).catch(err => {
+          loading.value = false;
+          err?.msg && notifyError(err.msg);
         });
       })
       .catch((err) => {

@@ -92,6 +92,15 @@ export function equalObjectByXpath(obj1: Object, obj2: Object, xpath: Array<stri
 export function equalObjectByLodash(obj1: Object, obj2: Object,): boolean {
     const o1 = cloneByJSON(obj1);
     const o2 = cloneByJSON(obj2);
+
+    // 不需要检测 advancedMockDisabled
+    delete o1?.['advancedMockDisabled'];
+    delete o2?.['advancedMockDisabled'];
+
+    // 不需要检测 scriptMockEnabled
+    delete o1?.['scriptMockDisabled'];
+    delete o2?.['scriptMockDisabled'];
+
     // 编辑器会做格式化，所以需要去除空格和换行符
     if (o1?.body && typeof o1.body === 'string') {
         o1.body = o1.body.replace(/\s|\n/g, '')

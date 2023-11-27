@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineEmits, nextTick, onMounted, provide, ref} from "vue";
+import {computed, defineEmits, nextTick, onMounted, provide, ref, defineExpose, onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {Form, notification} from 'ant-design-vue';
 import {useStore} from "vuex";
@@ -48,14 +48,14 @@ import DebugMethod from './method.vue';
 import DebugComp from '@/views/component/debug/index.vue';
 import SaveAsCasePopup from "../Cases/edit.vue";
 import {notifyError, notifySuccess} from "@/utils/notify";
-import {defineExpose} from "vue/dist/vue";
 import cloneDeep from "lodash/cloneDeep";
-
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
 const store = useStore<{ Debug: Debug, Endpoint: Endpoint }>();
 const endpointDetail = computed<any>(() => store.state.Endpoint.endpointDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 
+const {resetDebugChange,resetDebugChangeBase,clearDebugChange}= useIMLeaveTip();
 provide('usedBy', UsedBy.InterfaceDebug)
 const useForm = Form.useForm;
 const {t} = useI18n();
@@ -71,7 +71,7 @@ const saveDebugInterface = async (data) => {
   const res = await store.dispatch('Debug/save', data)
   store.commit("Global/setSpinning",false)
 
-  resetDebugData();
+  resetDebugChange();
 
 
   if (res === true) {
@@ -111,22 +111,17 @@ const saveAsCancel = () => {
   saveAsVisible.value = false
 }
 
-const resetDebugData = () => {
-  store.commit('Debug/setSrcDebugData', cloneDeep(debugData.value));
-  store.commit('Debug/setDebugChange', {base:false});
-}
-
-// onMounted(() => {
-//   resetDebugData();
-// })
-
 onMounted(() => {
-  resetDebugData()
+
 })
 
-defineExpose({
-  saveDebugInterface,
-});
+onUnmounted(() => {
+  // console.log('onUnmounted in debug-index')
+  // resetDebugChange();
+  clearDebugChange();
+  // store.dispatch('Debug/resetDataAndInvocations');
+})
+
 
 </script>
 

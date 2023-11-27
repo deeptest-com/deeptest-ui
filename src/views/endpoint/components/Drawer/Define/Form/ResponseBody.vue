@@ -7,12 +7,12 @@
       <DownOutlined v-if="collapse" @click="collapse = !collapse"/>
       <span class="label-name">增加响应体</span>
     </a-col>
-    <a-col :span="21"/>
+    <a-col :span="16"/>
   </a-row>
 
   <a-row class="form-item-response-item" v-if="collapse">
     <a-col :span="1"/>
-    <a-col :span="21">
+    <a-col :span="16">
       <a-select
           placeholder="请选择响应格式"
           :value="selectedCodeDetail.mediaType || 'application/json'"
@@ -35,8 +35,8 @@
           :contentStr="contentStr"
           :exampleStr="exampleStr"
           @generateExample="handleGenerateExample"
-          :tab-content-style="{width:'800px'}"
-          :value="activeResBodySchema"/>
+          :tab-content-style="{width:'800px'}"/>
+          
     </a-col>
   </a-row>
 </template>

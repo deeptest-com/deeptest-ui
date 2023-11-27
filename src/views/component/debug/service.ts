@@ -191,6 +191,12 @@ export function prepareDataForRequest(sourceData: any) {
         })
     }
 
+    if (data.cookies) {
+        data.cookies = data.cookies.filter((item) => {
+            return !!item.name
+        })
+    }
+
     data.body = data.body.replaceAll('\n', '').replaceAll(' ', '')
 
     return data

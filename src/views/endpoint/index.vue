@@ -71,6 +71,15 @@
                        :data-source="list">
                 <template #colTitle="{record}">
                   <div class="customTitleColRender">
+                    <div class="notice-icon">
+                      <a-tooltip v-if="record.changedStatus > ChangedStatus.NoChanged" :overlayClassName="'diff-custom-tooltip'">       
+                        <template #title>
+                        <span>{{record.changedStatus == ChangedStatus.Changed?'待处理':'已处理'}}，{{record.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a @click="showDiff(record.id)">查看详情</a></span>
+                        </template>
+                        <WarningFilled v-if="record.changedStatus == ChangedStatus.Changed"  @click="showDiff(record.id)" :style="{color: '#fb8b06'}" />
+                        <InfoCircleOutlined  v-if="record.changedStatus == ChangedStatus.IgnoreChanged"  @click="showDiff(record.id)" :style="{color: '#c6c6c6'}" />
+                      </a-tooltip>
+                  </div>
                     <EditAndShowField
                         :custom-class="'custom-endpoint show-on-hover'"
                         :value="record.title"
@@ -160,6 +169,7 @@
         :endpointIds='selectedRowIds'
         @cancal="showPublishDocsModal = false;"
         @ok="publishDocs"/>
+    <Diff @callback="editEndpoint"/>
     <!-- 编辑接口时，展开抽屉：外层再包一层 div, 保证每次打开弹框都重新渲染   -->
     <div v-if="drawerVisible">
       <Drawer
@@ -175,14 +185,14 @@
 </template>
 <script setup lang="ts">
 import {
-  computed, ref, onMounted,
+  computed, ref,
   watch, createVNode, onUnmounted
 } from 'vue';
-import {useRouter} from 'vue-router';
+import {onBeforeRouteLeave, useRouter} from 'vue-router';
 import {useStore} from "vuex";
 import debounce from "lodash.debounce";
 import {ColumnProps} from 'ant-design-vue/es/table/interface';
-import {ExclamationCircleOutlined} from '@ant-design/icons-vue';
+import {ExclamationCircleOutlined,WarningFilled,InfoCircleOutlined } from '@ant-design/icons-vue';
 import {Modal} from 'ant-design-vue';
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import {endpointStatusOpts, endpointStatus} from '@/config/constant';
@@ -214,6 +224,10 @@ import Swal from "sweetalert2";
 import cloneDeep from "lodash/cloneDeep";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
+import Diff from "./components/Drawer/Define/Diff/index.vue";
+import {ChangedStatus,SourceType} from "@/utils/enum";
+
 
 const {share} = useSharePage();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project }>();
@@ -458,7 +472,7 @@ async function handleCreateApi(data) {
   await store.dispatch('Endpoint/createApi', {
     "title": data.title,
     "projectId": currProject.value.id,
-    "serveId": currServe.value.id,
+    "serveId": data.serveId,
     "description": data.description || null,
     "categoryId": data.categoryId || null,
     "curl": data.curl || null,
@@ -488,7 +502,6 @@ async function handleImport(data, callback) {
   const res = await store.dispatch('Endpoint/importEndpointData', {
     ...data,
     "sourceType": 2,
-    "serveId": currServe.value.id,
   });
 
   // 导入成功，重新拉取列表 ，并且关闭弹窗
@@ -538,6 +551,7 @@ async function handleTableFilter(state) {
 const filter = ref()
 
 // 实时监听项目/服务 ID，如果项目切换了则重新请求数据
+/*
 watch(() => [currProject.value.id, currServe.value.id], async (newVal, oldVal) => {
   const [newProjectId, newServeId] = newVal;
   const [oldProjectId, oldServeId] = oldVal || [];
@@ -552,6 +566,22 @@ watch(() => [currProject.value.id, currServe.value.id], async (newVal, oldVal) =
       // 获取授权列表
       await store.dispatch('Endpoint/getSecurityList', {id: newServeId});
     }
+    store.commit('Endpoint/clearFilterState');
+    //filter.value.resetFields()
+  }
+}, {
+  immediate: true
+})
+*/
+watch(() => currProject.value.id, async (newVal, oldVal) => {
+  const newProjectId = newVal
+  const oldProjectId = oldVal
+  if (newProjectId !== undefined && oldProjectId !== undefined && newProjectId !== oldProjectId) {
+    selectedCategoryId.value = "";
+  }
+  if (newProjectId !== undefined) {
+    await loadList(1, pagination.value.pageSize);
+    await store.dispatch('Endpoint/getEndpointTagList');
     store.commit('Endpoint/clearFilterState');
     filter.value.resetFields()
   }
@@ -606,36 +636,43 @@ const username = (user: string) => {
 /*************************************************
  * ::::离开保存代码逻辑部分start
  ************************************************/
-const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
-const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
-const debugChange: any = computed<Endpoint>(() => store.state.Debug.debugChange);
-const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
-const srcEndpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.srcEndpointDetail);
-const debugData = computed<any>(() => store.state.Debug.debugData);
-const srcDebugData: any = computed<Endpoint>(() => store.state.Debug.srcDebugData);
-const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
+const {
+  isLeaveTip,
+  isDefineChange,
+  isMockChange,
+  debugChange,
+  debugChangeBase,
+  debugChangePostScript,
+  debugChangeCheckpoint,
+  debugChangePreScript,
+  resetMockChange,
+  resetDefineChange,
+  debugData,
+  debugInfo,
+  srcDebugData,
+  srcEndpointDetail,
+  endpointDetail,
+  isDebugChange,
+  resetDebugChange,
+} = useIMLeaveTip();
 
+// 接口定义 - 调试模块是否改变了 - 用于离开提示
 watch(() => {
   return [debugData.value,srcDebugData.value]
 }, () => {
   const cur = debugData.value;
   const src = srcDebugData.value;
+  if(!src?.usedBy || !cur?.usedBy){
+    return;
+  }
   // 处理格式化的数据
   const isChange = !equalObjectByLodash(src, cur);
-  const isInit = cur?.endpointInterfaceId && src?.endpointInterfaceId;
-  console.log('832222调试信息2',cur,src,isChange);
-  if(isInit){
-    store.commit('Debug/setDebugChange', {base:isChange});
-  }else {
-    store.commit('Debug/setDebugChange', {base:false});
-  }
-
+  store.commit('Debug/setDebugChange', {base:isChange});
 },{
   deep: true
 })
 
-
-// 接口信息改变了
+//  接口定义 - 接口信息改变了 - 用于离开提示
 watch(() => {
   return [endpointDetail.value,srcEndpointDetail.value]
 }, (newVal, oldValue) => {
@@ -643,7 +680,6 @@ watch(() => {
   const cur = endpointDetail.value;
   const isInit = cur?.id && src?.id;
   const isChange = !equalObjectByLodash(cur, src);
-  console.log('832222调试信息1',cur,src,isChange);
   if(isInit){
     store.commit('Endpoint/setIsDefineChange', isChange);
   }else {
@@ -655,60 +691,137 @@ watch(() => {
 
 const drawerRef:any = ref(null);
 // 关闭弹框时，如果接口信息改变了，弹出提示
-function closeDrawer() {
+async function closeDrawer() {
+  // 不需要提示
+  if(!isLeaveTip.value){
+    drawerVisible.value = false;
+    return;
+  }
+  const result = await Swal.fire({
+    ...settings.SwalLeaveSetting
+  });
   // 如果接口定义有变化，需要提示用户保存
   if (isDefineChange.value) {
-    Swal.fire({
-      ...settings.SwalLeaveSetting
-    }).then((result) => {
-      // isConfirmed: true,  保存并离开
-      if (result.isConfirmed) {
-        drawerRef.value?.save();
-        drawerVisible.value = false;
-        store.commit('Endpoint/setIsDefineChange', false);
-      }
-      // isDenied: false,  不保存，并离开
-      else if (result.isDenied) {
-        drawerVisible.value = false;
-        store.commit('Endpoint/setIsDefineChange', false);
-      }
-      // isDismissed: false 取消,即什么也不做
-      else if (result.isDismissed) {
-        console.log('isDismissed', result.isDismissed)
-      }
-    })
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      drawerRef.value?.save();
+      drawerVisible.value = false;
+      resetDefineChange()
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      drawerVisible.value = false;
+      resetDefineChange()
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('isDismissed', result.isDismissed)
+    }
   }
   // 调试模块数据有变化，需要提示用户是否要保存调试数据
-  else if(debugChangeBase.value){
-    Swal.fire({
-      ...settings.SwalLeaveSetting
-    }).then((result) => {
-      // isConfirmed: true,  保存并离开
-      if (result.isConfirmed) {
-        drawerVisible.value = false;
-        bus.emit(settings.eventLeaveDebugSaveData, {});
-        store.commit('Debug/setDebugChange', {base:false});
-      }
-      // isDenied: false,  不保存，并离开
-      else if (result.isDenied) {
-        drawerVisible.value = false;
-        store.commit('Debug/setDebugChange', {base:false});
-      }
-      // isDismissed: false 取消,即什么也不做
-      else if (result.isDismissed) {
-        console.log('isDismissed', result.isDismissed)
-      }
-    })
-  }
-  else {
-    drawerVisible.value = false;
-    store.commit('Debug/setDebugChange', {base:false});
-    store.commit('Endpoint/setIsDefineChange', false);
+  else if(isDebugChange.value){
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      drawerVisible.value = false;
+      bus.emit(settings.eventLeaveDebugSaveData, {});
+      resetDebugChange();
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      drawerVisible.value = false;
+      resetDebugChange();
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('isDismissed', result.isDismissed)
+    }
+  }// mock 数据变化了，需要提示保存
+  else if(isMockChange.value){
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      bus.emit(settings.eventLeaveMockSaveData, {});
+      resetMockChange();
+      drawerVisible.value = false;
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      drawerVisible.value = false;
+      resetMockChange();
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('isDismissed', result.isDismissed)
+    }
   }
 }
+
+// 与 beforeRouteLeave
+onBeforeRouteLeave(async (to, from,next) => {
+  if(!isLeaveTip.value){
+    next();
+    return false;
+  }
+  const result = await Swal.fire({
+    ...settings.SwalLeaveSetting
+  });
+  // 如果接口定义有变化，需要提示用户保存
+  if (isDefineChange.value) {
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      await drawerRef.value?.save();
+      next();
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      next();
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('保留');
+      return false;
+    }
+  }
+  // 调试模块数据有变化，需要提示用户是否要保存调试数据
+  else if(isDebugChange.value){
+    if (result.isConfirmed) {
+      bus.emit(settings.eventLeaveDebugSaveData, {});
+      resetDebugChange();
+      next()
+    }
+    // isDenied: false,  不保存，并离开 ,需要重置调试数据
+    else if (result.isDenied) {
+      resetDebugChange();
+      next()
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      return false;
+    }
+  }else if(isMockChange.value){
+    if (result.isConfirmed) {
+      bus.emit(settings.eventLeaveMockSaveData, {});
+      resetMockChange();
+      next()
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      next();
+      resetMockChange();
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      return false;
+    }
+  }
+})
+
 /*************************************************
  * ::::离开保存代码逻辑部分end
  ************************************************/
+
+function showDiff(id: number) {
+  store.commit('Endpoint/setDiffModalVisible', {endpointId:id,visible:true,projectId:currProject.value.id,callPlace:'list'});
+}
 
 </script>
 <style scoped lang="less">
@@ -801,10 +914,16 @@ function closeDrawer() {
 }
 
 .customTitleColRender {
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   color: #447DFD;
+  display: flex;
+  position: relative;
+  .notice-icon {
+   position: absolute;
+   left:-16px;
+   top:1px;
+  }
 }
 
 .customPathColRender {
@@ -823,5 +942,10 @@ function closeDrawer() {
       cursor: pointer;
     }
   }
+}
+</style>
+<style lang="less">
+.diff-custom-tooltip {
+  max-width: 320px;
 }
 </style>

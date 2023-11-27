@@ -59,6 +59,8 @@ import {
     removeAlternativeCaseAssertion,
     moveAlternativeCaseAssertion,
     updateName,
+    getEndpointDiff,
+    saveEndpointDiff
 } from './service';
 
 import {
@@ -81,7 +83,6 @@ import {
     getSchemaList, getSchemaDetail
 } from "@/views/project-settings/service";
 import { changeServe } from '../project-settings/service';
-import {ref} from "vue/dist/vue";
 
 export interface StateType {
     endpointId: number;
@@ -115,6 +116,7 @@ export interface StateType {
     selectMockExpect: any;
     mockExpectLoading: boolean;
     mockScript:any;
+    srcMockScript:any; // 检测是否有变更
 
     //生成代码
     code:string;
@@ -142,6 +144,11 @@ export interface StateType {
     activeAlternativeCaseAssertion:any;
     // 记录接口定义是否有变更
     isDefineChange: boolean;
+    // mock表达式是否有变更
+    isMockChange: boolean;
+    //diff弹框信息
+    diffModalVisible:any;
+
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -193,6 +200,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setSelectedMockExpect: Mutation<StateType>;
         setMockExpectLoading: Mutation<StateType>;
         setMockScript:Mutation<StateType>;
+        setSrcMockScript:Mutation<StateType>;
 
         setCode:Mutation<StateType>;
         setGlobalActiveTab:Mutation<StateType>;
@@ -204,6 +212,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setActiveAlternativeCaseAssertion:Mutation<StateType>;
 
         setIsDefineChange:Mutation<StateType>;
+        setIsMockChange:Mutation<StateType>;
+        setDiffModalVisible:Mutation<StateType>;
     };
     actions: {
         listEndpoint: Action<StateType, StateType>;
@@ -286,7 +296,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
         removeAlternativeCaseAssertion: Action<StateType, StateType>;
         disableAlternativeCaseAssertion: Action<StateType, StateType>;
         moveAlternativeCaseAssertion: Action<StateType, StateType>;
-
+        getEndPointDiff: Action<StateType, StateType>;
+        saveEndPointDiff: Action<StateType, StateType>;
     }
 }
 
@@ -313,7 +324,8 @@ const initState: StateType = {
         "createUser": null,
         "title": null,
         categoryId: null,
-        tagNames: []
+        tagNames: [],
+        serveId:null,
     },
     endpointDetail: null,
     srcEndpointDetail: null,
@@ -352,6 +364,7 @@ const initState: StateType = {
     selectMockExpect: {},
     mockExpectLoading: false,
     mockScript: {},
+    srcMockScript:{},
 
     code: "",
     globalActiveTab: '',
@@ -364,6 +377,8 @@ const initState: StateType = {
     activeAlternativeCaseAssertion: {},
 
     isDefineChange: false,
+    isMockChange: false,
+    diffModalVisible: {},
 };
 
 const StoreModel: ModuleType = {
@@ -539,6 +554,10 @@ const StoreModel: ModuleType = {
             state.mockScript = payload
         },
 
+        setSrcMockScript(state,payload){
+            state.srcMockScript = payload
+        },
+
         setCode(state, payload){
             state.code = payload
         },
@@ -565,14 +584,20 @@ const StoreModel: ModuleType = {
                 state.activeAlternativeCaseAssertion = payload;
             }
         },
-
         setIsDefineChange(state, payload){
             state.isDefineChange = payload
+        },
+        setIsMockChange(state, payload){
+            state.isMockChange = payload
+        },
+        setDiffModalVisible(state, payload){
+            state.diffModalVisible = payload
         },
     },
     actions: {
         async listEndpoint({commit, dispatch, state}, params: QueryParams) {
             try {
+                debugger
                 const response: ResponseData = await query(params);
                 if (response.code != 0) return;
 
@@ -1315,6 +1340,7 @@ const StoreModel: ModuleType = {
             try {
                 const res = await getMockScript(endpointId);
                 commit('setMockScript', res.data);
+                commit('setSrcMockScript',  cloneDeep(res.data));
                 return true;
             } catch (error) {
                 return false;
@@ -1573,6 +1599,24 @@ const StoreModel: ModuleType = {
             try {
                 await moveAlternativeCaseAssertion(payload);
                 dispatch('listAlternativeCaseAssertion', 0);
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
+        async getEndPointDiff({commit, dispatch, state}, payload: any) {
+            const res = await getEndpointDiff(payload)
+            if (res.code === 0) {
+                return res.data;
+            } else {
+                return {}
+            }
+        },
+        async saveEndPointDiff({commit, dispatch, state}, payload: any) {
+            try {
+                await saveEndpointDiff(payload);
+                await dispatch('loadList', {projectId: payload.projectId});
+                commit('setDiffModalVisible', {...state.diffModalVisible,visible: false, endpointId: 0});
                 return true;
             } catch (error) {
                 return false;

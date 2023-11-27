@@ -10,7 +10,18 @@
         :share-link="detailLink"
         :show-detail="true"
         :show-share="true"
-        @update-title="updateTitle"/>
+        @update-title="updateTitle" >
+        <template #custom>
+          <div class="diff-tag" v-if="endpointDetail.changedStatus > ChangedStatus.NoChanged" >   
+          <a-tag :color="endpointDetail.changedStatus == ChangedStatus.Changed?'warning':''">
+            <template #icon>
+              <WarningFilled v-if="endpointDetail.changedStatus == ChangedStatus.Changed"  @click="showDiff(endpointDetail.id)" :style="{color: '#fb8b06'}" />
+              <InfoCircleOutlined  v-if="endpointDetail.changedStatus == ChangedStatus.IgnoreChanged"  @click="showDiff(endpointDetail.id)" :style="{color: '#c6c6c6'}" />
+          </template>
+          {{endpointDetail.changedStatus == ChangedStatus.Changed?'待处理':'已处理'}}，{{endpointDetail.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a style="color:#427EE6;" @click="showDiff(endpointDetail.id)">查看详情</a></a-tag>
+        </div>
+       </template>
+      </DetailHeader>
     </template>
     <template #basicInfo>
       <!-- 基本信息 -->
@@ -22,7 +33,8 @@
     <template #tabHeader>
       <DetailTabHeader :tab-list="EndpointTabsList" :show-btn="true" @change-tab="changeTab" :active-key="activeTabKey">
         <template #btn>
-          <a-button v-if="activeTabKey === 'request' && showSaveBtn" type="primary" @click="save" :disabled="!isDefineChange || isInit">
+          <a-button v-if="activeTabKey === 'request' && showSaveBtn" type="primary" @click="save"
+                    :disabled="!isDefineChange || isInit">
             <template #icon>
               <icon-svg class="icon dp-icon-with-text" type="save"/>
             </template>
@@ -92,18 +104,21 @@ import cloneDeep from "lodash/cloneDeep";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import {useWujie} from "@/composables/useWujie";
+import useIMLeaveTip from "@/composables/useIMLeaveTip";
+import {WarningFilled,InfoCircleOutlined } from '@ant-design/icons-vue';
+import {ChangedStatus,SourceType} from "@/utils/enum";
+
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal, Global,Debug }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
 const debugData: any = computed<Endpoint>(() => store.state.Debug.debugData);
-// 调试基本信息是否有变化，因为检查点等单独保存
-const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
 const props = defineProps({
   visible: {
     required: true,
     type: Boolean,
   },
 })
+
 
 defineExpose({
   save,
@@ -119,59 +134,12 @@ const docsData = ref(null);
 const stickyKey = ref(0);
 
 const endpointDebugRef:any = ref(null);
+
+
+const {isLeaveTip,isDebugChange,resetDebugChange,isMockChange,resetDefineChange,resetMockChange,clearDebugChange,clearDefineChange,clearMockChange} = useIMLeaveTip();
 async function changeTab(value) {
   console.log('changeTab', value);
-  // 如果接口定义有变化，需要提示用户保存
-  if (isDefineChange.value) {
-    Swal.fire({
-      ...settings.SwalLeaveSetting
-    }).then((result) => {
-      // isConfirmed: true,  保存并离开
-      if (result.isConfirmed) {
-        save();
-        store.commit('Endpoint/setIsDefineChange', false);
-        // 保存成功后，切换tab
-        activeTabKey.value = value;
-        stickyKey.value++;
-      }
-      // isDenied: false,  不保存，并离开
-      else if (result.isDenied) {
-        activeTabKey.value = value;
-        stickyKey.value++;
-        store.commit('Endpoint/setIsDefineChange', false);
-      }
-      // isDismissed: false 取消,即什么也不做
-      else if (result.isDismissed) {
-        console.log('isDismissed', result.isDismissed)
-      }
-    })
-  }
-  // 调试模块数据有变化，需要提示用户是否要保存调试数据
-  else if(debugChangeBase.value){
-    Swal.fire({
-      ...settings.SwalLeaveSetting
-    }).then((result) => {
-      // isConfirmed: true,  保存并离开
-      if (result.isConfirmed) {
-        bus.emit(settings.eventLeaveDebugSaveData, {});
-        store.commit('Debug/setDebugChange', {base:false});
-        // 保存成功后，切换tab
-        activeTabKey.value = value;
-        stickyKey.value++;
-      }
-      // isDenied: false,  不保存，并离开
-      else if (result.isDenied) {
-        activeTabKey.value = value;
-        stickyKey.value++;
-        store.commit('Debug/setDebugChange', {base:false});
-      }
-      // isDismissed: false 取消,即什么也不做
-      else if (result.isDismissed) {
-        console.log('isDismissed', result.isDismissed)
-      }
-    })
-  }
-  else {
+  if(!isLeaveTip.value) {
     // click cases tab again, will cause EndpointCases component back to case list page
     if (activeTabKey.value === 'cases' && activeTabKey.value === value) {
       showList.value = true // back to list
@@ -184,6 +152,75 @@ async function changeTab(value) {
         endpointIds: [endpointDetail.value.id],
         needDetail: true,
       });
+    }
+    return
+  }
+
+  // 走到这儿，说明接口定义有变化，需要提示用户是否要保存
+  const result = await Swal.fire({
+    ...settings.SwalLeaveSetting
+  });
+  // 如果接口定义有变化，需要提示用户保存
+  if (isDefineChange.value) {
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      await save();
+      resetDefineChange()
+      // 保存成功后，切换tab
+      activeTabKey.value = value;
+      stickyKey.value++;
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      activeTabKey.value = value;
+      stickyKey.value++;
+      resetDefineChange()
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('isDismissed', result.isDismissed)
+    }
+  }
+  // 调试模块数据有变化，需要提示用户是否要保存调试数据
+  else if(isDebugChange.value){
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      bus.emit(settings.eventLeaveDebugSaveData, {});
+      resetDebugChange();
+      // 保存成功后，切换tab
+      activeTabKey.value = value;
+      stickyKey.value++;
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      activeTabKey.value = value;
+      stickyKey.value++;
+      resetDebugChange();
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('isDismissed', result.isDismissed)
+    }
+  }
+  // mock 数据变化了，需要提示保存
+  else if(isMockChange.value){
+    // isConfirmed: true,  保存并离开
+    if (result.isConfirmed) {
+      bus.emit(settings.eventLeaveMockSaveData, {});
+      resetMockChange();
+      // 保存成功后，切换tab
+      activeTabKey.value = value;
+      stickyKey.value++;
+    }
+    // isDenied: false,  不保存，并离开
+    else if (result.isDenied) {
+      activeTabKey.value = value;
+      stickyKey.value++;
+      resetMockChange();
+    }
+    // isDismissed: false 取消,即什么也不做
+    else if (result.isDismissed) {
+      console.log('isDismissed', result.isDismissed)
     }
   }
 
@@ -283,9 +320,10 @@ provide('notScrollIntoView', true);
 
 
 onUnmounted(() => {
-  // 重置接口定义变化状态 、调试变化状态，避免影响其他模块
-  store.commit('Endpoint/setIsDefineChange', false);
-  store.commit('Debug/setDebugChange', {base: false});
+  // 重置接口定义变化状态 、调试及 高级Mock变化状态，避免影响其他模块
+  clearDefineChange();
+  clearMockChange();
+  clearDebugChange();
 })
 
 
@@ -293,6 +331,11 @@ const isInit = ref(true);
 onMounted(() => {
   isInit.value = false;
 })
+
+function showDiff(id:number) {
+  store.commit('Endpoint/setDiffModalVisible', {endpointId:id,visible:true,projectId:endpointDetail.value.projectId,callPlace:"detail"});
+}
+
 
 </script>
 
@@ -305,5 +348,14 @@ onMounted(() => {
     margin-right: 6px;
   }
 }
+
 </style>
+
+<style lang="less" >
+
+.diff-tag .ant-tag span {
+    margin-left: 0px;
+}
+</style>
+
 

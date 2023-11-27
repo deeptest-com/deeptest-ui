@@ -34,17 +34,22 @@
             placeholder="请选择所属分类"
             allow-clear/>
       </a-form-item>
-
+      <a-form-item label="所属服务" name="serverId">
+        <SelectServe @change="change"/>
+      </a-form-item>
       <a-form-item name="dataSyncType">
         <template v-slot:label>
         数据合并策略
         <a-tooltip placement="topLeft" arrow-point-at-center overlayClassName="memo-tooltip">
           <template v-slot:title>
-            <span class="title">智能合并</span><br>
-            已存在的文件夹不再重复创建。<br>
-            相同接口如果在平台上做了修改，则不导入。<br>
-            相同接口在平台上没有做过修改，则不覆盖。<br>
-            新增接口导入<br>
+            当存在相同接口（方法和路径相同）定义时，可采用不同的策略：<br>
+            <span class="title">智能合并（推荐）</span><br>
+            自上次导入之后，接口在平台上没有做过修改，则覆盖。<br>
+            自上次导入之后，接口在平台做过修改，本次导入定义无变更，保留平台修改。<br>
+            自上次导入之后，接口在平台做过修改、本次导入定义也有变更，则提示不一致，用户手动处理。<br>
+            接口所属分类目录保留平台的修改。<br>
+            <span class="title">新增</span><br>
+            全新导入，即使存在相同接口，也创建新的接口定义。<br>
          </template>
         <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)" />
         </a-tooltip>
@@ -94,6 +99,7 @@ import {
 import {useStore} from "vuex";
 import {UploadOutlined,QuestionCircleOutlined} from '@ant-design/icons-vue';
 import {notifyWarn} from "@/utils/notify";
+import SelectServe from './SelectServe/index.vue';
 
 const store = useStore<{ Endpoint }>();
 const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
@@ -118,12 +124,12 @@ const driverTypeOpts = [
 
 const dataSyncTypeOpts = [
   {
-    label: '新增',
-    value: 3,
+    label: '智能合并（推荐）',
+    value: 2,
   },
   {
-    label: '智能合并',
-    value: 2,
+    label: '新增',
+    value: 3,
   },
   /*
   {
@@ -250,9 +256,10 @@ function handleRemove() {
 const formState = ref({
   categoryId: null as any,
   driverType: null,
-  "dataSyncType": null,   //数据同步方式 枚举值 full_cover：完全覆盖 copy_add：复制新增
-  "openUrlImport": false,  //开启url导入
-  "filePath": null, //文件路径
+  dataSyncType: null,   //数据同步方式 枚举值 full_cover：完全覆盖 copy_add：复制新增
+  openUrlImport: false,  //开启url导入
+  filePath: null, //文件路径
+  serveId:null,
 });
 
 watch(() => {
@@ -281,6 +288,11 @@ const disabled = computed(()=>{
   return formState.value.driverType != "swagger"
 })
 
+const change = (val)=>{
+  formState.value.serveId = val
+  console.log(formState.value.serveId,"282832838")
+}
+
 
 
 </script>
@@ -297,6 +309,11 @@ const disabled = computed(()=>{
 <style lang="less">
 .memo-tooltip {
   min-width:500px;
+  .title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
 }
 </style>
 

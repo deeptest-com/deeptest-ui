@@ -90,7 +90,7 @@ const currentEnvURL = computed(() => {
 const collapse = ref(true);
 
 async function changeServer(val) {
-  await store.dispatch('Debug/changeServer', { serverId: val, requestEnvVars: true }); // 切换环境
+  await store.dispatch('Debug/changeServer', { serverId: val,serveId:endpointDetail.value.id, requestEnvVars: true }); // 切换环境
   endpointDetail.value.serverId = val;
   store.commit('Endpoint/setEndpointDetail', {
     ...endpointDetail.value,
@@ -103,11 +103,13 @@ async function getServeServers() {
     })
 }
 
+/*
 onMounted(async () => {
   await store.dispatch('Debug/listServes', {
     serveId: currServe.value.id,
   })
 })
+*/
 
 /**
  * 添加路径参数
