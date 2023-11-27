@@ -25,23 +25,26 @@
               class="recorded-data-item">
 
           <div class="header dp-link" @click.stop="expand(item)">
-                <span class="method">{{item.method}}</span>
-                <span class="url">{{getUrl(item.url)}}</span>
-                <span class="status" :class="getResultClass(responseMap[item.requestId]?.statusCode)">
-                  <CheckCircleOutlined v-if="responseMap[item.requestId]?.statusCode===200" />
-                  <CloseCircleOutlined v-else />
+            <span class="checkbox block">
+              <a-checkbox v-model:checked="checked" />
+            </span>
+            <span class="method block">{{item.request.request.method}}</span>
+            <span class="url block">{{getUrl(item.request.request.url)}}</span>
+            <span class="status block" :class="getResultClass(responseMap[item.requestId]?.statusCode)">
+              <CheckCircleOutlined v-if="responseMap[item.requestId]?.statusCode===200" />
+              <CloseCircleOutlined v-else />
 
-                  {{responseMap[item.requestId]?.statusLine}}
-                </span>
+              {{responseMap[item.requestId]?.statusLine}}
+            </span>
 
-                <span class="actions">
-                  <RightOutlined v-if="activeItem.requestId !== item.requestId"
-                                 @click.stop="expand(item)"
-                                 class="dp-icon-btn dp-trans-80" />
-                  <DownOutlined v-if="activeItem.requestId === item.requestId"
-                                @click.stop="expand(item)"
-                                class="dp-icon-btn dp-trans-80" />
-                </span>
+            <span class="actions block">
+              <RightOutlined v-if="activeItem.requestId !== item.requestId"
+                             @click.stop="expand(item)"
+                             class="dp-icon-btn dp-trans-80" />
+              <DownOutlined v-if="activeItem.requestId === item.requestId"
+                            @click.stop="expand(item)"
+                            class="dp-icon-btn dp-trans-80" />
+            </span>
           </div>
 
           <div class="content" v-if="activeItem.requestId === item.requestId">
@@ -89,6 +92,7 @@ const {resetFields, validate, validateInfos} = useForm(model, rules);
 const activeItem = ref({} as any)
 const recordData = ref([] as any[])
 const responseMap = ref({} as any)
+const checked = ref({} as any)
 
 const expand = (item) => {
   if (activeItem.value.requestId === item.requestId) {
@@ -121,15 +125,17 @@ const onChromeExtEvent =(event) => {
   console.log('onChromeExtEvent', event.detail)
   const data = event.detail
 
-  if (data.statusCode) {
+  if (data.response) {
     responseMap.value[data.requestId] = data
   } else {
-    recordData.value.push(event.detail)
+    recordData.value.push(data)
   }
 }
 
 const getUrl = (url) => {
   console.log(url)
+
+  if (!url) return ''
 
   if (url.length > 50) {
     url = url.substr(0,50) + '...'
@@ -168,21 +174,25 @@ const wrapperCol = {span: 20}
 
         span {
           line-height: 36px;
+          &.block{
+            display: inline-block;
+          }
+        }
+
+        .checkbox {
+          width: 60px;
         }
 
         .method {
           width: 100px;
-          display: inline-block;
         }
 
         .url {
-          width: calc(100% - 288px);
-          display: inline-block;
+          width: calc(100% - 348px);
         }
 
         .status {
           width: 160px;
-          display: inline-block;
         }
 
         .actions {
