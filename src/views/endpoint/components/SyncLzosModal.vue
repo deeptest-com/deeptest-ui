@@ -111,7 +111,7 @@ const modelRef = reactive({
   "baseUrl": "",
   "categoryId": null,
   "classCode": "",
-  "dataSyncType": null,
+  "dataSyncType": 1,
   "functionCodes": [],
   "serveId": null,
 });
