@@ -270,7 +270,7 @@ const rulesRef = computed(() => ({
   "filePath": [
     {
       required: true,
-      message: modelRef.driverType === 'lzos' ? '请输入智能体厂环境url地址 例如：https://lzos.rysaas.cn/' : modelRef.openUrlImport ? '请输入swagger url' : '请选择文件',
+      message: modelRef.driverType === 'lzos' ? '请输入智能体厂环境url地址 例如：https://lzos.rysaas.cn' : modelRef.openUrlImport ? '请输入swagger url' : '请选择文件',
     }
   ],
 }));
