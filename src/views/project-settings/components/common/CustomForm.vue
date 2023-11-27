@@ -11,11 +11,26 @@
                 </span>
                 <a-input v-if="item.type === 'input'" :style="item.attrs || 'width: 150px'"
                     v-model:value="formState[item.modelName]" :placeholder="item.placeholder" />
-                <a-select v-if="item.type === 'select' && item.mode" v-model:value="formState[item.modelName]" :mode="item.mode"
-                    :style="item.attrs || 'width: 200px'" :placeholder="item.placeholder" :options="item.options" allowClear>
+                <a-select 
+                    v-if="item.type === 'select' && item.mode" 
+                    v-model:value="formState[item.modelName]" 
+                    :mode="item.mode"
+                    :style="item.attrs || 'width: 200px'" 
+                    :placeholder="item.placeholder" 
+                    :options="item.options" 
+                    :filterOption="item.filterOptions || false"
+                    :showSearch="item.showSearch"
+                    allowClear>
                 </a-select>
-                <a-select v-if="item.type === 'select' && !item.mode" v-model:value="formState[item.modelName]"
-                    :style="item.attrs || 'width: 200px'" :placeholder="item.placeholder" :options="item.options" allowClear>
+                <a-select 
+                    v-if="item.type === 'select' && !item.mode" 
+                    v-model:value="formState[item.modelName]"
+                    :style="item.attrs || 'width: 200px'" 
+                    :placeholder="item.placeholder" 
+                    :options="item.options" 
+                    :filterOption="item.filterOptions"
+                    :showSearch="item.showSearch"
+                    allowClear>
                 </a-select>
                 <a-button v-if="item.type === 'button'" class="editable-add-btn" type="primary" html-type="submit"
                     style="margin-bottom: 8px" @click="onSubmit">
@@ -56,6 +71,8 @@ interface FormItem {
     placeholder?: string; // input/ checkbox/ select 需要placeholder提示语
     attrs?: any; // 表单是否有自定义样式属性
     title?: string;
+    showSearch?: boolean;
+    filterOptions?: any;
 }
 
 const getFormState = () => {
