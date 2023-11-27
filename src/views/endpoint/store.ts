@@ -1072,8 +1072,8 @@ const StoreModel: ModuleType = {
                 } else {
                     result = null;
                 }
-            } catch (e) {
-                console.log(e)
+            } catch (e: any) {
+                e.msg && message.error(e.msg);
             }
             return result;
         },

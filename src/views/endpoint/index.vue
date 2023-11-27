@@ -23,11 +23,7 @@
                 <template #overlay>
                   <a-menu style="margin-top: 8px;">
                     <a-menu-item key="0">
-                      <a-button type="link" :size="'small'" href="javascript:void (0)" @click="inportApi">导入接口
-                      </a-button>
-                    </a-menu-item>
-                    <a-menu-item key="1">
-                      <a-button type="link" :size="'small'" href="javascript:void (0)" @click="syncLzos">lzos数据同步
+                      <a-button type="link" :size="'small'" href="javascript:void (0)" @click="importApi">导入接口
                       </a-button>
                     </a-menu-item>
                     <a-menu-item key="2">
@@ -185,9 +181,6 @@
             closeDrawer();
           }"/>
     </div>
-
-    <!-- lzos 数据同步 -->
-    <SyncLzosModal :visible="syncLzosVisible" @close="syncLzosVisible = false" @ok="handleSyncLzosSuccess" />
   </a-spin>
 </template>
 <script setup lang="ts">
@@ -223,7 +216,6 @@ import LeavePrompt from './components/LeavePrompt.vue';
 import Tags from './components/Tags/index.vue';
 import TooltipCell from '@/components/Table/tooltipCell.vue';
 import {DropdownActionMenu} from '@/components/DropDownMenu/index';
-import SyncLzosModal from './components/SyncLzosModal.vue';
 
 import {getMethodColor} from '@/utils/interface';
 import {notifyError, notifySuccess} from "@/utils/notify";
@@ -392,23 +384,10 @@ async function publishDocs() {
 /**
  * 导入接口
  * */
-const showImportModal = ref(false);
+const showImportModal = ref(true);
 
-function inportApi() {
+function importApi() {
   showImportModal.value = true;
-}
-
-/**
- * lzos 数据同步
- */
-const syncLzosVisible = ref(false);
-function syncLzos() {
-  syncLzosVisible.value = true;
-}
-
-function handleSyncLzosSuccess() {
-  syncLzosVisible.value = false;
-  refreshList('reset');
 }
 
 /**
@@ -517,25 +496,9 @@ async function handleBatchUpdate(data) {
 
 const isImporting = ref(false);
 
-async function handleImport(data, callback) {
-
-  isImporting.value = true;
-
-  const res = await store.dispatch('Endpoint/importEndpointData', {
-    ...data,
-    "sourceType": 2,
-  });
-
-  // 导入成功，重新拉取列表 ，并且关闭弹窗
-  if (res) {
-    await refreshList('reset');
-    if (callback) {
-      callback();
-    }
-    showImportModal.value = false;
-  }
-  isImporting.value = false
-
+async function handleImport() {
+  console.log('success');
+  refreshList('reset');
 }
 
 // 当前筛选条件，包括分类、服务、状态
