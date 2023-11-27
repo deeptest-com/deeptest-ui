@@ -47,7 +47,7 @@
         </template>
       </a-dropdown>
 
-      <a-dropdown placement="bottomRight" v-if="isAdmin">
+      <a-dropdown placement="bottomRight" v-if="isAdmin && !isWujieEnv" >
         <a class="indexlayout-top-sysmenu ant-dropdown-link operation-name message" style="margin-right: 6px;margin-left: 8px;">
           <SettingOutlined class="top-right-icon-desktop"/>
         </a>
@@ -64,13 +64,13 @@
       </a-dropdown>
 
       <!-- ::::消息通知 -->
-      <a-tooltip placement="bottom" title="消息通知">
+      <a-tooltip placement="bottom" title="消息通知" v-if="!isWujieEnv">
         <span class="operation-name message" @click="onMessageClick">
           <BellOutlined />
         </span>
       </a-tooltip>
 
-      <a-tooltip placement="bottom" @click="toggle">
+      <a-tooltip placement="bottom" @click="toggle" v-if="!isWujieEnv">
         <template #title>{{ isFullscreen ? '退出全屏' : '全屏' }}</template>
         <a-button type="text" class="share-btn">
           <FullscreenOutlined v-if="isFullscreen"
@@ -81,7 +81,7 @@
       </a-tooltip>
 
       <!-- ::::用户信息 -->
-      <a-dropdown placement="bottomRight">
+      <a-dropdown placement="bottomRight" v-if="!isWujieEnv">
         <a class="indexlayout-top-usermenu ant-dropdown-link" style="margin-right: 6px;margin-left: 8px;">
           <UserOutlined class="user-icon"/>
           <span class="operation-name">{{ currentUser.name }}</span>
@@ -126,7 +126,8 @@ import {useFullscreen} from '@vueuse/core';
 import {StateType as GlobalStateType} from "@/store/global";
 import {Cache_Key_Agent} from "@/utils/const";
 import {isLeyan} from "@/utils/comm";
-
+import {useWujie} from "@/composables/useWujie";
+const {isWujieEnv} = useWujie();
 const props = defineProps({
   theme: {
     required: false,

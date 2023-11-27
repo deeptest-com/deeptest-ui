@@ -15,6 +15,7 @@
     <div
         id="indexlayout-right"
         :class="{'fiexd-header': headFixed}">
+
       <right-top
           :collapsed="collapsed"
           v-if="!isWujieEnv"
@@ -26,6 +27,10 @@
           :menuData="permissionMenuData"
           :routeItem="routeItem">
       </right-top>
+
+      <div class="leyan-container-right-top">
+        <right-top-settings/>
+      </div>
 
       <div class="indexlayout-right-main" :class="{'wujie-main':isWujieEnv,'workspace-main':isWorkSpacePage}">
         <permission :roles="routeItem.roles">
@@ -58,12 +63,15 @@ import IndexLayoutRoutes from './routes';
 import Permission from '@/components/Permission/index.vue';
 import Left from '@/layouts/IndexLayout/components/Left.vue';
 import RightTop from '@/layouts/IndexLayout/components/RightTop.vue';
+import RightTopSettings from '@/layouts/IndexLayout/components/RightTopSettings.vue';
 import {useWujie} from "@/composables/useWujie";
 export default defineComponent({
   name: 'IndexLayout',
   components: {
+    RightTopSettings,
     Permission,
     Left,
+
     RightTop,
   },
   setup() {
@@ -166,7 +174,8 @@ export default defineComponent({
       onOpenChange,
       routeItem,
       isWujieEnv,
-      isWorkSpacePage
+      isWorkSpacePage,
+      RightTopSettings
     }
   }
 })
@@ -210,5 +219,12 @@ export default defineComponent({
 .indexlayout-main-conent {
   margin: 24px;
   position: relative;
+}
+.leyan-container-right-top{
+  position: fixed;
+  width: 280px;
+  top: 58px;
+  right: -6px;
+  background-color: #fff;
 }
 </style>
