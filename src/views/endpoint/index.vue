@@ -384,7 +384,7 @@ async function publishDocs() {
 /**
  * 导入接口
  * */
-const showImportModal = ref(true);
+const showImportModal = ref(false);
 
 function importApi() {
   showImportModal.value = true;
@@ -498,6 +498,7 @@ const isImporting = ref(false);
 
 async function handleImport() {
   console.log('success');
+  showImportModal.value = false;
   refreshList('reset');
 }
 

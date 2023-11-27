@@ -12,17 +12,19 @@
       :model="modelRef"
       :rules="rulesRef"
       :label-col="{ style: { width: '110px' } }">
-      <span class="form-tip">数据源选择</span>
+      <span class="form-header-title">数据源选择</span>
       <a-form-item label="接口数据来源" name="driverType">
         <a-select
+          @change="handleDriverTypeChanged"
           v-model:value="modelRef.driverType"
           :options="driverTypeOpts"
           placeholder="请选择"/>
       </a-form-item>
       <!-- 智能体厂 -->
       <template v-if="modelRef.driverType === 'lzos'">
-        <a-form-item label="环境URL" name="baseUrl">
-          <a-input v-model:value="modelRef.baseUrl" placeholder="请输入智能体厂环境url地址"/>
+        <a-form-item label="环境URL" name="filePath">
+          <a-input v-model:value="modelRef.filePath" placeholder="请输入智能体厂环境url地址"/>
+          <span class="form-tip">例如：https://lzos.rysaas.cn</span>
         </a-form-item>
         <a-form-item label="智能体名" name="classCode">
           <a-input v-model:value="modelRef.classCode" placeholder="请输入智能体模型类"/>
@@ -33,7 +35,9 @@
             v-model:value="modelRef.functionCodes"
             mode="multiple"
             :options="functionCodesOpts"
-            :max-tag-count="2"
+            :max-tag-count="1"
+            show-search
+            :filter-option="filterOption"
             placeholder="请选择待同步的消息">
             <template v-if="fetching" #notFoundContent>
               <a-spin size="small" />
@@ -85,7 +89,7 @@
           </a-spin>
         </a-form-item>
       </template>
-      <span class="form-tip">导入设置</span>
+      <span class="form-header-title">导入设置</span>
       <a-form-item label="导入至分类" name="categoryId">
         <a-tree-select
           @change="selectedCategory"
@@ -119,10 +123,11 @@
         <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)" />
         </a-tooltip>
       </template>
-        <a-select
-          v-model:value="modelRef.dataSyncType"
-          :options="dataSyncTypeOpts"
-          placeholder="请选择"/>
+      <a-select
+        v-model:value="modelRef.dataSyncType"
+        :options="dataSyncTypeOpts"
+        placeholder="请选择"/>
+      <span class="form-tip"><WarningOutlined /> 完全覆盖会导致通过平台上的接口定义更新被覆盖，请谨慎使用</span>
       </a-form-item>
     </a-form>
   </a-modal>
@@ -139,7 +144,7 @@ import {
 } from 'vue';
 import {useStore} from "vuex";
 import cloneDeep from "lodash/cloneDeep";
-import {UploadOutlined,QuestionCircleOutlined} from '@ant-design/icons-vue';
+import {UploadOutlined,QuestionCircleOutlined, WarningOutlined} from '@ant-design/icons-vue';
 import {notifyWarn} from "@/utils/notify";
 import SelectServe from './SelectServe/index.vue';
 
@@ -204,7 +209,7 @@ const treeData: any = computed(() => {
   return data?.[0]?.children || [];
 });
 
-const modelRef = reactive({
+const modelRef = reactive<any>({
   categoryId: null as any,
   driverType: null,
   dataSyncType: null,   //数据同步方式 枚举值 full_cover：完全覆盖 copy_add：复制新增
@@ -214,13 +219,12 @@ const modelRef = reactive({
   // 智能体厂
   classCode: '',
   functionCodes: [],
-  baseUrl: '',
 });
 
 const confirmLoading = ref(false);
 
 const functionCodesOpts = computed(() => {
-  if (!modelRef.baseUrl || !modelRef.classCode) {
+  if (!modelRef.filePath || !modelRef.classCode) {
     return [];
   }
   return store.state.Endpoint.thirdFunctionList;
@@ -251,12 +255,6 @@ const rulesRef = computed(() => ({
       message: '请选择所属服务',
     }
   ],
-  "baseUrl": [
-    {
-      required: true,
-      message: '请输入智能体厂环境url地址 例如：https://lzos.rysaas.cn/',
-    }
-  ],
   "classCode": [
     {
       required: true,
@@ -272,13 +270,17 @@ const rulesRef = computed(() => ({
   "filePath": [
     {
       required: true,
-      message: modelRef.openUrlImport ? '请输入swagger url' : '请选择文件',
+      message: modelRef.driverType === 'lzos' ? '请输入智能体厂环境url地址 例如：https://lzos.rysaas.cn/' : modelRef.openUrlImport ? '请输入swagger url' : '请选择文件',
     }
   ],
 }));
 
 const formRef = ref();
 const spinning = ref<boolean>(false);
+
+const handleDriverTypeChanged = (v) => {
+  modelRef.dataSyncType = v === 'lzos' ? 1 : 2;
+}
 
 /**
  * ::::: 智能体厂相关 ::::
@@ -288,10 +290,16 @@ const fetching = ref(false);
 const handleFocus = async () => {
   fetching.value = true;
   await store.dispatch('Endpoint/listFunctionsByThirdPartyClass', {
-    baseUrl: modelRef.baseUrl,
+    filePath: modelRef.filePath,
     classCode: modelRef.classCode
   });
   fetching.value = false;
+};
+
+const filterOption = (input: string, option: any) => {
+  if (option.value.includes(input)) {
+    return true
+  }
 };
 
 function ok() {
@@ -303,8 +311,8 @@ function ok() {
     .validate()
     .then(async () => {
       confirmLoading.value = true;
-      const { filePath, baseUrl, openUrlImport, functionCodes, classCode, ...rest } = modelRef;
-      const params = modelRef.driverType === 'lzos' ? { baseUrl, classCode, functionCodes, ...rest } : { filePath, openUrlImport, ...rest };
+      const { filePath, openUrlImport, functionCodes, classCode, ...rest } = modelRef;
+      const params = modelRef.driverType === 'lzos' ? { filePath, classCode, functionCodes, ...rest } : { filePath, openUrlImport, ...rest };
 
       const res = await store.dispatch('Endpoint/importEndpointData', {
         ...params,
@@ -432,7 +440,7 @@ const change = (val)=>{
   justify-content: flex-end;
 }
 
-.form-tip {
+.form-header-title {
   font-size: 14px;
   line-height: 24px;
   margin-bottom: 24px;
@@ -441,6 +449,11 @@ const change = (val)=>{
   font-weight: bold;
 }
 
+.form-tip {
+  font-size: 12px;
+  line-height: 16px;
+  color: #F59A23;
+}
 </style>
 
 
