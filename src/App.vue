@@ -18,6 +18,8 @@ import {isElectronEnv} from "@/utils/agentEnv";
 import {isLeyan} from "@/utils/comm";
 import {Cache_Key_Agent_Local_Port, Cache_Key_Server_Url} from "@/utils/const";
 import {useRoute, useRouter} from "vue-router";
+import {useWujie} from "@/composables/useWujie";
+
 export default defineComponent({
   name: 'App',
   setup() {
@@ -26,14 +28,15 @@ export default defineComponent({
 
 
     const isLyEnv = isLeyan();
+    const {isWujieEnv} = useWujie();
     // NOTICE: 以下代码仅适用于ly环境，其他环境删除即可
     const store = useStore<{User: UserStateType}>();
     const currentUser = computed<CurrentUser>(()=> store.state.User.currentUser);
     watch(() => {
       return currentUser.value
     },(newVal) => {
-      // 仅ly环境才会接入
-      if(newVal?.username && isLyEnv){
+      // 仅ly环境才会接入 嵌入到乐研中，也不需要嵌入反馈系统
+      if(newVal?.username && isLyEnv && !isWujieEnv){
         // 渲染ly评论反馈系统
         renderfeedback(currentUser);
       }
@@ -67,9 +70,18 @@ export default defineComponent({
     onMounted(() => {
       setHtmlLang(locale.value);
 
-      bus?.$on('changeRouterForLeyan', (path: string) => {
-        router.push(path);
-      })
+      //  监听父应用传递过来的消息
+
+      if(isWujieEnv){
+        bus?.$on('sendMsgToLeyanAPI', (msg: any) => {
+          if (msg?.type === 'changeRouter') {
+            router.push(msg?.data?.path);
+          }
+          if (msg?.type === 'logout') {
+            store.dispatch('User/logout');
+          }
+        })
+      }
 
     })
 

@@ -1,11 +1,11 @@
 <template>
-  <div class="user-layout">
-    <div class="logo" :class="{'ly-logo':isLeyanEnv}" ></div>
+  <div class="user-layout" :style="isWujieEnv?{width:'100%',height:'100%'}:{}">
+    <div v-if="!isWujieEnv" class="logo" :class="{'ly-logo':isLeyanEnv}" ></div>
     <div class="right-main">
       <div class="right-content">
         <router-view></router-view>
       </div>
-      <div class="right-footer">
+      <div class="right-footer" >
         Copyright © {{new Date().getFullYear()}} {{company}} <br>
         {{companyCopyRight}}
       </div>
@@ -21,7 +21,7 @@ import { getRouteItem, RoutesDataItem, vueRoutes } from '@/utils/routes';
 import UserLayoutRoutes from './routes';
 import useTitle from '@/composables/useTitle';
 import {isLeyan} from "@/utils/comm";
-
+import {useWujie} from "@/composables/useWujie";
 export default defineComponent({
   name: 'UserLayout',
   components: {
@@ -29,6 +29,7 @@ export default defineComponent({
   setup() {
 
     let isLeyanEnv = isLeyan();
+    const {isWujieEnv} = useWujie();
 
     const route = useRoute();
 
@@ -58,6 +59,7 @@ export default defineComponent({
     return {
       isLeyanEnv,
       company,
+      isWujieEnv,
       companyCopyRight,
     }
 
