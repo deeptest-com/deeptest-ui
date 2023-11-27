@@ -19,54 +19,45 @@
            @deeptest-event-from-chrome-ext="onChromeExtEvent"></div>
 
       <div class="recorded-data-list">
+        <a-checkbox-group v-model:value="checkedItems">
 
-        <div  v-for="(item, index) in recordData" :key="index"
+          <div v-for="(item, index) in recordData" :key="index"
               :class="[activeItem.requestId === item.requestId ? 'active' : '']"
               class="recorded-data-item">
 
-          <div class="header dp-link" @click.stop="expand(item)">
-            <span class="checkbox block">
-              <a-checkbox v-model:checked="checked" />
-            </span>
-            <span class="method block">{{item.request.request.method}}</span>
-            <span class="url block">{{getUrl(item.request.request.url)}}</span>
-            <span class="status block" :class="getResultClass(responseMap[item.requestId]?.statusCode)">
-              <CheckCircleOutlined v-if="responseMap[item.requestId]?.statusCode===200" />
-              <CloseCircleOutlined v-else />
+            <div class="header dp-link">
+              <span class="checkbox block">
+                <a-checkbox :value="index" />
+              </span>
 
-              {{responseMap[item.requestId]?.statusLine}}
-            </span>
+              <span class="method block">{{item.info.request?.method}}</span>
+              <span class="url block">{{getUrl(item.info.request?.url)}}</span>
+              <span class="status block" :class="getResultClass(responseMap[item.requestId]?.info?.response?.status)">
+                <CheckCircleOutlined v-if="responseMap[item.requestId]?.info?.response?.status===200" />
+                <CloseCircleOutlined v-else />
 
-            <span class="actions block">
-              <RightOutlined v-if="activeItem.requestId !== item.requestId"
-                             @click.stop="expand(item)"
-                             class="dp-icon-btn dp-trans-80" />
-              <DownOutlined v-if="activeItem.requestId === item.requestId"
-                            @click.stop="expand(item)"
-                            class="dp-icon-btn dp-trans-80" />
-            </span>
-          </div>
+                {{responseMap[item.requestId]?.info?.response?.statusText}}
+              </span>
 
-          <div class="content" v-if="activeItem.requestId === item.requestId">
-            {{item}}
-            <br />
-            {{responseMap[item.requestId]}}
-<!--            <div class="request">
-              <a-row v-if="item.requestBody" type="flex">
-                <a-col flex="100px">请求体：</a-col>
-                <a-col flex="auto">
-                  {{item.requestBody}}
-                </a-col>
-              </a-row>
-            </div>-->
-
-            <div class="response">
-
+              <span @click.stop="expand(item)" class="actions block">
+                <RightOutlined v-if="activeItem.requestId !== item.requestId"
+                               @click.stop="expand(item)"
+                               class="dp-icon-btn dp-trans-80" />
+                <DownOutlined v-if="activeItem.requestId === item.requestId"
+                              @click.stop="expand(item)"
+                              class="dp-icon-btn dp-trans-80" />
+              </span>
             </div>
+
+            <div class="content" v-if="activeItem.requestId === item.requestId">
+              {{item}}
+              <br />
+              {{responseMap[item.requestId]}}
+            </div>
+
           </div>
 
-        </div>
-
+        </a-checkbox-group>
       </div>
   </div>
 </template>
@@ -92,7 +83,7 @@ const {resetFields, validate, validateInfos} = useForm(model, rules);
 const activeItem = ref({} as any)
 const recordData = ref([] as any[])
 const responseMap = ref({} as any)
-const checked = ref({} as any)
+const checkedItems = ref([] as any[])
 
 const expand = (item) => {
   if (activeItem.value.requestId === item.requestId) {
@@ -118,14 +109,14 @@ const startRecord = () => {
 }
 
 const stopRecord = () => {
-  console.log('stopRecord')
+  console.log('stopRecord', checkedItems.value)
 }
 
 const onChromeExtEvent =(event) => {
   console.log('onChromeExtEvent', event.detail)
   const data = event.detail
 
-  if (data.response) {
+  if (data.type === 'response') {
     responseMap.value[data.requestId] = data
   } else {
     recordData.value.push(data)
@@ -160,46 +151,50 @@ const wrapperCol = {span: 20}
   overflow-y: auto;
 
   .recorded-data-list {
-    .recorded-data-item {
-      margin: 4px;
-      border-radius: 5px;
-      border: 1px solid #d9d9d9;
+    .ant-checkbox-group {
+      width: 100%;
 
-      .header {
-        height: 36px;
-        background-color: #fafafa;
+      .recorded-data-item {
+        margin: 4px;
         border-radius: 5px;
+        border: 1px solid #d9d9d9;
 
-        padding: 0px 12px;
+        .header {
+          height: 36px;
+          background-color: #fafafa;
+          border-radius: 5px;
 
-        span {
-          line-height: 36px;
-          &.block{
+          padding: 0px 12px;
+
+          span {
+            line-height: 36px;
+
+            &.block {
+              display: inline-block;
+            }
+          }
+
+          .checkbox {
+            width: 60px;
+          }
+
+          .method {
+            width: 100px;
+          }
+
+          .url {
+            width: calc(100% - 348px);
+          }
+
+          .status {
+            width: 160px;
+          }
+
+          .actions {
+            width: 28px;
             display: inline-block;
           }
         }
-
-        .checkbox {
-          width: 60px;
-        }
-
-        .method {
-          width: 100px;
-        }
-
-        .url {
-          width: calc(100% - 348px);
-        }
-
-        .status {
-          width: 160px;
-        }
-
-        .actions {
-          width: 28px;
-          display: inline-block;
-        }
-      }
 
         .content {
           padding: 16px 10px;
@@ -216,5 +211,5 @@ const wrapperCol = {span: 20}
       }
     }
   }
-
+}
 </style>
