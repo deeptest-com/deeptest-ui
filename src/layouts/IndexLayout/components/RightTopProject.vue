@@ -129,9 +129,6 @@ const selectProject = async (item): Promise<void> => {
   await store.dispatch('ProjectGlobal/changeProject', item.id);
   await store.dispatch('Environment/getEnvironment', {id: 0, projectId: item.id});
 
-  // 项目切换后，需要重新更新可选服务列表
-  await store.dispatch("ServeGlobal/fetchServe");
-
   // 更新左侧菜单以及按钮权限
   if (params.projectNameAbbr) {
     await store.dispatch('Global/getPermissionList', { projectId: item.id });
@@ -160,15 +157,6 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOut);
 });
-
-/**
- * fixed: 保证选中项目不为空之后，再fetchServe列表，避免由于currProjectId=NaN导致服务列表返回异常问题
- */
-watch(() => {return currProject.value;}, (val: any) => {
-  if (val.id) {
-    store.dispatch("ServeGlobal/fetchServe");
-  }
-})
 
 watch(dropdownVisible, (value) => {
   if (value)  {
