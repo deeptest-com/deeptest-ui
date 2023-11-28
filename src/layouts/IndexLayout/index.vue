@@ -28,7 +28,7 @@
           :routeItem="routeItem">
       </right-top>
 
-      <div class="leyan-container-right-top">
+      <div class="leyan-container-right-top" v-if="isWujieEnv">
         <right-top-settings/>
       </div>
 

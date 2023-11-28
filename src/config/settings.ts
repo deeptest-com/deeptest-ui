@@ -97,6 +97,7 @@ export interface SettingsType {
      * pane resize
      */
     paneResizeTop: string;
+    sendMsgToLeyan: string;
 
     /**
      * ly api 客户端本地存储的用户信息
@@ -162,6 +163,9 @@ const settings: SettingsType = {
     // 测试计划相关的
     eventGetPlanDetail: 'eventGetPlanDetail',
     eventGetPlansReports: 'eventGetPlansReports',
+
+    // 向乐研基座工程发送消息（无界）
+    sendMsgToLeyan: 'sendMsgToLeyan',
 
     // pane Resizer
     paneResizeTop: 'paneResizeTop',

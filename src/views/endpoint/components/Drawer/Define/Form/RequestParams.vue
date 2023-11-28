@@ -17,8 +17,8 @@
                       'box-shadow': `none` ,
                       background:  selectedParamType !== item.value ? '#f5f5f5' : '#fff',
                      'border-color': '#d9d9d9'}"
-              v-for="item in paramTypeOpts" 
-              :key="item.value" 
+              v-for="item in paramTypeOpts"
+              :key="item.value"
               :value="item.value">
                 {{item.label}}
                 {{ getRpNumbers(item.value) }}
@@ -146,6 +146,7 @@ import RequestHeader from './RequestHeader.vue'
 import GlobalParams from './GlobalParams.vue'
 import {Endpoint} from "@/views/endpoint/data";
 import {cloneByJSON} from "@/utils/object";
+import {useWujie} from "@/composables/useWujie";
 
 const store = useStore<{ Endpoint, Debug, ProjectGlobal, User }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
@@ -201,6 +202,11 @@ const paramTypeOpts = [
 const selectedParamType = ref('query');
 const router = useRouter();
 function goEditSecurity() {
+  const {isWujieEnv,parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
+  if(isInLeyanWujieContainer){
+    window.open(`${parentOrigin}/dev/${projectName}/settings/API?activeKey=service&sectab=service-security&serveId=${endpointDetail.value.serveId}`, '_blank')
+    return;
+  }
   window.open(`${window.location.origin}/${router.currentRoute.value.params.projectNameAbbr}/project-setting/service-setting?sectab=service-security&serveId=${endpointDetail.value.serveId}`, '_blank')
 }
 

@@ -72,7 +72,7 @@
                 <template #colTitle="{record}">
                   <div class="customTitleColRender">
                     <div class="notice-icon">
-                      <a-tooltip v-if="record.changedStatus > ChangedStatus.NoChanged" :overlayClassName="'diff-custom-tooltip'">       
+                      <a-tooltip v-if="record.changedStatus > ChangedStatus.NoChanged" :overlayClassName="'diff-custom-tooltip'">
                         <template #title>
                         <span>{{record.changedStatus == ChangedStatus.Changed?'待处理':'已处理'}}，{{record.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a @click="showDiff(record.id)">查看详情</a></span>
                         </template>
@@ -227,6 +227,7 @@ import settings from "@/config/settings";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import Diff from "./components/Drawer/Define/Diff/index.vue";
 import {ChangedStatus,SourceType} from "@/utils/enum";
+import {useWujie} from "@/composables/useWujie";
 
 
 const {share} = useSharePage();
@@ -367,7 +368,13 @@ const fetching = ref(false);
 
 /*查看选中的接口文档*/
 function goDocs() {
-  window.open(`${window.location.origin}/docs/view?endpointIds=${selectedRowIds.value.join(',')}`, '_blank');
+  const {isWujieEnv,parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
+  if(isInLeyanWujieContainer){
+    window.open(`${parentOrigin}/dev/${projectName}/API/docsView?endpointIds=${selectedRowIds.value.join(',')}`, '_blank')
+    return;
+  }
+  const viewURL = `docs/view?endpointIds=${selectedRowIds.value.join(',')}`
+  window.open(`${window.location.origin}/${viewURL}`, '_blank');
 }
 
 const showPublishDocsModal: any = ref(false)

@@ -55,11 +55,11 @@ const activeKey = ref<string>('test-scenario');
 const loading = ref(false);
 
 const stickyKey = ref(0);
-const {projectName,parentOrigin,isWujieEnv} = useWujie();
+const {projectName,parentOrigin,isWujieEnv,isInLeyanWujieContainer} = useWujie();
 const detailLink = computed(() => {
   const {params: {projectNameAbbr = ''}} = router.currentRoute.value;
   // 无界环境，使用父级域名跳转
-  if(isWujieEnv && parentOrigin && projectName){
+  if(isInLeyanWujieContainer){
     return `${parentOrigin}/dev/${projectName}/testing/TP/${projectNameAbbr}-TP-${currPlan.value.id}`;
   }
   return `${window.location.origin}/${projectNameAbbr}/TP/${projectNameAbbr}-TP-${currPlan.value.id}`;

@@ -42,6 +42,7 @@ import { useStore } from "vuex";
 import { StateType as Debug } from "@/views/component/debug/store";
 import { SettingOutlined } from "@ant-design/icons-vue";
 import { useRouter } from "vue-router";
+import {useWujie} from "@/composables/useWujie";
 
 const VNodes = defineComponent({
   props: {
@@ -111,8 +112,17 @@ const getSelectEnvLeftPosition = () => {
   return `${width + 16 + 20}px`;
 };
 
+
+
 const handleRedirectEnv = (e) => {
+
   e.preventDefault();
+  const {isWujieEnv,projectName,parentOrigin,isInLeyanWujieContainer} = useWujie();
+  if(isWujieEnv && projectName && parentOrigin){
+    window.open(`${parentOrigin}/dev/${projectName}/settings/API?activeKey=env`, '_blank');
+    return;
+  }
+
   window.open(`${window.location.origin}/${router.currentRoute.value.params.projectNameAbbr}/project-setting/enviroment/var`, '_blank');
 };
 

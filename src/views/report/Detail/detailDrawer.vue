@@ -41,11 +41,11 @@ const router = useRouter();
 const emits = defineEmits(['onClose', 'execCancel']);
 const store = useStore<{ Report: ReportStateType, Plan: PlanStateType }>();
 const detailResult = computed<any>(() => store.state.Report.detailResult);
-const {projectName,parentOrigin,isWujieEnv} = useWujie();
+const {projectName,parentOrigin,isWujieEnv,isInLeyanWujieContainer} = useWujie();
 const detailLink = computed(() => {
   const { params: { projectNameAbbr } } = router.currentRoute.value;
   // 无界环境，使用父级域名跳转
-  if(isWujieEnv && parentOrigin && projectName) {
+  if(isInLeyanWujieContainer) {
     return `${parentOrigin}/dev/${projectName}/testing/TR/${detailResult.value?.serialNumber}`;
   }
   return `${window.location.origin}/${projectNameAbbr}/TR/${detailResult.value.serialNumber}`;

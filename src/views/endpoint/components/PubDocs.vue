@@ -58,6 +58,7 @@ import {NewEndpointFormState} from "@/views/Endpoint/data";
 import {InboxOutlined, UploadOutlined} from '@ant-design/icons-vue';
 import {notifySuccess} from "@/utils/notify";
 import { useRouter } from 'vue-router';
+import {useWujie} from "@/composables/useWujie";
 
 const store = useStore<{ Endpoint }>();
 
@@ -116,7 +117,19 @@ async function ok() {
         );
         if (res) {
           notifySuccess('发布成功');
-          window.open(`${window.location.origin}/${router.currentRoute.value.params.projectNameAbbr}/docs?documentId=${res.data}`, '_self')
+          const {isWujieEnv,parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
+          if(isInLeyanWujieContainer){
+            //  todo 乐研环境下的跳转
+            window.open(`${parentOrigin}/dev/${projectName}/API/docs?documentId=${res.data}`, '_blank')
+            return;
+          }
+          router.push({
+            path: `/${router.currentRoute.value.params.projectNameAbbr}/docs`,
+            query: {
+              documentId: res.data,
+            }
+          });
+          // window.open(`${window.location.origin}/${router.currentRoute.value.params.projectNameAbbr}/docs?documentId=${res.data}`, '_self')
         }
         reset();
         emit('ok');

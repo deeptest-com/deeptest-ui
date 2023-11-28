@@ -166,6 +166,7 @@ import {useStore} from "vuex";
 import {StateType as ServeStateType} from "@/store/serve";
 import debounce from "lodash.debounce";
 import { useRouter } from "vue-router";
+import {useWujie} from "@/composables/useWujie";
 const props = defineProps(['value', 'serveId', 'isRefChildNode', 'isRoot']);
 const emit = defineEmits(['change']);
 const tabsList: any = ref([]);
@@ -366,14 +367,32 @@ async function searchRefs(keyword) {
   }, 500)();
 }
 
+
+// const {isWujieEnv} = useWujie();
+const {projectName,parentOrigin,isWujieEnv,isInLeyanWujieContainer} = useWujie();
+// const detailLink = computed(() => {
+//   const {params: {projectNameAbbr = ''}} = router.currentRoute.value;
+//   // 无界环境，使用父级域名跳转
+//   if(isInLeyanWujieContainer){
+//     return `${parentOrigin}/dev/${projectName}/API/IM/${endpointDetail.value?.serialNumber}`;
+//   }
+//   return `${window.location.origin}/${projectNameAbbr}/IM/${endpointDetail.value?.serialNumber}`;
+// })
 /**
  * 查看组件
  * */
 function goViewComponent() {
   console.log('goViewComponent', props.value);
-  const refStr = encodeURIComponent(props.value.ref);
+  const {type, ref} = props.value;
+  const refStr = encodeURIComponent(ref);
+  // 无界环境，使用父级域名跳转
+  if(isInLeyanWujieContainer){
+    const url = `${parentOrigin}/dev/${projectName}/settings/API?activeKey=service&sectab=service-component&serveId=${props.serveId}&refId=${refStr}`;
+    window.open(url, '_blank');
+    return;
+  }
   const url = `${window.location.origin}/${router.currentRoute.value.params.projectNameAbbr}/project-setting/service-setting?sectab=service-component&serveId=${props.serveId}&refId=${refStr}`;
-  window.open(url, '_blank')
+  window.open(url, '_blank');
 }
 
 watch(() => {
@@ -386,7 +405,7 @@ watch(() => {
   }
 
   let {type, types} = props.value || {};
-  // ref 优先级高于 type，如果是 ref，则优先取 ref值判断类型
+  // ref 优先级高于 type，如果是 ref，则优先取 ref值 判断类型
   type = props.value?.ref || type;
   const allTypes = [...(types || []), type];
   // 打开时，初始化数据

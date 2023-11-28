@@ -12,7 +12,7 @@
         :show-share="true"
         @update-title="updateTitle" >
         <template #custom>
-          <div class="diff-tag" v-if="endpointDetail.changedStatus > ChangedStatus.NoChanged" >   
+          <div class="diff-tag" v-if="endpointDetail.changedStatus > ChangedStatus.NoChanged" >
           <a-tag :color="endpointDetail.changedStatus == ChangedStatus.Changed?'warning':''">
             <template #icon>
               <WarningFilled v-if="endpointDetail.changedStatus == ChangedStatus.Changed"  @click="showDiff(endpointDetail.id)" :style="{color: '#fb8b06'}" />
@@ -306,11 +306,11 @@ async function save() {
 }
 
 
-const {projectName,parentOrigin,isWujieEnv} = useWujie();
+const {projectName,parentOrigin,isWujieEnv,isInLeyanWujieContainer} = useWujie();
 const detailLink = computed(() => {
   const {params: {projectNameAbbr = ''}} = router.currentRoute.value;
   // 无界环境，使用父级域名跳转
-  if(isWujieEnv && parentOrigin && projectName){
+  if(isInLeyanWujieContainer){
     return `${parentOrigin}/dev/${projectName}/API/IM/${endpointDetail.value?.serialNumber}`;
   }
   return `${window.location.origin}/${projectNameAbbr}/IM/${endpointDetail.value?.serialNumber}`;

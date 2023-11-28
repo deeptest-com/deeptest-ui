@@ -92,12 +92,12 @@ const emit = defineEmits(['ok', 'close', 'refreshList', 'closeExecDrawer']);
 const router = useRouter();
 const activeKey = ref('1');
 const stickyKey = ref(0);
-const {projectName,parentOrigin,isWujieEnv} = useWujie();
+const {projectName,parentOrigin,isWujieEnv,isInLeyanWujieContainer} = useWujie();
 const detailLink = computed(() => {
   const { params: { projectNameAbbr } } = router.currentRoute.value;
 
   // 无界环境，使用父级域名跳转
-  if(isWujieEnv && parentOrigin && projectName){
+  if(isInLeyanWujieContainer){
     return `${parentOrigin}/dev/${projectName}/testing/TS/${detailResult.value?.serialNumber}`;
   }
 

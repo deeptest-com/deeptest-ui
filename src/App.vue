@@ -64,7 +64,6 @@ export default defineComponent({
     }
 
     const bus = window?.$wujie?.bus;
-    const propsFormParentApp: any = window?.$wujie?.props;
 
     const router = useRouter();
 
@@ -75,15 +74,23 @@ export default defineComponent({
 
       if(isWujieEnv){
         bus?.$on('sendMsgToLeyanAPI', (msg: any) => {
+          console.log('832msg', msg)
           if (msg?.type === 'changeRouter') {
+            // debugger;
             router.push(msg?.data?.path);
           }
           if (msg?.type === 'logout') {
             store.dispatch('User/logout');
           }
         })
+        // 通知上层应用已经加载完毕
+        bus?.$emit(settings.sendMsgToLeyan, {
+          type: 'appMounted',
+          data: {
+            path: router.currentRoute.value.path
+          }
+        })
       }
-
     })
 
     const {isDefineChange,isDebugChange} =  useIMLeaveTip();
