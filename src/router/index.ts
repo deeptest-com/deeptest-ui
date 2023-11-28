@@ -1,6 +1,5 @@
 /**
  * 路由入口
- * @author LiQingSong
  */
 import NProgress from 'nprogress'; // progress bar
 import 'nprogress/nprogress.css'; // progress bar style
@@ -20,6 +19,20 @@ import UserLayout from '@/layouts/UserLayout/index.vue';
 import BlankLayout from "@/layouts/BlankLayout.vue";
 
 export const routes: RoutesDataItem[] = [
+  {
+    title: 'empty',
+    path: '/test',
+    component: BlankLayout,
+    children: [
+      {
+        title: '请求测试',
+        path: 'request',
+        component: () => import('@/views/test/request.vue'),
+        hidden: true,
+      },
+    ],
+  },
+
   {
     title: 'empty',
     path: '/mock',

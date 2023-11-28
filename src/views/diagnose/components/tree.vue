@@ -64,7 +64,7 @@
                             <a-menu-item key="5" @click="importCurl(nodeProps.dataRef)">
                                导入cURL
                             </a-menu-item>
-                            <a-menu-item key="6" @click="recordRequest(nodeProps.dataRef)">
+                            <a-menu-item key="6" @click="openRecordConf(nodeProps.dataRef)">
                                录制请求
                             </a-menu-item>
                           </template>
@@ -135,6 +135,7 @@ import debounce from "lodash.debounce";
 import InterfaceSelectionFromDefine from "@/views/component/InterfaceSelectionFromDefine/main.vue";
 import CurlImportModal from "./curl.vue";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import {getNodePath} from "@/utils/dom";
 
 const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType, ProjectGlobal: ProjectStateType, ServeGlobal: ServeStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -359,9 +360,13 @@ const importCurlCancel = () => {
   console.log('importCurlCancel')
   curlImportVisible.value = false
 }
-const recordRequest = () => {
-  console.log('recordRequest')
-  store.dispatch('DiagnoseInterface/openRecordConf')
+const openRecordConf = (node) => {
+  console.log('openRecordConf', node)
+  let paths = []
+  getNodePath(node, paths, treeDataMap.value)
+
+  const data = {targetId: node.id, targetName: paths.join(' -> ')}
+  store.dispatch('DiagnoseInterface/openRecordConf', data)
 }
 
 async function onDrop(info: DropEvent) {

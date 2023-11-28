@@ -7,11 +7,19 @@
                  @blur="validate('url', { trigger: 'blur' }).catch(() => {})"/>
       </a-form-item>
 
+      <a-form-item label="存放目录">
+        {{ recordConf.targetName }}
+      </a-form-item>
+
       <a-form-item>
-        <a-button type="primary" class="dp-btn-gap"
+        <a-button v-if="!isRecording" type="primary" class="dp-btn-gap"
                   @click="startRecord"
                   :disabled="!model.url">开始录制</a-button> &nbsp;
-        <a-button @click="stopRecord" class="dp-btn-gap">停止录制</a-button>
+        <a-button v-if="isRecording" @click="stopRecord" class="dp-btn-gap">停止录制</a-button>
+        &nbsp;&nbsp;&nbsp;
+        <a-button :disabled="isRecording || checkedItems.length === 0" @click="importRecordData" class="dp-btn-gap">
+          转换成接口
+        </a-button>
       </a-form-item>
     </a-form>
 
@@ -19,8 +27,14 @@
            @deeptest-event-from-chrome-ext="onChromeExtEvent"></div>
 
       <div class="recorded-data-list">
-        <a-checkbox-group v-model:value="checkedItems">
+        <div>
+          <a-checkbox v-model:checked="checkAll" class="check-all"
+                      @change="onCheckAll">
+            全选
+          </a-checkbox>
+        </div>
 
+        <a-checkbox-group v-model:value="checkedItems">
           <div v-for="(item, index) in recordData" :key="index"
               :class="[activeItem.requestId === item.requestId ? 'active' : '']"
               class="recorded-data-item">
@@ -50,9 +64,9 @@
             </div>
 
             <div class="content" v-if="activeItem.requestId === item.requestId">
-              {{item}}
+              请求：{{item}}
               <br />
-              {{responseMap[item.requestId]}}
+              响应：{{responseMap[item.requestId]}}
             </div>
 
           </div>
@@ -70,6 +84,12 @@ import {CheckCircleOutlined, CloseCircleOutlined, RightOutlined, DownOutlined,} 
 import {ScopeDeeptest} from "@/utils/const";
 import {Form} from "ant-design-vue";
 import {ResultStatus} from "@/utils/enum";
+import {StateType as DiagnoseInterfaceStateType} from "@/views/diagnose/store";
+import {StateType as ServeStateType} from "@/store/serve";
+
+const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType, ServeGlobal: ServeStateType }>();
+const recordConf = computed<any>(() => store.state.DiagnoseInterface.recordConf);
+const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 
 const useForm = Form.useForm;
 const model = ref({url: 'http://111.231.16.35:9000/forms/post'})
@@ -82,8 +102,11 @@ const {resetFields, validate, validateInfos} = useForm(model, rules);
 
 const activeItem = ref({} as any)
 const recordData = ref([] as any[])
+const requestMap = ref({} as any)
 const responseMap = ref({} as any)
 const checkedItems = ref([] as any[])
+const isRecording = ref(false)
+const checkAll = ref(false)
 
 const expand = (item) => {
   if (activeItem.value.requestId === item.requestId) {
@@ -107,9 +130,31 @@ const startRecord = () => {
     window.postMessage(data, '*')
   })
 }
+const importRecordData = () => {
+  console.log('importRecordData', checkedItems.value)
+  const selected = recordData.value.map((item, index) => {
+     if (checkedItems.value.indexOf(index) > -1) {
+       return {
+         request: item.info.request,
+         response: {
+           body: item.response?.body,
+           status: item.response?.status,
+           statusText: item.response?.statusText,
+         }
+       }
+     }
+  })
 
+  const data = {
+    items: selected,
+    targetId: recordConf.value.targetId,
+    serveId: currServe.value.id,
+  }
+
+  store.dispatch('DiagnoseInterface/importRecordData', data);
+}
 const stopRecord = () => {
-  console.log('stopRecord', checkedItems.value)
+  console.log('stopRecord')
 }
 
 const onChromeExtEvent =(event) => {
@@ -117,9 +162,15 @@ const onChromeExtEvent =(event) => {
   const data = event.detail
 
   if (data.type === 'response') {
+    requestMap.value[data.requestId].response = {
+      body: data.body,
+      status: data.info.response?.status,
+      statusText: data.info.response?.statusText,
+    }
     responseMap.value[data.requestId] = data
   } else {
     recordData.value.push(data)
+    requestMap.value[data.requestId] = data
   }
 }
 
@@ -140,6 +191,25 @@ function getResultClass (code) {
   return code === 200 ? 'pass': 'fail'
 }
 
+const onCheckAll = () => {
+  console.log('onCheckAll')
+
+  if (checkAll.value) {
+    recordData.value.forEach((item, index) => {
+      checkedItems.value.push(index)
+    })
+  } else {
+    checkedItems.value = []
+  }
+}
+
+watch(() => checkedItems, (val) => {
+  if (checkedItems.value.length === recordData.value.length)
+    checkAll.value = true
+  else
+    checkAll.value = false
+}, {immediate: true, deep: true});
+
 const labelCol = {span: 3}
 const wrapperCol = {span: 20}
 
@@ -151,11 +221,15 @@ const wrapperCol = {span: 20}
   overflow-y: auto;
 
   .recorded-data-list {
+    .check-all {
+      padding-left: 12px;
+    }
+
     .ant-checkbox-group {
       width: 100%;
 
       .recorded-data-item {
-        margin: 4px;
+        margin: 4px 0;
         border-radius: 5px;
         border: 1px solid #d9d9d9;
 

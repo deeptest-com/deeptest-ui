@@ -161,9 +161,11 @@ const errorHandler = (axiosResponse: AxiosResponse) => {
 }
 
 export default function (config: AxiosRequestConfig): AxiosPromise<any> {
-    const cachedServerUrl = getCachedServerUrl()
-    if (cachedServerUrl) {
-        config.baseURL = cachedServerUrl
+    if (!config.baseURL) {
+        const cachedServerUrl = getCachedServerUrl()
+        if (cachedServerUrl) {
+            config.baseURL = cachedServerUrl
+        }
     }
 
     return request(config).

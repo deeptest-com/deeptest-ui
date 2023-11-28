@@ -3,7 +3,7 @@
   <div class="diagnose-interface-design-main">
       <div id="diagnose-interface-debug-panel">
 
-        <a-tabs v-if="interfaceTabs?.length"
+        <a-tabs v-if="interfaceTabs?.length || recordConf"
                 class="dp-tabs-full-height"
                 type="editable-card"
                 :hideAdd="true"
@@ -60,7 +60,7 @@ import {StateType as ServeStateType} from "@/store/serve";
 import {prepareDataForRequest} from "@/views/component/debug/service";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {notifyError, notifySuccess} from "@/utils/notify";
-import RequestRecord from "@/views/component/RequestRecord/index.vue";
+import RequestRecord from "../components/record.vue";
 
 provide('usedBy', UsedBy.DiagnoseDebug)
 
