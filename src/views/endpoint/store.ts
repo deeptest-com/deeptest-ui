@@ -333,7 +333,7 @@ const initState: StateType = {
         "title": null,
         categoryId: null,
         tagNames: [],
-        serveId:null,
+        serveIds: [],
     },
     endpointDetail: null,
     srcEndpointDetail: null,

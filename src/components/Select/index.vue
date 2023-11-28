@@ -17,7 +17,7 @@
           :placeholder="placeholder"
           :options="options"
           :filterOption="filterOptions"
-          style="width: 180px;"
+          :style="{ width: `${width || 180}px` }"
           :value="values"
           :showSearch="showSearch || false"
           @focus="focus"
@@ -36,7 +36,7 @@ import {vOnClickOutside} from '@vueuse/components';
 import {Tooltip} from 'ant-design-vue'
 
 
-const props = defineProps(['placeholder', 'value', 'width', 'options', 'filterOptions', 'showSearch']);
+const props = defineProps(['placeholder', 'value', 'width', 'options', 'filterOptions', 'showSearch', 'width']);
 const emits = defineEmits(['change', 'focus']);
 
 const visible = ref(false)
