@@ -13,6 +13,7 @@
       <!-- for body -->
       <a-form-item v-if="model.src === 'body'" label="提取方法" v-bind="validateInfos.type" required>
         <a-select v-model:value="model.type"
+                  @change="changeType"
                   @blur="validate('type', { trigger: 'change' }).catch(() => {})">
           <a-select-option v-for="(item, idx) in typeOptions" :key="idx" :value="item.value">
             {{ t(item.label) }}
@@ -227,6 +228,11 @@ const cancel = () => {
   if (props.finish) {
     props.finish()
   }
+}
+
+const changeType = () => {
+  console.log('changeType')
+  model.value.expression = ''
 }
 
 onMounted(() => {

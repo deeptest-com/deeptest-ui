@@ -32,6 +32,7 @@
       <template v-if="model.type === 'extractor'">
         <a-form-item label="提取方法" v-bind="validateInfos.type" required>
           <a-select v-model:value="model.extractorType"
+                    @change="changeType"
                     @blur="validate('extractorType', { trigger: 'change' }).catch(() => {})">
             <a-select-option v-for="(item, idx) in extractorTypeOptions" :key="idx" :value="item.value">
               {{ t(item.label) }}
@@ -259,6 +260,11 @@ const loadExtractorVariable = () => {
       variables.value = jsn.data
     })
   }
+}
+
+const changeType = () => {
+  console.log('changeType')
+  model.value.extractorExpression = ''
 }
 
 const labelCol = { span: 4 }
