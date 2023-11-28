@@ -89,6 +89,7 @@ function useCaseExecution(): CaseExecution {
                     responseDefine: (item.response.consoleLogs || []).find(e => e.conditionEntityType === ""),
                     checkpoint: (item.response.consoleLogs || []).filter(e => e.conditionEntityType === ConditionType.checkpoint),
                 });
+                item.resultStatus = item.status;
             }
             if (item.category === 'case' && !execStatusMap.value[item.caseUuid]) {
                 execStatusMap.value[item.caseUuid] = cloneDeep(item);

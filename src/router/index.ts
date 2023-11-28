@@ -204,7 +204,7 @@ router.afterEach(() => {
 router.onError(async (err) => {
   // errMessage: ChunkLoadError: Loading chunk chunk-fa45f182 failed.
   console.error('routerPageLoad failed', err);
-  const result = err.match(/ChunkLoadError/g);
+  const result = (err.message || '').match(/Loading chunk (\S)+ failed/g);
   if (result) {
     const swalresult = await Swal.fire({
       ...settings.SwalLeaveSetting,
@@ -214,7 +214,7 @@ router.onError(async (err) => {
       showCancelButton: false,
       confirmButtonText: '重新加载'
     });
-    if (result.isConfirmed) {
+    if (swalresult.isConfirmed) {
       window.location.reload();
     }
   }
