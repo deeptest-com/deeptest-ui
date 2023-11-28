@@ -16,9 +16,9 @@
 
         <a-button type="primary" @click="post">Post</a-button>
 
-        <a-button type="primary" @click="submit">Submit</a-button>
+        <a-button type="primary" @click="submit">Submit Form</a-button>
 
-        <a-button type="primary" @click="submitUrlEncoded">Submit UrlEncoded</a-button>
+        <a-button type="primary" @click="submitUrlencoded">Submit UrlEncode</a-button>
       </a-form-item>
     </a-form>
   </div>
@@ -31,7 +31,10 @@ import {getCachedServerUrl} from "@/utils/serverEnv";
 const labelCol = { style: { width: '150px' } };
 const wrapperCol =  { span: 14 };
 
-const model = ref({});
+const model = ref({
+  name: 'aaron',
+  email: '462826@qq.com'
+});
 
 const get = async () => {
   doGet().then(res => {
@@ -49,7 +52,7 @@ const submit = async () => {
     console.log(res)
   })
 };
-const submitUrlEncoded = async () => {
+const submitUrlencoded = async () => {
   doSubmitUrlencoded(model.value).then(res => {
     console.log(res)
   })
@@ -85,40 +88,30 @@ async function doPost(data): Promise<any> {
 }
 
 async function doSubmit(data): Promise<any> {
-  return doRequest({
-    baseURL: 'http://111.231.16.35:9000/',
-    url: `post`,
-    method: 'post',
-    data: data,
-    headers: {
-      'Content-type': 'application/x-www-form-urlencoded'
-    },
-    transformRequest: [function (data) {
-      let ret = ''
-      for (let it in data) {
-        ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+  const params = new URLSearchParams(data);
+
+  return axios.post('http://111.231.16.35:9000/post', params.toString(), {
+      headers: {
+        'Content-type': 'multipart/form-data'
       }
-      return ret
-    }],
-  });
+    }).then((response) => {
+      return Promise.resolve(response.data);
+    }).catch((error) => {
+      console.error(error)
+    });
 }
 
 async function doSubmitUrlencoded(data): Promise<any> {
-  return doRequest({
-    baseURL: 'http://111.231.16.35:9000/',
-    url: `post`,
-    method: 'post',
-    data: data,
+  const params = new URLSearchParams(data);
+
+  return axios.post('http://111.231.16.35:9000/post', params.toString(), {
     headers: {
       'Content-type': 'application/x-www-form-urlencoded'
-    },
-    transformRequest: [function (data) {
-      let ret = ''
-      for (let it in data) {
-        ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
-      }
-      return ret
-    }],
+    }
+  }).then((response) => {
+    return Promise.resolve(response.data);
+  }).catch((error) => {
+    console.error(error)
   });
 }
 

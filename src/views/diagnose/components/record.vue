@@ -92,7 +92,7 @@ const recordConf = computed<any>(() => store.state.DiagnoseInterface.recordConf)
 const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 
 const useForm = Form.useForm;
-const model = ref({url: 'http://111.231.16.35:9000/forms/post'})
+const model = ref({url: 'http://localhost:8000/test/request'})
 const rules = ref({
   url: [
     {required: true, message: '请输入站点URL地址', trigger: 'blur'},
@@ -204,7 +204,7 @@ const onCheckAll = () => {
 }
 
 watch(() => checkedItems, (val) => {
-  if (checkedItems.value.length === recordData.value.length)
+  if (checkedItems.value.length > 0 && checkedItems.value.length === recordData.value.length)
     checkAll.value = true
   else
     checkAll.value = false

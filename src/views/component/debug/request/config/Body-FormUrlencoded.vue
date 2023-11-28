@@ -61,13 +61,13 @@ import {computed, ComputedRef, defineComponent, inject, PropType, Ref, ref} from
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import { DeleteOutlined, PlusOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons-vue';
-
+import Tips from "@/components/Tips/index.vue";
+import {Param, BodyFormUrlEncodedItem} from "@/views/component/debug/data";
+import {StateType as Debug} from "@/views/component/debug/store";
 import {UsedBy} from "@/utils/enum";
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 
-import {Param, BodyFormUrlEncodedItem} from "@/views/component/debug/data";
-import {StateType as Debug} from "@/views/component/debug/store";
 const store = useStore<{  Debug: Debug }>();
 
 const debugData = computed<any>(() => store.state.Debug.debugData);

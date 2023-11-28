@@ -106,6 +106,7 @@ import {
 } from '@ant-design/icons-vue';
 import {notification} from "ant-design-vue";
 import {NotificationKeyCommon} from "@/utils/const";
+import Tips from "@/components/Tips/index.vue";
 import settings from "@/config/settings";
 import {UsedBy} from "@/utils/enum";
 const usedBy = inject('usedBy') as UsedBy

@@ -169,7 +169,6 @@ onMounted(() => {
   }
   .body {
     height: calc(100% - 30px);
-    overflow-y: hidden;
     &>div {
       height: 100%;
     }
