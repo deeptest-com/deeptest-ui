@@ -536,32 +536,12 @@ async function handleTableFilter(state) {
 
 const filter = ref()
 
-// 实时监听项目/服务 ID，如果项目切换了则重新请求数据
-/*
-watch(() => [currProject.value.id, currServe.value.id], async (newVal, oldVal) => {
-  const [newProjectId, newServeId] = newVal;
-  const [oldProjectId, oldServeId] = oldVal || [];
-  if (newProjectId !== undefined && oldProjectId !== undefined && newProjectId !== oldProjectId) {
-    selectedCategoryId.value = "";
-  }
-  if (newProjectId !== undefined && newServeId !== oldServeId) {
-    await loadList(1, pagination.value.pageSize);
-    await store.dispatch('Endpoint/getEndpointTagList');
-    if (newServeId) {
-      await store.dispatch('Debug/listServes', {serveId: newServeId});
-      // 获取授权列表
-      await store.dispatch('Endpoint/getSecurityList', {id: newServeId});
-    }
-    store.commit('Endpoint/clearFilterState');
-    //filter.value.resetFields()
-  }
-}, {
-  immediate: true
-})
-*/
 watch(() => currProject.value.id, async (newVal, oldVal) => {
   const newProjectId = newVal
   const oldProjectId = oldVal
+  if (newVal) {
+    store.dispatch("ServeGlobal/fetchServe");
+  }
   if (newProjectId !== undefined && oldProjectId !== undefined && newProjectId !== oldProjectId) {
     selectedCategoryId.value = "";
   }
@@ -578,21 +558,6 @@ watch(() => currProject.value.id, async (newVal, oldVal) => {
 async function refreshList(resetPage?: string) {
   await loadList(resetPage ? 1 : pagination.value.current, pagination.value.pageSize);
 }
-
-watch(
-    () => [createApiModalVisible.value, showImportModal.value],
-    async (newValue, oldVal) => {
-      /**
-       * 分享场景打开页面： 自动打开抽屉展示指定接口详情，会触发这里的监听，
-       * 这里改成： 必须是触发了关闭弹窗 才触发，避免此场景 多次调用 loadCategory接口
-       */
-      const oldValue = oldVal || [];
-      if ((!newValue[0] && oldValue[0]) || (!newValue[1] && oldValue[1])) {
-        await store.dispatch('Endpoint/loadCategory');
-      }
-    },
-    {immediate: true}
-);
 
 // 页面路由卸载时，清空搜索条件
 onUnmounted(async () => {

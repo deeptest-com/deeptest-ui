@@ -15,7 +15,7 @@
         </a-select>
       </div>
       <div id="env-selector">
-        <EnvSelector :show="showBaseUrl()" :server-id="serverId" :serveId="debugData.serveId" @change="changeServer" :disabled="usedBy === UsedBy.ScenarioDebug" />
+        <EnvSelector :show="showBaseUrl()" :serveId="debugData.serveId" @change="changeServer" :disabled="usedBy === UsedBy.ScenarioDebug" />
       </div>
       <div v-if="showBaseUrl()" class="base-url">
         <a-input placeholder="请输入地址"
@@ -316,18 +316,6 @@ watch(() => {
 }, {
   immediate: true,
 })
-
-
-watch(() => {
-  return debugData.value.serveId;
-}, async (val) => {
-  if (val) {
-    await store.dispatch('Debug/listServes', {serveId: val});
-  }
-}, {
-  immediate: true
-})
-
 
 onMounted(() => {
   // 离开前保存数据

@@ -6,6 +6,7 @@
     @change="change"
     :size="size"
     :disabled="disabled"
+    :options="serves"
   />
 </template>
 

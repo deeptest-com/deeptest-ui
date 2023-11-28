@@ -765,7 +765,6 @@ const StoreModel: ModuleType = {
             pageSize = pageSize || state.listResult.pagination.pageSize;
             const otherParams = {
                 ...state.filterState,
-                serveId: rootState.ServeGlobal.currServe.id,
                 ...opts
             };
 
