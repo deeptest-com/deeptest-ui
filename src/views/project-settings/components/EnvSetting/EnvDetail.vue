@@ -115,7 +115,7 @@
     </a-form>
     <a-modal v-model:visible="addServiceModalVisible" title="关联服务" @ok="handleAddServiceOk">
         <a-form-item class="select-service" :labelCol="{ span: 6 }" :wrapperCol="{ span: 16 }" label="请选择服务">
-            <Select :value="selectedService" :options="serviceOptions" placeholder="请选择服务" style="width: 200px" @change="handleSelect" />
+            <Select :value="selectedService" :options="serviceOptions" :showSearch="true" :filterOptions="filterOptions" placeholder="请选择服务" style="width: 200px" @change="handleSelect" />
         </a-form-item>
 
     </a-modal>
@@ -126,7 +126,7 @@ import { useStore } from "vuex";
 import { PlusOutlined } from '@ant-design/icons-vue';
 import ConBoxTitle from '@/components/ConBoxTitle/index.vue';
 import PermissionButton from "@/components/PermissionButton/index.vue";
-import Select from '@/components/Select';
+import Select from '@/components/Select/index.vue';
 import { globalVarsColumns, serveServersColumns } from '../../config';
 import { useGlobalEnv } from '../../hooks/useGlobalEnv';
 import { StateType as ProjectSettingStateType } from "@/views/ProjectSetting/store";
@@ -162,6 +162,10 @@ async function addService() {
 
 const handleSelect = (e) => {
     selectedService.value = e;
+}
+
+const filterOptions = (value, option) => {
+    return option.label.includes(value || '');
 }
 
 function handleAddServiceOk() {
