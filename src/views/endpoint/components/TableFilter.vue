@@ -106,7 +106,6 @@ async function handleFilterChange(type, e) {
 }
 
 async function handleFilter(needRequest = true) {
-  console.log(needRequest);
   emit('filter', {
     ...filterState.value,
     ...formState.value,

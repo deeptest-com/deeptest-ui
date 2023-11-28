@@ -531,6 +531,9 @@ const loadList = debounce(async (page, size, opts?: any) => {
 
 async function handleTableFilter(state) {
   filterState.value = state;
+  if (!state.needRequest) {
+    store.commit('Endpoint/setFilterState', state);
+  }
   if (state.needRequest) {
     await loadList(1, pagination.value.pageSize, state);
   }
