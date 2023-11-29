@@ -542,3 +542,19 @@ export async function saveEndpointDiff(data:any): Promise<any> {
         data: data,
     });
 }
+
+export async function listFunctionsByThirdPartyClass(data: any) {
+    return request({
+        url: '/endpoint/listFunctionsByThirdPartyClass',
+        method: 'POST',
+        data
+    })
+}
+
+export async function importThirdPartyFunctions(data: any) {
+    return request({
+        url: '/endpoint/importThirdPartyFunctions',
+        method: 'POST',
+        data
+    })
+}

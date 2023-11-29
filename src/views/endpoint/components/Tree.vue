@@ -102,12 +102,6 @@ const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
 const treeDataMapCategory = computed<any>(() => store.state.Endpoint.treeDataMapCategory);
 const createTagModalVisible = ref(false);
-const props = defineProps({
-  serveId: {
-    required: false,
-    type: Number || String,
-  },
-})
 const searchValue = ref('');
 const expandedKeys = ref<number[]>([]);
 const autoExpandParent = ref<boolean>(false);
@@ -306,7 +300,6 @@ async function handleTagModalOk(obj) {
       "targetId": obj.id,
       type: "endpoint",
       "projectId": currProject.value.id,
-      "serveId": props.serveId || null, // 仅在接口管理模块下有
     });
     if (res?.code === 0) {
       createTagModalVisible.value = false;

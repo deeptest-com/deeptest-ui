@@ -1,5 +1,6 @@
 import {Mutation, Action} from 'vuex';
 import cloneDeep from "lodash/cloneDeep";
+import {message} from "ant-design-vue";
 import {StoreModuleType} from "@/utils/store";
 import {ResponseData} from '@/utils/request';
 import {
@@ -60,7 +61,9 @@ import {
     moveAlternativeCaseAssertion,
     updateName,
     getEndpointDiff,
-    saveEndpointDiff
+    saveEndpointDiff,
+    listFunctionsByThirdPartyClass,
+    importThirdPartyFunctions
 } from './service';
 
 import {
@@ -148,7 +151,8 @@ export interface StateType {
     isMockChange: boolean;
     //diff弹框信息
     diffModalVisible:any;
-
+    //diff弹框信息
+    thirdFunctionList: any;
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -214,6 +218,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setIsDefineChange:Mutation<StateType>;
         setIsMockChange:Mutation<StateType>;
         setDiffModalVisible:Mutation<StateType>;
+        setListFunctionsByClass: Mutation<StateType>;
     };
     actions: {
         listEndpoint: Action<StateType, StateType>;
@@ -298,6 +303,9 @@ export interface ModuleType extends StoreModuleType<StateType> {
         moveAlternativeCaseAssertion: Action<StateType, StateType>;
         getEndPointDiff: Action<StateType, StateType>;
         saveEndPointDiff: Action<StateType, StateType>;
+
+        listFunctionsByThirdPartyClass: Action<StateType, StateType>;
+        importThirdPartyFunctions: Action<StateType, StateType>;
     }
 }
 
@@ -325,7 +333,7 @@ const initState: StateType = {
         "title": null,
         categoryId: null,
         tagNames: [],
-        serveId:null,
+        serveIds: [],
     },
     endpointDetail: null,
     srcEndpointDetail: null,
@@ -379,6 +387,7 @@ const initState: StateType = {
     isDefineChange: false,
     isMockChange: false,
     diffModalVisible: {},
+    thirdFunctionList: [],
 };
 
 const StoreModel: ModuleType = {
@@ -593,6 +602,10 @@ const StoreModel: ModuleType = {
         setDiffModalVisible(state, payload){
             state.diffModalVisible = payload
         },
+
+        setListFunctionsByClass(state, payload) {
+            state.thirdFunctionList = payload;
+        }
     },
     actions: {
         async listEndpoint({commit, dispatch, state}, params: QueryParams) {
@@ -752,7 +765,6 @@ const StoreModel: ModuleType = {
             pageSize = pageSize || state.listResult.pagination.pageSize;
             const otherParams = {
                 ...state.filterState,
-                serveId: rootState.ServeGlobal.currServe.id,
                 ...opts
             };
 
@@ -1059,8 +1071,8 @@ const StoreModel: ModuleType = {
                 } else {
                     result = null;
                 }
-            } catch (e) {
-                console.log(e)
+            } catch (e: any) {
+                e.msg && message.error(e.msg);
             }
             return result;
         },
@@ -1622,6 +1634,36 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
+
+        async listFunctionsByThirdPartyClass({commit}, payload: any) {
+            try {
+                const response: any = await listFunctionsByThirdPartyClass(payload);
+                if (response.code === 0) {
+                    commit('setListFunctionsByClass', response.data.map(e => ({
+                        value: e.code,
+                        label: e.code
+                    })));
+                    return true;
+                }
+                return false;
+            } catch(error) {
+                message.error(error.msg);
+                return false;
+            }
+        },
+            
+        async importThirdPartyFunctions(_store, payload: any) {
+            try {
+                const response: any = await importThirdPartyFunctions(payload);
+                if (response.code === 0) {
+                    return true;
+                } 
+                return false;
+            } catch(error) {
+                error.msg && message.error(error.msg);
+                return false;
+            }
+        }
     },
 };
 

@@ -5,7 +5,7 @@ import { SelectTypes } from 'ant-design-vue/es/select';
 export default defineComponent({
     name: 'Select',
     props: ['placeholder', 'value', 'width', 'options'],
-    emits: ['change'],
+    emits: ['change', 'focus'],
     setup(props, {emit}) {
 
         const visible = ref(true)
@@ -58,7 +58,8 @@ export default defineComponent({
         
         const focus = () => {
           visible.value = true
-          console.log(visible.value,)
+          console.log(visible.value)
+          emit('focus');
         }
 
         const blur = (e :any) => {
@@ -124,14 +125,14 @@ export default defineComponent({
             mode={'multiple'}
             maxTagCount={1}
             allowClear
-            onChange={this.change}
+            onChange={(e) => this.change(e)}
             placeholder={this.props.placeholder}
             options={this.options1 ||[]}
             style={"width: 180px;"}
             value={this.values}
-            onFocus={this.focus}
+            onFocus={() => this.focus}
             maxTagPlaceholder={this.maxTagPlaceholder}
-            onBlur={this.blur}
+            onBlur={() => this.blur}
             v-on-click-outside={this.canClose}
             />
       </>)
