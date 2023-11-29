@@ -146,7 +146,6 @@ watch(
 watch(() => {
   return props.serveId;
 }, async (val, oldVal) => {
-  console.error(val, oldVal);
   if (val !== oldVal) {
     await store.dispatch('Debug/listServes', {serveId: val});
   }
