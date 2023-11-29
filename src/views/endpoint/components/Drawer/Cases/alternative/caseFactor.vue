@@ -1,5 +1,5 @@
 <template>
-  <div class="case-tree">
+  <div class="case-tree-container">
     <div class="case-tree-toolbar">
       <span class="dp-link-primary">
         <a-checkbox :disabled="executionType === 'single'" v-model:checked="allSelected" @change="handleSelect">全选</a-checkbox>
@@ -19,7 +19,7 @@
       </a-radio-group>
 
       <span class="multiple-execution-result" v-if="executionType === 'single' && reportTreeData.length > 0">
-        <span>通过</span>
+        <span :class="[getDpResultClass(getMultiExecReport.status), 'case-exec-status']">{{ getMultiExecReport.status === ResultStatus.Pass ? '通过' : '失败' }}</span>
         <a-button class="case-exec-detail" type="link" @click.stop="queryMultiDetail()">详情</a-button>
       </span>
     </div>
@@ -253,7 +253,19 @@ function getNodeMap(treeNode: any, mp: any) {
   return
 }
 
+const getMultiExecReport = computed(() => {
+  const reportInfo = reportTreeData.value[0]?.logs[0];
+  return reportInfo || {};
+});
+
 const queryMultiDetail = () => {
+  // const reportInfo = reportTreeData.value[0]?.logs[0];
+  // Object.assign(currRespDetail, {
+  //   reqContent: JSON.parse(reportInfo.reqContent || '{}') ,
+  //   resContent: JSON.parse(reportInfo.respContent || '{}') ,
+  //   invokeId: reportInfo.response.invokeId
+  // });
+  // logResponseDetailVisible.value = true;
   execDrawerVisible.value = true;
 }
 
@@ -349,7 +361,7 @@ defineExpose({ getSelectedTreeNodes, getSelectedNodes, loadCaseTree, executionTy
 </script>
 
 <style lang="less" scoped>
-.case-tree {
+.case-tree-container {
   .case-tree-toolbar {
     display: flex;
     align-items: center;
@@ -400,5 +412,14 @@ defineExpose({ getSelectedTreeNodes, getSelectedNodes, loadCaseTree, executionTy
     align-items: center;
     justify-content: center;
   }
+
+  :deep(.dp-color-pass) {
+    color: #14945a;
+  }
+
+  :deep(.dp-color-fail) {
+    color: #dc2626; 
+  }
+  
 }
 </style>
