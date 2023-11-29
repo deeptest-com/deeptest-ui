@@ -1646,8 +1646,9 @@ const StoreModel: ModuleType = {
                     return true;
                 }
                 return false;
-            } catch(error) {
-                message.error(error.msg);
+            } catch(error: any) {
+                commit('setListFunctionsByClass',[]);
+                error.msg && message.error(error.msg);
                 return false;
             }
         },
