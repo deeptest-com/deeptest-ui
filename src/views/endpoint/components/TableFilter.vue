@@ -46,7 +46,7 @@
           enter-button
           :value="formState?.title"
           @change="(e) => handleFilterChange('title',e)"
-          @search="handleFilter"/>
+          @search="e => handleFilter(true)"/>
       </a-form-item>
     </a-space>
   </a-form>
