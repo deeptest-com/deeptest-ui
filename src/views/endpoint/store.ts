@@ -434,12 +434,18 @@ const StoreModel: ModuleType = {
             state.filterState.createUser = payload.createUser || null;
             state.filterState.title = payload.title || null ;
             state.filterState.categoryId = payload.categoryId || null ;
+            state.filterState.serveIds = payload.serveIds || [];
+            state.filterState.tagNames = payload.tagNames || [];
         },
         clearFilterState(state) {
-            state.filterState.status = null;
-            state.filterState.createUser = null;
-            state.filterState.title =null ;
-            state.filterState.categoryId =null ;
+            state.filterState = {
+                status: null,
+                createUser: null,
+                title: null,
+                tagNames: [],
+                categoryId: null,
+                serveIds: [],
+            }
         },
         setEndpointDetail(state, payload) {
             state.endpointDetail = payload;
@@ -760,7 +766,7 @@ const StoreModel: ModuleType = {
                 return false
             }
         },
-        async loadList({commit, state, rootState}: any, {projectId, page, pageSize, ...opts}: any) {
+        async loadList({commit, state}: any, {projectId, page, pageSize, ...opts}: any) {
             page = page || state.listResult.pagination.current;
             pageSize = pageSize || state.listResult.pagination.pageSize;
             const otherParams = {
