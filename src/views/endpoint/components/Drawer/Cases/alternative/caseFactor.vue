@@ -19,7 +19,9 @@
       </a-radio-group>
 
       <span class="multiple-execution-result" v-if="executionType === 'single' && reportTreeData.length > 0">
-        <span :class="[getDpResultClass(getMultiExecReport.status), 'case-exec-status']">{{ getMultiExecReport.status === ResultStatus.Pass ? '通过' : '失败' }}</span>
+        <span :class="[getDpResultClass(getMultiExecReport.status), 'case-exec-status']">
+          {{ getMultiExecReport.status === ResultStatus.Pass ? '通过' : '失败' }}
+        </span>
         <a-button class="case-exec-detail" type="link" @click.stop="queryMultiDetail()">详情</a-button>
       </span>
     </div>
@@ -254,6 +256,8 @@ function getNodeMap(treeNode: any, mp: any) {
 }
 
 const getMultiExecReport = computed(() => {
+  console.log('getMultiExecReport')
+
   const reportInfo = reportTreeData.value[0]?.logs[0];
   return reportInfo || {};
 });
@@ -418,8 +422,8 @@ defineExpose({ getSelectedTreeNodes, getSelectedNodes, loadCaseTree, executionTy
   }
 
   :deep(.dp-color-fail) {
-    color: #dc2626; 
+    color: #dc2626;
   }
-  
+
 }
 </style>
