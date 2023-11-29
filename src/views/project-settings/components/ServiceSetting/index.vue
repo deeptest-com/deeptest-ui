@@ -92,20 +92,20 @@ let formConfig = ref([
     placeholder: '服务名称',
     valueType: 'string'
   },
-  {
-    type: 'select',
-    modelName: 'username',
-    placeholder: '负责人(默认创建人)',
-    options: computed(() => userListOptions.value),
-    valueType: 'string',
-    showSearch: true,
-    filterOptions: (value: string, option: any) => {
-      const valueSplitArray = (value || '').split('');
-      const nameSplitArray = (option.name || '').split('');
-      const usernameSplitArray = (option.username || '').split('');
-      return valueSplitArray.every(e => nameSplitArray.includes(e) || usernameSplitArray.includes(e));
-    } 
-  },
+  // {
+  //   type: 'select',
+  //   modelName: 'username',
+  //   placeholder: '负责人(默认创建人)',
+  //   options: computed(() => userListOptions.value),
+  //   valueType: 'string',
+  //   showSearch: true,
+  //   filterOptions: (value: string, option: any) => {
+  //     const valueSplitArray = (value || '').split('');
+  //     const nameSplitArray = (option.name || '').split('');
+  //     const usernameSplitArray = (option.username || '').split('');
+  //     return valueSplitArray.every(e => nameSplitArray.includes(e) || usernameSplitArray.includes(e));
+  //   } 
+  // },
   {
     type: 'input',
     modelName: 'description',
