@@ -23,56 +23,77 @@
       </a-form-item>
     </a-form>
 
-      <div id="deeptest-event-node" style="word-wrap: break-word;"
-           @deeptest-event-from-chrome-ext="onChromeExtEvent"></div>
+    <div class="recorded-data-list">
+      <a-form class="filter"
+              layout="inline">
 
-      <div class="recorded-data-list">
-        <div>
+        <a-form-item>
           <a-checkbox v-model:checked="checkAll" class="check-all"
                       @change="onCheckAll">
             全选
           </a-checkbox>
-        </div>
+        </a-form-item>
 
-        <a-checkbox-group v-model:value="checkedItems">
-          <div v-for="(item, index) in recordData" :key="index"
-              :class="[activeItem.requestId === item.requestId ? 'active' : '']"
-              class="recorded-data-item">
+        <a-form-item class="form-item-search">
+          <a-select v-model:value="searchModel.method">
+            <a-select-option value="">请求方法</a-select-option>
+            <a-select-option v-for="(item, index) in requestMethodOpts" :key="index"
+                             :value="item.value">
+              {{item.label}}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
 
-            <div class="header dp-link">
-              <span class="checkbox block">
-                <a-checkbox :value="index" />
-              </span>
+        <a-form-item class="form-item-keywords">
+          <a-input-search v-model:value="searchModel.keywords"
+                          @search="onSearch"
+                          placeholder="输入关键字过滤"
+                          enter-button />
+        </a-form-item>
+      </a-form>
 
-              <span class="method block">{{item.info.request?.method}}</span>
-              <span class="url block">{{getUrl(item.info.request?.url)}}</span>
-              <span class="status block" :class="getResultClass(responseMap[item.requestId]?.info?.response?.status)">
-                <CheckCircleOutlined v-if="responseMap[item.requestId]?.info?.response?.status===200" />
-                <CloseCircleOutlined v-else />
+      <a-checkbox-group v-model:value="checkedItems">
+        <div v-for="(item, index) in recordData" :key="index"
+            :class="[activeItem?.requestId === item.requestId ? 'active' : '']"
+            class="recorded-data-item">
 
-                {{responseMap[item.requestId]?.info?.response?.statusText}}
-              </span>
+          <div class="header dp-link">
+            <span class="checkbox block">
+              <a-checkbox :value="index" />
+            </span>
 
-              <span @click.stop="expand(item)" class="actions block">
-                <RightOutlined v-if="activeItem.requestId !== item.requestId"
-                               @click.stop="expand(item)"
-                               class="dp-icon-btn dp-trans-80" />
-                <DownOutlined v-if="activeItem.requestId === item.requestId"
-                              @click.stop="expand(item)"
-                              class="dp-icon-btn dp-trans-80" />
-              </span>
-            </div>
+            <span class="method block">{{item.info.request?.method}}</span>
+            <span class="url block">{{getUrl(item.info.request?.url)}}</span>
+            <span class="status block" :class="getResultClass(responseMap[item.requestId]?.info?.response?.status)">
+              <CheckCircleOutlined v-if="responseMap[item.requestId]?.info?.response?.status===200" />
+              <CloseCircleOutlined v-else />
 
-            <div class="content" v-if="activeItem.requestId === item.requestId">
-              请求：{{item}}
-              <br />
-              响应：{{responseMap[item.requestId]}}
-            </div>
+              {{responseMap[item.requestId]?.info?.response?.statusText}}
+            </span>
 
+            <span @click.stop="expand(item)" class="actions block">
+              <RightOutlined v-if="activeItem?.requestId !== item.requestId"
+                             @click.stop="expand(item)"
+                             class="dp-icon-btn dp-trans-80" />
+              <DownOutlined v-if="activeItem?.requestId === item.requestId"
+                            @click.stop="expand(item)"
+                            class="dp-icon-btn dp-trans-80" />
+            </span>
           </div>
 
-        </a-checkbox-group>
-      </div>
+          <div class="content" v-if="activeItem?.requestId === item.requestId">
+            请求：{{item}}
+            <br />
+            响应：{{responseMap[item.requestId]}}
+          </div>
+
+        </div>
+
+      </a-checkbox-group>
+    </div>
+
+    <div id="deeptest-event-node" style="word-wrap: break-word;"
+         @deeptest-event-from-chrome-ext="onChromeExtEvent"></div>
   </div>
 </template>
 
@@ -86,13 +107,14 @@ import {Form} from "ant-design-vue";
 import {ResultStatus} from "@/utils/enum";
 import {StateType as DiagnoseInterfaceStateType} from "@/views/diagnose/store";
 import {StateType as ServeStateType} from "@/store/serve";
+import {requestMethodOpts} from "@/config/constant";
 
 const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType, ServeGlobal: ServeStateType }>();
 const recordConf = computed<any>(() => store.state.DiagnoseInterface.recordConf);
 const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 
 const useForm = Form.useForm;
-const model = ref({url: 'http://localhost:8000/test/request'})
+const model = ref({url: `${window.location.origin}/test/request`})
 const rules = ref({
   url: [
     {required: true, message: '请输入站点URL地址', trigger: 'blur'},
@@ -101,12 +123,29 @@ const rules = ref({
 const {resetFields, validate, validateInfos} = useForm(model, rules);
 
 const activeItem = ref({} as any)
-const recordData = ref([] as any[])
 const requestMap = ref({} as any)
 const responseMap = ref({} as any)
 const checkedItems = ref([] as any[])
 const isRecording = ref(false)
 const checkAll = ref(false)
+const searchModel = ref({method: '', keywords: ''})
+
+const recordDataOrigin = ref([] as any[])
+const recordData = computed<any>(() => {
+  const ret = recordDataOrigin.value.filter((item) => {
+    if (item.info?.request?.method.indexOf(searchModel.value.method) > -1 &&
+        item.info?.request?.url.indexOf(searchModel.value.keywords) > -1)
+      return true
+  })
+
+  console.log('000', ret)
+
+  return ret
+})
+
+const onSearch = () => {
+  console.log('onSearch', searchModel.value)
+}
 
 const expand = (item) => {
   if (activeItem.value.requestId === item.requestId) {
@@ -169,7 +208,7 @@ const onChromeExtEvent =(event) => {
     }
     responseMap.value[data.requestId] = data
   } else {
-    recordData.value.push(data)
+    recordDataOrigin.value.push(data)
     requestMap.value[data.requestId] = data
   }
 }
@@ -221,6 +260,15 @@ const wrapperCol = {span: 20}
   overflow-y: auto;
 
   .recorded-data-list {
+    .filter {
+      margin-bottom: 6px;
+      .form-item-search {
+        width: 160px;
+      }
+      .form-item-keywords {
+        width: 360px;
+      }
+    }
     .check-all {
       padding-left: 12px;
     }
