@@ -29,9 +29,8 @@
                     @blur="validate('sql', { trigger: 'blur' }).catch(() => {})"/>
       </a-form-item>
 
-      <a-form-item label="JSONPath" v-bind="validateInfos.jsonPath" required>
-        <a-input v-model:value="model.jsonPath"
-                 @blur="validate('jsonPath', { trigger: 'blur' }).catch(() => {})"/>
+      <a-form-item label="JSONPath" v-bind="validateInfos.jsonPath">
+        <a-input v-model:value="model.jsonPath" />
 
         <div class="tips">
           <div>数据查询返回的结果是个数组，可使用表达式$[0].name读取第一行记录的name属性。</div>
@@ -42,11 +41,10 @@
 
       </a-form-item>
 
-      <a-form-item label="变量名称" v-bind="validateInfos.variable" required>
+      <a-form-item label="变量名称" v-bind="validateInfos.variable">
         <a-input-group compact>
           <a-input v-model:value="model.variable"
                    @change="onVarChanged"
-                   @blur="validate('variable', { trigger: 'blur' }).catch(() => {})"
                    style="width: 72%"/>
 
           <a-select v-model:value="model.code"
@@ -120,9 +118,6 @@ const checkConn = async (rule: any, value: number) => {
 const rules = computed(() => { return {
   dbConnId: [
     { validator: checkConn, trigger: 'change' },
-  ],
-  variable: [
-    {required: true, message: '请输入变量名', trigger: 'blur'},
   ],
 }})
 
