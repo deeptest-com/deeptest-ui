@@ -27,7 +27,7 @@
           <span class="form-tip">例如：https://lzos.rysaas.cn</span>
         </a-form-item>
         <a-form-item label="智能体名" name="classCode">
-          <a-input v-model:value="modelRef.classCode" placeholder="请输入智能体模型类"/>
+          <a-input v-model:value="modelRef.classCode" placeholder="请输入智能体模型类" @change="handleClassCodeChanged"/>
         </a-form-item>
         <a-form-item label="消息名" name="functionCodes">
           <a-select
@@ -301,6 +301,12 @@ const filterOption = (input: string, option: any) => {
     return true
   }
 };
+
+const handleClassCodeChanged = () => {
+  Object.assign(modelRef, {
+    functionCodes: [],
+  })
+}
 
 function ok() {
   if (uploading.value) {

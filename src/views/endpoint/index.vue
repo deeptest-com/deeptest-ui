@@ -277,7 +277,7 @@ const columns = [
     title: '状态',
     dataIndex: 'status',
     slots: {customRender: 'colStatus'},
-    width: 80,
+    width: 100,
   },
   {
     title: '所属服务',
