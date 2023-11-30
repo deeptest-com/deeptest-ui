@@ -23,13 +23,21 @@
       <!-- 智能体厂 -->
       <template v-if="modelRef.driverType === 'lzos'">
         <a-form-item label="环境URL" name="filePath">
-          <a-input v-model:value="modelRef.filePath" placeholder="请输入智能体厂环境url地址"/>
-          <span class="form-tip" style="color: #7F7F7F">例如：https://lzos.rysaas.cn</span>
+          <a-input v-model:value="modelRef.filePath" placeholder="请输入智能体厂环境URL地址，如 https://lzos.rysaas.cn"/>
         </a-form-item>
         <a-form-item label="智能体名" name="classCode">
           <a-input v-model:value="modelRef.classCode" placeholder="请输入智能体模型类" @change="handleClassCodeChanged"/>
         </a-form-item>
-        <a-form-item label="消息名" name="functionCodes">
+        <a-form-item name="functionCodes">
+          <template v-slot:label>
+            消息名
+            <a-tooltip placement="topLeft">
+              <template v-slot:title>
+              智能体消息将被同步为乐研API中的接口
+              </template>
+            <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)" />
+            </a-tooltip>
+          </template>
           <a-select
             @focus="handleFocus"
             v-model:value="modelRef.functionCodes"
@@ -100,9 +108,8 @@
           :treeDefaultExpandAll="true"
           :replaceFields="{ title: 'name',value:'id'}"
           :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-          placeholder="请选择分类"
+          placeholder="请选择分类目录，为空时默认导入至根目录下"
           allow-clear/>
-          <span class="form-tip" style="color: #7F7F7F">分类目录为空时，默认导入至根目录下</span>
       </a-form-item>
       <a-form-item label="所属服务" name="serveId">
         <SelectServe v-if="visible" @change="change"/>
@@ -130,7 +137,7 @@
         v-model:value="modelRef.dataSyncType"
         :options="dataSyncTypeOpts"
         placeholder="请选择"/>
-      <span class="form-tip"><WarningOutlined /> 完全覆盖会导致通过平台上的接口定义更新被覆盖，请谨慎使用</span>
+      <span v-if="modelRef.dataSyncType === 1" class="form-tip"><WarningOutlined /> 完全覆盖会导致通过平台上的接口定义更新被覆盖，请谨慎使用</span>
       </a-form-item>
     </a-form>
   </a-modal>
@@ -273,7 +280,7 @@ const rulesRef = computed(() => ({
   "filePath": [
     {
       required: true,
-      message: modelRef.driverType === 'lzos' ? '请输入智能体厂环境url地址 例如：https://lzos.rysaas.cn' : modelRef.openUrlImport ? '请输入swagger url' : '请选择文件',
+      message: modelRef.driverType === 'lzos' ? '请输入智能体厂环境url地址' : modelRef.openUrlImport ? '请输入Swagger Url' : '请选择文件',
     }
   ],
 }));
