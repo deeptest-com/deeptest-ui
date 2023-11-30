@@ -304,6 +304,9 @@ const handleFocus = async () => {
       });
       fetching.value = false;
     })
+    .catch(err => {
+      console.log('error', err);
+    })
 };
 
 const filterOption = (input: string, option: any) => {
