@@ -14,6 +14,7 @@
       <DetailTabHeader 
         :tab-list="ScenarioTabList" 
         :show-btn="true" 
+        :active-key="activeKey"
         @change-tab="changeTab">
         <template #btn>
           <a-button v-if="activeKey === '1'" class="tab-header-btn" type="primary" @click="onSelectEnv">执行场景</a-button>
@@ -21,7 +22,7 @@
       </DetailTabHeader>
     </template>
     <template #tabContent>
-      <div class="tab-pane" :style="activeKey !== '1' ? { padding: '16px'} : null">
+      <div class="tab-pane" :style="activeKey !== '1' ? { padding: '16px'} : undefined">
         <Design v-if="activeKey === '1'" :id="detailResult?.id"/>
         <ExecList v-if="activeKey === '2'" @showDetail="showDetail"/>
         <PlanList v-if="activeKey === '3'" :linked="true"/>
@@ -72,15 +73,14 @@ onMounted(async () => {
     }
     const tempArr = tsSerialNumber.split('-');
     const tsId = tempArr[tempArr.length - 1];
-    await store.dispatch('Scenario/getNode', null) // clear right page
     await store.dispatch('Scenario/getScenario', tsId);
     /**
      * 单独刷新详情页 需要初始化 用户列表和 serve列表
      */
     await store.dispatch('Project/getUserList');
-    await store.dispatch('Scenario/loadCategory');
     store.commit('Global/setSpinning', false);
     store.commit('Detail/setShow', true);
+    store.dispatch('Scenario/loadCategory');
   } catch(e) {
     store.commit('Global/setSpinning', false);
     store.commit('Detail/setShow', true);

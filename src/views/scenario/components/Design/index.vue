@@ -31,11 +31,4 @@ onMounted(() => {
   store.dispatch('Scenario/getNode', null)
 })
 
-watch(() => {
-  return selectedNode.value;
-}, val => {
-  console.log(val);
-}, {
-  immediate: true
-})
 </script>
