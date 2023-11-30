@@ -108,7 +108,7 @@
           :treeDefaultExpandAll="true"
           :replaceFields="{ title: 'name',value:'id'}"
           :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-          placeholder="请选择分类目录，为空时默认导入至根目录下"
+          placeholder="请选择分类目录"
           allow-clear/>
       </a-form-item>
       <a-form-item label="所属服务" name="serveId">
