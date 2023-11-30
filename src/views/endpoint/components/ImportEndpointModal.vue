@@ -47,7 +47,7 @@
       </template>
       <!-- Swagger -->
       <template v-else-if="modelRef.driverType === 'swagger'">
-        <a-form-item label="开启url导入" name="openUrlImport">
+        <a-form-item label="导入方式" name="openUrlImport">
           <a-radio-group 
             :options="openUrlImportOpts"
             v-model:value="modelRef.openUrlImport"/>
@@ -67,7 +67,7 @@
             </a-upload>
           </a-spin>
         </a-form-item>
-        <a-form-item label="swagger url" v-if="modelRef.openUrlImport" name="filePath">
+        <a-form-item label="Swagger URL" v-if="modelRef.openUrlImport" name="filePath">
           <a-input v-model:value="modelRef.filePath" />
         </a-form-item>
       </template>
@@ -112,14 +112,16 @@
         数据合并策略
         <a-tooltip placement="topLeft" arrow-point-at-center overlayClassName="memo-tooltip">
           <template v-slot:title>
-            当存在相同接口（方法和路径相同）定义时，可采用不同的策略：<br>
-            <span class="title">智能合并（推荐）</span><br>
-            自上次导入之后，接口在平台上没有做过修改，则覆盖。<br>
-            自上次导入之后，接口在平台做过修改，本次导入定义无变更，保留平台修改。<br>
-            自上次导入之后，接口在平台做过修改、本次导入定义也有变更，则提示不一致，用户手动处理。<br>
-            接口所属分类目录保留平台的修改。<br>
+            当存在相同接口时（路径和方法定义相同），可采用不同的合并策略：<br>
+            <span class="title">智能合并</span><br>
+            自上次导入之后：<br>
+            1.仅有一侧接口有变更，平台保留变更后的接口定义；<br>
+            2.若两侧均有变更，则标记不一致，用户需手动处理。<br>
             <span class="title">新增</span><br>
             全新导入，即使存在相同接口，也创建新的接口定义。<br>
+            <span class="title">完全覆盖</span><br>
+            不保留平台中的接口变更，完全使用导入的数据进行覆盖，包括接口所属分类目录。<br>
+            仅限相同数据源导入的接口，通过平台创建的接口定义不会被合并。<br>
         </template>
         <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)" />
         </a-tooltip>
@@ -196,12 +198,12 @@ const dataSyncTypeOpts = [
 
 const openUrlImportOpts = [
   {
-    label: '是',
-    value: true,
+    label: '文件导入',
+    value: false,
   },
   {
-    label: '否',
-    value: false,
+    label: 'URL导入',
+    value: true,
   }
 ];
 
