@@ -31,7 +31,7 @@
         <a-form-item name="functionCodes">
           <template v-slot:label>
             消息名
-            <a-tooltip placement="topLeft" arrow-point-at-center overlayClassName="memo-tooltip">
+            <a-tooltip placement="topLeft">
               <template v-slot:title>
               智能体消息将被同步为乐研API中的接口
               </template>
