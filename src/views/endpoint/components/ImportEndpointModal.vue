@@ -31,9 +31,9 @@
         <a-form-item name="functionCodes">
           <template v-slot:label>
             消息名
-            <a-tooltip placement="topLeft">
+            <a-tooltip placement="topLeft" overlayClassName="message-tooltip">
               <template v-slot:title>
-              智能体消息将被同步为乐研API中的接口
+                <div>智能体消息将被同步为乐研API中的接口</div>
               </template>
             <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)" />
             </a-tooltip>
@@ -491,6 +491,10 @@ const change = (val)=>{
     font-weight: 600;
     margin-bottom: 10px;
   }
+}
+
+.message-tooltip {
+  min-width: 266px;
 }
 </style>
 
