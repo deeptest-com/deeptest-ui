@@ -24,7 +24,7 @@
       <template v-if="modelRef.driverType === 'lzos'">
         <a-form-item label="环境URL" name="filePath">
           <a-input v-model:value="modelRef.filePath" placeholder="请输入智能体厂环境url地址"/>
-          <span class="form-tip">例如：https://lzos.rysaas.cn</span>
+          <span class="form-tip" style="color: #7F7F7F">例如：https://lzos.rysaas.cn</span>
         </a-form-item>
         <a-form-item label="智能体名" name="classCode">
           <a-input v-model:value="modelRef.classCode" placeholder="请输入智能体模型类" @change="handleClassCodeChanged"/>
@@ -102,7 +102,7 @@
           :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
           placeholder="请选择分类"
           allow-clear/>
-          <span class="form-tip">分类目录为空时，默认导入至根目录下</span>
+          <span class="form-tip" style="color: #7F7F7F">分类目录为空时，默认导入至根目录下</span>
       </a-form-item>
       <a-form-item label="所属服务" name="serveId">
         <SelectServe v-if="visible" @change="change"/>
