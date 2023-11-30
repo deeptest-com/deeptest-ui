@@ -455,14 +455,12 @@ watch(() => {
 
 const change = (val)=>{
   modelRef.serveId = val
-  console.log(modelRef.serveId,"282832838")
 }
 
 const handleTreeSelectSearch = (evt) => {
   loading.value = true;
   treeData.value = [];
   setTimeout(() => {
-    console.log(filterByKeyword(cloneDeep(treeDataCategory.value || []) , evt, 'name'));
     treeData.value = filterByKeyword(cloneDeep(treeDataCategory.value || []) , evt, 'name');
     loading.value = false;
   }, 500);
