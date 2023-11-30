@@ -444,10 +444,7 @@ watch(() => {
 }, (newVal) => {
   if(newVal) {
     confirmLoading.value = false;
-  }
-  if (newVal && props.selectedCategoryId) {
-    modelRef.categoryId = props.selectedCategoryId || null;
-
+    modelRef.categoryId = (!props.selectedCategoryId || props.selectedCategoryId === -1) ? null : props.selectedCategoryId;
   }
 }, {
   immediate: true

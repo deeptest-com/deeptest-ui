@@ -726,7 +726,6 @@ const StoreModel: ModuleType = {
             try {
                 await removeCategory(payload.id, payload.type);
                 await dispatch('loadCategory');
-                await dispatch('loadList', {projectId: payload.projectId});
                 return true;
             } catch (error) {
                 return false;
