@@ -122,10 +122,12 @@ const formState: UnwrapRef<NewEndpointFormState> = reactive({
 const showError = ref(false)
 
 watch(() => {
-  return props.selectedCategoryId
+  return props.visible
 }, (newVal) => {
   if (newVal) {
-    formState.categoryId = props.selectedCategoryId || -1;
+    Object.assign(formState, {
+      categoryId: props.selectedCategoryId || -1
+    });
   }
 }, {
   immediate: true
