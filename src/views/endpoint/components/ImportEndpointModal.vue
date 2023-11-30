@@ -102,6 +102,7 @@
           :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
           placeholder="请选择分类"
           allow-clear/>
+          <span class="form-tip">分类目录为空时，默认导入至根目录下</span>
       </a-form-item>
       <a-form-item label="所属服务" name="serveId">
         <SelectServe v-if="visible" @change="change"/>
@@ -239,7 +240,7 @@ const rulesRef = computed(() => ({
   ],
   "categoryId": [
     {
-      required: true,
+      required: false,
       message: '请选择所属分类目录',
     }
   ],
@@ -288,22 +289,19 @@ const handleDriverTypeChanged = (v) => {
 const fetching = ref(false);
 
 const handleFocus = async () => {
-  if (!modelRef.filePath && !modelRef.classCode) {
-    message.error('请先输入环境URL和智能体名');
-    store.commit('Endpoint/setListFunctionsByClass', []);
-    return;
-  }
-  if (!modelRef.filePath || !modelRef.classCode) {
-    message.error(!modelRef.filePath ? '请先输入环境URL' : '请先输入智能体名');
-    store.commit('Endpoint/setListFunctionsByClass', []);
-    return;
-  }
-  fetching.value = true;
-  await store.dispatch('Endpoint/listFunctionsByThirdPartyClass', {
-    filePath: modelRef.filePath,
-    classCode: modelRef.classCode
-  });
-  fetching.value = false;
+  formRef.value
+    .validateFields([
+      'filePath',
+      'classCode'
+    ])
+    .then(async () => {
+      fetching.value = true;
+      await store.dispatch('Endpoint/listFunctionsByThirdPartyClass', {
+        filePath: modelRef.filePath,
+        classCode: modelRef.classCode
+      });
+      fetching.value = false;
+    })
 };
 
 const filterOption = (input: string, option: any) => {
