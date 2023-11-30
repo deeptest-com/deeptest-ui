@@ -27,12 +27,12 @@
               </span>
             </a-col>
             <TooltipJumpUrl :jumpUrl="jumpUrl">
-            <a-col flex="1" class="title">
+            <a-col flex="1" class="name">
               {{item.name}}
             </a-col>
             </TooltipJumpUrl>
             <TooltipJumpUrl :jumpUrl="jumpUrl">
-            <a-col flex="1" class="title">
+            <a-col flex="1" class="value">
               {{item.defaultValue}}
             </a-col>
            </TooltipJumpUrl> 
@@ -122,6 +122,14 @@
       }
 
     } 
+
+    .params {
+      .name, .value {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
   }
   
   </style>
