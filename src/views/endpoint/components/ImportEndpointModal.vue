@@ -99,17 +99,25 @@
       </template>
       <span class="form-header-title">导入设置</span>
       <a-form-item label="导入至分类" name="categoryId">
-        <a-tree-select
-          @change="selectedCategory"
-          :value="modelRef.categoryId"
-          show-search
-          :multiple="false"
-          :treeData="treeData"
-          :treeDefaultExpandAll="true"
-          :replaceFields="{ title: 'name',value:'id'}"
-          :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-          placeholder="请选择分类目录"
-          allow-clear/>
+        <Empty :loading="loading">
+          <template #content>
+            <a-tree-select
+              @change="selectedCategory"
+              :value="modelRef.categoryId"
+              v-model:searchValue="searchValue"
+              show-search
+              :multiple="false"
+              :treeData="treeData"
+              :treeDefaultExpandAll="true"
+              :filterTreeNode="false"
+              :replaceFields="{ title: 'name',value:'id'}"
+              :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+              placeholder="请选择分类目录"
+              @search="handleTreeSelectSearch"
+              allow-clear/>
+          </template>
+        </Empty>
+        
       </a-form-item>
       <a-form-item label="所属服务" name="serveId">
         <SelectServe v-if="visible" @change="change"/>
@@ -153,13 +161,17 @@ import {
   computed, watch,
 } from 'vue';
 import {useStore} from "vuex";
-import { message } from 'ant-design-vue';
+import cloneDeep from "lodash/cloneDeep";
 import {UploadOutlined,QuestionCircleOutlined, WarningOutlined} from '@ant-design/icons-vue';
 import {notifyWarn} from "@/utils/notify";
 import SelectServe from './SelectServe/index.vue';
+import Empty from '@/components/TableEmpty/index.vue';
+import { filterByKeyword } from '@/utils/tree';
 
 const store = useStore<{ Endpoint }>();
-const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
+const treeDataCategory = computed<any>(() => {
+  return (store.state.Endpoint.treeDataCategory?.[0]?.children || []).filter(e => e.id !== -1)
+});
 
 const props = defineProps({
   visible: {
@@ -214,10 +226,9 @@ const openUrlImportOpts = [
   }
 ];
 
-const treeData: any = computed(() => {
-  const data = treeDataCategory.value;
-  return data?.[0]?.children || [];
-});
+const treeData: any = ref([]);
+
+const loading = ref(false);
 
 const modelRef = reactive<any>({
   categoryId: null as any,
@@ -230,6 +241,8 @@ const modelRef = reactive<any>({
   classCode: '',
   functionCodes: [],
 });
+
+const searchValue = ref('');
 
 const confirmLoading = ref(false);
 
@@ -342,6 +355,7 @@ function ok() {
 
       const res = await store.dispatch('Endpoint/importEndpointData', {
         ...params,
+        categoryId: modelRef.categoryId || -1,
         "sourceType": 2,
       });
       confirmLoading.value = false;
@@ -439,24 +453,24 @@ watch(() => {
   immediate: true
 })
 
-const rules = {
-  categoryId: [{required: false}],
-  driverType: [{required: true, message: '请选择接口数据来源'}],
-  dataSyncType: [{required: true, message: '请选择数据同步方式'}],
-  openUrlImport: [{required: false}],
-  filePath: [{required: true, message: '请上传文件或输入url地址'}],
-};
-
-const disabled = computed(()=>{
-  return modelRef.driverType != "swagger"
-})
-
 const change = (val)=>{
   modelRef.serveId = val
-  console.log(modelRef.serveId,"282832838")
 }
 
+const handleTreeSelectSearch = (evt) => {
+  loading.value = true;
+  treeData.value = [];
+  setTimeout(() => {
+    treeData.value = filterByKeyword(cloneDeep(treeDataCategory.value || []) , evt, 'name');
+    loading.value = false;
+  }, 500);
+}
 
+watch(() => {
+  return treeDataCategory.value;
+}, (val) => {
+  treeData.value = val;
+})
 
 </script>
 
