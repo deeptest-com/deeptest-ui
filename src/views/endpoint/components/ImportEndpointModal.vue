@@ -143,7 +143,7 @@ import {
   computed, watch,
 } from 'vue';
 import {useStore} from "vuex";
-import cloneDeep from "lodash/cloneDeep";
+import { message } from 'ant-design-vue';
 import {UploadOutlined,QuestionCircleOutlined, WarningOutlined} from '@ant-design/icons-vue';
 import {notifyWarn} from "@/utils/notify";
 import SelectServe from './SelectServe/index.vue';
@@ -288,6 +288,16 @@ const handleDriverTypeChanged = (v) => {
 const fetching = ref(false);
 
 const handleFocus = async () => {
+  if (!modelRef.filePath && !modelRef.classCode) {
+    message.error('请先输入环境URL和智能体名');
+    store.commit('Endpoint/setListFunctionsByClass', []);
+    return;
+  }
+  if (!modelRef.filePath || !modelRef.classCode) {
+    message.error(!modelRef.filePath ? '请先输入环境URL' : '请先输入智能体名');
+    store.commit('Endpoint/setListFunctionsByClass', []);
+    return;
+  }
   fetching.value = true;
   await store.dispatch('Endpoint/listFunctionsByThirdPartyClass', {
     filePath: modelRef.filePath,
