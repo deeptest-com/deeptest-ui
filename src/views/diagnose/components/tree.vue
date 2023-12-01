@@ -169,7 +169,7 @@ const showKeywordsTip = computed(() => {
 async function loadTreeData() {
   if (currProject?.value?.id > 0 && currServe?.value?.id > 0) {
     await store.dispatch('DiagnoseInterface/loadTree', {projectId: currProject.value.id, serveId: currServe.value.id});
-    expandAll();
+    //expandAll();
   }
 }
 
