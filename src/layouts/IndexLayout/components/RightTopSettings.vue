@@ -21,7 +21,7 @@
 
         <span v-else>
           <CloudDownloadOutlined class="user-icon" style="color: #c0c4cc;" />
-          <a href="https://deeptest.com/setup.html" target="_blank" style="color: #fff;">
+          <a href="https://deeptest.com/setup.html" target="_blank" style="color: #8A8A8A;">
             客户端下载
           </a>
         </span>
