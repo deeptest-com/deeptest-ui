@@ -104,7 +104,7 @@
 <script setup lang="ts">
 import {
   computed, ref, onMounted,
-  watch, defineEmits, defineProps, unref
+  watch, defineEmits, unref
 } from 'vue';
 import {
   PlusOutlined,
@@ -132,18 +132,9 @@ import {notifyError, notifySuccess} from "@/utils/notify";
 
 const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType, ProjectGlobal: ProjectStateType, ServeGlobal: ServeStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
-const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
-
 const treeData = computed<any>(() => store.state.DiagnoseInterface.treeData);
 const treeDataMap = computed<any>(() => store.state.DiagnoseInterface.treeDataMap);
 const interfaceId = computed<any>(() => store.state.DiagnoseInterface.interfaceId);
-
-const props = defineProps({
-  serveId: {
-    required: false,
-    type: Number || String,
-  },
-})
 
 const keywords = ref('');
 const replaceFields = {key: 'id'};
@@ -171,12 +162,6 @@ async function loadTreeData() {
   expandAll();
 }
 
-async function getServeServers() {
-  await store.dispatch('DiagnoseInterface/getServeServers', {
-    id: currServe.value.id,
-  })
-}
-
 watch(() => currProject.value.id, async (newVal, oldVal) => {
   if (newVal !== oldVal) {
     store.commit('DiagnoseInterface/setTreeData', []);
@@ -189,13 +174,6 @@ watch(() => currProject.value.id, async (newVal, oldVal) => {
     }, 300);
   }
 }, {immediate: true});
-
-watch(() => currServe.value.id, async val => {
-  if (!val) {
-    await store.dispatch('ServeGlobal/fetchServe');
-    getServeServers();
-  }
-}, { immediate: true });
 
 watch(keywords, (newVal) => {
   expandedKeys.value = filterTree(treeData.value, newVal)
@@ -250,10 +228,8 @@ function selectNode(keys, e) {
   }
   setSelectedKey(getSelectedKeyName(), currProject.value.id, selectedKeys.value[0])
 
-  // if (e) {
-    const selectedItem = treeDataMap.value[selectedKeys.value[0]]
-    store.dispatch('DiagnoseInterface/openInterfaceTab', selectedItem);
-  // }
+  const selectedItem = treeDataMap.value[selectedKeys.value[0]]
+  store.dispatch('DiagnoseInterface/openInterfaceTab', selectedItem);
 }
 
 const currentNode = ref(null as any);
@@ -278,7 +254,6 @@ async function handleModalOk(model) {
   console.log('handleModalOk')
   Object.assign(model, {
     projectId: currProject.value.id,
-    serveId: currServe.value.id,
   })
 
   const interfaceData = await store.dispatch('DiagnoseInterface/saveInterface', model);
