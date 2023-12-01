@@ -5,6 +5,7 @@
 # 同步 config/root-directory 下的文件到 / 目录下
 # 复制根目录下的文件
 cp -a frontend-config/.env.*   ./
+cp -a frontend-config/.app.*   ./
 cp -a frontend-config/package.json   ./
 cp -a frontend-config/.yarnrc  ./
 # 复制 assets 的目录

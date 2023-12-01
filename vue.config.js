@@ -1,9 +1,18 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const bodyParser = require('body-parser')
 const mockServer = require('./src/utils/mock/server');
-const { NODE_ENV, VUE_APP_PORT, VUE_APP_MOCK } = process.env;
-
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
+
+let { NODE_ENV, VUE_APP_PORT, VUE_APP_MOCK, APP_CONF } = process.env
+
+// loa app conf if needed
+if (NODE_ENV === 'production' && APP_CONF !== '') {
+    const prodConf = require(`./.app.${APP_CONF}`)
+
+    process.env.VUE_APP_API_SERVER = prodConf.VUE_APP_API_SERVER
+    process.env.VUE_APP_API_AGENT = prodConf.VUE_APP_API_SERVER
+}
+console.log('API URL: ', process.env.VUE_APP_API_SERVER, process.env.VUE_APP_API_AGENT)
 
 module.exports = {
     publicPath: '/',

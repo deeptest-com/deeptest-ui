@@ -48,3 +48,6 @@ README.md
 
 *.sh
 
+/.prod.*.js
+/.app.client.js
+/.app.demo.js
