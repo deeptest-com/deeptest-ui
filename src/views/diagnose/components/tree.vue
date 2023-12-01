@@ -32,6 +32,10 @@
 
           <template #title="nodeProps">
             <div class="tree-title" :title="nodeProps.dataRef.title" :draggable="nodeProps.dataRef.id === -1">
+              <span class="tree-icon">
+                <FolderOutlined v-if="nodeProps.dataRef.type === 'dir' && !nodeProps.expanded" />
+                <FolderOpenOutlined v-if="nodeProps.dataRef.type === 'dir' && nodeProps.expanded" />
+              </span>
               <span class="tree-title-text" v-if="nodeProps.dataRef.title.indexOf(keywords) > -1">
                 <span>{{nodeProps.dataRef.title.substr(0, nodeProps.dataRef.title.indexOf(keywords))}}</span>
                 <span style="color: #f50">{{keywords}}</span>
@@ -41,26 +45,26 @@
 
               <span class="more-icon" v-if="nodeProps.dataRef.id > 0">
                   <a-dropdown>
-                       <MoreOutlined/>
+                      <MoreOutlined/>
                       <template #overlay>
                         <a-menu>
                           <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="0" @click="create(nodeProps.dataRef.id, 'dir')">
-                             新建目录
+                            新建目录
                           </a-menu-item>
                           <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="1" @click="create(nodeProps.dataRef.id, 'interface')">
-                             新建接口
+                            新建接口
                           </a-menu-item>
                           <a-menu-item v-if="nodeProps.dataRef.id !== -1" key="2" @click="edit(nodeProps)">
-                           {{'编辑' + (nodeProps.dataRef.type === 'interface' ? '接口' : '目录')}}
+                          {{'编辑' + (nodeProps.dataRef.type === 'interface' ? '接口' : '目录')}}
                           </a-menu-item>
                           <a-menu-item v-if="nodeProps.dataRef.id !== -1" key="3" @click="deleteNode(nodeProps.dataRef)">
                             {{'删除' + (nodeProps.dataRef.type === 'interface' ? '接口' : '目录')}}
                           </a-menu-item>
                           <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="4" @click="importInterfaces(nodeProps.dataRef)">
-                             导入接口
+                            导入接口
                           </a-menu-item>
                           <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="5" @click="importCurl(nodeProps.dataRef)">
-                             导入cURL
+                            导入cURL
                           </a-menu-item>
                         </a-menu>
                       </template>
@@ -109,7 +113,9 @@ import {
 import {
   PlusOutlined,
   CaretDownOutlined,
-  MoreOutlined
+  MoreOutlined,
+  FolderOutlined,
+  FolderOpenOutlined
 } from '@ant-design/icons-vue';
 import {message, Modal, notification, Spin} from 'ant-design-vue';
 import {DropEvent} from 'ant-design-vue/es/tree/Tree';
@@ -218,7 +224,10 @@ let selectedKeys = ref<number[]>([]);
 const emit = defineEmits(['select']);
 
 function selectNode(keys, e) {
-  console.log('selectNode', keys, treeDataMap.value)
+  if (e?.node?.dataRef?.type === 'dir') {
+    // 目录不可被点击
+    return;
+  }
 
   if (keys.length === 0 && e) {
     selectedKeys.value = [e.node.dataRef.id] // un-select
@@ -374,7 +383,29 @@ watch(() => {
     justify-content: center;
   }
 
+  :deep(.ant-tree-node-content-wrapper) {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
 
+    .ant-tree-title {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+    }
+  }
+
+  .tree-title {
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+
+    .tree-icon {
+      margin-right: 4px;
+    }
+  }
+
+  
   .nodata-tip {
     margin-left: 0 !important;
   }
