@@ -153,7 +153,7 @@ const treeData: any = computed(() => {
 
 async function loadCategorys() {
   await store.dispatch('Scenario/loadCategory');
-  expandAll();
+  //expandAll();
 }
 
 // 切换项目  重置搜索关键词/重置分类列表

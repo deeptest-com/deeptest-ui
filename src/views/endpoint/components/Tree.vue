@@ -166,7 +166,7 @@ onMounted(async () => {
 
 async function loadCategories() {
   await store.dispatch('Endpoint/loadCategory');
-  expandAll();
+ // expandAll();
   await nextTick();
 }
 
