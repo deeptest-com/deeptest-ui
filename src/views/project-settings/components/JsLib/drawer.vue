@@ -67,7 +67,7 @@
             </div>
             <div class="dp-input-tip">
               包含函数的具体实现代码。&nbsp;
-              <a @click="downloadFile(serverUrl + 'upload/math.js', 'module.js')">示例</a>
+              <a @click="downloadFile(serverUrl + 'api/v1/download/sample/module.js', 'module.js')">示例</a>
             </div>
           </a-form-item>
 
@@ -107,7 +107,7 @@
             </div>
             <div class="dp-input-tip">
               用于前端脚本编辑器中的定义声明，缺少这个文件将导致Web代码编辑器里报红色的语法错误。&nbsp;
-              <a @click="downloadFile(serverUrl + 'upload/math.d.ts', 'module.d.ts')">示例</a>
+              <a @click="downloadFile(serverUrl + 'api/v1/download/sample/module.d.ts', 'module.d.ts')">示例</a>
             </div>
           </a-form-item>
 
