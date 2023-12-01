@@ -6,7 +6,7 @@
             class="search-input"
             v-model:value="keywords"
             placeholder="输入关键字过滤"/>
-        <div class="add-btn" @click="create(treeData?.[0]?.id, 'dir')">
+        <div class="add-btn" @click="create(0, 'dir')">
           <PlusOutlined style="font-size: 16px;"/>
         </div>
       </div>
