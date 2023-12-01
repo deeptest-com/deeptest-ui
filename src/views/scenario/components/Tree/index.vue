@@ -341,7 +341,7 @@ async function onDrop(info: DropEvent) {
 
 onMounted(async () => {
   await loadCategorys();
-  expandAll();
+  // expandAll();
 })
 
 </script>
