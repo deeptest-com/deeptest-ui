@@ -10,7 +10,7 @@ if (NODE_ENV === 'production' && APP_CONF !== '') {
     const prodConf = require(`./.app.${APP_CONF}`)
 
     process.env.VUE_APP_API_SERVER = prodConf.VUE_APP_API_SERVER
-    process.env.VUE_APP_API_AGENT = prodConf.VUE_APP_API_SERVER
+    process.env.VUE_APP_API_AGENT = prodConf.VUE_APP_API_AGENT
 }
 console.log('API URL: ', process.env.VUE_APP_API_SERVER, process.env.VUE_APP_API_AGENT)
 
