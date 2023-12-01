@@ -167,10 +167,8 @@ const showKeywordsTip = computed(() => {
 });
 
 async function loadTreeData() {
-  if (currProject?.value?.id > 0 && currServe?.value?.id > 0) {
-    await store.dispatch('DiagnoseInterface/loadTree', {projectId: currProject.value.id, serveId: currServe.value.id});
-    expandAll();
-  }
+  await store.dispatch('DiagnoseInterface/loadTree', {projectId: currProject.value.id});
+  expandAll();
 }
 
 async function getServeServers() {
@@ -179,11 +177,8 @@ async function getServeServers() {
   })
 }
 
-watch(() => currServe.value, async (newVal, oldVal) => {
-  const { id: newServeId, projectId: newProjectId } = newVal;
-  const { id: oldServeId, projectId: oldProjectId } = oldVal || {};
-  if ((newServeId !== oldServeId) || (newProjectId !== oldProjectId)) {
-    // serverId 发生变化
+watch(() => currProject.value.id, async (newVal, oldVal) => {
+  if (newVal !== oldVal) {
     loading.value = true;
     keywords.value = '';
     await loadTreeData();
@@ -201,7 +196,7 @@ watch(keywords, (newVal) => {
 });
 
 const getSelectedKeyName = () => {
-  return `diagnose-interface-` + currServe.value.id
+  return `diagnose-interface-` + currProject.value.id
 }
 const selectStoredKeyCall = debounce(async () => {
   console.log('selectStoredKeyCall')
