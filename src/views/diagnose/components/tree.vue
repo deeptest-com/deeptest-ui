@@ -338,6 +338,10 @@ const importCurlCancel = () => {
 }
 
 async function onDrop(info: DropEvent) {
+  if (info.node?.dataRef?.type === "interface") {
+    message.error('仅可移动到目录下');
+    return;
+  }
   const dropKey = info.node.eventKey;
   const dragKey = info.dragNode.eventKey;
   const pos = info.node.pos.split('-');

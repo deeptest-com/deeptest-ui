@@ -32,7 +32,7 @@
                    :title="urlDisabled ? '请在接口定义中修改' : ''"/>
         </a-tooltip> -->
         <a-input
-          placeholder="请输入路径"
+          placeholder="请输入http(s)://开头的地址"
           v-model:value="debugData.url"
           @change="pathUpdated"
           :disabled="urlDisabled"
