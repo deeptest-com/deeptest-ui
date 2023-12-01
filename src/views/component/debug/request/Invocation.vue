@@ -23,20 +23,19 @@
                  :disabled="baseUrlDisabled" />
       </div>
 
-      <div class="url">
-        <!-- <a-tooltip placement="bottom" :visible="!isPathValid"  overlayClassName="dp-tip-small" :title="'请输入合法的路径,以http(s)开头'">
-          <a-input placeholder="请输入路径"
+      <div class="url"
+           :class="[isPathValid  ? '' :  'dp-field-error' ]">
+        <a-tooltip 
+          :overlayClassName="getOverlayClassName()" 
+          placement="bottom" 
+          :visible="!isPathValid"
+          :title="'请输入合法的路径,以http(s)开头'">
+          <a-input placeholder="请输入http(s)://开头的地址"
                    v-model:value="debugData.url"
                    @change="pathUpdated"
                    :disabled="urlDisabled"
                    :title="urlDisabled ? '请在接口定义中修改' : ''"/>
-        </a-tooltip> -->
-        <a-input
-          placeholder="请输入http(s)://开头的地址"
-          v-model:value="debugData.url"
-          @change="pathUpdated"
-          :disabled="urlDisabled"
-          :title="urlDisabled ? '请在接口定义中修改' : ''"/>
+        </a-tooltip>
       </div>
 
       <div class="send">
@@ -182,6 +181,10 @@ const isShowSync = computed(() => {
 
   return ret
 })
+
+const getOverlayClassName = () => {
+  return `${usedBy === UsedBy.DiagnoseDebug ? 'dp-field-error-tooltip' : ''} dp-tip-small`
+}
 
 watch(debugData, (newVal) => {
   if (usedBy === UsedBy.InterfaceDebug || usedBy === UsedBy.CaseDebug) {
