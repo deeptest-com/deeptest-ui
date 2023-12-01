@@ -143,7 +143,7 @@ const autoExpandParent = ref<boolean>(false);
 const loading = ref(false);
 
 const list = computed(() => {
-  const data = cloneDeep(unref(treeData)?.[0]?.children);
+  const data = cloneDeep(unref(treeData));
   if (data?.length > 0) {
     return [...filterByKeyword(data, keywords.value, 'title')];
   }
