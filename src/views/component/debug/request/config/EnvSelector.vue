@@ -56,7 +56,6 @@ const VNodes = defineComponent({
 });
 
 const props = defineProps<{
-  serverId: any;
   show: boolean;
   disabled: boolean;
   serveId:any
@@ -70,7 +69,7 @@ const router = useRouter();
 const store = useStore<{ Debug: Debug; Endpoint; Global; ServeGlobal; }>();
 const servers = computed<any[]>(() => store.state.Debug.serves);
 const currServerId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);  //当前选择的环境id
-const currServe = computed<any>(() => store.state.ServeGlobal.currServe); // 当前选择的服务
+const debugData = computed<any>(() => store.state.Debug.debugData);
 
 const selectEnvTopPosition = ref("0px");
 const selectEnvLeftPosition = ref("0px");
@@ -118,7 +117,7 @@ const handleRedirectEnv = (e) => {
 
 const handleFocus = () => {
   store.dispatch('Debug/listServes', {
-    serveId: props.serveId? props.serveId :currServe.value.id,
+    serveId: props.serveId,
   })
 };
 
@@ -143,6 +142,16 @@ watch(
     }
   }
 );
+
+watch(() => {
+  return props.serveId;
+}, async (val, oldVal) => {
+  if (val !== oldVal) {
+    await store.dispatch('Debug/listServes', {serveId: val});
+  }
+}, {
+  immediate: true
+})
 </script>
 <style lang="less">
 .select-env-container { // related to body

@@ -298,7 +298,6 @@ async function save() {
   );
   store.commit("Global/setSpinning", false)
   notifySuccess('保存成功');
-  emit('refreshList');
   setTimeout(() => {
     store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value));
   }, 200);

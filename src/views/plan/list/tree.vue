@@ -155,7 +155,7 @@ const treeData: any = computed(() => {
 
 async function loadCategories() {
   await store.dispatch('Plan/loadCategory');
-  expandAll();
+  //expandAll();
 }
 
 watch(() => {
@@ -336,7 +336,7 @@ async function onDrop(info: DropEvent) {
 
 onMounted(async () => {
   await loadCategories();
-  expandAll();
+  // expandAll();
 })
 
 </script>
