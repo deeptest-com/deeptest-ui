@@ -179,16 +179,23 @@ async function getServeServers() {
 
 watch(() => currProject.value.id, async (newVal, oldVal) => {
   if (newVal !== oldVal) {
+    store.commit('DiagnoseInterface/setTreeData', []);
     loading.value = true;
     keywords.value = '';
     await loadTreeData();
-    await getServeServers();
     selectStoredKeyCall();
     setTimeout(() => {
       loading.value = false
     }, 300);
   }
-}, {immediate: true})
+}, {immediate: true});
+
+watch(() => currServe.value.id, async val => {
+  if (!val) {
+    await store.dispatch('ServeGlobal/fetchServe');
+    getServeServers();
+  }
+}, { immediate: true });
 
 watch(keywords, (newVal) => {
   expandedKeys.value = filterTree(treeData.value, newVal)
