@@ -76,7 +76,7 @@ export default defineComponent({
   setup() {
     const store = useStore<{ Global: GlobalStateType; User: UserStateType; }>();
     const route = useRoute();
-
+    
     const version = ref('')
 
     onMounted(() => {
@@ -95,7 +95,7 @@ export default defineComponent({
     const menuData: RoutesDataItem[] = vueRoutes(IndexLayoutRoutes);
 
     // 当前路由 item
-    const routeItem = computed<RoutesDataItem>(() => getRouteItem(route.path, menuData));
+    const routeItem = computed<RoutesDataItem>(() => getRouteItem(route, menuData));
 
     // 有权限的菜单
     const permissionMenuData = computed<RoutesDataItem[]>(() => getPermissionMenuData(store.state.User.currentUser.sysRoles, menuData));
