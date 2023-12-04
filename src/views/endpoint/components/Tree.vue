@@ -335,7 +335,8 @@ async function onDrop(info: DropEvent) {
     "currProjectId": currProject.value.id,
     "dragKey": dragKey, // 移动谁
     "dropKey": dropKey,  // 移动那儿
-    "dropPos": dropPosition // 0 表示移动到目标节点的子节点，-1 表示移动到目标节点的前面， 1表示移动到目标节点的后面
+    "dropPos": dropPosition, // 0 表示移动到目标节点的子节点，-1 表示移动到目标节点的前面， 1表示移动到目标节点的后面
+    "type": 'endpoint',
   });
   if (res) {
     // 移动到目标节点的子节点，则需要展开目标节点
