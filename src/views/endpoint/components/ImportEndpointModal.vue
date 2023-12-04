@@ -303,6 +303,7 @@ const spinning = ref<boolean>(false);
 
 const handleDriverTypeChanged = (v) => {
   modelRef.dataSyncType = v === 'lzos' ? 1 : 2;
+  modelRef.filePath = '';
 }
 
 /**
