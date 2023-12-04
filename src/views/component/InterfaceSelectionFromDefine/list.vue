@@ -35,7 +35,7 @@
         rowKey="id">
 
       <template #colName="{text}">
-        {{ text }}
+        <TooltipCell :text="text" />
       </template>
 
       <template #colMethod="{text}">
@@ -67,6 +67,7 @@ import {useStore} from "vuex";
 import {StateType as ServeStateType} from "@/store/serve";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {listEndpointInterface} from "@/views/endpoint/service";
+import TooltipCell from '@/components/Table/tooltipCell.vue';
 
 const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType }>();
 
