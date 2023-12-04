@@ -15,7 +15,7 @@
         </a-select>
       </div>
       <div id="env-selector">
-        <EnvSelector :show="showBaseUrl()" :server-id="serverId" :serveId="debugData.serveId" @change="changeServer" :disabled="usedBy === UsedBy.ScenarioDebug" />
+        <EnvSelector :show="showBaseUrl()" :serveId="debugData.serveId" @change="changeServer" :disabled="usedBy === UsedBy.ScenarioDebug" />
       </div>
       <div v-if="showBaseUrl()" class="base-url">
         <a-input placeholder="请输入地址"
@@ -25,8 +25,12 @@
 
       <div class="url"
            :class="[isPathValid  ? '' :  'dp-field-error' ]">
-        <a-tooltip placement="bottom" :visible="!isPathValid"  overlayClassName="dp-tip-small" :title="'请输入合法的路径,以http(s)开头'">
-          <a-input placeholder="请输入路径"
+        <a-tooltip 
+          :overlayClassName="getOverlayClassName()" 
+          placement="bottom" 
+          :visible="!isPathValid"
+          :title="'请输入合法的路径,以http(s)开头'">
+          <a-input placeholder="请输入http(s)://开头的地址"
                    v-model:value="debugData.url"
                    @change="pathUpdated"
                    :disabled="urlDisabled"
@@ -182,6 +186,10 @@ const isShowSync = computed(() => {
   return ret
 })
 
+const getOverlayClassName = () => {
+  return `${usedBy === UsedBy.DiagnoseDebug ? 'dp-field-error-tooltip' : ''} dp-tip-small`
+}
+
 watch(debugData, (newVal) => {
   if (usedBy === UsedBy.InterfaceDebug || usedBy === UsedBy.CaseDebug) {
     debugData.value.url = debugData?.value.url || endpointDetail.value?.path || ''
@@ -321,18 +329,6 @@ watch(() => {
 }, {
   immediate: true,
 })
-
-
-watch(() => {
-  return debugData.value.serveId;
-}, async (val) => {
-  if (val) {
-    await store.dispatch('Debug/listServes', {serveId: val});
-  }
-}, {
-  immediate: true
-})
-
 
 onMounted(() => {
   // 离开前保存数据

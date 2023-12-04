@@ -88,7 +88,7 @@ const StoreModel: ModuleType = {
         },
 
         setTreeData(state, data) {
-            state.treeData = data
+                        state.treeData = data
         },
         setTreeDataMap(state, payload) {
             state.treeDataMap = payload
@@ -123,17 +123,15 @@ const StoreModel: ModuleType = {
     actions: {
         async loadTree({ commit, state, dispatch }, params: any) {
             try {
-                commit('setTreeData', []);
                 const response: ResponseData = await query(params);
                 if (response.code != 0) return;
-
+                
                 commit('setQueryParams', params);
-                commit('setTreeData', response.data);
+                commit('setTreeData', response.data || []);
 
-                const data = {id: 0, children: response.data} // covert arr to obj
+                const data = {id: 0, children: response.data || []} // covert arr to obj
                 const mp = genNodeMap(data)
                 commit('setTreeDataMap', mp);
-
                 return true;
             } catch (error) {
                 return false;
@@ -227,18 +225,22 @@ const StoreModel: ModuleType = {
         },
 
         async getServeServers({commit}, payload: any) {
-            const res = await serverList({
-                serveId: payload.id
-            });
-            if (res.code === 0) {
-                const servers = (res.data.servers || []).map((item: any) => {
-                    item.label = item.environmentName;
-                    item.value = item.environmentId;
-                    return item;
-                })
-                commit('setServeServers', servers);
-            } else {
-                return false
+            try {
+                const res = await serverList({
+                    serveId: payload.id
+                });
+                if (res.code === 0) {
+                    const servers = (res.data.servers || []).map((item: any) => {
+                        item.label = item.environmentName;
+                        item.value = item.environmentId;
+                        return item;
+                    })
+                    commit('setServeServers', servers);
+                } else {
+                    return false
+                }
+            } catch(error) {
+                return false;
             }
         },
 

@@ -1,5 +1,6 @@
 import {Mutation, Action} from 'vuex';
 import cloneDeep from "lodash/cloneDeep";
+import {message} from "ant-design-vue";
 import {StoreModuleType} from "@/utils/store";
 import {ResponseData} from '@/utils/request';
 import {
@@ -65,7 +66,9 @@ import {
     resetPostConditions,
     resetPreConditions,
     getEndpointDiff,
-    saveEndpointDiff
+    saveEndpointDiff,
+    listFunctionsByThirdPartyClass,
+    importThirdPartyFunctions
 } from './service';
 
 import {
@@ -159,7 +162,8 @@ export interface StateType {
     isMockChange: boolean;
     //diff弹框信息
     diffModalVisible:any;
-
+    //diff弹框信息
+    thirdFunctionList: any;
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -230,6 +234,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setBenchMarkList: Mutation<StateType>;
         setIsMockChange:Mutation<StateType>;
         setDiffModalVisible:Mutation<StateType>;
+        setListFunctionsByClass: Mutation<StateType>;
     };
     actions: {
         listEndpoint: Action<StateType, StateType>;
@@ -322,6 +327,9 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         getEndPointDiff: Action<StateType, StateType>;
         saveEndPointDiff: Action<StateType, StateType>;
+
+        listFunctionsByThirdPartyClass: Action<StateType, StateType>;
+        importThirdPartyFunctions: Action<StateType, StateType>;
     }
 }
 
@@ -349,7 +357,7 @@ const initState: StateType = {
         "title": null,
         categoryId: null,
         tagNames: [],
-        serveId:null,
+        serveIds: [],
     },
     endpointDetail: null,
     srcEndpointDetail: null,
@@ -409,6 +417,7 @@ const initState: StateType = {
     benchMarkList: [],
     isMockChange: false,
     diffModalVisible: {},
+    thirdFunctionList: [],
 };
 
 const StoreModel: ModuleType = {
@@ -455,12 +464,18 @@ const StoreModel: ModuleType = {
             state.filterState.createUser = payload.createUser || null;
             state.filterState.title = payload.title || null ;
             state.filterState.categoryId = payload.categoryId || null ;
+            state.filterState.serveIds = payload.serveIds || [];
+            state.filterState.tagNames = payload.tagNames || [];
         },
         clearFilterState(state) {
-            state.filterState.status = null;
-            state.filterState.createUser = null;
-            state.filterState.title =null ;
-            state.filterState.categoryId =null ;
+            state.filterState = {
+                status: null,
+                createUser: null,
+                title: null,
+                tagNames: [],
+                categoryId: null,
+                serveIds: [],
+            }
         },
         setEndpointDetail(state, payload) {
             state.endpointDetail = payload;
@@ -639,6 +654,10 @@ const StoreModel: ModuleType = {
         setDiffModalVisible(state, payload){
             state.diffModalVisible = payload
         },
+
+        setListFunctionsByClass(state, payload) {
+            state.thirdFunctionList = payload;
+        }
     },
     actions: {
         async listEndpoint({commit, dispatch, state}, params: QueryParams) {
@@ -753,7 +772,6 @@ const StoreModel: ModuleType = {
             try {
                 await removeCategory(payload.id, payload.type);
                 await dispatch('loadCategory');
-                await dispatch('loadList', {projectId: payload.projectId});
                 return true;
             } catch (error) {
                 return false;
@@ -793,12 +811,11 @@ const StoreModel: ModuleType = {
                 return false
             }
         },
-        async loadList({commit, state, rootState}: any, {projectId, page, pageSize, ...opts}: any) {
+        async loadList({commit, state}: any, {projectId, page, pageSize, ...opts}: any) {
             page = page || state.listResult.pagination.current;
             pageSize = pageSize || state.listResult.pagination.pageSize;
             const otherParams = {
                 ...state.filterState,
-                serveId: rootState.ServeGlobal.currServe.id,
                 ...opts
             };
 
@@ -1105,8 +1122,8 @@ const StoreModel: ModuleType = {
                 } else {
                     result = null;
                 }
-            } catch (e) {
-                console.log(e)
+            } catch (e: any) {
+                e.msg && message.error(e.msg);
             }
             return result;
         },
@@ -1769,6 +1786,37 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
+
+        async listFunctionsByThirdPartyClass({commit}, payload: any) {
+            try {
+                const response: any = await listFunctionsByThirdPartyClass(payload);
+                if (response.code === 0) {
+                    commit('setListFunctionsByClass', response.data.map(e => ({
+                        value: e.code,
+                        label: e.code
+                    })));
+                    return true;
+                }
+                return false;
+            } catch(error: any) {
+                commit('setListFunctionsByClass',[]);
+                error.msg && message.error(error.msg);
+                return false;
+            }
+        },
+            
+        async importThirdPartyFunctions(_store, payload: any) {
+            try {
+                const response: any = await importThirdPartyFunctions(payload);
+                if (response.code === 0) {
+                    return true;
+                } 
+                return false;
+            } catch(error) {
+                error.msg && message.error(error.msg);
+                return false;
+            }
+        }
     },
 };
 

@@ -56,7 +56,6 @@ const VNodes = defineComponent({
 });
 
 const props = defineProps<{
-  serverId: any;
   show: boolean;
   disabled: boolean;
   serveId:any
@@ -121,7 +120,7 @@ const handleRedirectEnv = (e) => {
 
 const handleFocus = () => {
   store.dispatch('Debug/listServes', {
-    serveId: props.serveId? props.serveId :currServe.value.id,
+    serveId: props.serveId,
   })
 };
 
@@ -147,6 +146,15 @@ watch(
   }
 );
 
+watch(() => {
+  return props.serveId;
+}, async (val, oldVal) => {
+  if (val !== oldVal && props.show && val) {
+    await store.dispatch('Debug/listServes', {serveId: val});
+  }
+}, {
+  immediate: true
+})
 </script>
 <style lang="less">
 .select-env-container { // related to body

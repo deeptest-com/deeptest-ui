@@ -99,7 +99,6 @@ onMounted(async () => {
     /**
      * 单独刷新详情页 需要初始化 用户列表和 serve列表
      */
-    await store.dispatch("ServeGlobal/fetchServe");
     await store.dispatch('Project/getUserList');
     await store.dispatch('Endpoint/loadCategory');
     await store.commit("Global/setSpinning", false);

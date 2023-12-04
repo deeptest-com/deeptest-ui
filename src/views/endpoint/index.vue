@@ -23,18 +23,18 @@
                 <template #overlay>
                   <a-menu style="margin-top: 8px;">
                     <a-menu-item key="0">
-                      <a-button type="link" :size="'small'" href="javascript:void (0)" @click="inportApi">导入接口
+                      <a-button type="link" :size="'small'" href="javascript:void (0)" @click="importApi">导入接口
                       </a-button>
                     </a-menu-item>
-                    <a-menu-item key="1">
+                    <a-menu-item key="2">
                       <a-button :disabled="!hasSelected" :size="'small'" type="link" @click="goDocs">查看文档</a-button>
                     </a-menu-item>
-                    <a-menu-item key="1">
+                    <a-menu-item key="3">
                       <a-button :disabled="!hasSelected" :size="'small'" type="link"
                                 @click="showPublishDocsModal = true">发布文档
                       </a-button>
                     </a-menu-item>
-                    <a-menu-item key="0">
+                    <a-menu-item key="4">
                       <a-button :disabled="!hasSelected" type="link" :size="'small'" @click="batchUpdate">批量修改
                       </a-button>
                     </a-menu-item>
@@ -194,6 +194,8 @@ import debounce from "lodash.debounce";
 import {ColumnProps} from 'ant-design-vue/es/table/interface';
 import {ExclamationCircleOutlined,WarningFilled,InfoCircleOutlined } from '@ant-design/icons-vue';
 import {Modal} from 'ant-design-vue';
+import _ from "lodash";
+
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import {endpointStatusOpts, endpointStatus} from '@/config/constant';
 import ContentPane from '@/views/component/ContentPane/index.vue';
@@ -214,7 +216,6 @@ import LeavePrompt from './components/LeavePrompt.vue';
 import Tags from './components/Tags/index.vue';
 import TooltipCell from '@/components/Table/tooltipCell.vue';
 import {DropdownActionMenu} from '@/components/DropDownMenu/index';
-import _ from "lodash";
 
 import {getMethodColor} from '@/utils/interface';
 import {notifyError, notifySuccess} from "@/utils/notify";
@@ -385,7 +386,7 @@ async function publishDocs() {
  * */
 const showImportModal = ref(false);
 
-function inportApi() {
+function importApi() {
   showImportModal.value = true;
 }
 
@@ -495,25 +496,10 @@ async function handleBatchUpdate(data) {
 
 const isImporting = ref(false);
 
-async function handleImport(data, callback) {
-
-  isImporting.value = true;
-
-  const res = await store.dispatch('Endpoint/importEndpointData', {
-    ...data,
-    "sourceType": 2,
-  });
-
-  // 导入成功，重新拉取列表 ，并且关闭弹窗
-  if (res) {
-    await refreshList('reset');
-    if (callback) {
-      callback();
-    }
-    showImportModal.value = false;
-  }
-  isImporting.value = false
-
+async function handleImport() {
+  console.log('success');
+  showImportModal.value = false;
+  refreshList('reset');
 }
 
 // 当前筛选条件，包括分类、服务、状态
@@ -545,37 +531,22 @@ const loadList = debounce(async (page, size, opts?: any) => {
 
 async function handleTableFilter(state) {
   filterState.value = state;
-  await loadList(1, pagination.value.pageSize, state);
+  if (!state.needRequest) {
+    store.commit('Endpoint/setFilterState', state);
+  }
+  if (state.needRequest) {
+    await loadList(1, pagination.value.pageSize, state);
+  }
 }
 
 const filter = ref()
 
-// 实时监听项目/服务 ID，如果项目切换了则重新请求数据
-/*
-watch(() => [currProject.value.id, currServe.value.id], async (newVal, oldVal) => {
-  const [newProjectId, newServeId] = newVal;
-  const [oldProjectId, oldServeId] = oldVal || [];
-  if (newProjectId !== undefined && oldProjectId !== undefined && newProjectId !== oldProjectId) {
-    selectedCategoryId.value = "";
-  }
-  if (newProjectId !== undefined && newServeId !== oldServeId) {
-    await loadList(1, pagination.value.pageSize);
-    await store.dispatch('Endpoint/getEndpointTagList');
-    if (newServeId) {
-      await store.dispatch('Debug/listServes', {serveId: newServeId});
-      // 获取授权列表
-      await store.dispatch('Endpoint/getSecurityList', {id: newServeId});
-    }
-    store.commit('Endpoint/clearFilterState');
-    //filter.value.resetFields()
-  }
-}, {
-  immediate: true
-})
-*/
 watch(() => currProject.value.id, async (newVal, oldVal) => {
   const newProjectId = newVal
   const oldProjectId = oldVal
+  if (newVal) {
+    store.dispatch("ServeGlobal/fetchServe");
+  }
   if (newProjectId !== undefined && oldProjectId !== undefined && newProjectId !== oldProjectId) {
     selectedCategoryId.value = "";
   }
@@ -592,21 +563,6 @@ watch(() => currProject.value.id, async (newVal, oldVal) => {
 async function refreshList(resetPage?: string) {
   await loadList(resetPage ? 1 : pagination.value.current, pagination.value.pageSize);
 }
-
-watch(
-    () => [createApiModalVisible.value, showImportModal.value],
-    async (newValue, oldVal) => {
-      /**
-       * 分享场景打开页面： 自动打开抽屉展示指定接口详情，会触发这里的监听，
-       * 这里改成： 必须是触发了关闭弹窗 才触发，避免此场景 多次调用 loadCategory接口
-       */
-      const oldValue = oldVal || [];
-      if ((!newValue[0] && oldValue[0]) || (!newValue[1] && oldValue[1])) {
-        await store.dispatch('Endpoint/loadCategory');
-      }
-    },
-    {immediate: true}
-);
 
 // 页面路由卸载时，清空搜索条件
 onUnmounted(async () => {

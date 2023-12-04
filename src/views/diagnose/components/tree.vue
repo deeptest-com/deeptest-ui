@@ -6,7 +6,7 @@
             class="search-input"
             v-model:value="keywords"
             placeholder="输入关键字过滤"/>
-        <div class="add-btn" @click="create(treeData?.[0]?.id, 'dir')">
+        <div class="add-btn" @click="create(0, 'dir')">
           <PlusOutlined style="font-size: 16px;"/>
         </div>
       </div>
@@ -32,6 +32,10 @@
 
           <template #title="nodeProps">
             <div class="tree-title" :title="nodeProps.dataRef.title" :draggable="nodeProps.dataRef.id === -1">
+              <span class="tree-icon">
+                <FolderOutlined v-if="nodeProps.dataRef.type === 'dir' && !nodeProps.expanded" />
+                <FolderOpenOutlined v-if="nodeProps.dataRef.type === 'dir' && nodeProps.expanded" />
+              </span>
               <span class="tree-title-text" v-if="nodeProps.dataRef.title.indexOf(keywords) > -1">
                 <span>{{nodeProps.dataRef.title.substr(0, nodeProps.dataRef.title.indexOf(keywords))}}</span>
                 <span style="color: #f50">{{keywords}}</span>
@@ -41,26 +45,26 @@
 
               <span class="more-icon" v-if="nodeProps.dataRef.id > 0">
                   <a-dropdown>
-                       <MoreOutlined/>
+                      <MoreOutlined/>
                       <template #overlay>
                         <a-menu>
                           <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="0" @click="create(nodeProps.dataRef.id, 'dir')">
-                             新建目录
+                            新建目录
                           </a-menu-item>
                           <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="1" @click="create(nodeProps.dataRef.id, 'interface')">
-                             新建接口
+                            新建接口
                           </a-menu-item>
                           <a-menu-item v-if="nodeProps.dataRef.id !== -1" key="2" @click="edit(nodeProps)">
-                           {{'编辑' + (nodeProps.dataRef.type === 'interface' ? '接口' : '目录')}}
+                          {{'编辑' + (nodeProps.dataRef.type === 'interface' ? '接口' : '目录')}}
                           </a-menu-item>
                           <a-menu-item v-if="nodeProps.dataRef.id !== -1" key="3" @click="deleteNode(nodeProps.dataRef)">
                             {{'删除' + (nodeProps.dataRef.type === 'interface' ? '接口' : '目录')}}
                           </a-menu-item>
                           <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="4" @click="importInterfaces(nodeProps.dataRef)">
-                             导入接口
+                            导入接口
                           </a-menu-item>
                           <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="5" @click="importCurl(nodeProps.dataRef)">
-                             导入cURL
+                            导入cURL
                           </a-menu-item>
                         </a-menu>
                       </template>
@@ -104,12 +108,14 @@
 <script setup lang="ts">
 import {
   computed, ref, onMounted,
-  watch, defineEmits, defineProps, unref
+  watch, defineEmits, unref
 } from 'vue';
 import {
   PlusOutlined,
   CaretDownOutlined,
-  MoreOutlined
+  MoreOutlined,
+  FolderOutlined,
+  FolderOpenOutlined
 } from '@ant-design/icons-vue';
 import {message, Modal, notification, Spin} from 'ant-design-vue';
 import {DropEvent} from 'ant-design-vue/es/tree/Tree';
@@ -132,18 +138,9 @@ import {notifyError, notifySuccess} from "@/utils/notify";
 
 const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType, ProjectGlobal: ProjectStateType, ServeGlobal: ServeStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
-const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
-
 const treeData = computed<any>(() => store.state.DiagnoseInterface.treeData);
 const treeDataMap = computed<any>(() => store.state.DiagnoseInterface.treeDataMap);
 const interfaceId = computed<any>(() => store.state.DiagnoseInterface.interfaceId);
-
-const props = defineProps({
-  serveId: {
-    required: false,
-    type: Number || String,
-  },
-})
 
 const keywords = ref('');
 const replaceFields = {key: 'id'};
@@ -152,7 +149,7 @@ const autoExpandParent = ref<boolean>(false);
 const loading = ref(false);
 
 const list = computed(() => {
-  const data = cloneDeep(unref(treeData)?.[0]?.children);
+  const data = cloneDeep(unref(treeData));
   if (data?.length > 0) {
     return [...filterByKeyword(data, keywords.value, 'title')];
   }
@@ -167,33 +164,22 @@ const showKeywordsTip = computed(() => {
 });
 
 async function loadTreeData() {
-  if (currProject?.value?.id > 0 && currServe?.value?.id > 0) {
-    await store.dispatch('DiagnoseInterface/loadTree', {projectId: currProject.value.id, serveId: currServe.value.id});
-    expandAll();
-  }
+  await store.dispatch('DiagnoseInterface/loadTree', {projectId: currProject.value.id});
+  expandAll();
 }
 
-async function getServeServers() {
-  await store.dispatch('DiagnoseInterface/getServeServers', {
-    id: currServe.value.id,
-  })
-}
-
-watch(() => currServe.value, async (newVal, oldVal) => {
-  const { id: newServeId, projectId: newProjectId } = newVal;
-  const { id: oldServeId, projectId: oldProjectId } = oldVal || {};
-  if ((newServeId !== oldServeId) || (newProjectId !== oldProjectId)) {
-    // serverId 发生变化
+watch(() => currProject.value.id, async (newVal, oldVal) => {
+  if (newVal !== oldVal) {
+    store.commit('DiagnoseInterface/setTreeData', []);
     loading.value = true;
     keywords.value = '';
     await loadTreeData();
-    await getServeServers();
     selectStoredKeyCall();
     setTimeout(() => {
       loading.value = false
     }, 300);
   }
-}, {immediate: true})
+}, {immediate: true});
 
 watch(keywords, (newVal) => {
   expandedKeys.value = filterTree(treeData.value, newVal)
@@ -201,7 +187,7 @@ watch(keywords, (newVal) => {
 });
 
 const getSelectedKeyName = () => {
-  return `diagnose-interface-` + currServe.value.id
+  return `diagnose-interface-` + currProject.value.id
 }
 const selectStoredKeyCall = debounce(async () => {
   console.log('selectStoredKeyCall')
@@ -238,8 +224,8 @@ let selectedKeys = ref<number[]>([]);
 const emit = defineEmits(['select']);
 
 function selectNode(keys, e) {
-  console.log('selectNode', keys, treeDataMap.value)
-  if (e && e.node.dataRef.type === 'dir') {
+  if (e?.node?.dataRef?.type === 'dir') {
+    // 目录不可被点击
     return;
   }
 
@@ -251,10 +237,8 @@ function selectNode(keys, e) {
   }
   setSelectedKey(getSelectedKeyName(), currProject.value.id, selectedKeys.value[0])
 
-  // if (e) {
-    const selectedItem = treeDataMap.value[selectedKeys.value[0]]
-    store.dispatch('DiagnoseInterface/openInterfaceTab', selectedItem);
-  // }
+  const selectedItem = treeDataMap.value[selectedKeys.value[0]]
+  store.dispatch('DiagnoseInterface/openInterfaceTab', selectedItem);
 }
 
 const currentNode = ref(null as any);
@@ -279,7 +263,6 @@ async function handleModalOk(model) {
   console.log('handleModalOk')
   Object.assign(model, {
     projectId: currProject.value.id,
-    serveId: currServe.value.id,
   })
 
   const interfaceData = await store.dispatch('DiagnoseInterface/saveInterface', model);
@@ -355,6 +338,10 @@ const importCurlCancel = () => {
 }
 
 async function onDrop(info: DropEvent) {
+  if (info.node?.dataRef?.type === "interface") {
+    message.error('仅可移动到目录下');
+    return;
+  }
   const dropKey = info.node.eventKey;
   const dragKey = info.dragNode.eventKey;
   const pos = info.node.pos.split('-');
@@ -400,7 +387,29 @@ watch(() => {
     justify-content: center;
   }
 
+  :deep(.ant-tree-node-content-wrapper) {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
 
+    .ant-tree-title {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+    }
+  }
+
+  .tree-title {
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+
+    .tree-icon {
+      margin-right: 4px;
+    }
+  }
+
+  
   .nodata-tip {
     margin-left: 0 !important;
   }

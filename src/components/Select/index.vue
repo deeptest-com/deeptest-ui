@@ -16,8 +16,10 @@
           class="selector-con"
           :placeholder="placeholder"
           :options="options"
-          style="width: 180px;"
+          :filterOption="filterOptions"
+          :style="{ width: `${width || 180}px` }"
           :value="values"
+          :showSearch="showSearch || false"
           @focus="focus"
           :maxTagPlaceholder="maxTagPlaceholder"
           v-on-click-outside="canClose">
@@ -34,8 +36,8 @@ import {vOnClickOutside} from '@vueuse/components';
 import {Tooltip} from 'ant-design-vue'
 
 
-const props = defineProps(['placeholder', 'value', 'width', 'options'])
-const emits = defineEmits(['change'])
+const props = defineProps(['placeholder', 'value', 'width', 'options', 'filterOptions', 'showSearch', 'width']);
+const emits = defineEmits(['change', 'focus']);
 
 const visible = ref(false)
 
@@ -74,6 +76,7 @@ const change = (e) => {
 const focus = () => {
   visible.value = true
   open.value = true
+  emits('focus');
 }
 
 const close = (key) => {

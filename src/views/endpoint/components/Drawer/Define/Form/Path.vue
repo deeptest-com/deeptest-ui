@@ -8,25 +8,7 @@
     </a-col>
     <a-col :span="17">
       <div class="path-param-header">
-        <a-input class="path-param-header-input" :value="endpointDetail.path" @change="updatePath" placeholder="请输入路径">
-          <!---
-          <template #addonBefore>
-            <a-select
-                :options="serveServers"
-                :value="currentServerId || null"
-                @change="changeServer"
-                @focus="getServeServers"
-                placeholder="请选择环境"
-                class="select-env">
-              <template #notFoundContent>
-                <a-button type="link" @click="addEnv" class="add-env-btn">新建环境</a-button>
-              </template>
-            </a-select>
-
-            <span v-if="currentEnvURL" class="current-env-url">{{ currentEnvURL || '---' }}</span>
-          </template>
-            -->
-        </a-input>
+        <a-input class="path-param-header-input" :value="endpointDetail.path" @change="updatePath" placeholder="请输入路径" />
         <a-button @click="addPathParams" class="path-param-header-btn">
           <template #icon>
             <PlusOutlined/>
@@ -96,20 +78,6 @@ async function changeServer(val) {
     ...endpointDetail.value,
   })
 }
-
-async function getServeServers() {
-    await store.dispatch('Debug/listServes', {
-      serveId: currServe.value.id,
-    })
-}
-
-/*
-onMounted(async () => {
-  await store.dispatch('Debug/listServes', {
-    serveId: currServe.value.id,
-  })
-})
-*/
 
 /**
  * 添加路径参数

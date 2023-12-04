@@ -478,8 +478,8 @@ const StoreModel: ModuleType = {
             const res = await getUserList();
             if (res.code === 0) {
                 res.data.result.forEach((item) => {
-                    item.label = item.username;
-                    item.value = item.username
+                    item.label = item.name;
+                    item.value = item.username;
                 })
                 commit('setUserList', res.data.result);
             }
@@ -663,9 +663,10 @@ const StoreModel: ModuleType = {
             commit('setEnvDetail', envData || initEnvData);
         },
         addEnvServe({ commit, state }, serveData: any) {
-            const newEnvDetail = JSON.parse(JSON.stringify(state.activeEnvDetail));
-            newEnvDetail.serveServers.push(serveData);
-            commit('setEnvDetail', newEnvDetail);
+            commit('setEnvDetail', {
+                ...state.activeEnvDetail,
+                serveServers: [...state.activeEnvDetail.serveServers, ...serveData],
+            });
         },
         addEnvVar({ commit, state }, varData: any) {
             const newEnvDetail = JSON.parse(JSON.stringify(state.activeEnvDetail));

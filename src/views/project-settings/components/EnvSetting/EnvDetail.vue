@@ -115,7 +115,7 @@
     </a-form>
     <a-modal v-model:visible="addServiceModalVisible" title="关联服务" @ok="handleAddServiceOk">
         <a-form-item class="select-service" :labelCol="{ span: 6 }" :wrapperCol="{ span: 16 }" label="请选择服务">
-            <a-select v-model:value="selectedService" :options="serviceOptions" placeholder="请选择服务" style="width: 200px" />
+            <Select :value="selectedService" :options="serviceOptions" :showSearch="true" :filterOptions="filterOptions" placeholder="请选择服务" style="width: 200px" @change="handleSelect" />
         </a-form-item>
 
     </a-modal>
@@ -123,20 +123,19 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useStore } from "vuex";
-import {message, notification} from 'ant-design-vue';
 import { PlusOutlined } from '@ant-design/icons-vue';
 import ConBoxTitle from '@/components/ConBoxTitle/index.vue';
 import PermissionButton from "@/components/PermissionButton/index.vue";
+import Select from '@/components/Select/index.vue';
 import { globalVarsColumns, serveServersColumns } from '../../config';
 import { useGlobalEnv } from '../../hooks/useGlobalEnv';
 import { StateType as ProjectSettingStateType } from "@/views/ProjectSetting/store";
-import {notifyError} from "@/utils/notify";
 import {urlValidator} from "@/utils/validate";
 
 const store = useStore<{ ProjectSetting: ProjectSettingStateType }>();
 const serviceOptions = computed<any>(() => store.state.ProjectSetting.serviceOptions);
 const addServiceModalVisible = ref(false);
-const selectedService = ref(null);
+const selectedService = ref<any[]>([]);
 const formRef = ref<any>();
 
 const {
@@ -161,25 +160,28 @@ async function addService() {
     addServiceModalVisible.value = true;
 }
 
-function handleAddServiceOk() {
-    const selectServe: any = serviceOptions.value.find((item: any) => {
-        return selectedService.value === item.id;
-    })
-    const envDetail = JSON.parse(JSON.stringify(activeEnvDetail.value));
-    const isExsitServe = envDetail.serveServers.find((item: any) => {
-        return item.serveId === selectServe.id;
-    });
-    if (!isExsitServe) {
-        store.dispatch('ProjectSetting/addEnvServe', {
-            "url": "",
-            "serveName": selectServe.name,
-            "serveId": selectServe.id,
-        })
-        addServiceModalVisible.value = false;
-    } else {
-      notifyError('不可添加重复的服务,请重新选择~');
-    }
+const handleSelect = (e) => {
+    selectedService.value = e;
+}
 
+const filterOptions = (value, option) => {
+    return option.label.includes(value || '');
+}
+
+function handleAddServiceOk() {
+    const envDetail = JSON.parse(JSON.stringify(activeEnvDetail.value));
+    const selectServes: any = serviceOptions.value.filter((item: any) => {
+        return selectedService.value.includes(item.id);
+    }).filter((item: any) => {
+        return !envDetail.serveServers.find(serve => serve.serveId === item.id)
+    });
+    store.dispatch('ProjectSetting/addEnvServe', selectServes.map(e => ({
+        "url": "",
+        "serveName": e.name,
+        "serveId": e.id,
+    })));
+    addServiceModalVisible.value = false;
+    selectedService.value = [];
 }
 
 </script>
