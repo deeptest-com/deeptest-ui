@@ -21,6 +21,7 @@ import {useStore} from "vuex";
 
 const store = useStore<{ Docs, ProjectGlobal }>();
 import {useRouter} from "vue-router";
+import {hideGlobalLoading} from "@/utils/handleLoad";
 
 const loading = ref(false);
 const router = useRouter();
@@ -138,13 +139,7 @@ watch(() => {
 // 获取版本列表
 onMounted(async () => {
   if (isDocsSharePage || isDocsViewPage) {
-    const appLoadingEl = document.getElementsByClassName('app-loading');
-    if (appLoadingEl[0]) {
-      appLoadingEl[0].classList.add('hide');
-      setTimeout(() => {
-          document.body.removeChild(appLoadingEl[0]);
-      }, 600);
-    }
+    hideGlobalLoading();
     return;
   }
   await store.dispatch('Docs/getVersionList', {

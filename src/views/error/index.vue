@@ -21,6 +21,7 @@
 import { watch, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ApplyProPermissionsModal from "@/components/ApplyProPermissions/index.vue";
+import {hideGlobalLoading} from "@/utils/handleLoad";
 
 const router = useRouter();
 
@@ -28,7 +29,7 @@ const router = useRouter();
  * 1. 用户访问无权限页面
  * 2. 用户访问的详情记录不存在
  * 3. 用户访问的页面不存在
- * */ 
+ * */
 const backHome = {
   text: '回到首页',
   action: () => {
@@ -90,13 +91,8 @@ watch(() => {
     projectInfo.value = { projectId, projectName };
   }
 
-  const appLoadingEl = document.getElementsByClassName('app-loading');
-  if (appLoadingEl[0]) {
-    appLoadingEl[0].classList.add('hide');
-    setTimeout(() => {
-      document.body.removeChild(appLoadingEl[0]);
-    }, 600)
-  } 
+  hideGlobalLoading();
+
 }, {
   immediate: true,
 });

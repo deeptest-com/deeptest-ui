@@ -19,6 +19,7 @@ import UserLayoutRoutes from '@/layouts/UserLayout/routes';
 import UserLayout from '@/layouts/UserLayout/index.vue';
 import BlankLayout from "@/layouts/BlankLayout.vue";
 import {useWujie} from "@/composables/useWujie";
+import {hideGlobalLoading, showGlobalLoading} from "@/utils/handleLoad";
 
 export const routes: RoutesDataItem[] = [
   {
@@ -193,9 +194,12 @@ const router = createRouter({
 
 router.beforeEach((/* to, from */) => {
   // start progress bar
+  showGlobalLoading();
   const {isWujieEnv} = useWujie();
   if(!isWujieEnv){
     NProgress.start();
+  }else {
+    showGlobalLoading();
   }
 
 });
@@ -203,9 +207,14 @@ router.beforeEach((/* to, from */) => {
 router.afterEach(() => {
   // finish progress bar
   const {isWujieEnv} = useWujie();
+  hideGlobalLoading()
   if(!isWujieEnv){
     NProgress.done();
+  }else {
+    hideGlobalLoading()
   }
 });
+
+
 
 export default router;

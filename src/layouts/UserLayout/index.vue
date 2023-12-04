@@ -22,6 +22,7 @@ import UserLayoutRoutes from './routes';
 import useTitle from '@/composables/useTitle';
 import {isLeyan} from "@/utils/comm";
 import {useWujie} from "@/composables/useWujie";
+import {hideGlobalLoading} from "@/utils/handleLoad";
 export default defineComponent({
   name: 'UserLayout',
   components: {
@@ -44,13 +45,7 @@ export default defineComponent({
 
 
     onMounted(() => {
-      const appLoadingEl = document.getElementsByClassName('app-loading');
-      if (appLoadingEl[0]) {
-        appLoadingEl[0].classList.add('hide');
-        setTimeout(() => {
-            document.body.removeChild(appLoadingEl[0]);
-        }, 600);
-      }
+      hideGlobalLoading();
     });
 
     const company = process.env.VUE_APP_DEPLOY_ENV_COMPANY;
