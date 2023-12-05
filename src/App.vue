@@ -1,7 +1,7 @@
 <template>
-    <a-config-provider :locale="antdLocales">
-      <router-view></router-view>
-    </a-config-provider>
+  <a-config-provider :locale="antdLocales">
+    <router-view></router-view>
+  </a-config-provider>
 </template>
 <script lang="ts">
 import {defineComponent, computed, onMounted, watch, ref,onUnmounted} from "vue";
@@ -25,10 +25,9 @@ export default defineComponent({
   setup() {
     const { locale } = useI18n();
     const antdLocales = computed(()=> antdMessages[locale.value]);
-
-
     const isLyEnv = isLeyan();
     const {isWujieEnv} = useWujie();
+    const spinning = ref<boolean>(false);
     // NOTICE: 以下代码仅适用于ly环境，其他环境删除即可
     const store = useStore<{User: UserStateType,Endpoint,Debug}>();
     const currentUser = computed<CurrentUser>(()=> store.state.User.currentUser);
@@ -74,14 +73,14 @@ export default defineComponent({
 
       if(isWujieEnv){
         bus?.$on('sendMsgToLeyanAPI', (msg: any) => {
-          console.log('832msg', msg)
+          // console.log('832msg', msg)
           if (msg?.type === 'changeRouter') {
-            // debugger;
             router.push(msg?.data?.path);
           }
           if (msg?.type === 'logout') {
             store.dispatch('User/logout');
           }
+
         })
         // 通知上层应用已经加载完毕
         bus?.$emit(settings.sendMsgToLeyan, {
