@@ -143,12 +143,6 @@ const model = computed<any>(() => {
   return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
 });
 
-onMounted(() => {
-  if(!model?.value?.id){
-    load();
-  }
-})
-
 const isInit = ref(true)
 const rules = computed(() => { return {
   src: [
@@ -189,11 +183,14 @@ const srcOptions = getEnumSelectItems(ExtractorSrc)
 const typeOptions = getEnumSelectItems(ExtractorType)
 
 const load = () => {
-  console.log('load', props.condition)
+  console.log('load extractor', props.condition)
   store.dispatch('Debug/getExtractor', props.condition)
 }
 
-
+watch(() => props.condition, (newVal) => {
+      load()
+    }, {immediate: true, deep: true}
+)
 
 let {resetFields, validate, validateInfos} = useForm(model, rules);
 
@@ -238,6 +235,10 @@ const changeType = () => {
 onMounted(() => {
   console.log('onMounted')
   bus.on(settings.eventConditionSave, save);
+
+  if(!model?.value?.id){
+    load();
+  }
 })
 onBeforeUnmount( () => {
   console.log('onBeforeUnmount')

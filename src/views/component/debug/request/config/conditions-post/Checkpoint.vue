@@ -139,22 +139,21 @@ const operatorsForCode = getCompareOptsForRespCode()
 const extractorTypeOptions = getEnumSelectItems(ExtractorType)
 
 const load = () => {
+  console.log('load checkpoint', props.condition)
   if (props.condition.entityId) {
     store.dispatch('Debug/getCheckpoint', props.condition)
   }
 }
 
+watch(() => props.condition, (newVal) => {
+      load()
+    }, {immediate: true, deep: true}
+)
 
 const {assertionConditionsDataObj} = useIMLeaveTip();
 const model = computed<any>(() => {
   return isForBenchmarkCase ? store.state.Debug.benchMarkCase.checkpointData : (assertionConditionsDataObj.value?.[props?.condition?.entityId] || {})
 });
-
-onMounted(() => {
-  if(!model?.value?.id){
-    load();
-  }
-})
 
 const variables = ref([])
 
@@ -180,8 +179,6 @@ const rulesRef = computed(() => {
     operator: model.value.type === CheckpointType.judgement ? [] : operatorRequired,
     value: model.value.type === CheckpointType.judgement ? [] : valueRequired,
   }
-
-  console.log('===', ret)
 
   return ret
 })
@@ -225,6 +222,10 @@ const cancel = () => {
 onMounted(() => {
   console.log('onMounted')
   bus.on(settings.eventConditionSave, save);
+
+  if(!model?.value?.id){
+    load();
+  }
 
   loadExtractorVariable()
 })
