@@ -55,7 +55,7 @@ const props = defineProps({
     type: Function,
     required: true,
   },
-})
+  })
 
 const validMethods = listDefinedMethod()
 
@@ -90,6 +90,10 @@ const loading = ref(false);
 const finish = () => {
   console.log('finish', modelRef.value)
   validate().then(async () => {
+    if (modelRef.value.from === 'saveAs') {
+      emits('finish', modelRef.value);
+      return;
+    }
     loading.value = true;
     const result = await store.dispatch('Endpoint/saveCase', {
       ...modelRef.value,
