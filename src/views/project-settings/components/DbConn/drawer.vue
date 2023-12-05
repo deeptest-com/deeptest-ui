@@ -13,7 +13,7 @@
         </div>
       </template>
 
-      <div v-if="visible">
+      <div>
         <div v-if="!isLy" class="dbConn-tips-container">
           <a href="https://deeptest.com/dbConn.html" target="_blank">
             <QuestionCircleOutlined class="dp-icon-btn dp-trans-80"/>
