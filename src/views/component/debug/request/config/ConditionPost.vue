@@ -87,10 +87,10 @@
                 :condition="activePostCondition"
                 :finish="list"/>
 
-              <Checkpoint
+<!--              <Checkpoint
                 v-if="element.entityType === ConditionType.checkpoint"
                 :condition="activePostCondition"
-                :finish="list"/>
+                :finish="list"/>-->
 
               <Script
                 v-if="element.entityType === ConditionType.script"

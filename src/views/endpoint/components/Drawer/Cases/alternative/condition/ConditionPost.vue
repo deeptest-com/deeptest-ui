@@ -80,17 +80,17 @@
             </div>
 
             <div class="content" v-if="activePostCondition.id === +element.id">
-              <Extractor 
+              <Extractor
                 v-if="element.entityType === ConditionType.extractor"
                 :condition="activePostCondition"
                 :finish="list"/>
 
-              <Checkpoint 
+<!--              <Checkpoint
                 v-if="element.entityType === ConditionType.checkpoint"
                 :condition="activePostCondition"
-                :finish="list"/>
+                :finish="list"/>-->
 
-              <Script 
+              <Script
                 v-if="element.entityType === ConditionType.script"
                 :condition="activePostCondition"
                 :finish="list"/>
@@ -106,7 +106,7 @@
       </draggable>
     </div>
 
-    <FullScreenPopup 
+    <FullScreenPopup
       v-if="fullscreen"
       :visible="fullscreen"
       :model="activePostCondition"
@@ -118,13 +118,13 @@
 import {computed, inject, ref, watch, onUnmounted, provide} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import { 
-  CheckCircleOutlined, 
+import {
+  CheckCircleOutlined,
   DeleteOutlined,
-  ClearOutlined, 
+  ClearOutlined,
   RightOutlined,
-  DownOutlined, 
-  CloseCircleOutlined, 
+  DownOutlined,
+  CloseCircleOutlined,
   FullscreenOutlined } from '@ant-design/icons-vue';
 import draggable from 'vuedraggable';
 import Tips from "@/components/Tips/index.vue";
@@ -164,7 +164,7 @@ const conditionType = ref(ConditionType.extractor)
 const conditionTypes = ref(getEnumSelectItems(ConditionType))
 
 const expand = (item) => {
-  console.log('expand', item) 
+  console.log('expand', item)
   store.commit('Debug/setActivePostCondition', item);
 }
 
@@ -198,7 +198,7 @@ const disable = (item) => {
 }
 const remove = (item) => {
   console.log('remove', item)
-  
+
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
     store.dispatch('Debug/removePostCondition', item)
   })
@@ -258,7 +258,7 @@ onUnmounted(() => {
     &>div {
       height: 100%;
     }
-    
+
     .collapse-list {
       height: 100%;
       width: 100%;

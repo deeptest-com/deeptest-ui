@@ -1,6 +1,6 @@
 export const send_request_get = `
 dt.sendRequest("http://111.231.16.35:9000/get", function (error, response) {
-   log(error ? error : response.statusContent);
+   log(error ? error : response.statusCode);
 });
 `;
 
@@ -13,7 +13,7 @@ var postRequest = {
   }
 };
 dt.sendRequest(postRequest, (error, response) => {
-   log(error ? error : response);
+   log(error ? error : response.statusCode);
 });
 `;
 
