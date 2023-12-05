@@ -278,7 +278,7 @@ const queryMultiDetail = () => {
 const queryDetail = (reportInfo?: any) => {
   const category = reportTreeData.value[0].logs;
   const selectedCategory = category.find(e => e.logs.some(param => param.caseUuid === reportInfo.parentUuid));
-  execSelectedKeys.value = execSelectedKeys.value.concat([reportInfo.caseUuid, reportInfo.parentUuid, selectedCategory.caseUuid]);
+  execSelectedKeys.value = [reportInfo.caseUuid, reportInfo.parentUuid, selectedCategory.caseUuid];
   execDrawerVisible.value = true;
 }
 

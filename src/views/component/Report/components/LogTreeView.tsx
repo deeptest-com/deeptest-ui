@@ -116,7 +116,11 @@ export default defineComponent({
                             return <div
                                 class={[item.processorType === 'processor_logic_else' ? 'log-item-else' : 'log-item', itemIndex === 0 ? 'log-item-first' : '']}>
                                 {renderCollapseTitle(item, itemIndex, log)}
-                                <a-collapse>
+                                <a-collapse
+                                    activeKey={activeKeyMap[item.id]}
+                                    onChange={(key) => {
+                                        change(item.id, key)
+                                    }}>
                                     {renderLogs(item)}
                                 </a-collapse>
                                 {pageSize -1 === itemIndex  ? renderPage(pid) : null}
@@ -128,7 +132,11 @@ export default defineComponent({
             return logs.map((log, logIndex) => {
                 return <div key={log.id}
                             class={[log.processorType === 'processor_logic_else' ? 'log-item-else' : 'log-item', logIndex === 0 ? 'log-item-first' : '']}>
-                    <a-collapse>
+                    <a-collapse
+                        activeKey={activeKeyMap[log.id]}
+                        onChange={(key) => {
+                            change(log.id, key)
+                        }}>
                         {renderLogs(log)}
                     </a-collapse>
                 </div>
