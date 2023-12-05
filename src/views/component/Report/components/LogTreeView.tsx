@@ -12,6 +12,7 @@ export default defineComponent({
     props: {
         treeData: Array,
         isSingleScenario: Boolean,
+        selectedKeys: Array,
     },
     emits: ['change'],
     setup(props, {emit}) {
@@ -38,6 +39,14 @@ export default defineComponent({
             if (newVal?.length) {
                 newVal.forEach((item) => {
                     activeKeyMap.value[item.id] = [item.id];
+                })
+            }
+        }, {immediate: true, deep: true})
+
+        watch(() => props.selectedKeys, (newVal: any) => {
+            if (newVal?.length) {
+                newVal.forEach((item) => {
+                    activeKeyMap.value[item] = [item];
                 })
             }
         }, {immediate: true, deep: true})
