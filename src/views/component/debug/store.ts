@@ -44,7 +44,7 @@ import {
     getDbOpt, saveDbOpt, removeDbOpt,
 } from './service';
 
-import { serverList, changeServe, getVarsByEnv } from '@/views/project-settings/service';
+import {serverList, changeServe, getVarsByEnv, listDbConn} from '@/views/project-settings/service';
 import {Checkpoint, Cookie, DebugInfo, Extractor, Interface, Response, Script} from "./data";
 import {ConditionCategory, ConditionType, UsedBy} from "@/utils/enum";
 import {ResponseData} from "@/utils/request";
@@ -85,6 +85,7 @@ export interface StateType {
     debugChange: any;
     environmentsFromServers: any[];
     currServe: any;
+    dbConns: any[];
 
     benchMarkCase: {
         assertionConditions: any[];
@@ -135,6 +136,7 @@ const initState: StateType = {
     },
     environmentsFromServers: [],
     currServe: [],
+    dbConns: [],
 
     // 备选用例临时数据存储
     benchMarkCase: {
@@ -192,6 +194,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setEnvironmentsFromServers: Mutation<StateType>; // 获取环境列表
         setCurrServe: Mutation<StateType>; // 设置当前所选环境
+        setDbConns: Mutation<StateType>;
 
         setGlobalParams: Mutation<StateType>;
 
@@ -266,6 +269,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         updateBody: Action<StateType, StateType>;
 
         changeServer: Action<StateType, StateType>;
+        listDbConn: Action<StateType, StateType>;
 
         saveResponseDefine:Action<StateType, StateType>
 
@@ -434,6 +438,9 @@ const StoreModel: ModuleType = {
         },
         setCurrServe(state, payload) {
             state.currServe = payload;
+        },
+        setDbConns(state, payload) {
+            state.dbConns = payload;
         },
         setGlobalParams(state, payload){
             state.debugData.globalParams.forEach((item:any,index:number,arr:any[])=>{
@@ -1112,6 +1119,11 @@ const StoreModel: ModuleType = {
             } else if (name === 'set_mock_resp_text') {
                 line = "dt.response.data = dt.response.data.replace('old', 'new');"
 
+            } else if (name === 'send_request_get') {
+                line = send_request_get
+            } else if (name === 'send_request_post') {
+                line = send_request_post
+
             } else if (name === 'assert_resp_status_Code') {
                 line = assert_resp_status_Code
             } else if (name === 'assert_resp_json_field') {
@@ -1199,6 +1211,16 @@ const StoreModel: ModuleType = {
                 }
             }
             return true;
+        },
+
+        async listDbConn({commit, dispatch, state}) {
+            const resp = await listDbConn({ignoreDisabled: true})
+            if (resp.code === 0) {
+                commit('setDbConns', resp.data);
+                return true;
+            }  else {
+                return false
+            }
         },
 
         async saveResponseDefine({commit, dispatch, state}, payload: any) {

@@ -188,7 +188,7 @@ function onClose() {
   }
 
   .record-name {
-    width: 120px;
+    width: 100%;
   }
 }
 </style>

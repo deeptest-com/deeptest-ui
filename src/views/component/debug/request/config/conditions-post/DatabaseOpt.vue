@@ -6,6 +6,7 @@
         <a-row type="flex">
           <a-col flex="auto">
             <a-select v-model:value="model.dbConnId"
+                      @focus="loadDbConns"
                       @blur="validate('dbConnId', { trigger: 'change' }).catch(() => {})">
 
               <a-select-option key="0" :value="0" >请选择</a-select-option>
@@ -102,6 +103,7 @@ const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const responseData = computed<any>(() => store.state.Debug.responseData);
+const dbConns = computed<any>(() => store.state.Debug.dbConns);
 
 const {postConditionsDataObj} = useIMLeaveTip();
 const model = computed<any>(() => {
@@ -138,11 +140,9 @@ const load = () => {
 }
 load()
 
-const dbConns = ref([])
 const loadDbConns = async () => {
   console.log('loadDbConns')
-  const resp = await listDbConn({ignoreDisabled: true})
-  dbConns.value = resp.data
+  store.dispatch('Debug/listDbConn')
 }
 loadDbConns()
 
