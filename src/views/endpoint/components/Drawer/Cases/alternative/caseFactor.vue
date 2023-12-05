@@ -277,7 +277,7 @@ const queryMultiDetail = () => {
 
 const queryDetail = (reportInfo?: any) => {
   console.log('当前查看case', reportInfo);
-  const category = treeData.value[0].logs;
+  const category = reportTreeData.value[0].logs;
   const selectedCategory = category.find(e => e.logs.some(param => param.caseUuid === reportInfo.parentUuid));
   execSelectedKeys.value = execSelectedKeys.value.concat([reportInfo.caseUuid, reportInfo.parentUuid, selectedCategory.caseUuid]);
   console.log('选中的case', reportInfo.caseUuid);
