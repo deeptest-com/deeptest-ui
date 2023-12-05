@@ -20,7 +20,7 @@ export default defineComponent({
         const pageInfo = ref({});
 
         function change(uid, keys) {
-            activeKeyMap.value[uid] = keys;
+            activeKeyMap.value[uid] = [uid];
         }
 
         function changePageInfo(pid) {
@@ -53,7 +53,6 @@ export default defineComponent({
             function renderHeader(log) {
                 // 接口场景
                 if (log.processorCategory === 'processor_interface') {
-                    console.log('render InterfaceHeader')
                     return <InterfaceHeader endpointData={log}/>
                 }
                 // 其他场景
@@ -62,7 +61,6 @@ export default defineComponent({
 
             function renderContent(log) {
                 if (log.processorCategory === 'processor_interface' && log.detail !== undefined && log.detail !== '{}') {
-                    console.log('render InterfaceContent')
                     return <InterfaceContent endpointData={log} />
                 }
                 // 场景中的叶子节点不再渲染

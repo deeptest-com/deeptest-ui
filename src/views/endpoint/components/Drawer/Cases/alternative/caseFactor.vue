@@ -92,7 +92,8 @@
     <div class="scenario-exec-info-main" v-if="execDrawerVisible">
       <LogTreeView
         class="scenario-exec-log-tree"
-        :treeData="reportTreeData || []" />
+        :treeData="reportTreeData || []"
+        :selectedKeys="execSelectedKeys" />
     </div>
   </a-drawer>
 </template>
@@ -138,6 +139,7 @@ const treeDataMap = ref({});
 const currRespDetail = reactive({});
 const logResponseDetailVisible = ref(false);
 const execDrawerVisible = ref(false);
+const execSelectedKeys = ref<any[]>([]);
 
 const treeData = computed(() => {
 
@@ -274,12 +276,14 @@ const queryMultiDetail = () => {
 }
 
 const queryDetail = (reportInfo?: any) => {
-  Object.assign(currRespDetail, {
-    reqContent: JSON.parse(reportInfo.reqContent || '{}') ,
-    resContent: JSON.parse(reportInfo.respContent || '{}') ,
-    invokeId: reportInfo.response.invokeId
-  });
-  logResponseDetailVisible.value = true;
+  console.log('当前查看case', reportInfo);
+  const category = treeData.value[0].logs;
+  const selectedCategory = category.find(e => e.logs.some(param => param.caseUuid === reportInfo.parentUuid));
+  execSelectedKeys.value = execSelectedKeys.value.concat([reportInfo.caseUuid, reportInfo.parentUuid, selectedCategory.caseUuid]);
+  console.log('选中的case', reportInfo.caseUuid);
+  console.log('选中的param', reportInfo.parentUuid);
+  console.log('选中的category', selectedCategory);
+  execDrawerVisible.value = true;
 }
 
 const handleExecTypeChange = evt => {
