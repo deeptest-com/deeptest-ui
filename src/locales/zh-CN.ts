@@ -92,6 +92,7 @@ export default {
     'script': '定制代码',
     'judgement': '表达式',
     'extractor': '提取器',
+    'extractBody': '提取响应体',
     'extractorVari': '提取变量',
 
     'fulltext': '全文本',

@@ -7,7 +7,7 @@
                   @change="selectType"
                   @blur="validate('type', { trigger: 'change' }).catch(() => {})">
           <a-select-option v-for="(item, idx) in types" :key="idx" :value="item.value">
-            {{ t(item.label) }}
+            {{ t(item.label === 'extractor' ? 'extractBody' : item.label) }}
           </a-select-option>
         </a-select>
       </a-form-item>
