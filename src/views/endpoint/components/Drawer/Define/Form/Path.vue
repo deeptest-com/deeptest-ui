@@ -58,15 +58,15 @@ const store = useStore<{ Endpoint, Debug, ProjectGlobal, User,ServeGlobal }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const currentUser: any = computed<Endpoint>(() => store.state.User.currentUser);
 
-const serveServers: any = computed<any>(() => store.state.Debug.serves);
+const environmentsFromServers: any = computed<any>(() => store.state.Debug.environmentsFromServers);
 
 const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 const currentServerId = computed(() => store.state.Debug.currServe.environmentId || null );
-const currentEnvURL = computed(() => {
-  return serveServers.value?.find((item) => {
-    return currentServerId.value === item.id;
-  })?.url
-});
+// const currentEnvURL = computed(() => {
+//   return environmentsFromServers.value?.find((item) => {
+//     return currentServerId.value === item.id;
+//   })?.url
+// });
 
 // 是否折叠,默认展开
 const collapse = ref(true);

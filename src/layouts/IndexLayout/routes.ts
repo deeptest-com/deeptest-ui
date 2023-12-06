@@ -282,6 +282,16 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         }
       },
       {
+        icon: 'db-conn',
+        title: 'index-layout.menu.project.setting.dbConn',
+        path: 'dbconn',
+        component: () => import('@/views/project-settings/components/DbConn/index.vue'),
+        hidden: false,
+        meta: {
+          code: 'PROJECT-SETTING-DBCONN'
+        }
+      },
+      {
         icon: 'swaggerSync',
         title: 'index-layout.menu.project.setting.swaggerSync',
         path: 'swaggerSync',

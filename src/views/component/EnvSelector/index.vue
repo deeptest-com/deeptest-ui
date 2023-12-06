@@ -39,7 +39,7 @@ const store = useStore<{ Plan, ProjectSetting: ProjectSettingStateType, ProjectG
 const envList = computed<any>(() => store.state.ProjectSetting.envList);
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const selectEnvId = computed<any>(() => store.state.ProjectSetting.selectEnvId);
-// const envId: any = computed<Scenario>(() => store.state.Scenario.detailResult?.currEnvId);
+
 const currEnvId = ref(null);
 
 const labelCol = {span: 5};

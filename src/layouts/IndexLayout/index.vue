@@ -29,6 +29,14 @@
         <permission :roles="routeItem.roles">
           <router-view></router-view>
         </permission>
+
+<!--        <div style="position: fixed; right: 16px; bottom: -16px; z-index: 999999;">
+          <div @click="sendMsg" class="dp-link-primary">Open Record Window</div>
+          <br />
+          <div id="deeptest-event-node" style="word-wrap: break-word;"
+               @deeptest-event-from-chrome-ext="onChromeExtEvent"></div>
+        </div>-->
+
       </div>
     </div>
   </div>
@@ -56,6 +64,7 @@ import IndexLayoutRoutes from './routes';
 import Permission from '@/components/Permission/index.vue';
 import Left from '@/layouts/IndexLayout/components/Left.vue';
 import RightTop from '@/layouts/IndexLayout/components/RightTop.vue';
+import {ScopeDeeptest} from "@/utils/const";
 
 export default defineComponent({
   name: 'IndexLayout',
@@ -67,7 +76,7 @@ export default defineComponent({
   setup() {
     const store = useStore<{ Global: GlobalStateType; User: UserStateType; }>();
     const route = useRoute();
-
+    
     const version = ref('')
 
     onMounted(() => {
@@ -86,7 +95,7 @@ export default defineComponent({
     const menuData: RoutesDataItem[] = vueRoutes(IndexLayoutRoutes);
 
     // 当前路由 item
-    const routeItem = computed<RoutesDataItem>(() => getRouteItem(route.path, menuData));
+    const routeItem = computed<RoutesDataItem>(() => getRouteItem(route, menuData));
 
     // 有权限的菜单
     const permissionMenuData = computed<RoutesDataItem[]>(() => getPermissionMenuData(store.state.User.currentUser.sysRoles, menuData));
@@ -142,6 +151,21 @@ export default defineComponent({
     // 设置title
     useTitle(routeItem);
 
+    const sendMsg = () => {
+      console.log('sendMsg')
+      const data = {
+        scope: ScopeDeeptest,
+        content: {
+          act: 'recordStart'
+        }
+      }
+
+      window.postMessage(data, '*')
+    }
+    const onChromeExtEvent =() => {
+      console.log('onChromeExtEvent')
+    }
+
     return {
       collapsed,
       toggleCollapsed,
@@ -155,7 +179,9 @@ export default defineComponent({
       permissionMenuData,
       version,
       onOpenChange,
-      routeItem
+      routeItem,
+      sendMsg,
+      onChromeExtEvent,
     }
   }
 })
@@ -184,6 +210,14 @@ export default defineComponent({
       min-width: 1217px;
       overflow: hidden;
       padding: 16px;
+
+      .hide-btn {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        width: 20px;
+        height: 20px;
+      }
     }
   }
 }

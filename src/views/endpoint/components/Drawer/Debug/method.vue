@@ -88,10 +88,13 @@ const initMethod = async () => {
   }
   await changeMethod({},true)
 
+  // todo: 这里异步触发，与changeMethod 中 resetDebugChange也会触发多次。后续优化 
   setTimeout(() => {
     resetDebugChange();
   }, 500);
 }
+
+// todo: 这里不放在钩子里写，可能会触发多次。需要优化到钩子函数中
 initMethod()
 
 function hasDefinedMethod(method: string) {

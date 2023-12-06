@@ -1,13 +1,9 @@
 <template>
-  <div class="case-assertion-main">
+  <div class="post-condition-main">
     <div class="head">
       <a-row type="flex">
-        <a-col flex="100px">
-          <a-button @click="create" type="primary" size="small">新建</a-button>
-        </a-col>
-
         <a-col flex="1">
-          此处定义的断言，将在基准用例的前、后置处理器运行后执行。
+          <a-button @click="create" type="primary" size="small">添加断言</a-button>
         </a-col>
 
         <a-col flex="100px" class="dp-right">
@@ -18,7 +14,7 @@
 
     <div class="content">
       <draggable tag="div" item-key="name" class="collapse-list"
-                 :list="assertions || []"
+                 :list="assertionConditions || []"
                  handle=".handle"
                  @end="move">
         <template #item="{ element }">
@@ -28,27 +24,39 @@
               <div @click.stop="expand(element)" class="title dp-link">
                 <icon-svg class="handle dp-drag icon" type="move"  />
 
-                <icon-svg type="checkpoint" class="icon"  />
+                <icon-svg v-if="element.entityType === ConditionType.extractor"
+                          type="variable"
+                          class="icon variable" />
+                <icon-svg v-if="element.entityType === ConditionType.checkpoint"
+                          type="checkpoint"
+                          class="icon"  />
+                <icon-svg v-if="element.entityType === ConditionType.script"
+                          type="script"
+                          class="icon"  />
 
                 <div class="entity-type">断言</div>
                 <div class="assert-expression">
-                  <TooltipCell :tip="element.desc">
-                    <span class="expression-content" v-html="element.desc"></span>
+                  <TooltipCell :tip="element.desc || t(element.entityType)">
+                    <span class="expression-content" v-html="element.desc || t(element.entityType)"></span>
                   </TooltipCell>
                 </div>
               </div>
               <div class="buttons">
-                <icon-svg class="icon dp-link-primary dp-icon-large" type="save"
-                          title="保存"
-                          v-if="activeAssertion.id === element.id"
-                          @click.stop="save(element)" />
+                <a-button size="small" type="primary" v-if="activeAssertion.id === element.id"
+                          @click.stop="save(element)" style="margin-right: 4px;">保存</a-button>
+
+                <ClearOutlined v-if="activeAssertion.id === +element.id && element.entityType === ConditionType.script"
+                               @click.stop="format(element)"  class="dp-icon-btn dp-trans-80" />&nbsp;
 
                 <CheckCircleOutlined v-if="!element.disabled" @click.stop="disable(element)"
                                      class="dp-icon-btn dp-trans-80 dp-color-pass" />
                 <CloseCircleOutlined v-if="element.disabled" @click.stop="disable(element)"
                                      class="dp-icon-btn dp-trans-80" />
-
                 <DeleteOutlined @click.stop="remove(element)"  class="dp-icon-btn dp-trans-80" />
+
+                <FullscreenOutlined class="dp-icon-btn dp-trans-80"
+                                    v-if="activeAssertion.id === element.id"
+                                    @click.stop="openFullscreen(element)" />
 
                 <RightOutlined v-if="activeAssertion.id !== element.id"
                                @click.stop="expand(element)"  class="dp-icon-btn dp-trans-80" />
@@ -58,122 +66,142 @@
             </div>
 
             <div class="content" v-if="activeAssertion.id === +element.id">
-              <Assertion :finish="list" />
+              <Checkpoint 
+                v-if="element.entityType === ConditionType.checkpoint"
+                :condition="activeAssertion"
+                :finish="list" />
             </div>
           </div>
-
         </template>
       </draggable>
     </div>
+
+    <FullScreenPopup 
+      v-if="fullscreen"
+      :visible="fullscreen"
+      :model="activeAssertion"
+      :onCancel="closeFullScreen" />
   </div>
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, inject, ref, watch} from "vue";
+import {computed, inject, ref, watch, provide, onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import { QuestionCircleOutlined, CheckCircleOutlined, DeleteOutlined,
-  ClearOutlined, MenuOutlined, RightOutlined,
-  DownOutlined, CloseCircleOutlined, FullscreenOutlined, SaveOutlined } from '@ant-design/icons-vue';
+import { 
+  CheckCircleOutlined, 
+  DeleteOutlined,
+  ClearOutlined, 
+  RightOutlined,
+  DownOutlined, 
+  CloseCircleOutlined, 
+  FullscreenOutlined } from '@ant-design/icons-vue';
+import draggable from 'vuedraggable';
 import {ConditionType, UsedBy} from "@/utils/enum";
 import {EnvDataItem} from "@/views/project-settings/data";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import {confirmToDelete} from "@/utils/confirm";
+import {StateType as Debug} from "@/views/component/debug/store";
 import IconSvg from "@/components/IconSvg";
-
-import Assertion from "./assertion.vue";
+import Checkpoint from "@/views/component/debug/request/config/conditions-post/Checkpoint.vue";
+import FullScreenPopup from "@/views/component/debug/request/config/ConditionPopup.vue";
 import TooltipCell from "@/components/Table/tooltipCell.vue";
-import draggable from 'vuedraggable'
 import Tips from "@/components/Tips/index.vue";
-import {StateType as EndpointStateType} from "@/views/endpoint/store";
 
-const store = useStore<{ Endpoint: EndpointStateType }>();
-const assertions = computed<any>(() => store.state.Endpoint.alternativeCaseAssertions);
-const activeAssertion = computed<any>(() => store.state.Endpoint.activeAlternativeCaseAssertion);
+const store = useStore<{  Debug: Debug }>();
+const debugData = computed<any>(() => store.state.Debug.debugData);
+const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
+const assertionConditions = computed<any>(() => store.state.Debug.benchMarkCase.assertionConditions);
+const activeAssertion = computed<any>(() => store.state.Debug.benchMarkCase.activeAssertion);
 
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 
-const props = defineProps({
-  model: {
-    required: true,
-    type: Object,
-  },
-})
-
-const fullscreen = ref(false)
+const fullscreen = ref(false);
 
 const expand = (item) => {
   console.log('expand', item)
-  item.debugInterfaceId = props.model.debugInterfaceId
-  store.commit('Endpoint/setActiveAlternativeCaseAssertion', item)
+  store.commit('Debug/setActiveAssertion', Object.assign(item, {
+    isForBenchmarkCase: true,
+  }))
 }
 
-const list = () => {
-  console.log('list')
-  store.dispatch('Endpoint/listAlternativeCaseAssertion', props.model.baseId)
+const list = async () => {
+  await store.dispatch('Debug/listAssertionCondition', {
+    isForBenchmarkCase: true
+  })
 }
-
-watch(props.model, (newVal) => {
-  console.log('watch props.model', props.model)
-  list()
+watch(debugData, async (newVal) => {
+  await list();
 }, {immediate: true, deep: true});
 
 const create = () => {
-  console.log('create', ConditionType.checkpoint)
-  store.dispatch('Endpoint/createAlternativeCaseAssertion', {})
+  console.log('create', ConditionType.checkpoint);
+  store.dispatch('Debug/createPostCondition', {
+    entityType: ConditionType.checkpoint,
+    ...debugInfo.value,
+    isForBenchmarkCase: true,
+  })
 }
 
 const format = (item) => {
-  console.log('format', item)
+  console.log('format', item);
   bus.emit(settings.eventEditorAction, {act: settings.eventTypeFormat})
 }
 const disable = (item) => {
   console.log('disable', item)
-  store.dispatch('Endpoint/disableAlternativeCaseAssertion', item)
+  store.dispatch('Debug/disablePostCondition', {
+    ...item,
+    isForBenchmarkCase: true
+  })
 }
 const remove = (item) => {
   console.log('remove', item)
 
-  confirmToDelete(`确定删除选中断言？`, '', () => {
-    store.dispatch('Endpoint/removeAlternativeCaseAssertion', item)
+  confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
+    store.dispatch('Debug/removePostCondition', {
+      ...item,
+      isForBenchmarkCase: true
+    })
   })
 }
 function move(_e: any) {
-  const ids = assertions.value.map((e: any) => {
+  const envIdList = assertionConditions.value.map((e: EnvDataItem) => {
     return e.id;
   })
-
-  store.dispatch('Debug/moveAlternativeCaseAssertion', {
-    data: ids,
+  store.dispatch('Debug/movePostCondition', {
+    data: envIdList,
+    isForBenchmarkCase: true,
+    info: debugInfo.value,
+    entityType: ConditionType.checkpoint,
   })
 }
 
 const save = (item) => {
   console.log('save', item)
-  bus.emit(settings.eventConditionSave, {});
+  bus.emit(settings.eventConditionSave, item);
 }
+
+const openFullscreen = (item) => {
+  console.log('openFullscreen', item)
+  fullscreen.value = true
+}
+const closeFullScreen = (item) => {
+  console.log('closeFullScreen', item)
+  fullscreen.value = false
+}
+
+onUnmounted(() => {
+  store.commit('Debug/setActiveAssertion', {});
+})
+
+provide('isForBenchmarkCase', true);
 
 </script>
 
-<style lang="less">
-.case-assertion-main {
-  .codes {
-    height: 100%;
-    min-height: 160px;
-
-    .editor {
-      height: 100%;
-      min-height: 160px;
-    }
-  }
-}
-</style>
-
 <style lang="less" scoped>
-.case-assertion-main {
-  padding: 16px;
+.post-condition-main {
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -184,34 +212,11 @@ const save = (item) => {
   }
   .content {
     flex: 1;
-    height: calc(100% - 30px);
-    overflow-y: auto;
-
-    display: flex;
-    &>div {
-      height: 100%;
-    }
-
-    .codes {
-      flex: 1;
-    }
-    .refer {
-      width: 260px;
-      padding: 10px;
-      overflow-y: auto;
-
-      .title {
-        margin-top: 12px;
-      }
-      .desc {
-
-      }
-    }
+    overflow-y: scroll;
 
     .collapse-list {
-      height: 100%;
       width: 100%;
-      padding: 0;
+      padding-bottom: 10px;
 
       .collapse-item {
         margin: 4px;
@@ -223,7 +228,7 @@ const save = (item) => {
         }
 
         .header {
-          height: 28px;
+          height: 36px;
           padding: 3px;
           background-color: #fafafa;
           border-radius: 5px;
@@ -262,6 +267,9 @@ const save = (item) => {
           .buttons {
             width: 160px;
             text-align: right;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
           }
         }
         .content {

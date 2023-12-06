@@ -49,7 +49,7 @@ export interface SettingsType {
     skippedVersion: string;
     ignoreUtil: string,
 
-    eventNotify,
+    eventNotify: string,
     eventWebSocketConnStatus: string,
     eventWebSocketMsg: string,
 

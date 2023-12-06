@@ -19,10 +19,16 @@ import {defineProps} from "vue";
 import { QuestionCircleOutlined, ArrowRightOutlined } from '@ant-design/icons-vue';
 import {isLeyan} from "@/utils/comm";
 
-const props = defineProps<{
-  title: string
-  section?: string
-}>()
+const props = defineProps({
+  title: {
+    required: true,
+    type: String
+  },
+  section: {
+    required: false,
+    type: String
+  },
+})
 
 const openHelp = (bookmark?) => {
   if (!props.section) return

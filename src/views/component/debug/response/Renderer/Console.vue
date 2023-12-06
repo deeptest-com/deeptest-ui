@@ -1,8 +1,8 @@
 <template>
-  <div class="response-console-main" v-if="consoleData && consoleData.length">
-    <div v-for="(item, index) in consoleData"
+  <div class="response-console-main" v-if="consoleLogs && consoleLogs.length">
+    <div v-for="(item, index) in consoleLogs"
          :key="index"
-         :class="getResultClass(item)" class="item">
+         :class="getResultClass(item.resultStatus)" class="item">
 
       <span v-if="item.resultStatus===ResultStatus.Pass">
         <CheckCircleOutlined />
@@ -21,6 +21,10 @@
         <icon-svg v-if="item.conditionEntityType === ConditionType.script"
                   type="script"
                   class="icon"  />
+
+        <icon-svg v-if="item.conditionEntityType === ConditionType.databaseOpt"
+                  type="db-opt"
+                  class="icon"  />
       </span>
       &nbsp;
       <span v-html="item.resultMsg"></span>
@@ -38,6 +42,7 @@ import {ConditionType, ResultStatus} from "@/utils/enum";
 import { CheckCircleOutlined, CloseCircleOutlined} from '@ant-design/icons-vue';
 import IconSvg from "@/components/IconSvg";
 import Empty from "@/components/others/empty.vue";
+import {getResultClass} from "@/utils/dom";
 
 const {t} = useI18n();
 
@@ -49,16 +54,15 @@ const store = useStore<{  Debug: Debug }>();
 const responseData = computed<any>(() => props.data || store.state.Debug.responseData);
 const consoleData = computed<any>(() => store.state.Debug.consoleData);
 
+const consoleLogs = computed<any>(() => {
+  return responseData.value.consoleLogs ? responseData.value.consoleLogs : consoleData.value
+});
+
 watch(responseData, (newVal) => {
-  console.log('watch responseData', responseData.value.invokeId)
+  console.log('watch responseData in console tab, invokeId = ', responseData.value.invokeId)
   if (responseData.value.invokeId)
     store.dispatch("Debug/getInvocationLog", responseData.value.invokeId)
 }, {deep: true, immediate: true})
-
-const getResultClass = (item) => {
-  return item.resultStatus===ResultStatus.Pass? 'pass':
-      item.resultStatus===ResultStatus.Fail ? 'fail' : ''
-}
 
 </script>
 

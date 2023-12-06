@@ -1,38 +1,36 @@
 <template>
   <div class="pre-condition-main">
     <div class="head">
-      <a-row type="flex" class="row">
-        <a-col flex="1" class="left">
-          <icon-svg type="script" class="icon"  />
-          <span>JavaScript代码</span>
-        </a-col>
+      <div class="left">
+        <icon-svg type="script" class="icon"  />
+        <span>JavaScript代码</span>
+      </div>
+      <div class="right">
+        <a-button size="small" type="primary" @click.stop="save" style="margin-right: 4px" :disabled="!debugChange?.preScript">保存</a-button>
 
-        <a-col flex="100px" class="dp-right">
-          <a-button size="small" type="primary" @click.stop="save" style="margin-right: 4px" :disabled="!debugChange?.preScript">保存</a-button>
-          <Tips section="pre-condition" title="请求前的预处理脚本" />
+        <Tips :section="'pre-condition'" :title="'请求前的预处理脚本'" />
 
-          <a-tooltip overlayClassName="dp-tip-small">
-            <template #title>全屏</template>
-            <FullscreenOutlined @click.stop="openFullscreen()"  class="dp-icon-btn dp-trans-80" />
-          </a-tooltip>
-
-        </a-col>
-      </a-row>
+        <a-tooltip overlayClassName="dp-tip-small">
+          <template #title>全屏</template>
+          <FullscreenOutlined @click.stop="openFullscreen()"  class="dp-icon-btn dp-trans-80" />
+        </a-tooltip>
+      </div>
     </div>
 
     <div class="content">
       <Script />
     </div>
 
-    <FullScreenPopup v-if="fullscreen"
-                     :visible="fullscreen"
-                     :model="scriptData"
-                     :onCancel="closeFullScreen" />
+    <FullScreenPopup
+      v-if="fullscreen"
+      :visible="fullscreen"
+      :model="scriptData"
+      :onCancel="closeFullScreen" />
   </div>
 </template>
 
 <script setup lang="ts">
-import {computed, inject, onMounted, onUnmounted, ref, watch} from "vue";
+import {computed, inject, ref, watch, defineProps, provide, onMounted, onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import { FullscreenOutlined } from '@ant-design/icons-vue';
@@ -61,9 +59,10 @@ const fullscreen = ref(false)
 
 const getPreConditionScript = () => {
   console.log('getPreConditionScript')
-  store.dispatch('Debug/getPreConditionScript')
+  store.dispatch('Debug/getPreConditionScript', {
+    isForBenchmarkCase: false
+  })
 }
-
 
 onMounted(() => {
   if(!scriptData.value.id){
@@ -89,6 +88,7 @@ const format = (item) => {
   bus.emit(settings.eventEditorAction, {act: settings.eventTypeFormat})
 }
 
+provide('isForBenchmarkCase', false);
 /*************************************************
  * ::::前置处理器保存提示
  ************************************************/
@@ -108,19 +108,6 @@ watch(() => {
 
 </script>
 
-<style lang="less">
-.pre-condition-main {
-  .codes {
-    height: 100%;
-    min-height: 160px;
-
-    .editor {
-      height: 100%;
-      min-height: 160px;
-    }
-  }
-}
-</style>
 
 <style lang="less" scoped>
 .pre-condition-main {
@@ -132,21 +119,21 @@ watch(() => {
     height: 42px;
     padding: 2px 3px;
     border-bottom: 1px solid #d9d9d9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-    .row {
-      height: 100%;
-
-      :deep(.ant-col) {
-        align-items: center;
-        display: flex;
-      }
-
-      .left {
-        .icon {
-          margin-right: 5px;
-        }
-      }
+    .left {
+      flex: 1;
+      display: flex;
+      align-items: center;
     }
+
+    .right {
+      display: flex;
+      align-items: center;
+    }
+
   }
   .content {
     flex: 1;
@@ -156,22 +143,6 @@ watch(() => {
     display: flex;
     &>div {
       height: 100%;
-    }
-
-    .codes {
-      flex: 1;
-    }
-    .refer {
-      width: 260px;
-      padding: 10px;
-      overflow-y: auto;
-
-      .title {
-        margin-top: 12px;
-      }
-      .desc {
-
-      }
     }
 
     .collapse-list {
