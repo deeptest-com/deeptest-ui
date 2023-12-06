@@ -435,9 +435,11 @@ async function updateTitle(value: string, record: any) {
 
 async function updateServe(value: any, record: any,) {
   await store.dispatch('Endpoint/updateServe', {
-    id: record.id,
-    serveId: value
+    "fieldName": "serveId",
+    "value": value,
+    "endpointIds": [record.id]
   });
+  record.serveId = value;
 }
 
 // 打开抽屉
