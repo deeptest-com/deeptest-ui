@@ -191,8 +191,6 @@ const save = (item) => {
     return;
   }
 
-  console.log('---', rulesRef.value)
-
   validate().then(() => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
@@ -257,7 +255,7 @@ const loadExtractorVariable = () => {
   }
 
   if (model.value.type === CheckpointType.extractorVari) {
-    listExtractorVariable(debugInfo.value).then((jsn) => {
+    listExtractorVariable(Object.assign(debugInfo.value, {isForBenchmarkCase})).then((jsn) => {
       variables.value = jsn.data
     })
   }
