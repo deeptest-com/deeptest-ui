@@ -331,14 +331,17 @@ async function onDelete(record: any) {
   Modal.confirm({
     title: '确认要删除该组件吗',
     icon: createVNode(ExclamationCircleOutlined),
-    onOk() {
-      store.dispatch('ProjectSetting/deleteSchema', {
+    async onOk() {
+     await store.dispatch('ProjectSetting/deleteSchema', {
         id: record.id,
         serveId: props.serveId,
         name: keyword.value
       })
+      await getList();
     }
   })
+
+ 
 }
 
 

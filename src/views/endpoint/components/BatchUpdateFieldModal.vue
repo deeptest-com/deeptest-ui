@@ -36,7 +36,9 @@
             placeholder="请选择所属分类"
             allow-clear/>
         <a-select v-else
-                  :value="formState.value"/>
+                :options="serves"
+                placeholder="请选择服务"
+                :value="formState.value"/>
       </a-form-item>
     </a-form>
   </a-modal>
@@ -55,8 +57,9 @@ import {endpointStatusOpts} from '@/config/constant';
 import {useStore} from "vuex";
 import {NewEndpointFormState} from "@/views/Endpoint/data";
 
-const store = useStore<{ Endpoint }>();
+const store = useStore<{ Endpoint,ServeGlobal }>();
 const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
+  const serves = computed<any>(() => store.state.ServeGlobal.serves);
 
 const treeData: any = computed(() => {
   const data = treeDataCategory.value;
@@ -73,6 +76,10 @@ const FieldNameOpts = [
     label: '所属分类',
     value: 'categoryId',
   },
+  {
+    label: '服务',
+    value: 'serveId',
+  }
 ]
 
 const props = defineProps({

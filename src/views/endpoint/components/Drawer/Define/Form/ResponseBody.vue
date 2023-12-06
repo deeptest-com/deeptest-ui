@@ -31,7 +31,7 @@
           @generateFromJSON="generateFromJSON"
           @changeContent="changeContent"
           @changeExamples="changeExamples"
-          :serveId="currServe.id"
+          :serveId="serveId"
           :contentStr="contentStr"
           :exampleStr="exampleStr"
           @generateExample="handleGenerateExample"
@@ -45,17 +45,15 @@ import {computed, defineEmits, defineProps, onMounted, ref, watch,} from 'vue';
 import {useStore} from "vuex";
 import {mediaTypesOpts,} from '@/config/constant';
 import {DownOutlined, RightOutlined} from '@ant-design/icons-vue';
-import {Endpoint} from "@/views/endpoint/data";
 import SchemaEditor from '@/components/SchemaEditor/index.vue';
 
 const store = useStore<{ Endpoint, Debug, ProjectGlobal, User, ServeGlobal }>();
 const selectedCodeDetail = computed<any>(() => store.state.Endpoint.selectedCodeDetail);
-const currentUser: any = computed<Endpoint>(() => store.state.User.currentUser);
-const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
+
 
 // 是否折叠,默认展开
 const collapse = ref(true);
-const props = defineProps({});
+const props = defineProps(['serveId']);
 const emit = defineEmits([]);
 const activeResBodySchema: any = ref({
   content: null,
@@ -84,7 +82,7 @@ function handleResBodyMediaTypeChange(e) {
   store.commit('Endpoint/setSelectedCodeDetail', selectedCodeDetail?.value);
 }
 
-async function generateFromJSON(JSONStr: string) {
+async function generateFromJSON(JSONStr?: string) {
   activeResBodySchema.value.content = await store.dispatch('Endpoint/example2schema', {data: JSONStr});
   contentStr.value = JSON.stringify(activeResBodySchema.value.content);
 }
@@ -92,7 +90,7 @@ async function generateFromJSON(JSONStr: string) {
 async function handleGenerateExample(examples: any) {
   const content = contentStr.value;
   const res = await store.dispatch('Endpoint/schema2example',
-      {data: content, serveId: currServe.value.id,}
+      {data: content, serveId: props.serveId,}
   );
   const example = {
     name: `Example ${examples.length + 1}`,
@@ -101,7 +99,7 @@ async function handleGenerateExample(examples: any) {
   if(!activeResBodySchema.value?.examples) {
     activeResBodySchema.value.examples = [];
   }
-  activeResBodySchema.value.examples.push(example);
+  activeResBodySchema.value.examples?.push(example)
   exampleStr.value = JSON.stringify(activeResBodySchema.value.examples);
 }
 

@@ -12,7 +12,7 @@
     </a-select>
   </div>
   <div :class="['editor','show-on-hover', customClass]" v-else>
-    <span class="title" @click.stop="handleClick">{{ label }}</span> &nbsp;&nbsp;
+    <span class="title" @click.stop="handleClick">{{ name }}</span> &nbsp;&nbsp;
     <span class="edit-icon"><EditOutlined @click.stop="isEditing = true"/></span>
   </div>
 </template>
@@ -21,11 +21,16 @@ import {
   defineProps,
   defineEmits,
   ref, watch,
+  computed
 } from 'vue';
 import {
   EditOutlined,
 } from '@ant-design/icons-vue';
 import { vOnClickOutside } from '@vueuse/components';
+
+const name = computed(() => { 
+  return props.label || props.options.find((item) => item.value === props.value)?.label;
+});
 const isEditing = ref(false);
 const fieldValue:any = ref('');
 const props = defineProps({
@@ -33,7 +38,7 @@ const props = defineProps({
     required: true,
   },
   label: {
-    required: true,
+    required: false,
   },
   options: {
     required: true,

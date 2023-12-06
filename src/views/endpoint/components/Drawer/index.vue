@@ -28,7 +28,8 @@
       <EndpointBasicInfo
           @changeStatus="changeStatus"
           @change-description="changeDescription"
-          @changeCategory="changeCategory"/>
+          @changeCategory="changeCategory"
+          @changeServe="changeServe"/>
     </template>
     <template #tabHeader>
       <DetailTabHeader :tab-list="EndpointTabsList" :show-btn="true" @change-tab="changeTab" :active-key="activeTabKey">
@@ -269,6 +270,12 @@ async function changeCategory(value) {
   await store.dispatch('Endpoint/loadCategory');
 }
 
+async function changeServe(value:number) {
+  await store.dispatch('Endpoint/updateEndpointDetail',
+      {...endpointDetail.value, serveId:value}
+  );
+  await store.dispatch('Endpoint/getEndpointDetail', {id: endpointDetail.value.id});
+}
 
 const activeTabKey = ref('request');
 
