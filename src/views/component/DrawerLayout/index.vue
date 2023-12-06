@@ -92,7 +92,7 @@ const setFullScreen = (value: boolean) => {
   setTimeout(() => {
     bus.emit(settings.paneResizeTop);
   }, 300);
-  
+
 };
 const toDetail = (url: string) => {
   console.log('查看详情', url);
@@ -213,7 +213,11 @@ provide('isFullScreen', computed(() => isFullscreen.value));
     justify-content: space-between;
     :deep(.header-text) {
       display: flex;
-      max-width: 80%;
+      flex:1;
+      //max-width: 80%;
+    }
+    :deep(input) {
+      width: 320px!important;
     }
     :deep(.header-text .serialNumber) {
       margin-right: 6px;
