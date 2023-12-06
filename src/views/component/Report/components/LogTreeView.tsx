@@ -21,7 +21,7 @@ export default defineComponent({
         const pageInfo = ref({});
 
         function change(uid, keys) {
-            activeKeyMap.value[uid] = [uid];
+            activeKeyMap.value[uid] = keys;
         }
 
         function changePageInfo(pid) {
@@ -117,7 +117,7 @@ export default defineComponent({
                                 class={[item.processorType === 'processor_logic_else' ? 'log-item-else' : 'log-item', itemIndex === 0 ? 'log-item-first' : '']}>
                                 {renderCollapseTitle(item, itemIndex, log)}
                                 <a-collapse
-                                    activeKey={activeKeyMap[item.id]}
+                                    activeKey={activeKeyMap.value[item.id]}
                                     onChange={(key) => {
                                         change(item.id, key)
                                     }}>
@@ -133,7 +133,7 @@ export default defineComponent({
                 return <div key={log.id}
                             class={[log.processorType === 'processor_logic_else' ? 'log-item-else' : 'log-item', logIndex === 0 ? 'log-item-first' : '']}>
                     <a-collapse
-                        activeKey={activeKeyMap[log.id]}
+                        activeKey={activeKeyMap.value[log.id]}
                         onChange={(key) => {
                             change(log.id, key)
                         }}>
