@@ -1557,7 +1557,7 @@ const StoreModel: ModuleType = {
         async batchUpdateField({commit, dispatch}, payload: any) {
             const res = await batchUpdateField(payload);
             if (res.code === 0) {
-                await dispatch('loadList', {projectId: payload.projectId});
+               // await dispatch('loadList', {projectId: payload.projectId});
                 await dispatch('loadCategory');
             } else {
                 return null
