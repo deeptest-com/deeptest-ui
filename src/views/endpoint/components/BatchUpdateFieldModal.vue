@@ -38,7 +38,7 @@
         <a-select v-else
                 :options="serves"
                 placeholder="请选择服务"
-                :value="formState.value"/>
+                v-model:value="formState.value"/>
       </a-form-item>
     </a-form>
   </a-modal>
