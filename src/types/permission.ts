@@ -32,5 +32,6 @@ export enum RouteMenuType {
     "PROJECT-SETTING-MEMBERS" = "project-setting-members",
     "PROJECT-SETTING-SWAGGERSYNC" = "project-setting-swaggerSync",
     "PROJECT-SETTING-MOCK" = "project-setting-mock",
-    "PROJECT-SETTING-JSLIB" = "project-setting-jslib"
+    "PROJECT-SETTING-JSLIB" = "project-setting-jslib",
+    "PROJECT-SETTING-DBCONN" = "project-setting-dbconn"
 }

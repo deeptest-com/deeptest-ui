@@ -1,16 +1,18 @@
 <template>
     <a-config-provider :locale="antdLocales">
       <router-view></router-view>
+
+      <Notification></Notification>
     </a-config-provider>
 </template>
 <script lang="ts">
 import {defineComponent, computed, onMounted, watch, ref,onUnmounted} from "vue";
+import { useI18n } from "vue-i18n";
+import {useStore} from "vuex";
 import { antdMessages } from "@/config/i18n";
 import { setHtmlLang } from "@/utils/i18n";
-import { useI18n } from "vue-i18n";
-// import Notification from "./components/others/Notification.vue";
+import Notification from "./components/others/Notification.vue";
 import renderfeedback from "@/utils/feedback";
-import {useStore} from "vuex";
 import { StateType as UserStateType, CurrentUser } from "@/store/user";
 import settings from "@/config/settings";
 import {isElectronEnv} from "@/utils/agentEnv";
@@ -20,10 +22,12 @@ import {Cache_Key_Agent_Local_Port, Cache_Key_Server_Url} from "@/utils/const";
 
 export default defineComponent({
   name: 'App',
+  components: {
+    Notification,
+  },
   setup() {
     const { locale } = useI18n();
     const antdLocales = computed(()=> antdMessages[locale.value]);
-
 
     const isLyEnv = isLeyan();
     // NOTICE: 以下代码仅适用于ly环境，其他环境删除即可

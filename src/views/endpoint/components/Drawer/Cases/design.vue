@@ -82,7 +82,7 @@ const saveCaseInterface = async (e) => {
   let data = JSON.parse(JSON.stringify(debugData.value))
   data = prepareDataForRequest(data)
 
-  Object.assign(data, {shareVars: null, envVars: null, globalEnvVars: null, globalParamVars: null})
+  Object.assign(data, {envDataToView: null})
 
   const res = await store.dispatch('Endpoint/saveCaseDebugData', data)
 
@@ -187,7 +187,9 @@ onUnmounted(() => {
 .endpoint-debug-cases-design-main {
   padding: 0px 0px 16px 16px;
   position: relative;
-  height: calc(100vh - 96px);
+  // height: calc(100vh - 96px);
+  height: 100%;
+  overflow: hidden;
 
   #endpoint-debug-cases-design-panel {
     height: calc(100vh - 96px);

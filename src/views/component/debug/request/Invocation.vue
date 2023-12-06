@@ -38,7 +38,7 @@
         </a-tooltip>
       </div>
 
-      <div class="send">
+      <div class="send" v-if="showOperation">
         <a-button type="primary" trigger="click"
                   @click="confirmSend"
                   :disabled="!isPathValid">
@@ -46,7 +46,7 @@
         </a-button>
       </div>
 
-      <div class="save">
+      <div class="save" v-if="showOperation">
         <a-button trigger="click" class="dp-bg-light"
                   @click="save"
                   :disabled="!isPathValid || (!isDebugChange && checkDataChange)">
@@ -55,14 +55,14 @@
         </a-button>
       </div>
 
-      <div v-if="usedBy === UsedBy.InterfaceDebug"
+      <div v-if="usedBy === UsedBy.InterfaceDebug && showOperation"
            :disabled="!isPathValid"
            class="save-as-case">
         <a-button trigger="click" @click="saveAsCase" class="dp-bg-light">
           另存为用例
         </a-button>
       </div>
-      <div v-if="isShowSync"
+      <div v-if="isShowSync && showOperation"
            :disabled="!isPathValid"
            class="sync">
         <a-button trigger="click" @click="sync" class="dp-bg-light">
@@ -115,18 +115,17 @@ const {
   debugChangePreScript,
   debugChangePostScript,
   debugChangeCheckpoint} = useIMLeaveTip();
-const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal }>();
-const debugData = computed<any>(() => store.state.Debug.debugData);
-
-const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
-const servers = computed<any[]>(() => store.state.Debug.serves);
-const currService = computed(() => store.state.ServeGlobal.currServe);
+const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal, User }>();
+const currUser = computed(() => store.state.User.currentUser);
 const currServe = computed(() => store.state.Debug.currServe);
+const debugData = computed<any>(() => store.state.Debug.debugData);
+const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
+const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 
 const props = defineProps({
   onSave: {
     type: Function as PropType<(data) => void>,
-    required: true
+    required: false
   },
   onSaveAsCase: {
     type: Function,
@@ -151,6 +150,11 @@ const props = defineProps({
     type: Boolean,
     required: false,
     default: false
+  },
+  showOperation: {
+    type: Boolean,
+    required: false,
+    default: true,
   },
   checkDataChange: {
     type: Boolean,
@@ -203,15 +207,16 @@ function changeServer(id) {
 }
 
 
-
 const send = async (e) => {
   const data = prepareDataForRequest(debugData.value)
   console.log('sendRequest', data);
 
   if (validateInfo()) {
     store.commit("Global/setSpinning",true)
+
+    data.environmentId = environmentId.value
     const callData = {
-      serverUrl: process.env.VUE_APP_API_SERVER, // used by agent to submit result to server
+      serverUrl: process.env.VUE_APP_API_SERVER,
       token: await getToken(),
       data: data
     }
@@ -243,7 +248,7 @@ const save = (e) => {
 
 
   if (validateInfo()) {
-     props.onSave(data)
+    props.onSave && props.onSave(data)
   }
 
   bus.emit(settings.eventConditionSave, {});

@@ -153,7 +153,7 @@ import IconSvg from "@/components/IconSvg";
 import GenerateCode from './GenerateCode.vue';
 
 
-const props = defineProps(['tabContentStyle', 'contentStr', 'serveId', 'exampleStr', 'schemeVisibleKey']);
+const props = defineProps(['tabContentStyle', 'contentStr', 'serveId', 'exampleStr', 'schemeVisibleKey', 'value']);
 const emit = defineEmits<{
   (e: 'generateFromJSON', jsonStr?: string): void,
   (e: 'generateExample', jsonStr?: string): void,

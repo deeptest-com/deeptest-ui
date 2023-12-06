@@ -11,7 +11,7 @@ import debounce from "lodash.debounce";
 import {addExtractAction, addReplaceAction} from "@/components/Editor/service";
 import {getJslibs, getSnippet} from "@/views/component/debug/service";
 
-import {UsedBy} from "@/utils/enum";
+import {UsedBy, UsedWith} from "@/utils/enum";
 
 export default defineComponent({
   name: "MonacoEditor",
@@ -67,25 +67,25 @@ export default defineComponent({
   },
 
   beforeUnmount() {
-    try {   
+    try {
       console.log('editor beforeUnmount')
       this.editor && this.editor.dispose();
       bus.off(settings.eventEditorAction)
-      
+
     } catch (error) {
       console.log('editor beforeUnmount',error)
     }
- 
+
   },
   unmounted() {
-    try {   
+    try {
       console.log('editor unmounted')
       this.editor && this.editor.dispose();
       bus.off(settings.eventEditorAction)
     } catch (error) {
       console.log('editor unmounted',error)
     }
- 
+
   },
 
   methods: {
@@ -104,11 +104,22 @@ export default defineComponent({
       })
 
       const usedBy = inject('usedBy')
+      const usedWith = inject('usedWith', '')
+
       if (options.initTsModules) {
         const loadJsLibs = async () => {
-          const declareSnippet = usedBy == UsedBy.MockData ? 'mock.d' : 'deeptest.d'
-
           const typeFiles = []
+
+          if (usedWith === UsedWith.PostCondition) {
+            const chaiDeclareSnippet = 'chai.d'
+            const chaiDeclareJson = await getSnippet(chaiDeclareSnippet)
+            if (chaiDeclareJson.code === 0 && !!chaiDeclareJson.data?.script) {
+              typeFiles.push({content: chaiDeclareJson.data.script})
+            }
+          }
+
+          const declareSnippet = usedBy == UsedBy.MockData ?
+              'mock.d' : usedWith === UsedWith.PostCondition ? 'deeptest-post.d' : 'deeptest.d'
 
           const defaultDeclareJson = await getSnippet(declareSnippet)
           if (defaultDeclareJson.code === 0 && !!defaultDeclareJson.data?.script) {

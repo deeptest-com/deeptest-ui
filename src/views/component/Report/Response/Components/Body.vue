@@ -13,15 +13,15 @@
       </a-row>
     </div>
     <div class="editor-wrapper">
-        <MonacoEditor 
+        <MonacoEditor
             v-if="!isImage(data.contentType)"
-            class="editor" 
+            class="editor"
             :value="content"
-            :language="language" 
+            :language="language"
             theme="vs"
             :key = "language"
             :options="editorOptions" />
-        <img v-else class="image" :src="'data:' + data.contentType + ';base64,' + data.content" />    
+        <img v-else class="image" :src="'data:' + data.contentType + ';base64,' + data.content" />
     </div>
 </template>
 <script setup lang="ts">
@@ -53,18 +53,13 @@ watch (()=>{return language.value} ,(val)=>{
   if (val == 'raw') {
     content.value = props.data.content.replace(/\r\n/g,'').replace(/\n/g,'').replace(/\s+/g,'')
   }
-  console.log(content.value)
+  // console.log(content.value)
+}, {immediate: true})
 
-}, {immediate: true}) 
+// watch(() => {return props.data;}, val => {
+//     console.log(val);
+// }, {immediate: true, deep: true})
 
-watch(() => {
-    return props.data;
-}, val => {
-    console.log(val);
-}, {
-    immediate: true,
-    deep: true
-})
 </script>
 
 <style scoped lang="less">

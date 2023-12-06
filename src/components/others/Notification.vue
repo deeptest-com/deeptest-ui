@@ -34,11 +34,11 @@ export default defineComponent({
 
     onMounted(() => {
       console.log('onMounted')
-      bus.on(settings.eventNotify, notifyErr);
+      bus.on('eventNotify', notifyErr);
     })
     onBeforeUnmount( () => {
       console.log('onBeforeUnmount')
-      bus.off(settings.eventNotify, notifyErr);
+      bus.off('eventNotify', notifyErr);
     })
 
     return {

@@ -1,38 +1,47 @@
 <template>
   <div class="endpoint-debug-cases-list">
     <div class="toolbar">
+      <a-button type="default" @click="autoGenAlternativeCase">自动生成用例(Beta)</a-button>
       <a-button type="primary" trigger="click" @click="create">
         <span>新建用例</span>
       </a-button>
     </div>
 
     <div class="content">
-      <a-table v-if="list.length > 0"
-                :data-source="list"
-                :pagination="{
-                    ...pagination,
-                    onChange: (page) => {
-                      query(page,pagination.pageSize);
-                    },
-                    onShowSizeChange: (_page, size) => {
-                      query(1,size);
-                    },
-                    showTotal: (total) => {
-                      return `共 ${total} 条数据`;
-                    },
-                }"
+      <a-table
+        :data-source="list"
+        :expandIconAsCell="false"
+        :expandIconColumnIndex="1"
+        :expandedRowKeys="expandKeys"
+        :pagination="{
+            ...pagination,
+            onChange: (page) => {
+              query(page,pagination.pageSize, 'page');
+            },
+            onShowSizeChange: (_page, size) => {
+              query(1,size, 'pageSize');
+            },
+            showTotal: (total) => {
+              return `共 ${total} 条数据`;
+            },
+        }"
 
-                :columns="columns"
-                :loading="loading"
-                row-key="id"
-                class="dp-table">
-
+        :columns="columns"
+        :loading="loading"
+        :row-key="record => record.id"
+        class="dp-table"
+        @expandedRowsChange="expandedRowsChange">
         <template #name="{ record, text }">
-          <EditAndShowField placeholder="名称"
-                            :custom-class="'custom-endpoint show-on-hover'"
-                            :value="text || ''"
-                            @update="(val) => updateName(val, record)"
-                            @edit="design(record)"/>
+          <div class="case-title"
+               :style="{ width: record.caseType === 'alternative' ? 'calc(100% - 60px)' : 'calc(100% - 32px)' }"
+                :title="text">
+            <EditAndShowField
+              placeholder="名称"
+              :custom-class="'custom-endpoint show-on-hover'"
+              :value="text || ''"
+              @update="(val) => updateName(val, record)"
+              @edit="design(record)"/>
+          </div>
         </template>
 
         <template #createdAt="{ record }">
@@ -48,42 +57,47 @@
         </template>
 
         <template #action="{ record }">
-          <!--
-          <a-button type="link" @click="() => generate(record)">
-            <AppstoreAddOutlined title="备选用例" />
-          </a-button>
-        -->
+          <a-tooltip title="备选用例" placement="top">
+            <a-button v-if="record.caseType === 'benchmark'" type="link" @click="() => props.showBenchMark(record)">
+              <AppstoreAddOutlined />
+            </a-button>
+          </a-tooltip>
 
-          <a-button type="link" @click="() => copy(record)">
-            <CopyOutlined title="复制" />
+          <a-tooltip title="复制" placement="top">
+            <a-button type="link" @click="() => copy(record)">
+            <CopyOutlined />
           </a-button>
+          </a-tooltip>
 
-          <a-button type="link" @click="() => remove(record)">
-            <DeleteOutlined title="删除" />
+          <a-tooltip title="删除" placement="top">
+            <a-button type="link" @click="() => remove(record)">
+            <DeleteOutlined />
           </a-button>
+          </a-tooltip>
         </template>
 
       </a-table>
-
-      <a-empty class="dp-empty-no-margin"
-               v-if="list.length === 0"
-               :image="simpleImage"/>
 
       <CaseEdit
           v-if="editVisible"
           :visible="editVisible"
           :model="editModel"
-          :onFinish="createFinish"
+          @finish="onFinish"
           :onCancel="createCancel"/>
 
     </div>
+
+    <AutoGenCaseModal
+      v-if="showAutoGenCaseModal"
+      :show="showAutoGenCaseModal"
+      @close="showAutoGenCaseModal = false"
+      @confirm="handleAutoGenCaseConfirm" />
   </div>
 </template>
 
-<script lang="ts" setup>
+<script lang="tsx" setup>
 import {computed, defineProps, provide, ref} from "vue";
 import {UsedBy} from "@/utils/enum";
-import {Empty} from "ant-design-vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import {DeleteOutlined, CopyOutlined, AppstoreAddOutlined} from '@ant-design/icons-vue';
@@ -99,10 +113,10 @@ import {notifyError, notifySuccess} from "@/utils/notify";
 import {PaginationConfig} from "@/views/endpoint/data";
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import CaseEdit from "./edit.vue";
-import GenerateCasePopup from "./generate.vue";
+import AutoGenCaseModal from "./alternative/autoGenCaseModal.vue";
+import TableExpandIconVue from "@/components/Table/TableExpandIcon.vue";
 
 provide('usedBy', UsedBy.InterfaceDebug)
-const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 const {t} = useI18n();
 
 const store = useStore<{ Endpoint: Endpoint, Debug: Debug, Project: Project }>();
@@ -110,6 +124,7 @@ const endpoint = computed<any>(() => store.state.Endpoint.endpointDetail);
 const userList = computed<any>(() => store.state.Project.userList);
 
 const list = computed<any[]>(() => store.state.Endpoint.caseList.list);
+const hasChildrenNode = computed(() => (list.value || []).some(e => e.children !== null));
 let pagination = computed<PaginationConfig>(() => store.state.Endpoint.caseList.pagination);
 
 const debugData = computed<any>(() => store.state.Debug.debugData);
@@ -120,7 +135,7 @@ const props = defineProps({
     type: Function,
     required: true,
   },
-  onGenerate: {
+  showBenchMark: {
     type: Function,
     required: true,
   },
@@ -128,7 +143,7 @@ const props = defineProps({
 
 const loading = ref<boolean>(true);
 
-const query = debounce(async (page, size): Promise<void> => {
+const query = debounce(async (page, size, type?: string): Promise<void> => {
   console.log('getList')
 
   loading.value = true;
@@ -138,7 +153,16 @@ const query = debounce(async (page, size): Promise<void> => {
     pageSize: size,
   });
   loading.value = false
-}, 300)
+  // 重新获取列表时 更新当前展开的行
+  if (type === 'page' && expandKeys.value.length > 0) {
+    // 跳转页 且 是一键展开
+    expandAll();
+  }
+  if (type === 'pageSize' && expandKeys.value.length > 0) {
+    collapseAll();
+    expandAll();
+  }
+}, 300);
 query(1, pagination.value.pageSize)
 
 const editVisible = ref(false)
@@ -148,17 +172,12 @@ const create = () => {
   editVisible.value = true
   editModel.value = {title: ''}
 }
-const createFinish = (data) => {
-  console.log('createFinish', data)
 
-  data.endpointId = endpoint.value.id
-
-  store.dispatch('Endpoint/saveCase', data).then((result) => {
-    console.log('saveCase', result)
-
-    editVisible.value = false
-  })
+const onFinish = () => {
+  query(1, pagination.value.pageSize);
+  editVisible.value = false;
 }
+
 const createCancel = () => {
   console.log('createVisible')
   editVisible.value = false
@@ -200,18 +219,45 @@ const username = (user:string)=>{
   return result?.label || '-'
 }
 
-const generate = (record) => {
-  props.onGenerate(record)
+/**
+ * 表格表头 展开所有 /  收起所有
+ */
+const expandKeys = ref<any[]>([]);
+
+const expandedRowsChange = keys => {
+  expandKeys.value = keys;
+}
+
+const expandAll = () => {
+  expandKeys.value = expandKeys.value.concat((list.value || []).filter(e => e.children?.length > 0).map(e => {
+    if (e.children?.length > 0) {
+      return e.id;
+    }
+  }));
+}
+
+const collapseAll = () => {
+  expandKeys.value = [];
+}
+
+const toggleExpandedAll = (expand: boolean) => {
+  expand ? expandAll() : collapseAll();
 }
 
 const columns = [
   {
     title: '编号',
     dataIndex: 'serialNumber',
-    width: 120,
+    width: 150,
   },
   {
-    title: '名称',
+    title: () => {
+      return (
+        <TableExpandIconVue isExpanded={expandKeys.value.length > 0} onChange={(expand) => toggleExpandedAll(expand)}>
+          <span>标题</span>
+        </TableExpandIconVue>
+      )
+    },
     dataIndex: 'name',
     slots: {customRender: 'name'},
   },
@@ -220,21 +266,14 @@ const columns = [
     dataIndex: 'createUserName',
     slots: {customRender: 'createUserName'},
     ellipsis: true,
-    width: '100px',
-  },
-  {
-    title: '创建时间',
-    dataIndex: 'createdAt',
-    slots: {customRender: 'createdAt'},
-    ellipsis: true,
-    width: '190px',
+    width: 100,
   },
   {
     title: '更新时间',
     dataIndex: 'updatedAt',
     slots: {customRender: 'updatedAt'},
     ellipsis: true,
-    width: '190px',
+    width: 190,
   },
   {
     title: '操作',
@@ -244,6 +283,20 @@ const columns = [
   },
 ];
 
+
+/**
+ * 自动生成用例
+ */
+const showAutoGenCaseModal = ref(false);
+
+const handleAutoGenCaseConfirm = (evt) => {
+  props.showBenchMark(evt);
+  showAutoGenCaseModal.value = false;
+};
+
+const autoGenAlternativeCase = () => {
+  showAutoGenCaseModal.value = true;
+};
 </script>
 
 <style lang="less" scoped>
@@ -254,19 +307,30 @@ const columns = [
 
   .toolbar {
     position: absolute;
-    z-index: 999999;
+    z-index: 1001;
     top: -42px;
     right: 0;
-    width: 200px;
     text-align: right;
+    display: flex;
+    align-items: center;
+
     .ant-btn {
-      margin-left: 10px;
+      margin-left: 20px;
     }
   }
 
   .content {
     height: 100%;
+
+    :deep(.ant-table-column-title) {
+      display: flex;
+      align-items: center;
+    }
   }
+}
+
+.case-title {
+  display: inline-block;
 }
 
 </style>

@@ -12,6 +12,7 @@ export default defineComponent({
     props: {
         treeData: Array,
         isSingleScenario: Boolean,
+        selectedKeys: Array,
     },
     emits: ['change'],
     setup(props, {emit}) {
@@ -42,6 +43,14 @@ export default defineComponent({
             }
         }, {immediate: true, deep: true})
 
+        watch(() => props.selectedKeys, (newVal: any) => {
+            if (newVal?.length) {
+                newVal.forEach((item) => {
+                    activeKeyMap.value[item] = [item];
+                })
+            }
+        }, {immediate: true, deep: true})
+
         /**
          * @desc 渲染场景执行树
          * @param logs 需要渲染的场景类型
@@ -61,7 +70,7 @@ export default defineComponent({
 
             function renderContent(log) {
                 if (log.processorCategory === 'processor_interface' && log.detail !== undefined && log.detail !== '{}') {
-                    return <InterfaceContent endpointData={log}/>
+                    return <InterfaceContent endpointData={log} />
                 }
                 // 场景中的叶子节点不再渲染
                 if (!showArrowScenarioType.includes(log.processorType)) {
@@ -107,7 +116,11 @@ export default defineComponent({
                             return <div
                                 class={[item.processorType === 'processor_logic_else' ? 'log-item-else' : 'log-item', itemIndex === 0 ? 'log-item-first' : '']}>
                                 {renderCollapseTitle(item, itemIndex, log)}
-                                <a-collapse>
+                                <a-collapse
+                                    activeKey={activeKeyMap.value[item.id]}
+                                    onChange={(key) => {
+                                        change(item.id, key)
+                                    }}>
                                     {renderLogs(item)}
                                 </a-collapse>
                                 {pageSize -1 === itemIndex  ? renderPage(pid) : null}
@@ -119,7 +132,11 @@ export default defineComponent({
             return logs.map((log, logIndex) => {
                 return <div key={log.id}
                             class={[log.processorType === 'processor_logic_else' ? 'log-item-else' : 'log-item', logIndex === 0 ? 'log-item-first' : '']}>
-                    <a-collapse>
+                    <a-collapse
+                        activeKey={activeKeyMap.value[log.id]}
+                        onChange={(key) => {
+                            change(log.id, key)
+                        }}>
                         {renderLogs(log)}
                     </a-collapse>
                 </div>

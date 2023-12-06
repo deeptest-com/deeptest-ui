@@ -2,6 +2,7 @@
  * 路由入口
  * @author LiQingSong
  */
+import Swal from "sweetalert2";
 import NProgress from 'nprogress'; // progress bar
 import 'nprogress/nprogress.css'; // progress bar style
 NProgress.configure({ showSpinner: false, easing: 'ease', speed: 1000 }); // NProgress Configuration
@@ -199,5 +200,24 @@ router.afterEach(() => {
   // finish progress bar
   NProgress.done();
 });
+
+router.onError(async (err) => {
+  // errMessage: ChunkLoadError: Loading chunk chunk-fa45f182 failed.
+  console.error('routerPageLoad failed', err);
+  const result = (err.message || '').match(/Loading chunk (\S)+ failed/g);
+  if (result) {
+    const swalresult = await Swal.fire({
+      ...settings.SwalLeaveSetting,
+      title: '资源已更新，点击重新加载以使用',
+      html: '',
+      showDenyButton: false,
+      showCancelButton: false,
+      confirmButtonText: '重新加载'
+    });
+    if (swalresult.isConfirmed) {
+      window.location.reload();
+    }
+  }
+})
 
 export default router;
