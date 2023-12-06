@@ -117,9 +117,11 @@ watch(() => debugData.value.debugInterfaceId, (newVal) => {
 
 watch(() => {
   return debugData.value;
-}, () => {
-  store.dispatch('Debug/listPostCondition');
-  store.dispatch('Debug/listAssertionCondition')
+}, (val) => {
+  if (val.method) {
+    store.dispatch('Debug/listPostCondition');
+    store.dispatch('Debug/listAssertionCondition');
+  }
 }, {
   immediate: true,
 });

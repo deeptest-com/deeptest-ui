@@ -40,13 +40,14 @@ import {notifyError, notifySuccess} from "@/utils/notify";
 
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
+const isForBenchmarkCase = inject('isForBenchmarkCase');
 const {t} = useI18n();
 
 const store = useStore<{  Debug: Debug }>();
 
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
-const model = computed<any>(() => store.state.Debug.cookieData);
+const model = computed<any>(() => isForBenchmarkCase ? store.state.Debug.benchMarkCase.cookieData : store.state.Debug.cookieData);
 
 const props = defineProps({
   condition: {
@@ -61,7 +62,7 @@ const props = defineProps({
 
 const load = () => {
   console.log('load', props.condition)
-  store.dispatch('Debug/getCookie', props.condition.entityId)
+  store.dispatch('Debug/getCookie', props.condition)
 }
 load()
 

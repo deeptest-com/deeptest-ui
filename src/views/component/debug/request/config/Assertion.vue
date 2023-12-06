@@ -67,30 +67,36 @@
             </div>
 
             <div class="content" v-if="activeAssertion.id === +element.id">
-              <Checkpoint v-if="element.entityType === ConditionType.checkpoint"
-                          :condition="activeAssertion"
-                          :finish="list" />
+              <Checkpoint
+                v-if="element.entityType === ConditionType.checkpoint"
+                :condition="activeAssertion"
+                :finish="list" />
             </div>
           </div>
-
         </template>
       </draggable>
     </div>
 
-    <FullScreenPopup v-if="fullscreen"
-                     :visible="fullscreen"
-                     :model="activeAssertion"
-                     :onCancel="closeFullScreen" />
+    <FullScreenPopup
+      v-if="fullscreen"
+      :visible="fullscreen"
+      :model="activeAssertion"
+      :onCancel="closeFullScreen" />
   </div>
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch,onUnmounted} from "vue";
+import {computed, inject, ref, watch, defineProps, provide, onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import { QuestionCircleOutlined, CheckCircleOutlined, DeleteOutlined,
-  ClearOutlined, MenuOutlined, RightOutlined,
-  DownOutlined, CloseCircleOutlined, FullscreenOutlined, SaveOutlined } from '@ant-design/icons-vue';
+import {
+  CheckCircleOutlined,
+  DeleteOutlined,
+  ClearOutlined,
+  RightOutlined,
+  DownOutlined,
+  CloseCircleOutlined,
+  FullscreenOutlined } from '@ant-design/icons-vue';
 import {ConditionType, UsedBy} from "@/utils/enum";
 import {EnvDataItem} from "@/views/project-settings/data";
 import bus from "@/utils/eventBus";
@@ -115,53 +121,61 @@ const activeAssertion = computed<any>(() => store.state.Debug.activeAssertion);
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 
-const fullscreen = ref(false)
+const fullscreen = ref(false);
 
 const expand = (item) => {
   console.log('expand', item)
-  store.commit('Debug/setActiveAssertion', item)
+  store.commit('Debug/setActiveAssertion', Object.assign(item, {
+    isForBenchmarkCase: false,
+  }))
 }
 
-const list = () => {
-  console.log('list')
-  store.dispatch('Debug/listAssertionCondition')
+const list = async () => {
+  await store.dispatch('Debug/listAssertionCondition', {
+    isForBenchmarkCase: false
+  })
 }
-
-watch(debugData, (newVal) => {
-  console.log('watch debugData')
-  list()
+watch(debugData, async (newVal) => {
+  await list();
 }, {immediate: true, deep: true});
 
 const create = () => {
-  console.log('create', ConditionType.checkpoint)
+  console.log('create', ConditionType.checkpoint);
   store.dispatch('Debug/createPostCondition', {
     entityType: ConditionType.checkpoint,
     ...debugInfo.value,
+    isForBenchmarkCase: false,
   })
 }
 
 const format = (item) => {
-  console.log('format', item)
+  console.log('format', item);
   bus.emit(settings.eventEditorAction, {act: settings.eventTypeFormat})
 }
 const disable = (item) => {
   console.log('disable', item)
-  store.dispatch('Debug/disablePostCondition', item)
+  store.dispatch('Debug/disablePostCondition', {
+    ...item,
+    isForBenchmarkCase: false
+  })
 }
 const remove = (item) => {
   console.log('remove', item)
 
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
-    store.dispatch('Debug/removePostCondition', item)
+    store.dispatch('Debug/removePostCondition', {
+      ...item,
+      isForBenchmarkCase: false
+    })
   })
 }
 function move(_e: any) {
   const envIdList = assertionConditions.value.map((e: EnvDataItem) => {
     return e.id;
   })
-
   store.dispatch('Debug/movePostCondition', {
     data: envIdList,
+    isForBenchmarkCase: false,
     info: debugInfo.value,
     entityType: ConditionType.checkpoint,
   })
@@ -169,7 +183,7 @@ function move(_e: any) {
 
 const save = (item) => {
   console.log('save', item)
-  bus.emit(settings.eventConditionSave, {});
+  bus.emit(settings.eventConditionSave, item);
 }
 
 const openFullscreen = (item) => {
@@ -208,24 +222,9 @@ onUnmounted(() => {
   store.commit('Debug/setActiveAssertion', {});
 })
 
-
-
+provide('isForBenchmarkCase', false);
 
 </script>
-
-<style lang="less">
-.post-condition-main {
-  .codes {
-    height: 100%;
-    min-height: 160px;
-
-    .editor {
-      height: 100%;
-      min-height: 160px;
-    }
-  }
-}
-</style>
 
 <style lang="less" scoped>
 .post-condition-main {
@@ -239,34 +238,11 @@ onUnmounted(() => {
   }
   .content {
     flex: 1;
-    height: calc(100% - 30px);
-    overflow-y: auto;
-
-    display: flex;
-    &>div {
-      height: 100%;
-    }
-
-    .codes {
-      flex: 1;
-    }
-    .refer {
-      width: 260px;
-      padding: 10px;
-      overflow-y: auto;
-
-      .title {
-        margin-top: 12px;
-      }
-      .desc {
-
-      }
-    }
+    overflow-y: scroll;
 
     .collapse-list {
-      height: 100%;
       width: 100%;
-      padding: 0;
+      padding-bottom: 10px;
 
       .collapse-item {
         margin: 4px;

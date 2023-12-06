@@ -11,11 +11,15 @@ export enum UsedBy {
     ScenarioDebug = "scenario_debug",
     DiagnoseDebug = "diagnose_debug",
     CaseDebug = "case_debug",
-    CaseGenerate = "case_generate",
+    AlternativeCaseDebug = "alternative_case_debug",
     MockData = "mock_data",
     MockResp = "mock_resp",
 
     OpenAPIYaml = "openapi_yaml",
+}
+
+export enum UsedWith {
+    PostCondition = "post_condition",
 }
 
 export enum ProcessorInterfaceSrc {
@@ -150,7 +154,7 @@ export const Methods = [
 ]
 
 export enum ComparisonOperator {
-    empty = 'empty',
+    // empty = 'empty',
     equal = 'equal',
     notEqual = 'notEqual',
     greaterThan = 'greaterThan',
@@ -177,9 +181,11 @@ export enum ConditionType {
     checkpoint = 'checkpoint',
     script = 'script',
     cookie = 'cookie',
+    databaseOpt= 'databaseOpt'
 }
 export enum PreConditionType {
     script = 'script',
+    databaseOpt= 'databaseOpt'
 }
 
 export enum ExtractorSrc {
@@ -189,6 +195,7 @@ export enum ExtractorSrc {
 }
 export enum ExtractorType {
     boundary = 'boundary',
+    jsonpath = 'jsonpath',
     jsonquery = 'jsonquery',
     htmlquery = 'htmlquery',
     xmlquery = 'xmlquery',
@@ -199,8 +206,9 @@ export enum CheckpointType {
     responseStatus = 'responseStatus',
     responseHeader = 'responseHeader',
     responseBody = 'responseBody',
+    judgement = 'judgement',
+    extractorVari = 'extractorVari',
     extractor = 'extractor',
-    judgement = 'judgement'
 }
 
 export enum AuthorizationTypes {

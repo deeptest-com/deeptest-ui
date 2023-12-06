@@ -1,7 +1,7 @@
 <template>
     <div v-for="(item, index) in responseData"
            :key="index"
-           :class="['item', customClass, getResultClass(item)]">
+           :class="['item', customClass, getResultClass(item.resultStatus)]">
 
         <span v-if="item.resultStatus===ResultStatus.Pass">
           <CheckCircleOutlined />
@@ -18,14 +18,11 @@
 <script lang = "ts" setup>
 import {defineProps} from 'vue';
 import { CheckCircleOutlined, CloseCircleOutlined} from '@ant-design/icons-vue';
-
+import {getResultClass} from "@/utils/dom";
 import {ResultStatus} from "@/utils/enum";
+
 const props = defineProps(['responseData', 'customClass'])
 
-const getResultClass = (item) => {
-  return item.resultStatus===ResultStatus.Pass? 'pass':
-      item.resultStatus===ResultStatus.Fail ? 'fail' : ''
-}
 </script>
 
 <style lang="less" scoped>

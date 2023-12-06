@@ -12,7 +12,7 @@ export default function useTitle(route: ComputedRef<RoutesDataItem> | Ref<Routes
 
     const setTitle = (title: string): void => {
         document.title = `${t(title)} - ${settings.siteTitle}`;
-    } 
+    }
 
     watch<RoutesDataItem, false>(route,(route) => {
         route.title && setTitle(route.title);

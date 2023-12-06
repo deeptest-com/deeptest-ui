@@ -4,11 +4,11 @@
     <CustomCodeHeader v-if="fullscreen" mode="fullscreen" @update-screen="emits('cancel')" />
     <div class="content">
       <div class="codes">
-        <MonacoEditor 
+        <MonacoEditor
           customId="custom-code-container"
           ref="monacoEditor"
-          theme="vs" 
-          language="typescript" 
+          theme="vs"
+          language="typescript"
           class="editor"
           :value="modelRef.content || ''"
           :timestamp="timestamp"
@@ -27,6 +27,9 @@
 
           <div @click="addSnippet('datapool_get')" class="dp-link-primary">获取数据池变量</div>
           <div @click="addSnippet('log')" class="dp-link-primary">打印日志</div>
+
+          <div @click="addSnippet('send_request_get')" class="dp-link-primary">发送GET请求</div>
+          <div @click="addSnippet('send_request_post')" class="dp-link-primary">发送POST请求</div>
         </div>
 
         <div class="title">

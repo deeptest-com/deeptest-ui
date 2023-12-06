@@ -142,8 +142,8 @@ export async function saveEndpoint(data: any): Promise<any> {
 
 /**
  * 更新接口名称
- * @param data  { id, name } 
- * @returns 
+ * @param data  { id, name }
+ * @returns
  */
 export async function updateName(data: any): Promise<any> {
     return request({
@@ -459,14 +459,22 @@ export async function removeEndpointCase(data): Promise<any> {
 }
 
 // alternative case
-export async function loadAlternativeCase(baseId: number): Promise<any> {
-    const params = {baseId}
+export async function loadAlternativeCase(payload: { method: string, endpointId: string }): Promise<any> {
     return request({
         url: `/${apiAlternativeCase}/load`,
         method: 'GET',
-        params,
+        params: payload,
     })
 }
+
+export async function loadAlternativeCaseFactor(payload: { caseId: number | string }): Promise<any> {
+    return request({
+        url: `${apiAlternativeCase}/loadFactor`,
+        method: 'GET',
+        params: payload,
+    })
+}
+
 export async function loadAlternativeCaseSaved(baseId: number): Promise<any> {
     const params = {baseId}
     return request({
@@ -475,11 +483,34 @@ export async function loadAlternativeCaseSaved(baseId: number): Promise<any> {
         params,
     })
 }
-export async function saveAlternativeCase(data: any): Promise<any> {
+export async function createBenchmarkCase(data: any): Promise<any> {
     return request({
-        url: `/${apiAlternativeCase}/save`,
+        url: `/${apiAlternativeCase}/createBenchmark`,
         method: 'POST',
         data
+    })
+}
+
+export async function saveAlternativeFactor(data: any): Promise<any> {
+    return request({
+        url: `/${apiAlternativeCase}/saveFactor`,
+        method: 'POST',
+        data
+    })
+}
+export async function saveAlternativeCase(data: any): Promise<any> {
+    return request({
+        url: `/${apiAlternativeCase}/saveCase`,
+        method: 'POST',
+        data
+    })
+}
+
+export async function listForBenchMark(payload: any): Promise<any> {
+    return request({
+        url: 'endpoints/cases/listForBenchmark',
+        method: 'get',
+        params: payload,
     })
 }
 
@@ -515,10 +546,27 @@ export async function moveAlternativeCaseAssertion(data): Promise<any> {
     return request({
         url: `/${apiAlternativeCaseAssertions}/move`,
         method: 'POST',
-        data: data,
+        data,
     });
 }
 
+// 重置用例因子- 后置处理器包含断言
+export async function resetPostConditions(data: { debugInterfaceId: number, endpointInterfaceId: number, category: string }): Promise<any> {
+    return request({
+        url: '/postConditions/resetForCase',
+        method: 'get',
+        params: data,
+    })
+}
+
+// 重置用例因子-预处理
+export async function resetPreConditions(data: { debugInterfaceId: number, endpointInterfaceId: number }): Promise<any> {
+    return request({
+        url: '/preConditions/resetForCase',
+        method: 'get',
+        params: data,
+    })
+}
 /**
  * 获取差异
  * */

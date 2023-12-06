@@ -36,7 +36,7 @@ function createScriptUrlElements(scriptUrls: string[], index= 0) {
             script.onerror = function () {
                 createScriptUrlElements(scriptUrls, index + 1);
             };
-        }        
+        }
         document.body.appendChild(script);
     } else {
         if (scriptUrls.length > index + 1) {
