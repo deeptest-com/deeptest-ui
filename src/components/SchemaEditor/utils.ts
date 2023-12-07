@@ -362,7 +362,7 @@ export const handleRefInfo = (tree: any, result: any) => {
     // 兼容，返回的值为空字符串的情况，则直接不展开
     if (!result?.content) {
         tree.extraViewInfo.isExpand = false;
-        notifyWarn(`引用的字段的详情数据为空`);
+        notifyWarn(`引用的数据组件不存在/已删除`);
         return;
     }
 

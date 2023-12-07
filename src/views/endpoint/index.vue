@@ -2,7 +2,7 @@
   <a-spin tip="Loading..." :spinning="isImporting" style="z-index: 2000;">
     <ContentPane>
       <template #left>
-        <Tree @select="selectNode" :serveId="currServe.id"/>
+        <Tree @select="selectNode"/>
       </template>
       <template #right>
         <div style="min-width: 1080px;overflow-x:scroll ">
@@ -110,6 +110,15 @@
                     />
                   </div>
                 </template>
+                <template #colServe="{record}">
+                  <div class="customServeColRender">
+                    <EditAndShowSelect
+                    :value="record?.serveId"
+                    :options="serves"
+                    @update="(val) => { updateServe(val,record) }"/>
+                  </div>
+                </template>
+
                 <template #colCreateUser="{record}">
                   <div class="customTagsColRender">
                     {{ username(record.createUser) }}
@@ -212,17 +221,15 @@ import {StateType as ServeStateType} from "@/store/serve";
 import {StateType as Debug} from "@/views/component/debug/store";
 import Tree from './components/Tree.vue'
 import BatchUpdateFieldModal from './components/BatchUpdateFieldModal.vue';
-import LeavePrompt from './components/LeavePrompt.vue';
 import Tags from './components/Tags/index.vue';
 import TooltipCell from '@/components/Table/tooltipCell.vue';
 import {DropdownActionMenu} from '@/components/DropDownMenu/index';
 
 import {getMethodColor} from '@/utils/interface';
 import {notifyError, notifySuccess} from "@/utils/notify";
-import {equalObjectByXpath,equalObjectByLodash} from "@/utils/object";
+import {equalObjectByLodash} from "@/utils/object";
 import useSharePage from '@/hooks/share';
 import Swal from "sweetalert2";
-import cloneDeep from "lodash/cloneDeep";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
@@ -233,7 +240,6 @@ import {ChangedStatus,SourceType} from "@/utils/enum";
 const {share} = useSharePage();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
-const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
 
 const list = computed<Endpoint[]>(() => store.state.Endpoint.listResult.list);
@@ -276,6 +282,7 @@ const columns = [
   {
     title: '所属服务',
     dataIndex: 'serveName',
+    slots: {customRender: 'colServe'},
     ellipsis: true,
     width: 110,
   },
@@ -424,6 +431,16 @@ async function updateTitle(value: string, record: any) {
   await store.dispatch('Endpoint/updateEndpointName',
       {id: record.id, name: value}
   );
+}
+
+async function updateServe(value: any, record: any,) {
+  await store.dispatch('Endpoint/updateServe', {
+    "fieldName": "serveId",
+    "value": value,
+    "endpointIds": [record.id]
+  });
+  record.serveId = value;
+  await refreshList();
 }
 
 // 打开抽屉

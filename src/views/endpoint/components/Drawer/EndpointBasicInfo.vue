@@ -31,12 +31,10 @@
           @update="handleChangeCategory"/>
     </a-descriptions-item>
     <a-descriptions-item label="所属服务">
-      <SelectServe
-      :serveId="endpointDetail?.serveId" 
-      :disabled="true" 
-      size="small"
-      style="width:100px"   
-      />
+      <EditAndShowSelect
+          :value="endpointDetail?.serveId"
+          :options="serves"
+          @update="handleChangeServe"/>
     </a-descriptions-item>
     <a-descriptions-item label="创建时间">{{ endpointDetail?.createdAt }}</a-descriptions-item>
     <a-descriptions-item label="最近更新">{{ endpointDetail?.updatedAt }}</a-descriptions-item>
@@ -59,6 +57,7 @@ import EditAndShowSelect from '@/components/EditAndShowSelect/index.vue';
 import EditAndShowTreeSelect from '@/components/EditAndShowTreeSelect/index.vue';
 import Tags from '../Tags/index.vue';
 import SelectServe from '../SelectServe/index.vue';
+
 
 const store = useStore<{ Endpoint, Project,ServeGlobal }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
@@ -100,7 +99,7 @@ const categoryLabel = computed(() => {
 });
 
 const userList = computed<any>(() => store.state.Project.userList);
-const emit = defineEmits(['changeStatus', 'changeDescription', 'changeCategory']);
+const emit = defineEmits(['changeStatus', 'changeDescription', 'changeCategory','changeServe']);
 
 function handleChangeStatus(val) {
   emit('changeStatus', val);
@@ -112,6 +111,10 @@ function handleChangeCategory(val) {
 
 function updateDescription(val: string) {
   emit('changeDescription', val);
+}
+
+function handleChangeServe(val: number) {
+  emit('changeServe', val);
 }
 
 const updateTags = async (tags :[],id:number,projectId:number)=>{
