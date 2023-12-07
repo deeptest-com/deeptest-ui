@@ -19,7 +19,7 @@
       </div>
       <div v-if="showBaseUrl()" class="base-url">
         <a-input placeholder="请输入地址"
-                 v-model:value="debugData.baseUrl"
+                 :value="currServe.url || ''"
                  :disabled="baseUrlDisabled" />
       </div>
 
@@ -319,19 +319,6 @@ function validatePath() {
 
   return isMatch
 }
-
-watch(() => {
-  return currServe.value;
-}, val => {
-  if (!Object.keys(val).length) {
-    return;
-  }
-  debugData.value.baseUrl = val.url;
-  debugData.value.serveId = val.serveId;
-}, {
-  immediate: true,
-})
-
 
 onMounted(() => {
   // 离开前保存数据
