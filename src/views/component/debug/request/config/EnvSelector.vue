@@ -74,9 +74,6 @@ const selectEnvTopPosition = ref("0px");
 const selectEnvLeftPosition = ref("0px");
 
 onMounted(() => {
-  store.dispatch('Debug/listServes', {
-    serveId: props.serveId,
-  })
   selectEnvTopPosition.value = getSelectEnvTopPosition();
   selectEnvLeftPosition.value = getSelectEnvLeftPosition();
 });
@@ -148,7 +145,7 @@ watch(
 watch(() => {
   return props.serveId;
 }, async (val, oldVal) => {
-  if (val !== oldVal && props.show && val) {
+    if (val !== oldVal && props.show && val) {
     await store.dispatch('Debug/listServes', {serveId: val});
   }
 }, {

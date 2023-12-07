@@ -117,7 +117,6 @@ const {
   debugChangeCheckpoint} = useIMLeaveTip();
 const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal, User }>();
 const currUser = computed(() => store.state.User.currentUser);
-const currServe = computed(() => store.state.Debug.currServe);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
@@ -191,10 +190,11 @@ const getOverlayClassName = () => {
 }
 
 watch(debugData, (newVal) => {
+  console.error(newVal);
   if (usedBy === UsedBy.InterfaceDebug || usedBy === UsedBy.CaseDebug) {
     debugData.value.url = debugData?.value.url || endpointDetail.value?.path || ''
   }
-  debugData.value.baseUrl = currServe.value.url;
+  // debugData.value.baseUrl = currServe.value.url;
   //debugData.value.serveId = currServe.value.serveId;
 }, {immediate: true, deep: true});
 
@@ -319,16 +319,6 @@ function validatePath() {
 
   return isMatch
 }
-
-
-watch(() => {
-  return currServe.value;
-}, val => {
-  debugData.value.baseUrl = val.url;
-  debugData.value.serveId = val.serveId;
-}, {
-  immediate: true,
-})
 
 onMounted(() => {
   // 离开前保存数据
