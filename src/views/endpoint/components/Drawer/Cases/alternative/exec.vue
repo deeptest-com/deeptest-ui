@@ -15,6 +15,7 @@
         :percent="progressValue"
         :key="progressKey"
         @exec-cancel="execCancel" />
+
       <LogTreeView
         class="scenario-exec-log-tree"
         :treeData="reports || []" />
@@ -23,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref, defineProps, defineEmits, watch} from "vue";
+import {computed, ref, defineProps, defineEmits, watch, onMounted, onUnmounted} from "vue";
 
 import {useStore} from "vuex";
 
@@ -76,27 +77,26 @@ const execCancel = () => {
   execStop();
 }
 
-watch(() => {
-  return props.execDrawerVisible;
-}, async val => {
-  if (val) {
-    progressStatus.value = 'in_progress';
-    await execBegin();
-    bus.on(settings.eventWebSocketMsg, OnWebSocketMsg);
-    bus.on(settings.eventWebSocketConnStatus, onWebSocketConnStatusMsg);
-  } else {
-    execCancel();
-    bus.off(settings.eventWebSocketMsg, OnWebSocketMsg);
-    bus.off(settings.eventWebSocketConnStatus, onWebSocketConnStatusMsg);
-  }
-}, {
-  immediate: true,
-})
-
 const onClose = () => {
-  execStop();
+  execCancel();
   emits('close');
 };
+
+onMounted(() => {
+  console.log('onMounted')
+
+  progressStatus.value = 'in_progress';
+  execBegin();
+
+  bus.on(settings.eventWebSocketMsg, OnWebSocketMsg);
+  bus.on(settings.eventWebSocketConnStatus, onWebSocketConnStatusMsg);
+})
+onUnmounted(() => {
+  console.log('onUnmounted')
+
+  bus.off(settings.eventWebSocketMsg, OnWebSocketMsg);
+  bus.off(settings.eventWebSocketConnStatus, onWebSocketConnStatusMsg);
+})
 
 </script>
 
