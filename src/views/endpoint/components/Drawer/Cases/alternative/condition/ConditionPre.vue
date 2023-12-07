@@ -4,7 +4,7 @@
       <div class="left">
         <icon-svg type="script" class="icon"  />
         <span>JavaScript代码</span>
-      </div> 
+      </div>
       <div class="right">
         <a-button size="small" type="primary" @click.stop="save" style="margin-right: 4px">保存</a-button>
 
@@ -21,7 +21,7 @@
       <Script />
     </div>
 
-    <FullScreenPopup 
+    <FullScreenPopup
       v-if="fullscreen"
       :visible="fullscreen"
       :model="scriptData"
@@ -61,9 +61,9 @@ const getPreConditionScript = () => {
 }
 
 onMounted(() => {
-  if(!scriptData.value.id){
+  // if(!scriptData.value.id){
     getPreConditionScript();
-  }
+  // }
 })
 
 const save = () => {
@@ -113,7 +113,7 @@ provide('isForBenchmarkCase', true);
       display: flex;
       align-items: center;
     }
-      
+
   }
   .content {
     flex: 1;
