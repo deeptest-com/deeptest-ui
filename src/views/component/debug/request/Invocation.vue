@@ -190,7 +190,6 @@ const getOverlayClassName = () => {
 }
 
 watch(debugData, (newVal) => {
-  console.error(newVal);
   if (usedBy === UsedBy.InterfaceDebug || usedBy === UsedBy.CaseDebug) {
     debugData.value.url = debugData?.value.url || endpointDetail.value?.path || ''
   }
