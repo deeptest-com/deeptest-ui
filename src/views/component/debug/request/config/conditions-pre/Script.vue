@@ -176,7 +176,8 @@ onBeforeUnmount( () => {
     }
 
     .codes {
-      flex: 1;
+      // flex: 1;
+      width: calc(100% - 260px);
     }
     .refer {
       width: 260px;

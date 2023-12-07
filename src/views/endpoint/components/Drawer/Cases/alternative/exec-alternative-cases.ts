@@ -27,6 +27,16 @@ function useCaseExecution(): CaseExecution {
     const execResults = ref<any[]>([]);
     // 执行结果
     const execResultMap = ref<any>({});
+    // 执行异常的report存放
+    const errorReports = ref<any[]>([]);
+
+    const updateParentLog = (log: any) => {
+        if (!execResultMap[log.parentUuid].logs) {
+            execResultMap[log.parentUuid].logs = [];
+        }
+        const findIndex = execResultMap[log.parentUuid].logs.findIndex(e => e.caseUuid === log.caseUuid);
+        findIndex > 0 ? execResultMap[log.parentUuid].logs.splice(findIndex, 1, log) : execResultMap[log.parentUuid].logs.push(log);
+    };
 
     const updateExeclogs = (log: any) => {
         execResultMap[log.caseUuid] = log;
@@ -35,13 +45,28 @@ function useCaseExecution(): CaseExecution {
             findIndex > 0 ? execResults.value.splice(findIndex, 1, log) : execResults.value.push(log);
             return;
         }
-        if (execResultMap[log.parentUuid]) {
-            if (!execResultMap[log.parentUuid].logs) {
-                execResultMap[log.parentUuid].logs = [];
-            }
-            const findIndex = execResultMap[log.parentUuid].logs.findIndex(e => e.caseUuid === log.caseUuid);
-            findIndex > 0 ? execResultMap[log.parentUuid].logs.splice(findIndex, 1, log) : execResultMap[log.parentUuid].logs.push(log);
+
+        /**
+         * 线上环境发现这里执行顺序有时候会错乱，先增加fix代码  处理
+         * 将 顺序错乱的数据，parentUuid在map中找不到的先存放到  数组中，每步执行时，当map中找到  该数据的parent时，再设置
+         */
+        if (errorReports.value.length > 0) {
+            errorReports.value.forEach((element, index) => {
+              if (element.parentUuid && execResultMap.value[element.parentUuid]) {
+                updateParentLog(element);
+                errorReports.value.splice(index, 1); 
+              }
+            });
         }
+
+        if (log.parentUuid && !execResultMap[log.parentUuid]) {
+            errorReports.value.push(log);
+        }
+        
+        if (log.parentUuid && execResultMap[log.parentUuid]) {
+            updateParentLog(log);
+        }
+
         store.commit('Endpoint/setAlternativeExecResults', JSON.parse(JSON.stringify(execResults.value)));
         store.commit('Endpoint/setAlternativeExecStatusMap', execStatusMap.value);
     };

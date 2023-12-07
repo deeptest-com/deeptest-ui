@@ -289,12 +289,15 @@ export default defineComponent({
       }
     },
 
-    timestamp() {
-      console.log('watch timestamp');
-      this.value !== this._getValue() && this._setValue(this.value);
+    timestamp: {
+      deep: true,
+      handler(timestamp) {
+        console.log('watch editor timestamp', timestamp)
+        this.value !== this._getValue() && this._setValue(this.value);
+      }
     },
      value() {
-       //console.log('watch value', this.value);
+       //console.log('watch editor value', this.value);
        this.value !== this._getValue() && this._setValue(this.value);
      },
 
