@@ -31,15 +31,15 @@ function useCaseExecution(): CaseExecution {
     const errorReports = ref<any[]>([]);
 
     const updateParentLog = (log: any) => {
-        if (!execResultMap[log.parentUuid].logs) {
-            execResultMap[log.parentUuid].logs = [];
+        if (!execResultMap.value[log.parentUuid].logs) {
+            execResultMap.value[log.parentUuid].logs = [];
         }
-        const findIndex = execResultMap[log.parentUuid].logs.findIndex(e => e.caseUuid === log.caseUuid);
-        findIndex > 0 ? execResultMap[log.parentUuid].logs.splice(findIndex, 1, log) : execResultMap[log.parentUuid].logs.push(log);
+        const findIndex = execResultMap.value[log.parentUuid].logs.findIndex(e => e.caseUuid === log.caseUuid);
+        findIndex > 0 ? execResultMap.value[log.parentUuid].logs.splice(findIndex, 1, log) : execResultMap.value[log.parentUuid].logs.push(log);
     };
 
     const updateExeclogs = (log: any) => {
-        execResultMap[log.caseUuid] = log;
+        execResultMap.value[log.caseUuid] = log;
         if (log.category === 'root') {
             const findIndex = execResults.value.findIndex(e => e.caseUuid === log.caseUuid);
             findIndex > 0 ? execResults.value.splice(findIndex, 1, log) : execResults.value.push(log);
@@ -59,11 +59,11 @@ function useCaseExecution(): CaseExecution {
             });
         }
 
-        if (log.parentUuid && !execResultMap[log.parentUuid]) {
+        if (log.parentUuid && !execResultMap.value[log.parentUuid]) {
             errorReports.value.push(log);
         }
         
-        if (log.parentUuid && execResultMap[log.parentUuid]) {
+        if (log.parentUuid && execResultMap.value[log.parentUuid]) {
             updateParentLog(log);
         }
 
@@ -95,7 +95,7 @@ function useCaseExecution(): CaseExecution {
         }
         // 更新结果
         else if (wsMsg.category === 'result') {
-            if (execResultMap[log.caseUuid]) {
+            if (execResultMap.value[log.caseUuid]) {
                 return;
             }
             const item = {
