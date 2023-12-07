@@ -291,6 +291,7 @@ watch(() => {
 }, {immediate: true});
 
 
+
 async function cancel() {
   emit('close');
 }
@@ -335,6 +336,16 @@ function showDiff(id:number) {
   store.commit('Endpoint/setDiffModalVisible', {endpointId:id,visible:true,projectId:endpointDetail.value.projectId,callPlace:"detail"});
 }
 
+/**
+ * 接口服务变化了，需要同步更新调试数据
+ */
+watch(() => {
+  return endpointDetail.value.serveId
+}, (newVal) => {
+  if (newVal != "") {
+    store.commit('Debug/setDebugData', {...debugData.value,serveId:newVal});
+  }
+}, {immediate: true});
 
 </script>
 
