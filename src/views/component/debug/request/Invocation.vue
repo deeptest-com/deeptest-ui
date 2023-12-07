@@ -218,7 +218,10 @@ const send = async (e) => {
     const callData = {
       serverUrl: process.env.VUE_APP_API_SERVER,
       token: await getToken(),
-      data: data
+      data: {
+        ...data,
+        baseUrl: currServe.value.url,
+      }
     }
     await store.dispatch('Debug/call', callData).finally(()=>{
       store.commit("Global/setSpinning",false)
