@@ -249,11 +249,11 @@ const userList = computed<any>(() => store.state.Project.userList);
  * 表格数据
  * */
 const columns = [
-  {
-    title: '编号',
-    dataIndex: 'serialNumber',
-    width: 200,
-  },
+  // {
+  //   title: '编号',
+  //   dataIndex: 'serialNumber',
+  //   width: 200,
+  // },
   {
     title: '接口名称',
     dataIndex: 'title',
