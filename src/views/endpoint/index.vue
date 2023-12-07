@@ -440,6 +440,7 @@ async function updateServe(value: any, record: any,) {
     "endpointIds": [record.id]
   });
   record.serveId = value;
+  await refreshList();
 }
 
 // 打开抽屉

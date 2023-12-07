@@ -84,7 +84,6 @@ import cloneDeep from "lodash/cloneDeep";
 
 const store = useStore<{ Endpoint: any, ProjectGlobal: ProjectStateType, ServeGlobal: ServeStateType, DiagnoseInterface }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
-const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 
 const treeData = computed<any>(() => {
   const children = cloneDeep(store.state.Endpoint.caseTree);
@@ -152,9 +151,11 @@ const selectServe = () => {
 }
 
 
-watch((currServe.value), async (newVal) => {
-  console.log('watch currProject', currProject?.value.id, currServe?.value.id)
-  await loadTreeData(currServe?.value.id);
+watch((serveId.value), async (newVal:number) => {
+  console.log('watch currProject', newVal)
+  if (newVal > 0) {
+    await loadTreeData(newVal);
+  }
 }, {
   immediate: true
 })
