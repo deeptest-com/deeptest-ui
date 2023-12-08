@@ -53,16 +53,16 @@ const changeTab = (key) => {
   z-index: 100;
 }
 
+.tab-header-btns {
+  width: 20%;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .tab-header-items {
   width: 80%;
   display: flex;
   align-items: center;
-
-  .tab-header-btns {
-    width: 20%;
-    display: flex;
-    justify-content: flex-end;
-  }
 
   .tab-header-item {
     color: #000000d9;

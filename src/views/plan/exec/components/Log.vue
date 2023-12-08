@@ -9,7 +9,7 @@
         <a-collapse v-if="item.processorCategory === 'processor_interface'" expand-icon-position="right">
           <a-collapse-panel key="index" :header="getHeader(item)">
             <template #extra>
-              <span :class="getResultCls(item.resultStatus)">{{ t(item.resultStatus) }}</span>
+              <span :class="getDpResultClass(item.resultStatus)">{{ t(item.resultStatus) }}</span>
             </template>
 
             <div class="resp-content">
@@ -67,7 +67,7 @@
                       {{ checkpoint.actualResult }}
                     </a-col>
                     <a-col flex="100px">
-                      <span :class="getResultCls(checkpoint.resultStatus)">{{ t(checkpoint.resultStatus) }}</span>
+                      <span :class="getDpResultClass(checkpoint.resultStatus)">{{ t(checkpoint.resultStatus) }}</span>
                     </a-col>
                   </a-row>
                 </div>
@@ -122,11 +122,9 @@
 
 <script setup lang="ts">
 import {defineProps, ref} from "vue";
-import {Collapse, CollapsePanel} from 'ant-design-vue';
 import ALink from "@/components/ALink/index.vue";
-import {ExtractorSrc, ExtractorType, ComparisonOperator, CheckpointType} from "@/utils/enum";
+import {ExtractorSrc, ExtractorType, CheckpointType} from "@/utils/enum";
 import Log from "./Log.vue"
-import {getResultCls} from "@/utils/dom"
 import {useI18n} from "vue-i18n";
 import MonacoEditor from "@/components/Editor/MonacoEditor.vue";
 import {MonacoOptions} from "@/utils/const";

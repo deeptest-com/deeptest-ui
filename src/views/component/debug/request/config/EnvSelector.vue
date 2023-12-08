@@ -10,8 +10,8 @@
       }"
     >
       <a-select
-        :value="currServerId"
-        :options="servers"
+        :value="environmentId"
+        :options="environmentsFromServers"
         @focus="handleFocus"
         @change="e => $emit('change', e)"
         placeholder="请选择环境"
@@ -67,14 +67,17 @@ const containerScrollTop = inject("containerScrollTop", null) as any;
 const router = useRouter();
 
 const store = useStore<{ Debug: Debug; Endpoint; Global; ServeGlobal; }>();
-const servers = computed<any[]>(() => store.state.Debug.serves);
-const currServerId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);  //当前选择的环境id
-const debugData = computed<any>(() => store.state.Debug.debugData);
+const environmentsFromServers = computed<any[]>(() => store.state.Debug.environmentsFromServers);
+const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);  //当前选择的环境id
+const currServe = computed<any>(() => store.state.ServeGlobal.currServe); // 当前选择的服务
 
 const selectEnvTopPosition = ref("0px");
 const selectEnvLeftPosition = ref("0px");
 
 onMounted(() => {
+  store.dispatch('Debug/listServes', {
+    serveId: props.serveId? props.serveId :currServe.value.id,
+  })
   selectEnvTopPosition.value = getSelectEnvTopPosition();
   selectEnvLeftPosition.value = getSelectEnvLeftPosition();
 });

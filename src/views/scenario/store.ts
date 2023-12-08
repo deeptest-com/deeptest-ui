@@ -36,6 +36,10 @@ import {
 
 import {getNodeMap} from "@/services/tree";
 import {getSnippet} from "@/views/component/debug/service";
+import {
+    send_request_get,
+    send_request_post
+} from "@/views/component/debug/config";
 
 export interface StateType {
     scenarioId: number;
@@ -561,12 +565,27 @@ const StoreModel: ModuleType = {
             }
         },
         async addSnippet({commit, dispatch, state}, name: string) {
-            const json = await getSnippet(name)
-            if (json.code === 0) {
-                let script = (state.nodeData.content ? state.nodeData.content: '') + '\n' +  json.data.script
-                script = script.trim()
-                commit('setCodeContent', script);
+            let script = ''
+
+            if (name === 'log') {
+                script = "log('test');"
+
+            } else if (name === 'send_request_get') {
+                script = send_request_get
+            } else if (name === 'send_request_post') {
+                script = send_request_post
+
+            } else {
+                const json = await getSnippet(name)
+                if (json.code === 0) {
+                    script = json.data.script
+                }
             }
+
+            script = (state.nodeData.content ? state.nodeData.content: '') + '\n' + script
+            script = script.trim()
+
+            commit('setCodeContent', script);
 
             return true;
         },

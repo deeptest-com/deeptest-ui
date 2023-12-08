@@ -12,5 +12,5 @@ export const getMethodColor = (method:any) => {
     const item: any = requestMethodOpts.find((item: any) => {
         return item.value === method;
     });
-    return item.color || '#04C495';
+    return item?.color || '#04C495';
 }

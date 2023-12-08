@@ -106,7 +106,8 @@ const execStart = async () => {
   resetData();
   const token = await getToken();
   const data = {
-    serverUrl: process.env.VUE_APP_API_SERVER, // used by agent to submit result to server
+    userId: currUser.value.id,
+    serverUrl: process.env.VUE_APP_API_SERVER,
     token: token,
     planId: currPlan.value && currPlan.value.id,
     environmentId: currEnvId.value

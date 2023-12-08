@@ -96,7 +96,10 @@ const disable = (idx) => {
 const remove = (idx) => {
   console.log('remove')
   debugData.value.bodyFormUrlencoded.splice(idx, 1)
-  add()
+  const len = debugData.value.bodyFormUrlencoded.length
+  if (len == 0 || !!debugData.value.bodyFormUrlencoded[len-1].name) {
+    add()
+  }
 }
 const insert = (idx) => {
   console.log('insert')

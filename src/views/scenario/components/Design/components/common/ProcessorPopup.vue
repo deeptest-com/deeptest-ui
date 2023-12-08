@@ -9,7 +9,7 @@
 
     <div class="content">
       <div class="processor-form">
-        <ProcessorCustomCodeEdit 
+        <ProcessorCustomCodeEdit
           v-if="model.processorType === ProcessorCategory.ProcessorCustomCode"
           :processor="model"
           @cancel="cancel"
@@ -45,7 +45,7 @@ const emits = defineEmits(['updateScreen']);
 
 const save = (item) => {
   console.log('save', item)
-  bus.emit(settings.eventConditionSave, {});
+  bus.emit(settings.eventConditionSave, item);
 }
 
 const cancel = () => {

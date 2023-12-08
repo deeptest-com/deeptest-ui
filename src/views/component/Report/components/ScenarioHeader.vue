@@ -1,15 +1,17 @@
 <template>
   <div class="scenario-basicinfo">
     <div class="scenario-name">{{ record.name }}</div>
-    <div class="scenario-priority">{{ record.priority}}</div>
-    <div :class="['scenario-status', logInfo.resultStatus]">{{ statusMap.get(status) }}
-    </div>
-    <div class="scenario-rate">
-      <div class="scenario-rate-progress">
-        <a-progress :percent="progressInfo.progressValue" :status="progressInfo.status" :show-info="false"/>
+    <template v-if="record.showMoreInfo !== false">
+      <div class="scenario-priority">{{ record.priority}}</div>
+      <div :class="['scenario-status', logInfo.resultStatus]">{{ statusMap.get(status) }}
       </div>
-      <div class="scenario-rate-info">通过率 {{ `${progressInfo.progressValue}%` }}</div>
-    </div>
+      <div class="scenario-rate">
+        <div class="scenario-rate-progress">
+          <a-progress :percent="progressInfo.progressValue" :status="progressInfo.status" :show-info="false"/>
+        </div>
+        <div class="scenario-rate-info">通过率 {{ `${progressInfo.progressValue}%` }}</div>
+      </div>
+    </template>
   </div>
 </template>
 <script lang="ts" setup>

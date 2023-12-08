@@ -6,43 +6,33 @@
               {{ reqContent.method }}
       </span>
     </div>
-
-    <div class="summary">
-      <div class="left">
-        <a-tooltip :title="reqContent.url">
-          <a class="endpoint-url" href="javascript:void (0)">
-            {{ reqContent.url }}
-          </a>
-        </a-tooltip>
-
-        <a-tooltip :title="`${endpointData.name}`">
-          <span class="endpoint-name">
-            {{ endpointData.name || '' }}
-          </span>
-        </a-tooltip>
+    <div class="endpoint-basis">
+      <div class="endpoint-url">
+        <TooltipCell :text="reqContent.url || ''" />
       </div>
-      <div class="right">
-        <span class="endpoint-code" v-if="endpointData.resultStatus !== 'loading'">
-            状态码: &nbsp; <span :style="{ color: `${responseCodeColorMap[resContent.statusCode]}` }">{{
-            resContent.statusCode
-          }}</span>
-          </span>
-
-        <span 
-          class="endpoint-time"
-          v-if="endpointData.resultStatus !== 'loading'">
-          耗时:
-          <a-tooltip :title="`${resContent.time} ms`">&nbsp;
-            <span v-html="formatWithSeconds(resContent.time)"></span>
-          </a-tooltip>
-        </span>
-
-        <span 
-          class="endpoint-time"
-          v-if="endpointData.resultStatus !== 'loading'">
-          大小: &nbsp;<span style="color: rgb(4, 196, 149)">{{ resContent.contentLength }} B</span>
-        </span>
+      <div class="endpoint-name">
+        <TooltipCell :text="endpointData.name || ''" />
       </div>
+    </div>
+   
+    <div class="endpoint-code" v-if="endpointData.resultStatus !== 'loading'">
+      状态码: &nbsp; 
+      <span :style="{ color: `${responseCodeColorMap[resContent.statusCode]}` }">{{ resContent.statusCode }}</span>
+    </div>
+
+    <div
+      class="endpoint-time"
+      v-if="endpointData.resultStatus !== 'loading'">
+      耗时:
+      <a-tooltip :title="`${resContent.time} ms`">&nbsp;
+        <span v-html="formatWithSeconds(resContent.time)"></span>
+      </a-tooltip>
+    </div>
+
+    <div
+      class="endpoint-size"
+      v-if="endpointData.resultStatus !== 'loading'">
+      大小: &nbsp;<span style="color: rgb(4, 196, 149)">{{ resContent.contentLength }} B</span>
     </div>
 
     <div class="status endpoint-status">
@@ -68,6 +58,8 @@ import {responseCodes} from '@/config/constant';
 import {formatWithSeconds} from '@/utils/datetime';
 import ResponseDrawer from '@/views/component/Report/Response/index.vue';
 import { getMethodColor } from '@/utils/interface';
+import {watch} from "vue/dist/vue";
+import TooltipCell from '@/components/Table/tooltipCell.vue';
 
 
 enum StatusMap {
@@ -138,7 +130,6 @@ function handleQueryDetail() {
 .endpoint-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   overflow: hidden;
   white-space: nowrap;
   overflow: hidden;
@@ -146,7 +137,6 @@ function handleQueryDetail() {
   text-align: right;
 
   .endpoint-status {
-    width: 60px;
     height: 22px;
     font-size: 14px;
     border-radius: 2px;
@@ -179,38 +169,14 @@ function handleQueryDetail() {
     margin-right: 20px;
   }
 
-  .endpoint-url {
-    max-width: 280px;
-    margin-right: 20px;
-    display: inline-block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: left;
-  }
-
-  .endpoint-url,
-  .endpoint-name {
-    line-height: 22px;
-    margin-right: 16px;
-  }
-
-  .endpoint-name {
-    margin-right: 16px;
-    max-width: 150px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
   .endpoint-code {
     margin-right: 12px;
   }
 
   .endpoint-time,
-  .endpoint-code {
-    max-width: 80px;
-    text-align: center;
+  .endpoint-code,
+  .endpoint-size {
+    text-align: left;
     font-size: 14px;
     line-height: 22px;
     margin-right: 16px;
@@ -224,32 +190,19 @@ function handleQueryDetail() {
   }
 
   .endpoint-time {
-    max-width: 120px;
+    width: 100px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-align: right;
   }
 
-  .endpoint-type {
-    font-size: 14px;
-    line-height: 22px;
-    color: #447DFD;
-    cursor: pointer;
+  .endpoint-code {
+    width: 80px;
   }
 
-  .endpoint-response {
-    //display: flex;
-    //align-items: center;
-    //justify-content: flex-end;
+  .endpoint-size {
+    width: 80px;
   }
-}
-
-.enpoint-expand {
-}
-
-.status {
-  width: 60px;
 }
 
 .processor-icon-svg {
@@ -257,16 +210,27 @@ function handleQueryDetail() {
   margin-right: 4px;
 }
 
-.summary {
-  flex: 1;
-  margin-right: 16px;
+.endpoint-basis {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  flex: 1;
+  overflow: hidden;
 
-  .left,.right {
-    display: flex;
-    align-items: center;
+  .endpoint-url,
+  .endpoint-name {
+    line-height: 22px;
+    text-align: left;
+    overflow: hidden;
+  }
+
+  .endpoint-url {
+    padding-right: 16px;
+    color: #447DFD;
+  }
+
+  .endpoint-name {
+    flex: 1;
+    padding-right: 16px;
   }
 }
 </style>

@@ -52,6 +52,7 @@ import {
     generateSchemaByResponse,
     loadAlternativeCase,
     loadAlternativeCaseSaved,
+    saveAlternativeFactor,
     saveAlternativeCase,
     queryEndpointCase,
     listAlternativeCaseAssertion,
@@ -59,7 +60,11 @@ import {
     disableAlternativeCaseAssertion,
     removeAlternativeCaseAssertion,
     moveAlternativeCaseAssertion,
-    updateName,
+    updateName, createBenchmarkCase, 
+    listForBenchMark,
+    loadAlternativeCaseFactor,
+    resetPostConditions,
+    resetPreConditions,
     getEndpointDiff,
     saveEndpointDiff,
     listFunctionsByThirdPartyClass,
@@ -145,8 +150,14 @@ export interface StateType {
     alternativeCasesSaved:any;
     alternativeCaseAssertions: any[];
     activeAlternativeCaseAssertion:any;
+    alternativeCaseFactor: any;
+    alternativeTreeData: any;
+    alternativeExecStatusMap: any;
+    alternativeExecResults: any;
     // 记录接口定义是否有变更
     isDefineChange: boolean;
+
+    benchMarkList: any[];
     // mock表达式是否有变更
     isMockChange: boolean;
     //diff弹框信息
@@ -211,11 +222,16 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setBaseCaseId:Mutation<StateType>;
         setAlternativeCases:Mutation<StateType>;
+        setAlternativeTreeData: Mutation<StateType>;
         setAlternativeCasesSaved:Mutation<StateType>;
         setAlternativeCaseAssertions:Mutation<StateType>;
         setActiveAlternativeCaseAssertion:Mutation<StateType>;
+        setAlternativeCaseFactor: Mutation<StateType>;
+        setAlternativeExecStatusMap: Mutation<StateType>;
+        setAlternativeExecResults: Mutation<StateType>;
 
         setIsDefineChange:Mutation<StateType>;
+        setBenchMarkList: Mutation<StateType>;
         setIsMockChange:Mutation<StateType>;
         setDiffModalVisible:Mutation<StateType>;
         setListFunctionsByClass: Mutation<StateType>;
@@ -294,13 +310,21 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         loadAlternativeCase: Action<StateType, StateType>;
         loadAlternativeCaseSaved: Action<StateType, StateType>;
+        createBenchmarkCase: Action<StateType, StateType>;
+        saveAlternativeFactor: Action<StateType, StateType>;
         saveAlternativeCase: Action<StateType, StateType>;
         listAlternativeCaseAssertion: Action<StateType, StateType>;
-        createAlternativeCaseAssertion: Action<StateType, StateType>;
+        createBenchmarkCaseAssertion: Action<StateType, StateType>;
         saveAlternativeCaseAssertion: Action<StateType, StateType>;
         removeAlternativeCaseAssertion: Action<StateType, StateType>;
         disableAlternativeCaseAssertion: Action<StateType, StateType>;
         moveAlternativeCaseAssertion: Action<StateType, StateType>;
+        loadAlternativeFactor: Action<StateType, StateType>;
+
+        listForBenchMark: Action<StateType, StateType>;
+        resetPostConditions: Action<StateType, StateType>;
+        resetPreConditions: Action<StateType, StateType>;
+
         getEndPointDiff: Action<StateType, StateType>;
         saveEndPointDiff: Action<StateType, StateType>;
 
@@ -383,8 +407,14 @@ const initState: StateType = {
     alternativeCasesSaved: [],
     alternativeCaseAssertions: [],
     activeAlternativeCaseAssertion: {},
+    alternativeCaseFactor: {},
+    alternativeTreeData: {},
+    alternativeExecResults: [],
+    alternativeExecStatusMap: [],
 
     isDefineChange: false,
+
+    benchMarkList: [],
     isMockChange: false,
     diffModalVisible: {},
     thirdFunctionList: [],
@@ -586,6 +616,9 @@ const StoreModel: ModuleType = {
         setAlternativeCases(state, payload){
             state.alternativeCases = payload
         },
+        setAlternativeTreeData(state, payload) {
+            state.alternativeTreeData = payload;
+        },
         setAlternativeCasesSaved(state, payload){
             state.alternativeCasesSaved = payload
         },
@@ -599,8 +632,21 @@ const StoreModel: ModuleType = {
                 state.activeAlternativeCaseAssertion = payload;
             }
         },
+        setAlternativeCaseFactor(state, payload) {
+            state.alternativeCaseFactor = payload;
+        },
+
         setIsDefineChange(state, payload){
             state.isDefineChange = payload
+        },
+        setBenchMarkList(state, payload) {
+            state.benchMarkList = payload;
+        },
+        setAlternativeExecResults(state, payload) {
+            state.alternativeExecResults = payload;
+        },
+        setAlternativeExecStatusMap(state, payload) {
+            state.alternativeExecStatusMap = payload;
         },
         setIsMockChange(state, payload){
             state.isMockChange = payload
@@ -863,7 +909,7 @@ const StoreModel: ModuleType = {
                         })
                     })
                 }catch (e){
-                    console.error(e)
+                    console.log(e)
                 }
 
                 await commit('setEndpointDetail', res.data || null);
@@ -891,7 +937,7 @@ const StoreModel: ModuleType = {
                 await dispatch("getEndpointDetail", {id: payload.id})
                 await dispatch('loadList', {projectId: payload.projectId});
             }catch (e){
-                console.error(e)
+                console.log(e)
             }
 
             // debugger
@@ -1085,7 +1131,7 @@ const StoreModel: ModuleType = {
         async getEndpointList({ commit }, payload: any) {
             const resp = await getEndpointList(payload)
             if (resp.code === 0) {
-                commit('setEndpointCaseDetail', resp.data);
+                // commit('setEndpointCaseDetail', resp.data);
             } else {
                 return false
             }
@@ -1440,12 +1486,12 @@ const StoreModel: ModuleType = {
 
                 const response: ResponseData = await queryEndpointCase(params);
                 if (response.code != 0) return false;
-
+                
                 const data = response.data;
 
                 commit('setEndpointCaseList', {
                     ...initState.listResult,
-                    list: data.result || [],
+                    list: (data.result || []).map(e => ({ ...e, children: e.children?.length > 0 ? e.children : null })),
                     pagination: {
                         ...initState.listResult.pagination,
                         current: params.page,
@@ -1463,7 +1509,7 @@ const StoreModel: ModuleType = {
             const resp: ResponseData = await getEndpointCase(id);
 
             if (resp.code === 0) {
-                commit('setEndpointCaseDetail', resp.data);
+                commit('setEndpointCaseDetail', { ...resp.data, id });
                 return true;
             } else {
                 return false
@@ -1472,7 +1518,6 @@ const StoreModel: ModuleType = {
         async saveCase({state, dispatch}, payload: any) {
             const jsn = await saveEndpointCase(payload)
             if (jsn.code === 0) {
-                dispatch('listCase', state.caseQueryParams);
                 return true;
             } else {
                 return false
@@ -1526,18 +1571,17 @@ const StoreModel: ModuleType = {
             }
         },
 
-        async loadAlternativeCase({commit, state, dispatch }, baseId: number) {
-            commit('setBaseCaseId', baseId);
-
-            const jsn = await loadAlternativeCase(baseId)
+        async loadAlternativeCase({commit}, payload) {
+            const jsn = await loadAlternativeCase(payload)
             if (jsn.code === 0) {
-                commit('setAlternativeCases', jsn.data.children);
+                commit('setAlternativeCases', jsn.data.children || []);
+                commit('setAlternativeTreeData', jsn.data);
                 return true;
             } else {
                 return false
             }
         },
-        async loadAlternativeCaseSaved({ commit, state, dispatch }, baseId: number) {
+        async loadAlternativeCaseSaved({ commit, state }, baseId: number) {
             const jsn = await loadAlternativeCaseSaved(baseId)
             if (jsn.code === 0) {
                 state.alternativeCasesSaved = jsn.data
@@ -1547,6 +1591,46 @@ const StoreModel: ModuleType = {
                 return false
             }
         },
+        async createBenchmarkCase({ commit }, payload: any) {
+            try {
+                const jsn = await createBenchmarkCase(payload)
+                if (jsn.code === 0) {
+                    return jsn.data;
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch(err) {
+                return Promise.reject(err);
+            }
+        },
+
+        async saveAlternativeFactor({ commit, state, dispatch }, data: any) {
+            try {
+                const jsn = await saveAlternativeFactor(data)
+                if (jsn.code === 0) {
+                    return jsn.data;
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch(err) {
+                return Promise.reject(err);
+            }
+        },
+
+        async loadAlternativeFactor({ commit }, data: any) {
+            try {
+                const jsn = await loadAlternativeCaseFactor(data)
+                if (jsn.code === 0) {
+                    commit('setAlternativeCaseFactor', jsn.data);
+                    return true;
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch(err) {
+                return Promise.reject(err);
+            }
+        },
+
         async saveAlternativeCase({ commit, state, dispatch }, data: any) {
             const jsn = await saveAlternativeCase(data)
             if (jsn.code === 0) {
@@ -1568,7 +1652,7 @@ const StoreModel: ModuleType = {
                 return false
             }
         },
-        async createAlternativeCaseAssertion({commit, dispatch, state}, payload: any) {
+        async createBenchmarkCaseAssertion({commit, dispatch, state}, payload: any) {
             try {
                 payload.alternativeCaseId = state.baseCaseId
                 await saveAlternativeCaseAssertion(payload);
@@ -1621,6 +1705,69 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
+
+        /**
+         * 自动生成用例中  可选的 用例列表 【其中仅包含 caseType = default 类型的用例】
+         * @param param0 store context
+         * @param payload request params
+         * @returns 
+         */
+        async listForBenchMark({ commit }, payload: any) {
+            try {
+                const jsn = await listForBenchMark(payload);
+                if (jsn.code === 0) {
+                    commit('setBenchMarkList', (jsn.data || []).map(e => ({ value: e.id, label: e.name })));
+                    return true;
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch (error) {
+                return Promise.reject(error);
+            }
+        },
+
+        /**
+         * 备选用例- 用例因子 恢复默认【针对 后置处理，断言】
+         * @returns 
+         */
+        async resetPostConditions({ rootState }: any, payload: any) {
+            try {
+                const jsn = await resetPostConditions({ 
+                    ...payload, 
+                    endpointInterfaceId: rootState.Debug.debugData.endpointInterfaceId, 
+                    debugInterfaceId: rootState.Debug.debugInfo.debugInterfaceId 
+                });
+                if (jsn.code === 0) {
+                    return Promise.resolve();
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch (error) {
+                return Promise.reject(error);
+            }
+        },
+
+        /**
+         * 备选用例- 用例因子 恢复默认【针对 预处理】
+         * @returns 
+         */
+        async resetPreConditions({ rootState }: any, payload: any) {
+            try {
+                const jsn = await resetPreConditions({
+                    ...payload, 
+                    endpointInterfaceId: rootState.Debug.debugData.endpointInterfaceId, 
+                    debugInterfaceId: rootState.Debug.debugInfo.debugInterfaceId 
+                });
+                if (jsn.code === 0) {
+                    return Promise.resolve();
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch (error) {
+                return Promise.reject(error);
+            }
+        },
+
         async getEndPointDiff({commit, dispatch, state}, payload: any) {
             const res = await getEndpointDiff(payload)
             if (res.code === 0) {

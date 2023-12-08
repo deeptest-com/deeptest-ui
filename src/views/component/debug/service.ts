@@ -23,6 +23,7 @@ const apiExtractor = 'extractors'
 const apiCookie = 'cookies'
 const apiCheckpoint = 'checkpoints'
 const apiScript = 'scripts'
+const apiDatabaseOpts = 'databaseOpts'
 
 const apiParser = 'parser'
 
@@ -213,9 +214,7 @@ export function getCodeLangByType(type) {
 }
 
 // conditions
-export async function getPreConditionScript(debugInterfaceId, endpointInterfaceId: number): Promise<any> {
-    const params = {debugInterfaceId, endpointInterfaceId}
-
+export async function getPreConditionScript(params:{ debugInterfaceId, endpointInterfaceId: number, usedBy: string, isForBenchmarkCase?: boolean;}): Promise<any> {
     return request({
         url: `/${apiPreConditions}/getScript`,
         method: 'GET',
@@ -249,9 +248,7 @@ export async function movePreConditions(data): Promise<any> {
     });
 }
 
-export async function listPostConditions(debugInterfaceId, endpointInterfaceId: number, category: ConditionCategory): Promise<any> {
-    const params = {debugInterfaceId, endpointInterfaceId, category}
-
+export async function listPostConditions(params: {debugInterfaceId, endpointInterfaceId: number, category: ConditionCategory, usedBy: string, isForBenchmarkCase?: boolean}): Promise<any> {
     return request({
         url: `/${apiPostConditions}`,
         method: 'GET',
@@ -386,6 +383,27 @@ export async function saveScript(data): Promise<any> {
 export async function removeScript(id: number): Promise<any> {
     return request({
         url: `/${apiScript}/${id}`,
+        method: 'DELETE',
+    });
+}
+
+// dbConn
+export async function getDbOpt(id: number): Promise<any> {
+    return request({
+        url: `/${apiDatabaseOpts}/${id}`,
+        method: 'GET',
+    });
+}
+export async function saveDbOpt(data): Promise<any> {
+    return request({
+        url: `/${apiDatabaseOpts}`,
+        method: data.id ? 'PUT' : 'POST',
+        data: data,
+    });
+}
+export async function removeDbOpt(id: number): Promise<any> {
+    return request({
+        url: `/${apiDatabaseOpts}/${id}`,
         method: 'DELETE',
     });
 }

@@ -43,6 +43,10 @@
                           type="script"
                           class="icon"  />
 
+                <icon-svg v-if="element.entityType === ConditionType.databaseOpt"
+                          type="db-opt"
+                          class="icon"  />
+
                 <span v-html="element.desc || t(element.entityType)"></span>
               </div>
               <div class="buttons">
@@ -78,17 +82,25 @@
             </div>
 
             <div class="content" v-if="activePostCondition.id === +element.id">
-              <Extractor v-if="element.entityType === ConditionType.extractor"
-                         :condition="activePostCondition"
-                          :finish="list"/>
+              <Extractor
+                v-if="element.entityType === ConditionType.extractor"
+                :condition="activePostCondition"
+                :finish="list"/>
 
-              <Checkpoint v-if="element.entityType === ConditionType.checkpoint"
-                          :condition="activePostCondition"
-                          :finish="list"/>
+<!--              <Checkpoint
+                v-if="element.entityType === ConditionType.checkpoint"
+                :condition="activePostCondition"
+                :finish="list"/>-->
 
-              <Script v-if="element.entityType === ConditionType.script"
-                      :condition="activePostCondition"
-                      :finish="list"/>
+              <Script
+                v-if="element.entityType === ConditionType.script"
+                :condition="activePostCondition"
+                :finish="list"/>
+
+              <DatabaseOpt
+                  v-if="element.entityType === ConditionType.databaseOpt"
+                  :condition="activePostCondition"
+                  :finish="list"/>
             </div>
           </div>
 
@@ -96,23 +108,29 @@
       </draggable>
     </div>
 
-    <FullScreenPopup v-if="fullscreen"
-                     :visible="fullscreen"
-                     :model="activePostCondition"
-                     :onCancel="closeFullScreen" />
+    <FullScreenPopup
+      v-if="fullscreen"
+      :visible="fullscreen"
+      :model="activePostCondition"
+      :onCancel="closeFullScreen" />
   </div>
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch, getCurrentInstance, ComponentInternalInstance, onUnmounted, onMounted} from "vue";
+import {computed, inject, ref, watch, getCurrentInstance, ComponentInternalInstance, onUnmounted, onMounted, provide, defineProps} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import { CheckCircleOutlined, DeleteOutlined,
-  ClearOutlined, RightOutlined,
-  DownOutlined, CloseCircleOutlined, FullscreenOutlined } from '@ant-design/icons-vue';
+import {
+  CheckCircleOutlined,
+  DeleteOutlined,
+  ClearOutlined,
+  RightOutlined,
+  DownOutlined,
+  CloseCircleOutlined,
+  FullscreenOutlined } from '@ant-design/icons-vue';
 import draggable from 'vuedraggable'
 import Tips from "@/components/Tips/index.vue";
-import {ConditionType, UsedBy} from "@/utils/enum";
+import {ConditionType, UsedBy, UsedWith} from "@/utils/enum";
 import {EnvDataItem} from "@/views/project-settings/data";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
@@ -124,7 +142,7 @@ import useIMLeaveTip   from "@/composables/useIMLeaveTip";
 import Extractor from "./conditions-post/Extractor.vue";
 import Checkpoint from "./conditions-post/Checkpoint.vue";
 import Script from "./conditions-post/Script.vue";
-import Cookie from "./conditions-post/Cookie.vue";
+import DatabaseOpt from "./conditions-post/DatabaseOpt.vue";
 import FullScreenPopup from "./ConditionPopup.vue";
 import {equalObjectByLodash} from "@/utils/object";
 
@@ -132,7 +150,10 @@ const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const postConditions = computed<any>(() => store.state.Debug.postConditions);
-const activePostCondition:any = computed<any>(() => store.state.Debug.activePostCondition);
+const activePostCondition = computed<any>(() => store.state.Debug.activePostCondition);
+
+provide('usedWith', UsedWith.PostCondition)
+
 
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
@@ -147,23 +168,23 @@ const expand = (item) => {
   store.commit('Debug/setActivePostCondition', item);
 }
 
-const list = () => {
+const list = async () => {
   console.log('list')
-  store.dispatch('Debug/listPostCondition')
+  await store.dispatch('Debug/listPostCondition', {
+    isForBenchmarkCase: false
+  })
 }
 
-watch(debugData, (newVal) => {
-  console.log('watch debugData')
-  list()
+watch(debugData, async (newVal) => {
+  await list();
 }, {immediate: true, deep: true});
-
-
 
 const create = () => {
   console.log('create', conditionType.value)
   store.dispatch('Debug/createPostCondition', {
     entityType: conditionType.value,
     ...debugInfo.value,
+    isForBenchmarkCase: false
   })
 }
 
@@ -186,17 +207,17 @@ function move(_e: any) {
   const envIdList = postConditions.value.map((e: EnvDataItem) => {
     return e.id;
   })
-
   store.dispatch('Debug/movePostCondition', {
     data: envIdList,
     info: debugInfo.value,
+    isForBenchmarkCase: false,
     entityType: '',
   })
 }
 
 const save = (item) => {
   console.log('save', item)
-  bus.emit(settings.eventConditionSave, {});
+  bus.emit(settings.eventConditionSave, item);
 }
 
 const openFullscreen = (item) => {
@@ -208,7 +229,7 @@ const closeFullScreen = (item) => {
   fullscreen.value = false
 }
 
-
+provide('isForBenchmarkCase', false);
 /*************************************************
  * ::::后置处理器提示
  ************************************************/
@@ -242,55 +263,26 @@ onUnmounted(() => {
 
 </script>
 
-<style lang="less">
-.post-condition-main {
-  .codes {
-    height: 100%;
-    min-height: 160px;
-
-    .editor {
-      height: 100%;
-      min-height: 160px;
-    }
-  }
-}
-</style>
-
 <style lang="less" scoped>
 .post-condition-main {
   height: 100%;
-  display: flex;
-  flex-direction: column;
 
   .head {
     height: 30px;
     padding: 2px 3px;
   }
   .content {
-    flex: 1;
     height: calc(100% - 30px);
     margin-bottom: 8px;
     overflow-y: auto;
-
     display: flex;
+
+    &.benchmark-condition-content {
+      height: unset;
+    }
+
     &>div {
       height: 100%;
-    }
-
-    .codes {
-      flex: 1;
-    }
-    .refer {
-      width: 260px;
-      padding: 10px;
-      overflow-y: auto;
-
-      .title {
-        margin-top: 12px;
-      }
-      .desc {
-
-      }
     }
 
     .collapse-list {
@@ -308,6 +300,7 @@ onUnmounted(() => {
         }
 
         &.active {
+          height: 100%;
           border: 1px solid #1890ff;
         }
 

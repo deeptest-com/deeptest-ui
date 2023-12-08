@@ -1,6 +1,6 @@
 <template>
   <a-modal
-      :title="'配置'+t(model.entityType || model.conditionEntityType)"
+      :title="'配置'+ t(model?.conditionEntityType ? model?.conditionEntityType : model?.entityType)"
       :visible="visible"
       :footer="null"
       @cancel="cancel"
@@ -23,9 +23,14 @@
 
         <PreScript v-if="model.conditionEntityType === ConditionType.script"
                 :condition="model"
+                :fullScreen="true"
                 :finish="onCancel" />
 
         <PostScript v-if="model.entityType === ConditionType.script"
+                    :condition="model"
+                    :finish="onCancel" />
+
+        <DatabaseOpt v-if="model.entityType === ConditionType.databaseOpt"
                     :condition="model"
                     :finish="onCancel" />
       </div>
@@ -42,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import {defineProps, onMounted} from "vue";
+import {computed, defineProps, inject, ref} from "vue";
 import {useI18n} from "vue-i18n";
 
 import {ConditionType} from "@/utils/enum";
@@ -51,6 +56,7 @@ import Cookie from "./conditions-post/Cookie.vue";
 import Checkpoint from "./conditions-post/Checkpoint.vue";
 import PreScript from "./conditions-pre/Script.vue";
 import PostScript from "./conditions-post/Script.vue";
+import DatabaseOpt from "./conditions-post/DatabaseOpt.vue";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 
@@ -72,9 +78,8 @@ const props = defineProps({
 })
 
 const save = (item) => {
-  console.log('save', item)
-  bus.emit(settings.eventConditionSave, {});
-}
+  bus.emit(settings.eventConditionSave, props.model);
+};
 
 const cancel = () => {
   console.log('cancel')

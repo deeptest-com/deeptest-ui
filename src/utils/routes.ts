@@ -88,7 +88,8 @@ import { equalObject } from "./object";
  * @param pathname path
  * @param routesData routes
  */
-export const getRouteItem = (pathname: string, routesData: RoutesDataItem[]): RoutesDataItem => {
+export const getRouteItem = (route: any, routesData: RoutesDataItem[]): RoutesDataItem => {
+  const pathname = route?.params?.projectNameAbbr ? route.path.replace(route.params.projectNameAbbr, ':projectNameAbbr') : route.path;
   let item: RoutesDataItem = { title: '', path: '', redirect: '', roles: [] };
 
   for (let index = 0, len = routesData.length; index < len; index += 1) {
@@ -107,15 +108,15 @@ export const getRouteItem = (pathname: string, routesData: RoutesDataItem[]): Ro
         item = element;
         break;
       }
-    }
-
-    if (element.children) {
-      item = getRouteItem(pathname, element.children);
+    } else if (element.children) {
+      item = getRouteItem(route, element.children);
       if (item.path !== '') {
         break;
       }
     }
   }
+
+  console.log('item, mmm', item);
 
   return item;
 };

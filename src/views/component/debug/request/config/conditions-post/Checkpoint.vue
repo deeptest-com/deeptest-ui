@@ -1,12 +1,13 @@
 <template>
   <div class="response-checkpoint-main">
-    <a-form :label-col="{ style: { width: '68px' } }" :wrapper-col="wrapperCol">
+    <a-form :label-col="{ style: { width: '86px' } }" :wrapper-col="wrapperCol">
+
       <a-form-item label="类型" v-bind="validateInfos.type">
         <a-select v-model:value="model.type"
                   @change="selectType"
                   @blur="validate('type', { trigger: 'change' }).catch(() => {})">
           <a-select-option v-for="(item, idx) in types" :key="idx" :value="item.value">
-            {{ t(item.label) }}
+            {{ t(item.label === 'extractor' ? 'extractBody' : item.label) }}
           </a-select-option>
         </a-select>
       </a-form-item>
@@ -18,7 +19,7 @@
                  @blur="validate('expression', { trigger: 'blur' }).catch(() => {})" />
       </a-form-item>
 
-      <a-form-item v-if="model.type === 'extractor'" label="变量名称" v-bind="validateInfos.extractorVariable">
+      <a-form-item v-if="model.type === 'extractorVari'" label="变量名称" v-bind="validateInfos.extractorVariable" required>
         <a-select v-model:value="model.extractorVariable"
                   @blur="validate('extractorVariable', { trigger: 'blur' }).catch(() => {})">
           <a-select-option v-for="(item, idx) in variables" :key="idx" :value="item.name">
@@ -27,9 +28,28 @@
         </a-select>
       </a-form-item>
 
-      <a-form-item v-if="model.type !== 'judgement'" label="运算符" v-bind="validateInfos.operator">
+      <!-- for extractor -->
+      <template v-if="model.type === 'extractor'">
+        <a-form-item label="提取方法" v-bind="validateInfos.type" required>
+          <a-select v-model:value="model.extractorType"
+                    @change="changeType"
+                    @blur="validate('extractorType', { trigger: 'change' }).catch(() => {})">
+            <a-select-option v-for="(item, idx) in extractorTypeOptions" :key="idx" :value="item.value">
+              {{ t(item.label) }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item v-if="model.extractorType"
+                     :label="model.extractorType==='jsonpath' ? t('jsonpath') : 'XPath'" v-bind="validateInfos.extractorExpression" required>
+          <a-input v-model:value="model.extractorExpression"
+                   @blur="validate('extractorExpression', { trigger: 'blur' }).catch(() => {})"/>
+        </a-form-item>
+      </template>
+
+      <a-form-item v-if="model.type !== 'judgement'" label="运算符" v-bind="validateInfos.operator" required>
         {{ void (options = model.type === 'responseStatus' ? operatorsForCode :
           isInArray(model.type, ['responseHeader', 'responseBody']) ? operatorsForString : operators) }}
+
         <a-select v-model:value="model.operator"
                   @blur="validate('operator', { trigger: 'change' }).catch(() => {})">
 
@@ -40,14 +60,14 @@
         </a-select>
       </a-form-item>
 
-      <a-form-item v-if="model.type === 'judgement'" label="判断表达式" v-bind="validateInfos.expression">
+      <a-form-item v-if="model.type === 'judgement'" label="判断表达式" v-bind="validateInfos.expression" required>
         <a-textarea v-model:value="model.expression" :auto-size="{ minRows: 2, maxRows: 5 }"
                  @blur="validate('expression', { trigger: 'blur' }).catch(() => {})" />
 
         <div class="dp-input-tip">{{t('tips_expression_bool', {name: '{name}', number: '{+number}'})}}</div>
       </a-form-item>
 
-      <a-form-item v-if="model.type !== 'judgement'" label="数值" v-bind="validateInfos.value">
+      <a-form-item v-if="model.type !== 'judgement'" label="数值" v-bind="validateInfos.value" required>
         <a-input v-model:value="model.value"
                  @blur="validate('value', { trigger: 'blur' }).catch(() => {})" />
       </a-form-item>
@@ -78,9 +98,9 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, CloseCircleOutlined, CheckC
 import {
   listExtractorVariable
 } from "@/views/component/debug/service";
-import {ComparisonOperator, CheckpointType, UsedBy} from "@/utils/enum";
+import {ComparisonOperator, CheckpointType, UsedBy, ExtractorType} from "@/utils/enum";
 import {isInArray} from "@/utils/array";
-import {getResultCls} from "@/utils/dom"
+import {getDpResultClass} from "@/utils/dom"
 import {getCompareOptsForRespCode, getCompareOptsForString} from "@/utils/compare";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {Checkpoint} from "@/views/component/debug/data";
@@ -92,13 +112,14 @@ import {notifyError, notifySuccess} from "@/utils/notify";
 import useIMLeaveTip   from "@/composables/useIMLeaveTip";
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
+const isForBenchmarkCase = inject('isForBenchmarkCase');
 const {t} = useI18n();
 
 const store = useStore<{  Debug: any }>();
 
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
-// const model = computed<any>(() => store.state.Debug.checkpointData);
+// const model = computed<any>(() => isForBenchmarkCase ? store.state.Debug.benchMarkCase.checkpointData : store.state.Debug.checkpointData);
 
 const props = defineProps({
   condition: {
@@ -115,52 +136,61 @@ const types = getEnumSelectItems(CheckpointType)
 const operators = getEnumSelectItems(ComparisonOperator)
 const operatorsForString = getCompareOptsForString()
 const operatorsForCode = getCompareOptsForRespCode()
+const extractorTypeOptions = getEnumSelectItems(ExtractorType)
 
 const load = () => {
-  console.log('load', props.condition)
-  store.dispatch('Debug/getCheckpoint', props.condition.entityId)
+  console.log('load checkpoint', props.condition)
+  if (props.condition.entityId) {
+    store.dispatch('Debug/getCheckpoint', props.condition)
+  }
 }
 
+watch(() => props.condition, (newVal) => {
+      load()
+    }, {immediate: true, deep: true}
+)
 
 const {assertionConditionsDataObj} = useIMLeaveTip();
 const model = computed<any>(() => {
-  return assertionConditionsDataObj.value?.[props?.condition?.entityId] || {}
+  return isForBenchmarkCase ? store.state.Debug.benchMarkCase.checkpointData : (assertionConditionsDataObj.value?.[props?.condition?.entityId] || {})
 });
-
-onMounted(() => {
-  if(!model?.value?.id){
-    load();
-  }
-})
-
-
 
 const variables = ref([])
 
 const extractorVariableRequired = [{ required: true, message: '请选择变量', trigger: 'change' }]
+const extractorTypeRequired = [{ required: true, message: '请选择提取器类型', trigger: 'change' }]
+const extractorExpressionRequired = [{ required: true, message: '请输入提取器表达式', trigger: 'change' }]
 const expressionRequired = [{ required: true, message: '请输入表达式', trigger: 'blur' }]
 const operatorRequired = [{ required: true, message: '请选择操作', trigger: 'change' }]
 const valueRequired = [{ required: true, message: '请输入数值', trigger: 'blur' }]
 
-const rulesRef = computed(() => { return {
+const rulesRef = computed(() => {
+  const ret = {
     type: [
       { required: true, message: '请选择类型', trigger: 'blur' },
     ],
-    extractorVariable: model.value.type === CheckpointType.extractor ? extractorVariableRequired : [],
+
+    extractorVariable: model.value.type === CheckpointType.extractorVari ? extractorVariableRequired : [],
+    extractorType:  model.value.type === CheckpointType.extractor ? extractorTypeRequired : [],
+    extractorExpression: model.value.type === CheckpointType.extractor ? extractorExpressionRequired : [],
+
     expression: model.value.type === CheckpointType.responseHeader || model.value.type === CheckpointType.judgement ?
         expressionRequired : [],
-    operator: [
-      model.value.type === CheckpointType.judgement ? [] : operatorRequired,
-    ],
-    value: [
-      model.value.type === CheckpointType.judgement ? [] : valueRequired,
-    ],
-}})
+    operator: model.value.type === CheckpointType.judgement ? [] : operatorRequired,
+    value: model.value.type === CheckpointType.judgement ? [] : valueRequired,
+  }
+
+  return ret
+})
 
 let { resetFields, validate, validateInfos } = useForm(model, rulesRef);
 
-const save = () => {
+const save = (item) => {
   console.log('save', model.value)
+  if (item && item.entityId !== model.value.id) {
+    return;
+  }
+
   validate().then(() => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
@@ -191,6 +221,10 @@ onMounted(() => {
   console.log('onMounted')
   bus.on(settings.eventConditionSave, save);
 
+  if(!model?.value?.id){
+    load();
+  }
+
   loadExtractorVariable()
 })
 onBeforeUnmount( () => {
@@ -220,11 +254,16 @@ const loadExtractorVariable = () => {
       model.value.operator = ComparisonOperator.equal
   }
 
-  if (model.value.type === CheckpointType.extractor) {
-    listExtractorVariable(debugInfo.value).then((jsn) => {
+  if (model.value.type === CheckpointType.extractorVari) {
+    listExtractorVariable(Object.assign(debugInfo.value, {isForBenchmarkCase})).then((jsn) => {
       variables.value = jsn.data
     })
   }
+}
+
+const changeType = () => {
+  console.log('changeType')
+  model.value.extractorExpression = ''
 }
 
 const labelCol = { span: 4 }

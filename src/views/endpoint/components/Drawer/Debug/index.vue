@@ -65,7 +65,7 @@ const emit = defineEmits(['switchToDefineTab']);
 const saveDebugInterface = async (data) => {
   console.log('saveDebugInterface', data)
 
-  Object.assign(data, {shareVars: null, envVars: null, globalEnvVars: null, globalParamVars: null})
+  Object.assign(data, {envDataToView: null})
 
   store.commit("Global/setSpinning",true)
   const res = await store.dispatch('Debug/save', data)

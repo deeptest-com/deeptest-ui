@@ -252,7 +252,7 @@ const columns = [
   {
     title: '编号',
     dataIndex: 'serialNumber',
-    width: 150,
+    width: 200,
   },
   {
     title: '接口名称',
@@ -274,16 +274,16 @@ const columns = [
     width: 200,
   },
   {
-    title: '状态',
-    dataIndex: 'status',
-    slots: {customRender: 'colStatus'},
-    width: 100,
-  },
-  {
     title: '所属服务',
     dataIndex: 'serveName',
     ellipsis: true,
     width: 110,
+  },
+  {
+    title: '状态',
+    dataIndex: 'status',
+    slots: {customRender: 'colStatus'},
+    width: 100,
   },
   {
     title: '创建人',

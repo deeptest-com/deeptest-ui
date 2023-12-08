@@ -116,7 +116,7 @@ const saveDiagnoseInterface = async (e) => {
     let data = JSON.parse(JSON.stringify(debugData.value))
     data = prepareDataForRequest(data)
 
-    Object.assign(data, {shareVars: null, envVars: null, globalEnvVars: null, globalParamVars: null})
+    Object.assign(data, {envDataToView: null})
 
     const res = await store.dispatch('DiagnoseInterface/saveDiagnoseDebugData', data).finally(()=> store.commit("Global/setSpinning",false))
 

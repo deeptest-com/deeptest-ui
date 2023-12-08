@@ -37,12 +37,35 @@
           </a-col>
 
           <a-col flex="2" class="flow">
-            <a-input v-if="item.type!=='file'" v-model:value="item.value" class="dp-bg-input-transparent" />
-            <span v-if="item.type==='file'" class="filename">{{getFileName(item.value)}}</span>
+            <a-input v-if="item.type!=='file'"
+                     v-model:value="item.value"
+                     class="dp-bg-input-transparent" />
 
-            <a-button v-if="item.type==='file'" @click="selectFile(idx)">
-              <UploadOutlined />
-            </a-button>
+            <a-row v-if="item.type==='file'">
+              <a-col flex="1" class="filename">{{getFileName(item.value)}}</a-col>
+
+              <a-col flex="100px" class="upload-buttons">
+                <div v-if="isElectron">
+                  <a-button
+                        @click="uploadByElectron(idx)">
+                      <UploadOutlined />
+                  </a-button>
+                </div>
+
+                <div v-else>
+                  <a-upload
+                            :beforeUpload="uploadByPage"
+                            :customRequest="afterUploadByPage(idx)"
+                            :showUploadList="false"
+                            accept="*.*">
+                    <a-button>
+                      <UploadOutlined/>
+                    </a-button>
+                  </a-upload>
+                </div>
+              </a-col>
+            </a-row>
+
           </a-col>
 
           <a-col flex="80px" class="dp-right dp-icon-btn-container">
@@ -91,12 +114,12 @@ const {t} = useI18n();
 import {BodyFormDataItem} from "@/views/component/debug/data";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {notifyWarn} from "@/utils/notify";
+import {getUrls} from "@/utils/request";
+import {getToken} from "@/utils/localToken";
+import {uploadRequest} from "@/utils/upload";
 const store = useStore<{  Debug: Debug }>();
 
 const debugData = computed<any>(() => store.state.Debug.debugData);
-
-let uploadRef = ref()
-const isElectron = ref(!!window.require)
 
 const onFormDataChange = (idx) => {
   console.log('onFormDataChange', idx)
@@ -122,7 +145,10 @@ const disable = (idx) => {
 const remove = (idx) => {
   console.log('remove')
   debugData.value.bodyFormData.splice(idx, 1)
-  add()
+  const len = debugData.value.bodyFormData.length
+  if (len == 0 || !!debugData.value.bodyFormData[len-1].name) {
+    add()
+  }
 }
 const insert = (idx) => {
   console.log('insert')
@@ -131,26 +157,49 @@ const insert = (idx) => {
 
 const selectedItemIndex = ref(0)
 
+let uploadPath = ref('')
+const isElectron = ref(!!window.require)
 let ipcRenderer = undefined as any
+
+// catch electron upload event
 if (isElectron.value && !ipcRenderer) {
   ipcRenderer = window.require('electron').ipcRenderer
 
-  ipcRenderer.on(settings.electronMsgReplay, (event, data) => {
-    console.log('from electron: ', data)
-    debugData.value.bodyFormData[selectedItemIndex.value].value = data.filepath
+  ipcRenderer.on(settings.electronMsgReplay, (event, result) => {
+    console.log('from electron: ', result)
+    if (result.code === 0) {
+      // data.value = result.data.data
+      debugData.value.bodyFormData[selectedItemIndex.value].value = result.data.path
+    }
   })
 }
 
-const selectFile = (index) => {
-  console.log('selectFile', index)
+const uploadByElectron = async (index) => {
+  console.log('uploadByElectron', index)
   selectedItemIndex.value = index
 
-  if (isElectron.value) {
-    const data = {act: 'chooseFile'} as any
-    ipcRenderer.send(settings.electronMsg, data)
-  } else {
-    notifyWarn(`请使用客户端上传文件`);
+  const data = {
+    act: 'uploadFile',
+    url: getUrls().serverUrl + '/upload',
+    params: {isJslib: true},
+    token: await getToken(),
   }
+  ipcRenderer.send(settings.electronMsg, data)
+}
+const uploadByPage = (file, fileList) => {
+  console.log('uploadByPage', file, fileList)
+
+  uploadRequest(file, {}).then((res) => {
+    uploadPath.value = res.path
+  })
+
+  return false
+}
+const afterUploadByPage = (index) => {
+  console.log('afterUploadByPage', index)
+  if (!uploadPath.value) return
+
+  debugData.value.bodyFormData[index].value = uploadPath.value
 }
 
 const getFileName = (path) => {
@@ -161,7 +210,7 @@ const getFileName = (path) => {
 }
 
 onMounted(() => {
-  console.log('onMounted', uploadRef.value)
+  console.log('onMounted')
 })
 
 </script>
@@ -180,6 +229,12 @@ onMounted(() => {
     }
     .filename {
       padding: 0 10px;
+      border-right: 0 !important;
+    }
+    .upload-buttons {
+      .ant-upload.ant-upload-select {
+        display: block;
+      }
     }
     .ant-btn {
       position: absolute;

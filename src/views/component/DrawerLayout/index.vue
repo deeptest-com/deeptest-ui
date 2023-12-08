@@ -150,8 +150,8 @@ provide('isFullScreen', computed(() => isFullscreen.value));
 
   .dp-drawer-content-tabs-header {
     position: sticky;
-    z-index: 9999;
-    top: 0;
+    z-index: 1001;
+    top: -1px;
     display: flex;
     align-items: center;
     justify-content: space-between;

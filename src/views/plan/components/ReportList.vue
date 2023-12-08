@@ -51,7 +51,7 @@ const columns = [
         title: '编号',
         dataIndex: 'serialNumber',
         slots: { customRender: 'serialNumber' },
-        width: 150,
+        width: 180,
     },
     {
         title: '测试通过率',
