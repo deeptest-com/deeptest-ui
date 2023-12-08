@@ -135,17 +135,14 @@ const treeData: any = computed(() => {
  */
 const ContextMenuList = [
   {
-    key: '1',
     label: '新建子分类',
     action: (_record: any) => newCategory(_record),
   },
   {
-    key: '2',
     label: '删除分类',
     action: (_record: any) => deleteCategory(_record),
   },
   {
-    key: '3',
     label: '编辑分类',
     action: (_record: any) => editCategory(_record),
   }
@@ -166,8 +163,8 @@ async function loadCategorys() {
 // 切换项目  重置搜索关键词/重置分类列表
 watch(() => {
   return currProject.value;
-}, async (newVal) => {
-  if (newVal?.id) {
+}, async (newVal, oldVal) => {
+  if (newVal?.id && newVal?.id !== oldVal?.id) {
     store.commit('Scenario/setTreeDataCategory', {});
     searchValue.value = '';
     await loadCategorys();
@@ -345,12 +342,6 @@ async function onDrop(info: DropEvent) {
     notifyError('移动失败');
   }
 }
-
-onMounted(async () => {
-  await loadCategorys();
-  // expandAll();
-})
-
 </script>
 
 <style scoped lang="less">

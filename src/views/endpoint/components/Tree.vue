@@ -137,17 +137,14 @@ const treeData: any = computed(() => {
  */
 const ContextMenuList = [
   {
-    key: '1',
     label: '新建子分类',
     action: (_record: any) => newCategorie(_record),
   },
   {
-    key: '2',
     label: '删除分类',
     action: (_record: any) => deleteCategorie(_record),
   },
   {
-    key: '3',
     label: '编辑分类',
     action: (_record: any) => editCategorie(_record),
   }

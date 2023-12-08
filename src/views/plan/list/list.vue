@@ -2,7 +2,12 @@
   <div class="plan-list-main">
     <a-card :bordered="false">
       <template #title>
-        <a-button type="primary" @click="() => create()">新建</a-button>
+        <PermissionButton
+          v-if="hasPermission('')"
+          code="" 
+          type="primary"
+          :text="'新建'"
+          @handle-access="create()" />
       </template>
       <template #extra>
         <a-form :layout="'inline'">
@@ -132,11 +137,12 @@ import { PaginationConfig, Plan } from '../data.d';
 import { StateType } from "../store";
 import { momentUtc } from "@/utils/datetime";
 import { planStatusColorMap, planStatusTextMap, planStatusOptions } from "@/config/constant";
-
+import PermissionButton from '@/components/PermissionButton/index.vue';
 import Select from '@/components/Select/index.vue';
 import { DropdownActionMenu } from "@/components/DropDownMenu";
 import {notifyError} from "@/utils/notify";
 import useSharePage from "@/hooks/share";
+import usePermission from "@/composables/usePermission";
 
 const columns = [
   {
@@ -219,6 +225,8 @@ const dropdownMenuList = [
     auth: '',
   }
 ]
+
+const { hasPermission }  = usePermission();
 const { share } = useSharePage();
 const store = useStore<{ Plan: StateType, ProjectGlobal: ProjectStateType,Project }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);

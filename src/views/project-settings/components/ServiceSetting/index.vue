@@ -129,44 +129,37 @@ const rules = {
 
 const dropMenuList = [
 {
-    key: '1',
     auth: 'ENDPOINT-COPY',
     label: '服务组件',
     action: (record: any) => onOpenComponent(record)
   },
   {
-    key: '2',
     auth: '',
     label: '服务版本',
     action: (record: any) => onOpenVersion(record)
   },
 
   {
-    key: '3',
     auth: '',
     label: 'Security',
     action: (record: any) => onOpenSecurity(record)
   },
   {
-    key: '4',
     auth: '',
     label: '禁用',
     action: (record: any) => onDisabled(record)
   },
   {
-    key: '5',
     auth: '',
     label: '复制',
     action: (record: any) => onCopy(record)
   },
   {
-    key: '6',
     auth: '',
     label: '删除',
     action: (record: any) => onDelete(record)
   },
   {
-    key: '7',
     auth: '',
     label: '查看文档',
     action: (record: any) => goDocs(record)

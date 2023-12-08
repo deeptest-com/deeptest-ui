@@ -15,7 +15,6 @@
                 code="ENDPOINT-ADD"
                 type="primary"
                 :loading="loading"
-                action="create"
                 @handle-access="handleCreateEndPoint"/>
               <DropdownActionMenu :dropdown-list="BulkMenuList">
                 <a-button>批量操作</a-button>
@@ -304,19 +303,16 @@ const columns = [
 // 批量操作下拉菜单
 const BulkMenuList = computed(() => [
   {
-    key: '1',
     label: '导入接口',
     action: (_record: any) => importApi()
   },
   {
-    key: '2',
     label: '查看文档',
     disabled: !hasSelected.value,
     action: (_record: any) => goDocs()
   },
 
   {
-    key: '3',
     label: '发布文档',
     disabled: !hasSelected.value,
     action: (_record: any) => {
@@ -324,7 +320,6 @@ const BulkMenuList = computed(() => [
     }
   },
   {
-    key: '4',
     label: '批量修改',
     disabled: !hasSelected.value,
     action: (_record: any) => batchUpdate()
@@ -333,26 +328,22 @@ const BulkMenuList = computed(() => [
 
 const MenuList = [
   {
-    key: '1',
     auth: 'ENDPOINT-COPY',
     label: '克隆',
     action: (record: any) => clone(record)
   },
   {
-    key: '2',
     auth: '',
     label: '分享链接',
     action: (record: any) => share(record, 'IM')
   },
 
   {
-    key: '3',
     auth: 'ENDPOINT-DELETEE',
     label: '删除',
     action: (record: any) => del(record)
   },
   {
-    key: '4',
     auth: 'ENDPOINT-OUTDATED',
     label: '过期',
     action: (record: any) => disabled(record)

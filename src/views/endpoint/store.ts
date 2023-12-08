@@ -857,7 +857,8 @@ const StoreModel: ModuleType = {
                 ...params
             });
             if (res.code === 0) {
-                await dispatch('loadList', {projectId: params.projectId});
+                return true;
+                // await dispatch('loadList', {projectId: params.projectId});
             } else {
                 return false
             }
