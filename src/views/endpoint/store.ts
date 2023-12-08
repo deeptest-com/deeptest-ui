@@ -330,6 +330,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         listFunctionsByThirdPartyClass: Action<StateType, StateType>;
         importThirdPartyFunctions: Action<StateType, StateType>;
+
+        updateServe: Action<StateType, StateType>;
     }
 }
 
@@ -1555,7 +1557,7 @@ const StoreModel: ModuleType = {
         async batchUpdateField({commit, dispatch}, payload: any) {
             const res = await batchUpdateField(payload);
             if (res.code === 0) {
-                await dispatch('loadList', {projectId: payload.projectId});
+               // await dispatch('loadList', {projectId: payload.projectId});
                 await dispatch('loadCategory');
             } else {
                 return null
@@ -1813,6 +1815,18 @@ const StoreModel: ModuleType = {
                 } 
                 return false;
             } catch(error) {
+                error.msg && message.error(error.msg);
+                return false;
+            }
+        },
+        async updateServe ({state}, payload: any){
+            try {
+                const response = await batchUpdateField(payload);
+                if (response.code === 0) {
+                    return true;
+                } 
+                return false;
+            }catch(error) {
                 error.msg && message.error(error.msg);
                 return false;
             }

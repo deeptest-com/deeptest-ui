@@ -97,7 +97,6 @@ onUnmounted(() => {
   bus.off(settings.eventWebSocketMsg, OnWebSocketMsg);
   bus.off(settings.eventWebSocketConnStatus, onWebSocketConnStatusMsg);
 })
-
 </script>
 
 <style lang="less" scoped>
