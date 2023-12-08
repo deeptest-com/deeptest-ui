@@ -11,7 +11,7 @@
                 :placeholder="'请选择负责人'"
                 :options="userOptions || []"
                 :value="queryParams.adminId || []"
-                :width="'180px'"
+                style="width: 180px;"
                 @change="(e) => {
                  changeAdminId(e);
               }"
@@ -22,7 +22,7 @@
                 :placeholder="'请选择状态'"
                 :options="planStatusOptions || []"
                 :value="queryParams.status || []"
-                :width="'180px'"
+                style="width: 180px;"
                 @change="(e) => {
                  changeStatus(e);
               }"
