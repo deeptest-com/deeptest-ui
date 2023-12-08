@@ -84,7 +84,6 @@ export class WebSocket {
   static async sentMsg(roomName: string, msg: string): Promise<void> {
     console.log(`send msg to room "${roomName}"`)
     roomName = await getToken() || roomName;
-    if (!WebSocket.conn) return
 
     WebSocket.conn.leaveAll().then(() =>
         this.joinRoomAndSend(roomName, msg)

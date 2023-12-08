@@ -83,6 +83,17 @@ export function equalObjectByXpath(obj1: Object, obj2: Object, xpath: Array<stri
 
 
 /**
+ * @description 排除掉一些字段，然后再比较
+ *
+ * */
+function excludeFields(o1, o2, fileds) {
+    fileds.forEach((field:string) => {
+        delete o1?.[field];
+        delete o2?.[field];
+    })
+}
+
+/**
  * @description 传入两个对象，返回两个对象是否相等
  * @param {Object} obj1
  * @param {Object} obj2
@@ -93,13 +104,39 @@ export function equalObjectByLodash(obj1: Object, obj2: Object,): boolean {
     const o1 = cloneByJSON(obj1);
     const o2 = cloneByJSON(obj2);
 
-    // 不需要检测 advancedMockDisabled
-    delete o1?.['advancedMockDisabled'];
-    delete o2?.['advancedMockDisabled'];
+    /**
+     * 接口定义-备选用例-点击保存之后，点击返回仍然会触发提示
+     * [https://leyan.nancalcloud.com/dev/LYAPI/workitem/LYAPI-1255]
+     * 触发根源： debugData: { baseUrl: '', ... }
+     * baseUrl 通过api/v1/debugs/interface/save 接口 仍无法更新。导致页面显示的baseurl与接口返回的不一致。因此出现该问题。
+     * 根据实际场景，baseUrl字段可能 不需要参与到逻辑中，因此 暂时先排除掉该参数
+     */
 
-    // 不需要检测 scriptMockEnabled
-    delete o1?.['scriptMockDisabled'];
-    delete o2?.['scriptMockDisabled'];
+    const fields = [
+        'baseUrl',
+        'title',
+        'advancedMockDisabled',
+        'scriptMockDisabled',
+        'status',
+        'tags',
+        'description',
+        'categoryId',
+        'changedTime',
+        'createdAt',
+        'updatedAt',
+        'snapshot'
+    ]
+
+    //  排除掉一些字段，然后再比较
+    excludeFields(o1, o2, fields);
+
+    //  todo 更新基本信息，会导致内部的接口信息也更新，因此需要排除掉接口信息
+    // o1?.interfaces?.forEach((item, index) => {
+    //     delete item?.updatedAt;
+    // });
+    // o2?.interfaces?.forEach((item, index) => {
+    //     delete item?.updatedAt;
+    // });
 
     // 编辑器会做格式化，所以需要去除空格和换行符
     if (o1?.body && typeof o1.body === 'string') {

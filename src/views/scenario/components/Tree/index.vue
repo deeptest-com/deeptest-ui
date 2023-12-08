@@ -5,7 +5,7 @@
         <a-input-search
             class="search-input"
             v-model:value="searchValue"
-            placeholder="搜索接口分类"/>
+            placeholder="输入关键字过滤"/>
         <div class="add-btn" @click="newCategory(treeDataCategory?.[0])">
           <PlusOutlined style="font-size: 16px;"/>
         </div>
@@ -153,7 +153,7 @@ const treeData: any = computed(() => {
 
 async function loadCategorys() {
   await store.dispatch('Scenario/loadCategory');
-  expandAll();
+  //expandAll();
 }
 
 // 切换项目  重置搜索关键词/重置分类列表
@@ -341,7 +341,7 @@ async function onDrop(info: DropEvent) {
 
 onMounted(async () => {
   await loadCategorys();
-  expandAll();
+  // expandAll();
 })
 
 </script>

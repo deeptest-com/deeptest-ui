@@ -45,17 +45,13 @@ const StoreModel: ModuleType = {
     async fetchServe({ commit }) {
       try {
         const response: ResponseData = await listServe();
-        const { data } = response;
-        let currServe = {};
-        if (data.currServe.id ){
-          currServe = data.currServe
-        }else if (data && data.serves && data.serves.length > 0) {
-          currServe = data.serves[0];
+        const { data, code } = response;
+        if (code === 0) {
+          const payload = { currServe: data.currServe, serves: (data.serves || []).map(e => ({ ...e, value: e.id, label: e.name })) };
+          commit('saveServes', payload);
+          return true;
         }
-        const payload = { currServe, serves: (data && data.serves) || [] };
-        commit('saveServes', payload);
-
-        return true;
+        return false;
       } catch (error) {
         return false;
       }

@@ -28,7 +28,8 @@
       <EndpointBasicInfo
           @changeStatus="changeStatus"
           @change-description="changeDescription"
-          @changeCategory="changeCategory"/>
+          @changeCategory="changeCategory"
+          @changeServe="changeServe"/>
     </template>
     <template #tabHeader>
       <DetailTabHeader :tab-list="EndpointTabsList" :show-btn="true" @change-tab="changeTab" :active-key="activeTabKey">
@@ -270,6 +271,12 @@ async function changeCategory(value) {
   await store.dispatch('Endpoint/loadCategory');
 }
 
+async function changeServe(value:number) {
+  await store.dispatch('Endpoint/updateEndpointDetail',
+      {...endpointDetail.value, serveId:value}
+  );
+  await store.dispatch('Endpoint/getEndpointDetail', {id: endpointDetail.value.id});
+}
 
 const activeTabKey = ref('request');
 
@@ -283,6 +290,7 @@ watch(() => {
     switchToDefineTab()
   }
 }, {immediate: true});
+
 
 
 async function cancel() {
@@ -299,7 +307,6 @@ async function save() {
   );
   store.commit("Global/setSpinning", false)
   notifySuccess('保存成功');
-  emit('refreshList');
   setTimeout(() => {
     store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value));
   }, 200);
@@ -336,6 +343,16 @@ function showDiff(id:number) {
   store.commit('Endpoint/setDiffModalVisible', {endpointId:id,visible:true,projectId:endpointDetail.value.projectId,callPlace:"detail"});
 }
 
+/**
+ * 接口服务变化了，需要同步更新调试数据
+ */
+watch(() => {
+  return endpointDetail.value.serveId
+}, (newVal) => {
+  if (newVal != "") {
+    store.commit('Debug/setDebugData', {...debugData.value,serveId:newVal});
+  }
+}, {immediate: true});
 
 </script>
 

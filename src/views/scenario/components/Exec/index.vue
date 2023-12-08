@@ -9,18 +9,18 @@
     wrapClassName="drawer-exec"
     @close="onClose">
     <div class="scenario-exec-info-main" v-if="execDrawerVisible">
-      <ReportBasicInfo 
+      <ReportBasicInfo
         :items="baseInfoList || []"
         :showBtn="show"
         :btnText="'另存为报告'"
         @handleBtnClick="genReport"/>
       <StatisticTable :data="statisticData" :value="statInfo"/>
-      <Progress 
+      <Progress
         :exec-status="progressStatus"
         :percent="progressValue"
         :key="progressKey"
         @exec-cancel="execCancel" />
-      <LogTreeView 
+      <LogTreeView
         class="scenario-exec-log-tree"
         :treeData="scenarioReports"
         :isSingleScenario="true" />
@@ -57,7 +57,7 @@ import {
   updateStatFromLog
 } from '@/composables/useExecLogs';
 import {momentUtc} from "@/utils/datetime";
-import {CurrentUser} from "@/store/user";
+import {CurrentUser, StateType as UserStateType} from "@/store/user";
 import {notifyError, notifySuccess} from "@/utils/notify";
 
 const props = defineProps<{
@@ -66,7 +66,8 @@ const props = defineProps<{
 
 const emits = defineEmits(['onClose'])
 
-const store = useStore<{ Report: ReportStateType, Scenario: ScenarioStateType, Debug: DebugStateType, Global: GlobalStateType, Exec: ExecStatus, ProjectSetting, Environment,User }>();
+const store = useStore<{ User: UserStateType, Report: ReportStateType, Scenario: ScenarioStateType, Debug: DebugStateType, Global: GlobalStateType, Exec: ExecStatus, ProjectSetting, Environment }>();
+const currUser = computed(() => store.state.User.currentUser);
 const nodeData = computed<any>(() => store.state.Scenario.nodeData);
 const detailResult = computed<any>(() => store.state.Scenario.detailResult);
 const currentUser:any = computed<CurrentUser>(()=> store.state.User.currentUser);
@@ -93,11 +94,13 @@ const baseInfoList = computed(() => {
 
 // 每次重新渲染
 const progressKey = ref(0);
+
 const execStart = async () => {
   resetData();
   progressKey.value += 1;
   const data = {
-    serverUrl: process.env.VUE_APP_API_SERVER, // used by agent to submit result to server
+    userId: currUser.value.id,
+    serverUrl: process.env.VUE_APP_API_SERVER,
     token: await getToken(),
     scenarioId: scenarioId.value,
     environmentId: currEnvId.value,

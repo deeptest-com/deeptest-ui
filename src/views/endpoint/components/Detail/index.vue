@@ -67,6 +67,7 @@ import EndpointDefine from '../Drawer/Define/index.vue';
 import EndpointDebug from '../Drawer/Debug/index.vue';
 import EndpointCases from '../Drawer/Cases/index.vue';
 import EndpointMock from '../Drawer/Mock/index.vue';
+import IconSvg from "@/components/IconSvg";
 import Docs from '@/components/Docs/index.vue';
 import { DetailHeader, DetailLayout, DetailTabHeader } from '@/views/component/DetailLayout';
 import { EndpointTabsList } from '@/config/constant';
@@ -98,7 +99,6 @@ onMounted(async () => {
     /**
      * 单独刷新详情页 需要初始化 用户列表和 serve列表
      */
-    await store.dispatch("ServeGlobal/fetchServe");
     await store.dispatch('Project/getUserList');
     await store.dispatch('Endpoint/loadCategory');
     await store.commit("Global/setSpinning", false);

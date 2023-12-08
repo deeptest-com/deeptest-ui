@@ -3,6 +3,7 @@ import settings from "@/config/settings";
 import debounce from "lodash.debounce";
 import {defaultPathParams, requestMethodOpts} from "@/config/constant";
 import {cloneByJSON} from "@/utils/object";
+import {ResultStatus} from "@/utils/enum";
 
 export function resizeWidth(mainId: string, leftId: string, splitterId: string, rightId: string,
                             leftMin: number, rightMin: number): boolean {
@@ -104,17 +105,17 @@ export const resizeHandler = debounce(() => {
     bus.emit(settings.eventEditorAction, {act: settings.eventTypeContainerHeightChanged})
 }, 50);
 
-export function hasClass( elements, cName ){
+export function hasClass( elements:any, cName:any ){
     if (!elements) return false
     return !!elements.className.match( new RegExp( "(\\s|^)" + cName + "(\\s|$)") )
 }
-export function addClass(elements, cName){
+export function addClass(elements:any, cName:any){
     if (!elements) return
     if( !hasClass( elements,cName ) ){
         elements.className += " " + cName
     }
 }
-export function removeClass( elements, cName ){
+export function removeClass( elements:any, cName:any ){
     if (!elements) return
     if( hasClass( elements,cName ) ){
         elements.className = elements.className.replace( new RegExp( "(\\s|^)" + cName + "(\\s|$)" ), " " )
@@ -153,19 +154,6 @@ export function formatXml(xml: any) : string {
 
         return PADDING.repeat(pad - indent) + node;
     }).join('\r\n');
-}
-
-export function getResultCls (result) {
-    if (!result) return 'dp-color-unknown'
-
-    result = result.toLowerCase()
-    if (result === 'pass') {
-        return 'dp-color-pass'
-    } else if (result === 'fail') {
-        return 'dp-color-fail'
-    } else {
-        return 'dp-color-unknown'
-    }
 }
 
 export function getContextMenuStyle (x, y, height) {
@@ -229,7 +217,7 @@ function getRightTabTop() {
     return 100
 }
 
-export const getMethodColor = (method, disabled) => {
+export const getMethodColor = (method, disabled?: any) => {
     if (disabled) {
         return 'default'
     }
@@ -318,4 +306,21 @@ export function getFileName(path) {
     const name = path.substring(index + 1)
 
     return name
+}
+
+export function getDpResultClass (result) {
+    if (!result) return 'dp-color-unknown'
+
+    result = result.toLowerCase()
+    if (result === 'pass') {
+        return 'dp-color-pass'
+    } else if (result === 'fail') {
+        return 'dp-color-fail'
+    } else {
+        return 'dp-color-unknown'
+    }
+}
+export function getResultClass (resultStatus) {
+    return resultStatus===ResultStatus.Pass? 'pass':
+        resultStatus===ResultStatus.Fail ? 'fail' : ''
 }

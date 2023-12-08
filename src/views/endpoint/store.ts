@@ -1,5 +1,6 @@
 import {Mutation, Action} from 'vuex';
 import cloneDeep from "lodash/cloneDeep";
+import {message} from "ant-design-vue";
 import {StoreModuleType} from "@/utils/store";
 import {ResponseData} from '@/utils/request';
 import {
@@ -51,6 +52,7 @@ import {
     generateSchemaByResponse,
     loadAlternativeCase,
     loadAlternativeCaseSaved,
+    saveAlternativeFactor,
     saveAlternativeCase,
     queryEndpointCase,
     listAlternativeCaseAssertion,
@@ -58,9 +60,15 @@ import {
     disableAlternativeCaseAssertion,
     removeAlternativeCaseAssertion,
     moveAlternativeCaseAssertion,
-    updateName,
+    updateName, createBenchmarkCase, 
+    listForBenchMark,
+    loadAlternativeCaseFactor,
+    resetPostConditions,
+    resetPreConditions,
     getEndpointDiff,
-    saveEndpointDiff
+    saveEndpointDiff,
+    listFunctionsByThirdPartyClass,
+    importThirdPartyFunctions
 } from './service';
 
 import {
@@ -142,13 +150,20 @@ export interface StateType {
     alternativeCasesSaved:any;
     alternativeCaseAssertions: any[];
     activeAlternativeCaseAssertion:any;
+    alternativeCaseFactor: any;
+    alternativeTreeData: any;
+    alternativeExecStatusMap: any;
+    alternativeExecResults: any;
     // 记录接口定义是否有变更
     isDefineChange: boolean;
+
+    benchMarkList: any[];
     // mock表达式是否有变更
     isMockChange: boolean;
     //diff弹框信息
     diffModalVisible:any;
-
+    //diff弹框信息
+    thirdFunctionList: any;
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -207,13 +222,19 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setBaseCaseId:Mutation<StateType>;
         setAlternativeCases:Mutation<StateType>;
+        setAlternativeTreeData: Mutation<StateType>;
         setAlternativeCasesSaved:Mutation<StateType>;
         setAlternativeCaseAssertions:Mutation<StateType>;
         setActiveAlternativeCaseAssertion:Mutation<StateType>;
+        setAlternativeCaseFactor: Mutation<StateType>;
+        setAlternativeExecStatusMap: Mutation<StateType>;
+        setAlternativeExecResults: Mutation<StateType>;
 
         setIsDefineChange:Mutation<StateType>;
+        setBenchMarkList: Mutation<StateType>;
         setIsMockChange:Mutation<StateType>;
         setDiffModalVisible:Mutation<StateType>;
+        setListFunctionsByClass: Mutation<StateType>;
     };
     actions: {
         listEndpoint: Action<StateType, StateType>;
@@ -289,15 +310,28 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         loadAlternativeCase: Action<StateType, StateType>;
         loadAlternativeCaseSaved: Action<StateType, StateType>;
+        createBenchmarkCase: Action<StateType, StateType>;
+        saveAlternativeFactor: Action<StateType, StateType>;
         saveAlternativeCase: Action<StateType, StateType>;
         listAlternativeCaseAssertion: Action<StateType, StateType>;
-        createAlternativeCaseAssertion: Action<StateType, StateType>;
+        createBenchmarkCaseAssertion: Action<StateType, StateType>;
         saveAlternativeCaseAssertion: Action<StateType, StateType>;
         removeAlternativeCaseAssertion: Action<StateType, StateType>;
         disableAlternativeCaseAssertion: Action<StateType, StateType>;
         moveAlternativeCaseAssertion: Action<StateType, StateType>;
+        loadAlternativeFactor: Action<StateType, StateType>;
+
+        listForBenchMark: Action<StateType, StateType>;
+        resetPostConditions: Action<StateType, StateType>;
+        resetPreConditions: Action<StateType, StateType>;
+
         getEndPointDiff: Action<StateType, StateType>;
         saveEndPointDiff: Action<StateType, StateType>;
+
+        listFunctionsByThirdPartyClass: Action<StateType, StateType>;
+        importThirdPartyFunctions: Action<StateType, StateType>;
+
+        updateServe: Action<StateType, StateType>;
     }
 }
 
@@ -325,7 +359,7 @@ const initState: StateType = {
         "title": null,
         categoryId: null,
         tagNames: [],
-        serveId:null,
+        serveIds: [],
     },
     endpointDetail: null,
     srcEndpointDetail: null,
@@ -375,10 +409,17 @@ const initState: StateType = {
     alternativeCasesSaved: [],
     alternativeCaseAssertions: [],
     activeAlternativeCaseAssertion: {},
+    alternativeCaseFactor: {},
+    alternativeTreeData: {},
+    alternativeExecResults: [],
+    alternativeExecStatusMap: [],
 
     isDefineChange: false,
+
+    benchMarkList: [],
     isMockChange: false,
     diffModalVisible: {},
+    thirdFunctionList: [],
 };
 
 const StoreModel: ModuleType = {
@@ -425,12 +466,18 @@ const StoreModel: ModuleType = {
             state.filterState.createUser = payload.createUser || null;
             state.filterState.title = payload.title || null ;
             state.filterState.categoryId = payload.categoryId || null ;
+            state.filterState.serveIds = payload.serveIds || [];
+            state.filterState.tagNames = payload.tagNames || [];
         },
         clearFilterState(state) {
-            state.filterState.status = null;
-            state.filterState.createUser = null;
-            state.filterState.title =null ;
-            state.filterState.categoryId =null ;
+            state.filterState = {
+                status: null,
+                createUser: null,
+                title: null,
+                tagNames: [],
+                categoryId: null,
+                serveIds: [],
+            }
         },
         setEndpointDetail(state, payload) {
             state.endpointDetail = payload;
@@ -571,6 +618,9 @@ const StoreModel: ModuleType = {
         setAlternativeCases(state, payload){
             state.alternativeCases = payload
         },
+        setAlternativeTreeData(state, payload) {
+            state.alternativeTreeData = payload;
+        },
         setAlternativeCasesSaved(state, payload){
             state.alternativeCasesSaved = payload
         },
@@ -584,8 +634,21 @@ const StoreModel: ModuleType = {
                 state.activeAlternativeCaseAssertion = payload;
             }
         },
+        setAlternativeCaseFactor(state, payload) {
+            state.alternativeCaseFactor = payload;
+        },
+
         setIsDefineChange(state, payload){
             state.isDefineChange = payload
+        },
+        setBenchMarkList(state, payload) {
+            state.benchMarkList = payload;
+        },
+        setAlternativeExecResults(state, payload) {
+            state.alternativeExecResults = payload;
+        },
+        setAlternativeExecStatusMap(state, payload) {
+            state.alternativeExecStatusMap = payload;
         },
         setIsMockChange(state, payload){
             state.isMockChange = payload
@@ -593,6 +656,10 @@ const StoreModel: ModuleType = {
         setDiffModalVisible(state, payload){
             state.diffModalVisible = payload
         },
+
+        setListFunctionsByClass(state, payload) {
+            state.thirdFunctionList = payload;
+        }
     },
     actions: {
         async listEndpoint({commit, dispatch, state}, params: QueryParams) {
@@ -707,7 +774,6 @@ const StoreModel: ModuleType = {
             try {
                 await removeCategory(payload.id, payload.type);
                 await dispatch('loadCategory');
-                await dispatch('loadList', {projectId: payload.projectId});
                 return true;
             } catch (error) {
                 return false;
@@ -747,12 +813,11 @@ const StoreModel: ModuleType = {
                 return false
             }
         },
-        async loadList({commit, state, rootState}: any, {projectId, page, pageSize, ...opts}: any) {
+        async loadList({commit, state}: any, {projectId, page, pageSize, ...opts}: any) {
             page = page || state.listResult.pagination.current;
             pageSize = pageSize || state.listResult.pagination.pageSize;
             const otherParams = {
                 ...state.filterState,
-                serveId: rootState.ServeGlobal.currServe.id,
                 ...opts
             };
 
@@ -846,7 +911,7 @@ const StoreModel: ModuleType = {
                         })
                     })
                 }catch (e){
-                    console.error(e)
+                    console.log(e)
                 }
 
                 await commit('setEndpointDetail', res.data || null);
@@ -874,7 +939,7 @@ const StoreModel: ModuleType = {
                 await dispatch("getEndpointDetail", {id: payload.id})
                 await dispatch('loadList', {projectId: payload.projectId});
             }catch (e){
-                console.error(e)
+                console.log(e)
             }
 
             // debugger
@@ -1059,8 +1124,8 @@ const StoreModel: ModuleType = {
                 } else {
                     result = null;
                 }
-            } catch (e) {
-                console.log(e)
+            } catch (e: any) {
+                e.msg && message.error(e.msg);
             }
             return result;
         },
@@ -1068,7 +1133,7 @@ const StoreModel: ModuleType = {
         async getEndpointList({ commit }, payload: any) {
             const resp = await getEndpointList(payload)
             if (resp.code === 0) {
-                commit('setEndpointCaseDetail', resp.data);
+                // commit('setEndpointCaseDetail', resp.data);
             } else {
                 return false
             }
@@ -1423,12 +1488,12 @@ const StoreModel: ModuleType = {
 
                 const response: ResponseData = await queryEndpointCase(params);
                 if (response.code != 0) return false;
-
+                
                 const data = response.data;
 
                 commit('setEndpointCaseList', {
                     ...initState.listResult,
-                    list: data.result || [],
+                    list: (data.result || []).map(e => ({ ...e, children: e.children?.length > 0 ? e.children : null })),
                     pagination: {
                         ...initState.listResult.pagination,
                         current: params.page,
@@ -1446,7 +1511,7 @@ const StoreModel: ModuleType = {
             const resp: ResponseData = await getEndpointCase(id);
 
             if (resp.code === 0) {
-                commit('setEndpointCaseDetail', resp.data);
+                commit('setEndpointCaseDetail', { ...resp.data, id });
                 return true;
             } else {
                 return false
@@ -1455,7 +1520,6 @@ const StoreModel: ModuleType = {
         async saveCase({state, dispatch}, payload: any) {
             const jsn = await saveEndpointCase(payload)
             if (jsn.code === 0) {
-                dispatch('listCase', state.caseQueryParams);
                 return true;
             } else {
                 return false
@@ -1493,7 +1557,7 @@ const StoreModel: ModuleType = {
         async batchUpdateField({commit, dispatch}, payload: any) {
             const res = await batchUpdateField(payload);
             if (res.code === 0) {
-                await dispatch('loadList', {projectId: payload.projectId});
+               // await dispatch('loadList', {projectId: payload.projectId});
                 await dispatch('loadCategory');
             } else {
                 return null
@@ -1509,18 +1573,17 @@ const StoreModel: ModuleType = {
             }
         },
 
-        async loadAlternativeCase({commit, state, dispatch }, baseId: number) {
-            commit('setBaseCaseId', baseId);
-
-            const jsn = await loadAlternativeCase(baseId)
+        async loadAlternativeCase({commit}, payload) {
+            const jsn = await loadAlternativeCase(payload)
             if (jsn.code === 0) {
-                commit('setAlternativeCases', jsn.data.children);
+                commit('setAlternativeCases', jsn.data.children || []);
+                commit('setAlternativeTreeData', jsn.data);
                 return true;
             } else {
                 return false
             }
         },
-        async loadAlternativeCaseSaved({ commit, state, dispatch }, baseId: number) {
+        async loadAlternativeCaseSaved({ commit, state }, baseId: number) {
             const jsn = await loadAlternativeCaseSaved(baseId)
             if (jsn.code === 0) {
                 state.alternativeCasesSaved = jsn.data
@@ -1530,6 +1593,46 @@ const StoreModel: ModuleType = {
                 return false
             }
         },
+        async createBenchmarkCase({ commit }, payload: any) {
+            try {
+                const jsn = await createBenchmarkCase(payload)
+                if (jsn.code === 0) {
+                    return jsn.data;
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch(err) {
+                return Promise.reject(err);
+            }
+        },
+
+        async saveAlternativeFactor({ commit, state, dispatch }, data: any) {
+            try {
+                const jsn = await saveAlternativeFactor(data)
+                if (jsn.code === 0) {
+                    return jsn.data;
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch(err) {
+                return Promise.reject(err);
+            }
+        },
+
+        async loadAlternativeFactor({ commit }, data: any) {
+            try {
+                const jsn = await loadAlternativeCaseFactor(data)
+                if (jsn.code === 0) {
+                    commit('setAlternativeCaseFactor', jsn.data);
+                    return true;
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch(err) {
+                return Promise.reject(err);
+            }
+        },
+
         async saveAlternativeCase({ commit, state, dispatch }, data: any) {
             const jsn = await saveAlternativeCase(data)
             if (jsn.code === 0) {
@@ -1551,7 +1654,7 @@ const StoreModel: ModuleType = {
                 return false
             }
         },
-        async createAlternativeCaseAssertion({commit, dispatch, state}, payload: any) {
+        async createBenchmarkCaseAssertion({commit, dispatch, state}, payload: any) {
             try {
                 payload.alternativeCaseId = state.baseCaseId
                 await saveAlternativeCaseAssertion(payload);
@@ -1604,6 +1707,69 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
+
+        /**
+         * 自动生成用例中  可选的 用例列表 【其中仅包含 caseType = default 类型的用例】
+         * @param param0 store context
+         * @param payload request params
+         * @returns 
+         */
+        async listForBenchMark({ commit }, payload: any) {
+            try {
+                const jsn = await listForBenchMark(payload);
+                if (jsn.code === 0) {
+                    commit('setBenchMarkList', (jsn.data || []).map(e => ({ value: e.id, label: e.name })));
+                    return true;
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch (error) {
+                return Promise.reject(error);
+            }
+        },
+
+        /**
+         * 备选用例- 用例因子 恢复默认【针对 后置处理，断言】
+         * @returns 
+         */
+        async resetPostConditions({ rootState }: any, payload: any) {
+            try {
+                const jsn = await resetPostConditions({ 
+                    ...payload, 
+                    endpointInterfaceId: rootState.Debug.debugData.endpointInterfaceId, 
+                    debugInterfaceId: rootState.Debug.debugInfo.debugInterfaceId 
+                });
+                if (jsn.code === 0) {
+                    return Promise.resolve();
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch (error) {
+                return Promise.reject(error);
+            }
+        },
+
+        /**
+         * 备选用例- 用例因子 恢复默认【针对 预处理】
+         * @returns 
+         */
+        async resetPreConditions({ rootState }: any, payload: any) {
+            try {
+                const jsn = await resetPreConditions({
+                    ...payload, 
+                    endpointInterfaceId: rootState.Debug.debugData.endpointInterfaceId, 
+                    debugInterfaceId: rootState.Debug.debugInfo.debugInterfaceId 
+                });
+                if (jsn.code === 0) {
+                    return Promise.resolve();
+                } else {
+                    return Promise.reject(jsn);
+                }
+            } catch (error) {
+                return Promise.reject(error);
+            }
+        },
+
         async getEndPointDiff({commit, dispatch, state}, payload: any) {
             const res = await getEndpointDiff(payload)
             if (res.code === 0) {
@@ -1622,6 +1788,49 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
+
+        async listFunctionsByThirdPartyClass({commit}, payload: any) {
+            try {
+                const response: any = await listFunctionsByThirdPartyClass(payload);
+                if (response.code === 0) {
+                    commit('setListFunctionsByClass', response.data.map(e => ({
+                        value: e.code,
+                        label: e.code
+                    })));
+                    return true;
+                }
+                return false;
+            } catch(error: any) {
+                commit('setListFunctionsByClass',[]);
+                error.msg && message.error(error.msg);
+                return false;
+            }
+        },
+            
+        async importThirdPartyFunctions(_store, payload: any) {
+            try {
+                const response: any = await importThirdPartyFunctions(payload);
+                if (response.code === 0) {
+                    return true;
+                } 
+                return false;
+            } catch(error) {
+                error.msg && message.error(error.msg);
+                return false;
+            }
+        },
+        async updateServe ({state}, payload: any){
+            try {
+                const response = await batchUpdateField(payload);
+                if (response.code === 0) {
+                    return true;
+                } 
+                return false;
+            }catch(error) {
+                error.msg && message.error(error.msg);
+                return false;
+            }
+        }
     },
 };
 

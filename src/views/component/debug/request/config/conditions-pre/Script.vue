@@ -24,6 +24,9 @@
 
             <div @click="addSnippet('datapool_get')" class="dp-link-primary">获取数据池变量</div>
             <div @click="addSnippet('log')" class="dp-link-primary">打印日志</div>
+
+            <div @click="addSnippet('send_request_get')" class="dp-link-primary">发送GET请求</div>
+            <div @click="addSnippet('send_request_post')" class="dp-link-primary">发送POST请求</div>
           </div>
 
           <div class="title">
@@ -47,11 +50,10 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, inject, onBeforeUnmount, onMounted, reactive, ref, watch} from "vue";
-import {message, Form, notification} from 'ant-design-vue';
+import {computed, inject, onBeforeUnmount, onMounted, ref, watch, defineProps} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import {UsedBy} from "@/utils/enum";
+import cloneDeep from "lodash/cloneDeep";
 
 import {StateType as Debug} from "@/views/component/debug/store";
 import {StateType as Snippet} from "@/store/snippet";
@@ -63,10 +65,16 @@ import settings from "@/config/settings";
 import Tips from "@/components/Tips/index.vue";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import {StateType as ProjectStateType} from "@/store/project";
-import cloneDeep from "lodash/cloneDeep";
 
-const useForm = Form.useForm;
-const usedBy = inject('usedBy') as UsedBy
+const props = defineProps({
+  fullScreen: {
+    type: Boolean,
+    default: false,
+    required: false,
+  }
+})
+
+const isForBenchmarkCase = inject('isForBenchmarkCase', false);
 const {t} = useI18n();
 
 const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet: Snippet }>();
@@ -74,7 +82,9 @@ const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet:
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
-const scriptData = computed<any>(() => store.state.Debug.scriptData);
+const scriptData = computed<any>(() => {
+  return isForBenchmarkCase ? store.state.Debug.benchMarkCase.scriptData : store.state.Debug.scriptData
+});
 const jslibNames = computed<any>(() => store.state.Snippet.jslibNames);
 
 store.dispatch('Snippet/listJslibNames')
@@ -86,25 +96,23 @@ watch(scriptData, (newVal) => {
 }, {immediate: true, deep: true})
 
 const editorOptions = ref(Object.assign({
-      usedWith: 'request',
-      initTsModules: true,
-
-      allowNonTsExtensions: true,
-      minimap: {
-        enabled: false
-      },
-    }, MonacoOptions
+  usedWith: 'request',
+  initTsModules: true,
+  allowNonTsExtensions: true,
+  minimap: {
+    enabled: false
+  },
+}, MonacoOptions
 ))
 const getPreConditionScript = () => {
   console.log('getPreConditionScript')
-  store.dispatch('Debug/getPreConditionScript')
+  store.dispatch('Debug/getPreConditionScript', { isForBenchmarkCase });
 }
 const addSnippet = (snippetName) => {
   console.log('addSnippet', snippetName)
-  store.dispatch('Debug/addSnippet', snippetName)
+  store.dispatch('Debug/addSnippet', { name: snippetName, isForBenchmarkCase })
 }
 const editorChange = (newScriptCode) => {
-  console.log('editorChange')
   scriptData.value.content = newScriptCode;
 }
 
@@ -146,10 +154,8 @@ onMounted(() => {
 onBeforeUnmount( () => {
   console.log('onBeforeUnmount')
   bus.off(settings.eventPreConditionSave, save);
+  bus.off(settings.eventConditionSave, save);
 })
-
-const labelCol = { span: 0 }
-const wrapperCol = { span: 24 }
 
 </script>
 
@@ -170,7 +176,8 @@ const wrapperCol = { span: 24 }
     }
 
     .codes {
-      flex: 1;
+      // flex: 1;
+      width: calc(100% - 260px);
     }
     .refer {
       width: 260px;

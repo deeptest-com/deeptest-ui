@@ -28,7 +28,21 @@ import {
     deleteServeVersion,
     disableServeVersions,
     sortEnv, listDatapool, saveDatapool, deleteDatapool, disableDatapool, getDatapool,
-    saveSwaggerSync, getSwaggerSync, saveMock, getMock
+    saveSwaggerSync, getSwaggerSync, saveMock, getMock,
+
+    deleteJslib,
+    disableJslib,
+    getJslib,
+    listJslib,
+    saveJslib,
+    updateJslibName,
+
+    deleteDbConn,
+    disableDbConn,
+    getDbConn,
+    listDbConn,
+    saveDbConn,
+    updateDbConnName
 } from './service';
 import {message, notification} from 'ant-design-vue';
 import {
@@ -53,7 +67,6 @@ import {
 import {disabledStatus, disabledStatusTagColor, serveStatus, serveStatusTagColor} from '@/config/constant';
 import { momentUtc } from '@/utils/datetime';
 import {notifyError, notifySuccess} from "@/utils/notify";
-import {deleteJslib, disableJslib, getJslib, listJslib, saveJslib, updateJsLibName} from "@/views/sys-settings/service";
 
 export interface StateType {
     envList: any;
@@ -75,6 +88,9 @@ export interface StateType {
 
     jslibModels: any[];
     jslibModel: any;
+
+    dbConnModels: any[];
+    dbConnModel: any;
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -100,6 +116,9 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setJslibs: Mutation<StateType>,
         setJslib: Mutation<StateType>,
+
+        setDbConns: Mutation<StateType>,
+        setDbConn: Mutation<StateType>,
     };
     actions: {
         // 环境-全局变量-全局参数相关
@@ -164,9 +183,16 @@ export interface ModuleType extends StoreModuleType<StateType> {
         listJslib: Action<StateType, StateType>,
         getJslib: Action<StateType, StateType>,
         saveJslib: Action<StateType, StateType>,
-        updateJsLibName: Action<StateType, StateType>,
+        updateJslibName: Action<StateType, StateType>,
         deleteJslib: Action<StateType, StateType>,
         disableJslib: Action<StateType, StateType>,
+
+        listDbConn: Action<StateType, StateType>,
+        getDbConn: Action<StateType, StateType>,
+        saveDbConn: Action<StateType, StateType>,
+        updateDbConnName: Action<StateType, StateType>,
+        deleteDbConn: Action<StateType, StateType>,
+        disableDbConn: Action<StateType, StateType>,
     }
 }
 
@@ -203,6 +229,9 @@ const initState: StateType = {
 
     jslibModels: [],
     jslibModel: {},
+
+    dbConnModels: [],
+    dbConnModel: {},
 };
 
 const StoreModel: ModuleType = {
@@ -263,6 +292,13 @@ const StoreModel: ModuleType = {
         },
         setJslib(state, payload) {
             state.jslibModel = payload;
+        },
+
+        setDbConns(state, payload) {
+            state.dbConnModels = payload;
+        },
+        setDbConn(state, payload) {
+            state.dbConnModel = payload;
         },
     },
     actions: {
@@ -442,8 +478,8 @@ const StoreModel: ModuleType = {
             const res = await getUserList();
             if (res.code === 0) {
                 res.data.result.forEach((item) => {
-                    item.label = item.username;
-                    item.value = item.username
+                    item.label = item.name;
+                    item.value = item.username;
                 })
                 commit('setUserList', res.data.result);
             }
@@ -514,7 +550,7 @@ const StoreModel: ModuleType = {
             const res = await deleteSchema(id);
             if (res.code === 0) {
                 notifySuccess('删除成功');
-                await dispatch('getSchemaList', { serveId, name });
+                //await dispatch('getSchemaList', { serveId, name });
             } else {
                 notifyError('删除失败');
             }
@@ -627,9 +663,10 @@ const StoreModel: ModuleType = {
             commit('setEnvDetail', envData || initEnvData);
         },
         addEnvServe({ commit, state }, serveData: any) {
-            const newEnvDetail = JSON.parse(JSON.stringify(state.activeEnvDetail));
-            newEnvDetail.serveServers.push(serveData);
-            commit('setEnvDetail', newEnvDetail);
+            commit('setEnvDetail', {
+                ...state.activeEnvDetail,
+                serveServers: [...state.activeEnvDetail.serveServers, ...serveData],
+            });
         },
         addEnvVar({ commit, state }, varData: any) {
             const newEnvDetail = JSON.parse(JSON.stringify(state.activeEnvDetail));
@@ -771,8 +808,8 @@ const StoreModel: ModuleType = {
             }
             return res.msgKey
         },
-        async updateJsLibName({ dispatch }, data) {
-            const res = await updateJsLibName(data);
+        async updateJslibName({ dispatch }, data) {
+            const res = await updateJslibName(data);
 
             if (res.code === 0) {
                 dispatch('listJslib')
@@ -794,6 +831,64 @@ const StoreModel: ModuleType = {
             const res = await disableJslib(id);
             if (res.code === 0) {
                 dispatch('listJslib')
+            } else {
+                notifyError('删除自定义脚本库失败');
+            }
+        },
+
+        async listDbConn({ commit }, params) {
+            const res = await listDbConn(params)
+            if (res.code === 0) {
+                commit('setDbConns', res.data);
+                return true;
+            } else {
+                return false;
+            }
+        },
+        async getDbConn({ commit, dispatch }, id: number) {
+            const res = await getDbConn(id);
+            if (res.code === 0) {
+                commit('setDbConn', res.data);
+            } else {
+                notifyError(`获取自定义脚本库失败`);
+            }
+        },
+        async saveDbConn({ dispatch }, data) {
+            console.log('888')
+            const res = await saveDbConn(data);
+            console.log('999')
+
+            if (res.code === 0) {
+                notifySuccess('保存成功');
+                dispatch('listDbConn')
+            } else {
+                notifyError(res.msg);
+            }
+            return res.msgKey
+        },
+        async updateDbConnName({ dispatch }, data) {
+            const res = await updateDbConnName(data);
+
+            if (res.code === 0) {
+                dispatch('listDbConn')
+            } else {
+                notifyError('修改自定义脚本库名称失败');
+            }
+            return res.msgKey
+        },
+        async deleteDbConn({ dispatch }, id) {
+            const res = await deleteDbConn(id);
+            if (res.code === 0) {
+                notifySuccess('删除自定义脚本库成功');
+                dispatch('listDbConn')
+            } else {
+                notifyError('删除自定义脚本库失败');
+            }
+        },
+        async disableDbConn({ dispatch }, id) {
+            const res = await disableDbConn(id);
+            if (res.code === 0) {
+                dispatch('listDbConn')
             } else {
                 notifyError('删除自定义脚本库失败');
             }

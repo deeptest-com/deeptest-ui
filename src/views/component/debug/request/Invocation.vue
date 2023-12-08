@@ -15,18 +15,22 @@
         </a-select>
       </div>
       <div id="env-selector">
-        <EnvSelector :show="showBaseUrl()" :server-id="serverId" :serveId="debugData.serveId" @change="changeServer" :disabled="usedBy === UsedBy.ScenarioDebug" />
+        <EnvSelector :show="showBaseUrl()" :serveId="debugData.serveId" @change="changeServer" :disabled="usedBy === UsedBy.ScenarioDebug" />
       </div>
       <div v-if="showBaseUrl()" class="base-url">
         <a-input placeholder="请输入地址"
-                 v-model:value="debugData.baseUrl"
+                 :value="currServe.url || ''"
                  :disabled="baseUrlDisabled" />
       </div>
 
       <div class="url"
            :class="[isPathValid  ? '' :  'dp-field-error' ]">
-        <a-tooltip placement="bottom" :visible="!isPathValid"  overlayClassName="dp-tip-small" :title="'请输入合法的路径,以http(s)开头'">
-          <a-input placeholder="请输入路径"
+        <a-tooltip 
+          :overlayClassName="getOverlayClassName()" 
+          placement="bottom" 
+          :visible="!isPathValid"
+          :title="'请输入合法的路径,以http(s)开头'">
+          <a-input placeholder="请输入http(s)://开头的地址"
                    v-model:value="debugData.url"
                    @change="pathUpdated"
                    :disabled="urlDisabled"
@@ -34,7 +38,7 @@
         </a-tooltip>
       </div>
 
-      <div class="send">
+      <div class="send" v-if="showOperation">
         <a-button type="primary" trigger="click"
                   @click="confirmSend"
                   :disabled="!isPathValid">
@@ -42,7 +46,7 @@
         </a-button>
       </div>
 
-      <div class="save">
+      <div class="save" v-if="showOperation">
         <a-button trigger="click" class="dp-bg-light"
                   @click="save"
                   :disabled="!isPathValid || (!isDebugChange && checkDataChange)">
@@ -51,14 +55,14 @@
         </a-button>
       </div>
 
-      <div v-if="usedBy === UsedBy.InterfaceDebug"
+      <div v-if="usedBy === UsedBy.InterfaceDebug && showOperation"
            :disabled="!isPathValid"
            class="save-as-case">
         <a-button trigger="click" @click="saveAsCase" class="dp-bg-light">
           另存为用例
         </a-button>
       </div>
-      <div v-if="isShowSync"
+      <div v-if="isShowSync && showOperation"
            :disabled="!isPathValid"
            class="sync">
         <a-button trigger="click" @click="sync" class="dp-bg-light">
@@ -111,18 +115,17 @@ const {
   debugChangePreScript,
   debugChangePostScript,
   debugChangeCheckpoint} = useIMLeaveTip();
-const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal }>();
-const debugData = computed<any>(() => store.state.Debug.debugData);
-
-const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
-const servers = computed<any[]>(() => store.state.Debug.serves);
-const currService = computed(() => store.state.ServeGlobal.currServe);
+const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal, User }>();
+const currUser = computed(() => store.state.User.currentUser);
 const currServe = computed(() => store.state.Debug.currServe);
+const debugData = computed<any>(() => store.state.Debug.debugData);
+const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
+const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 
 const props = defineProps({
   onSave: {
     type: Function as PropType<(data) => void>,
-    required: true
+    required: false
   },
   onSaveAsCase: {
     type: Function,
@@ -147,6 +150,11 @@ const props = defineProps({
     type: Boolean,
     required: false,
     default: false
+  },
+  showOperation: {
+    type: Boolean,
+    required: false,
+    default: true,
   },
   checkDataChange: {
     type: Boolean,
@@ -178,11 +186,15 @@ const isShowSync = computed(() => {
   return ret
 })
 
+const getOverlayClassName = () => {
+  return `${usedBy === UsedBy.DiagnoseDebug ? 'dp-field-error-tooltip' : ''} dp-tip-small`
+}
+
 watch(debugData, (newVal) => {
   if (usedBy === UsedBy.InterfaceDebug || usedBy === UsedBy.CaseDebug) {
     debugData.value.url = debugData?.value.url || endpointDetail.value?.path || ''
   }
-  debugData.value.baseUrl = currServe.value.url;
+    // debugData.value.baseUrl = currServe.value.url;
   //debugData.value.serveId = currServe.value.serveId;
 }, {immediate: true, deep: true});
 
@@ -195,17 +207,21 @@ function changeServer(id) {
 }
 
 
-
 const send = async (e) => {
   const data = prepareDataForRequest(debugData.value)
   console.log('sendRequest', data);
 
   if (validateInfo()) {
     store.commit("Global/setSpinning",true)
+
+    data.environmentId = environmentId.value
     const callData = {
-      serverUrl: process.env.VUE_APP_API_SERVER, // used by agent to submit result to server
+      serverUrl: process.env.VUE_APP_API_SERVER,
       token: await getToken(),
-      data: data
+      data: {
+        ...data,
+        baseUrl: currServe.value.url,
+      }
     }
     await store.dispatch('Debug/call', callData).finally(()=>{
       store.commit("Global/setSpinning",false)
@@ -235,7 +251,7 @@ const save = (e) => {
 
 
   if (validateInfo()) {
-     props.onSave(data)
+    props.onSave && props.onSave(data)
   }
 
   bus.emit(settings.eventConditionSave, {});
@@ -306,28 +322,6 @@ function validatePath() {
 
   return isMatch
 }
-
-
-watch(() => {
-  return currServe.value;
-}, val => {
-  debugData.value.baseUrl = val.url;
-  debugData.value.serveId = val.serveId;
-}, {
-  immediate: true,
-})
-
-
-watch(() => {
-  return debugData.value.serveId;
-}, async (val) => {
-  if (val) {
-    await store.dispatch('Debug/listServes', {serveId: val});
-  }
-}, {
-  immediate: true
-})
-
 
 onMounted(() => {
   // 离开前保存数据

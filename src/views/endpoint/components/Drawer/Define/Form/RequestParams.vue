@@ -91,6 +91,7 @@
             <div class="header-defined header-defined-items">
               <div v-for="(item,index) in selectedMethodDetail.headers" :key="item.id">
                 <RequestHeader
+                    :serveId="endpointDetail.serveId"
                     :fieldData="{...item,index:index}"
                     :showRequire="true"
                     @del="deleteParams('headers',index)"
@@ -103,6 +104,7 @@
             <div class="header-defined ">
               <div v-for="(item,index) in selectedMethodDetail.params" :key="item.id">
                 <Field
+                    :serveId="endpointDetail.serveId"
                     :fieldData="{...item,index:index}"
                     :showRequire="true"
                     @del="deleteParams('params',index)"
@@ -115,6 +117,7 @@
             <div class="header-defined ">
               <div v-for="(item,index) in selectedMethodDetail.cookies" :key="item.id">
                 <Field
+                    :serveId="endpointDetail.serveId"
                     :fieldData="{...item,index:index}"
                     :showRequire="true"
                     @del="deleteParams('cookies',index)"

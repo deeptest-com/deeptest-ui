@@ -94,10 +94,12 @@ import Log from "./Log.vue"
 import { momentShort } from "@/utils/datetime";
 import {useI18n} from "vue-i18n";
 import {getToken} from "@/utils/localToken";
+import {StateType as UserStateType} from "@/store/user";
 const { t } = useI18n();
 
 const router = useRouter();
-const store = useStore<{ Plan: PlanStateType, Global: GlobalStateType, Exec: ExecStatus; }>();
+const store = useStore<{ User: UserStateType, Plan: PlanStateType, Global: GlobalStateType, Exec: ExecStatus; }>();
+const currUser = computed(() => store.state.User.currentUser);
 const collapsed = computed<boolean>(()=> store.state.Global.collapsed);
 
 const planId = ref(+router.currentRoute.value.params.id)
@@ -109,7 +111,8 @@ const execStart = async () => {
   logTreeData.value = []
 
   const data = {
-    serverUrl: process.env.VUE_APP_API_SERVER, // used by agent to submit result to server
+    userId: currUser.value.id,
+    serverUrl: process.env.VUE_APP_API_SERVER,
     token: await getToken(),
     planId: planId.value,
   }

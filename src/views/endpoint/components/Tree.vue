@@ -102,12 +102,6 @@ const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
 const treeDataMapCategory = computed<any>(() => store.state.Endpoint.treeDataMapCategory);
 const createTagModalVisible = ref(false);
-const props = defineProps({
-  serveId: {
-    required: false,
-    type: Number || String,
-  },
-})
 const searchValue = ref('');
 const expandedKeys = ref<number[]>([]);
 const autoExpandParent = ref<boolean>(false);
@@ -172,8 +166,8 @@ onMounted(async () => {
 
 async function loadCategories() {
   await store.dispatch('Endpoint/loadCategory');
-  expandAll();
-  await nextTick();
+ // expandAll();
+  // await nextTick();
 }
 
 watch(() => {
@@ -251,7 +245,9 @@ async function deleteCategorie(node) {
         projectId: await getCache(settings.currProjectId)
       });
       if (res) {
-        emit('select', node.parentId);//选中删除分类的父类
+        const isRoot = node.parentId === (treeDataCategory?.value || [])?.[0]?.id;
+        selectedKeys.value = isRoot ? [] : [node.parentId];
+        emit('select', isRoot ? null : node.parentId);//选中删除分类的父类
         notifySuccess('删除成功');
       } else {
         notifyError('删除失败');
@@ -306,7 +302,6 @@ async function handleTagModalOk(obj) {
       "targetId": obj.id,
       type: "endpoint",
       "projectId": currProject.value.id,
-      "serveId": props.serveId || null, // 仅在接口管理模块下有
     });
     if (res?.code === 0) {
       createTagModalVisible.value = false;
@@ -340,7 +335,8 @@ async function onDrop(info: DropEvent) {
     "currProjectId": currProject.value.id,
     "dragKey": dragKey, // 移动谁
     "dropKey": dropKey,  // 移动那儿
-    "dropPos": dropPosition // 0 表示移动到目标节点的子节点，-1 表示移动到目标节点的前面， 1表示移动到目标节点的后面
+    "dropPos": dropPosition, // 0 表示移动到目标节点的子节点，-1 表示移动到目标节点的前面， 1表示移动到目标节点的后面
+    "type": 'endpoint',
   });
   if (res) {
     // 移动到目标节点的子节点，则需要展开目标节点

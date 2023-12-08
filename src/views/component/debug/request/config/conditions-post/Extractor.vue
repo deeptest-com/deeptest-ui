@@ -13,6 +13,7 @@
       <!-- for body -->
       <a-form-item v-if="model.src === 'body'" label="提取方法" v-bind="validateInfos.type" required>
         <a-select v-model:value="model.type"
+                  @change="changeType"
                   @blur="validate('type', { trigger: 'change' }).catch(() => {})">
           <a-select-option v-for="(item, idx) in typeOptions" :key="idx" :value="item.value">
             {{ t(item.label) }}
@@ -44,7 +45,7 @@
       </template>
 
       <a-form-item v-if="model.src === 'body' && model.type !== 'boundary'"
-                   :label="model.type==='regx'?'表达式':'XPath'" v-bind="validateInfos.expression" required>
+                   :label="model.type==='regx' ? '表达式': (model.type==='jsonpath' ? t('jsonpath') : 'XPath')" v-bind="validateInfos.expression" required>
         <a-input v-model:value="model.expression"
                  @blur="validate('expression', { trigger: 'blur' }).catch(() => {})"/>
       </a-form-item>
@@ -63,7 +64,7 @@
               选择变量
             </a-select-option>
 
-            <a-select-option v-for="(item, idx) in debugData.shareVars"
+            <a-select-option v-for="(item, idx) in debugData.envDataToView?.shareVars"
                              :key="idx"
                              :value="item.id + '-' + item.name">
               {{ item.name }}
@@ -113,6 +114,7 @@ import {notifyError, notifySuccess} from "@/utils/notify";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
+const isForBenchmarkCase = inject('isForBenchmarkCase');
 const {t} = useI18n();
 const props = defineProps({
   condition: {
@@ -138,14 +140,8 @@ const boundaryEndRequired = [{required: true, message: '请输入边界结束字
 
 const {postConditionsDataObj} = useIMLeaveTip();
 const model = computed<any>(() => {
-  return postConditionsDataObj.value?.[props?.condition?.entityId] || {}
+  return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
 });
-
-onMounted(() => {
-  if(!model?.value?.id){
-    load();
-  }
-})
 
 const isInit = ref(true)
 const rules = computed(() => { return {
@@ -167,18 +163,18 @@ const rules = computed(() => { return {
 
 
 watch(model, (newVal) => {
-  if (!isInit.value) return
+      if (!isInit.value) return
 
-  isInit.value = false
+      isInit.value = false
 
-  if (responseData.value.contentLang === 'json') {
-    model.value.type = ExtractorType.jsonquery
-  } else if (responseData.value.contentLang === 'xml') {
-    model.value.type = ExtractorType.xmlquery
-  } else if (responseData.value.contentLang === 'html') {
-    model.value.type = ExtractorType.htmlquery
-  }
-  }, {immediate: true, deep: true}
+      if (responseData.value.contentLang === 'json') {
+        model.value.type = ExtractorType.jsonquery
+      } else if (responseData.value.contentLang === 'xml') {
+        model.value.type = ExtractorType.xmlquery
+      } else if (responseData.value.contentLang === 'html') {
+        model.value.type = ExtractorType.htmlquery
+      }
+    }, {immediate: true, deep: true}
 )
 
 const types = getEnumSelectItems(CheckpointType)
@@ -187,16 +183,22 @@ const srcOptions = getEnumSelectItems(ExtractorSrc)
 const typeOptions = getEnumSelectItems(ExtractorType)
 
 const load = () => {
-  console.log('load', props.condition)
-  store.dispatch('Debug/getExtractor', props.condition.entityId)
+  console.log('load extractor', props.condition)
+  store.dispatch('Debug/getExtractor', props.condition)
 }
 
-
+watch(() => props.condition, (newVal) => {
+      load()
+    }, {immediate: true, deep: true}
+)
 
 let {resetFields, validate, validateInfos} = useForm(model, rules);
 
-const save = () => {
-  console.log('save')
+const save = (item) => {
+  if (item && item.entityId !== model.value.id) {
+    return;
+  }
+  console.log('save', model.value, item);
   validate().then(() => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
@@ -224,9 +226,18 @@ const cancel = () => {
   }
 }
 
+const changeType = () => {
+  console.log('changeType')
+  model.value.expression = ''
+}
+
 onMounted(() => {
   console.log('onMounted')
   bus.on(settings.eventConditionSave, save);
+
+  if(!model?.value?.id){
+    load();
+  }
 })
 onBeforeUnmount( () => {
   console.log('onBeforeUnmount')
@@ -244,8 +255,8 @@ const onVarChanged = (e) => {
   }
 
   let found = false
-  for (let i in debugData.value.shareVars) {
-    const item = debugData.value.shareVars[i]
+  for (let i in debugData.value.envDataToView.shareVars) {
+    const item = debugData.value.envDataToView.shareVars[i]
 
     if (value === item.name) {
       model.value.code = item.id + '-' + item.name

@@ -8,25 +8,7 @@
     </a-col>
     <a-col :span="17">
       <div class="path-param-header">
-        <a-input class="path-param-header-input" :value="endpointDetail.path" @change="updatePath" placeholder="请输入路径">
-          <!---
-          <template #addonBefore>
-            <a-select
-                :options="serveServers"
-                :value="currentServerId || null"
-                @change="changeServer"
-                @focus="getServeServers"
-                placeholder="请选择环境"
-                class="select-env">
-              <template #notFoundContent>
-                <a-button type="link" @click="addEnv" class="add-env-btn">新建环境</a-button>
-              </template>
-            </a-select>
-          
-            <span v-if="currentEnvURL" class="current-env-url">{{ currentEnvURL || '---' }}</span>
-          </template>
-            -->
-        </a-input>
+        <a-input class="path-param-header-input" :value="endpointDetail.path" @change="updatePath" placeholder="请输入路径" />
         <a-button @click="addPathParams" class="path-param-header-btn">
           <template #icon>
             <PlusOutlined/>
@@ -76,15 +58,15 @@ const store = useStore<{ Endpoint, Debug, ProjectGlobal, User,ServeGlobal }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const currentUser: any = computed<Endpoint>(() => store.state.User.currentUser);
 
-const serveServers: any = computed<any>(() => store.state.Debug.serves);
+const environmentsFromServers: any = computed<any>(() => store.state.Debug.environmentsFromServers);
 
 const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 const currentServerId = computed(() => store.state.Debug.currServe.environmentId || null );
-const currentEnvURL = computed(() => {
-  return serveServers.value?.find((item) => {
-    return currentServerId.value === item.id;
-  })?.url
-});
+// const currentEnvURL = computed(() => {
+//   return environmentsFromServers.value?.find((item) => {
+//     return currentServerId.value === item.id;
+//   })?.url
+// });
 
 // 是否折叠,默认展开
 const collapse = ref(true);
@@ -96,20 +78,6 @@ async function changeServer(val) {
     ...endpointDetail.value,
   })
 }
-
-async function getServeServers() {
-    await store.dispatch('Debug/listServes', {
-      serveId: currServe.value.id,
-    })
-}
-
-/*
-onMounted(async () => {
-  await store.dispatch('Debug/listServes', {
-    serveId: currServe.value.id,
-  })
-})
-*/
 
 /**
  * 添加路径参数

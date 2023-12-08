@@ -36,6 +36,14 @@
         <permission :roles="routeItem.roles">
           <router-view></router-view>
         </permission>
+
+<!--        <div style="position: fixed; right: 16px; bottom: -16px; z-index: 999999;">
+          <div @click="sendMsg" class="dp-link-primary">Open Record Window</div>
+          <br />
+          <div id="deeptest-event-node" style="word-wrap: break-word;"
+               @deeptest-event-from-chrome-ext="onChromeExtEvent"></div>
+        </div>-->
+
       </div>
     </div>
   </div>
@@ -65,6 +73,8 @@ import Left from '@/layouts/IndexLayout/components/Left.vue';
 import RightTop from '@/layouts/IndexLayout/components/RightTop.vue';
 import RightTopSettings from '@/layouts/IndexLayout/components/RightTopSettings.vue';
 import {useWujie} from "@/composables/useWujie";
+import {ScopeDeeptest} from "@/utils/const";
+
 export default defineComponent({
   name: 'IndexLayout',
   components: {
@@ -79,6 +89,7 @@ export default defineComponent({
     const route = useRoute();
     const router = useRouter();
     const path: any = router.currentRoute.value.path;
+
 
     const version = ref('')
 
@@ -100,7 +111,7 @@ export default defineComponent({
     const menuData: RoutesDataItem[] = vueRoutes(IndexLayoutRoutes);
 
     // 当前路由 item
-    const routeItem = computed<RoutesDataItem>(() => getRouteItem(route.path, menuData));
+    const routeItem = computed<RoutesDataItem>(() => getRouteItem(route, menuData));
 
     // 有权限的菜单
     const permissionMenuData = computed<RoutesDataItem[]>(() => getPermissionMenuData(store.state.User.currentUser.sysRoles, menuData));
@@ -158,6 +169,20 @@ export default defineComponent({
 
     const isWorkSpacePage =  path.includes('/workspace');
 
+    const sendMsg = () => {
+      console.log('sendMsg')
+      const data = {
+        scope: ScopeDeeptest,
+        content: {
+          act: 'recordStart'
+        }
+      }
+
+      window.postMessage(data, '*')
+    }
+    const onChromeExtEvent =() => {
+      console.log('onChromeExtEvent')
+    }
 
     return {
       collapsed,
@@ -175,7 +200,9 @@ export default defineComponent({
       routeItem,
       isWujieEnv,
       isWorkSpacePage,
-      RightTopSettings
+      RightTopSettings,
+      sendMsg,
+      onChromeExtEvent,
     }
   }
 })
@@ -211,6 +238,15 @@ export default defineComponent({
       }
       &.workspace-main{
         padding: 0;
+      padding: 16px;
+      }
+
+      .hide-btn {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        width: 20px;
+        height: 20px;
       }
     }
   }

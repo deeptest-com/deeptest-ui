@@ -149,7 +149,7 @@ const errorHandler = (axiosResponse: AxiosResponse) => {
             resultMsg: axiosResponse.data.msg
         } as ResultErr
 
-        bus.emit(settings.eventNotify, result)
+        bus.emit('eventNotify', result)
 
         const {config, data} = axiosResponse;
         const {url, baseURL} = config;

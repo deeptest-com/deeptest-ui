@@ -85,14 +85,14 @@ const onCancel = () => {
   max-height: 500px;
 
   .left {
-    width: 260px;
+    width: 240px;
     overflow: hidden;
     height: 500px;
+    margin-right: 16px;
   }
 
   .right {
     flex: 1;
-    margin-left: 16px;
   }
 }
 </style>

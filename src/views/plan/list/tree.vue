@@ -5,7 +5,7 @@
         <a-input-search
             class="search-input"
             v-model:value="searchValue"
-            placeholder="搜索接口分类"/>
+            placeholder="输入关键字过滤"/>
         <div class="add-btn" @click="newCategorie(treeDataCategory?.[0])">
           <PlusOutlined style="font-size: 16px;"/>
         </div>
@@ -155,7 +155,7 @@ const treeData: any = computed(() => {
 
 async function loadCategories() {
   await store.dispatch('Plan/loadCategory');
-  expandAll();
+  //expandAll();
 }
 
 watch(() => {
@@ -336,7 +336,7 @@ async function onDrop(info: DropEvent) {
 
 onMounted(async () => {
   await loadCategories();
-  expandAll();
+  // expandAll();
 })
 
 </script>

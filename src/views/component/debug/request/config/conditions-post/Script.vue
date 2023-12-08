@@ -2,13 +2,17 @@
   <div class="post-script-main">
     <div class="content">
       <div class="codes">
-        <MonacoEditor theme="vs" language="typescript"
-                      v-if="model?.id"
-                      class="editor"
-                      :value="model.content"
-                      :options="editorOptions"
-                      :timestamp="timestamp"
-                      @change="editorChange" />
+        <MonacoEditor
+          ref="monacoEditor"
+          v-if="model?.id"
+          :customId="`post-script-${condition.entityId}`"
+          theme="vs"
+          language="typescript"
+          class="editor"
+          :value="model.content"
+          :options="editorOptions"
+          :timestamp="timestamp"
+          @change="editorChange" />
       </div>
 
       <div class="refer">
@@ -23,9 +27,17 @@
           <div @click="addSnippet('datapool_get')" class="dp-link-primary">获取数据池变量</div>
 
           <div @click="addSnippet('log')" class="dp-link-primary">打印日志</div>
+
+          <div @click="addSnippet('send_request_get')" class="dp-link-primary">发送GET请求</div>
+          <div @click="addSnippet('send_request_post')" class="dp-link-primary">发送POST请求</div>
+
           <div @click="addSnippet('set_mock_resp_code')" class="dp-link-primary">设置响应码</div>
           <div @click="addSnippet('set_mock_resp_field')" class="dp-link-primary">修改JSON响应对象</div>
           <div @click="addSnippet('set_mock_resp_text')" class="dp-link-primary">修改字符串响应内容</div>
+
+          <div @click="addSnippet('assert_resp_status_Code')" class="dp-link-primary">断言响应状态码为200</div>
+          <div @click="addSnippet('assert_resp_json_field')" class="dp-link-primary">断言JSON响应字段取值</div>
+          <div @click="addSnippet('assert_resp_content_contain')" class="dp-link-primary">断言HTML响应内容包含</div>
         </div>
 
         <div class="title">
@@ -69,14 +81,14 @@ import cloneDeep from "lodash/cloneDeep";
 
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
+const isForBenchmarkCase = inject('isForBenchmarkCase');
 const {t} = useI18n();
 const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet: Snippet }>();
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 
-
-const {postConditionsDataObj,debugData,debugInfo} = useIMLeaveTip();
+const {postConditionsDataObj, debugData, debugInfo} = useIMLeaveTip();
 const model = computed<any>(() => {
-  return postConditionsDataObj.value?.[props?.condition?.entityId] || {}
+  return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
 });
 
 onMounted(() => {
@@ -85,6 +97,7 @@ onMounted(() => {
   }
 })
 const jslibNames = computed<any>(() => store.state.Snippet.jslibNames);
+const monacoEditor = ref();
 
 const props = defineProps({
   condition: {
@@ -99,10 +112,9 @@ const props = defineProps({
 
 const load = () => {
   console.log('load script ...', props.condition)
-  store.dispatch('Debug/getScript', props.condition.entityId)
-  store.dispatch('Snippet/listJslibNames');
+  store.dispatch('Debug/getScript', props.condition)
+  store.dispatch('Snippet/listJslibNames')
 }
-
 
 const timestamp = ref('')
 
@@ -123,7 +135,7 @@ const editorOptions = ref(Object.assign({
 const addSnippet = (snippetName) => {
   store.dispatch('Debug/addSnippetForPost', {
     name:snippetName,
-    data:model
+    data:model,
   })
 }
 const editorChange = (newScriptCode) => {
@@ -139,28 +151,30 @@ const rules = reactive({
 
 let { resetFields, validate, validateInfos } = useForm(model, rules);
 
-const save = () => {
+const save = (item) => {
+  if (item && item.entityId !==  model.value.id) {
+    return;
+  }
+  console.log('save', model.value)
+  // validate().then(() => {
+  const data = cloneDeep(model.value);
+  data.debugInterfaceId = debugInfo.value.debugInterfaceId
+  data.endpointInterfaceId = debugInfo.value.endpointInterfaceId
+  data.projectId = debugData.value.projectId
 
-    console.log('save', model.value)
-    // validate().then(() => {
-      const data = cloneDeep(model.value);
-      data.debugInterfaceId = debugInfo.value.debugInterfaceId
-      data.endpointInterfaceId = debugInfo.value.endpointInterfaceId
-      data.projectId = debugData.value.projectId
-
-      store.dispatch('Debug/saveScript', data).then((result) => {
-        if (result) {
-          notifySuccess(`保存成功`);
-          if (props.finish) {
-            props.finish()
-          }
-          // 重新拉取一下最新的数据
-          load();
-        } else {
-          notifyError(`保存失败`);
-        }
-      })
-    // })
+  store.dispatch('Debug/saveScript', data).then((result) => {
+    if (result) {
+      notifySuccess(`保存成功`);
+      if (props.finish) {
+        props.finish()
+      }
+      // 重新拉取一下最新的数据
+      load();
+    } else {
+      notifyError(`保存失败`);
+    }
+  })
+  // })
 }
 
 const cancel = () => {
@@ -171,6 +185,14 @@ const cancel = () => {
 
 onMounted(() => {
   bus.on(settings.eventConditionSave, save);
+  bus.on(settings.paneResizeTop, () => {
+    monacoEditor.value?.resizeIt({
+        act: 'heightChanged',
+        container: 'codes',
+        id: `post-script-${props.condition.entityId}`,
+        mixedHeight: 1,
+      })
+    })
 })
 onBeforeUnmount( () => {
   bus.off(settings.eventConditionSave, save);
@@ -190,39 +212,23 @@ const wrapperCol = { span: 24 }
 
   .content {
     display: flex;
-    height: calc(100% - 32px);
+    height: calc(100% - 10px);
 
-    &>div {
-      height: 100%;
-    }
     .codes {
       flex: 1;
-      height: 100%;
-      min-height: 160px;
-
-      .editor {
-        height: 100%;
-        min-height: 160px;
-      }
     }
 
     .refer {
       width: 260px;
+      height: 100%;
       padding: 10px;
       overflow-y: auto;
 
       .title {
         margin-top: 12px;
       }
-      .desc {
-
-      }
     }
   }
-  .footer {
-
-  }
-
 
 }
 </style>
