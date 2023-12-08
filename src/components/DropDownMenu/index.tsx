@@ -1,9 +1,9 @@
-import { PropType, defineComponent, VNode, toRefs, computed } from "vue";
-import { useStore } from "vuex";
-import { PermissionButtonType } from "@/types/permission";
+import { PropType, defineComponent, toRefs } from "vue";
 import "./index.less";
 import { MoreOutlined } from "@ant-design/icons-vue";
 import { MenuItem, Recordable } from "./type";
+import usePermission from "@/composables/usePermission";
+
 
 /**
  * props定义
@@ -42,25 +42,19 @@ const MenuItem = defineComponent({
     },
     record: {
       type: Object,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
+      required: false,
     }
   },
   setup(props, ctx) {
-    const store = useStore();
-    const permissionButtonMap = computed(() => {
-      return store.state.Global.permissionButtonMap;
-    });
-
-    const hasPermission = computed(() => {
-      if (!props.auth) {
-        return true;
-      }
-      return permissionButtonMap.value[PermissionButtonType[`${props.auth}`]];
-    });
-
     const defaultTip = '暂无权限，请联系管理员';
 
-    const handleClick = e => {
-      if (!hasPermission.value) {
+    const handleClick = (_e?: any) => {
+      if (props.disabled) {
+        _e.preventDefault();
         return;
       }
       props.action?.(props.record);
@@ -68,10 +62,9 @@ const MenuItem = defineComponent({
 
     return () => {
       return (
-        <a-menu-item class={{ 'lyapi-drop-menu-item': true, 'has-no-permission': !hasPermission.value }} onClick={e => handleClick(e)}>
-          <a-tooltip title={hasPermission.value ? null : (props.tip || defaultTip)} color="#1677ff">
-            {props.label}
-          </a-tooltip>
+        <a-menu-item class={{ 'lyapi-drop-menu-item': true, 'has-no-permission': props.disabled }} onClick={e => handleClick(e)}>
+          
+          <span>{props.label}</span> 
         </a-menu-item>
       )
     }
@@ -150,7 +143,7 @@ export const DropdownActionMenu = defineComponent({
   props: DropdownMenuProps,
   setup(props, { slots }) {
     const { dropdownList, actionList, record } = toRefs(props);
-
+    const { hasPermission }  = usePermission();
     
     return () => {
       return (
@@ -162,7 +155,10 @@ export const DropdownActionMenu = defineComponent({
             <a-divider type="vertical" />
           )} */}
           {dropdownList.value.length > 0 && (
-            <DropdownList list={dropdownList.value.filter(e => ifShow(e, props))} record={record.value} v-slots={slots} />
+            <DropdownList 
+              list={dropdownList.value.filter(e => hasPermission(e.auth || '') && ifShow(e, props))} 
+              record={record.value} 
+              v-slots={slots} />
           )}
         </div>
       )

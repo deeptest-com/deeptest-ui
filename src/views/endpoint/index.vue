@@ -9,38 +9,17 @@
           <div class="top-action">
             <div class="top-action-left">
               <PermissionButton
-                  class="action-new"
-                  text="新建接口"
-                  code="ENDPOINT-ADD"
-                  type="primary"
-                  :loading="loading"
-                  action="create"
-                  @handle-access="handleCreateEndPoint"/>
-              <a-dropdown :trigger="['hover']" :placement="'bottomLeft'">
-                <a class="ant-dropdown-link" @click.prevent>
-                  <a-button>批量操作</a-button>
-                </a>
-                <template #overlay>
-                  <a-menu style="margin-top: 8px;">
-                    <a-menu-item key="0">
-                      <a-button type="link" :size="'small'" href="javascript:void (0)" @click="importApi">导入接口
-                      </a-button>
-                    </a-menu-item>
-                    <a-menu-item key="2">
-                      <a-button :disabled="!hasSelected" :size="'small'" type="link" @click="goDocs">查看文档</a-button>
-                    </a-menu-item>
-                    <a-menu-item key="3">
-                      <a-button :disabled="!hasSelected" :size="'small'" type="link"
-                                @click="showPublishDocsModal = true">发布文档
-                      </a-button>
-                    </a-menu-item>
-                    <a-menu-item key="4">
-                      <a-button :disabled="!hasSelected" type="link" :size="'small'" @click="batchUpdate">批量修改
-                      </a-button>
-                    </a-menu-item>
-                  </a-menu>
-                </template>
-              </a-dropdown>
+                v-if="hasPermission('ENDPOINT-ADD')"
+                class="action-new"
+                text="新建接口"
+                code="ENDPOINT-ADD"
+                type="primary"
+                :loading="loading"
+                action="create"
+                @handle-access="handleCreateEndPoint"/>
+              <DropdownActionMenu :dropdown-list="BulkMenuList">
+                <a-button>批量操作</a-button>
+              </DropdownActionMenu>  
             </div>
             <div class="top-search-filter">
               <TableFilter @filter="handleTableFilter" ref="filter"/>
@@ -235,8 +214,9 @@ import settings from "@/config/settings";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import Diff from "./components/Drawer/Define/Diff/index.vue";
 import {ChangedStatus,SourceType} from "@/utils/enum";
+import usePermission from '@/composables/usePermission';
 
-
+const { hasPermission } = usePermission();
 const {share} = useSharePage();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -320,6 +300,37 @@ const columns = [
     slots: {customRender: 'action'},
   },
 ];
+
+// 批量操作下拉菜单
+const BulkMenuList = computed(() => [
+  {
+    key: '1',
+    label: '导入接口',
+    action: (_record: any) => importApi()
+  },
+  {
+    key: '2',
+    label: '查看文档',
+    disabled: !hasSelected.value,
+    action: (_record: any) => goDocs()
+  },
+
+  {
+    key: '3',
+    label: '发布文档',
+    disabled: !hasSelected.value,
+    action: (_record: any) => {
+      showPublishDocsModal.value = true
+    }
+  },
+  {
+    key: '4',
+    label: '批量修改',
+    disabled: !hasSelected.value,
+    action: (_record: any) => batchUpdate()
+  },
+]);
+
 const MenuList = [
   {
     key: '1',
@@ -346,7 +357,7 @@ const MenuList = [
     label: '过期',
     action: (record: any) => disabled(record)
   },
-]
+];
 
 const selectedRowKeys = ref<Key[]>([]);
 
@@ -830,14 +841,14 @@ function showDiff(id: number) {
   box-sizing: border-box;
   overflow: hidden;
 
-  .ant-btn {
-    margin-right: 16px;
-  }
-
   .top-action-left {
     min-width: 220px;
     display: flex;
     align-items: center;
+
+    :deep(.action-new) {
+      margin-right: 8px;
+    }
   }
 }
 

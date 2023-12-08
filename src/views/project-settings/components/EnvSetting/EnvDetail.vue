@@ -54,7 +54,9 @@
                 <PermissionButton
                     class="envDetail-btn"
                     code="ADD-ENVIRONMENT-VARIABLE"
+                    :disabled="isMockEnv ? true : false"
                     text="添加"
+                    :tip="isMockEnv ? 'Mock环境为系统生成，不可编辑' : ''"
                     @handle-access="addVar">
                     <template #before>
                         <PlusOutlined />
@@ -103,7 +105,7 @@
                 </a-table>
             </div>
         </div>
-        <div class="envDetail-footer">
+        <div class="envDetail-footer" v-if="!isMockEnv">
             <PermissionButton
                 class="save-btn"
                 code="SAVE-ENVIRONMENT"
@@ -219,9 +221,11 @@ function handleAddServiceOk() {
     }
 }
 
-.envDetail-btn {
-    margin-top: 16px;
-    margin-bottom: 16px;
+.serveServers {
+    :deep(.envDetail-btn) {
+        margin-top: 16px;
+        margin-bottom: 16px;
+    }
 }
 
 .envDetail-footer {
@@ -233,7 +237,7 @@ function handleAddServiceOk() {
     margin-top: 60px;
     box-shadow: 0px -1px 0px rgba(0, 0, 0, 0.06);
 
-    .save-btn {
+    :deep(.save-btn) {
         margin-right: 16px;
     }
 }
