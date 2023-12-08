@@ -56,7 +56,7 @@
           </a-form-item>
 
           <a-form-item label="密码" v-bind="validateInfos.password">
-            <a-input v-model:value="model.password" />
+            <a-input-password v-model:value="model.password" />
           </a-form-item>
 
           <a-form-item label="描述">

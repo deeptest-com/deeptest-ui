@@ -15,6 +15,7 @@
         :percent="progressValue"
         :key="progressKey"
         @exec-cancel="execCancel" />
+
       <LogTreeView
         class="scenario-exec-log-tree"
         :treeData="reports || []" />
@@ -77,7 +78,7 @@ const execCancel = () => {
 }
 
 const onClose = () => {
-  execStop();
+  execCancel();
   emits('close');
 };
 

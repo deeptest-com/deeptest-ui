@@ -5,7 +5,7 @@
         <a-input-search
             class="search-input"
             v-model:value="searchValue"
-            placeholder="搜索接口分类"/>
+            placeholder="输入关键字过滤"/>
         <div class="add-btn" @click="newCategory(treeDataCategory?.[0])">
           <PlusOutlined style="font-size: 16px;"/>
         </div>
