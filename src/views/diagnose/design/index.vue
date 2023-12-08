@@ -61,7 +61,6 @@ provide('usedBy', UsedBy.DiagnoseDebug)
 
 const store = useStore<{ Debug: Debug, DiagnoseInterface: DiagnoseInterfaceStateType, ProjectGlobal: ProjectStateType, ServeGlobal: ServeStateType,Global }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
-const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 
 const interfaceId = computed<any>(() => store.state.DiagnoseInterface.interfaceId);

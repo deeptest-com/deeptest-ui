@@ -52,9 +52,9 @@
           </a-row>
           <RequestParams/>
           <!-- 增加请求体 -->
-          <RequestBody v-if="showRequestBody"/>
+          <RequestBody v-if="showRequestBody" :serveId="endpointDetail.serveId"/>
           <!-- 响应定义  -->
-          <Response/>
+          <Response :serveId="endpointDetail.serveId"/>
         </div>
         <div class="no-defined" v-else>
           <a-button type="primary" @click="addEndpoint">

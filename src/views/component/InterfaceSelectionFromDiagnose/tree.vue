@@ -84,7 +84,6 @@ import {getMethodColor} from "@/utils/dom";
 
 const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType, ProjectGlobal: ProjectStateType, ServeGlobal: ServeStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
-const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 
 //const treeData = computed<any>(() => store.state.DiagnoseInterface.treeData);
 const treeData = computed<any[]>(() => {
@@ -146,8 +145,8 @@ const expandedKeys = ref<number[]>([]);
 const autoExpandParent = ref<boolean>(false);
 
 async function loadTreeData() {
-  if (currProject?.value?.id > 0 && currServe?.value?.id > 0) {
-    await store.dispatch('DiagnoseInterface/loadTree', {projectId: currProject.value.id, serveId: currServe.value.id});
+  if (currProject?.value?.id > 0) {
+    await store.dispatch('DiagnoseInterface/loadTree', {projectId: currProject.value.id});
     expandAll();
   }
 }

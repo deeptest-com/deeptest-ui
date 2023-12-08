@@ -265,20 +265,29 @@ const getMultiExecReport = computed(() => {
 });
 
 const queryMultiDetail = () => {
-  // const reportInfo = reportTreeData.value[0]?.logs[0];
-  // Object.assign(currRespDetail, {
-  //   reqContent: JSON.parse(reportInfo.reqContent || '{}') ,
-  //   resContent: JSON.parse(reportInfo.respContent || '{}') ,
-  //   invokeId: reportInfo.response.invokeId
-  // });
-  // logResponseDetailVisible.value = true;
   execDrawerVisible.value = true;
 }
 
+const findAllDeptParentNode = (parentUuid: string, list: any[], result: any[]) => {
+  for(let value of list) {
+    if (value.caseUuid === parentUuid) {
+      result.push(value.caseUuid);
+      if (value.category !== 'category' && value.parentUuid) {
+        findAllDeptParentNode(value.parentUuid, reportTreeData.value[0].logs, result);
+      }
+    } else {
+      if (value.logs && value.logs.length > 0) {
+        findAllDeptParentNode(parentUuid, value.logs, result);
+      }
+    }
+  }
+ }
+
 const queryDetail = (reportInfo?: any) => {
   const category = reportTreeData.value[0].logs;
-  const selectedCategory = category.find(e => e.logs.some(param => param.caseUuid === reportInfo.parentUuid));
-  execSelectedKeys.value = [reportInfo.caseUuid, reportInfo.parentUuid, selectedCategory.caseUuid];
+  const result = [reportInfo.caseUuid];
+  findAllDeptParentNode(reportInfo.parentUuid, category, result);
+  execSelectedKeys.value = result;
   execDrawerVisible.value = true;
 }
 
