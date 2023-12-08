@@ -396,10 +396,9 @@ function selectMenu(menuInfo, treeNode) {
   const targetProcessorId = targetModelId
   const targetProcessorCategory = treeDataMap.value[targetModelId].entityCategory
   const targetProcessorType = treeDataMap.value[targetModelId].entityType
+
   addNode(mode, processorCategory, processorType,
       targetProcessorCategory, targetProcessorType, targetProcessorId);
-
-
 }
 
 /**
