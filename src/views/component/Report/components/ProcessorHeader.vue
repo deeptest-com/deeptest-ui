@@ -3,7 +3,7 @@
     <div class="left">
       <!-- ::::通用的场景图标 和 场景名称 -->
       <IconSvg :type="DESIGN_TYPE_ICON_MAP[record.processorType]" class="processor-icon-svg"/>
-      <TooltipCell :text="name" :maxWidth="120" :customClass="record.processorType" />
+      <TooltipCell :text="name" :customClass="record.processorType" />
     </div>
 
     <div class="summary">
