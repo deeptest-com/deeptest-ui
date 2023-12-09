@@ -198,7 +198,8 @@ export function prepareDataForRequest(sourceData: any) {
         })
     }
 
-    data.body = data.body.replaceAll('\n', '').replaceAll(' ', '')
+    //后端处理删除换行符和多余空格，删除掉
+    //data.body = data.body.replaceAll('\n', '').replaceAll(' ', '')
 
     return data
 }
