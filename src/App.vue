@@ -22,6 +22,7 @@ import {Cache_Key_Agent_Local_Port, Cache_Key_Server_Url} from "@/utils/const";
 import {useRoute, useRouter} from "vue-router";
 import {useWujie} from "@/composables/useWujie";
 import fixMonacoEditor from "@/utils/fixMonacoEditor";
+import {WebSocket} from "@/services/websocket";
 fixMonacoEditor();
 export default defineComponent({
   name: 'App',
@@ -74,8 +75,11 @@ export default defineComponent({
 
     onMounted(() => {
       setHtmlLang(locale.value);
+
       //  监听父应用传递过来的消息
       if(isWujieEnv){
+        //
+        WebSocket.init(true);
         bus?.$on('sendMsgToLeyanAPI', (msg: any) => {
           // console.log('832msg', msg)
           if (msg?.type === 'changeRouter') {

@@ -64,6 +64,7 @@ export class WebSocket {
   }
 
   static joinRoomAndSend(roomName: string, msg: string): void {
+    // debugger;
     if (WebSocket.conn && WebSocket.conn.room(roomName)) {
       WebSocket.conn.room(roomName).emit('OnChat', msg)
       return
@@ -85,7 +86,7 @@ export class WebSocket {
     console.log(`send msg to room "${roomName}"`)
     roomName = await getToken() || roomName;
 
-    WebSocket.conn.leaveAll().then(() =>
+    WebSocket?.conn?.leaveAll().then(() =>
         this.joinRoomAndSend(roomName, msg)
     )
   }
@@ -96,6 +97,7 @@ export async function getWebSocketApi() {
   // const loc = window.location
   // console.log(`${isProd}, ${loc.toString()}`)
 
+  // debugger;
   // const apiHost = process.env.VUE_APP_API_AGENT ? process.env.VUE_APP_API_AGENT : ''
   const apiHost = await getAgentUrl();
   const url = apiHost.replace('http', 'ws') + '/ws'
