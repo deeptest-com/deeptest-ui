@@ -5,7 +5,7 @@
 /**
  * 循环相关的迭代器
  * */
-export const loopIteratorTypes = ['processor_loop_time', 'processor_loop_in', 'processor_loop_until', 'processor_loop_range', 'processor_loop_variable', 'processor_data_default'];
+export const loopIteratorTypes = ['processor_loop_time', 'processor_loop_in', 'processor_loop_until', 'processor_loop_range', 'processor_data_default'];
 /**
  * 仅显示禁用和删除的操作的类型，即叶子节点
  * */
@@ -93,7 +93,7 @@ export const DESIGN_MENU_CONFIG = [
                 icon: 'arrange-count',
             },
             {
-                title: '循环列表',
+                title: '循环数组',
                 key: 'processor_loop_in',
                 icon: 'arrange-loop-list',
             },
@@ -105,11 +105,6 @@ export const DESIGN_MENU_CONFIG = [
             {
                 title: '循环区间',
                 key: 'processor_loop_range',
-                icon: 'arrange-range',
-            },
-            {
-                title: '循环数组',
-                key: 'processor_loop_variable',
                 icon: 'arrange-range',
             },
         ]
@@ -272,7 +267,6 @@ export const DESIGN_TYPE_ICON_MAP = {
     'processor_extractor_regx': 'arrange-extractor',
     "processor_loop_break": "arrange-return",
     "processor_loop_range": "arrange-range",
-    "processor_loop_variable": "arrange-range",
     "processor_loop_in": "arrange-loop-list",
     'processor_loop_time': 'arrange-count',
     'processor_loop_until': 'arrange-untils',
@@ -302,7 +296,6 @@ export const menuKeyMapToProcessorCategory = {
     "processor_loop_time": "processor_loop",
     "processor_loop_until": "processor_loop",
     "processor_loop_range": "processor_loop",
-    "processor_loop_variable": "processor_loop",
     "processor_loop_break": "processor_loop",
     "processor_loop_in": "processor_loop",
     'processor_logic_if': 'processor_logic',
@@ -331,7 +324,6 @@ export const showLineScenarioType = [
     'processor_loop_time',
     'processor_loop_until',
     'processor_loop_range',
-    'processor_loop_variable',
     'processor_loop_in',
     'processor_logic_if',
     'processor_data_default',
@@ -346,12 +338,13 @@ export const showArrowScenarioType = [
     'processor_loop_time',
     'processor_loop_until',
     'processor_loop_range',
-    'processor_loop_variable',
     'processor_loop_in',
     'processor_logic_if',
     'processor_logic_else',
     'processor_data_default',
-    // 'processor_custom_code',
+
+    'processor_assertion_default',
+    'processor_custom_code',
 ]
 
 /**
@@ -407,8 +400,7 @@ export const scenarioTypeMapToText = {
     'processor_loop_time': '循环次数',
     'processor_loop_until': '循环直到',
     'processor_loop_range': '循环区间',
-    'processor_loop_variable': '循环数组',
-    'processor_loop_in': '循环列表',
+    'processor_loop_in': '循环数组',
     'processor_logic_if': 'if',
     'processor_logic_else': 'else',
     'processor_extractor_boundary': '边界提取',

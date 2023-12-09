@@ -16,7 +16,7 @@
       <template v-if="record.processorType === 'processor_loop_time'">
         <p class="text"><code>{{ `${detail?.times}` }}</code>次  <span style="margin-left: 24px" v-if="detail && detail.breakIfExpression">跳出条件：<code>{{ `${detail?.breakIfExpression}` }}</code></span></p>
       </template>
-      <!-- ::::循环列表 -->
+      <!-- ::::循环数组 -->
       <template v-if="record.processorType === 'processor_loop_in'">
         <p class="text">从 <code>{{ `${detail?.list}` }}</code>中 <code>{{ `${!detail?.isRand ? '顺序' : '随机'}` }}</code>取值赋给变量 <code>{{ `${detail?.variableName}` }}</code>  <span style="margin-left: 24px" v-if="detail && detail.breakIfExpression">跳出条件： <code>{{ `${detail?.breakIfExpression}` }}</code></span></p>
       </template>
@@ -60,13 +60,14 @@
       <template v-if="record.processorType === 'processor_print_default'">
         <p class="text">{{ `${detail?.result}` }} </p>
       </template>
+
       <!-- ::::断言 -->
       <template v-if="record.processorType === 'processor_assertion_default'">
         <p class="text">断言表达式：<code>{{ `${detail?.expression}` }}</code></p>
       </template>
       <!-- ::::自定义代码 -->
       <template v-if="record.processorType === 'processor_custom_code'">
-        <p class="text"><code>{{ `${detail?.content}` }}</code></p>
+        <p class="text"></p>
       </template>
     </div>
 
@@ -79,8 +80,6 @@
       <span v-else-if="detail?.result" class="success">{{ showScenarioExecStatus[record.processorType]?.success }}</span>
       <span v-else class="fail">{{ showScenarioExecStatus[record.processorType]?.fail }}</span>
     </div>
-
-
 
     <div v-if="data.showMoreInfo !== false" class="right" @click.stop="clickMore">
       详情
