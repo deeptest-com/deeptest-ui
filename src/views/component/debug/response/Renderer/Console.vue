@@ -27,7 +27,16 @@
                   class="icon"  />
       </span>
       &nbsp;
+      <span v-if="item.conditionEntityType === ConditionType.checkpoint">断言</span>
       <span v-html="item.resultMsg"></span>
+
+      <template v-if="item.variables">
+        ，
+        <span v-for="(v, k) in toJsonObj(item.variables)" :key="k">
+          {{k}} {{v === `<nil>` ? ' 未定义' : ` = ${v}`}}
+        </span>
+        。
+      </template>
     </div>
   </div>
   <Empty :desc="'暂无数据'" style="margin-top: 100px" v-else/>
@@ -43,6 +52,7 @@ import { CheckCircleOutlined, CloseCircleOutlined} from '@ant-design/icons-vue';
 import IconSvg from "@/components/IconSvg";
 import Empty from "@/components/others/empty.vue";
 import {getResultClass} from "@/utils/dom";
+import {toJsonObj} from "@/utils/string";
 
 const {t} = useI18n();
 

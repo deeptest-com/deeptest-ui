@@ -5,3 +5,7 @@ export function getUuid() {
         return v.toString(16);
     });
 }
+
+export function toJsonObj(str) {
+    return JSON.parse(str)
+}
