@@ -24,52 +24,27 @@ const DropdownMenuProps = {
   } // 当前操作项
 };
 
-const MenuItem = defineComponent({
-  name: 'MenuItem',
-  props: {
-    auth: {
-      type: String,
-    },
-    label: {
-      type: String,
-    },
-    action: {
-      type: Function as PropType<(...args: any[]) => void>
-    },
-    tip: {
-      type: String,
-      required: false,
-    },
-    record: {
-      type: Object,
-    },
-    disabled: {
-      type: Boolean,
-      default: false,
-      required: false,
+const RenderMenuItem = ({ item, record }: { item: MenuItem, record: Recordable }) => {
+  const handleClick = (_e?: any) => {
+    if (item.disabled) {
+      _e.preventDefault();
+      return;
     }
-  },
-  setup(props, ctx) {
-    const defaultTip = '暂无权限，请联系管理员';
+    item.action?.(record);
+  };
 
-    const handleClick = (_e?: any) => {
-      if (props.disabled) {
-        _e.preventDefault();
-        return;
-      }
-      props.action?.(props.record);
-    };
-
-    return () => {
-      return (
-        <a-menu-item class={{ 'lyapi-drop-menu-item': true, 'has-no-permission': props.disabled }} onClick={e => handleClick(e)}>
-          
-          <span>{props.label}</span> 
-        </a-menu-item>
-      )
+  const renderContent = () => {
+    if (typeof item.label === 'function') {
+      return item.label(record);
     }
-  },
-})
+    return item.label;
+  };
+  return (
+    <a-menu-item class={{ 'lyapi-drop-menu-item': true, 'has-no-permission': item.disabled }} onClick={e => handleClick(e)}>
+      <span>{renderContent()}</span> 
+    </a-menu-item>
+  )
+}
 
 
 const ActionList = (opts: { list: MenuItem[], record: Recordable}) => {
@@ -109,7 +84,7 @@ const DropdownList = defineComponent({
           <a-menu>
             {
               props.list.map((e: any, index) => (
-                <MenuItem key={index} {...e} record={props.record} />
+                RenderMenuItem({ item: e, record: props.record })
               ))
             }
           </a-menu>
