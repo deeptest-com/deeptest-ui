@@ -64,7 +64,7 @@ const columns = [
   },
   {
     title: '执行人',
-    dataIndex: 'createUserName',
+    dataIndex: 'execUserName',
     width: 80,
   },
   {
