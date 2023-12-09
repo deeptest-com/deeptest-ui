@@ -12,7 +12,7 @@ import {addExtractAction, addReplaceAction} from "@/components/Editor/service";
 import {getJslibs, getSnippet} from "@/views/component/debug/service";
 
 import {UsedBy, UsedWith} from "@/utils/enum";
-
+import fixMonacoEditor from "@/utils/fixMonacoEditor";
 export default defineComponent({
   name: "MonacoEditor",
   props: {
@@ -40,6 +40,7 @@ export default defineComponent({
   setup(props){
     const { width, height } = toRefs(props)
 
+    fixMonacoEditor();
     const style = computed(()=>{
       const fixedWidth = width.value.toString().includes('%') ? width.value : `${width.value}px`
       const fixedHeight = height.value.toString().includes('%')? height.value : `${height.value}px`

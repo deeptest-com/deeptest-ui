@@ -21,7 +21,8 @@ import useIMLeaveTip   from "@/composables/useIMLeaveTip";
 import {Cache_Key_Agent_Local_Port, Cache_Key_Server_Url} from "@/utils/const";
 import {useRoute, useRouter} from "vue-router";
 import {useWujie} from "@/composables/useWujie";
-
+import fixMonacoEditor from "@/utils/fixMonacoEditor";
+fixMonacoEditor();
 export default defineComponent({
   name: 'App',
   components: {
@@ -73,9 +74,7 @@ export default defineComponent({
 
     onMounted(() => {
       setHtmlLang(locale.value);
-
       //  监听父应用传递过来的消息
-
       if(isWujieEnv){
         bus?.$on('sendMsgToLeyanAPI', (msg: any) => {
           // console.log('832msg', msg)
@@ -85,8 +84,8 @@ export default defineComponent({
           if (msg?.type === 'logout') {
             store.dispatch('User/logout');
           }
-
         })
+
         // 通知上层应用已经加载完毕
         bus?.$emit(settings.sendMsgToLeyan, {
           type: 'appMounted',

@@ -1,5 +1,5 @@
 <template>
-  <div class="workbench">
+  <div class="workbench" :class="isWujieEnv ? 'wujie-workbench' :''">
       <StatisticHeader :params="cardData" :type="1"/>
       <List style="margin-top:16px"/>
   </div>
@@ -12,6 +12,7 @@ import {ref,computed,onMounted, nextTick,watch} from "vue";
 import { useStore } from "vuex";
 import { StateType } from "@/views/home/store";
 import { StateType as ProjectStateType } from "@/store/project";
+import {useWujie} from "@/composables/useWujie";
 import {setCache,getCache} from "@/utils/localCache";
 import settings from "@/config/settings";
 import StatisticHeader from "@/components/StatisticHeader/index.vue";
@@ -30,6 +31,7 @@ console.log(`TODO: change default project to ${projectId.value} on server side`)
 // onMounted(async () => {
 
 // });
+const {isWujieEnv} = useWujie();
 
 const getHearderData = async (): Promise<void> => {
   await store.dispatch("Home/queryCard", {projectId:currProject.value.id});
@@ -56,6 +58,9 @@ watch(
 .workbench {
   height: 100%;
   overflow-y: scroll;
-  padding: 16px 12px 16px 16px;
+  &.wujie-workbench{
+    height: calc(100% - 94px);
+  }
+  //padding: 16px 12px 16px 16px;
 }
 </style>
