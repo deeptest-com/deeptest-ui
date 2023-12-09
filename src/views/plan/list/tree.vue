@@ -164,8 +164,8 @@ async function loadCategories() {
 
 watch(() => {
   return currProject.value;
-}, async (newVal) => {
-  if (newVal?.id) {
+}, async (newVal, oldVal) => {
+  if (newVal?.id !== oldVal?.id) {
     searchValue.value = '';
     store.commit('Plan/setTreeDataCategory', {});
     await loadCategories();
@@ -337,11 +337,6 @@ async function onDrop(info: DropEvent) {
     notifyError('移动失败');
   }
 }
-
-onMounted(async () => {
-  await loadCategories();
-  // expandAll();
-})
 
 </script>
 
