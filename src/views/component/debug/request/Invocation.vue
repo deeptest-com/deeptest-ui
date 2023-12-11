@@ -26,7 +26,7 @@
       <div class="url"
            :class="[isPathValid  ? '' :  'dp-field-error' ]">
         <a-tooltip 
-          :overlayClassName="getOverlayClassName()" 
+          :overlayStyle="getOverlayStyle()"
           placement="bottom" 
           :visible="!isPathValid"
           :title="'请输入合法的路径,以http(s)开头'">
@@ -186,8 +186,8 @@ const isShowSync = computed(() => {
   return ret
 })
 
-const getOverlayClassName = () => {
-  return `${usedBy === UsedBy.DiagnoseDebug ? 'dp-field-error-tooltip' : ''} dp-tip-small`
+const getOverlayStyle = () => {
+  return usedBy === UsedBy.DiagnoseDebug ? { 'zIndex': 999 } : usedBy === UsedBy.ScenarioDebug ? { 'zIndex': '1001' } : {};
 }
 
 watch(debugData, (newVal) => {

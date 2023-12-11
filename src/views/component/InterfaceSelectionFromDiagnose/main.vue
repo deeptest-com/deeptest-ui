@@ -9,7 +9,7 @@
     width="600px"
   >
     <div class="interface-selection-main">
-        <Tree :selectInterfaces="onSelectInterfaces" />
+      <Tree ref="diagnoseTree" />
     </div>
 
     <template #footer>
@@ -24,6 +24,7 @@ import {defineProps, ref} from "vue";
 import debounce from "lodash.debounce";
 
 import Tree from "./tree.vue"
+import { message } from "ant-design-vue";
 
 const props = defineProps({
   onFinish: {
@@ -37,15 +38,17 @@ const props = defineProps({
 })
 
 const selectInterfaces = ref([])
-const onSelectInterfaces = (data) => {
-  console.log('onSelectInterfaces', data)
-  selectInterfaces.value = data
-}
-
-const onSubmit = debounce( async () => props.onFinish(selectInterfaces.value),300)
+const diagnoseTree = ref();
+const onSubmit = debounce( async () => {
+  const selectedNodes = diagnoseTree.value.getSelectedTreeNodes();
+  if (selectedNodes.length === 0) {
+    message.error('请选择快捷调试接口');
+    return;
+  }
+  props.onFinish(selectedNodes);
+},300)
 
 const onCancel = () => {
-  console.log('onCancel')
   props.onCancel()
 }
 

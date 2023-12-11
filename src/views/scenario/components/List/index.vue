@@ -141,18 +141,7 @@
   </div>
 
   <!-- 动态场景执行抽屉 -->
-  <a-drawer
-      :placement="'right'"
-      :width="1200"
-      :closable="true"
-      :visible="execVisible"
-      :title="'执行场景'"
-      class="drawer"
-      wrapClassName="drawer-exec"
-      :bodyStyle="{padding:'16px',marginBottom:'56px'}"
-      @close="execVisible = false">
-    <ExecInfo v-if="execVisible"/>
-  </a-drawer>
+  <ExecInfo :exec-drawer-visible="execVisible" @on-close="execVisible = false"/>
 
 </template>
 
