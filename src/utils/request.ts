@@ -62,9 +62,15 @@ const requestStatic = axios.create({
 
 // 如果是嵌入到乐研中，需要设置请求头 xToken ，用于嵌入乐研的权限验证
 if (isWujieEnv && xToken) {
+
     request.defaults.headers['X-Token'] = xToken;
     requestAgent.defaults.headers['X-Token'] = xToken;
     requestStatic.defaults.headers['X-Token'] = xToken;
+
+    const org = window.location.origin;
+    request.defaults.headers['X-API-Origin'] = org;
+    requestAgent.defaults.headers['X-API-Origin'] = org;
+    requestStatic.defaults.headers['X-API-Origin'] = org;
 }
 
 // 全局设置 - post请求头
