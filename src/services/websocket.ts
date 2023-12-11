@@ -7,7 +7,7 @@ import settings from "@/config/settings";
 import {getAgentUrl} from "@/utils/agentEnv";
 
 export const WsDefaultNamespace = 'default'
-export const WsDefaultRoom = 'default'
+export const WsDefaultRoom = 'default_room'
 
 export class WebSocket {
   static conn: NSConn
