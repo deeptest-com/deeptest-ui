@@ -9,7 +9,7 @@ interface SharePage {
 
 function useSharePage(): SharePage {
   const router = useRouter();
-  const { copy } = useClipboard({});
+  const { copy } = useClipboard({legacy: true});
   const { params: { projectNameAbbr } } = router.currentRoute.value;
 
   const getShareLink = (record, pageType) => {

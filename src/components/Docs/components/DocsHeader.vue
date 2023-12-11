@@ -133,7 +133,7 @@ const shortCutText = ref(isMac ? '⌘ K' : 'Ctrl K');
 // 复制链接
 const source = ref('')
 
-const {text, copy, copied, isSupported} = useClipboard({source});
+const {text, copy, copied, isSupported} = useClipboard({source,legacy: true});
 const {isFullscreen, enter, exit, toggle} = useFullscreen();
 
 import {useStore} from "vuex";

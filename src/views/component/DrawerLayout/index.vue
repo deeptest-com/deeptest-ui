@@ -69,7 +69,7 @@ const props = defineProps({
 
 const emit = defineEmits(['ok', 'close', 'refreshList']);
 const store = useStore<{ Global}>();
-const { copy } = useClipboard({});
+const { copy } = useClipboard({legacy: true});
 const router = useRouter();
 
 const contentRef: any = ref(null)

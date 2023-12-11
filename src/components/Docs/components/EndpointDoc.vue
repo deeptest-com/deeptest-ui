@@ -165,7 +165,7 @@ const props = defineProps<{
   info: Object;
   onlyShowDocs?: boolean;
 }>();
-const {text, copy, copied, isSupported} = useClipboard({});
+const {text, copy, copied, isSupported} = useClipboard({legacy: true});
 const info: any = computed(() => {
   return props.info;
 })
