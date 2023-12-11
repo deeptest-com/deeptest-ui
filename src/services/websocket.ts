@@ -85,9 +85,13 @@ export class WebSocket {
     console.log(`send msg to room "${roomName}"`)
     roomName = await getToken() || roomName;
 
-    WebSocket.conn.leaveAll().then(() =>
+    if (WebSocket.conn) {
+      WebSocket.conn.leaveAll().then(() =>
         this.joinRoomAndSend(roomName, msg)
-    )
+      )
+    } else {
+      this.joinRoomAndSend(roomName, msg)
+    }
   }
 }
 

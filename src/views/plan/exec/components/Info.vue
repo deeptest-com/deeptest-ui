@@ -95,6 +95,7 @@ import { momentShort } from "@/utils/datetime";
 import {useI18n} from "vue-i18n";
 import {getToken} from "@/utils/localToken";
 import {StateType as UserStateType} from "@/store/user";
+import {getUuid} from "@/utils/string";
 const { t } = useI18n();
 
 const router = useRouter();
@@ -105,13 +106,16 @@ const collapsed = computed<boolean>(()=> store.state.Global.collapsed);
 const planId = ref(+router.currentRoute.value.params.id)
 store.dispatch('Plan/loadExecResult', planId.value);
 
+const execUuid = ref('')
 const execStart = async () => {
   console.log('execStart')
 
+  execUuid.value = currUser.value.id + '@' + getUuid()
   logTreeData.value = []
 
   const data = {
     userId: currUser.value.id,
+    execUuid: execUuid.value,
     serverUrl: process.env.VUE_APP_API_SERVER,
     token: await getToken(),
     planId: planId.value,
@@ -122,7 +126,13 @@ const execStart = async () => {
 
 const execCancel = () => {
   console.log('execCancel')
-  const msg = {act: 'stop', execReq: {scenarioId: planId.value}}
+  const msg = {
+    act: 'stop',
+    execReq: {
+      execUuid: execUuid.value,
+      scenarioId: planId.value,
+    }
+  }
   WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify(msg))
 }
 

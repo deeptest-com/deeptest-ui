@@ -59,6 +59,7 @@ import {
 import {momentUtc} from "@/utils/datetime";
 import {CurrentUser, StateType as UserStateType} from "@/store/user";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import {getUuid} from "@/utils/string";
 
 const props = defineProps<{
   execDrawerVisible: boolean;
@@ -95,11 +96,15 @@ const baseInfoList = computed(() => {
 // 每次重新渲染
 const progressKey = ref(0);
 
+const execUuid = ref('')
 const execStart = async () => {
   resetData();
+  execUuid.value = currUser.value.id + '@' + getUuid()
   progressKey.value += 1;
+
   const data = {
     userId: currUser.value.id,
+    execUuid: execUuid.value,
     serverUrl: process.env.VUE_APP_API_SERVER,
     token: await getToken(),
     scenarioId: scenarioId.value,
@@ -114,7 +119,10 @@ const execCancel = () => {
 }
 
 const stopExec = () => {
-  const msg = {act: 'stop', execReq: {scenarioId: scenarioId.value}};
+  const msg = {act: 'stop', execReq: {
+    execUuid: execUuid.value,
+    scenarioId: scenarioId.value,
+  }};
   WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify(msg));
 }
 
