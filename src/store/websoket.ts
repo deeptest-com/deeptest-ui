@@ -13,8 +13,8 @@ export interface WebSocketData {
 export interface ModuleType extends StoreModuleType<WebSocketData> {
   state: WebSocketData;
   mutations: {
-    saveConnStatus: Mutation<WebSocketData>;
-    saveRoom: Mutation<WebSocketData>;
+    // saveConnStatus: Mutation<WebSocketData>;
+    // saveRoom: Mutation<WebSocketData>;
   };
   actions: {
     connect: Action<WebSocketData, WebSocketData>;
@@ -24,7 +24,7 @@ export interface ModuleType extends StoreModuleType<WebSocketData> {
 
 const initState: WebSocketData = {
   connStatus: '',
-  room: 'room',
+  room: WsDefaultRoom,
 }
 
 const StoreModel: ModuleType = {
@@ -34,33 +34,27 @@ const StoreModel: ModuleType = {
     ...initState
   },
   mutations: {
-    saveConnStatus(state, payload) {
-      console.log('saveConnection', payload)
-      state.connStatus = payload
-    },
-    saveRoom (state, payload) {
-      console.log('saveRoom', payload)
-      state.room = payload
-    }
+    // saveConnStatus(state, payload) {
+    //   console.log('saveConnection', payload)
+    //   state.connStatus = payload
+    // },
+    // saveRoom (state, payload) {
+    //   console.log('saveRoom', payload)
+    //   state.room = payload
+    // }
   },
   actions: {
     async connect({ commit }, room) {
-      console.log("connect to websocket")
+      console.log("connect to default room")
 
-      await WebSocket.init(false)
-
-      if (!room) {
-        room = WsDefaultRoom
-      }
-      const msg = {act: 'init'}
-      WebSocket.sentMsg(room, JSON.stringify(msg))
+      await WebSocket.sentMsg(WsDefaultRoom, JSON.stringify({act: 'init'}))
 
       return true;
     },
     async changeStatus({ commit }, status) {
       console.log("changeStatus")
 
-      commit('saveConnStatus', status)
+      // commit('saveConnStatus', status)
 
       return true;
     },

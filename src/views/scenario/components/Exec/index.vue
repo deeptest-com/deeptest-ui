@@ -110,20 +110,25 @@ const execStart = async () => {
     scenarioId: scenarioId.value,
     environmentId: currEnvId.value,
   }
-  WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify({act: 'execScenario', scenarioExecReq: data}))
+  console.log('****** send exec scenario ws data', data);
+  WebSocket.sentMsg(execUuid.value, JSON.stringify({
+    act: 'execScenario',
+    scenarioExecReq: data
+  }))
+}
+const stopExec = () => {
+  WebSocket.sentMsg(execUuid.value, JSON.stringify({
+    act: 'stop',
+    execReq: {
+      execUuid: execUuid.value,
+      scenarioId: scenarioId.value,
+    }
+  }));
 }
 
 const execCancel = () => {
   progressStatus.value = 'cancel';
   stopExec();
-}
-
-const stopExec = () => {
-  const msg = {act: 'stop', execReq: {
-    execUuid: execUuid.value,
-    scenarioId: scenarioId.value,
-  }};
-  WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify(msg));
 }
 
 watch(() => {

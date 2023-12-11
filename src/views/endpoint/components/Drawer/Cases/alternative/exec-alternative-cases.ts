@@ -158,8 +158,8 @@ function useCaseExecution(): CaseExecution {
             type,
             environmentId: environmentId,
         }
-        console.log('===== websocket data =====', data);
-        WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify({
+        console.log('****** send exec cases ws data', data);
+        WebSocket.sentMsg(execUuid.value, JSON.stringify({
             act: 'execCases',
             casesExecReq: data
         }))
@@ -167,12 +167,11 @@ function useCaseExecution(): CaseExecution {
     const execStop = () => {
         if (!execUuid.value) return
 
-        const data = {
-            execUuid: execUuid.value
-        }
-        WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify({
-            act: 'execCasesStop',
-            execReq: data,
+        WebSocket.sentMsg(execUuid.value, JSON.stringify({
+            act: 'stop',
+            execReq: {
+                execUuid: execUuid.value
+            },
         }));
     }
 

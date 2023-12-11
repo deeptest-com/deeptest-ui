@@ -115,27 +115,29 @@ const execStart = async () => {
     execUuid: execUuid.value,
     serverUrl: process.env.VUE_APP_API_SERVER,
     token: token,
-    planId: currPlan.value && currPlan.value.id,
+    planId: currPlan.value?.id,
     environmentId: currEnvId.value
   }
-  WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify({act: 'execPlan', planExecReq: data}));
+  console.log('****** send exec plan ws data', data);
+  WebSocket.sentMsg(execUuid.value, JSON.stringify({
+    act: 'execPlan',
+    planExecReq: data
+  }));
+};
+const stopExec = () => {
+  WebSocket.sentMsg(execUuid.value, JSON.stringify({
+    act: 'stop',
+    execReq: {
+      execUuid: execUuid.value,
+      planId: currPlan.value?.id,
+    }
+  }))
 };
 
 const execCancel = () => {
   progressStatus.value = 'cancel';
   stopExec();
 };
-
-const stopExec = () => {
-  const msg = {act: 'stop',
-    execReq: {
-      execUuid: execUuid.value,
-      planId: currPlan.value && currPlan.value.id,
-    }
-  };
-  WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify(msg))
-};
-
 
 const OnWebSocketMsg = (data: any) => {
   if (!data.msg) return;

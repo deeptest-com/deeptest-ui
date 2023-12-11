@@ -120,20 +120,24 @@ const execStart = async () => {
     token: await getToken(),
     planId: planId.value,
   }
-
-  WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify({act: 'execPlan', planExecReq: data}))
+  console.log('****** send exec plan ws data', data);
+  WebSocket.sentMsg(execUuid.value, JSON.stringify({
+    act: 'execPlan',
+    planExecReq: data
+  }))
 }
-
-const execCancel = () => {
-  console.log('execCancel')
-  const msg = {
+const stopExec = () => {
+  WebSocket.sentMsg(execUuid.value, JSON.stringify({
     act: 'stop',
     execReq: {
       execUuid: execUuid.value,
-      scenarioId: planId.value,
+      planId: planId.value,
     }
-  }
-  WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify(msg))
+  }))
+};
+const execCancel = () => {
+  console.log('execCancel')
+  stopExec()
 }
 
 const design = () => {
