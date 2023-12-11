@@ -121,7 +121,7 @@ const onChecked = (checkedKeys, e) => {
 
 
 const loadServe = async () => {
-  listServe().then((json) => {
+  await listServe().then((json) => {
     serves.value = json.data.serves
 
     if (serves.value.length > 0) {
@@ -130,8 +130,9 @@ const loadServe = async () => {
   })
 }
 
-onMounted(() => {
-  loadServe()
+onMounted(async () => {
+  await loadServe()
+  selectServe()
 })
 
 const searchValue = ref('');
@@ -149,16 +150,6 @@ const selectServe = () => {
   console.log('selectServe', serveId.value)
   loadTreeData(serveId.value)
 }
-
-
-watch((serveId.value), async (newVal:number) => {
-  console.log('watch currProject', newVal)
-  if (newVal > 0) {
-    await loadTreeData(newVal);
-  }
-}, {
-  immediate: true
-})
 
 
 // 展开所有
@@ -182,9 +173,6 @@ function expandAll() {
   expandedKeys.value = keys;
 }
 
-onMounted(async () => {
-  console.log('onMounted')
-})
 
 </script>
 
