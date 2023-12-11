@@ -18,7 +18,7 @@
         :visible="visible"
         :overlayStyle="{}">
       <template #content>
-        <div class="select-content" v-on-click-outside="closeSearchModal">
+        <div class="select-content">
           <a-list item-layout="horizontal" :data-source="data" v-if="data?.length > 0">
             <template #renderItem="{ item }">
               <a-list-item @click="selectItem(item)" class="list-item">
@@ -109,9 +109,8 @@ import {
   ref,
   defineProps,
   defineEmits,
-  computed, watch, createVNode, onMounted,
+  computed, watch
 } from 'vue';
-import {Empty, message, notification} from 'ant-design-vue';
 import {
   DownOutlined,
   RightOutlined,
@@ -121,15 +120,11 @@ import {
   ReadOutlined,
   FullscreenOutlined,
   FullscreenExitOutlined,
-  ExclamationCircleOutlined,
-  CopyOutlined
 } from '@ant-design/icons-vue';
 import {useMagicKeys} from '@vueuse/core'
 import {getCodeColor, getMethodColor} from "../hooks/index"
 import debounce from "lodash.debounce";
-import {Modal} from 'ant-design-vue';
 import {useClipboard, useFullscreen} from '@vueuse/core'
-import { vOnClickOutside } from '@vueuse/components'
 const searchInputRef: any = ref(null);
 const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
@@ -169,7 +164,6 @@ const data: any = ref([]);
 
 const emit = defineEmits(['select', 'changeVersion']);
 
-const expand = ref(true);
 const keys = useMagicKeys()
 const CtrlK = keys['Ctrl+K'];
 const cmdK = keys['Command+K'];
@@ -188,12 +182,6 @@ const versions = computed(() => {
 const title = computed(() => {
   return props.data?.name;
 })
-
-// todo: 搜索弹框展示的实际不对，需要再处理
-const showSearchModal = ref(false);
-function closeSearchModal() {
-  showSearchModal.value = false;
-}
 
 function selectItem(item) {
   emit('select', item?.value);
@@ -214,8 +202,7 @@ function focus() {
 }
 
 const visible = computed(() => {
-  return keywords.value || isFocus.value;
-  // return isFocus.value;
+  return isFocus.value;
 })
 
 function blur() {
