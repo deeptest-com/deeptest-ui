@@ -68,16 +68,12 @@ const router = useRouter();
 
 const store = useStore<{ Debug: Debug; Endpoint; Global; ServeGlobal; }>();
 const environmentsFromServers = computed<any[]>(() => store.state.Debug.environmentsFromServers);
-const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);  //当前选择的环境id
-const currServe = computed<any>(() => store.state.ServeGlobal.currServe); // 当前选择的服务
+const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);  //当前
 
 const selectEnvTopPosition = ref("0px");
 const selectEnvLeftPosition = ref("0px");
 
 onMounted(() => {
-  store.dispatch('Debug/listServes', {
-    serveId: props.serveId? props.serveId :currServe.value.id,
-  })
   selectEnvTopPosition.value = getSelectEnvTopPosition();
   selectEnvLeftPosition.value = getSelectEnvLeftPosition();
 });
@@ -149,7 +145,7 @@ watch(
 watch(() => {
   return props.serveId;
 }, async (val, oldVal) => {
-  if (val !== oldVal && props.show && val) {
+    if (val !== oldVal && props.show && val) {
     await store.dispatch('Debug/listServes', {serveId: val});
   }
 }, {

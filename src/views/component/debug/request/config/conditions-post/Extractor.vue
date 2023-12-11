@@ -195,7 +195,6 @@ watch(() => props.condition, (newVal) => {
 let {resetFields, validate, validateInfos} = useForm(model, rules);
 
 const save = (item) => {
-  console.error('save', model.value, item);
   if (item && item.entityId !== model.value.id) {
     return;
   }

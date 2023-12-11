@@ -36,7 +36,7 @@
               @generateExample="handleGenerateExample"
               @changeContent="changeContent"
               @changeExamples="changeExamples"
-              :serveId="currServe.id"
+              :serveId="serveId"
               :contentStr="contentStr"
               :exampleStr="exampleStr"
               :tab-content-style="{width:'100%'}"/>
@@ -59,7 +59,7 @@ const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpoi
 const selectedMethodDetail = computed<any>(() => store.state.Endpoint.selectedMethodDetail);
 const currentUser: any = computed<Endpoint>(() => store.state.User.currentUser);
 const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
-const props = defineProps({});
+const props = defineProps(['serveId']);
 const emit = defineEmits([]);
 // 是否折叠,默认展开
 const collapse = ref(true);
@@ -86,7 +86,7 @@ watch(() => {
   activeReqBodySchema.value.examples = JSON.parse(exampleStr.value);
 }, {immediate: true});
 
-async function generateFromJSON(JSONStr: string) {
+async function generateFromJSON(JSONStr?: string) {
   activeReqBodySchema.value.content = await store.dispatch('Endpoint/example2schema', {data: JSONStr});
   contentStr.value = JSON.stringify(activeReqBodySchema.value.content);
 }
@@ -95,15 +95,16 @@ async function handleGenerateExample(examples: any) {
   const content = contentStr.value;
   const res = await store.dispatch('Endpoint/schema2example', {
     data: content,
-    serveId: currServe.value.id
+    serveId: props.serveId
   });
   const example = {
     name: `Example ${examples.length + 1}`,
     content: JSON.stringify(res),
   };
   if(!activeReqBodySchema?.value?.examples?.length) {
-    activeReqBodySchema.value.examples = [];
+    activeReqBodySchema.value.examples = []
   }
+  // debugger;
   activeReqBodySchema.value.examples.push(example);
   exampleStr.value = JSON.stringify(activeReqBodySchema.value.examples);
 }

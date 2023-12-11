@@ -104,7 +104,7 @@
             </a-col>
           </a-row>
           <!-- 响应体 -->
-          <ResponseBody/>
+          <ResponseBody :serveId="serveId"/>
         </div>
         <div v-if="!selectedCodeDetail">
           <a-button type="primary" @click="addCodeResponse">
@@ -151,7 +151,7 @@ const currentUser: any = computed<Endpoint>(() => store.state.User.currentUser);
 // 是否折叠,默认展开
 const collapse = ref(true);
 const resHeaderCollapse = ref(true);
-const props = defineProps({});
+const props = defineProps(['serveId']);
 const emit = defineEmits([]);
 const selectedCode = ref('200');
 

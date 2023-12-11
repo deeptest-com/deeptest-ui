@@ -550,7 +550,7 @@ const StoreModel: ModuleType = {
             const res = await deleteSchema(id);
             if (res.code === 0) {
                 notifySuccess('删除成功');
-                await dispatch('getSchemaList', { serveId, name });
+                //await dispatch('getSchemaList', { serveId, name });
             } else {
                 notifyError('删除失败');
             }

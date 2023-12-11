@@ -176,12 +176,11 @@ interface fieldStateType {
   minLength: number
   maxLength: number
 }
-const props = defineProps(['fieldData', 'hideRequire', 'hideRef', 'hideOther', 'hideDel', 'needAutoComplete', 'options']);
+const props = defineProps(['fieldData', 'hideRequire', 'hideRef', 'hideOther', 'hideDel', 'needAutoComplete', 'options','serveId']);
 const emit = defineEmits(['del', 'setRef', 'settingOther', 'change']);
 
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal }>();
 const refsOptions: any = computed<Endpoint>(() => store.state.Endpoint.refsOptions);
-const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 
 const fieldState = ref<fieldStateType | any>({
   name: '',
@@ -286,7 +285,7 @@ function del() {
 async function setRef(data: any) {
   showRef.value = true;
   await store.dispatch('Endpoint/getRefsOptions', {
-    serveId: currServe.value.id,
+    serveId: props.serveId,
     type: fieldState.value.type
   });
 }

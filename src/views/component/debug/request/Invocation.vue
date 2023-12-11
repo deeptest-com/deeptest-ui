@@ -19,7 +19,7 @@
       </div>
       <div v-if="showBaseUrl()" class="base-url">
         <a-input placeholder="请输入地址"
-                 v-model:value="debugData.baseUrl"
+                 :value="currServe.url || ''"
                  :disabled="baseUrlDisabled" />
       </div>
 
@@ -194,7 +194,7 @@ watch(debugData, (newVal) => {
   if (usedBy === UsedBy.InterfaceDebug || usedBy === UsedBy.CaseDebug) {
     debugData.value.url = debugData?.value.url || endpointDetail.value?.path || ''
   }
-  debugData.value.baseUrl = currServe.value.url;
+    // debugData.value.baseUrl = currServe.value.url;
   //debugData.value.serveId = currServe.value.serveId;
 }, {immediate: true, deep: true});
 
@@ -218,7 +218,10 @@ const send = async (e) => {
     const callData = {
       serverUrl: process.env.VUE_APP_API_SERVER,
       token: await getToken(),
-      data: data
+      data: {
+        ...data,
+        baseUrl: currServe.value.url,
+      }
     }
     await store.dispatch('Debug/call', callData).finally(()=>{
       store.commit("Global/setSpinning",false)
@@ -319,16 +322,6 @@ function validatePath() {
 
   return isMatch
 }
-
-
-watch(() => {
-  return currServe.value;
-}, val => {
-  debugData.value.baseUrl = val.url;
-  debugData.value.serveId = val.serveId;
-}, {
-  immediate: true,
-})
 
 onMounted(() => {
   // 离开前保存数据
