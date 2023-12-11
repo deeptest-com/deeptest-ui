@@ -96,10 +96,6 @@ export class WebSocket {
 }
 
 export async function getWebSocketApi() {
-  // const isProd = process.env.NODE_ENV === 'production'
-  // const loc = window.location
-  // console.log(`${isProd}, ${loc.toString()}`)
-
   // const apiHost = process.env.VUE_APP_API_AGENT ? process.env.VUE_APP_API_AGENT : ''
   const apiHost = await getAgentUrl();
   const url = apiHost.replace('http', 'ws') + '/ws'
