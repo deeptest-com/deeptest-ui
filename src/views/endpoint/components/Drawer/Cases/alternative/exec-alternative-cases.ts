@@ -90,7 +90,7 @@ function useCaseExecution(): CaseExecution {
         const log = wsMsg.data ? JSON.parse(JSON.stringify(wsMsg.data)) : {};
 
         if (wsMsg.category === 'result' && log.category === 'case') {
-            console.log('$$$$$$$$$$$$$$$ case log', log.caseUuid)
+            console.log('****** case log', log.caseUuid)
         }
 
         // 初始化

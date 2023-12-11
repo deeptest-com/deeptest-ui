@@ -82,7 +82,7 @@ export class WebSocket {
   }
 
   static async sentMsg(roomName: string, msg: string): Promise<void> {
-    console.log(`send msg to room "${roomName}"`)
+    console.log(`****** send msg to room "${roomName}"`, msg)
     roomName = await getToken() || roomName;
 
     if (WebSocket.conn) {
