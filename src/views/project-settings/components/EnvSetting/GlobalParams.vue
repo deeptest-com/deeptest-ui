@@ -210,7 +210,7 @@ watch(() => {
   align-items: center;
   justify-content: flex-end;
 
-  .save-btn {
+  :deep(.save-btn) {
     margin-right: 16px;
   }
 }

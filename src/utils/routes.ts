@@ -116,8 +116,6 @@ export const getRouteItem = (route: any, routesData: RoutesDataItem[]): RoutesDa
     }
   }
 
-  console.log('item, mmm', item);
-
   return item;
 };
 
