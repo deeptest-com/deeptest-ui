@@ -46,14 +46,12 @@ const StoreModel: ModuleType = {
   actions: {
     async connect({ commit }, room) {
       console.log("connect to default room")
-
       await WebSocket.sentMsg(WsDefaultRoom, JSON.stringify({act: 'init'}))
 
       return true;
     },
     async changeStatus({ commit }, status) {
       console.log("changeStatus")
-
       // commit('saveConnStatus', status)
 
       return true;
