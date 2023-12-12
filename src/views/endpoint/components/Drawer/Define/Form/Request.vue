@@ -47,7 +47,7 @@
               描述信息
             </a-col>
             <a-col :span="12">
-              <a-input placeholder="描述信息" v-model:value="selectedMethodDetail.description"/>
+              <a-textarea v-model:value="selectedMethodDetail.description" :autoSize="{ minRows: 1, maxRows: 3 }" placeholder="描述信息"/>
             </a-col>
           </a-row>
           <RequestParams/>
@@ -202,7 +202,7 @@ function cancelDeleteMethod(code: string) {
   }
   .form-item-request-item {
     margin-top: 16px;
-    align-items: center;
+    // align-items: center;
 
     .form-label {
       width: 120px;
