@@ -78,12 +78,18 @@ export default defineComponent({
 
       //  监听父应用传递过来的消息
       if(isWujieEnv){
-        //
         WebSocket.init(true);
         bus?.$on('sendMsgToLeyanAPI', (msg: any) => {
-          // console.log('832msg', msg)
+          console.log('832msg', msg)
           if (msg?.type === 'changeRouter') {
-            router.push(msg?.data?.path);
+            // 切换项目了，需要重置数据
+            if(msg?.data?.isChangeProject){
+              // 重置数据
+              window?.location?.reload();
+            }else {
+              router.push(msg?.data?.path);
+            }
+
           }
           if (msg?.type === 'logout') {
             store.dispatch('User/logout');
