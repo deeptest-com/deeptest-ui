@@ -4,7 +4,7 @@
     <ProcessorHeader/>
     <a-card :bordered="false">
       <div>
-        <a-form :wrapper-col="wrapperCol">
+        <a-form :labelCol="labelCol" :wrapper-col="wrapperCol">
           <a-form-item :wrapper-col="{ span: 24 }">
             <a-alert message="循环数组处理器遍历数组中的所有元素，并将元素赋值于指定变量。数组可以从变量中读取，也可以使用固定的列表值。"
                      type="info" show-icon />
@@ -18,7 +18,7 @@
             </a-radio-group>
           </a-form-item>
 
-          <a-form-item v-if="modelRef.inType==='variable'" label="数组变量" v-bind="validateInfos.variable" required>
+          <a-form-item v-if="modelRef.inType==='variable'" label="数组变量名" v-bind="validateInfos.variable" required>
             <a-input v-model:value="modelRef.variable"
                      @blur="validate('variable', { trigger: 'blur' }).catch(() => {})"
                      placeholder="数组变量的名称"/>
@@ -116,8 +116,8 @@ onUnmounted(() => {
   console.log('onUnmounted')
 })
 
-const labelCol = { span: 4 }
-const wrapperCol = { span: 16 }
+const labelCol = { span: 3 }
+const wrapperCol = { span: 18 }
 
 </script>
 
