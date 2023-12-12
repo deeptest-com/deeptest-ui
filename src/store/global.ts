@@ -144,7 +144,7 @@ const StoreModel: ModuleType = {
   actions: {
     async getPermissionList({ commit }, payload: any) {
       const menuData = {};
-      const buttonData = {};
+      const buttonData: any[] = [];
       try {
         const result = await getPermissionMenuList(payload);
         if (result.code === 0 && result.data.result) {
@@ -152,7 +152,7 @@ const StoreModel: ModuleType = {
             if (e.type === 'menu') {
               menuData[e.code] = e;
             } else if (e.type === 'button') {
-              buttonData[e.code] = e;
+              buttonData.push(e.code);
             }
           })
         }

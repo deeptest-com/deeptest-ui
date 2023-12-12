@@ -1,5 +1,4 @@
 <template>
-  <!-- 权限按钮 -->
   <!-- 这里判断当前页面按钮是否在权限列表中,反之则提示用户 -->
   <a-tooltip :title="disabled ? disabledTooltip : null" color="#1677ff">
     <a-button
@@ -51,18 +50,15 @@ const permissionButtonMap = computed<any[]>(
   () => store.state.Global.permissionButtonMap
 );
 const disabled = computed(() => {
-  console.log(props);
   if (props.disabled) {
     return true;
   }
-  if (permissionButtonMap.value && Object.keys(permissionButtonMap.value).length > 0) {
+  if (permissionButtonMap.value && permissionButtonMap.value.length > 0) {
     const permission = !hasPermission();
     return permission;
   }
   return false;
 });
-const currentUser = computed<any>(() => store.state.User.currentUser);
-const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 
 const handleClick = (e) => {
   e.preventDefault();
@@ -70,42 +66,10 @@ const handleClick = (e) => {
 };
 
 const hasPermission = () => {
-  // let hasPermissionButton = false
-  // let filterUserName = ["undefined", "", currentUser.value.username]
-  // if (currentUser.value.sysRoles.indexOf('admin') != -1) {
-  //   return true
-  // }
-  // if (currentUser.value.projectRoles[currProject.value.id] == 'admin') {
-  //   return true
-  // }
-  // if (permissionButtonMap.value[PermissionButtonType[`${props.code}`]] && props.action != 'delete') {
-  //   return true
-  // }
-  // if (permissionButtonMap.value[PermissionButtonType[`${props.code}`]] && props.action == 'delete' && filterUserName.indexOf(props.dataCreateUser) > -1)  {
-  //   return true
-  // }
   if (!props.code) {
     return true;
   }
-  const hasPermissionButton =
-    permissionButtonMap.value[PermissionButtonType[`${props.code}`]];
-  return hasPermissionButton;
+  return permissionButtonMap.value.includes(PermissionButtonType[`${props.code}`]);
 };
 
 </script>
-<style scoped lang="less">
-.permission-btn {
-  
-  &.envDetail-btn {
-    margin-bottom: 16px;
-  }
-
-  &.action-new {
-    margin-right: 8px;
-  }
-
-  &.save-btn {
-    margin-right: 16px;
-  }
-}
-</style>

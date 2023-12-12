@@ -149,29 +149,6 @@ async function save() {
   });
 }
 
-function onFinish() {
-  console.log("完成创建");
-}
-
-watch(
-  () => {
-    return currProject.value;
-  },
-  (val) => {
-    if (val.id) {
-      store.dispatch("Plan/loadMembers", {
-        id: val.id,
-        keywords: "",
-        pageSize: 100,
-        page: 1,
-      });
-    }
-  },
-  {
-    immediate: true,
-  }
-);
-
 // 新建计划时，如果有选中的分类，则默认选中分类
 watch(
   () => {
@@ -192,6 +169,12 @@ watch(
         name: "",
         testStage: null,
         desc: "",
+      });
+      store.dispatch("Plan/loadMembers", {
+        id: currProject.value.id,
+        keywords: "",
+        pageSize: 100,
+        page: 1,
       });
     }
   }

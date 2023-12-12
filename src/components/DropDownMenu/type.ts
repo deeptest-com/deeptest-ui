@@ -1,4 +1,4 @@
-import { VNode } from "vue";
+import { VNode, PropType } from "vue";
 
 export type Recordable<T = any> = {
   [x: string]: T;
@@ -18,4 +18,6 @@ export type MenuItem = {
   children?: MenuItem[];
   disabled?: boolean;
   key?: string;
+  action: (...args: any[]) => void,
+  tip?: string;
 } 

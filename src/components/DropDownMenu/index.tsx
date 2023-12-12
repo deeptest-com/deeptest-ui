@@ -1,9 +1,9 @@
-import { PropType, defineComponent, VNode, toRefs, computed } from "vue";
-import { useStore } from "vuex";
-import { PermissionButtonType } from "@/types/permission";
+import { PropType, defineComponent, toRefs } from "vue";
 import "./index.less";
 import { MoreOutlined } from "@ant-design/icons-vue";
 import { MenuItem, Recordable } from "./type";
+import usePermission from "@/composables/usePermission";
+
 
 /**
  * props定义
@@ -24,59 +24,27 @@ const DropdownMenuProps = {
   } // 当前操作项
 };
 
-const MenuItem = defineComponent({
-  name: 'MenuItem',
-  props: {
-    auth: {
-      type: String,
-    },
-    label: {
-      type: String,
-    },
-    action: {
-      type: Function as PropType<(...args: any[]) => void>
-    },
-    tip: {
-      type: String,
-      required: false,
-    },
-    record: {
-      type: Object,
+const RenderMenuItem = ({ item, record }: { item: MenuItem, record: Recordable }) => {
+  const handleClick = (_e?: any) => {
+    if (item.disabled) {
+      _e.preventDefault();
+      return;
     }
-  },
-  setup(props, ctx) {
-    const store = useStore();
-    const permissionButtonMap = computed(() => {
-      return store.state.Global.permissionButtonMap;
-    });
+    item.action?.(record);
+  };
 
-    const hasPermission = computed(() => {
-      if (!props.auth) {
-        return true;
-      }
-      return permissionButtonMap.value[PermissionButtonType[`${props.auth}`]];
-    });
-
-    const defaultTip = '暂无权限，请联系管理员';
-
-    const handleClick = e => {
-      if (!hasPermission.value) {
-        return;
-      }
-      props.action?.(props.record);
-    };
-
-    return () => {
-      return (
-        <a-menu-item class={{ 'lyapi-drop-menu-item': true, 'has-no-permission': !hasPermission.value }} onClick={e => handleClick(e)}>
-          <a-tooltip title={hasPermission.value ? null : (props.tip || defaultTip)} color="#1677ff">
-            {props.label}
-          </a-tooltip>
-        </a-menu-item>
-      )
+  const renderContent = () => {
+    if (typeof item.label === 'function') {
+      return item.label(record);
     }
-  },
-})
+    return item.label;
+  };
+  return (
+    <a-menu-item class={{ 'lyapi-drop-menu-item': true, 'has-no-permission': item.disabled }} onClick={e => handleClick(e)}>
+      <span>{renderContent()}</span> 
+    </a-menu-item>
+  )
+}
 
 
 const ActionList = (opts: { list: MenuItem[], record: Recordable}) => {
@@ -116,7 +84,7 @@ const DropdownList = defineComponent({
           <a-menu>
             {
               props.list.map((e: any, index) => (
-                <MenuItem key={index} {...e} record={props.record} />
+                RenderMenuItem({ item: e, record: props.record })
               ))
             }
           </a-menu>
@@ -150,7 +118,7 @@ export const DropdownActionMenu = defineComponent({
   props: DropdownMenuProps,
   setup(props, { slots }) {
     const { dropdownList, actionList, record } = toRefs(props);
-
+    const { hasPermission }  = usePermission();
     
     return () => {
       return (
@@ -162,7 +130,10 @@ export const DropdownActionMenu = defineComponent({
             <a-divider type="vertical" />
           )} */}
           {dropdownList.value.length > 0 && (
-            <DropdownList list={dropdownList.value.filter(e => ifShow(e, props))} record={record.value} v-slots={slots} />
+            <DropdownList 
+              list={dropdownList.value.filter(e => hasPermission(e.auth || '') && ifShow(e, props))} 
+              record={record.value} 
+              v-slots={slots} />
           )}
         </div>
       )

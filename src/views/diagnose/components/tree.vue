@@ -44,32 +44,8 @@
               <span class="tree-title-text" v-else>{{ nodeProps.dataRef.title }}</span>
 
               <span class="more-icon" v-if="nodeProps.dataRef.id > 0">
-                  <a-dropdown>
-                      <MoreOutlined/>
-                      <template #overlay>
-                        <a-menu>
-                          <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="0" @click="create(nodeProps.dataRef.id, 'dir')">
-                            新建目录
-                          </a-menu-item>
-                          <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="1" @click="create(nodeProps.dataRef.id, 'interface')">
-                            新建接口
-                          </a-menu-item>
-                          <a-menu-item v-if="nodeProps.dataRef.id !== -1" key="2" @click="edit(nodeProps)">
-                          {{'编辑' + (nodeProps.dataRef.type === 'interface' ? '接口' : '目录')}}
-                          </a-menu-item>
-                          <a-menu-item v-if="nodeProps.dataRef.id !== -1" key="3" @click="deleteNode(nodeProps.dataRef)">
-                            {{'删除' + (nodeProps.dataRef.type === 'interface' ? '接口' : '目录')}}
-                          </a-menu-item>
-                          <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="4" @click="importInterfaces(nodeProps.dataRef)">
-                            导入接口
-                          </a-menu-item>
-                          <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="5" @click="importCurl(nodeProps.dataRef)">
-                            导入cURL
-                          </a-menu-item>
-                        </a-menu>
-                      </template>
-                    </a-dropdown>
-                </span>
+                <DropdownActionMenu :dropdown-list="DropdownMenuList" :record="nodeProps" />
+              </span>
             </div>
           </template>
         </a-tree>
@@ -133,6 +109,7 @@ import {filterByKeyword, filterTree} from "@/utils/tree";
 import {confirmToDelete} from "@/utils/confirm";
 import debounce from "lodash.debounce";
 import InterfaceSelectionFromDefine from "@/views/component/InterfaceSelectionFromDefine/main.vue";
+import { DropdownActionMenu } from '@/components/DropDownMenu';
 import CurlImportModal from "./curl.vue";
 import {notifyError, notifySuccess} from "@/utils/notify";
 
@@ -362,6 +339,43 @@ async function onDrop(info: DropEvent) {
     notifyError('移动失败');
   }
 }
+
+const DropdownMenuList = [
+  {
+    label: '新建目录',
+    ifShow: (nodeProps) => nodeProps.dataRef.type === 'dir',
+    action: (nodeProps) => create(nodeProps.dataRef?.id, 'dir'),
+  },
+  {
+    label: '新建接口',
+    ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
+    action: (nodeProps) => create(nodeProps.dataRef?.id, 'interface'),
+  },
+  {
+    label: (nodeProps) => {
+      return `编辑${nodeProps.dataRef.type === 'interface' ? '接口' : '目录'}`;
+    },
+    ifShow: (nodeProps) => nodeProps.dataRef.id !== -1,
+    action: (nodeProps) => edit(nodeProps),
+  },
+  {
+    label: (nodeProps) => {
+      return `删除${nodeProps.dataRef.type === 'interface' ? '接口' : '目录'}`;
+    },
+    ifShow: (nodeProps) => nodeProps.dataRef.id !== -1,
+    action: (nodeProps) => deleteNode(nodeProps.dataRef),
+  },
+  {
+    label: '导入接口',
+    ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
+    action: (nodeProps) => importInterfaces(nodeProps.dataRef),
+  },
+  {
+    label: '导入cURL',
+    ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
+    action: (nodeProps) => importCurl(nodeProps.dataRef),
+  },
+]
 
 onMounted(async () => {
   console.log('onMounted')
