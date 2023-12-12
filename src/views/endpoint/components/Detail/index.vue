@@ -61,6 +61,7 @@
 import { onMounted, computed, ref, watch, unref, onUnmounted, provide } from 'vue';
 import {onBeforeRouteLeave, useRouter} from 'vue-router';
 import { useStore } from 'vuex';
+import cloneDeep from "lodash/cloneDeep";
 
 import { Endpoint } from "@/views/endpoint/data";
 import EndpointBasicInfo from '../Drawer/EndpointBasicInfo.vue';
@@ -181,6 +182,10 @@ async function save() {
   });
   await store.commit('Global/setSpinning', false);
   notifySuccess('保存成功');
+
+  setTimeout(() => {
+    store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value));
+  }, 200);
 }
 
 watch(() => {
@@ -415,7 +420,21 @@ onUnmounted(() => {
 /*************************************************
  * ::::离开保存代码逻辑部分end
  ************************************************/
-
+ watch(() => {
+  return [endpointDetail.value,srcEndpointDetail.value]
+}, (newVal, oldValue) => {
+  const src = srcEndpointDetail.value;
+  const cur = endpointDetail.value;
+  const isInit = cur?.id && src?.id;
+  const isChange = !equalObjectByLodash(cur, src);
+  if(isInit){
+    store.commit('Endpoint/setIsDefineChange', isChange);
+  }else {
+    store.commit('Endpoint/setIsDefineChange', false);
+  }
+}, {
+  deep: true
+});
 </script>
 <style lang="less" scoped>
 .tab-pane {

@@ -81,15 +81,15 @@ watch(() => {
   .description-edit {
     display: none;
     position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate3d(-50%, -50%, 0);
-    width: 20px;
-    height: 20px;
+    right: 0;
+    top: 0;
+    width: 24px;
+    height: 100%;
     box-shadow: 0 3px 6px #6f6f6f33;
-    align-items: center;
     justify-content: center;
-    background-color: #091e4214;
+    background-color: #091e4221;
+    padding-top: 10px;
+    cursor: pointer;
 
     :deep(.anticon) {
       color: #000;
