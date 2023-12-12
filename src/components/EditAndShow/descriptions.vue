@@ -25,18 +25,14 @@
 <script setup lang="ts">
 import { CheckOutlined, CloseOutlined, EditOutlined } from '@ant-design/icons-vue';
 import { ref, defineProps, defineEmits, onMounted, computed, watch } from 'vue';
+import { transformHtmlToTextare, transformTextareaToHtml } from '@/utils/comm'; 
 
 const props = defineProps<{
   description?: string | undefined;
   minRows?: number;
   maxRows?: number;
 }>();
-const transHtmlToTextarea = () => {
-    if (!props.description) {
-    return '';
-  }
-  return props.description.replace(/<br>/g, '\n').replace(/(&nbsp;)/g, ' ')
-};
+
 const emits = defineEmits(['confirm']);
 const textValue = ref('');
 const isEdit = ref(false);
@@ -49,16 +45,17 @@ const style = computed(() => {
 })
 
 const handleConfirm = () => {
-  const reg = /\r\n/g.test(textValue.value);
   // 处理 textarea的空格，换行， \r\n 兼容i7,i8,  \n兼容i9以上   \s处理所有空格，包含中英文
-  const result = textValue.value.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\s/g, '&nbsp;')
+  const result = transformTextareaToHtml(textValue.value);
   emits('confirm', result);
 }
 
 watch(() => {
   return props.description;
-}, () => {
-  textValue.value = transHtmlToTextarea();
+}, (v) => {
+  if (v) {
+    textValue.value = transformHtmlToTextare(v);
+  }
 }, {
   immediate: true,
 })

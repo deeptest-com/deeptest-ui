@@ -12,6 +12,7 @@
       <EndpointBasicInfo
         @changeStatus="changeStatus"
         @change-description="changeDescription"
+        @change-serve="changeServe"
         @changeCategory="changeCategory"/>
     </template>
     <template #tabHeader>
@@ -100,6 +101,7 @@ onMounted(async () => {
      * 单独刷新详情页 需要初始化 用户列表和 serve列表
      */
     await store.dispatch('Project/getUserList');
+    store.dispatch('ServeGlobal/fetchServe');
     await store.dispatch('Endpoint/loadCategory');
     await store.commit("Global/setSpinning", false);
     await store.commit("Detail/setShow", true);
@@ -121,25 +123,38 @@ async function changeStatus(status) {
 }
 
 async function updateTitle(title) {
-  await store.dispatch('Endpoint/updateEndpointDetail',
-      {...imDetail.value, title: title}
+  await store.dispatch('Endpoint/updateEndpointName',
+      {id: imDetail.value.id, name: title}
   );
   await store.dispatch('Endpoint/getEndpointDetail', {id: imDetail.value.id});
 }
 
 async function changeDescription(description) {
-  await store.dispatch('Endpoint/updateEndpointDetail',
-      {...imDetail.value, description}
-  );
+  await store.dispatch('Endpoint/batchUpdateField', {
+    "fieldName": 'description',
+    "value": description,
+    "endpointIds": [imDetail.value.id]
+  });
   await store.dispatch('Endpoint/getEndpointDetail', {id: imDetail.value.id});
 }
 
 async function changeCategory(value) {
-  await store.dispatch('Endpoint/updateEndpointDetail',
-      {...imDetail.value, categoryId: value}
-  );
+  await store.dispatch('Endpoint/batchUpdateField', {
+    "fieldName": 'categoryId',
+    value,
+    "endpointIds": [imDetail.value.id]
+  });
   await store.dispatch('Endpoint/getEndpointDetail', {id: imDetail.value.id});
   await store.dispatch('Endpoint/loadCategory');
+}
+
+async function changeServe(value:number) {
+  await store.dispatch('Endpoint/batchUpdateField', {
+    "fieldName": 'serveId',
+    value,
+    "endpointIds": [imDetail.value.id]
+  });
+  await store.dispatch('Endpoint/getEndpointDetail', {id: imDetail.value.id});
 }
 
 const activeTabKey = ref('request');
