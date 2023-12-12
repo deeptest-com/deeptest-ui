@@ -24,8 +24,7 @@
 </template>
 <script setup lang="ts">
 import { CheckOutlined, CloseOutlined, EditOutlined } from '@ant-design/icons-vue';
-import { max } from 'moment';
-import { ref, defineProps, defineEmits, onMounted, computed } from 'vue';
+import { ref, defineProps, defineEmits, onMounted, computed, watch } from 'vue';
 
 const props = defineProps<{
   description?: string | undefined;
@@ -33,13 +32,13 @@ const props = defineProps<{
   maxRows?: number;
 }>();
 const transHtmlToTextarea = () => {
-  if (!props.description) {
+    if (!props.description) {
     return '';
   }
   return props.description.replace(/<br>/g, '\n').replace(/(&nbsp;)/g, ' ')
 };
 const emits = defineEmits(['confirm']);
-const textValue = ref(transHtmlToTextarea() || '');
+const textValue = ref('');
 const isEdit = ref(false);
 const lineHeight = 20;
 const style = computed(() => {
@@ -55,7 +54,16 @@ const handleConfirm = () => {
   const result = textValue.value.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\s/g, '&nbsp;')
   emits('confirm', result);
 }
+
+watch(() => {
+  return props.description;
+}, () => {
+  textValue.value = transHtmlToTextarea();
+}, {
+  immediate: true,
+})
 </script>
+
 <style scoped lang="less">
 .description {
   position: relative;
