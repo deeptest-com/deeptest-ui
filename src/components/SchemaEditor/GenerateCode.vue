@@ -57,7 +57,7 @@ import IconSvg from "@/components/IconSvg";
 import { MonacoOptions } from "@/utils/const";
 import { useStore } from "vuex";
 import { CopyOutlined } from '@ant-design/icons-vue';
-import { useClipboard } from '@vueuse/core'
+import useClipboard from "@/composables/useClipboard";
 import { notifySuccess } from "@/utils/notify";
 
 

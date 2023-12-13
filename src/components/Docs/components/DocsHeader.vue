@@ -124,7 +124,8 @@ import {
 import {useMagicKeys} from '@vueuse/core'
 import {getCodeColor, getMethodColor} from "../hooks/index"
 import debounce from "lodash.debounce";
-import {useClipboard, useFullscreen} from '@vueuse/core'
+import {useFullscreen} from '@vueuse/core';
+import useClipboard from "@/composables/useClipboard";
 const searchInputRef: any = ref(null);
 const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
@@ -133,7 +134,7 @@ const shortCutText = ref(isMac ? '⌘ K' : 'Ctrl K');
 // 复制链接
 const source = ref('')
 
-const {text, copy, copied, isSupported} = useClipboard({source,legacy: true});
+const {text, copy} = useClipboard({source,legacy: true});
 const {isFullscreen, enter, exit, toggle} = useFullscreen();
 
 import {useStore} from "vuex";

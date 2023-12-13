@@ -12,6 +12,7 @@ module.exports = {
     devServer: {
         port: VUE_APP_PORT || 8000,
         disableHostCheck: true,
+        https:false,
         headers: { "Access-Control-Allow-Origin": "*" },
         before: function(app, server) {
             if(NODE_ENV === 'development' && VUE_APP_MOCK === 'true') {
