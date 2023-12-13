@@ -23,6 +23,7 @@ import {useRoute, useRouter} from "vue-router";
 import {useWujie} from "@/composables/useWujie";
 import fixMonacoEditor from "@/utils/fixMonacoEditor";
 import {WebSocket} from "@/services/websocket";
+import store from "@/config/store";
 fixMonacoEditor();
 export default defineComponent({
   name: 'App',
@@ -78,15 +79,20 @@ export default defineComponent({
 
       //  监听父应用传递过来的消息
       if(isWujieEnv){
-        //
         WebSocket.init(true);
-        bus?.$on('sendMsgToLeyanAPI', (msg: any) => {
-          // console.log('832msg', msg)
+        bus?.$on('sendMsgToLeyanAPI', async (msg: any) => {
+          console.log('832msg', msg)
           if (msg?.type === 'changeRouter') {
-            router.push(msg?.data?.path);
+            // 切换项目了，需要重置数据
+            if(msg?.data?.isChangeProject && msg?.data?.projectName){
+               const result = await store.dispatch('ProjectGlobal/checkProjectAndUser', { project_code: msg?.data?.projectName });
+              // 更新左侧菜单以及按钮权限
+              await store.dispatch('Global/getPermissionList', { projectId: result.id });
+            }
+            await router.push(msg?.data?.path);
           }
           if (msg?.type === 'logout') {
-            store.dispatch('User/logout');
+           await store.dispatch('User/logout');
           }
         })
 
@@ -118,8 +124,6 @@ export default defineComponent({
     onUnmounted(() => {
       window.removeEventListener('beforeunload', onbeforeunloadCallback);
     })
-
-
 
     return {
       antdLocales

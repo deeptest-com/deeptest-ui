@@ -207,7 +207,6 @@ router.beforeEach((/* to, from */) => {
 });
 
 router.afterEach(() => {
-
     // 非无界环境下，加载进度条
     if (!isWujieEnv) {
         // 路由加载完成后，隐藏全局loading,并结束进度条
@@ -215,9 +214,10 @@ router.afterEach(() => {
         NProgress.done();
     // 无界环境下，隐藏全局loading
     } else {
-      setTimeout(() => {
+      // setTimeout(() => {
+      //   hideGlobalLoading();
+      // }, 500);
         hideGlobalLoading();
-      }, 500);
     }
 });
 

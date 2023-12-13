@@ -1,5 +1,5 @@
 import { useRouter } from "vue-router";
-import {useClipboard} from '@vueuse/core'
+import useClipboard from "@/composables/useClipboard";
 import { notifySuccess } from "@/utils/notify";
 
 interface SharePage {
