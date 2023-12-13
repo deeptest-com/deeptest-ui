@@ -362,6 +362,7 @@ const DropdownMenuList = [
     label: (nodeProps) => {
       return `删除${nodeProps.dataRef.type === 'interface' ? '接口' : '目录'}`;
     },
+    auth: 'p-api-debug-del',
     ifShow: (nodeProps) => nodeProps.dataRef.id !== -1,
     action: (nodeProps) => deleteNode(nodeProps.dataRef),
   },

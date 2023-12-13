@@ -24,7 +24,7 @@ import { useStore } from "vuex";
 import SiderMenuItem from './SiderMenuItem.vue';
 import { RoutesDataItem } from '@/utils/routes';
 import { StateType as GlobalStateType } from "@/store/global";
-import { RouteMenuType } from "@/types/permission";
+import usePermission from "@/composables/usePermission";
 import {isLeyan} from "@/utils/comm";
 
 export default defineComponent({
@@ -70,7 +70,8 @@ export default defineComponent({
   setup(props) {
     const store = useStore<{ Global: GlobalStateType }>();
     // 后端获取的权限路由可访问列表
-    const permissionRouteMenuMap = computed(() => store.state.Global.permissionMenuMap);
+    const { hasPermission } = usePermission();
+    const permissionMenuList = computed(() => store.state.Global.permissionMenuList)
     const { menuData, topNavEnable }  = toRefs(props);
     const newMenuData = ref<RoutesDataItem[]>([]);
     const isLeyanEnv = isLeyan();
@@ -104,23 +105,23 @@ export default defineComponent({
           // }
 
           // 根据可访问权限路由表来做匹配可展示的路由menu
-          if (permissionRouteMenuMap.value && permissionRouteMenuMap.value[RouteMenuType[`${routeDataItem.meta?.code}`]]) {
+          if (hasPermission(routeDataItem.meta?.code)) {
             MenuItems.push({ ...routeDataItem });
           }
         }
       }
       newMenuData.value = MenuItems;
-      console.log('getNewMenuData---,', newMenuData);
     }
 
     const openChange = (key: string): void => {
       props.onOpenChange && props.onOpenChange(key);
     }
 
-    watch(() => {return permissionRouteMenuMap.value;}, () => {
+    watch(() => {return permissionMenuList.value;}, (val) => {
       getNewMenuData();
     }, {
-      immediate: true
+      immediate: true,
+      deep: true,
     })
 
     return {

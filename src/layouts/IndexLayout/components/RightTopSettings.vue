@@ -153,6 +153,8 @@ const onMenuClick = (event: any) => {
   } else if (key === 'logout') {
     store.dispatch('User/logout').then((res) => {
       if (res === true) {
+        store.commit('ProjectGlobal/saveProjects', {});
+        store.commit('Global/setPermissionMenuList', []);
         router.replace({
           path: '/user/login',
           query: {

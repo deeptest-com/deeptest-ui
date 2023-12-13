@@ -9,10 +9,9 @@
           <div class="top-action">
             <div class="top-action-left">
               <PermissionButton
-                v-if="hasPermission('ENDPOINT-ADD')"
+                v-if="hasPermission('')"
                 class="action-new"
                 text="新建接口"
-                code="ENDPOINT-ADD"
                 type="primary"
                 :loading="loading"
                 @handle-access="handleCreateEndPoint"/>
@@ -329,7 +328,7 @@ const BulkMenuList = computed(() => [
 
 const MenuList = [
   {
-    auth: 'ENDPOINT-COPY',
+    auth: '',
     label: '克隆',
     action: (record: any) => clone(record)
   },
@@ -340,12 +339,12 @@ const MenuList = [
   },
 
   {
-    auth: 'ENDPOINT-DELETEE',
+    auth: 'p-api-endpoint-del',
     label: '删除',
     action: (record: any) => del(record)
   },
   {
-    auth: 'ENDPOINT-OUTDATED',
+    auth: '',
     label: '过期',
     action: (record: any) => disabled(record)
   },

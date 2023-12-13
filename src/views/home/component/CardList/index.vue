@@ -29,7 +29,7 @@
                     }}</span>
                 </div>
 
-                <div class="action">
+                <div class="action" v-if="dropDownList.length > 0">
                   <DropdownActionMenu :dropdown-list="dropDownList" :record="item">
                     <EllipsisOutlined key="ellipsis"/>
                   </DropdownActionMenu>
@@ -85,6 +85,7 @@ import {useStore} from "vuex";
 import {StateType} from "../../store";
 import {getProjectLogo} from "@/components/CreateProjectModal";
 import {DropdownActionMenu} from "@/components/DropDownMenu/index";
+import usePermission from "@/composables/usePermission";
 
 // 组件接收参数
 const props = defineProps({
@@ -102,6 +103,7 @@ const props = defineProps({
 });
 const router = useRouter();
 const store = useStore<{ Home: StateType }>();
+const { hasPermission } = usePermission();
 const ListItem = List.Item;
 const list = computed<any>(() => store.state.Home.queryResult.list);
 
@@ -121,32 +123,32 @@ const loading = ref(true);
 const current = ref(1);
 const total = computed(() => filterList.value.length);
 
-const dropDownList = [
-  {
+const dropDownList = computed(() => {
+ return [{
     label: '申请加入',
     action: (record) => emit("join", record),
-    auth: '',
+    auth: 'p-project-apply',
     ifShow: (record) => record.accessible === 0,
   },
   {
     label: '编辑',
     action: (record) => emit("edit", record),
-    auth: '',
+    auth: 'p-project-edit',
     ifShow: (record) => record.accessible === 1,
   },
   {
     label: '删除',
     action: (record) => emit("delete", record),
-    auth: '',
+    auth: 'p-project-del',
     ifShow: (record) => record.accessible === 1,
   },
   {
     label: '退出项目',
     action: (record) => emit("exit", record),
-    auth: '',
+    auth: 'p-project-exit',
     ifShow: (record) => record.accessible === 1,
-  }
-]
+  }].filter(e => hasPermission(e.auth));
+})
 
 watch(() => props?.searchValue, (val) => {
   current.value = 1;
@@ -169,8 +171,9 @@ async function goProject(item: any) {
     return false;
   }
   await store.dispatch("ProjectGlobal/changeProject", item?.projectId);
+  await store.commit('Global/setPermissionMenuList', []);
   // 更新左侧菜单以及按钮权限
-  await store.dispatch("Global/getPermissionList", { projectId: item.projectId });
+  await store.dispatch("Global/getPermissionMenuList", { currProjectId: item.projectId });
   router.push(`/${item.projectShortName}/workspace`);
 }
 </script>

@@ -13,7 +13,6 @@
             <div class="serveServers">
                 <div class="serveServers-header">服务访问地址</div>
                 <PermissionButton
-                    code="LINK-SERVICE"
                     :disabled="isMockEnv"
                     :tip="isMockEnv ? 'Mock环境为系统生成，不可编辑' : ''"
                     class="envDetail-btn"
@@ -38,7 +37,6 @@
                     </template>
                     <template #customAction="{ index }">
                         <PermissionButton
-                            code="UNLINK-SERVICE"
                             type="text"
                             :disabled="isMockEnv"
                             size="small"
@@ -53,7 +51,6 @@
                 <div class="vars-header">环境变量</div>
                 <PermissionButton
                     class="envDetail-btn"
-                    code="ADD-ENVIRONMENT-VARIABLE"
                     :disabled="isMockEnv ? true : false"
                     text="添加"
                     :tip="isMockEnv ? 'Mock环境为系统生成，不可编辑' : ''"
@@ -95,7 +92,6 @@
                     </template>
                     <template #customAction="{ index }">
                         <PermissionButton
-                            code="DELETE-ENVIRONMENT-VARIABLE"
                             type="text"
                             size="small"
                             :danger="true"
@@ -108,7 +104,7 @@
         <div class="envDetail-footer" v-if="!isMockEnv">
             <PermissionButton
                 class="save-btn"
-                code="SAVE-ENVIRONMENT"
+                code="save-env"
                 type="primary"
                 text="保存"
                 html-type="submit"

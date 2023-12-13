@@ -130,7 +130,7 @@ const rules = {
 
 const dropMenuList = [
 {
-    auth: 'ENDPOINT-COPY',
+    auth: 'endpoint-copy',
     label: '服务组件',
     action: (record: any) => onOpenComponent(record)
   },

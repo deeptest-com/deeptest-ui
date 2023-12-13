@@ -145,7 +145,7 @@ const dropdownMenuList = [
     {
         label: '删除',
         action: (record) => handleDelete(record.id),
-        auth: '',
+        auth: 'p-api-tr-del',
     },
 ];
 

@@ -142,6 +142,7 @@ const treeData: any = computed(() => {
   },
   {
     label: '删除分类',
+    auth: 'p-api-tp-del',
     action: (_record: any) => deleteCategorie(_record),
   },
   {

@@ -142,6 +142,7 @@ const ContextMenuList = [
   },
   {
     label: '删除分类',
+    auth: 'p-api-endpoint-del',
     action: (_record: any) => deleteCategorie(_record),
   },
   {

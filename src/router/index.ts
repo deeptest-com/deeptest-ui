@@ -116,7 +116,7 @@ export const routes: RoutesDataItem[] = [
                         component: () => import('@/views/user/list/index.vue'),
                         meta: {
                             title: '用户管理',
-                            code: 'SYS-SETTING-USER-MANAGE'
+                            code: 'p-api-sys-set-user'
                         }
                     },
                     {
@@ -126,7 +126,7 @@ export const routes: RoutesDataItem[] = [
                         component: () => import('@/views/sys-settings/Agent/index.vue'),
                         meta: {
                             title: '代理管理',
-                            code: 'SYS-SETTING-AGENT'
+                            code: 'p-api-sys-set-agent'
                         }
                     },
                 ]

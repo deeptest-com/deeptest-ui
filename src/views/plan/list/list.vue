@@ -4,7 +4,6 @@
       <template #title>
         <PermissionButton
           v-if="hasPermission('')"
-          code="" 
           type="primary"
           :text="'新建'"
           @handle-access="create()" />
@@ -189,7 +188,7 @@ const dropdownMenuList = [
   {
     label: '删除',
     action: (record) => remove(record.id),
-    auth: '',
+    auth: 'p-api-tp-del',
   }
 ]
 

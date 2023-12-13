@@ -24,40 +24,31 @@
   </a-tooltip>
 </template>
 <script setup lang="ts">
-import { defineProps, defineEmits, computed, ref, watch } from "vue";
-import { useStore } from "vuex";
-import { StateType as GlobalStateType } from "@/store/global";
-import { PermissionButtonType } from "@/types/permission";
+import { defineProps, defineEmits, computed } from "vue";
+import usePermission from "@/composables/usePermission";
 
 const props = defineProps<{
-  code: String;
-  text: String;
-  disabled?: Boolean;
-  type?: String;
-  htmlType?: String;
-  danger?: Boolean;
-  size?: String;
-  loading?: Boolean;
-  dataCreateUser?: String;
-  action?: String;
-  tip?: String;
+  code?: string;
+  text: string;
+  disabled?: boolean;
+  type?: string;
+  htmlType?: string;
+  danger?: boolean;
+  size?: string;
+  loading?: boolean;
+  dataCreateUser?: string;
+  action?: string;
+  tip?: string;
 }>();
 
 const emits = defineEmits(["handleAccess"]);
 const disabledTooltip = computed(() => props.tip || "暂无权限，请联系管理员");
-const store = useStore<{ Global: GlobalStateType; User; ProjectGlobal }>();
-const permissionButtonMap = computed<any[]>(
-  () => store.state.Global.permissionButtonMap
-);
+const { hasPermission } = usePermission();
 const disabled = computed(() => {
   if (props.disabled) {
     return true;
   }
-  if (permissionButtonMap.value && permissionButtonMap.value.length > 0) {
-    const permission = !hasPermission();
-    return permission;
-  }
-  return false;
+  return !hasPermission(props.code);
 });
 
 const handleClick = (e) => {
@@ -65,11 +56,5 @@ const handleClick = (e) => {
   emits("handleAccess");
 };
 
-const hasPermission = () => {
-  if (!props.code) {
-    return true;
-  }
-  return permissionButtonMap.value.includes(PermissionButtonType[`${props.code}`]);
-};
 
 </script>

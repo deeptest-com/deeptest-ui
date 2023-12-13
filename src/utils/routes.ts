@@ -299,7 +299,7 @@ export const vueRoutes = (routesData: RoutesDataItem[], parentPath = '/', headSt
  * @param roles 自定义权限名
  */
 export const hasPermissionRouteRoles = (userRoles: string[], roles?: string | string[]): boolean => {
-  if (userRoles.includes('admin')) {
+  if ((userRoles || []).includes('admin')) {
     return true;
   }
 
@@ -324,7 +324,7 @@ export const hasPermissionRouteRoles = (userRoles: string[], roles?: string | st
  * @param route 当前路由
  */
 export const hasPermission = (roles: string[], route: RoutesDataItem): boolean => {
-  if (roles.includes('admin')) {
+  if ((roles || []).includes('admin')) {
     return true;
   }
 

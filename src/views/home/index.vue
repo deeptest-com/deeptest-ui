@@ -17,6 +17,7 @@
                 style="width: 200px; margin-right: 20px"
                 placeholder="请输入项目名称搜索"/>
             <a-button
+                v-if="hasPermission('p-project-create')"
                 type="primary"
                 style="margin-right: 20px"
                 @click="handleOpenAdd">新建项目
@@ -84,9 +85,11 @@ import {removeMember} from "@/views/project/service";
 import {NotificationKeyCommon} from "@/utils/const";
 import {CurrentUser, StateType as UserStateType} from "@/store/user";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import usePermission from "@/composables/usePermission";
 
 // 获取当前登录用户信息
 const router = useRouter();
+const { hasPermission } = usePermission();
 const store = useStore<{ Home: StateType, User: UserStateType }>();
 const currentUser = computed<CurrentUser>(() => store.state.User.currentUser);
 const cardData = computed<any>(() => store.state.Home.cardData);
