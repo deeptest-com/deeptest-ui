@@ -84,12 +84,14 @@ const categoryId = ref(0)
 const loadServe = async () => {
   listServe().then((json) => {
     serves.value = json.data.serves
-
+    serves.value.unshift({id:0,name:"全部"})
+    /*
     if (serves.value.length > 0) {
       serveId.value = serves.value[0].id
       props.changeServe(serveId.value)
       loadCategoryByServe()
     }
+    */
   })
 }
 loadServe()

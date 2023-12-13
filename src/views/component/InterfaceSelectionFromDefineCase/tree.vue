@@ -123,10 +123,12 @@ const onChecked = (checkedKeys, e) => {
 const loadServe = async () => {
   await listServe().then((json) => {
     serves.value = json.data.serves
-
+    serves.value.unshift({id:0,name:"全部"})
+    /*
     if (serves.value.length > 0) {
       serveId.value = serves.value[0].id
     }
+    */
   })
 }
 
