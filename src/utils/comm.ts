@@ -37,3 +37,21 @@ export const getResponseKey = (debugInfo) => {
     console.log('getResponseKey', key)
     return key
 }
+
+/**
+ * 处理 textarea数据 转为 html文本
+ * @param v 
+ * @returns 
+ */
+export const transformTextareaToHtml = (v) => {
+    return v.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>').replace(/\s/g, '&nbsp;');
+}
+
+/**
+ * 处理 html转为 textarea文本
+ * @param v 
+ * @returns 
+ */
+export const transformHtmlToTextare = (v) => {
+    return v.replace(/<br>/g, '\n').replace(/(&nbsp;)/g, ' ')
+}

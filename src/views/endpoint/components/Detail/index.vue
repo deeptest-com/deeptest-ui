@@ -12,6 +12,7 @@
       <EndpointBasicInfo
         @changeStatus="changeStatus"
         @change-description="changeDescription"
+        @change-serve="changeServe"
         @changeCategory="changeCategory"/>
     </template>
     <template #tabHeader>
@@ -60,6 +61,7 @@
 import { onMounted, computed, ref, watch, unref, onUnmounted, provide } from 'vue';
 import {onBeforeRouteLeave, useRouter} from 'vue-router';
 import { useStore } from 'vuex';
+import cloneDeep from "lodash/cloneDeep";
 
 import { Endpoint } from "@/views/endpoint/data";
 import EndpointBasicInfo from '../Drawer/EndpointBasicInfo.vue';
@@ -100,6 +102,7 @@ onMounted(async () => {
      * 单独刷新详情页 需要初始化 用户列表和 serve列表
      */
     await store.dispatch('Project/getUserList');
+    store.dispatch('ServeGlobal/fetchServe');
     await store.dispatch('Endpoint/loadCategory');
     await store.commit("Global/setSpinning", false);
     await store.commit("Detail/setShow", true);
@@ -121,25 +124,38 @@ async function changeStatus(status) {
 }
 
 async function updateTitle(title) {
-  await store.dispatch('Endpoint/updateEndpointDetail',
-      {...imDetail.value, title: title}
+  await store.dispatch('Endpoint/updateEndpointName',
+      {id: imDetail.value.id, name: title}
   );
   await store.dispatch('Endpoint/getEndpointDetail', {id: imDetail.value.id});
 }
 
 async function changeDescription(description) {
-  await store.dispatch('Endpoint/updateEndpointDetail',
-      {...imDetail.value, description}
-  );
+  await store.dispatch('Endpoint/batchUpdateField', {
+    "fieldName": 'description',
+    "value": description,
+    "endpointIds": [imDetail.value.id]
+  });
   await store.dispatch('Endpoint/getEndpointDetail', {id: imDetail.value.id});
 }
 
 async function changeCategory(value) {
-  await store.dispatch('Endpoint/updateEndpointDetail',
-      {...imDetail.value, categoryId: value}
-  );
+  await store.dispatch('Endpoint/batchUpdateField', {
+    "fieldName": 'categoryId',
+    value,
+    "endpointIds": [imDetail.value.id]
+  });
   await store.dispatch('Endpoint/getEndpointDetail', {id: imDetail.value.id});
   await store.dispatch('Endpoint/loadCategory');
+}
+
+async function changeServe(value:number) {
+  await store.dispatch('Endpoint/batchUpdateField', {
+    "fieldName": 'serveId',
+    value,
+    "endpointIds": [imDetail.value.id]
+  });
+  await store.dispatch('Endpoint/getEndpointDetail', {id: imDetail.value.id});
 }
 
 const activeTabKey = ref('request');
@@ -166,6 +182,10 @@ async function save() {
   });
   await store.commit('Global/setSpinning', false);
   notifySuccess('保存成功');
+
+  setTimeout(() => {
+    store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value));
+  }, 200);
 }
 
 watch(() => {
@@ -400,7 +420,21 @@ onUnmounted(() => {
 /*************************************************
  * ::::离开保存代码逻辑部分end
  ************************************************/
-
+ watch(() => {
+  return [endpointDetail.value,srcEndpointDetail.value]
+}, (newVal, oldValue) => {
+  const src = srcEndpointDetail.value;
+  const cur = endpointDetail.value;
+  const isInit = cur?.id && src?.id;
+  const isChange = !equalObjectByLodash(cur, src);
+  if(isInit){
+    store.commit('Endpoint/setIsDefineChange', isChange);
+  }else {
+    store.commit('Endpoint/setIsDefineChange', false);
+  }
+}, {
+  deep: true
+});
 </script>
 <style lang="less" scoped>
 .tab-pane {
