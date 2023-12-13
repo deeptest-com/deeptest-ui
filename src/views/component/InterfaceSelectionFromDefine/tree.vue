@@ -6,6 +6,9 @@
             v-model:value="serveIds"
             mode="multiple"
             :placeholder="'请选择服务'"
+            :showArrow="true"
+            :allowClear="true"
+            :maxTagCount="1"
             @change="selectServe">
           <a-select-option v-for="item in serves" :key="item.id" :value="item.id">{{ item.name }}</a-select-option>
         </a-select>

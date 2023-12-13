@@ -4,9 +4,12 @@
       <a-select 
         style="margin-right: 20px; width: 100%"
         :bordered="true"
+        :showArrow="true"
         :placeholder="'请选择服务'"
         v-model:value="serveIds"
         mode="multiple"
+        :allowClear="true"
+        :maxTagCount="2"
         @change="selectServe">
         <a-select-option v-for="item in serves" :key="item.id" :value="item.id">{{ item.name }}</a-select-option>
       </a-select>
