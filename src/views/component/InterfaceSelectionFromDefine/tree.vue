@@ -3,7 +3,8 @@
     <div class="toolbar">
       <div class="tips">
         <a-select style="width: 220px" :bordered="true"
-            v-model:value="serveId"
+            v-model:value="serveIds"
+            mode="multiple"
             :placeholder="'请选择服务'"
             @change="selectServe">
           <a-select-option v-for="item in serves" :key="item.id" :value="item.id">{{ item.name }}</a-select-option>
@@ -78,14 +79,13 @@ watch(props, () => {
 }, {deep: true})
 
 const serves = ref([] as any[]);
-const serveId = ref(0)
+const serveIds = ref([] as number[]);
 const categoryId = ref(0)
 
 const loadServe = async () => {
   listServe().then((json) => {
     serves.value = json.data.serves
-    serves.value.unshift({id:0,name:"全部"})
-    props.changeServe(serveId.value)
+    props.changeServe(serveIds.value)
     loadCategoryByServe()
     /*
     if (serves.value.length > 0) {
@@ -99,8 +99,8 @@ const loadServe = async () => {
 loadServe()
 
 const selectServe = () => {
-  console.log('selectServe', serveId.value)
-  props.changeServe(serveId.value)
+  console.log('selectServe', serveIds.value)
+  props.changeServe(serveIds.value)
 
   loadCategoryByServe()
 }
@@ -108,7 +108,7 @@ const selectServe = () => {
 const treeDataCategory = ref([] as any[])
 let treeDataMapCategory = {}
 const loadCategoryByServe = async () => {
-  console.log('loadCategory', serveId.value)
+  console.log('loadCategory', serveIds.value)
 
   const response = await loadCategory('endpoint');
   if (response.code === 0) {

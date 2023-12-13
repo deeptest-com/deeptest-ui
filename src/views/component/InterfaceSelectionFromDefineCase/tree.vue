@@ -5,7 +5,8 @@
         style="margin-right: 20px; width: 100%"
         :bordered="true"
         :placeholder="'请选择服务'"
-        v-model:value="serveId"
+        v-model:value="serveIds"
+        mode="multiple"
         @change="selectServe">
         <a-select-option v-for="item in serves" :key="item.id" :value="item.id">{{ item.name }}</a-select-option>
       </a-select>
@@ -108,7 +109,7 @@ const fieldNames = {
 }
 
 const serves = ref([] as any[]);
-const serveId = ref(0)
+const serveIds = ref([] as number[]);
 
 
 const onChecked = (checkedKeys, e) => {
@@ -123,7 +124,6 @@ const onChecked = (checkedKeys, e) => {
 const loadServe = async () => {
   await listServe().then((json) => {
     serves.value = json.data.serves
-    serves.value.unshift({id:0,name:"全部"})
     /*
     if (serves.value.length > 0) {
       serveId.value = serves.value[0].id
@@ -140,17 +140,17 @@ onMounted(async () => {
 const searchValue = ref('');
 const expandedKeys = ref<number[]>([]);
 
-async function loadTreeData(serveId:number) {
+async function loadTreeData(serveIds:number[]) {
   if (currProject?.value?.id > 0 ) {
-    await store.dispatch('Endpoint/getCaseTree', {currProjectId: currProject.value.id, serveId: serveId});
+    await store.dispatch('Endpoint/getCaseTree',serveIds);
    // expandAll();
   }
 }
 
 
 const selectServe = () => {
-  console.log('selectServe', serveId.value)
-  loadTreeData(serveId.value)
+  console.log('selectServe', serveIds.value)
+  loadTreeData(serveIds.value)
 }
 
 
