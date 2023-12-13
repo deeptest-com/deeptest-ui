@@ -1168,12 +1168,12 @@ const StoreModel: ModuleType = {
 
                 if (response.code != 0) return;
 
-                const data = {id: 0,count:1, children: response.data}
+                //const data = {id: 0,count:1, children: response.data}
 
-                const newData = reBuildTree(data,0)
+                //const newData = reBuildTree(data,0)
 
-                commit('setCaseTree', newData.children);
-                const data1 = {id: 0, children: newData.children}
+                commit('setCaseTree', response.data);
+                const data1 = {id: 0, children: response.data}
                 const mp = genNodeMap(data1)
                 commit('setCaseTreeMap', mp);
 
