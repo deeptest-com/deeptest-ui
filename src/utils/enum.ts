@@ -173,6 +173,7 @@ export enum DataSrc {
 
 export enum ConditionCategory {
     result = 'result',
+    postCondition = 'postCondition',
     console = 'console',
     assert = 'assert'
 }

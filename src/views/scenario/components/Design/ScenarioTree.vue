@@ -21,7 +21,7 @@
             :showIcon="false"
             :expandAction="false"
             :auto-expand-parent="autoExpandParent"
-            :expandedKeys="expandedKeys"
+            :expandedKeys="expandedKeys || []"
             v-model:selectedKeys="selectedKeys"
             @drop="onDrop"
             @dragstart="onDragstart"
