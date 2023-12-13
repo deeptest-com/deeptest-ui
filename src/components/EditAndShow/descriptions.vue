@@ -1,5 +1,5 @@
 <template>
-  <div class="description">
+  <div :class="['description', isEdit && 'description-edit-box']">
     <!-- 编辑文本区域 -->
     <div class="description-editor" v-if="isEdit">
       <a-textarea v-model:value="textValue" placeholder="填写描述" :autoSize="{ minRows: minRows || 2, maxRows: maxRows || 6 }"></a-textarea>
@@ -66,8 +66,12 @@ watch(() => {
   position: relative;
   overflow-y: scroll;
   width: 100%;
+  display: inline-table;
 
-  &:hover {
+  &:not(.description-edit-box):hover {
+    border: 1px solid #d0d3d6;
+    border-radius: 2px;
+    box-sizing: border-box;
     .description-edit {
       display: flex;
     }
