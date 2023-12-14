@@ -7,6 +7,9 @@ export default function usePermission() {
   const permissionMenuList = computed<any[]>(
     () => store.state.Global.permissionMenuList
   );
+  const userRolesAuth = computed<any[]>(
+    () => store.state.Global.userRolesAuth,
+  );
 
   const hasPermission = (value: string | unknown) => {
     if (!value) {
@@ -18,6 +21,13 @@ export default function usePermission() {
     return unref(permissionMenuList).includes(value);
   };
 
+  const hasProjectAuth = (value: string | unknown) => {
+    if (!value) {
+      return true;
+    }
+    return unref(userRolesAuth).includes(value);
+  };
+
   const setPermission = (value: string) => {
     console.log('setPermission', value);
   };
@@ -27,6 +37,7 @@ export default function usePermission() {
   };
 
   return {
-    hasPermission
+    hasPermission,
+    hasProjectAuth
   };
 }

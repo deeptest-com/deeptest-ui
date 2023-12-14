@@ -42,7 +42,7 @@
             </div>
           </a-menu-item>
           <a-menu-item key="footer" class="menu-item footer">
-            <a-button v-if="hasPermission('p-project-create')" type="link" :size="'small'" @click="newProject">
+            <a-button v-if="hasProjectAuth('p-project-create')" type="link" :size="'small'" @click="newProject">
               <PlusOutlined/>
               新建项目
             </a-button>
@@ -87,7 +87,7 @@ const store = useStore<{
 }>();
 
 const route = useRoute();
-const { hasPermission } = usePermission();
+const { hasProjectAuth } = usePermission();
 const createProjectModalVisible = ref(false);
 const message = computed<number>(() => store.state.User.message);
 const projects = computed<any>(() => store.state.ProjectGlobal.projects);

@@ -49,7 +49,7 @@ export default defineComponent({
                 })
                 return;
             }
-
+            await store.dispatch('Global/getUserRolesAuth');
             isReady.value = true;
         }
 

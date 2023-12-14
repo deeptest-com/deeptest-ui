@@ -10,6 +10,7 @@ import {listAgent} from "@/views/sys-settings/service";
 import { getUserMenuList } from '@/services/project';
 import {Cache_Key_Agent} from "@/utils/const";
 import {getCache, setCache} from "@/utils/localCache";
+import { getUserRolesAuth } from '@/services/role';
 
 export interface StateType {
   // 左侧展开收起
@@ -30,6 +31,7 @@ export interface StateType {
   spinning:boolean;
   clientVersion: string;
   permissionMenuList: string[];
+  userRolesAuth: string[];
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -47,6 +49,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
     setAgents: Mutation<StateType>;
     setCurrAgent: Mutation<StateType>;
     setPermissionMenuList: Mutation<StateType>;
+    setRolesAuth: Mutation<StateType>;
   };
   actions: {
     getServerConfig: Action<StateType, StateType>;
@@ -55,6 +58,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
     getPermissionMenuList: Action<StateType, StateType>;
 
     listAgent: Action<StateType, StateType>;
+    getUserRolesAuth: Action<StateType, StateType>;
   };
 }
 
@@ -78,6 +82,7 @@ const initState: StateType = {
   spinning:false,
   clientVersion: '0.0.1',
   permissionMenuList: [],
+  userRolesAuth: [],
 };
 
 const StoreModel: ModuleType = {
@@ -135,6 +140,9 @@ const StoreModel: ModuleType = {
     },
     setPermissionMenuList(state, payload) {
       state.permissionMenuList = payload;
+    },
+    setRolesAuth(state, payload) {
+      state.userRolesAuth = payload;
     }
   },
   actions: {
@@ -187,6 +195,19 @@ const StoreModel: ModuleType = {
         }
       } catch(_err) {
         return false;
+      }
+    },
+
+    async getUserRolesAuth({ commit }) {
+      try {
+        const result: any = await getUserRolesAuth();
+        if (result.code === 0) {
+          commit('setRolesAuth', result.data);
+          return result.data;
+        }
+        return result;
+      } catch(error) {
+        return error;
       }
     }
   }

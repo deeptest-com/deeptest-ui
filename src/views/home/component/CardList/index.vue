@@ -103,7 +103,7 @@ const props = defineProps({
 });
 const router = useRouter();
 const store = useStore<{ Home: StateType }>();
-const { hasPermission } = usePermission();
+const { hasProjectAuth } = usePermission();
 const ListItem = List.Item;
 const list = computed<any>(() => store.state.Home.queryResult.list);
 
@@ -147,7 +147,7 @@ const dropDownList = computed(() => {
     action: (record) => emit("exit", record),
     auth: 'p-project-exit',
     ifShow: (record) => record.accessible === 1,
-  }].filter(e => hasPermission(e.auth));
+  }].filter(e => hasProjectAuth(e.auth));
 })
 
 watch(() => props?.searchValue, (val) => {

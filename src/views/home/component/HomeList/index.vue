@@ -48,7 +48,7 @@ const store = useStore<{
   Home: StateType;
   User: UserStateType;
 }>();
-const { hasPermission } = usePermission();
+const { hasProjectAuth } = usePermission();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currentUser = computed<any>(() => store.state.User.currentUser);
 const list = computed<any>(() => store.state.Home.queryResult.list);
@@ -104,7 +104,7 @@ const dropDownList = computed(() => {
     action: (record) => emit("exit", record),
     auth: 'p-project-exit',
     ifShow: (record) => record.accessible === 1,
-  }].filter(e => hasPermission(e.auth));
+  }].filter(e => hasProjectAuth(e.auth));
 })
 
 
