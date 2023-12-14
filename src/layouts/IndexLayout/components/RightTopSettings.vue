@@ -56,7 +56,7 @@
             <a-menu-item key="agentManage">
               代理管理
             </a-menu-item>
-            <a-menu-item key="userManage">
+            <a-menu-item key="userManage" v-if="hasProjectAuth('p-api-setting-usermanage')">
               用户管理
             </a-menu-item>
           </a-menu>
@@ -127,7 +127,9 @@ import {StateType as GlobalStateType} from "@/store/global";
 import {Cache_Key_Agent} from "@/utils/const";
 import {isLeyan} from "@/utils/comm";
 import {useWujie} from "@/composables/useWujie";
+import usePermission from "@/composables/usePermission";
 const {isWujieEnv} = useWujie();
+const { hasProjectAuth } = usePermission();
 const props = defineProps({
   theme: {
     required: false,
