@@ -23,9 +23,11 @@
     <a-col :span="18">
       <a-row class="form-item-request-item" v-if="collapse">
         <a-col :span="24">
-          <a-input @change="handleChangeDesc"
-                   placeholder="描述信息"
-                   :value="selectedMethodDetail.requestBody?.description"/>
+          <a-textarea 
+            :autoSize="{ minRows: 1, maxRows: 3 }"
+            :value="selectedMethodDetail.requestBody?.description" 
+            placeholder="描述信息" 
+            @change="handleChangeDesc"/>         
         </a-col>
       </a-row>
       <!-- 增加请求体 - scheme定义 -->

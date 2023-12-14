@@ -180,7 +180,7 @@ async function goProject(item: any) {
   await store.commit('Global/setPermissionMenuList', []);
 
   // 更新左侧菜单以及按钮权限
-  await store.dispatch("Global/getPermissionList", { projectId: item.projectId });
+  // await store.dispatch("Global/getPermissionList", { projectId: item.projectId });
 
   router.push(`/${item.projectShortName}/workspace`);
 }

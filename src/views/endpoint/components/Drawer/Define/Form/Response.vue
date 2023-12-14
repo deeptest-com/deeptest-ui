@@ -52,13 +52,12 @@
       <div :class="{'form-item-response-body':true,'has-data':selectedCodeDetail}"  v-if="collapse">
         <div v-if="selectedCodeDetail">
           <!-- Description -->
-          <a-row class="form-item-response-item">
+          <a-row class="form-item-response-item" style="align-items: unset;">
             <a-col class="form-label">
               描述
             </a-col>
             <a-col :span="16">
-              <a-input @change="handleResDescriptionChange" :placeholder="'请输入描述信息'"
-                       :value="selectedCodeDetail.description"/>
+              <a-textarea @change="handleResDescriptionChange" :value="selectedCodeDetail.description" :autoSize="{ minRows: 1, maxRows: 3 }" placeholder="描述信息"/>
             </a-col>
           </a-row>
           <!-- 增加响应头 -->

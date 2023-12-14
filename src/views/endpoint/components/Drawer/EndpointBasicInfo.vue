@@ -1,5 +1,5 @@
 <template>
-  <a-descriptions :size="'small'" :title="null" :column="4">
+  <a-descriptions size="small" :title="null" :column="4">
     <a-descriptions-item label="创建人">{{ endpointDetail ? username(endpointDetail.createUser) :'' }}</a-descriptions-item>
     <a-descriptions-item label="状态">
       <EditAndShowSelect
@@ -18,10 +18,6 @@
         }"
       />
     </a-descriptions-item>
-    <a-descriptions-item label="描述">
-      <EditAndShowField :placeholder="'请输入描述'" :value="endpointDetail?.description || '暂无'"
-                        @update="updateDescription"/>
-    </a-descriptions-item>
     <a-descriptions-item label="分类">
       <EditAndShowTreeSelect
           :label="categoryLabel"
@@ -38,6 +34,14 @@
     </a-descriptions-item>
     <a-descriptions-item label="创建时间">{{ endpointDetail?.createdAt }}</a-descriptions-item>
     <a-descriptions-item label="最近更新">{{ endpointDetail?.updatedAt }}</a-descriptions-item>
+    <a-descriptions-item></a-descriptions-item>
+    <a-descriptions-item label="描述" span="4">
+      <EditDescription 
+        :min-rows="2" 
+        :max-rows="6" 
+        :description="endpointDetail?.description" 
+        @confirm="updateDescription" />
+    </a-descriptions-item>
   </a-descriptions>
 </template>
 <script lang="ts" setup>
@@ -56,8 +60,7 @@ import EditAndShowField from '@/components/EditAndShow/index.vue';
 import EditAndShowSelect from '@/components/EditAndShowSelect/index.vue';
 import EditAndShowTreeSelect from '@/components/EditAndShowTreeSelect/index.vue';
 import Tags from '../Tags/index.vue';
-import SelectServe from '../SelectServe/index.vue';
-
+import EditDescription from '@/components/EditAndShow/descriptions.vue';
 
 const store = useStore<{ Endpoint, Project,ServeGlobal }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);

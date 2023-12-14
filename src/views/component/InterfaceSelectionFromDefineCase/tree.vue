@@ -1,11 +1,15 @@
 <template>
   <div class="tree-main">
     <div class="tree-filters">
-      <a-select 
+      <a-select
         style="margin-right: 20px; width: 100%"
         :bordered="true"
+        :showArrow="true"
         :placeholder="'请选择服务'"
-        v-model:value="serveId"
+        v-model:value="serveIds"
+        mode="multiple"
+        :allowClear="true"
+        :maxTagCount="2"
         @change="selectServe">
         <a-select-option v-for="item in serves" :key="item.id" :value="item.id">{{ item.name }}</a-select-option>
       </a-select>
@@ -36,9 +40,9 @@
           <span v-if="nodeProps.dataRef.type == 'dir' || nodeProps.dataRef.type == ''"><FolderOpenOutlined  style="margin-right: 4px"/> {{nodeProps.dataRef.name+' ('+nodeProps.dataRef.count+')'}}</span>
           <span v-if="nodeProps.dataRef.type == 'endpoint'"><ApiOutlined  style="margin-right: 4px"/> {{nodeProps.dataRef.name}}</span>
           <span v-if="nodeProps.dataRef.type == 'case'">
-            <ShareAltOutlined style="margin-right: 4px" /> 
-            <a-tag 
-              class="method-tag" 
+            <ShareAltOutlined style="margin-right: 4px" />
+            <a-tag
+              class="method-tag"
               style="margin-right: 8px;"
               :color="getMethodColor(nodeProps.dataRef.method || 'GET', nodeProps.dataRef.disable)">
               {{ nodeProps.dataRef.method || "GET" }}
@@ -56,7 +60,7 @@
                       </div>
                         --->
         </template>
-  
+
       </a-tree>
 
       <div v-if="!treeData.length" class="nodata-tip">
@@ -101,9 +105,8 @@ const fieldNames = {
 }
 
 const serves = ref([] as any[]);
-const serveId = ref(0)
+const serveIds = ref([] as number[]);
 const checkedKeys = ref([]);
-
 
 const onChecked = (keys) => {
   checkedKeys.value = keys;
@@ -116,10 +119,11 @@ const getSelectedTreeNodes = () => {
 const loadServe = async () => {
   await listServe().then((json) => {
     serves.value = json.data.serves
-
+    /*
     if (serves.value.length > 0) {
       serveId.value = serves.value[0].id
     }
+    */
   })
 }
 
@@ -130,13 +134,17 @@ onMounted(async () => {
 
 const searchValue = ref('');
 
-async function loadTreeData() {
-  await store.dispatch('Endpoint/getCaseTree', {currProjectId: currProject.value.id, serveId: serveId.value});
+async function loadTreeData(serveIds:number[]) {
+  if (currProject?.value?.id > 0 ) {
+    await store.dispatch('Endpoint/getCaseTree',serveIds);
+   // expandAll();
+  }
 }
 
 
-const selectServe = (_v) => {
-  loadTreeData()
+const selectServe = () => {
+  console.log('selectServe', serveIds.value)
+  loadTreeData(serveIds.value)
 }
 
 defineExpose({

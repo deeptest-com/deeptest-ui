@@ -249,32 +249,38 @@ async function changeStatus(status) {
 }
 
 async function updateTitle(title) {
-  await store.dispatch('Endpoint/updateEndpointDetail',
-      {...endpointDetail.value, title: title}
+  await store.dispatch('Endpoint/updateEndpointName',
+      {id: endpointDetail.value.id, name: title}
   );
   await store.dispatch('Endpoint/getEndpointDetail', {id: endpointDetail.value.id});
 }
 
 async function changeDescription(description) {
-  await store.dispatch('Endpoint/updateEndpointDetail',
-      {...endpointDetail.value, description}
-  );
+  await store.dispatch('Endpoint/batchUpdateField', {
+    "fieldName": 'description',
+    "value": description,
+    "endpointIds": [endpointDetail.value.id]
+  });
   await store.dispatch('Endpoint/getEndpointDetail', {id: endpointDetail.value.id});
 }
 
 async function changeCategory(value) {
-  await store.dispatch('Endpoint/updateEndpointDetail',
-      {...endpointDetail.value, categoryId: value}
-  );
+  await store.dispatch('Endpoint/batchUpdateField', {
+    "fieldName": 'categoryId',
+    value,
+    "endpointIds": [endpointDetail.value.id]
+  });
   await store.dispatch('Endpoint/getEndpointDetail', {id: endpointDetail.value.id});
 
   await store.dispatch('Endpoint/loadCategory');
 }
 
 async function changeServe(value:number) {
-  await store.dispatch('Endpoint/updateEndpointDetail',
-      {...endpointDetail.value, serveId:value}
-  );
+  await store.dispatch('Endpoint/batchUpdateField', {
+    "fieldName": 'serveId',
+    value,
+    "endpointIds": [endpointDetail.value.id]
+  });
   await store.dispatch('Endpoint/getEndpointDetail', {id: endpointDetail.value.id});
 }
 

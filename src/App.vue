@@ -23,6 +23,7 @@ import {useRoute, useRouter} from "vue-router";
 import {useWujie} from "@/composables/useWujie";
 import fixMonacoEditor from "@/utils/fixMonacoEditor";
 import {WebSocket} from "@/services/websocket";
+import {getCache, setCache} from "@/utils/localCache";
 import store from "@/config/store";
 fixMonacoEditor();
 export default defineComponent({
@@ -82,12 +83,21 @@ export default defineComponent({
         WebSocket.init(true);
         bus?.$on('sendMsgToLeyanAPI', async (msg: any) => {
           console.log('832msg', msg)
+
           if (msg?.type === 'changeRouter') {
+            const leyenProjectName = await getCache(settings.leyanProjectName);
+            const isChangeProject = leyenProjectName !== msg?.data?.projectName;
+            console.log('832msg', leyenProjectName, msg?.data?.projectName, isChangeProject)
+
             // 切换项目了，需要重置数据
-            if(msg?.data?.isChangeProject && msg?.data?.projectName){
+            if(isChangeProject){
                const result = await store.dispatch('ProjectGlobal/checkProjectAndUser', { project_code: msg?.data?.projectName });
               // 更新左侧菜单以及按钮权限
-              await store.dispatch('Global/getPermissionList', { projectId: result.id });
+              await store.dispatch('Global/getUserRolesAuth');
+              // await store.dispatch('Global/getPermissionList', { projectId: result.id });
+            }
+            if(msg?.data?.projectName){
+              await setCache(settings.leyanProjectName, msg?.data?.projectName);
             }
             await router.push(msg?.data?.path);
           }
