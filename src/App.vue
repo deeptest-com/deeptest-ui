@@ -93,8 +93,7 @@ export default defineComponent({
             if(isChangeProject){
                const result = await store.dispatch('ProjectGlobal/checkProjectAndUser', { project_code: msg?.data?.projectName });
               // 更新左侧菜单以及按钮权限
-              await store.dispatch('Global/getUserRolesAuth');
-              // await store.dispatch('Global/getPermissionList', { projectId: result.id });
+              await store.dispatch('Global/getPermissionMenuList', { currProject: result.id });
             }
             if(msg?.data?.projectName){
               await setCache(settings.leyanProjectName, msg?.data?.projectName);
