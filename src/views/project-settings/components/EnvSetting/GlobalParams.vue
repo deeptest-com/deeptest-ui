@@ -77,7 +77,6 @@
       <PermissionButton
           html-type="submit"
           type="primary"
-          code="save-global-param"
           text="保存"
           @handle-access="handleSaveGlobalParams">
       </PermissionButton>

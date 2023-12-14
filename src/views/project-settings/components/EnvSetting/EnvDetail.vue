@@ -104,7 +104,6 @@
         <div class="envDetail-footer" v-if="!isMockEnv">
             <PermissionButton
                 class="save-btn"
-                code="save-env"
                 type="primary"
                 text="保存"
                 html-type="submit"
