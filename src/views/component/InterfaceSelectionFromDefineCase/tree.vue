@@ -1,7 +1,7 @@
 <template>
   <div class="tree-main">
     <div class="tree-filters">
-      <a-select 
+      <a-select
         style="margin-right: 20px; width: 100%"
         :bordered="true"
         :showArrow="true"
@@ -40,9 +40,9 @@
           <span v-if="nodeProps.dataRef.type == 'dir' || nodeProps.dataRef.type == ''"><FolderOpenOutlined  style="margin-right: 4px"/> {{nodeProps.dataRef.name+' ('+nodeProps.dataRef.count+')'}}</span>
           <span v-if="nodeProps.dataRef.type == 'endpoint'"><ApiOutlined  style="margin-right: 4px"/> {{nodeProps.dataRef.name}}</span>
           <span v-if="nodeProps.dataRef.type == 'case'">
-            <ShareAltOutlined style="margin-right: 4px" /> 
-            <a-tag 
-              class="method-tag" 
+            <ShareAltOutlined style="margin-right: 4px" />
+            <a-tag
+              class="method-tag"
               style="margin-right: 8px;"
               :color="getMethodColor(nodeProps.dataRef.method || 'GET', nodeProps.dataRef.disable)">
               {{ nodeProps.dataRef.method || "GET" }}
@@ -60,7 +60,7 @@
                       </div>
                         --->
         </template>
-  
+
       </a-tree>
 
       <div v-if="!treeData.length" class="nodata-tip">
@@ -106,7 +106,7 @@ const fieldNames = {
 
 const serves = ref([] as any[]);
 const serveIds = ref([] as number[]);
-
+const checkedKeys = ref([]);
 
 const onChecked = (keys) => {
   checkedKeys.value = keys;
