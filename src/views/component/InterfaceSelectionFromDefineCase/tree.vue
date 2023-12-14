@@ -4,8 +4,12 @@
       <a-select 
         style="margin-right: 20px; width: 100%"
         :bordered="true"
+        :showArrow="true"
         :placeholder="'请选择服务'"
-        v-model:value="serveId"
+        v-model:value="serveIds"
+        mode="multiple"
+        :allowClear="true"
+        :maxTagCount="2"
         @change="selectServe">
         <a-select-option v-for="item in serves" :key="item.id" :value="item.id">{{ item.name }}</a-select-option>
       </a-select>
@@ -101,8 +105,7 @@ const fieldNames = {
 }
 
 const serves = ref([] as any[]);
-const serveId = ref(0)
-const checkedKeys = ref([]);
+const serveIds = ref([] as number[]);
 
 
 const onChecked = (keys) => {
@@ -116,10 +119,11 @@ const getSelectedTreeNodes = () => {
 const loadServe = async () => {
   await listServe().then((json) => {
     serves.value = json.data.serves
-
+    /*
     if (serves.value.length > 0) {
       serveId.value = serves.value[0].id
     }
+    */
   })
 }
 
@@ -130,13 +134,17 @@ onMounted(async () => {
 
 const searchValue = ref('');
 
-async function loadTreeData() {
-  await store.dispatch('Endpoint/getCaseTree', {currProjectId: currProject.value.id, serveId: serveId.value});
+async function loadTreeData(serveIds:number[]) {
+  if (currProject?.value?.id > 0 ) {
+    await store.dispatch('Endpoint/getCaseTree',serveIds);
+   // expandAll();
+  }
 }
 
 
-const selectServe = (_v) => {
-  loadTreeData()
+const selectServe = () => {
+  console.log('selectServe', serveIds.value)
+  loadTreeData(serveIds.value)
 }
 
 defineExpose({

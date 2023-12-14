@@ -15,7 +15,7 @@
       </div>
 
       <div class="right">
-        <List :selectInterfaces="onSelectInterfaces" :categoryId="categoryId" :serveId="serveId"></List>
+        <List :selectInterfaces="onSelectInterfaces" :categoryId="categoryId" :serveIds="serveIds"></List>
       </div>
     </div>
 
@@ -44,20 +44,20 @@ const props = defineProps({
   },
 })
 
-const serveId = ref(0)
+const serveIds = ref([] as number[])
 const categoryId = ref(0)
 const interfaceIds = ref([])
 
-const changeServe = (id) => {
-  console.log('changeServe', id)
-  serveId.value = id;
+const changeServe = (ids: number[]) => {
+  console.log('changeServe', ids)
+  serveIds.value = ids;
 }
-const changeCategory = (id) => {
+const changeCategory = (id: number) => {
   console.log('changeCategory', id)
   categoryId.value = id;
 }
 
-const onSelectInterfaces = async (ids) => {
+const onSelectInterfaces = async (ids: never[]) => {
   console.log('onSelectInterfaces', ids)
   interfaceIds.value = ids
 }
