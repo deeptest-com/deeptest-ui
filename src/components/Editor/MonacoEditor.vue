@@ -104,7 +104,7 @@ export default defineComponent({
         }
       })
 
-      const usedBy = inject('usedBy')
+      const usedBy = inject('usedBy', '')
       const usedWith = inject('usedWith', '')
 
       if (options.initTsModules) {

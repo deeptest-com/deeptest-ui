@@ -54,7 +54,7 @@ function useCaseExecution(): CaseExecution {
             errorReports.value.forEach((element, index) => {
               if (element.parentUuid && execResultMap.value[element.parentUuid]) {
                 updateParentLog(element);
-                errorReports.value.splice(index, 1); 
+                errorReports.value.splice(index, 1);
               }
             });
         }
@@ -62,7 +62,7 @@ function useCaseExecution(): CaseExecution {
         if (log.parentUuid && !execResultMap.value[log.parentUuid]) {
             errorReports.value.push(log);
         }
-        
+
         if (log.parentUuid && execResultMap.value[log.parentUuid]) {
             updateParentLog(log);
         }
@@ -90,7 +90,7 @@ function useCaseExecution(): CaseExecution {
         const log = wsMsg.data ? JSON.parse(JSON.stringify(wsMsg.data)) : {};
 
         if (wsMsg.category === 'result' && log.category === 'case') {
-            console.log('$$$$$$$$$$$$$$$ case log', log.caseUuid)
+            console.log('****** case log', log.caseUuid)
         }
 
         // 初始化
@@ -139,29 +139,40 @@ function useCaseExecution(): CaseExecution {
     }
 
     const execStart = async ({ environmentId, baseCaseId, usedBy, cases, type }) => {
-        execUuid.value = getUuid();
+        const userId = currUser.value.id
+        execUuid.value = userId + '@' + getUuid()
+
         execStatusMap.value = {};
         execResults.value = [];
         store.commit('Endpoint/setAlternativeExecResults', []);
         store.commit('Endpoint/setAlternativeExecStatusMap', {});
         const data = {
             userId: currUser.value.id,
+            execUuid: execUuid.value,
             serverUrl: process.env.VUE_APP_API_SERVER,
             token: await getToken(),
             projectId: currProject.value.id,
             baseCaseId,
             usedBy,
-            execUuid: execUuid.value,
             cases,
             type,
             environmentId: environmentId,
         }
-        console.log('===== websocket data =====', data);
-        WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify({act: 'execCases', casesExecReq: data}))
+        console.log('****** send exec cases ws data', data);
+        WebSocket.sentMsg(execUuid.value, JSON.stringify({
+            act: 'execCases',
+            casesExecReq: data
+        }))
     }
     const execStop = () => {
-        const msg = {act: 'execCasesStop', execReq: {execUuid: execUuid.value}};
-        WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify(msg));
+        if (!execUuid.value) return
+
+        WebSocket.sentMsg(execUuid.value, JSON.stringify({
+            act: 'stop',
+            execReq: {
+                execUuid: execUuid.value
+            },
+        }));
     }
 
     return {

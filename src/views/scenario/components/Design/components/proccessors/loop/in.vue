@@ -4,16 +4,35 @@
     <ProcessorHeader/>
     <a-card :bordered="false">
       <div>
-        <a-form :wrapper-col="wrapperCol">
-          <a-form-item label="变量名称" v-bind="validateInfos.variableName">
-            <a-input v-model:value="modelRef.variableName"
-                     @blur="validate('variableName', { trigger: 'blur' }).catch(() => {})"/>
+        <a-form :labelCol="labelCol" :wrapper-col="wrapperCol">
+          <a-form-item :wrapper-col="{ span: 24 }">
+            <a-alert message="循环数组处理器遍历数组中的所有元素，并将元素赋值于指定变量。数组可以从变量中读取，也可以使用固定的列表值。"
+                     type="info" show-icon />
           </a-form-item>
 
-          <a-form-item label="列表" v-bind="validateInfos.list">
+          <a-form-item label="循环数组" required>
+            <a-radio-group name="inType"
+                           v-model:value="modelRef.inType">
+              <a-radio value="variable">变量</a-radio>
+              <a-radio value="list">列表</a-radio>
+            </a-radio-group>
+          </a-form-item>
+
+          <a-form-item v-if="modelRef.inType==='variable'" label="数组变量名" v-bind="validateInfos.variable" required>
+            <a-input v-model:value="modelRef.variable"
+                     @blur="validate('variable', { trigger: 'blur' }).catch(() => {})"
+                     placeholder="数组变量的名称"/>
+          </a-form-item>
+
+          <a-form-item v-if="modelRef.inType==='list'" label="列表" v-bind="validateInfos.list" required>
             <a-input v-model:value="modelRef.list"
-                     @blur="validate('list', { trigger: 'blur' }).catch(() => {})"/>
-            <div class="dp-input-tip">列表以英文逗号分隔</div>
+                     @blur="validate('list', { trigger: 'blur' }).catch(() => {})"
+                     placeholder="列表以英文逗号分隔，如：1、2、3、4"/>
+          </a-form-item>
+
+          <a-form-item label="循环变量" v-bind="validateInfos.variableName" required>
+            <a-input v-model:value="modelRef.variableName"
+                     @blur="validate('variableName', { trigger: 'blur' }).catch(() => {})"/>
           </a-form-item>
 
           <a-form-item label="是否随机">
@@ -48,6 +67,7 @@ import ProcessorHeader from '../../common/ProcessorHeader.vue';
 import {StateType as ScenarioStateType} from "../../../../../store";
 import debounce from "lodash.debounce";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import {CheckpointType} from "@/utils/enum";
 const useForm = Form.useForm;
 
 const router = useRouter();
@@ -56,14 +76,17 @@ const {t} = useI18n();
 
 const formRef = ref();
 
-const rulesRef = reactive({
-  variableName: [
-    {required: true, message: '请输入变量名称', trigger: 'blur'},
-  ],
-  list: [
-    {required: true, message: '请输入列表', trigger: 'blur'},
-  ],
-});
+const variableRequired = [{required: true, message: '请输入数组变量的名称', trigger: 'blur'}]
+const listRequired = [{required: true, message: '请输入列表', trigger: 'blur'}]
+const rulesRef = computed(() => {
+  return {
+    variableName: [
+      {required: true, message: '请输入变量名称', trigger: 'blur'},
+    ],
+    variable: modelRef.value.inType === 'variable' ? variableRequired : [],
+    list: modelRef.value.inType === 'list' ? listRequired : [],
+  }
+})
 
 const store = useStore<{ Scenario: ScenarioStateType; }>();
 const modelRef = computed<any>(() => store.state.Scenario.nodeData);
@@ -83,6 +106,9 @@ const submitForm = debounce(async () => {
 }, 300);
 
 onMounted(() => {
+  if (!modelRef.value.inType) modelRef.value.inType = 'variable'
+  if (!modelRef.value.variable) modelRef.value.variable = ''
+  if (!modelRef.value.list) modelRef.value.list = ''
   if (!modelRef.value.repeatTimes) modelRef.value.repeatTimes = 1
 })
 
@@ -90,8 +116,8 @@ onUnmounted(() => {
   console.log('onUnmounted')
 })
 
-const labelCol = { span: 4 }
-const wrapperCol = { span: 16 }
+const labelCol = { span: 3 }
+const wrapperCol = { span: 18 }
 
 </script>
 
