@@ -59,7 +59,7 @@ const detail = computed(() => {
 
 const editorOptions = ref(Object.assign({
   usedWith: 'request',
-
+  readOnly: true,
   allowNonTsExtensions: true,
   minimap: {
     enabled: true
