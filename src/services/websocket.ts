@@ -57,7 +57,7 @@ export class WebSocket {
   }
 
   static async sentMsg(roomName: string, msg: string) {
-    if (!WebSocket.conn) {
+    if (!WebSocket.conn || WebSocket.conn.conn.isClosed()) {
       await WebSocket.init(true)
     }
 
