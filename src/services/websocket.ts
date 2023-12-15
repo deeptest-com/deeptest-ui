@@ -6,15 +6,8 @@ import {getToken} from "@/utils/localToken";
 import settings from "@/config/settings";
 import {getAgentUrl} from "@/utils/agentEnv";
 
-export type WsEvent = {
-  room: string;
-  code: string;
-  data: any;
-};
-
-export const WsDefaultNameSpace = 'default'
-export const WsDefaultRoom = 'default'
-
+export const WsDefaultNamespace = 'default'
+export const WsDefaultRoom = 'default_room'
 
 export class WebSocket {
   static conn: NSConn
@@ -53,7 +46,7 @@ export class WebSocket {
           }
         })
 
-        await conn.connect(WsDefaultNameSpace)
+        await conn.connect(WsDefaultNamespace)
 
       } catch (err) {
         console.log('failed connect to websocket', err)
@@ -63,40 +56,20 @@ export class WebSocket {
     return WebSocket
   }
 
-  static joinRoomAndSend(roomName: string, msg: string): void {
-    if (WebSocket.conn && WebSocket.conn.room(roomName)) {
-      WebSocket.conn.room(roomName).emit('OnChat', msg)
-      return
-    } else {
-      WebSocket.init(true).then(() => {
-        WebSocket.conn.joinRoom(roomName).then((room) => {
-          console.log(`success to join room "${roomName}"`)
-          WebSocket.conn.room(roomName).emit('OnChat', msg)
-
-        }).catch(err => {
-          console.log(`fail to join room ${roomName}`, err)
-          bus.emit(settings.eventWebSocketConnStatus, {msg: '{"conn": "fail"}'});
-        })
-      })
+  static async sentMsg(roomName: string, msg: string) {
+    if (!WebSocket.conn || WebSocket.conn.conn.isClosed()) {
+      await WebSocket.init(true)
     }
-  }
 
-  static async sentMsg(roomName: string, msg: string): Promise<void> {
-    console.log(`send msg to room "${roomName}"`)
-    roomName = await getToken() || roomName;
+    if (!WebSocket.conn.room(roomName)) {
+      await WebSocket.conn.joinRoom(roomName)
+    }
 
-    WebSocket.conn.leaveAll().then(() =>
-        this.joinRoomAndSend(roomName, msg)
-    )
+    WebSocket.conn.room(roomName).emit('OnChat', msg)
   }
 }
 
 export async function getWebSocketApi() {
-  // const isProd = process.env.NODE_ENV === 'production'
-  // const loc = window.location
-  // console.log(`${isProd}, ${loc.toString()}`)
-
-  // const apiHost = process.env.VUE_APP_API_AGENT ? process.env.VUE_APP_API_AGENT : ''
   const apiHost = await getAgentUrl();
   const url = apiHost.replace('http', 'ws') + '/ws'
   console.log(`websocket url = ${url}`)
