@@ -15,12 +15,6 @@
         :options="priorityOptions"
         @update="(val) => handleChange('priority',val)"/>
     </a-descriptions-item>
-    <a-descriptions-item label="描述">
-      <EditAndShowField :placeholder="'请输入描述'" :value="detailResult?.desc || ''"
-                        @update="(val) => {
-                            handleChange('desc',val)
-                           }"/>
-    </a-descriptions-item>
     <a-descriptions-item label="分类">
       <EditAndShowTreeSelect
           :label="categoryLabel"
@@ -40,6 +34,10 @@
     </a-descriptions-item>
     <a-descriptions-item label="创建时间">{{ momentUtc(detailResult?.createdAt) }}</a-descriptions-item>
     <a-descriptions-item label="最近更新">{{ momentUtc(detailResult?.updatedAt) }}</a-descriptions-item>
+    <a-descriptions-item></a-descriptions-item>
+    <a-descriptions-item label="描述" :span="4">
+      <EditDescription :minRows="2" :maxRows="6" :description="detailResult.desc" @confirm="v => handleChange('desc', v)" />                     
+    </a-descriptions-item>
   </a-descriptions>
 </template>
 <script lang="ts" setup>
@@ -58,6 +56,7 @@ import {Scenario} from "@/views/Scenario/data";
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import EditAndShowSelect from '@/components/EditAndShowSelect/index.vue';
 import EditAndShowTreeSelect from '@/components/EditAndShowTreeSelect/index.vue';
+import EditDescription from '@/components/EditAndShow/descriptions.vue';
 import {momentUtc} from '@/utils/datetime';
 
 const store = useStore<{ Scenario,Project }>();
@@ -112,9 +111,15 @@ async function handleChange(type, value) {
     );
   }
   if (type === 'desc') {
-    await store.dispatch('Scenario/saveScenario',
+    const result = await store.dispatch('Scenario/saveScenario',
       {id: detailResult.value.id, desc: value}
     );
+    if (result) {
+      store.commit('Scenario/setDetail', {
+        ...detailResult.value,
+        desc: value,
+      })
+    }
   }
   if (type === 'categoryId') {
     await store.dispatch('Scenario/updateCategoryId',
@@ -122,9 +127,15 @@ async function handleChange(type, value) {
     );
   }
   if (type === 'type') {
-    await store.dispatch('Scenario/saveScenario',
+    const result = await store.dispatch('Scenario/saveScenario',
       {id: detailResult.value.id, type: value}
     );
+    if (result) {
+      store.commit('Scenario/setDetail', {
+        ...detailResult.value,
+        type: value,
+      })
+    }
   }
 }
 

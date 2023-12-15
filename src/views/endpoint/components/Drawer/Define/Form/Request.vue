@@ -47,7 +47,7 @@
               描述信息
             </a-col>
             <a-col :span="12">
-              <a-input placeholder="描述信息" v-model:value="selectedMethodDetail.description"/>
+              <a-textarea :value="selectedMethodDetail.description" :autoSize="{ minRows: 1, maxRows: 3 }" placeholder="描述信息" @change="handleResDescriptionChange"/>
             </a-col>
           </a-row>
           <RequestParams/>
@@ -113,6 +113,11 @@ function hasDefinedMethod(method: string) {
   return endpointDetail?.value?.interfaces?.some((item) => {
     return item.method === method;
   })
+}
+
+function handleResDescriptionChange(evt: any) {
+  selectedMethodDetail.value.description = evt.target.value;
+  store.commit('Endpoint/setSelectedMethodDetail', selectedMethodDetail.value);
 }
 
 // 当前选中的请求方法详情
@@ -202,7 +207,7 @@ function cancelDeleteMethod(code: string) {
   }
   .form-item-request-item {
     margin-top: 16px;
-    align-items: center;
+    // align-items: center;
 
     .form-label {
       width: 120px;
