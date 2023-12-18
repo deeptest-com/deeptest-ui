@@ -84,14 +84,7 @@
           分享链接
         </a-button>
       </a-tooltip>
-      <!--      <a-tooltip placement="bottom" :title="'复制分享链接'">-->
-      <!--        <a-button :size="'small'" type="text" @click="copyUrl">-->
-      <!--          <template #icon>-->
-      <!--            <CopyOutlined class="action-item"/>-->
-      <!--          </template>-->
-      <!--          复制-->
-      <!--        </a-button>-->
-      <!--      </a-tooltip>-->
+
       <a-tooltip placement="bottom" @click="toggle" v-if="isDocsViewPage || isDocsSharePage">
         <template #title>全屏</template>
         <a-button type="text" class="share-btn">
@@ -130,6 +123,7 @@ const searchInputRef: any = ref(null);
 const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
 const shortCutText = ref(isMac ? '⌘ K' : 'Ctrl K');
+import {useWujie} from "@/composables/useWujie";
 
 // 复制链接
 const source = ref('')
@@ -224,9 +218,10 @@ watch(cmdK, (v) => {
 })
 
 async function shareDocs() {
+  const {isWujieEnv,parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
   // 如果是分享页面，则直接复制链接即可
   if(isDocsSharePage || isDocsViewPage){
-    source.value = `${window.location.href}`;
+    source.value = isInLeyanWujieContainer ? `${window.parent.location.href}` : `${window.location.href}`;
     copyUrl();
     return
   }
@@ -237,20 +232,9 @@ async function shareDocs() {
   })
 
   if (res) {
-    source.value = `${window.location.origin}/docs/share?code=${res.code}`;
+    source.value = isInLeyanWujieContainer?  `${parentOrigin}/dev/${projectName}/API/docsView?code=${res.code}` : `${window.location.origin}/docs/share?code=${res.code}`;
     copyUrl();
   }
-  // Modal.confirm({
-  //   title: `确定分享版本号为 ${currentVersion.value} 的文档吗？`,
-  //   icon: createVNode(ExclamationCircleOutlined),
-  //   onOk() {
-  //     notifySuccess('分享成功, 分享链接已复制到剪切板 ');
-  //   },
-  //   onCancel() {
-  //     console.log('Cancel');
-  //   },
-  //   class: 'test',
-  // });
 }
 
 function copyUrl() {
@@ -297,6 +281,7 @@ watch(() => {
   justify-content: space-between;
   height: 56px;
   align-items: center;
+
 
   .logo {
     //width: 294px;
@@ -390,6 +375,7 @@ watch(() => {
   margin-right: 6px;
   margin-left: 6px;
   cursor: pointer;
+  position: relative;
 }
 
 
