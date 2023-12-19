@@ -108,7 +108,12 @@ watch(() => {
   return props.stickyKey;
 }, (newVal) => {
   if (newVal && contentRef?.value) {
-    contentRef?.value?.scrollTo(0, 78);
+    const el = document.getElementsByClassName('dp-drawer-content-basic-info');
+    if (el && el[0]) {
+      const { height } = el[0].getBoundingClientRect();
+      contentRef?.value?.scrollTo(0, height);
+    }
+    
   }
 })
 
