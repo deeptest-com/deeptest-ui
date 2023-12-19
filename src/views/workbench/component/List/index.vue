@@ -35,9 +35,8 @@
         >
         <template #sort="{ record }">
           <a-button type="primary" shape="circle" size="small" :ghost="record.sort>3">{{record.sort}}</a-button>
-          (<span v-if="record.hb > 0" style="color:red;">+{{ record.hb }}</span>
-          <span v-else-if="record.hb < 0" style="color:green;">-{{ record.hb }}</span>
-          <span v-else style="color:rgb(70, 68, 68);">{{ record.hb }}</span>)
+            <span v-if="record.hb > 0" style="color:red;margin-left: 2px;">(<ArrowUpOutlined />{{ record.hb }})</span>
+            <span v-else-if="record.hb < 0" style="color:green;margin-left: 2px;">(<ArrowDownOutlined />{{ record.hb*-1 }})</span>
          </template>
           <template #sortTitle>
             <Header :title="'排名'" :prompt="'按用户创建的场景数排名，场景数相同时按照最近更新时间先后排。和上周对比排名的上下浮动'" />
@@ -74,6 +73,7 @@ import { StateType as UserStateType } from "@/store/user";
 import { StateType as ProjectStateType } from "@/store/project";
 import { MoreOutlined } from "@ant-design/icons-vue";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import { ArrowUpOutlined,ArrowDownOutlined } from "@ant-design/icons-vue";
 import Header  from "./header.vue";
 const router = useRouter();
 const store = useStore<{
@@ -84,7 +84,10 @@ const store = useStore<{
 const projects = computed<any>(() => store.state.ProjectGlobal.projects);
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currentUser = computed<any>(() => store.state.User.currentUser);
-const list = computed<any[]>(() =>  store.state.workbench.queryResult.list);
+const list = computed<any[]>(() =>  store.state.workbench.queryResult.list.map(item => {
+  //item.hb = Math.floor(Math.random() * 100) -50;
+  return item;
+}));
 const projectId = +router.currentRoute.value.params.id;
 const timeframe = ref<string>("month");
 let pagination = computed<PaginationConfig>(
