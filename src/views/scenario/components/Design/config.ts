@@ -93,7 +93,7 @@ export const DESIGN_MENU_CONFIG = [
                 icon: 'arrange-count',
             },
             {
-                title: '循环列表',
+                title: '循环数组',
                 key: 'processor_loop_in',
                 icon: 'arrange-loop-list',
             },
@@ -107,12 +107,6 @@ export const DESIGN_MENU_CONFIG = [
                 key: 'processor_loop_range',
                 icon: 'arrange-range',
             },
-            // {
-            //     title: '跳出循环',
-            //     key: 'processor_loop_break',
-            //     icon: 'arrange-return',
-            //     enableInNodeTypes: [...loopIteratorTypes],
-            // },
         ]
     },
     // 条件
@@ -348,7 +342,9 @@ export const showArrowScenarioType = [
     'processor_logic_if',
     'processor_logic_else',
     'processor_data_default',
-    // 'processor_custom_code',
+
+    'processor_assertion_default',
+    'processor_custom_code',
 ]
 
 /**
@@ -404,7 +400,7 @@ export const scenarioTypeMapToText = {
     'processor_loop_time': '循环次数',
     'processor_loop_until': '循环直到',
     'processor_loop_range': '循环区间',
-    'processor_loop_in': '循环列表',
+    'processor_loop_in': '循环数组',
     'processor_logic_if': 'if',
     'processor_logic_else': 'else',
     'processor_extractor_boundary': '边界提取',

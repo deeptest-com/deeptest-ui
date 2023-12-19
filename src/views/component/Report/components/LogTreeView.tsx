@@ -4,6 +4,9 @@ import ScenarioHeader from "./ScenarioHeader.vue";
 import InterfaceHeader from "./InterfaceHeader.vue";
 import ProcessorHeader from "./ProcessorHeader.vue";
 import InterfaceContent from "./InterfaceContent.vue";
+import AssertionContent from "./AssertionContent.vue";
+import CustomCodeContent from "./CustomCodeContent.vue";
+
 import LogContent from "./LogContent.vue";
 import {showArrowScenarioType,} from "@/views/scenario/components/Design/config";
 
@@ -64,6 +67,7 @@ export default defineComponent({
                 if (log.processorCategory === 'processor_interface') {
                     return <InterfaceHeader endpointData={log}/>
                 }
+
                 // 其他场景
                 return <ProcessorHeader record={log} onMore={handleMore}/>
             }
@@ -71,7 +75,12 @@ export default defineComponent({
             function renderContent(log) {
                 if (log.processorCategory === 'processor_interface' && log.detail !== undefined && log.detail !== '{}') {
                     return <InterfaceContent endpointData={log} />
+                } else if (log.processorCategory === 'processor_assertion') {
+                    return <AssertionContent data={log} />
+                } else if  (log.processorCategory === 'processor_custom_code') {
+                    return <CustomCodeContent data={log} />
                 }
+
                 // 场景中的叶子节点不再渲染
                 if (!showArrowScenarioType.includes(log.processorType)) {
                     return null;

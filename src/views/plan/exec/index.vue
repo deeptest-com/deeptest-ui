@@ -52,6 +52,7 @@ import {
   execLogs, execResults, updateExecLogs, updateExecResult, statInfo
   , statisticData, initData, progressStatus, progressValue, updatePlanRes, updateStatFromLog,
 } from '@/composables/useExecLogs';
+import {getUuid} from "@/utils/string";
 
 const props = defineProps<{
   drawerVisible: boolean
@@ -102,29 +103,41 @@ const basicInfoList = computed(() => {
   ]
 })
 
+const execUuid = ref('')
 const execStart = async () => {
   resetData();
+
   const token = await getToken();
+  execUuid.value = currUser.value.id + '@' + getUuid()
+
   const data = {
     userId: currUser.value.id,
+    execUuid: execUuid.value,
     serverUrl: process.env.VUE_APP_API_SERVER,
     token: token,
-    planId: currPlan.value && currPlan.value.id,
+    planId: currPlan.value?.id,
     environmentId: currEnvId.value
   }
-  WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify({act: 'execPlan', planExecReq: data}));
+  console.log('****** send exec plan ws data', data);
+  WebSocket.sentMsg(execUuid.value, JSON.stringify({
+    act: 'execPlan',
+    planExecReq: data
+  }));
+};
+const stopExec = () => {
+  WebSocket.sentMsg(execUuid.value, JSON.stringify({
+    act: 'stop',
+    execReq: {
+      execUuid: execUuid.value,
+      planId: currPlan.value?.id,
+    }
+  }))
 };
 
 const execCancel = () => {
   progressStatus.value = 'cancel';
   stopExec();
 };
-
-const stopExec = () => {
-  const msg = {act: 'stop', execReq: {planId: currPlan.value && currPlan.value.id}};
-  WebSocket.sentMsg(settings.webSocketRoom, JSON.stringify(msg))
-};
-
 
 const OnWebSocketMsg = (data: any) => {
   if (!data.msg) return;

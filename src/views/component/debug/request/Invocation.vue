@@ -28,6 +28,7 @@
         <a-tooltip 
           :overlayStyle="getOverlayStyle()"
           placement="bottom" 
+      
           :visible="!isPathValid"
           :title="'请输入合法的路径,以http(s)开头'">
           <a-input placeholder="请输入http(s)://开头的地址"
@@ -110,6 +111,7 @@ import {handlePathLinkParams} from "@/utils/dom";
 import {syncSourceMapToText} from "@/views/scenario/components/Design/config"
 import {notifyWarn} from "@/utils/notify";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
+import {getUuid} from "@/utils/string";
 const {
   isDebugChange,
   debugChangePreScript,
@@ -216,6 +218,7 @@ const send = async (e) => {
 
     data.environmentId = environmentId.value
     const callData = {
+      execUuid: currUser.value.id + '@' + getUuid(),
       serverUrl: process.env.VUE_APP_API_SERVER,
       token: await getToken(),
       data: {

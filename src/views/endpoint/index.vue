@@ -17,7 +17,7 @@
                 @handle-access="handleCreateEndPoint"/>
               <DropdownActionMenu :dropdown-list="BulkMenuList">
                 <a-button>批量操作</a-button>
-              </DropdownActionMenu>  
+              </DropdownActionMenu>
             </div>
             <div class="top-search-filter">
               <TableFilter @filter="handleTableFilter" ref="filter"/>
@@ -386,7 +386,7 @@ function goDocs() {
   window.open(`${window.location.origin}/${viewURL}`, '_blank');
 }
 
-const showPublishDocsModal: any = ref(false)
+const showPublishDocsModal: boolean = ref(false)
 
 // 发布文档版本
 async function publishDocs() {

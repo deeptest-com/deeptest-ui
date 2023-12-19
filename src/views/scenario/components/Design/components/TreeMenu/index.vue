@@ -16,6 +16,9 @@
 <script setup lang="ts">
 import {defineEmits, defineProps, computed, watch} from "vue";
 import cloneDeep from "lodash/cloneDeep";
+import {DESIGN_MENU_CONFIG} from "../../config";
+import SubMenu from "./SubMenu.vue";
+import MenuItem from "./MenuItem.vue";
 
 const props = defineProps(['treeNode']);
 const emit = defineEmits(['selectMenu']);
@@ -23,11 +26,6 @@ const emit = defineEmits(['selectMenu']);
 function selectMenu(info) {
   emit('selectMenu', info, props.treeNode)
 }
-
-import {DESIGN_MENU_CONFIG} from "../../config";
-import SubMenu from "./SubMenu.vue";
-import MenuItem from "./MenuItem.vue";
-
 
 /**
  * 根据当前的节点类型，过滤掉不需要的菜单
