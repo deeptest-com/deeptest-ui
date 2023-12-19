@@ -708,7 +708,7 @@ const StoreModel: ModuleType = {
                 const resp = await listPostConditions({
                     debugInterfaceId: state.debugInfo.debugInterfaceId,
                     endpointInterfaceId: state.debugData.endpointInterfaceId,
-                    category: ConditionCategory.console,
+                    category: ConditionCategory.postCondition,
                     usedBy: state.debugInfo.usedBy,
                 });
                 const {data} = resp;

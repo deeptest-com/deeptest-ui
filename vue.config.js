@@ -1,9 +1,18 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const bodyParser = require('body-parser')
 const mockServer = require('./src/utils/mock/server');
-const { NODE_ENV, VUE_APP_PORT, VUE_APP_MOCK } = process.env;
-
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
+
+let { NODE_ENV, VUE_APP_PORT, VUE_APP_MOCK, APP_CONF } = process.env
+
+// loa app conf if needed
+if (NODE_ENV === 'production' && APP_CONF) {
+    const prodConf = require(`./.app.${APP_CONF}`)
+
+    process.env.VUE_APP_API_SERVER = prodConf.VUE_APP_API_SERVER
+    process.env.VUE_APP_API_AGENT = prodConf.VUE_APP_API_AGENT
+}
+console.log('API URL: ', process.env.VUE_APP_API_SERVER, process.env.VUE_APP_API_AGENT)
 
 module.exports = {
     publicPath: '/',
@@ -42,31 +51,31 @@ module.exports = {
     chainWebpack(config) {
         // 内置的 svg Rule 添加 exclude
         config.module
-        .rule('svg')
-        .exclude.add(/iconsvg/)
-        .end();
+            .rule('svg')
+            .exclude.add(/iconsvg/)
+            .end();
 
         // 添加 svg-sprite-loader Rule
         config.module
-        .rule('svg-sprite-loader')
-        .test(/.svg$/)
-        .include.add(/iconsvg/)
-        .end()
-        .use('svg-sprite-loader')
-        .loader('svg-sprite-loader');
+            .rule('svg-sprite-loader')
+            .test(/.svg$/)
+            .include.add(/iconsvg/)
+            .end()
+            .use('svg-sprite-loader')
+            .loader('svg-sprite-loader');
 
         // 添加 svgo Rule
         config.module
-        .rule('svgo')
-        .test(/.svg$/)
-        .include.add(/iconsvg/)
-        .end()
-        .use('svgo-loader')
-        .loader('svgo-loader')
-        .options({
-            // externalConfig 配置特殊不是相对路径，起始路径是根目录
-            externalConfig: './src/assets/iconsvg/svgo.yml',
-        });
+            .rule('svgo')
+            .test(/.svg$/)
+            .include.add(/iconsvg/)
+            .end()
+            .use('svgo-loader')
+            .loader('svgo-loader')
+            .options({
+                // externalConfig 配置特殊不是相对路径，起始路径是根目录
+                externalConfig: './src/assets/iconsvg/svgo.yml',
+            });
 
         config.resolve.alias.set('vue-i18n', 'vue-i18n/dist/vue-i18n.cjs.js')
 

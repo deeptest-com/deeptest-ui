@@ -76,8 +76,8 @@ const filters = ref<any>({})
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 
 const props = defineProps({
-  serveId: {
-    type: Number,
+  serveIds: {
+    type: Array,
     required: true,
   },
   categoryId: {
@@ -107,7 +107,7 @@ const loadList = debounce(async (page, pageSize) => {
   pagination.value.current = page
   pagination.value.pageSize = pageSize
   const data = {
-    serveId: props.serveId,
+    serveIds: props.serveIds,
     categoryId: props.categoryId,
     projectId: currProject.value.id,
     keywords: filters.value.keywords,

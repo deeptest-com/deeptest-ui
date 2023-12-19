@@ -239,8 +239,9 @@ export async function updateTag(data: any): Promise<any> {
 
 export async function loadCaseTree(data: QueryCaseTreeParams): Promise<any> {
     return request({
-        url: `/endpoints/cases/loadTree?serveId=${data.serveId}`,
-        method: 'GET',
+        url: `/endpoints/cases/loadTree`,
+        method: 'post',
+        data: data
     });
 }
 

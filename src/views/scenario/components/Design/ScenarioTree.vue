@@ -21,7 +21,7 @@
             :showIcon="false"
             :expandAction="false"
             :auto-expand-parent="autoExpandParent"
-            :expandedKeys="expandedKeys"
+            :expandedKeys="expandedKeys || []"
             v-model:selectedKeys="selectedKeys"
             @drop="onDrop"
             @dragstart="onDragstart"
@@ -334,6 +334,7 @@ const menuClick = (menuKey: string, targetId: number) => {
     removeNode()
     return
   }
+
   // add-child-interface-interface
   // add-child-interface-diagnose
   // add-child-processor_logic-processor_logic_if
@@ -396,10 +397,9 @@ function selectMenu(menuInfo, treeNode) {
   const targetProcessorId = targetModelId
   const targetProcessorCategory = treeDataMap.value[targetModelId].entityCategory
   const targetProcessorType = treeDataMap.value[targetModelId].entityType
+
   addNode(mode, processorCategory, processorType,
       targetProcessorCategory, targetProcessorType, targetProcessorId);
-
-
 }
 
 /**
