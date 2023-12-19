@@ -148,6 +148,9 @@ const handleSuccess = async () => {
 
 
 function handleJoin(item) {
+  if (!hasProjectAuth('p-project-apply')) {
+    return;
+  }
   Modal.confirm({
     title: "提示",
     content: "您还没有该项目的访问权限，是否申请更多角色权限？",
