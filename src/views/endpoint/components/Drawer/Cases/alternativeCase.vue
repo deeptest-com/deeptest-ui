@@ -14,7 +14,7 @@
             </template>
             返回
           </a-button>
-          <span class="case-name">自动生成用例（Beta）</span>
+          <span class="case-name">自动生成测试用例（Beta）</span>
         </div>
       </div>
       <!-- :::: 用例路径，方法展示区域 -->
@@ -435,7 +435,7 @@ const caseFactorActionList = [
     action: selectExecEnv,
   },
   {
-    text: '生成用例',
+    text: '生成测试用例',
     type: 'default',
     action: saveAsNewCase,
   },

@@ -1,9 +1,9 @@
 <template>
   <div class="endpoint-debug-cases-list">
     <div class="toolbar">
-      <a-button type="default" @click="autoGenAlternativeCase">自动生成用例(Beta)</a-button>
+      <a-button type="default" @click="autoGenAlternativeCase">自动生成测试用例(Beta)</a-button>
       <a-button type="primary" trigger="click" @click="create">
-        <span>新建用例</span>
+        <span>新建测试用例</span>
       </a-button>
     </div>
 

@@ -4,7 +4,7 @@
            :confirmLoading="loading"
            @ok="finish"
            @cancel="cancel"
-           :title="(!model.id ? '新建' : '修改') + '用例'">
+           :title="(!model.id ? '新建' : '修改') + '测试用例'">
     <a-form class="custom-center-form" :wrapper-col="{ span: 14 }">
 
       <a-form-item label="名称" v-bind="validateInfos.name">
