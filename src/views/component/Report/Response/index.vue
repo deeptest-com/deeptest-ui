@@ -77,14 +77,14 @@ function onClose() {
 }
 
 watch(() => {return props.responseDrawerVisible;}, (newVal) => {
-  console.log('-> watch interface detail info')
+  console.error('-> watch interface detail info', props.data);
   if (!newVal) return;
 
   const { respContent = "{}", reqContent = "{}", postConditions = [], preConditions = [], invokeId = 0 }: any = props.data;
   const responseData = JSON.parse(respContent);
   const requestData = JSON.parse(reqContent);
   const conditionType = [ConditionType.extractor, ConditionType.checkpoint, ConditionType.databaseOpt, ConditionType.script];
-  const consoleData = [...preConditions, ...postConditions].filter(condition => conditionType.includes(condition.type)).map(condition => ({
+  const consoleData = [...(preConditions || []), ...(postConditions || [])].filter(condition => conditionType.includes(condition.type)).map(condition => ({
     ...(condition.raw || {}),
     conditionEntityType: condition.type,
   }));
