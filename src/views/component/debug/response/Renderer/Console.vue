@@ -70,8 +70,12 @@ const consoleLogs = computed<any>(() => {
 
 watch(responseData, (newVal) => {
   console.log('watch responseData in console tab, invokeId = ', responseData.value.invokeId)
-  if (responseData.value.invokeId)
+  if (responseData.value.invokeId) {
     store.dispatch("Debug/getInvocationLog", responseData.value.invokeId)
+  } else { // 无invokeId 则重置 控制台数据 避免使用store的缓存数据
+    store.commit("Debug/setLog", []);
+  }
+    
 }, {deep: true, immediate: true})
 
 </script>
