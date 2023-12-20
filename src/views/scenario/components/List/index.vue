@@ -339,6 +339,7 @@ async function selectExecEnv() {
 }
 
 async function execScenario(record: any) {
+  store.commit('Scenario/setNode', {});
   selectEnvVisible.value = true;
   selectedExecScenario.value = record;
   execEnvId.value = record.currEnvId;
@@ -462,21 +463,6 @@ const username = (user:string)=>{
   let result = userList.value.find(arrItem => arrItem.value == user);
   return result?.label || '-'
 }
-
-onMounted(() => {
-  console.log('onMounted')
-})
-
-watch(
-    () => [isEditVisible.value, drawerVisible.value],
-    async (newValue) => {
-      if (!newValue[0] || !newValue[1]) {
-        await store.dispatch('Scenario/loadCategory');
-      }
-    },
-    {immediate: true}
-);
-
 </script>
 
 <style lang="less" scoped>
