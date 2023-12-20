@@ -62,20 +62,22 @@ const props = defineProps<{
 
 const store = useStore<{  Debug: Debug }>();
 const responseData = computed<any>(() => props.data || store.state.Debug.responseData);
-const consoleData = computed<any>(() => store.state.Debug.consoleData);
+const consoleData = computed<any>(() => {
+  if (props.data?.consoleData?.length) {
+    return props.data.consoleData;
+  }
+  return store.state.Debug.consoleData;
+});
 
 const consoleLogs = computed<any>(() => {
   return responseData.value.consoleLogs ? responseData.value.consoleLogs : consoleData.value
 });
 
-watch(responseData, (newVal) => {
+watch(responseData, (_newVal) => {
   console.log('watch responseData in console tab, invokeId = ', responseData.value.invokeId)
   if (responseData.value.invokeId) {
     store.dispatch("Debug/getInvocationLog", responseData.value.invokeId)
-  } else { // 无invokeId 则重置 控制台数据 避免使用store的缓存数据
-    store.commit("Debug/setLog", []);
   }
-    
 }, {deep: true, immediate: true})
 
 </script>
