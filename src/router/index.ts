@@ -203,7 +203,6 @@ router.afterEach(() => {
 
 router.onError(async (err) => {
   // errMessage: ChunkLoadError: Loading chunk chunk-fa45f182 failed.
-  console.error('routerPageLoad failed', err);
   const result = (err.message || '').match(/Loading chunk (\S)+ failed/g);
   if (result) {
     const swalresult = await Swal.fire({

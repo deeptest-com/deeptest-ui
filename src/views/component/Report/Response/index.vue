@@ -77,7 +77,6 @@ function onClose() {
 }
 
 watch(() => {return props.responseDrawerVisible;}, (newVal) => {
-  console.error('-> watch interface detail info', props.data);
   if (!newVal) return;
 
   const { respContent = "{}", reqContent = "{}", postConditions = [], preConditions = [], invokeId = 0 }: any = props.data;
