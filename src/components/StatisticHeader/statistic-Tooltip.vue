@@ -9,7 +9,7 @@
                 <QuestionCircleTwoTone />
             </a-tooltip>
         </template>
-        <template #prefix v-if="hbValue != undefined">
+        <template #prefix v-if="hbValue !== undefined">
             <div class="stat-content-num">
                 {{ value || 0 }}{{ suffix }}
             </div>
@@ -35,12 +35,16 @@ const props = defineProps({
 });
 
 
+const value = computed(() => {
+    return props.suffix !==  undefined? props.value?.toFixed(2) : props.value;
+})
+
 const mValue = computed(() => {
-    return props.hbValue ? props.hbValue : props.value;
+    return props.hbValue !== undefined ? props.hbValue : props.value;
 })
 
 const precision = computed(() => {
-    return props.hbValue ? 2 : 0;
+    return props.hbValue !==  undefined  ? 2 : 0;
 })
 
 const valueStyle = computed(() => {
@@ -48,7 +52,7 @@ const valueStyle = computed(() => {
 })
 
 const hSuffix = computed(() => {
-    return props.hbValue ? "%" : "";
+    return props.hbValue !==  undefined ? "%" : props.suffix !== undefined ? props.suffix : "" ;
 })
 
 </script>

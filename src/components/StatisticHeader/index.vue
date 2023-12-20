@@ -57,11 +57,10 @@
                 <StatisticTooltip
                   title="执行总次数"
                   :value="card?.execTotal||0"
-
                 />
                 <StatisticTooltip
                    :precision="2"
-                   suffix="%"
+                   :suffix="'%'"
                   title="测试通过率（%）"
                   :value="card?.passRate?card.passRate:0"
                   :prompt="'断言，即功能检查点的通过率。包括场景中的断言步骤和场景接口请求中的断言'"
