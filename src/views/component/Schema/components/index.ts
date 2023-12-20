@@ -1,0 +1,1 @@
+export { default as SchemaEditorContent } from './schemaEditor.vue';

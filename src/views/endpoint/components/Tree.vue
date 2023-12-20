@@ -74,7 +74,7 @@
 <script setup lang="ts">
 import {
   computed, ref, onMounted,
-  watch, defineEmits, defineProps, createVNode, nextTick
+  watch, defineEmits, defineProps, createVNode, nextTick, defineExpose
 } from 'vue';
 import {useStore} from "vuex";
 import {
@@ -349,9 +349,21 @@ async function onDrop(info: DropEvent) {
   }
 }
 
+const initTree = () => {
+  expandedKeys.value = [];
+  selectedKeys.value = [];
+}
+
+defineExpose({ initTree });
+
 </script>
 
 <style scoped lang="less">
+.dp-enpoint-tree-main {
+  height: 100%;
+  padding-bottom: 48px;
+}
+
 .container {
   margin: 16px;
   background: #ffffff;

@@ -2,10 +2,11 @@
   <a-spin tip="Loading..." :spinning="isImporting" style="z-index: 2000;">
     <ContentPane>
       <template #left>
-        <Tree @select="selectNode"/>
+        <Tree ref="endpointTree" @select="selectNode"/>
+        <SchemaTree ref="schema" @select="showSchema" />
       </template>
       <template #right>
-        <div style="min-width: 1080px;overflow-x:scroll ">
+        <div v-if="!openSchemaTab" style="min-width: 1080px;overflow-x:scroll ">
           <div class="top-action">
             <div class="top-action-left">
               <PermissionButton
@@ -155,6 +156,7 @@
             </template>
           </EmptyCom>
         </div>
+        <SchemaContent v-else/>
       </template>
     </ContentPane>
     <CreateEndpointModal
@@ -234,6 +236,7 @@ import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import Diff from "./components/Drawer/Define/Diff/index.vue";
+import { SchemaTree, SchemaContent } from '../component/Schema';
 import {ChangedStatus,SourceType} from "@/utils/enum";
 
 
@@ -250,6 +253,7 @@ const router = useRouter();
 type Key = ColumnProps['key'];
 const tagList: any = computed(() => store.state.Endpoint.tagList);
 const userList = computed<any>(() => store.state.Project.userList);
+const endpointTree = ref();
 
 /**
  * 表格数据
@@ -523,6 +527,10 @@ async function handleImport() {
 const filterState: any = ref({});
 
 async function selectNode(id) {
+  if (openSchemaTab.value) { // 如果此时在查看schema组件，则隐藏schema展示的内容，展示接口列表
+    openSchemaTab.value = false;
+    schema.value.initTree();
+  }
   selectedCategoryId.value = id;
   selectedRowKeys.value = [];
   selectedRow.value = {};
@@ -796,6 +804,18 @@ function showDiff(id: number) {
   store.commit('Endpoint/setDiffModalVisible', {endpointId:id,visible:true,projectId:currProject.value.id,callPlace:'list'});
 }
 
+
+/*************************************************
+ * :::: schema数据组件相关
+ ************************************************/
+const openSchemaTab = ref(false); 
+const schema = ref();
+
+const showSchema = () => {
+  selectedCategoryId.value = '';
+  endpointTree.value.initTree();
+  openSchemaTab.value = true;
+}
 </script>
 <style scoped lang="less">
 

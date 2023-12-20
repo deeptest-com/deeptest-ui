@@ -1,73 +1,71 @@
 <template>
   <div class="tree-container">
-    <div class="tree-con">
-      <div class="tag-filter-form">
-        <a-input-search
-            class="search-input"
-            v-model:value="searchValue"
-            placeholder="输入关键字过滤"/>
-        <div class="add-btn" @click="newCategorie(treeDataCategory?.[0])">
-          <PlusOutlined style="font-size: 16px;"/>
-        </div>
-      </div>
-      <div style="margin: 0 8px;">
-        <a-tree
-            class="deeptest-tree"
-            draggable
-            blockNode
-            showIcon
-            :expandedKeys="expandedKeys"
-            :auto-expand-parent="autoExpandParent"
-            @drop="onDrop"
-            @expand="onExpand"
-            @select="selectTreeItem"
-            :tree-data="treeData">
-          <template #switcherIcon>
-            <CaretDownOutlined/>
-          </template>
-          <template #title="nodeProps">
-            <div class="tree-title" :draggable="nodeProps.id === -1">
-                <span class="tree-title-text" v-if="nodeProps.title.indexOf(searchValue) > -1">
-                  {{ nodeProps.title.substr(0, nodeProps.title.indexOf(searchValue)) }}
-                  <span style="color: #f50">{{ searchValue }}</span>
-                  {{ nodeProps.title.substr(nodeProps.title.indexOf(searchValue) + searchValue.length) }}
-                </span>
-              <span class="tree-title-text" v-else>{{ nodeProps.title }}</span>
-              <span class="more-icon" v-if="nodeProps.id !== -1">
-                  <a-dropdown>
-                       <MoreOutlined/>
-                      <template #overlay>
-                        <a-menu>
-                          <a-menu-item key="0" @click="newCategorie(nodeProps)">
-                             新建子分类
-                          </a-menu-item>
-                          <a-menu-item :disabled="nodeProps.id === -1" key="1" @click="deleteCategorie(nodeProps)">
-                            删除分类
-                          </a-menu-item>
-                          <a-menu-item :disabled="nodeProps.id === -1" key="1" @click="editCategorie(nodeProps)">
-                            编辑分类
-                          </a-menu-item>
-                        </a-menu>
-                      </template>
-                    </a-dropdown>
-                </span>
-            </div>
-          </template>
-        </a-tree>
-        <div v-if="!treeData.length" class="nodata-tip">
-          <div v-if="showKeywordsTip">搜索结果为空 ~</div>
-          <a-spin v-else/>
-        </div>
+    <div class="tag-filter-form">
+      <a-input-search
+          class="search-input"
+          v-model:value="searchValue"
+          placeholder="输入关键字过滤"/>
+      <div class="add-btn" @click="newCategorie(treeDataCategory?.[0])">
+        <PlusOutlined style="font-size: 16px;"/>
       </div>
     </div>
-    <!--  创建接口 Tag  -->
-    <CreateCategoryModal
-        :visible="createTagModalVisible"
-        :nodeInfo="currentNode"
-        :mode="tagModalMode"
-        @cancel="handleCancelTagModalCancel"
-        @ok="handleTagModalOk"/>
+    <div class="tree-content">
+      <a-tree
+          class="deeptest-tree"
+          draggable
+          blockNode
+          showIcon
+          :expandedKeys="expandedKeys"
+          :auto-expand-parent="autoExpandParent"
+          @drop="onDrop"
+          @expand="onExpand"
+          @select="selectTreeItem"
+          :tree-data="treeData">
+        <template #switcherIcon>
+          <CaretDownOutlined/>
+        </template>
+        <template #title="nodeProps">
+          <div class="tree-title" :draggable="nodeProps.id === -1">
+              <span class="tree-title-text" v-if="nodeProps.title.indexOf(searchValue) > -1">
+                {{ nodeProps.title.substr(0, nodeProps.title.indexOf(searchValue)) }}
+                <span style="color: #f50">{{ searchValue }}</span>
+                {{ nodeProps.title.substr(nodeProps.title.indexOf(searchValue) + searchValue.length) }}
+              </span>
+            <span class="tree-title-text" v-else>{{ nodeProps.title }}</span>
+            <span class="more-icon" v-if="nodeProps.id !== -1">
+                <a-dropdown>
+                      <MoreOutlined/>
+                    <template #overlay>
+                      <a-menu>
+                        <a-menu-item key="0" @click="newCategorie(nodeProps)">
+                            新建子分类
+                        </a-menu-item>
+                        <a-menu-item :disabled="nodeProps.id === -1" key="1" @click="deleteCategorie(nodeProps)">
+                          删除分类
+                        </a-menu-item>
+                        <a-menu-item :disabled="nodeProps.id === -1" key="1" @click="editCategorie(nodeProps)">
+                          编辑分类
+                        </a-menu-item>
+                      </a-menu>
+                    </template>
+                  </a-dropdown>
+              </span>
+          </div>
+        </template>
+      </a-tree>
+      <div v-if="!treeData.length" class="nodata-tip">
+        <div v-if="showKeywordsTip">搜索结果为空 ~</div>
+        <a-spin v-else/>
+      </div>
+    </div>
   </div>
+  <!--  创建接口 Tag  -->
+  <CreateCategoryModal
+    :visible="createTagModalVisible"
+    :nodeInfo="currentNode"
+    :mode="tagModalMode"
+    @cancel="handleCancelTagModalCancel"
+    @ok="handleTagModalOk"/>
 </template>
 <script setup lang="ts">
 import {
@@ -343,8 +341,15 @@ onMounted(async () => {
 
 <style scoped lang="less">
 .tree-container {
-  //margin: 16px;
   background: #ffffff;
+  padding-top: 8px;
+  height: 100%;
+
+  .tree-content {
+    height: calc(100% - 50px);
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
 }
 
 .tag-filter-form {
@@ -352,7 +357,6 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
   height: 50px;
-  margin-top: 8px;
   .search-input {
     margin-left: 16px;
     margin-right: 8px;
@@ -364,55 +368,6 @@ onMounted(async () => {
     cursor: pointer;
   }
 }
-
-.content {
-  display: flex;
-  width: 100%;
-
-  .left {
-    width: 300px;
-    border-right: 1px solid #f0f0f0;
-  }
-
-  .right {
-    flex: 1
-  }
-}
-
-.action-new {
-  margin-right: 8px;
-}
-
-.top-action {
-  height: 60px;
-  display: flex;
-  align-items: center;
-  margin-left: 16px;
-
-  .ant-btn {
-    margin-right: 16px;
-  }
-}
-
-.action-btns {
-  display: flex;
-}
-
-.customTitleColRender {
-  display: flex;
-
-  .edit {
-    margin-left: 8px;
-    cursor: pointer;
-  }
-}
-
-.form-item-con {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .tree-title {
   position: relative;
 
