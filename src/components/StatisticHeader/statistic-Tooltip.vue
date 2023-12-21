@@ -2,7 +2,7 @@
     <a-statistic :value="mValue" :precision="precision" :suffix="hSuffix" :valueStyle="valueStyle">
         <template #title>
             {{ title }}
-            <a-tooltip placement="right" v-if="prompt" overlayClassName="memo-tooltip">
+            <a-tooltip placement="top" v-if="prompt" overlayClassName="memo-tooltip">
                 <template #title>
                     <span>{{ prompt }}</span>
                 </template>

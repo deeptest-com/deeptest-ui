@@ -1,5 +1,5 @@
 <template >
-      <a-tooltip placement="right">
+      <a-tooltip placement="top">
         <template #title>
           <span>{{prompt}}</span>
         </template>
