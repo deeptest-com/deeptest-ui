@@ -47,6 +47,7 @@ import BodyInfo from "./Components/Body.vue";
 import ResponseInfo from "@/views/component/debug/response/Renderer/Info.vue";
 import ResponseConsole from "@/views/component/debug/response/Renderer/Console.vue";
 import { InterfaceDetail } from "./data";
+import { ConditionType } from "@/utils/enum";
 
 const props = defineProps({
   responseDrawerVisible: {
@@ -76,21 +77,28 @@ function onClose() {
 }
 
 watch(() => {return props.responseDrawerVisible;}, (newVal) => {
-  console.log('-> watch interface detail info')
   if (!newVal) return;
 
-  const { resContent = {}, reqContent = {}, invokeId }: any = props.data;
+  const { respContent = "{}", reqContent = "{}", postConditions = [], preConditions = [], invokeId = 0 }: any = props.data;
+  const responseData = JSON.parse(respContent);
+  const requestData = JSON.parse(reqContent);
+  const conditionType = [ConditionType.extractor, ConditionType.checkpoint, ConditionType.databaseOpt, ConditionType.script];
+  const consoleData = [...(preConditions || []), ...(postConditions || [])].filter(condition => conditionType.includes(condition.type)).map(condition => ({
+    ...(condition.raw || {}),
+    conditionEntityType: condition.type,
+  }));
   Object.assign(interfaceResDetail, {
-    ...resContent,
+    ...JSON.parse(respContent),
     bodyInfo: {
-      content: resContent.content || "",
-      contentLang: resContent.contentLang || "",
-      contentType: resContent.contentType || "",
+      content: responseData.content || "",
+      contentLang: responseData.contentLang || "",
+      contentType: responseData.contentType || "",
     },
-    headers: resContent.headers || [],
-    cookies: resContent.cookies || [],
-    requestData: reqContent,
-    invokeId,
+    headers: responseData.headers || [],
+    cookies: responseData.cookies || [],
+    requestData,
+    consoleData,
+    invokeId
   });
 }, {immediate: true,});
 
