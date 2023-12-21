@@ -185,8 +185,8 @@ export async function getSchemaList(data: SchemaListReqParams): Promise<any> {
 export async function getSchemaDetail(data: SchemaDetailReqParams): Promise<any> {
     return request({
         url: `/serves/schema/detail`,
-        method: 'post',
-        data: data
+        method: 'get',
+        params: data
     });
 }
 /**

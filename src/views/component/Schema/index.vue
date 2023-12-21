@@ -10,45 +10,125 @@
       </span>
     </div>
     <div class="schema-content">
-      <Tree 
-        ref="schemaTree"
-        category-type="schema" 
-        :checked="false" 
-        :draggable="true"
-        :context-menu-list="dropDownMenuList" 
-        :tree-data="treeDataCategory"
-        :is-dir-node-clicked="false"
-        :node-draggable="checkNodeDraggable"
-        :show-more-icon="showMore"
-        :show-icon="true"
-        @tree-node-clicked="handleClick"
-        @tree-node-drop="onDrop" />
+      <a-spin tip="loading..." :spinning="loading">
+        <Tree 
+          ref="schemaTree"
+          category-type="schema" 
+          :checked="false" 
+          :draggable="true"
+          :context-menu-list="dropDownMenuList" 
+          :rootContextMenuList="rootDownMenuList"
+          :show-folder-icon="true"
+          :tree-data="treeData"
+          :is-dir-node-clicked="false"
+          :node-draggable="checkNodeDraggable"
+          :show-more-icon="showMore"
+          :show-icon="true"
+          @tree-node-clicked="handleClick"
+          @tree-node-drop="onDrop">
+          <template #folderIcon="{ nodeProps }">
+            <span class="tree-icon">
+              <FolderOutlined v-if="!nodeProps.expanded" />
+              <FolderOpenOutlined v-else/>
+            </span>
+          </template>
+          <template #nodeIcon>
+            <span class="tree-icon">
+              <SettingOutlined />
+            </span>
+          </template>
+        </Tree>
+      </a-spin>
     </div>
   </div>
+  <CreateModal 
+    :modalType="modalType"
+    :visible="visible" 
+    :record="selectedCategory"
+    @cancel="visible = false"
+    @ok="handleConfirm"
+  />
 </template>
+
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, defineEmits, defineExpose } from 'vue';
-import { SettingOutlined, ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons-vue';
+import { SettingOutlined, ArrowDownOutlined, ArrowUpOutlined, FolderOutlined, FolderOpenOutlined } from '@ant-design/icons-vue';
+import { message } from 'ant-design-vue';
 import { useStore } from 'vuex';
+import _ from "lodash";
+import cloneDeep from "lodash/cloneDeep";
 import Tree from '@/components/CategoryTree/index';
+import { CreateModal } from './components';
+import { StateType as SchemaStateType } from './store';
 import { confirmToDelete } from '@/utils/confirm';
 
 const emits = defineEmits(['select']);
-const store = useStore();
-const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory?.[0]?.children || []);
+const store = useStore<{ Schema: SchemaStateType, ProjectGlobal }>();
+const treeData = computed<any>(() => {
+  return store.state.Schema.schemaTreeData?.children || [];
+});
+const treeDataCategory = computed(() => {
+  return store.state.Schema.schemaTreeData;
+});
+const currProject = computed(() => store.state.ProjectGlobal.currProject);
+const activeSchema = computed(() => store.state.Schema.activeSchema);
+
 const expand = ref(false);
 const parentNode = ref();
 const schemaNode = ref();
 const prefixStyle = ref({});
 const schemaTree = ref<InstanceType<typeof Tree> | any>();
+const loading = ref(false);
+const selectedCategory = ref<any>({ title: '', targetId: '', id: 0 });
+const visible = ref(false);
+const modalType = ref('create');
 
-const handleClick = (evt) => {
+const uniquArrray = (data) => {
+  const obj = {};
+  const _data = cloneDeep(data);
+  _data.forEach((e, index) => {
+    if (!obj[e.entityId]) {
+      obj[e.entityId] = e;
+    } else {
+      _data.splice(index, 1)
+    }
+  })
+  return _data;
+}
+
+const handleClick = (keys, evt) => {
   console.log('clickNode', evt);
+  if (evt.node.dataRef?.entityId === 0) {
+    return;
+  }
+  store.commit('Schema/setActiveSchema', { ...evt.node.dataRef, key: evt.node?.dataRef?.entityId });
+  store.commit('Schema/setSchemas', uniquArrray([...store.state.Schema.schemas, evt.node.dataRef]));
+  store.dispatch('Schema/querySchema', { id: evt.node.dataRef?.entityId });
   emits('select');
 };
 
-const onDrop = (...args: any[]) => {
+const onDrop = async (...args: any[]) => {
   console.log('drop', args);
+  const { dragNode, node, dropPosition } = args[0];
+  const pos = node.pos.split('-');
+  const dropPos = dropPosition - Number(pos[pos.length - 1]);
+  if (dragNode.dataRef?.entityId === 0 && node.dataRef?.entityId !== 0 && dropPos === 0) {
+    message.error('分类不可移动到组件下');
+    return;
+  }
+  try {
+    await store.dispatch('Schema/moveCategory', {
+      currProjectId: currProject.value.id,
+      "dragKey": dragNode.eventKey, // 移动谁
+      "dropKey": node.eventKey,  // 移动那儿
+      "dropPos": dropPos, // 0 表示移动到目标节点的子节点，-1 表示移动到目标节点的前面， 1表示移动到目标节点的后面
+      "type": 'schema',
+    });
+    message.success('移动成功');
+  } catch(error: any) {
+    const msg = typeof error === 'string' ? error : (error.message || '');
+    msg && message.error(msg);
+  } 
 };
 
 // 通过具体的场景判断节点是否可以被拖拽
@@ -60,62 +140,113 @@ const showMore = (node) => {
   return node.id !== -1;
 };
 
+const createCategoryOrSchema = async (nodeProps, createType) => {
+  if (createType === 'category') {
+    modalType.value = 'create';
+    selectedCategory.value = nodeProps.dataRef ? { targetId: nodeProps.dataRef.id, title: '' } : { targetId: treeDataCategory.value.id, title: '' };
+    visible.value = true;
+    return;
+  } 
+  try {
+    await store.dispatch('Schema/saveSchema', {
+      targetId: nodeProps.dataRef ? nodeProps.dataRef.id : treeDataCategory.value.id,
+      name: 'NewComponent',
+    })
+  } catch(error) {
+    console.error(error);
+  } 
+};
+
+const editCategory = (nodeProps) => {
+  modalType.value = 'edit';
+  selectedCategory.value = { targetId: nodeProps.dataRef.parentId, title: nodeProps.dataRef.name, id: nodeProps.dataRef.id };
+  visible.value = true;
+};
+
+const delCategory = (nodeProps) => {
+  const title = '将级联删除分类下的所有子分类、数据模型定义';
+  const context = '删除后无法恢复，请确定是否删除？';
+  confirmToDelete(title, context, async () => {
+    try {
+      await store.dispatch('Schema/deleteCategory', {
+        id: nodeProps.dataRef.id, 
+        type: 'schema'
+      });
+    } catch(error: any) {
+      const msg = typeof error === 'string' ? error : (error.message || '');
+      msg && message.error(msg);
+    }
+  })
+};
+
+const copy = async(nodeProps) => {
+  try {
+    await store.dispatch('Schema/copySchema', nodeProps.dataRef?.entityId);
+    message.success('克隆成功');
+  } catch(error: any) {
+    const msg = typeof error === 'string' ? error : (error.message || '');
+    msg && message.error(msg);
+  }
+}
+
 const dropDownMenuList = [
   {
     auth: '',
     label: '新建数据组件',
-    action: (record) => {
-      console.log(record);
-    }
+    ifShow: record => record.entityId === 0,
+    action: record => createCategoryOrSchema(record, 'schema')
   },
   {
     auth: '',
     label: '新建子分类',
-    action: (record) => {
-      console.log(record);
-    }
+    ifShow: record => record.entityId === 0,
+    action: record => createCategoryOrSchema(record, 'category')
   },
   {
     auth: '',
-    label: '新建分类',
-    action: (record) => {
-      console.log(record);
-    }
-  },
-  {
-    auth: '',
+    ifShow: record => record.entityId === 0,
     label: '删除分类',
-    action: (record) => {
-      console.log(record);
-    }
+    action: (record) => delCategory(record)
   },
   {
     auth: '',
     label: '编辑分类',
-    action: (record) => {
-      console.log(record);
-    }
+    ifShow: record => record.entityId === 0,
+    action: (record) => editCategory(record)
   },
   {
     auth: '',
     label: '克隆',
-    action: (record) => {
-      console.log(record);
-    }
+    ifShow: record => record.entityId !== 0,
+    action: (record) => copy(record)
   },
   {
     auth: '',
     label: '删除',
+    ifShow: record => record.entityId !== 0,
     action: (record) => {
-      console.log(record);
-      const title = '将级联删除分类下的所有子分类、数据模型定义';
-      const context = '删除后无法恢复，请确定是否删除？';
-      confirmToDelete(title, context, () => {
-        console.log('确认删除');
+      const title = '删除后无法恢复，请确定是否删除？';
+      confirmToDelete(title, '', async () => {
+        await store.dispatch('Schema/deleteSchema', {
+          id: record.dataRef.entityId,
+        });
       })
     }
   },
 ];
+
+const rootDownMenuList = [
+  {
+    auth: '',
+    label: '新建数据组件',
+    action: record => createCategoryOrSchema(record, 'schema')
+  },
+  {
+    auth: '',
+    label: '新建分类',
+    action: record => createCategoryOrSchema(record, 'category')
+  },
+]
 
 const initTree = () => {
   expand.value = false;
@@ -124,42 +255,50 @@ const initTree = () => {
   }
 };
 
-// watch(() => {
-//   return schemaNode.value;
-// }, val => {
-//   if (val) {
-//     console.log(schemaNode);
-//     parentNode.value = val.parentNode;
-//   }
-// }, {
-//   immediate: true,
-// });
+const handleConfirm = async ({ data, callback }) => {
+  try {
+    if (modalType.value === 'create') {
+      await store.dispatch('Schema/createCategory', {
+        targetId: data.targetId,
+        name: data.title
+      })
+    } else {
+      await store.dispatch('Schema/updateCategory', {
+        id: data.id,
+        parent: data.targetId,
+        name: data.title,
+        type: 'schema'
+      })
+    }
+    callback(true);
+  } catch(error: any) {
+    const msg = typeof error === 'string' ? error : (error.message || '');
+    msg && message.error(msg);
+    callback(false);
+  }
+}
 
-// watch(() => {
-//   return parentNode.value;
-// }, val => {
-//   if (val) {
-//     const { width, top, left } = val.getBoundingClientRect();
-//     console.log(val.getBoundingClientRect());
-//     prefixStyle.value = {
-//       ...prefixStyle.value,
-//       top: `${top + width}px`,
-//       left: `${left}px`,
-//       width: `${width}px`,
-//     };
-//   }
-// }, {
-//   immediate: true,
-// });
+watch(() => {
+  return expand.value;
+}, async val => {
+  if (val) {
+    loading.value = true;
+    await store.dispatch('Schema/loadCategory');
+    loading.value = false;
+  }
+})
 
-// watch(() => {
-//   return expand.value;
-// }, val => {
-//   if (val) {
-//     const { height } = parentNode.value?.getBoundingClientRect();
-//     schemaNode.value.style.height = `${height * 0.8}px`
-//   }
-// })
+watch(() => {
+  return activeSchema.value;
+}, val => {
+  if (val.id) {
+    schemaTree.value?.setSelectedKeys(val.id);
+  } else {
+    schemaTree.value?.initTree();
+  }
+}, {
+  immediate: true
+})
 
 defineExpose({
   initTree
@@ -218,7 +357,6 @@ defineExpose({
     }
     .schema-content {
       height: calc(100% - 32px);
-      overflow-y: scroll;
     }
   }
 }

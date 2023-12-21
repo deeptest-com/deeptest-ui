@@ -127,8 +127,9 @@ export interface SchemaListReqParams {
 
 
 export interface SchemaDetailReqParams {
-    serveId: number | string;
-    ref: string;
+    serveId?: number | string;
+    ref?: string;
+    id: number | string;
 }
 
 export interface BasicSchemaParams {

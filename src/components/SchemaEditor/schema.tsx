@@ -319,7 +319,7 @@ export default defineComponent({
         }, (newVal: any) => {
             try {
                 nextTick(() => {
-                    let obj = JSON.parse(newVal);
+                    let obj = newVal ? JSON.parse(newVal) : '';
                     obj = obj ? obj : {type: 'object'};
                     data.value = addExtraViewInfo(obj);
                 })

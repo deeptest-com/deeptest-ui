@@ -241,7 +241,7 @@ import {ChangedStatus,SourceType} from "@/utils/enum";
 
 
 const {share} = useSharePage();
-const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project }>();
+const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project, Schema }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
 
@@ -254,6 +254,7 @@ type Key = ColumnProps['key'];
 const tagList: any = computed(() => store.state.Endpoint.tagList);
 const userList = computed<any>(() => store.state.Project.userList);
 const endpointTree = ref();
+const activeSchema = computed(() => store.state.Schema.activeSchema);
 
 /**
  * 表格数据
@@ -816,6 +817,16 @@ const showSchema = () => {
   endpointTree.value.initTree();
   openSchemaTab.value = true;
 }
+
+watch(() => {
+  return activeSchema.value;
+}, val => {
+  if (!val.id) {
+    openSchemaTab.value = false;
+    endpointTree.value.initTree();
+    selectedCategoryId.value = '';
+  }
+})
 </script>
 <style scoped lang="less">
 

@@ -384,7 +384,7 @@ const StoreModel: ModuleType = {
         async updateCategoryNode({ commit }, payload: any) {
             try {
                 const { id, ...params } = payload;
-                await updateCategory(id, { ...params });
+                await updateCategory({ ...params });
                 return true;
             } catch (error) {
                 return false;
@@ -416,7 +416,7 @@ const StoreModel: ModuleType = {
             commit('setTreeDataMapItemPropCategory', payload);
         },
         async saveCategory({ commit, dispatch, state }, payload: any) {
-            const jsn = await updateCategory(payload.id, payload)
+            const jsn = await updateCategory(payload)
             if (jsn.code === 0) {
                 commit('setCategory', jsn.data);
                 await dispatch('loadCategory');

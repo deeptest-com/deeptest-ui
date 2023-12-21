@@ -1,9 +1,12 @@
 <template>
   <div class="schema">
-
-    <a-tabs v-model:activeKey="activeKey" hide-add type="editable-card" @edit="onEdit">
-      <a-tab-pane v-for="pane in panes" :key="pane.key" :tab="pane.title">
-        <SchemaEditorContent />
+    <a-tabs 
+      :activeKey="activeSchema?.key" 
+      hide-add type="editable-card" 
+      @change="changeTab"
+      @edit="onEdit">
+      <a-tab-pane v-for="pane in tabs" :key="pane.key" :tab="pane.title">
+        <SchemaEditorContent @confirmDelete="key => onEdit(key, 'remove')" />
       </a-tab-pane>
     </a-tabs>
   </div>
@@ -13,55 +16,50 @@
 
 import { ref, computed } from 'vue';
 import { useStore } from 'vuex';
+import cloneDeep from "lodash/cloneDeep";
 import { StateType as SchemaStore } from './store';
 import { SchemaEditorContent } from './components';
 
 const store = useStore<{ Schema: SchemaStore }>();
-// const tabs = computed(() => store.state.Schema.tabs || panes);
-const panes = ref([
-  { title: 'Tab 1', content: 'Content of Tab 1', key: '1' },
-  { title: 'Tab 2', content: 'Content of Tab 2', key: '2' },
-]);
-// const tabs = computed(() => panes);
-
-const activeKey = ref(panes.value[0].key);
-
-const newTabIndex = ref(0);
+const tabs = computed(() => {
+  return (store.state.Schema.schemas || []).map(e => ({ title: e.name, ...e, key: e.entityId }));
+});
+const activeSchema = computed(() => store.state.Schema.activeSchema);
 
 const callback = (key: string) => {
   console.log(key);
 };
 
-const add = () => {
-  activeKey.value = `newTab${++newTabIndex.value}`;
-  panes.value.push({ title: 'New Tab', content: 'Content of new Tab', key: activeKey.value });
-};
-
 const remove = (targetKey: string) => {
-  let lastIndex = 0;
-  panes.value.forEach((pane, i) => {
-    if (pane.key === targetKey) {
-      lastIndex = i - 1;
-    }
-  });
-  panes.value = panes.value.filter(pane => pane.key !== targetKey);
-  if (panes.value.length && activeKey.value === targetKey) {
-    if (lastIndex >= 0) {
-      activeKey.value = panes.value[lastIndex].key;
-    } else {
-      activeKey.value = panes.value[0].key;
-    }
-  }
+  console.log(targetKey);
 };
 
 const onEdit = (targetKey: string | MouseEvent, action: string) => {
-  if (action === 'add') {
-    add();
-  } else {
-    remove(targetKey as string);
+  if (action !== 'remove') {
+    return;
+  }
+  console.error(targetKey);
+  const olderSchemas = cloneDeep(tabs.value);
+  const currActiveSchema = cloneDeep(activeSchema.value);
+  const findIndex = olderSchemas.findIndex(e => e.key === targetKey);
+  const schemas = tabs.value.filter(e => e.key !== targetKey);
+  store.commit('Schema/setSchemas', schemas);
+  if (currActiveSchema.key !== targetKey) {
+    return;
+  }
+  const newSchema = olderSchemas[findIndex - 1] ? olderSchemas[findIndex - 1] : olderSchemas[findIndex + 1] ? olderSchemas[findIndex + 1] : {};
+  store.commit('Schema/setActiveSchema', newSchema);
+  if (newSchema.entityId) {
+    store.dispatch('Schema/querySchema', { id: newSchema.entityId });
   }
 };
- 
+
+const changeTab = (evt) => {
+  const curr = tabs.value.find(e => e.key === evt);
+  store.dispatch('Schema/querySchema', { id: curr.entityId });
+  store.commit('Schema/setActiveSchema', curr);
+}
+
 </script>
 
 <style scoped lang="less">

@@ -20,7 +20,7 @@
 
   <div :class="['editor','show-on-hover', customClass]" v-else>
     <span class="title" @click.stop="handleClick">
-      {{fieldValue === 0 ? '0' : (fieldValue === '' ? '空' : fieldValue)}}
+      {{fieldValue === 0 ? '0' : (fieldValue === '' ? (emptyText || '空') : fieldValue)}}
     </span> &nbsp;&nbsp;
 
     <span class="edit-icon">
@@ -80,6 +80,11 @@ const props = defineProps({
     required: false,
     default: true,
     type: Boolean,
+  },
+  emptyText: {
+    required: false,
+    default: '',
+    type: String
   }
 })
 const emit = defineEmits(['update', 'edit']);

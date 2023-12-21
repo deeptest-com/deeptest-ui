@@ -1,5 +1,6 @@
-import { CaretDownOutlined } from "@ant-design/icons-vue";
-import { PropType, defineComponent, ref, defineExpose, Ref } from "vue";
+import { CaretDownOutlined, FolderOpenOutlined, FolderOutlined, PlusOutlined } from "@ant-design/icons-vue";
+import { PropType, defineComponent, ref, defineExpose, Ref, computed, reactive, watch } from "vue";
+import cloneDeep from "lodash/cloneDeep";
 import { DropdownActionMenu } from "../DropDownMenu";
 import "./index.less";
 
@@ -33,7 +34,7 @@ const CategoryTreeProps = {
     default: false,
   },
   showFolderIcon: { // 是否展示目录节点的icon
-    type: Boolean,
+    type: [Boolean, Function],
     default: false,
   },
   isDirNodeClicked: { // 目录节点是否可被点击
@@ -56,18 +57,24 @@ const CategoryTreeProps = {
     type: Function,
     default: (..._args: any[]) => {},
   },
+  rootContextMenuList: {
+    type: Array as PropType<any[]>,
+    default: () => []
+  }
 }
 
-const renderTitle = (node, searchValue) => {
+const renderTitle = (nodeProps, searchValue) => {
+  const node = nodeProps.dataRef;
+  const title = node.title || node.name || '';
   return (
-    (node.title || '').includes(searchValue) ? (
-      <span class="tree-title-text">
-        { node.title.substr(0, node.title.indexOf(searchValue)) }
+    title.includes(searchValue) ? (
+      <span class="tree-title-text" title={title}>
+        { title.substr(0, title.indexOf(searchValue)) }
         <span style="color: #f50">{ searchValue }</span>
-        { node.title.substr(node.title.indexOf(searchValue) + searchValue.length) }
+        { title.substr(title.indexOf(searchValue) + searchValue.length) }
       </span>
     ) : (
-      <span class="tree-title-text">{ node.title }</span>
+      <span class="tree-title-text" title={title}>{ title }</span>
     )
   );
 };
@@ -82,15 +89,40 @@ const renderMore = (nodeProps, props) => {
   )
 };
 
+const renderFolderIcon = (nodeProps) => {
+  return (
+    <span class="tree-icon">
+      { nodeProps.expanded  ? <FolderOutlined /> : <FolderOpenOutlined /> }
+    </span>
+  );
+};
+
+const setTreeDataKey = (data) => {
+  if (!data) {
+    return null;
+  }
+  return cloneDeep(data).map(e => ({
+    ...e,
+    key: e.id,
+    children: setTreeDataKey(e.children || null)
+  }));
+}
+
 const CategoryTree = defineComponent({
   name: 'CategoryTree',
   props: CategoryTreeProps,
-  setup(props, { expose }) {
+  setup(props, { expose, slots }) {
     const searchValue = ref('');
     const expandedKeys = ref([]);
     const checkedKeys = ref([]);
-    const selectedKeys = ref([]);
+    const selectedKeys = ref<any>([]);
     const autoExpandParent = ref(false);
+    const data = ref(setTreeDataKey(props.treeData || []));
+    watch(() => {
+      return props.treeData;
+    }, val => {
+      data.value = setTreeDataKey(val);
+    })
 
     const initTree = () => {
       expandedKeys.value = [];
@@ -104,6 +136,8 @@ const CategoryTree = defineComponent({
       title: (nodeProps) => {
         return (
           <div class="tree-title" draggable={props.nodeDraggable(nodeProps)}>
+            {(nodeProps.dataRef.entityId === 0 || nodeProps.dataRef.type === 'dir') && slots.folderIcon && slots.folderIcon({ nodeProps })}
+            {(nodeProps.dataRef.entityId !== 0 || (nodeProps.dataRef.type && nodeProps.dataRef.type !== 'dir')) && slots.nodeIcon && slots.nodeIcon()}
             {renderTitle(nodeProps, searchValue.value)}
             {renderMore(nodeProps, props)}
           </div>
@@ -111,9 +145,9 @@ const CategoryTree = defineComponent({
       }
     };
 
-    const selectedNode = (keys) => {
+    const selectedNode = (keys, evt) => {
       selectedKeys.value = keys;
-      props?.onTreeNodeClicked(keys);
+      props?.onTreeNodeClicked(keys, evt);
     };
 
     const expand = (keys) => {
@@ -121,25 +155,64 @@ const CategoryTree = defineComponent({
       autoExpandParent.value = false;
     };
 
-    expose({ initTree });
+    const handleRootAdd = () => {
+      if (props.rootContextMenuList.length > 0) {
+        return;
+      }
+    }
+
+    const setSelectedKeys = (key) => {
+      selectedKeys.value = [key];
+    }
+
+    const renderEmptyContent = () => {
+      return (
+        <div class="category-tree-empty">{ searchValue.value ? '搜索结果为空 ~ ' : '请点击上方按钮添加目录/组件 ~' }</div>
+      );
+    };
+
+    expose({ initTree, setSelectedKeys });
     return () => {
       return (
-        <div class="category-tree">
-          <a-tree 
-            searchValue={searchValue.value}
-            draggable={props.draggable}
-            checkable={props.checked}
-            expandedKeys={expandedKeys.value}
-            checkedKeys={checkedKeys.value}
-            selectedKeys={selectedKeys.value}
-            autoExpandParent={autoExpandParent.value}
-            treeData={props.treeData}
-            showIcon={props.showIcon}
-            onSelect={(keys) => selectedNode(keys)}
-            onDrop={(...args) => props.onTreeNodeDrop(args)}
-            onExpand={(keys) => expand(keys)}
-            v-slots={vSlots}
-          />
+        <div class="category-tree-container">
+          <div class="tag-filter-form">
+            <a-input-search
+              class="search-input"
+              value={searchValue.value}
+              allowClear={true}
+              placeholder="输入关键词搜索"/>
+            <div class="add-btn" onClick={() => handleRootAdd()}>
+              {props.rootContextMenuList.length > 0 ? (
+                <DropdownActionMenu dropdownList={props.rootContextMenuList} record={{}} >
+                  <PlusOutlined style="font-size: 16px;"/>
+                </DropdownActionMenu>
+              ) : (
+                <PlusOutlined style="font-size: 16px;"/>
+              )}
+            </div>
+          </div>
+          {data.value.length > 0 ? (
+            <div class="category-tree">
+              <a-tree 
+                searchValue={searchValue.value}
+                draggable={props.draggable}
+                checkable={props.checked}
+                expandedKeys={expandedKeys.value}
+                checkedKeys={checkedKeys.value}
+                selectedKeys={selectedKeys.value}
+                autoExpandParent={autoExpandParent.value}
+                treeData={data.value}
+                showIcon={props.showIcon}
+                onSelect={(keys, evt) => selectedNode(keys, evt)}
+                onDrop={(...args) => props.onTreeNodeDrop(args[0])}
+                onExpand={(keys) => expand(keys)}
+                v-slots={vSlots}
+              />
+            </div>
+          ): (
+            renderEmptyContent()
+          )}
+          
         </div>
       )
     }
