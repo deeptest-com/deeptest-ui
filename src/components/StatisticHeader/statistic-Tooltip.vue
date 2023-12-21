@@ -88,7 +88,6 @@ const hSuffix = computed(() => {
 
 <style lang="less">
 .memo-tooltip {
-    max-width: 412px;
-    min-width: 200px;
+    max-width: 354px;
 }
 </style>

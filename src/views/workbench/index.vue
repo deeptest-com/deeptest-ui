@@ -40,7 +40,6 @@ watch(
     return currProject.value;
   },
   (val: any) => {
-    console.log("~------currProject---", val);
     if (val.id) {
       getHearderData()
     }

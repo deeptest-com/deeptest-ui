@@ -39,13 +39,13 @@
             <span v-else-if="record.hb < 0" style="color:green;margin-left: 2px;">(<ArrowDownOutlined />{{ record.hb*-1 }})</span>
          </template>
           <template #sortTitle>
-            <Header :title="'排名'" :prompt="'按用户创建的场景数排名，场景数相同时按照最近更新时间先后排。和上周对比排名的上下浮动'" />
+            <Header :title="'排名'" :prompt="'按用户创建的场景数排名，场景数相同时按照最近更新时间先后排。和上周对比排名的上下浮动。'" />
          </template>
          <template #scenarioTitle>
             <Header :title="'场景数'" :prompt="'该用户创建的测试场景总数'" />
          </template>
          <template #interfaceTitle>
-            <Header :title="'接口数'" :prompt="'该用户添加到场景中的接口请求总数，无论该场景是否由此用户创建'" />
+            <Header :title="'接口数'" :prompt="'该用户添加到场景中的接口请求总数，无论该场景是否由此用户创建。'" />
          </template>
           <template #name="{ text, record }">
             <div class="project-name" @click="goProject(record.id)">
