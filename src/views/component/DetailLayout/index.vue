@@ -60,7 +60,12 @@ watch(() => {
   return props.stickyKey;
 }, val => {
   if (val && contentRef?.value) {
-    contentRef?.value?.scrollTo(0, 88);
+    const el = document.getElementsByClassName('detail-basic-info');
+    if (el && el[0]) {
+      const { height } = el[0].getBoundingClientRect();
+      contentRef?.value?.scrollTo(0, height);
+    }
+    
   }
 }, {
   immediate: true,

@@ -46,7 +46,7 @@
     </div>
 
     <ResponseDrawer
-      :data="currRespDetail"
+      :data="endpointData"
       :response-drawer-visible="logResponseDetailVisible"
       @onClose="logResponseDetailVisible = false" />
   </div>
@@ -102,11 +102,6 @@ const indicator = h(LoadingOutlined, {
 });
 
 function handleQueryDetail() {
-  Object.assign(currRespDetail, {
-    reqContent: reqContent.value,
-    resContent: resContent.value,
-    invokeId: props.endpointData.invokeId || 0
-  });
   logResponseDetailVisible.value = true;
 }
 </script>
