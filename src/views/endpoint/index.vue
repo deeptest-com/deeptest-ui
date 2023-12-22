@@ -582,6 +582,7 @@ watch(() => currProject.value.id, async (newVal, oldVal) => {
     await store.dispatch('Endpoint/getEndpointTagList');
     store.commit('Endpoint/clearFilterState');
     filter.value?.resetFields()
+    store.dispatch('Schema/loadCategory');
   }
 }, {
   immediate: true

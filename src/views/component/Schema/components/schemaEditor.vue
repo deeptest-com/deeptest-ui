@@ -4,7 +4,12 @@
       <!-- header编辑 -->
       <div class="schema-header">
         <div class="schema-header-left">
-          <EditAndShowField :value="schemaDetail?.name || ''" placeholder="请输入内容" @update="v => handleUpdated('name', v)" />
+          <EditAndShowField 
+            @cancel="handleCancel"
+            :auto-focus="activeSchemaTab.autoFocus" 
+            :value="schemaDetail?.name || ''" 
+            placeholder="请输入内容" 
+            @update="v => handleUpdated('name', v)" />
         </div>
         <div class="schema-header-right">
           <a-button type="default" @click="onDelete">删除</a-button>
@@ -15,6 +20,7 @@
       <div class="schema-header">
         <div class="schema-header-left">
           <EditAndShowField 
+            :custom-class="'text-gray'"
             :value="schemaDetail?.description || ''" 
             placeholder="请输入内容"
             empty-text="添加数据组件描述"
@@ -77,6 +83,7 @@ const loading = ref(false);
 
 const store = useStore<{ ProjectSetting: ProjectSettingStateType, Schema }>();
 const schemaDetail = computed(() => store.state.Schema.schemaDetail);
+const activeSchemaTab = computed(() => store.state.Schema.activeSchema);
 const schemas = computed(() => store.state.Schema.schemas);
 
 const handleSwitchMode = async (e) => {
@@ -129,8 +136,19 @@ const saveSchema = () => {
   store.dispatch('Schema/saveSchema', object);
 }
 
+const handleCancel = () => {
+  store.commit('Schema/activeSchema', {
+    ...activeSchemaTab,
+    autoFocus: false,
+  })
+}
+
 const handleUpdated = async (type: string, value: string) => {
   try {
+    store.commit('Schema/activeSchema', {
+      ...activeSchemaTab,
+      autoFocus: false,
+    })
     await store.dispatch('Schema/saveSchema', {
       "name": type === 'name' ? value : schemaDetail.value.name,
       "id": schemaDetail.value.id,

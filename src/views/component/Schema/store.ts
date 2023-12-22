@@ -132,13 +132,17 @@ const StoreModel: ModuleType = {
         return Promise.reject(error);
       }
     },
-    async saveSchema({ commit, dispatch }, payload) {
+    async saveSchema({ commit, dispatch, state }, payload) {
       try {
         const { code, data, msg } = await saveSchema(payload);
         if (code === 0) {
           dispatch('loadCategory');
-          // commit('setSchemaCategory', data);
-          return Promise.resolve();
+          const activeSchema = { id: data, key: data, entityId: data, title: 'NewComponent', autoFocus: true };
+          // 新建组件以后，设置当前选中tab以及tab列表
+          commit('setActiveSchema', activeSchema);
+          commit('setSchemas', state.schemas.concat([activeSchema]));
+          dispatch('querySchema', { id: data });
+          return Promise.resolve(data);
         }
         return Promise.reject(msg);
       } catch(error) {

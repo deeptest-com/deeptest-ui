@@ -3,6 +3,7 @@ import { PropType, defineComponent, ref, defineExpose, Ref, computed, reactive, 
 import cloneDeep from "lodash/cloneDeep";
 import { DropdownActionMenu } from "../DropDownMenu";
 import "./index.less";
+import { filterByKeyword } from "@/utils/tree";
 
 const CategoryTreeProps = {
   categoryType: { // 目录树类型
@@ -117,12 +118,9 @@ const CategoryTree = defineComponent({
     const checkedKeys = ref([]);
     const selectedKeys = ref<any>([]);
     const autoExpandParent = ref(false);
-    const data = ref(setTreeDataKey(props.treeData || []));
-    watch(() => {
-      return props.treeData;
-    }, val => {
-      data.value = setTreeDataKey(val);
-    })
+    const data = computed(() => {
+      return [...filterByKeyword(props.treeData, searchValue.value, 'name')];
+    });
 
     const initTree = () => {
       expandedKeys.value = [];
@@ -171,15 +169,20 @@ const CategoryTree = defineComponent({
       );
     };
 
+    const handleChange = (e) => {
+      searchValue.value = e.target.value;
+    };
+
     expose({ initTree, setSelectedKeys });
     return () => {
       return (
         <div class="category-tree-container">
           <div class="tag-filter-form">
-            <a-input-search
+            <a-input
               class="search-input"
               value={searchValue.value}
               allowClear={true}
+              onChange={e => handleChange(e)}
               placeholder="输入关键词搜索"/>
             <div class="add-btn" onClick={() => handleRootAdd()}>
               {props.rootContextMenuList.length > 0 ? (

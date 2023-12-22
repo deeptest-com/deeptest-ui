@@ -3,7 +3,7 @@
     <div class="schema-inlet" @click="expand = !expand">
       <span class="schema-icon"> <SettingOutlined />
       </span>
-      <span class="schema-title">数据组件(20)</span>
+      <span class="schema-title">数据组件({{ count }})</span>
       <span class="schema-expand-icon">
         <ArrowDownOutlined v-if="expand" />
         <ArrowUpOutlined v-else/>
@@ -63,13 +63,15 @@ import Tree from '@/components/CategoryTree/index';
 import { CreateModal } from './components';
 import { StateType as SchemaStateType } from './store';
 import { confirmToDelete } from '@/utils/confirm';
-import eventBus from '@/utils/eventBus';
-import settings from '@/config/settings';
 
 const emits = defineEmits(['select']);
 const store = useStore<{ Schema: SchemaStateType, ProjectGlobal }>();
 const treeData = computed<any>(() => {
   return store.state.Schema.schemaTreeData?.children || [];
+});
+
+const count = computed<any>(() => {
+  return store.state.Schema.schemaTreeData?.count || 0;
 });
 const treeDataCategory = computed(() => {
   return store.state.Schema.schemaTreeData;
@@ -152,13 +154,18 @@ const createCategoryOrSchema = async (nodeProps, createType) => {
     return;
   } 
   try {
+    const targetId = nodeProps.dataRef ? nodeProps.dataRef?.id : treeDataCategory.value?.id; 
+    if (!targetId) {
+      return Promise.reject('targetId not found');
+    }
     await store.dispatch('Schema/saveSchema', {
-      targetId: nodeProps.dataRef ? nodeProps.dataRef.id : treeDataCategory.value.id,
+      targetId,
       name: 'NewComponent',
-    })
+    });
+    emits('select');
   } catch(error) {
     console.error(error);
-  } 
+  }
 };
 
 const editCategory = (nodeProps) => {

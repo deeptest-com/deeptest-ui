@@ -44,9 +44,8 @@ import {
 } from '@ant-design/icons-vue';
 import { vOnClickOutside } from '@vueuse/components';
 import {notifyWarn} from "@/utils/notify";
-import TooltipCell from '../Table/tooltipCell.vue';
 const isEditing = ref(false);
-const fieldValue = ref('');
+const fieldValue = ref<any>('');
 const editor = ref(null);
 const props = defineProps({
   value: {
@@ -87,7 +86,7 @@ const props = defineProps({
     type: String
   }
 })
-const emit = defineEmits(['update', 'edit']);
+const emit = defineEmits(['update', 'edit', 'cancel']);
 
 function updateField() {
   if (!props.canEmpty && !fieldValue.value) {
@@ -107,6 +106,7 @@ function edit() {
 function cancelEdit() {
   fieldValue.value = props.value;
   isEditing.value = false;
+  emit('cancel');
 }
 
 function handleClick() {
@@ -145,6 +145,12 @@ watch(() => {return props.autoFocus}, (newVal) => {
 
   &.custom-endpoint {
     color: #447DFD;
+  }
+
+  &.text-gray {
+    .title {
+      color: #b0b0b0;
+    }
   }
 
   &.show-on-hover {
