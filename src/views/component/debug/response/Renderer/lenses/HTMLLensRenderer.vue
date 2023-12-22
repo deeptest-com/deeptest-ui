@@ -66,11 +66,14 @@ import settings from "@/config/settings";
 import ResponseExtractor from "@/components/Editor/ResponseExtractor.vue";
 import {getXpath, initIFrame, updateElem} from "@/services/parser-html";
 import {parseHtml, testExpr} from "@/views/component/debug/service";
-import {ExtractorSrc, ExtractorType, UsedBy} from "@/utils/enum";
+import {ConditionSrc, ExtractorSrc, ExtractorType, UsedBy} from "@/utils/enum";
 
 const {t} = useI18n();
 
 const usedBy = inject('usedBy') as UsedBy
+const src = inject('usedWith') as ConditionSrc
+const isForBenchmarkCase = inject('isForBenchmarkCase');
+
 const store = useStore<{  Debug: Debug }>();
 
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
@@ -148,6 +151,8 @@ const responseExtractorFinish = (conf) => {
   const data = {
     conf,
     info: debugInfo.value,
+    conditionSrc: src,
+    isForBenchmarkCase: isForBenchmarkCase,
   } as any
 
   store.dispatch('Debug/quickCreateExtractor', data).then((result) => {

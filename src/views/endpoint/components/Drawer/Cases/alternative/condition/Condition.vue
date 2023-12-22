@@ -188,7 +188,8 @@ const create = () => {
   store.dispatch('Debug/createCondition', {
     entityType: conditionType.value,
     ...debugInfo.value,
-    isForBenchmarkCase: true
+    isForBenchmarkCase: true,
+    conditionSrc: props.conditionSrc,
   })
 }
 
@@ -198,10 +199,17 @@ const format = (item) => {
 }
 const disable = (item) => {
   console.log('disable', item)
+
+  item.conditionSrc = props.conditionSrc
+  item.isForBenchmarkCase = props.isForBenchmarkCase
+
   store.dispatch('Debug/disableCondition', item)
 }
 const remove = (item) => {
   console.log('remove', item)
+
+  item.conditionSrc = props.conditionSrc
+  item.isForBenchmarkCase = props.isForBenchmarkCase
 
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
     store.dispatch('Debug/removeCondition', item)
@@ -214,8 +222,10 @@ function move(_e: any) {
   store.dispatch('Debug/moveCondition', {
     data: envIdList,
     info: debugInfo.value,
-    isForBenchmarkCase: true,
+
     entityType: '',
+    conditionSrc: props.conditionSrc,
+    isForBenchmarkCase: props.isForBenchmarkCase,
   })
 }
 

@@ -73,15 +73,17 @@ import MonacoEditor from "@/components/Editor/MonacoEditor.vue";
 import {MonacoOptions} from "@/utils/const";
 
 import {parseHtml, parseJson, testExpr} from "@/views/component/debug/service";
-import {ExtractorSrc, ExtractorType, UsedBy} from "@/utils/enum";
+import {ConditionSrc, ExtractorSrc, ExtractorType, UsedBy} from "@/utils/enum";
 import {StateType as Debug} from "@/views/component/debug/store";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import ResponseExtractor from "@/components/Editor/ResponseExtractor.vue";
 import GenerateFromResponse from "@/views/endpoint/components/Drawer/Define/GenerateFromResponse/index.vue";
 
-
 const usedBy = inject('usedBy') as UsedBy
+const src = inject('usedWith') as ConditionSrc
+const isForBenchmarkCase = inject('isForBenchmarkCase');
+
 const {t} = useI18n();
 const store = useStore<{  Debug: Debug }>();
 
@@ -152,6 +154,8 @@ const responseExtractorFinish = (conf) => {
   const data = {
     conf,
     info: debugInfo.value,
+    conditionSrc: src,
+    isForBenchmarkCase: isForBenchmarkCase,
   } as any
 
   store.dispatch('Debug/quickCreateExtractor', data).then((result) => {

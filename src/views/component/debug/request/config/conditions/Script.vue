@@ -31,7 +31,7 @@
           <div @click="addSnippet('send_request_get')" class="dp-link-primary">发送GET请求</div>
           <div @click="addSnippet('send_request_post')" class="dp-link-primary">发送POST请求</div>
 
-          <template v-if="usedWith==='post'">
+          <template v-if="src==='post_condition'">
             <div @click="addSnippet('set_mock_resp_code')" class="dp-link-primary">设置响应码</div>
             <div @click="addSnippet('set_mock_resp_field')" class="dp-link-primary">修改JSON响应对象</div>
             <div @click="addSnippet('set_mock_resp_text')" class="dp-link-primary">修改字符串响应内容</div>
@@ -83,8 +83,10 @@ import {StateType as ProjectStateType} from "@/store/project";
 import cloneDeep from "lodash/cloneDeep";
 
 const useForm = Form.useForm;
+
 const usedBy = inject('usedBy') as UsedBy
-const usedWith = inject('usedWith') as ConditionSrc
+const src = inject('usedWith') as ConditionSrc
+
 const isForBenchmarkCase = inject('isForBenchmarkCase');
 const {t} = useI18n();
 const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet: Snippet }>();
@@ -165,6 +167,8 @@ const save = (item) => {
   data.debugInterfaceId = debugInfo.value.debugInterfaceId
   data.endpointInterfaceId = debugInfo.value.endpointInterfaceId
   data.projectId = debugData.value.projectId
+  data.conditionSrc = src
+  model.value.isForBenchmarkCase = isForBenchmarkCase
 
   store.dispatch('Debug/saveScript', data).then((result) => {
     if (result) {

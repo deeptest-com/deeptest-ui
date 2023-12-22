@@ -274,12 +274,6 @@ export async function quickCreateExtractor(data): Promise<any> {
         data: data,
     });
 }
-export async function removeExtractor(id: number): Promise<any> {
-    return request({
-        url: `/${apiExtractor}/${id}`,
-        method: 'DELETE',
-    });
-}
 export async function listExtractorVariable(data: any): Promise<any> {
     return request({
         url: `/${apiExtractor}/listExtractorVariableForCheckpoint`,
@@ -302,19 +296,6 @@ export async function saveCookie(data): Promise<any> {
         data: data,
     });
 }
-export async function quickCreateCookie(data): Promise<any> {
-    return request({
-        url: `/${apiCookie}/quickCreate`,
-        method: 'POST',
-        data: data,
-    });
-}
-export async function removeCookie(id: number): Promise<any> {
-    return request({
-        url: `/${apiCookie}/${id}`,
-        method: 'DELETE',
-    });
-}
 
 // checkpoint
 export async function getCheckpoint(id: number): Promise<any> {
@@ -328,12 +309,6 @@ export async function saveCheckpoint(data): Promise<any> {
         url: `/${apiCheckpoint}`,
         method: data.id ? 'PUT' : 'POST',
         data: data,
-    });
-}
-export async function removeCheckpoint(id: number): Promise<any> {
-    return request({
-        url: `/${apiCheckpoint}/${id}`,
-        method: 'DELETE',
     });
 }
 
@@ -351,12 +326,6 @@ export async function saveScript(data): Promise<any> {
         data: data,
     });
 }
-export async function removeScript(id: number): Promise<any> {
-    return request({
-        url: `/${apiScript}/${id}`,
-        method: 'DELETE',
-    });
-}
 
 // dbConn
 export async function getDbOpt(id: number): Promise<any> {
@@ -370,12 +339,6 @@ export async function saveDbOpt(data): Promise<any> {
         url: `/${apiDatabaseOpts}`,
         method: data.id ? 'PUT' : 'POST',
         data: data,
-    });
-}
-export async function removeDbOpt(id: number): Promise<any> {
-    return request({
-        url: `/${apiDatabaseOpts}/${id}`,
-        method: 'DELETE',
     });
 }
 
