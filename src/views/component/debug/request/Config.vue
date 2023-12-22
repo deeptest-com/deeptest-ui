@@ -32,12 +32,16 @@
         <Authorization v-if="activeKey === 'auth'" />
       </a-tab-pane>
 
-      <a-tab-pane key="pre-condition" tab="预处理">
-        <PreCondition v-if="activeKey === 'pre-condition'" />
+      <a-tab-pane key="pre-condition" :tab="getTabTitle('preConditions')">
+        <Condition v-if="activeKey === 'pre-condition'"
+                   :isForBenchmarkCase="false"
+                   :conditionSrc="ConditionSrc.PreCondition" />
       </a-tab-pane>
 
       <a-tab-pane key="post-condition" :tab="getTabTitle('postConditions')">
-        <PostCondition v-if="activeKey === 'post-condition'" />
+        <Condition v-if="activeKey === 'post-condition'"
+                   :isForBenchmarkCase="false"
+                   :conditionSrc="ConditionSrc.PostCondition"/>
       </a-tab-pane>
 
       <a-tab-pane key="assertion" :tab="getTabTitle('assertionConditions')">
@@ -50,7 +54,7 @@
 <script setup lang="ts">
 import {computed, inject, ref, watch, onMounted,onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
-import {ConditionType, Methods, UsedBy} from "@/utils/enum";
+import {ConditionType, ConditionSrc, UsedBy} from "@/utils/enum";
 import {StateType as Debug} from "@/views/component/debug/store";
 
 import QueryParameters from "./config/QueryParameters.vue";
@@ -61,8 +65,7 @@ import Cookie from "./config/Cookie.vue";
 import RequestBody from "./config/Body.vue";
 import RequestHeaders from "./config/Headers.vue";
 import Authorization from "./config/Authorization.vue";
-import PreCondition from "./config/ConditionPre.vue";
-import PostCondition from "./config/ConditionPost.vue";
+import Condition from "./config/Condition.vue";
 import Assertion from "./config/Assertion.vue";
 import {useStore} from "vuex";
 import bus from "@/utils/eventBus";
@@ -76,6 +79,7 @@ const {t} = useI18n();
 
 const store = useStore<{  Debug: Debug }>()
 const debugData = computed<any>(() => store.state.Debug.debugData);
+const preConditions = computed<any>(() => store.state.Debug.preConditions);
 const postConditions = computed<any>(() => store.state.Debug.postConditions);
 const assertionConditions = computed<any>(() => store.state.Debug.assertionConditions);
 
@@ -87,11 +91,22 @@ const getTabTitle = computed(() => {
     pathParams: '路径参数',
     headers: '请求头',
     cookies: 'Cookie',
+    preConditions: '前置处理',
     postConditions: '后置处理',
     assertionConditions: '断言',
   }
   return type => {
-    const sourceData = type === 'postConditions' ? (postConditions.value || []) : type === 'assertionConditions' ? (assertionConditions.value || []) : (debugData.value[type] || []).filter(e => e.name);
+    let sourceData = []
+    if (type === 'preConditions') {
+      sourceData = preConditions.value || []
+    } else if (type === 'postConditions') {
+      sourceData = postConditions.value || []
+    } else if (type === 'assertionConditions') {
+      sourceData = assertionConditions.value || []
+    } else {
+      sourceData = (debugData.value[type] || []).filter(e => e.name)
+    }
+
     const globalParamsType = type === 'queryParams' ? 'query' : type === 'pathParams' ? 'path' : type === 'headers' ? 'header' : type === "cookies"? 'cookie': '';
     let globalParamsLength = 0;
     if (globalParamsType) {
@@ -99,7 +114,7 @@ const getTabTitle = computed(() => {
       globalParamsLength = globalParams.length;
     }
     const numbers = sourceData.length + globalParamsLength;
-    return `${typeMap[type]}${numbers ? `${'(*)'.replace('*', numbers)}` : ''}`
+    return `${typeMap[type]}${numbers ? `${'(*)'.replace('*', numbers+'')}` : ''}`
   }
 });
 
@@ -115,26 +130,23 @@ watch(() => debugData.value.debugInterfaceId, (newVal) => {
   }
 }, {immediate: true, deep: true});
 
-watch(() => {
-  return debugData.value;
-}, (val) => {
+watch(() => { return debugData.value }, (val) => {
+  console.log('watch debugData in debug/request/Config.vue')
   if (val.method) {
-    store.dispatch('Debug/listPostCondition');
     store.dispatch('Debug/listAssertionCondition');
   }
-}, {
-  immediate: true,
-});
-
-
-
+}, { immediate: true });
 
 /**
  * 离开提示保存: 后置处理器 + 断言
  * */
 const {
+  preConditionsList,
+  preConditionsDataObj,
+
   postConditionsList,
   postConditionsDataObj,
+
   debugInfo,
   assertionConditionsDataObj,
   debugChangePostScript,
@@ -144,6 +156,7 @@ const {
     resetMockChange,
   scriptData,
 }  = useIMLeaveTip();
+
 const getEntityType = (id) => {
   const cur = postConditionsList?.value?.find((item) => {
     return item.entityId === id
@@ -166,6 +179,7 @@ const leaveSave =  async (event) => {
       }
     })
   }
+
   // 断言缓存的数据 - 保存
   if(Object.keys(assertionConditionsDataObj.value)?.length && debugChangeCheckpoint.value){
     Object.values(assertionConditionsDataObj.value).map(async (item:any) => {
@@ -181,19 +195,15 @@ const leaveSave =  async (event) => {
     data.debugInterfaceId = debugInfo.value.debugInterfaceId
     data.endpointInterfaceId = debugInfo.value.endpointInterfaceId
     data.projectId = debugData.value.projectId;
-    await store.dispatch('Debug/savePreConditionScript', data)
   }
+
   resetDebugChange();
   if(event?.callback){
     event?.callback?.();
   }else {
     notifySuccess(`保存成功`);
   }
-
 }
-
-
-
 
 onMounted( () => {
   bus.on(settings.eventPostConditionSave, leaveSave);

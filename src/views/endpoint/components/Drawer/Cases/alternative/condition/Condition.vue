@@ -21,14 +21,14 @@
       </a-row>
     </div>
 
-    <div class="content">
+    <div :class="['content', 'benchmark-condition-content']">
       <draggable tag="div" item-key="name" class="collapse-list"
-                 :list="postConditions || []"
+                 :list="conditions || []"
                  handle=".handle"
                  @end="move">
         <template #item="{ element }">
 
-          <div :class="[activePostCondition.id === +element.id ? 'active' : '']" class="collapse-item">
+          <div :class="[activeCondition.id === +element.id ? 'active' : '']" class="collapse-item">
             <div class="header">
               <div @click.stop="expand(element)" class="title dp-link dp-ellipsis">
                 <icon-svg class="handle dp-drag icon" type="move" />
@@ -42,7 +42,6 @@
                 <icon-svg v-if="element.entityType === ConditionType.script"
                           type="script"
                           class="icon"  />
-
                 <icon-svg v-if="element.entityType === ConditionType.databaseOpt"
                           type="db-opt"
                           class="icon"  />
@@ -51,12 +50,11 @@
               </div>
               <div class="buttons">
                 <a-button size="small" type="primary"
-                          :disabled="getSaveBtnDisabled(element?.entityId)"
-                          v-if="activePostCondition.id === element.id"
+                          v-if="activeCondition.id === element.id"
                           @click.stop="save(element)">保存</a-button>
 
 
-                <ClearOutlined v-if="activePostCondition.id === +element.id && element.entityType === ConditionType.script"
+                <ClearOutlined v-if="activeCondition.id === +element.id && element.entityType === ConditionType.script"
                                @click.stop="format(element)"
                                class="dp-icon-btn dp-trans-80"
                                title="格式化"/>&nbsp;
@@ -68,39 +66,34 @@
                 <DeleteOutlined @click.stop="remove(element)"
                                 class="dp-icon-btn dp-trans-80" title="删除" />
 
-                <FullscreenOutlined v-if="activePostCondition.id === element.id"
+                <FullscreenOutlined v-if="activeCondition.id === element.id"
                                     @click.stop="openFullscreen(element)"
                                     class="dp-icon-btn dp-trans-80" title="全屏" />
 
-                <RightOutlined v-if="activePostCondition.id !== element.id"
+                <RightOutlined v-if="activeCondition.id !== element.id"
                                @click.stop="expand(element)"
                                class="dp-icon-btn dp-trans-80" />
-                <DownOutlined v-if="activePostCondition.id === element.id"
+                <DownOutlined v-if="activeCondition.id === element.id"
                               @click.stop="expand(element)"
                               class="dp-icon-btn dp-trans-80" />
               </div>
             </div>
 
-            <div class="content" v-if="activePostCondition.id === +element.id">
+            <div class="content" v-if="activeCondition.id === +element.id">
               <Extractor
                 v-if="element.entityType === ConditionType.extractor"
-                :condition="activePostCondition"
+                :condition="activeCondition"
                 :finish="list"/>
-
-<!--              <Checkpoint
-                v-if="element.entityType === ConditionType.checkpoint"
-                :condition="activePostCondition"
-                :finish="list"/>-->
 
               <Script
                 v-if="element.entityType === ConditionType.script"
-                :condition="activePostCondition"
+                :condition="activeCondition"
                 :finish="list"/>
 
               <DatabaseOpt
-                  v-if="element.entityType === ConditionType.databaseOpt"
-                  :condition="activePostCondition"
-                  :finish="list"/>
+                v-if="element.entityType === ConditionType.databaseOpt"
+                :condition="activeCondition"
+                :finish="list"/>
             </div>
           </div>
 
@@ -111,13 +104,13 @@
     <FullScreenPopup
       v-if="fullscreen"
       :visible="fullscreen"
-      :model="activePostCondition"
+      :model="activeCondition"
       :onCancel="closeFullScreen" />
   </div>
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch, getCurrentInstance, ComponentInternalInstance, onUnmounted, onMounted, provide, defineProps} from "vue";
+import {computed, inject, ref, watch, onUnmounted, provide, defineProps} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import {
@@ -128,9 +121,9 @@ import {
   DownOutlined,
   CloseCircleOutlined,
   FullscreenOutlined } from '@ant-design/icons-vue';
-import draggable from 'vuedraggable'
+import draggable from 'vuedraggable';
 import Tips from "@/components/Tips/index.vue";
-import {ConditionType, UsedBy, UsedWith} from "@/utils/enum";
+import {ConditionType, UsedBy, ConditionSrc} from "@/utils/enum";
 import {EnvDataItem} from "@/views/project-settings/data";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
@@ -138,22 +131,33 @@ import {confirmToDelete} from "@/utils/confirm";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {getEnumSelectItems} from "@/views/scenario/service";
 import IconSvg from "@/components/IconSvg";
-import useIMLeaveTip   from "@/composables/useIMLeaveTip";
-import Extractor from "./conditions-post/Extractor.vue";
-import Checkpoint from "./conditions-post/Checkpoint.vue";
-import Script from "./conditions-post/Script.vue";
-import DatabaseOpt from "./conditions-post/DatabaseOpt.vue";
-import FullScreenPopup from "./ConditionPopup.vue";
-import {equalObjectByLodash} from "@/utils/object";
+import Extractor from "@/views/component/debug/request/config/conditions-post/Extractor.vue";
+import Script from "@/views/component/debug/request/config/conditions-post/Script.vue";
+import DatabaseOpt from "@/views/component/debug/request/config/conditions-post/DatabaseOpt.vue";
+import FullScreenPopup from "@/views/component/debug/request/config/ConditionPopup.vue";
 
 const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
-const postConditions = computed<any>(() => store.state.Debug.postConditions);
-const activePostCondition = computed<any>(() => store.state.Debug.activePostCondition);
+const conditions = computed<any>(() => {
+  return store.state.Debug.benchMarkCase.conditions;
+});
+const activeCondition = computed<any>(() => {
+  return store.state.Debug.benchMarkCase.activeCondition;
+});
 
-provide('usedWith', UsedWith.PostCondition)
+const props = defineProps({
+  conditionSrc: {
+    type: String,
+    required: true,
+  },
+  isForBenchmarkCase: {
+    type: Boolean,
+    required: true,
+  },
+})
 
+provide('usedWith', props.conditionSrc)
 
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
@@ -165,13 +169,13 @@ const conditionTypes = ref(getEnumSelectItems(ConditionType))
 
 const expand = (item) => {
   console.log('expand', item)
-  store.commit('Debug/setActivePostCondition', item);
+  store.commit('Debug/setActiveCondition', item);
 }
 
 const list = async () => {
-  console.log('list')
-  await store.dispatch('Debug/listPostCondition', {
-    isForBenchmarkCase: false
+  console.log('list in alternative/condition/Condition')
+  await store.dispatch('Debug/listCondition', {
+    isForBenchmarkCase: true
   })
 }
 
@@ -181,10 +185,10 @@ watch(debugData, async (newVal) => {
 
 const create = () => {
   console.log('create', conditionType.value)
-  store.dispatch('Debug/createPostCondition', {
+  store.dispatch('Debug/createCondition', {
     entityType: conditionType.value,
     ...debugInfo.value,
-    isForBenchmarkCase: false
+    isForBenchmarkCase: true
   })
 }
 
@@ -194,23 +198,23 @@ const format = (item) => {
 }
 const disable = (item) => {
   console.log('disable', item)
-  store.dispatch('Debug/disablePostCondition', item)
+  store.dispatch('Debug/disableCondition', item)
 }
 const remove = (item) => {
   console.log('remove', item)
 
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
-    store.dispatch('Debug/removePostCondition', item)
+    store.dispatch('Debug/removeCondition', item)
   })
 }
 function move(_e: any) {
-  const envIdList = postConditions.value.map((e: EnvDataItem) => {
+  const envIdList = conditions.value.map((e: EnvDataItem) => {
     return e.id;
   })
-  store.dispatch('Debug/movePostCondition', {
+  store.dispatch('Debug/moveCondition', {
     data: envIdList,
     info: debugInfo.value,
-    isForBenchmarkCase: false,
+    isForBenchmarkCase: true,
     entityType: '',
   })
 }
@@ -229,36 +233,10 @@ const closeFullScreen = (item) => {
   fullscreen.value = false
 }
 
-provide('isForBenchmarkCase', false);
-/*************************************************
- * ::::后置处理器提示
- ************************************************/
-const {srcPostConditionsDataObj,postConditionsDataObj,debugChange} = useIMLeaveTip();
-const getSaveBtnDisabled = (id) => {
-  const cur =  postConditionsDataObj.value?.[id] || {};
-  const src =  srcPostConditionsDataObj.value?.[id] || {};
-  return equalObjectByLodash(cur, src);
-}
-
-watch(() => {
-  return [postConditions.value,postConditionsDataObj.value,srcPostConditionsDataObj.value]
-},(newVal,oldValue) => {
-  const cur =  postConditionsDataObj.value;
-  const src =  srcPostConditionsDataObj.value;
-  // debugger;
-
-  const isChange = !equalObjectByLodash(cur, src);
-  console.log(83222,cur,src,isChange,debugChange.value)
-  store.commit('Debug/setDebugChange',{
-    postScript:isChange,
-  })
-},{
-  deep:true
-})
-
+provide('isForBenchmarkCase', true);
 
 onUnmounted(() => {
-  store.commit('Debug/setActivePostCondition', {});
+  store.commit('Debug/setActiveCondition', {});
 })
 
 </script>
