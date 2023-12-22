@@ -98,7 +98,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, CloseCircleOutlined, CheckC
 import {
   listExtractorVariable
 } from "@/views/component/debug/service";
-import {ComparisonOperator, CheckpointType, UsedBy, ExtractorType} from "@/utils/enum";
+import {ComparisonOperator, CheckpointType, UsedBy, ExtractorType, ConditionSrc} from "@/utils/enum";
 import {isInArray} from "@/utils/array";
 import {getDpResultClass} from "@/utils/dom"
 import {getCompareOptsForRespCode, getCompareOptsForString} from "@/utils/compare";
@@ -110,10 +110,13 @@ import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import useIMLeaveTip   from "@/composables/useIMLeaveTip";
-const useForm = Form.useForm;
-const usedBy = inject('usedBy') as UsedBy
-const isForBenchmarkCase = inject('isForBenchmarkCase');
 const {t} = useI18n();
+const useForm = Form.useForm;
+
+const usedBy = inject('usedBy') as UsedBy
+const src = inject('usedWith') as ConditionSrc
+
+const isForBenchmarkCase = inject('isForBenchmarkCase');
 
 const store = useStore<{  Debug: any }>();
 
@@ -195,6 +198,8 @@ const save = (item) => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
     model.value.projectId = debugData.value.projectId
+    model.value.conditionSrc = src
+    model.value.isForBenchmarkCase = isForBenchmarkCase
 
     store.dispatch('Debug/saveCheckpoint', model.value).then((result) => {
       if (result) {

@@ -30,7 +30,7 @@ import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import {message, Form, notification} from 'ant-design-vue';
 
-import {UsedBy} from "@/utils/enum";
+import {ConditionSrc, UsedBy} from "@/utils/enum";
 
 import {StateType as Debug} from "@/views/component/debug/store";
 import {NotificationKeyCommon} from "@/utils/const";
@@ -39,8 +39,11 @@ import settings from "@/config/settings";
 import {notifyError, notifySuccess} from "@/utils/notify";
 
 const useForm = Form.useForm;
+
 const usedBy = inject('usedBy') as UsedBy
+const src = inject('usedWith') as ConditionSrc
 const isForBenchmarkCase = inject('isForBenchmarkCase');
+
 const {t} = useI18n();
 
 const store = useStore<{  Debug: Debug }>();
@@ -85,6 +88,8 @@ const save = () => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
     model.value.projectId = debugData.value.projectId
+    model.value.conditionSrc = src
+    model.value.isForBenchmarkCase = isForBenchmarkCase
 
     store.dispatch('Debug/saveCookie', model.value).then((result) => {
       if (result) {

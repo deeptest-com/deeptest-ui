@@ -24,15 +24,9 @@ import {
     listShareVar,
     loadData,
     moveConditions,
-    quickCreateCookie,
     quickCreateExtractor,
-    removeCheckpoint,
     removeConditions,
-    removeCookie,
-    removeDbOpt,
-    removeExtractor,
     removeInvocation,
-    removeScript,
     removeShareVar,
     save,
     saveAsCase,
@@ -258,26 +252,22 @@ export interface ModuleType extends StoreModuleType<StateType> {
         getExtractor: Action<StateType, StateType>;
         saveExtractor: Action<StateType, StateType>;
         quickCreateExtractor: Action<StateType, StateType>; // usedBy code editor
-        removeExtractor: Action<StateType, StateType>;
 
         getCookie: Action<StateType, StateType>;
         saveCookie: Action<StateType, StateType>;
         quickCreateCookie: Action<StateType, StateType>;
-        removeCookie: Action<StateType, StateType>;
 
         getCheckpoint: Action<StateType, StateType>;
         saveCheckpoint: Action<StateType, StateType>;
-        removeCheckpoint: Action<StateType, StateType>;
-
-        getScript: Action<StateType, StateType>;
-        saveScript: Action<StateType, StateType>;
-        removeScript: Action<StateType, StateType>;
-        addSnippet: Action<StateType, StateType>;
-        addSnippetForPost: Action<StateType, StateType>;
 
         getDbOpt: Action<StateType, StateType>;
         saveDbOpt: Action<StateType, StateType>;
-        removeDbOpt: Action<StateType, StateType>;
+
+        getScript: Action<StateType, StateType>;
+        saveScript: Action<StateType, StateType>;
+
+        addSnippet: Action<StateType, StateType>;
+        addSnippetForPost: Action<StateType, StateType>;
 
         listShareVar: Action<StateType, StateType>;
         removeShareVar: Action<StateType, StateType>;
@@ -777,7 +767,8 @@ const StoreModel: ModuleType = {
 
                 } else {
                     await dispatch('listCondition', {
-                        isForBenchmarkCase: payload.isForBenchmarkCase, conditionSrc: payload.conditionSrc });
+                        isForBenchmarkCase: payload.isForBenchmarkCase,
+                        conditionSrc: payload.conditionSrc });
 
                     const conditions = payload.isForBenchmarkCase ?
                         (payload.src === ConditionSrc.PreCondition ? state.benchMarkCase.preConditions : state.benchMarkCase.postConditions) :
@@ -868,7 +859,11 @@ const StoreModel: ModuleType = {
         async saveExtractor({commit, dispatch, state}, payload: any) {
             try {
                 await saveExtractor(payload);
-                dispatch('listCondition');
+                dispatch('listCondition', {
+                    isForBenchmarkCase: payload.isForBenchmarkCase,
+                    conditionSrc: payload.conditionSrc,
+                });
+
                 return true;
             } catch (error) {
                 return false;
@@ -885,18 +880,13 @@ const StoreModel: ModuleType = {
         async quickCreateExtractor({commit, dispatch, state}, payload: any) {
             try {
                 await quickCreateExtractor(payload);
-                dispatch('listCondition');
                 dispatch('listShareVar');
-                return true;
-            } catch (error) {
-                return false;
-            }
-        },
-        async removeExtractor({commit, dispatch, state}, payload) {
-            try {
-                await removeExtractor(payload.id);
 
-                dispatch('listCondition');
+                dispatch('listCondition', {
+                    isForBenchmarkCase: payload.isForBenchmarkCase,
+                    conditionSrc: payload.conditionSrc,
+                });
+
                 return true;
             } catch (error) {
                 return false;
@@ -921,26 +911,12 @@ const StoreModel: ModuleType = {
         async saveCookie({commit, dispatch, state}, payload: any) {
             try {
                 await saveCookie(payload);
-                dispatch('listCondition');
-                return true;
-            } catch (error) {
-                return false;
-            }
-        },
-        async quickCreateCookie({commit, dispatch, state}, payload: any) {
-            try {
-                await quickCreateCookie(payload);
-                dispatch('listCondition');
-                return true;
-            } catch (error) {
-                return false;
-            }
-        },
-        async removeCookie({commit, dispatch, state}, payload) {
-            try {
-                await removeCookie(payload.id);
 
-                dispatch('listCondition');
+                dispatch('listCondition', {
+                    isForBenchmarkCase: payload.isForBenchmarkCase,
+                    conditionSrc: payload.conditionSrc,
+                });
+
                 return true;
             } catch (error) {
                 return false;
@@ -974,7 +950,12 @@ const StoreModel: ModuleType = {
         async saveCheckpoint({commit, dispatch, state}, payload: any) {
             try {
                 await saveCheckpoint(payload);
-                dispatch('listCondition');
+
+                dispatch('listCondition', {
+                    isForBenchmarkCase: payload.isForBenchmarkCase,
+                    conditionSrc: payload.conditionSrc,
+                });
+
                 return true
             } catch (error) {
                 return false;
@@ -984,16 +965,6 @@ const StoreModel: ModuleType = {
             try {
                 await saveCheckpoint(payload);
                 return true
-            } catch (error) {
-                return false;
-            }
-        },
-        async removeCheckpoint({commit, dispatch, state}, id: number) {
-            try {
-                await removeCheckpoint(id);
-
-                dispatch('listCondition');
-                return true;
             } catch (error) {
                 return false;
             }
@@ -1022,8 +993,12 @@ const StoreModel: ModuleType = {
         async saveScript({commit, dispatch, state}, payload: any) {
             try {
                 await saveScript(payload);
-                // await commit('setSrcScript',cloneDeep(payload));
-                await dispatch('listCondition');
+
+                dispatch('listCondition', {
+                    isForBenchmarkCase: payload.isForBenchmarkCase,
+                    conditionSrc: payload.conditionSrc,
+                });
+
                 return true
             } catch (error) {
                 return false;
@@ -1033,16 +1008,6 @@ const StoreModel: ModuleType = {
             try {
                 await saveScript(payload);
                 return true
-            } catch (error) {
-                return false;
-            }
-        },
-        async removeScript({commit, dispatch, state}, id: number) {
-            try {
-                await removeScript(id);
-
-                dispatch('listCondition');
-                return true;
             } catch (error) {
                 return false;
             }
@@ -1069,7 +1034,12 @@ const StoreModel: ModuleType = {
         async saveDbOpt({commit, dispatch, state}, payload: any) {
             try {
                 await saveDbOpt(payload);
-                dispatch('listCondition');
+
+                dispatch('listCondition', {
+                    isForBenchmarkCase: payload.isForBenchmarkCase,
+                    conditionSrc: payload.conditionSrc,
+                });
+
                 return true;
             } catch (error) {
                 return false;
@@ -1078,16 +1048,6 @@ const StoreModel: ModuleType = {
         async leaveSaveDbOpt({commit, dispatch, state}, payload: any) {
             try {
                 await saveDbOpt(payload);
-                return true;
-            } catch (error) {
-                return false;
-            }
-        },
-        async removeDbOpt({commit, dispatch, state}, payload) {
-            try {
-                await removeDbOpt(payload.id);
-
-                dispatch('listCondition');
                 return true;
             } catch (error) {
                 return false;
