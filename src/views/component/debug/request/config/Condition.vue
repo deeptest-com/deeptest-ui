@@ -169,8 +169,20 @@ const {t} = useI18n();
 
 const fullscreen = ref(false)
 
-const conditionType = ref(ConditionType.extractor)
-const conditionTypes = ref(getEnumSelectItems(ConditionType))
+const conditionType = ref(props.conditionSrc === ConditionSrc.PreCondition ? ConditionType.script : ConditionType.extractor)
+const conditionTypes = ref(getConditionTypes())
+
+function getConditionTypes() {
+  const items = getEnumSelectItems(ConditionType)
+
+  let ret = items.filter(item => ![ConditionType.checkpoint,ConditionType.cookie].includes(item.value))
+
+  if (props.conditionSrc === ConditionSrc.PreCondition) {
+    ret = ret.filter(item => [ConditionType.script,ConditionType.databaseOpt].includes(item.value))
+  }
+
+  return ret
+}
 
 const expand = (item) => {
   console.log('expand', item)
