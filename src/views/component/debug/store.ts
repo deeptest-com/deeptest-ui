@@ -632,10 +632,15 @@ const StoreModel: ModuleType = {
 
                 commit('putInvokedMap')
 
-                await dispatch('listShareVar');
+                dispatch('listShareVar');
+                dispatch('listAssertionCondition');
 
-                await dispatch('listCondition');
-                await dispatch('listAssertionCondition');
+                dispatch('listCondition', {
+                    isForBenchmarkCase: false,
+                    conditionSrc: ConditionSrc.PreCondition });
+                dispatch('listCondition', {
+                    isForBenchmarkCase: false,
+                    conditionSrc: ConditionSrc.PostCondition });
 
                 return true;
             } else {
@@ -796,7 +801,10 @@ const StoreModel: ModuleType = {
                 if (payload.entityType === ConditionType.checkpoint) {
                     dispatch('listAssertionCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
                 } else {
-                    dispatch('listCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
+                    dispatch('listCondition', {
+                        isForBenchmarkCase: payload.isForBenchmarkCase,
+                        conditionSrc: payload.conditionSrc,
+                    });
                 }
                 return true;
             } catch (error) {
@@ -816,6 +824,7 @@ const StoreModel: ModuleType = {
                     });
                 }
                 return true;
+
             } catch (error) {
                 return false;
             }
@@ -826,9 +835,13 @@ const StoreModel: ModuleType = {
                 if (payload.entityType === ConditionType.checkpoint) {
                     dispatch('listAssertionCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
                 } else {
-                    dispatch('listCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
+                    dispatch('listCondition', {
+                        isForBenchmarkCase: payload.isForBenchmarkCase,
+                        conditionSrc: payload.conditionSrc,
+                    });
                 }
                 return true;
+
             } catch (error) {
                 return false;
             }
