@@ -1052,11 +1052,12 @@ const StoreModel: ModuleType = {
             }
         },
         // 获取可选组件信息
-        async getAllRefs({commit}, payload: any) {
+        async getAllRefs({commit, rootState}: any, payload: any) {
             const res = await getSchemaList({
                 ...payload,
                 "page": 1,
-                "pageSize": 100
+                "pageSize": 100,
+                projectId: rootState.ProjectGlobal.currProject.id,
             });
             if (res.code === 0) {
                 res.data.result.forEach((item: any) => {

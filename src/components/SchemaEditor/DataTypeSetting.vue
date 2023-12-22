@@ -358,7 +358,6 @@ async function searchRefs(keyword) {
   //TODO 加缓存，否则会重复拿数据
   debounce(async () => {
     refsOptions.value = await store.dispatch('Endpoint/getAllRefs', {
-      "serveId": props.serveId,
       page: 1,
       name: keyword,
       pageSize: 20

@@ -195,7 +195,6 @@ const StoreModel: ModuleType = {
       commit('setActiveSchema', {});
       commit('setSchemas', []);
       commit('setSchemaDetail', {});
-      commit('setSchemaCategory', {});
     },
     async removeSchemaTabs({ commit, state }, { data }) {
       const removeSchemaIds = getAllSchemaId(data); // 该目录下所有的schema

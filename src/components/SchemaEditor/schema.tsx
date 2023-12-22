@@ -43,8 +43,7 @@ export default defineComponent({
                 // 如果没有引用组件内容，需要获取组件详情
                 if (!tree.content) {
                     const result = await store.dispatch('Endpoint/getRefDetail', {
-                        ref: tree.ref,
-                        serveId: props.serveId
+                        id: tree.refId,
                     })
                     // 处理引用组件的信息
                     handleRefInfo(tree, result);

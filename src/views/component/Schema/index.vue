@@ -164,7 +164,7 @@ const createCategoryOrSchema = async (nodeProps, createType) => {
     });
     emits('select');
   } catch(error) {
-    console.error(error);
+    console.log(error)
   }
 };
 
@@ -321,6 +321,7 @@ watch(() => {
 watch(() => {
   return activeSchema.value;
 }, val => {
+  console.error(val);
   if (val.id) {
     schemaTree.value?.setSelectedKeys(val.id);
   } else {
