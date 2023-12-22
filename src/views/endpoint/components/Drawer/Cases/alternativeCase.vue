@@ -88,12 +88,16 @@
 
             <a-tab-pane key="pre-condition" tab="预处理">
               <CaseTips type="pre-condition" @reset="onReset" />
-              <ConditionPre v-if="activeKey === 'pre-condition'" />
+              <Condition v-if="activeKey === 'pre-condition'"
+                         :isForBenchmarkCase="true"
+                         :conditionSrc="ConditionSrc.PreCondition" />
             </a-tab-pane>
 
             <a-tab-pane key="post-condition" :tab="getTabTtitle('post-condition')">
               <CaseTips type="post-condition" @reset="onReset" />
-              <ConditionPost v-if="activeKey === 'post-condition'" />
+              <Condition v-if="activeKey === 'post-condition'"
+                         :isForBenchmarkCase="true"
+                         :conditionSrc="ConditionSrc.PostCondition" />
             </a-tab-pane>
 
             <a-tab-pane key="assertion" :tab="getTabTtitle('assertion')">
@@ -127,7 +131,7 @@
 
 <script lang="ts" setup>
 import {computed, defineProps, provide, ref, watch, unref, onMounted, onUnmounted} from "vue";
-import {UsedBy} from "@/utils/enum";
+import {UsedBy, ConditionSrc} from "@/utils/enum";
 import {useStore} from "vuex";
 import cloneDeep from "lodash/cloneDeep";
 import { message, Modal } from "ant-design-vue";
@@ -145,8 +149,7 @@ import {
   CaseFactor,
   CaseTips,
   SaveAlternative,
-  ConditionPost,
-  ConditionPre,
+  Condition,
   Assertion } from "./alternative";
 import EditAndShowField from "@/components/EditAndShow/index.vue";
 import Invocation from "@/views/component/debug/request/Invocation.vue";
@@ -206,7 +209,7 @@ const loadDebugData = async (data) => {
     loadingAlternativeCase.value = true;
     await store.dispatch('Debug/loadDataAndInvocations', data);
     resetDebugChange();
-    await store.dispatch('Debug/listPostCondition', { isForBenchmarkCase: true });
+    await store.dispatch('Debug/listCondition', { isForBenchmarkCase: true });
     await store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
     loadingAlternativeCase.value = false;
   } catch (err) {
@@ -370,7 +373,7 @@ const onReset = ({ type, params }: { type: string, params: any }) => {
         if (type === 'pre-condition') {
           store.dispatch('Debug/getPreConditionScript', { isForBenchmarkCase: true })
         } else if (type === 'post-condition' ) {
-          store.dispatch('Debug/listPostCondition', { isForBenchmarkCase: true });
+          store.dispatch('Debug/listCondition', { isForBenchmarkCase: true });
         } else {
           store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
         }
@@ -459,7 +462,7 @@ const onClose = () => {
 }
 
 const handleOpen = () => {
-  store.dispatch('Debug/listPostCondition', { isForBenchmarkCase: true });
+  store.dispatch('Debug/listCondition', { isForBenchmarkCase: true });
   store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
 }
 

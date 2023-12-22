@@ -51,12 +51,11 @@ import {computed, defineProps, inject, ref} from "vue";
 import {useI18n} from "vue-i18n";
 
 import {ConditionType} from "@/utils/enum";
-import Extractor from "./conditions-post/Extractor.vue";
-import Cookie from "./conditions-post/Cookie.vue";
-import Checkpoint from "./conditions-post/Checkpoint.vue";
-import PreScript from "./conditions-pre/Script.vue";
-import PostScript from "./conditions-post/Script.vue";
-import DatabaseOpt from "./conditions-post/DatabaseOpt.vue";
+import Extractor from "./conditions/Extractor.vue";
+import Cookie from "./conditions/Cookie.vue";
+import Checkpoint from "./conditions/Checkpoint.vue";
+import PostScript from "./conditions/Script.vue";
+import DatabaseOpt from "./conditions/DatabaseOpt.vue";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 

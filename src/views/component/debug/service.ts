@@ -3,7 +3,7 @@ import request from '@/utils/request';
 import {requestToAgent} from '@/utils/request';
 import {DebugInfo, Interface, OAuth20} from "./data";
 import {isInArray} from "@/utils/array";
-import {ConditionCategory, UsedBy} from "@/utils/enum";
+import {ConditionCategory, ConditionSrc, UsedBy} from "@/utils/enum";
 import {getToken} from "@/utils/localToken";
 import {getAgentUrl} from '@/utils/agentEnv';
 const apiPath = 'debugs';
@@ -12,13 +12,11 @@ const apiPathInvoke = `${apiPath}/invoke`;
 
 const apiAgentExec = 'exec';
 
-const apiSpec = 'spec';
 const apiAuth = 'auth';
 const apiShareVar = `shareVars`
 const apiSnippets = 'snippets'
 
-const apiPreConditions = 'preConditions'
-const apiPostConditions = 'postConditions'
+const apiConditions = 'conditions'
 const apiExtractor = 'extractors'
 const apiCookie = 'cookies'
 const apiCheckpoint = 'checkpoints'
@@ -215,69 +213,41 @@ export function getCodeLangByType(type) {
 }
 
 // conditions
-export async function getPreConditionScript(params:{ debugInterfaceId, endpointInterfaceId: number, usedBy: string, isForBenchmarkCase?: boolean;}): Promise<any> {
-    return request({
-        url: `/${apiPreConditions}/getScript`,
-        method: 'GET',
-        params,
-    });
-}
-export async function createPreConditions(data): Promise<any> {
-    return request({
-        url: `/${apiPreConditions}`,
-        method: data.id ? 'PUT' : 'POST',
-        data: data,
-    });
-}
-export async function disablePreConditions(id): Promise<any> {
-    return request({
-        url: `/${apiPreConditions}/${id}/disable`,
-        method: 'POST',
-    });
-}
-export async function removePreConditions(id): Promise<any> {
-    return request({
-        url: `/${apiPreConditions}/${id}`,
-        method: 'DELETE',
-    });
-}
-export async function movePreConditions(data): Promise<any> {
-    return request({
-        url: `/${apiPreConditions}/move`,
-        method: 'POST',
-        data: data,
-    });
-}
+export async function listConditions(params: {
+    debugInterfaceId, endpointInterfaceId: number,
+    category: ConditionCategory | undefined,
+    usedBy: string,
+    isForBenchmarkCase?: boolean,
+    src?: ConditionSrc }): Promise<any> {
 
-export async function listPostConditions(params: {debugInterfaceId, endpointInterfaceId: number, category: ConditionCategory, usedBy: string, isForBenchmarkCase?: boolean}): Promise<any> {
     return request({
-        url: `/${apiPostConditions}`,
+        url: `/${apiConditions}`,
         method: 'GET',
         params,
     });
 }
-export async function createPostConditions(data): Promise<any> {
+export async function createConditions(data): Promise<any> {
     return request({
-        url: `/${apiPostConditions}`,
+        url: `/${apiConditions}`,
         method: data.id ? 'PUT' : 'POST',
         data: data,
     });
 }
-export async function disablePostConditions(id): Promise<any> {
+export async function disableConditions(id): Promise<any> {
     return request({
-        url: `/${apiPostConditions}/${id}/disable`,
+        url: `/${apiConditions}/${id}/disable`,
         method: 'POST',
     });
 }
-export async function removePostConditions(id): Promise<any> {
+export async function removeConditions(id): Promise<any> {
     return request({
-        url: `/${apiPostConditions}/${id}`,
+        url: `/${apiConditions}/${id}`,
         method: 'DELETE',
     });
 }
-export async function movePostConditions(data): Promise<any> {
+export async function moveConditions(data): Promise<any> {
     return request({
-        url: `/${apiPostConditions}/move`,
+        url: `/${apiConditions}/move`,
         method: 'POST',
         data: data,
     });

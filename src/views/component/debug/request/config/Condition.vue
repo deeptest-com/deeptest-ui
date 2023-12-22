@@ -16,19 +16,21 @@
         </a-col>
 
         <a-col flex="100px" class="dp-right">
-          <Tips section="response-process" title="对请求响应的后处理" />
+          <Tips v-if="conditionSrc==='pre'" section="request-process" title="对请求的预处理" />
+          <Tips v-if="conditionSrc==='post'" section="response-process" title="对响应的后处理" />
         </a-col>
+
       </a-row>
     </div>
 
-    <div :class="['content', 'benchmark-condition-content']">
+    <div class="content">
       <draggable tag="div" item-key="name" class="collapse-list"
-                 :list="postConditions || []"
+                 :list="conditions || []"
                  handle=".handle"
                  @end="move">
         <template #item="{ element }">
 
-          <div :class="[activePostCondition.id === +element.id ? 'active' : '']" class="collapse-item">
+          <div :class="[activeCondition.id === +element.id ? 'active' : '']" class="collapse-item">
             <div class="header">
               <div @click.stop="expand(element)" class="title dp-link dp-ellipsis">
                 <icon-svg class="handle dp-drag icon" type="move" />
@@ -42,6 +44,7 @@
                 <icon-svg v-if="element.entityType === ConditionType.script"
                           type="script"
                           class="icon"  />
+
                 <icon-svg v-if="element.entityType === ConditionType.databaseOpt"
                           type="db-opt"
                           class="icon"  />
@@ -50,11 +53,12 @@
               </div>
               <div class="buttons">
                 <a-button size="small" type="primary"
-                          v-if="activePostCondition.id === element.id"
+                          :disabled="getSaveBtnDisabled(element?.entityId)"
+                          v-if="activeCondition.id === element.id"
                           @click.stop="save(element)">保存</a-button>
 
 
-                <ClearOutlined v-if="activePostCondition.id === +element.id && element.entityType === ConditionType.script"
+                <ClearOutlined v-if="activeCondition.id === +element.id && element.entityType === ConditionType.script"
                                @click.stop="format(element)"
                                class="dp-icon-btn dp-trans-80"
                                title="格式化"/>&nbsp;
@@ -66,39 +70,34 @@
                 <DeleteOutlined @click.stop="remove(element)"
                                 class="dp-icon-btn dp-trans-80" title="删除" />
 
-                <FullscreenOutlined v-if="activePostCondition.id === element.id"
+                <FullscreenOutlined v-if="activeCondition.id === element.id"
                                     @click.stop="openFullscreen(element)"
                                     class="dp-icon-btn dp-trans-80" title="全屏" />
 
-                <RightOutlined v-if="activePostCondition.id !== element.id"
+                <RightOutlined v-if="activeCondition.id !== element.id"
                                @click.stop="expand(element)"
                                class="dp-icon-btn dp-trans-80" />
-                <DownOutlined v-if="activePostCondition.id === element.id"
+                <DownOutlined v-if="activeCondition.id === element.id"
                               @click.stop="expand(element)"
                               class="dp-icon-btn dp-trans-80" />
               </div>
             </div>
 
-            <div class="content" v-if="activePostCondition.id === +element.id">
+            <div class="content" v-if="activeCondition.id === +element.id">
               <Extractor
                 v-if="element.entityType === ConditionType.extractor"
-                :condition="activePostCondition"
+                :condition="activeCondition"
                 :finish="list"/>
-
-<!--              <Checkpoint
-                v-if="element.entityType === ConditionType.checkpoint"
-                :condition="activePostCondition"
-                :finish="list"/>-->
 
               <Script
                 v-if="element.entityType === ConditionType.script"
-                :condition="activePostCondition"
+                :condition="activeCondition"
                 :finish="list"/>
 
               <DatabaseOpt
-                v-if="element.entityType === ConditionType.databaseOpt"
-                :condition="activePostCondition"
-                :finish="list"/>
+                  v-if="element.entityType === ConditionType.databaseOpt"
+                  :condition="activeCondition"
+                  :finish="list"/>
             </div>
           </div>
 
@@ -109,13 +108,13 @@
     <FullScreenPopup
       v-if="fullscreen"
       :visible="fullscreen"
-      :model="activePostCondition"
+      :model="activeCondition"
       :onCancel="closeFullScreen" />
   </div>
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch, onUnmounted, provide} from "vue";
+import {computed, inject, ref, watch, getCurrentInstance, ComponentInternalInstance, onUnmounted, onMounted, provide, defineProps} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import {
@@ -126,9 +125,9 @@ import {
   DownOutlined,
   CloseCircleOutlined,
   FullscreenOutlined } from '@ant-design/icons-vue';
-import draggable from 'vuedraggable';
+import draggable from 'vuedraggable'
 import Tips from "@/components/Tips/index.vue";
-import {ConditionType, UsedBy, UsedWith} from "@/utils/enum";
+import {ConditionType, UsedBy, ConditionSrc} from "@/utils/enum";
 import {EnvDataItem} from "@/views/project-settings/data";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
@@ -136,24 +135,34 @@ import {confirmToDelete} from "@/utils/confirm";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {getEnumSelectItems} from "@/views/scenario/service";
 import IconSvg from "@/components/IconSvg";
-import Extractor from "@/views/component/debug/request/config/conditions-post/Extractor.vue";
-import Checkpoint from "@/views/component/debug/request/config/conditions-post/Checkpoint.vue";
-import Script from "@/views/component/debug/request/config/conditions-post/Script.vue";
-import DatabaseOpt from "@/views/component/debug/request/config/conditions-post/DatabaseOpt.vue";
-import FullScreenPopup from "@/views/component/debug/request/config/ConditionPopup.vue";
+import useIMLeaveTip   from "@/composables/useIMLeaveTip";
+import Extractor from "./conditions/Extractor.vue";
+import Script from "./conditions/Script.vue";
+import DatabaseOpt from "./conditions/DatabaseOpt.vue";
+import FullScreenPopup from "./ConditionPopup.vue";
+import {equalObjectByLodash} from "@/utils/object";
+import debounce from "lodash.debounce";
 
 const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
-const postConditions = computed<any>(() => {
-  return store.state.Debug.benchMarkCase.postConditions;
-});
-const activePostCondition = computed<any>(() => {
-  return store.state.Debug.benchMarkCase.activePostCondition;
-});
+const activeCondition = computed<any>(() => store.state.Debug.activeCondition);
 
-provide('usedWith', UsedWith.PostCondition)
+const conditions = computed<any>(() =>
+    store.state.Debug[props.conditionSrc === ConditionSrc.PreCondition ? 'preConditions' : 'postConditions'] || []);
 
+const props = defineProps({
+  conditionSrc: {
+    type: String,
+    required: true,
+  },
+  isForBenchmarkCase: {
+    type: Boolean,
+    required: true,
+  },
+})
+
+provide('usedWith', props.conditionSrc)
 
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
@@ -165,26 +174,30 @@ const conditionTypes = ref(getEnumSelectItems(ConditionType))
 
 const expand = (item) => {
   console.log('expand', item)
-  store.commit('Debug/setActivePostCondition', item);
+  store.commit('Debug/setActiveCondition', item);
 }
 
-const list = async () => {
-  console.log('list')
-  await store.dispatch('Debug/listPostCondition', {
-    isForBenchmarkCase: true
+const list = debounce(async () => {
+  console.log('list in debug/request/config/Condition.vue', props.conditionSrc)
+  await store.dispatch('Debug/listCondition', {
+    src: props.conditionSrc,
+    isForBenchmarkCase: props.isForBenchmarkCase,
   })
-}
+}, 300)
 
 watch(debugData, async (newVal) => {
+  console.log('watch debugData')
+
   await list();
 }, {immediate: true, deep: true});
 
 const create = () => {
   console.log('create', conditionType.value)
   store.dispatch('Debug/createPostCondition', {
+    src: props.conditionSrc,
     entityType: conditionType.value,
     ...debugInfo.value,
-    isForBenchmarkCase: true
+    isForBenchmarkCase: false
   })
 }
 
@@ -204,13 +217,13 @@ const remove = (item) => {
   })
 }
 function move(_e: any) {
-  const envIdList = postConditions.value.map((e: EnvDataItem) => {
+  const envIdList = conditions.value.map((e: EnvDataItem) => {
     return e.id;
   })
   store.dispatch('Debug/movePostCondition', {
     data: envIdList,
     info: debugInfo.value,
-    isForBenchmarkCase: true,
+    isForBenchmarkCase: false,
     entityType: '',
   })
 }
@@ -229,10 +242,40 @@ const closeFullScreen = (item) => {
   fullscreen.value = false
 }
 
-provide('isForBenchmarkCase', true);
+provide('isForBenchmarkCase', false);
+/*************************************************
+ * ::::后置处理器提示
+ ************************************************/
+
+const {srcPreConditionsDataObj, preConditionsDataObj, srcPostConditionsDataObj, postConditionsDataObj, debugChange} = useIMLeaveTip();
+const srcConditionsDataObj = computed<any>(() =>
+  props.conditionSrc === ConditionSrc.PreCondition ?  srcPreConditionsDataObj.value : srcPostConditionsDataObj.value
+)
+const conditionsDataObj = computed<any>(() =>
+  props.conditionSrc === ConditionSrc.PreCondition ?  preConditionsDataObj.value : postConditionsDataObj.value
+)
+
+const getSaveBtnDisabled = (id) => {
+  const cur =  conditionsDataObj.value?.[id] || {};
+  const src =  srcConditionsDataObj.value?.[id] || {};
+  return equalObjectByLodash(cur, src);
+}
+
+watch(() => {return [conditions.value, conditionsDataObj.value, srcConditionsDataObj.value]},(newVal,oldValue) => {
+  console.log('watch conditions objs')
+
+  const cur =  conditionsDataObj.value;
+  const src =  srcConditionsDataObj.value;
+
+  const isChange = !equalObjectByLodash(cur, src);
+
+  store.commit('Debug/setDebugChange',{
+    postScript:isChange,
+  })
+},{deep:true})
 
 onUnmounted(() => {
-  store.commit('Debug/setActivePostCondition', {});
+  store.commit('Debug/setActiveCondition', {});
 })
 
 </script>
