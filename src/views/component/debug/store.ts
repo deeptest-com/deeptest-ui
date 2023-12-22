@@ -255,7 +255,6 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         getCookie: Action<StateType, StateType>;
         saveCookie: Action<StateType, StateType>;
-        quickCreateCookie: Action<StateType, StateType>;
 
         getCheckpoint: Action<StateType, StateType>;
         saveCheckpoint: Action<StateType, StateType>;
