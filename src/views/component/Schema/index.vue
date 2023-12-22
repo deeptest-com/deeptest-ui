@@ -10,35 +10,37 @@
       </span>
     </div>
     <div class="schema-content">
-      <a-spin tip="loading..." :spinning="loading">
-        <Tree 
-          ref="schemaTree"
-          category-type="schema" 
-          :checked="false" 
-          :draggable="true"
-          :context-menu-list="dropDownMenuList" 
-          :rootContextMenuList="rootDownMenuList"
-          :show-folder-icon="true"
-          :tree-data="treeData"
-          :is-dir-node-clicked="false"
-          :node-draggable="checkNodeDraggable"
-          :show-more-icon="showMore"
-          :show-icon="true"
-          @tree-node-clicked="handleClick"
-          @tree-node-drop="onDrop">
-          <template #folderIcon="{ nodeProps }">
-            <span class="tree-icon">
-              <FolderOutlined v-if="!nodeProps.expanded" />
-              <FolderOpenOutlined v-else/>
-            </span>
-          </template>
-          <template #nodeIcon>
-            <span class="tree-icon">
-              <SettingOutlined />
-            </span>
-          </template>
-        </Tree>
-      </a-spin>
+      <div class="schema-loading" v-if="loading">
+        <a-spin tip="loading..." :spinning="loading" />
+      </div>
+      <Tree 
+        v-else
+        ref="schemaTree"
+        category-type="schema" 
+        :checked="false" 
+        :draggable="true"
+        :context-menu-list="dropDownMenuList" 
+        :rootContextMenuList="rootDownMenuList"
+        :show-folder-icon="true"
+        :tree-data="treeData"
+        :is-dir-node-clicked="false"
+        :node-draggable="checkNodeDraggable"
+        :show-more-icon="showMore"
+        :show-icon="true"
+        @tree-node-clicked="handleClick"
+        @tree-node-drop="onDrop">
+        <template #folderIcon="{ nodeProps }">
+          <span class="tree-icon">
+            <FolderOutlined v-if="!nodeProps.expanded" />
+            <FolderOpenOutlined v-else/>
+          </span>
+        </template>
+        <template #nodeIcon>
+          <span class="tree-icon">
+            <SettingOutlined />
+          </span>
+        </template>
+      </Tree>
     </div>
   </div>
   <CreateModal 
@@ -61,6 +63,8 @@ import Tree from '@/components/CategoryTree/index';
 import { CreateModal } from './components';
 import { StateType as SchemaStateType } from './store';
 import { confirmToDelete } from '@/utils/confirm';
+import eventBus from '@/utils/eventBus';
+import settings from '@/config/settings';
 
 const emits = defineEmits(['select']);
 const store = useStore<{ Schema: SchemaStateType, ProjectGlobal }>();
@@ -172,6 +176,9 @@ const delCategory = (nodeProps) => {
         id: nodeProps.dataRef.id, 
         type: 'schema'
       });
+      if (nodeProps.dataRef.children) {
+        store.dispatch('Schema/removeSchemaTabs', { data: nodeProps.dataRef.children })
+      }
     } catch(error: any) {
       const msg = typeof error === 'string' ? error : (error.message || '');
       msg && message.error(msg);
@@ -227,9 +234,15 @@ const dropDownMenuList = [
     action: (record) => {
       const title = '删除后无法恢复，请确定是否删除？';
       confirmToDelete(title, '', async () => {
-        await store.dispatch('Schema/deleteSchema', {
-          id: record.dataRef.entityId,
-        });
+        try {
+          await store.dispatch('Schema/deleteSchema', {
+            id: record.dataRef.entityId,
+          });
+          store.dispatch('Schema/removeActiveSchema', record.dataRef?.entityId);
+        } catch(_error) {
+          message.error('删除失败');
+        }
+       
       })
     }
   },
@@ -278,13 +291,23 @@ const handleConfirm = async ({ data, callback }) => {
   }
 }
 
+const loadCategory = async () => {
+  loading.value = true;
+  await store.dispatch('Schema/loadCategory');
+  loading.value = false;
+}
+
 watch(() => {
   return expand.value;
 }, async val => {
   if (val) {
-    loading.value = true;
-    await store.dispatch('Schema/loadCategory');
-    loading.value = false;
+    if (treeData.value.length === 0) {
+      loadCategory();
+      return;
+    }
+    if (schemaTree.value && activeSchema.value.id) {
+      schemaTree.value?.setSelectedKeys(activeSchema.value.id);
+    }
   }
 })
 
@@ -298,6 +321,17 @@ watch(() => {
   }
 }, {
   immediate: true
+})
+
+watch(() => {
+  return currProject.value.id;
+}, (newVal, oldVal) => {
+  if (newVal && oldVal && newVal !== oldVal) {
+    expand.value = false;
+    store.dispatch('Schema/initSchema');
+  }
+}, {
+  immediate: true,
 })
 
 defineExpose({
@@ -350,13 +384,20 @@ defineExpose({
   }
 
   &.expanded {
-    height: 80%;
+    height: 66.6666%;
 
     .schema-inlet {
       border-bottom: 1px solid #e7e7e7;
     }
     .schema-content {
       height: calc(100% - 32px);
+
+      .schema-loading {
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
     }
   }
 }

@@ -530,7 +530,8 @@ const filterState: any = ref({});
 async function selectNode(id) {
   if (openSchemaTab.value) { // 如果此时在查看schema组件，则隐藏schema展示的内容，展示接口列表
     openSchemaTab.value = false;
-    schema.value.initTree();
+    schema.value?.initTree();
+    store.dispatch('Schema/initSchema');
   }
   selectedCategoryId.value = id;
   selectedRowKeys.value = [];
@@ -580,7 +581,7 @@ watch(() => currProject.value.id, async (newVal, oldVal) => {
     await loadList(1, pagination.value.pageSize);
     await store.dispatch('Endpoint/getEndpointTagList');
     store.commit('Endpoint/clearFilterState');
-    filter.value.resetFields()
+    filter.value?.resetFields()
   }
 }, {
   immediate: true
@@ -813,8 +814,6 @@ const openSchemaTab = ref(false);
 const schema = ref();
 
 const showSchema = () => {
-  selectedCategoryId.value = '';
-  endpointTree.value.initTree();
   openSchemaTab.value = true;
 }
 
@@ -823,8 +822,6 @@ watch(() => {
 }, val => {
   if (!val.id) {
     openSchemaTab.value = false;
-    endpointTree.value.initTree();
-    selectedCategoryId.value = '';
   }
 })
 </script>

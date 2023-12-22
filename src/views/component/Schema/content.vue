@@ -38,20 +38,7 @@ const onEdit = (targetKey: string | MouseEvent, action: string) => {
   if (action !== 'remove') {
     return;
   }
-  console.error(targetKey);
-  const olderSchemas = cloneDeep(tabs.value);
-  const currActiveSchema = cloneDeep(activeSchema.value);
-  const findIndex = olderSchemas.findIndex(e => e.key === targetKey);
-  const schemas = tabs.value.filter(e => e.key !== targetKey);
-  store.commit('Schema/setSchemas', schemas);
-  if (currActiveSchema.key !== targetKey) {
-    return;
-  }
-  const newSchema = olderSchemas[findIndex - 1] ? olderSchemas[findIndex - 1] : olderSchemas[findIndex + 1] ? olderSchemas[findIndex + 1] : {};
-  store.commit('Schema/setActiveSchema', newSchema);
-  if (newSchema.entityId) {
-    store.dispatch('Schema/querySchema', { id: newSchema.entityId });
-  }
+  store.dispatch('Schema/removeActiveSchema', targetKey);
 };
 
 const changeTab = (evt) => {

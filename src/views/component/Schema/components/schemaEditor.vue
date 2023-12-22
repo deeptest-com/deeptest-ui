@@ -137,20 +137,6 @@ const handleUpdated = async (type: string, value: string) => {
       "description": type === 'description' ? value : schemaDetail.value.description
     })
     if (type === 'name') {
-      // console.log(schemas.value.map(e => {
-      //   if (e.entityId === schemaDetail.value.id) {
-      //     e.name = value;
-      //     e.title = value;
-      //   }
-      //   return e;
-      // }));
-      // store.commit('Schema/setSchemas', schemas.value.map(e => {
-      //   if (e.entityId === schemaDetail.value.id) {
-      //     e.name = value;
-      //     e.title = value;
-      //   }
-      //   return e;
-      // }))
       Object.assign(schemas.value.find(e => e.entityId === schemaDetail.value.id), {
         name: value
       })
@@ -166,7 +152,7 @@ const onDelete = () => {
     loading.value = true;
     try {
       await store.dispatch('Schema/deleteSchema', schemaDetail.value);
-      emits('confirmDelete', schemaDetail.value.id);
+      store.dispatch('Schema/removeActiveSchema', schemaDetail.value.id);
     } catch(error) {
       message.error('删除失败');
     }
@@ -182,7 +168,7 @@ watch(() => {
 
     setTimeout(() => {
       loading.value = false;
-    }, 300);
+    }, 500);
   }
 }, {
   immediate: true
