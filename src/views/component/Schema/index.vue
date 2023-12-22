@@ -331,7 +331,6 @@ watch(() => {
 watch(() => {
   return activeSchema.value;
 }, val => {
-  console.error(val);
   if (val.id) {
     schemaTree.value?.setSelectedKeys(val.id);
   } else {
