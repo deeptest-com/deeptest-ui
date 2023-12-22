@@ -192,7 +192,7 @@ const expand = (item) => {
 const list = debounce(async () => {
   console.log('list in debug/request/config/Condition.vue', props.conditionSrc)
   await store.dispatch('Debug/listCondition', {
-    src: props.conditionSrc,
+    conditionSrc: props.conditionSrc,
     isForBenchmarkCase: props.isForBenchmarkCase,
   })
 }, 300)
@@ -205,11 +205,11 @@ watch(debugData, async (newVal) => {
 
 const create = () => {
   console.log('create', conditionType.value)
-  store.dispatch('Debug/createPostCondition', {
-    src: props.conditionSrc,
-    entityType: conditionType.value,
+  store.dispatch('Debug/createCondition', {
     ...debugInfo.value,
-    isForBenchmarkCase: false
+    entityType: conditionType.value,
+    isForBenchmarkCase: false,
+    conditionSrc: props.conditionSrc,
   })
 }
 
@@ -222,10 +222,11 @@ const disable = (item) => {
   store.dispatch('Debug/disablePostCondition', item)
 }
 const remove = (item) => {
+  item.conditionSrc = props.conditionSrc
   console.log('remove', item)
 
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
-    store.dispatch('Debug/removePostCondition', item)
+    store.dispatch('Debug/removeCondition', item)
   })
 }
 function move(_e: any) {

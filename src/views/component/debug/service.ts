@@ -218,7 +218,7 @@ export async function listConditions(params: {
     category: ConditionCategory | undefined,
     usedBy: string,
     isForBenchmarkCase?: boolean,
-    src?: ConditionSrc }): Promise<any> {
+    conditionSrc?: ConditionSrc }): Promise<any> {
 
     return request({
         url: `/${apiConditions}`,

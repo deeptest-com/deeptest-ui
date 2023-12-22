@@ -714,7 +714,7 @@ const StoreModel: ModuleType = {
 
         // conditions
         async listCondition({commit, state}, payload: {
-            category: ConditionCategory, isForBenchmarkCase: boolean, src: ConditionSrc }) {
+            category: ConditionCategory, isForBenchmarkCase: boolean, conditionSrc: ConditionSrc }) {
 
             try {
                 const resp = await listConditions({
@@ -722,13 +722,13 @@ const StoreModel: ModuleType = {
                     endpointInterfaceId: state.debugData.endpointInterfaceId,
                     usedBy: state.debugInfo.usedBy,
 
-                    src: payload.src,
+                    conditionSrc: payload.conditionSrc,
                     category: payload?.category,
                     isForBenchmarkCase: payload?.isForBenchmarkCase,
                 });
                 const {data} = resp;
 
-                const commitName = payload.src === ConditionSrc.PreCondition ?
+                const commitName = payload.conditionSrc === ConditionSrc.PreCondition ?
                     'setPreConditions' : 'setPostConditions'
                 commit(commitName, {
                     isForBenchmarkCase: payload?.isForBenchmarkCase || false,
@@ -772,7 +772,7 @@ const StoreModel: ModuleType = {
 
                 } else {
                     await dispatch('listCondition', {
-                        isForBenchmarkCase: payload.isForBenchmarkCase, src: payload.src });
+                        isForBenchmarkCase: payload.isForBenchmarkCase, conditionSrc: payload.conditionSrc });
 
                     const conditions = payload.isForBenchmarkCase ?
                         (payload.src === ConditionSrc.PreCondition ? state.benchMarkCase.preConditions : state.benchMarkCase.postConditions) :
@@ -812,6 +812,7 @@ const StoreModel: ModuleType = {
                 } else {
                     dispatch('listCondition', {
                         isForBenchmarkCase: payload.isForBenchmarkCase,
+                        conditionSrc: payload.conditionSrc,
                     });
                 }
                 return true;
