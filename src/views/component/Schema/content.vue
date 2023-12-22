@@ -22,7 +22,7 @@ import { SchemaEditorContent } from './components';
 
 const store = useStore<{ Schema: SchemaStore }>();
 const tabs = computed(() => {
-  return (store.state.Schema.schemas || []).map(e => ({ title: e.name, ...e, key: e.entityId }));
+  return (store.state.Schema.schemas || []).map(e => ({ ...e, key: e.entityId, title: e.name }));
 });
 const activeSchema = computed(() => store.state.Schema.activeSchema);
 

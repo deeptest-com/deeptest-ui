@@ -119,7 +119,7 @@ const CategoryTree = defineComponent({
     const selectedKeys = ref<any>([]);
     const autoExpandParent = ref(false);
     const data = computed(() => {
-      return [...filterByKeyword(props.treeData, searchValue.value, 'name')];
+      return [...filterByKeyword(setTreeDataKey(props.treeData || []), searchValue.value, 'name')];
     });
 
     const initTree = () => {
@@ -144,6 +144,9 @@ const CategoryTree = defineComponent({
     };
 
     const selectedNode = (keys, evt) => {
+      if (evt.node.dataRef.entityId === 0 || evt.node.dataRef.type === 'dir') {
+        return;
+      }
       selectedKeys.value = keys;
       props?.onTreeNodeClicked(keys, evt);
     };

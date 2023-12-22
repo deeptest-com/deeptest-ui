@@ -1,6 +1,6 @@
 <template>
-  <div class="schema-editor-container">
-    <a-spin tip="loading..." :spinning="loading">
+  <a-spin tip="loading..." :spinning="loading">
+    <div class="schema-editor-container">
       <!-- header编辑 -->
       <div class="schema-header">
         <div class="schema-header-left">
@@ -56,8 +56,8 @@
             @change="handleCodeChange"/>
         </div>
       </div>
-    </a-spin>
-  </div>
+    </div>
+  </a-spin>
 </template>
 <script setup lang="ts">
 import { ref, computed, watch, defineEmits } from 'vue';
@@ -137,22 +137,22 @@ const saveSchema = () => {
 }
 
 const handleCancel = () => {
-  store.commit('Schema/activeSchema', {
-    ...activeSchemaTab,
+  store.commit('Schema/setActiveSchema', {
+    ...activeSchemaTab.value,
     autoFocus: false,
   })
 }
 
 const handleUpdated = async (type: string, value: string) => {
   try {
-    store.commit('Schema/activeSchema', {
-      ...activeSchemaTab,
+    store.commit('Schema/setActiveSchema', {
+      ...activeSchemaTab.value,
       autoFocus: false,
     })
     await store.dispatch('Schema/saveSchema', {
       "name": type === 'name' ? value : schemaDetail.value.name,
       "id": schemaDetail.value.id,
-      "description": type === 'description' ? value : schemaDetail.value.description
+      "description": type === 'description' ? value : schemaDetail.value.description,
     })
     if (type === 'name') {
       Object.assign(schemas.value.find(e => e.entityId === schemaDetail.value.id), {

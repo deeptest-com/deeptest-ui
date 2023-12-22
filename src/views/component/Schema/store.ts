@@ -137,11 +137,6 @@ const StoreModel: ModuleType = {
         const { code, data, msg } = await saveSchema(payload);
         if (code === 0) {
           dispatch('loadCategory');
-          const activeSchema = { id: data, key: data, entityId: data, title: 'NewComponent', autoFocus: true };
-          // 新建组件以后，设置当前选中tab以及tab列表
-          commit('setActiveSchema', activeSchema);
-          commit('setSchemas', state.schemas.concat([activeSchema]));
-          dispatch('querySchema', { id: data });
           return Promise.resolve(data);
         }
         return Promise.reject(msg);
@@ -201,7 +196,7 @@ const StoreModel: ModuleType = {
       const newTabs = state.schemas.filter(e => !removeSchemaIds.includes(e.entityId)); // 找出不属于指定删除目录下的schema tabs
       commit('setSchemas', newTabs);
       if (newTabs[0]) {
-        commit('setActiveSchema', { ...newTabs[0], key: newTabs[0].entityId });
+        commit('setActiveSchema', { ...newTabs[0] });
       } else {
         commit('setActiveSchema', {})
       }
@@ -216,7 +211,7 @@ const StoreModel: ModuleType = {
         return;
       }
       const newSchema = olderSchemas[findIndex - 1] ? olderSchemas[findIndex - 1] : olderSchemas[findIndex + 1] ? olderSchemas[findIndex + 1] : {};
-      commit('setActiveSchema', newSchema.entityId ? { ...newSchema, key: newSchema.entityId } : newSchema);
+      commit('setActiveSchema', newSchema);
       if (newSchema.entityId) {
         dispatch('querySchema', { id: newSchema.entityId });
       }

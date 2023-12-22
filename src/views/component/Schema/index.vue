@@ -78,6 +78,7 @@ const treeDataCategory = computed(() => {
 });
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const activeSchema = computed(() => store.state.Schema.activeSchema);
+const schemas = computed(() => store.state.Schema.schemas);
 
 const expand = ref(false);
 const parentNode = ref();
@@ -118,6 +119,10 @@ const onDrop = async (...args: any[]) => {
   const { dragNode, node, dropPosition } = args[0];
   const pos = node.pos.split('-');
   const dropPos = dropPosition - Number(pos[pos.length - 1]);
+  if (dragNode.dataRef?.entityId !== 0 && node.dataRef?.entityId !== 0 && dropPos === 0) {
+    message.error('组件不可移动到组件下');
+    return;
+  }
   if (dragNode.dataRef?.entityId === 0 && node.dataRef?.entityId !== 0 && dropPos === 0) {
     message.error('分类不可移动到组件下');
     return;
@@ -158,10 +163,15 @@ const createCategoryOrSchema = async (nodeProps, createType) => {
     if (!targetId) {
       return Promise.reject('targetId not found');
     }
-    await store.dispatch('Schema/saveSchema', {
+    const data = await store.dispatch('Schema/saveSchema', {
       targetId,
       name: 'NewComponent',
     });
+    const newSchema = { id: data.categoryId, key: data.entityId, entityId: data.entityId, name: 'NewComponent', autoFocus: true };
+    // 新建组件以后，设置当前选中tab以及tab列表
+    store.commit('Schema/setActiveSchema', newSchema);
+    schemas.value.push(newSchema)
+    store.dispatch('Schema/querySchema', { id: data.entityId });
     emits('select');
   } catch(error) {
     console.log(error)
