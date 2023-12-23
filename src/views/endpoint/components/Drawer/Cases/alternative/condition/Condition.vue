@@ -171,9 +171,15 @@ const expand = (item) => {
 
 const list = async () => {
   console.log('list in alternative/condition/Condition')
-  await store.dispatch('Debug/listCondition', {
-    isForBenchmarkCase: isForBenchmarkCase
-  })
+
+  store.dispatch('Debug/listCondition', {
+    conditionSrc: ConditionSrc.PreCondition,
+    isForBenchmarkCase: isForBenchmarkCase,
+  });
+  store.dispatch('Debug/listCondition', {
+    conditionSrc: ConditionSrc.PostCondition,
+    isForBenchmarkCase: isForBenchmarkCase,
+  });
 }
 
 watch(debugData, async (newVal) => {

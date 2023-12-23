@@ -92,13 +92,13 @@
                          :conditionSrc="ConditionSrc.PreCondition" />
             </a-tab-pane>
 
-            <a-tab-pane key="post-condition" :tab="getTabTtitle('post-condition')">
+            <a-tab-pane key="post-condition" :tab="getTabTitle('post-condition')">
               <CaseTips type="post-condition" @reset="onReset" />
               <Condition v-if="activeKey === 'post-condition'"
                          :conditionSrc="ConditionSrc.PostCondition" />
             </a-tab-pane>
 
-            <a-tab-pane key="assertion" :tab="getTabTtitle('assertion')">
+            <a-tab-pane key="assertion" :tab="getTabTitle('assertion')">
               <CaseTips type="assertion" @reset="onReset" />
               <Assertion v-if="activeKey === 'assertion'" />
             </a-tab-pane>
@@ -184,7 +184,7 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 const postConditions = computed<any>(() => store.state.Debug.benchMarkCase.postConditions);
 const assertionConditions = computed<any>(() => store.state.Debug.benchMarkCase.assertionConditions);
 
-const getTabTtitle = computed(() => {
+const getTabTitle = computed(() => {
   return type => {
     const numbers = type === 'post-condition' ? unref(postConditions).length : unref(assertionConditions).length;
     const title = type === 'post-condition' ? '后置处理' : '断言';
@@ -205,9 +205,19 @@ const loadDebugData = async (data) => {
     loadingAlternativeCase.value = true;
     await store.dispatch('Debug/loadDataAndInvocations', data);
     resetDebugChange();
-    await store.dispatch('Debug/listCondition', { isForBenchmarkCase: true });
+
+    store.dispatch('Debug/listCondition', {
+      conditionSrc: ConditionSrc.PreCondition,
+      isForBenchmarkCase: true,
+    });
+    store.dispatch('Debug/listCondition', {
+      conditionSrc: ConditionSrc.PostCondition,
+      isForBenchmarkCase: true,
+    });
+
     await store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
     loadingAlternativeCase.value = false;
+
   } catch (err) {
     console.log('加载备选用例数据出错:', err);
   }
@@ -367,12 +377,21 @@ const onReset = ({ type, params }: { type: string, params: any }) => {
     onOk() {
       store.dispatch(`Endpoint/${type === 'pre-condition' ? 'resetPreConditions' : 'resetPostConditions'}`, params).then(() => {
         if (type === 'pre-condition') {
-          store.dispatch('Debug/getPreConditionScript', { isForBenchmarkCase: true })
+          store.dispatch('Debug/listCondition', {
+            conditionSrc: ConditionSrc.PreCondition,
+            isForBenchmarkCase: true,
+          });
+
         } else if (type === 'post-condition' ) {
-          store.dispatch('Debug/listCondition', { isForBenchmarkCase: true });
+          store.dispatch('Debug/listCondition', {
+            conditionSrc: ConditionSrc.PostCondition,
+            isForBenchmarkCase: true,
+          });
+
         } else {
           store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
         }
+
       }).catch(err => {
         notifyError(err);
       })
@@ -457,10 +476,18 @@ const onClose = () => {
   execDrawerVisible.value = false;
 }
 
-const handleOpen = () => {
-  store.dispatch('Debug/listCondition', { isForBenchmarkCase: true });
-  store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
-}
+// const handleOpen = () => {
+//   store.dispatch('Debug/listCondition', {
+//     conditionSrc: ConditionSrc.PreCondition,
+//     isForBenchmarkCase: true,
+//   });
+//   store.dispatch('Debug/listCondition', {
+//     conditionSrc: ConditionSrc.PostCondition,
+//     isForBenchmarkCase: true,
+//   });
+//
+//   store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
+// }
 
 </script>
 
