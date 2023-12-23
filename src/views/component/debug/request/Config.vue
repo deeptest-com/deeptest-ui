@@ -84,6 +84,8 @@ const assertionConditions = computed<any>(() => store.state.Debug.assertionCondi
 const activeKey = ref('query-param');
 
 const getTabTitle = computed(() => {
+  console.log('getTabTitle')
+
   const typeMap = {
     queryParams: '查询参数',
     pathParams: '路径参数',
