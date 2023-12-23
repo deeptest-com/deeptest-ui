@@ -34,13 +34,11 @@
 
       <a-tab-pane key="pre-condition" :tab="getTabTitle('preConditions')">
         <Condition v-if="activeKey === 'pre-condition'"
-                   :isForBenchmarkCase="false"
                    :conditionSrc="ConditionSrc.PreCondition" />
       </a-tab-pane>
 
       <a-tab-pane key="post-condition" :tab="getTabTitle('postConditions')">
         <Condition v-if="activeKey === 'post-condition'"
-                   :isForBenchmarkCase="false"
                    :conditionSrc="ConditionSrc.PostCondition"/>
       </a-tab-pane>
 

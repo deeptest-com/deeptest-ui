@@ -97,7 +97,7 @@ import {
   DownOutlined,
   CloseCircleOutlined,
   FullscreenOutlined } from '@ant-design/icons-vue';
-import {ConditionType, UsedBy} from "@/utils/enum";
+import {ConditionSrc, ConditionType, UsedBy} from "@/utils/enum";
 import {EnvDataItem} from "@/views/project-settings/data";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
@@ -105,7 +105,7 @@ import {confirmToDelete} from "@/utils/confirm";
 import {StateType as Debug} from "@/views/component/debug/store";
 import IconSvg from "@/components/IconSvg";
 import useIMLeaveTip   from "@/composables/useIMLeaveTip";
-import Checkpoint from "./conditions-post/Checkpoint.vue";
+import Checkpoint from "./conditions/Checkpoint.vue";
 import FullScreenPopup from "./ConditionPopup.vue";
 import TooltipCell from "@/components/Table/tooltipCell.vue";
 import draggable from 'vuedraggable'
@@ -141,9 +141,10 @@ watch(debugData, async (newVal) => {
 
 const create = () => {
   console.log('create', ConditionType.checkpoint);
-  store.dispatch('Debug/createPostCondition', {
+  store.dispatch('Debug/createCondition', {
     entityType: ConditionType.checkpoint,
     ...debugInfo.value,
+    conditionSrc: ConditionSrc.PostCondition,
     isForBenchmarkCase: false,
   })
 }
@@ -221,8 +222,6 @@ watch(() => {
 onUnmounted(() => {
   store.commit('Debug/setActiveAssertion', {});
 })
-
-provide('isForBenchmarkCase', false);
 
 </script>
 

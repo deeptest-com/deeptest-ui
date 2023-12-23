@@ -71,8 +71,8 @@ import {ConditionSrc, ExtractorSrc, ExtractorType, UsedBy} from "@/utils/enum";
 const {t} = useI18n();
 
 const usedBy = inject('usedBy') as UsedBy
-const src = inject('usedWith') as ConditionSrc
-const isForBenchmarkCase = inject('isForBenchmarkCase');
+const usedWith = inject('usedWith') as ConditionSrc
+const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
 
 const store = useStore<{  Debug: Debug }>();
 
@@ -151,7 +151,7 @@ const responseExtractorFinish = (conf) => {
   const data = {
     conf,
     info: debugInfo.value,
-    conditionSrc: src,
+    conditionSrc: usedWith,
     isForBenchmarkCase: isForBenchmarkCase,
   } as any
 

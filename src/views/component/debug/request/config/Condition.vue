@@ -143,6 +143,8 @@ import FullScreenPopup from "./ConditionPopup.vue";
 import {equalObjectByLodash} from "@/utils/object";
 import debounce from "lodash.debounce";
 
+const {t} = useI18n();
+
 const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
@@ -156,16 +158,11 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  isForBenchmarkCase: {
-    type: Boolean,
-    required: true,
-  },
 })
 
 provide('usedWith', props.conditionSrc)
-
 const usedBy = inject('usedBy') as UsedBy
-const {t} = useI18n();
+const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
 
 const fullscreen = ref(false)
 
@@ -193,7 +190,7 @@ const list = debounce(async () => {
   console.log('list in debug/request/config/Condition.vue', props.conditionSrc)
   await store.dispatch('Debug/listCondition', {
     conditionSrc: props.conditionSrc,
-    isForBenchmarkCase: props.isForBenchmarkCase,
+    isForBenchmarkCase: isForBenchmarkCase,
   })
 }, 300)
 
@@ -255,7 +252,6 @@ const closeFullScreen = (item) => {
   fullscreen.value = false
 }
 
-provide('isForBenchmarkCase', false);
 /*************************************************
  * ::::后置处理器提示
  ************************************************/

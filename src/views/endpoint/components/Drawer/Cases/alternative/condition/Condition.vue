@@ -131,10 +131,16 @@ import {confirmToDelete} from "@/utils/confirm";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {getEnumSelectItems} from "@/views/scenario/service";
 import IconSvg from "@/components/IconSvg";
-import Extractor from "@/views/component/debug/request/config/conditions-post/Extractor.vue";
-import Script from "@/views/component/debug/request/config/conditions-post/Script.vue";
-import DatabaseOpt from "@/views/component/debug/request/config/conditions-post/DatabaseOpt.vue";
+import Extractor from "@/views/component/debug/request/config/conditions/Extractor.vue";
+import Script from "@/views/component/debug/request/config/conditions/Script.vue";
+import DatabaseOpt from "@/views/component/debug/request/config/conditions/DatabaseOpt.vue";
 import FullScreenPopup from "@/views/component/debug/request/config/ConditionPopup.vue";
+
+const {t} = useI18n();
+
+provide('usedWith', props.conditionSrc)
+const usedBy = inject('usedBy') as UsedBy
+const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
 
 const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
@@ -151,16 +157,7 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  isForBenchmarkCase: {
-    type: Boolean,
-    required: true,
-  },
 })
-
-provide('usedWith', props.conditionSrc)
-
-const usedBy = inject('usedBy') as UsedBy
-const {t} = useI18n();
 
 const fullscreen = ref(false)
 
@@ -175,7 +172,7 @@ const expand = (item) => {
 const list = async () => {
   console.log('list in alternative/condition/Condition')
   await store.dispatch('Debug/listCondition', {
-    isForBenchmarkCase: true
+    isForBenchmarkCase: isForBenchmarkCase
   })
 }
 
@@ -188,7 +185,7 @@ const create = () => {
   store.dispatch('Debug/createCondition', {
     entityType: conditionType.value,
     ...debugInfo.value,
-    isForBenchmarkCase: true,
+    isForBenchmarkCase: isForBenchmarkCase,
     conditionSrc: props.conditionSrc,
   })
 }
@@ -201,7 +198,7 @@ const disable = (item) => {
   console.log('disable', item)
 
   item.conditionSrc = props.conditionSrc
-  item.isForBenchmarkCase = props.isForBenchmarkCase
+  item.isForBenchmarkCase = isForBenchmarkCase
 
   store.dispatch('Debug/disableCondition', item)
 }
@@ -209,7 +206,7 @@ const remove = (item) => {
   console.log('remove', item)
 
   item.conditionSrc = props.conditionSrc
-  item.isForBenchmarkCase = props.isForBenchmarkCase
+  item.isForBenchmarkCase = isForBenchmarkCase
 
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
     store.dispatch('Debug/removeCondition', item)
@@ -225,7 +222,7 @@ function move(_e: any) {
 
     entityType: '',
     conditionSrc: props.conditionSrc,
-    isForBenchmarkCase: props.isForBenchmarkCase,
+    isForBenchmarkCase: isForBenchmarkCase,
   })
 }
 
@@ -242,8 +239,6 @@ const closeFullScreen = (item) => {
   console.log('closeFullScreen', item)
   fullscreen.value = false
 }
-
-provide('isForBenchmarkCase', true);
 
 onUnmounted(() => {
   store.commit('Debug/setActiveCondition', {});

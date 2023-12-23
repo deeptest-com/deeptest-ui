@@ -89,14 +89,12 @@
             <a-tab-pane key="pre-condition" tab="预处理">
               <CaseTips type="pre-condition" @reset="onReset" />
               <Condition v-if="activeKey === 'pre-condition'"
-                         :isForBenchmarkCase="true"
                          :conditionSrc="ConditionSrc.PreCondition" />
             </a-tab-pane>
 
             <a-tab-pane key="post-condition" :tab="getTabTtitle('post-condition')">
               <CaseTips type="post-condition" @reset="onReset" />
               <Condition v-if="activeKey === 'post-condition'"
-                         :isForBenchmarkCase="true"
                          :conditionSrc="ConditionSrc.PostCondition" />
             </a-tab-pane>
 

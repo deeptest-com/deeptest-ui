@@ -68,8 +68,8 @@ import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 
 const usedBy = inject('usedBy') as UsedBy
-const src = inject('usedWith') as ConditionSrc
-const isForBenchmarkCase = inject('isForBenchmarkCase');
+const usedWith = inject('usedWith') as ConditionSrc
+const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
 
 const {t} = useI18n();
 const store = useStore<{  Debug: Debug }>();
@@ -128,13 +128,13 @@ const responseExtractorFinish = (conf) => {
   console.log('responseExtractorFinish')
 
   conf.type = conf.expressionType
-  conf.src = ExtractorSrc.body
+  conf.usedWith = ExtractorSrc.body
   conf.result = result.value
 
   const data = {
     conf,
     info: debugInfo.value,
-    conditionSrc: src,
+    conditionSrc: usedWith,
     isForBenchmarkCase: isForBenchmarkCase,
   } as any
 

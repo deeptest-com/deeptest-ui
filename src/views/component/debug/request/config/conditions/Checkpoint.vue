@@ -114,9 +114,9 @@ const {t} = useI18n();
 const useForm = Form.useForm;
 
 const usedBy = inject('usedBy') as UsedBy
-const src = inject('usedWith') as ConditionSrc
+const usedWith = inject('usedWith') as ConditionSrc
 
-const isForBenchmarkCase = inject('isForBenchmarkCase');
+const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
 
 const store = useStore<{  Debug: any }>();
 
@@ -198,7 +198,7 @@ const save = (item) => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
     model.value.projectId = debugData.value.projectId
-    model.value.conditionSrc = src
+    model.value.conditionSrc = usedWith
     model.value.isForBenchmarkCase = isForBenchmarkCase
 
     store.dispatch('Debug/saveCheckpoint', model.value).then((result) => {
