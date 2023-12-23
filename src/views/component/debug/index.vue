@@ -9,7 +9,7 @@
                     :baseUrlDisabled="baseUrlDisabled"
                     :checkDataChange="checkDataChange"
                     :urlDisabled="urlDisabled" />
-<!--        <Name v-if="usedBy === UsedBy.ScenarioDebug" />-->
+
         <DebugConfig />
       </div>
 
@@ -32,7 +32,7 @@
             </template>
           </a-tab-pane>
 
-<!--          <a-tab-pane key="history">
+<!--      <a-tab-pane key="history">
             <template #tab>
               <span id="his-tab">
                 <a-tooltip placement="left" overlayClassName="dp-tip-small">

@@ -60,7 +60,7 @@ import {
     disableAlternativeCaseAssertion,
     removeAlternativeCaseAssertion,
     moveAlternativeCaseAssertion,
-    updateName, createBenchmarkCase, 
+    updateName, createBenchmarkCase,
     listForBenchMark,
     loadAlternativeCaseFactor,
     resetPostConditions,
@@ -91,6 +91,7 @@ import {
     getSchemaList, getSchemaDetail
 } from "@/views/project-settings/service";
 import { changeServe } from '../project-settings/service';
+import {ConditionSrc} from "@/utils/enum";
 
 export interface StateType {
     endpointId: number;
@@ -112,8 +113,6 @@ export interface StateType {
     refsOptions: any;
     selectedMethodDetail: any;
     selectedCodeDetail: any;
-
-
 
     /**
      * 高级mock
@@ -1488,7 +1487,7 @@ const StoreModel: ModuleType = {
 
                 const response: ResponseData = await queryEndpointCase(params);
                 if (response.code != 0) return false;
-                
+
                 const data = response.data;
 
                 commit('setEndpointCaseList', {
@@ -1712,7 +1711,7 @@ const StoreModel: ModuleType = {
          * 自动生成用例中  可选的 用例列表 【其中仅包含 caseType = default 类型的用例】
          * @param param0 store context
          * @param payload request params
-         * @returns 
+         * @returns
          */
         async listForBenchMark({ commit }, payload: any) {
             try {
@@ -1730,14 +1729,14 @@ const StoreModel: ModuleType = {
 
         /**
          * 备选用例- 用例因子 恢复默认【针对 后置处理，断言】
-         * @returns 
+         * @returns
          */
         async resetPostConditions({ rootState }: any, payload: any) {
             try {
-                const jsn = await resetPostConditions({ 
-                    ...payload, 
-                    endpointInterfaceId: rootState.Debug.debugData.endpointInterfaceId, 
-                    debugInterfaceId: rootState.Debug.debugInfo.debugInterfaceId 
+                const jsn = await resetPostConditions({
+                    ...payload,
+                    endpointInterfaceId: rootState.Debug.debugData.endpointInterfaceId,
+                    debugInterfaceId: rootState.Debug.debugInfo.debugInterfaceId
                 });
                 if (jsn.code === 0) {
                     return Promise.resolve();
@@ -1751,14 +1750,14 @@ const StoreModel: ModuleType = {
 
         /**
          * 备选用例- 用例因子 恢复默认【针对 预处理】
-         * @returns 
+         * @returns
          */
         async resetPreConditions({ rootState }: any, payload: any) {
             try {
                 const jsn = await resetPreConditions({
-                    ...payload, 
-                    endpointInterfaceId: rootState.Debug.debugData.endpointInterfaceId, 
-                    debugInterfaceId: rootState.Debug.debugInfo.debugInterfaceId 
+                    ...payload,
+                    endpointInterfaceId: rootState.Debug.debugData.endpointInterfaceId,
+                    debugInterfaceId: rootState.Debug.debugInfo.debugInterfaceId
                 });
                 if (jsn.code === 0) {
                     return Promise.resolve();
@@ -1806,13 +1805,13 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
-            
+
         async importThirdPartyFunctions(_store, payload: any) {
             try {
                 const response: any = await importThirdPartyFunctions(payload);
                 if (response.code === 0) {
                     return true;
-                } 
+                }
                 return false;
             } catch(error) {
                 error.msg && message.error(error.msg);
@@ -1824,7 +1823,7 @@ const StoreModel: ModuleType = {
                 const response = await batchUpdateField(payload);
                 if (response.code === 0) {
                     return true;
-                } 
+                }
                 return false;
             }catch(error) {
                 error.msg && message.error(error.msg);
