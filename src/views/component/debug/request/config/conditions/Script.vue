@@ -64,11 +64,11 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, inject, onBeforeUnmount, onMounted, reactive, ref, watch,onUnmounted} from "vue";
+import {computed, defineProps, inject, onBeforeUnmount, onMounted, reactive, ref, watch} from "vue";
 import {Form} from 'ant-design-vue';
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import {ConditionSrc, ConditionType, UsedBy} from "@/utils/enum";
+import {ConditionSrc, UsedBy} from "@/utils/enum";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {StateType as Snippet} from "@/store/snippet";
@@ -92,9 +92,15 @@ const {t} = useI18n();
 const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet: Snippet }>();
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 
-const {postConditionsDataObj, debugData, debugInfo} = useIMLeaveTip();
+const {preConditionsDataObj, postConditionsDataObj, debugData, debugInfo} = useIMLeaveTip();
 const model = computed<any>(() => {
-  return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
+  if (conditionSrc === ConditionSrc.PreCondition)
+    return preConditionsDataObj.value?.[props?.condition?.entityId] || {};
+
+  else if (conditionSrc === ConditionSrc.PostCondition)
+    return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
+
+  return {}
 });
 
 onMounted(() => {
@@ -140,9 +146,12 @@ const editorOptions = ref(Object.assign({
 ))
 
 const addSnippet = (snippetName) => {
-  store.dispatch('Debug/addSnippetForPost', {
-    name:snippetName,
-    data:model,
+  console.log('addSnippet')
+
+  store.dispatch('Debug/addSnippet', {
+    name: snippetName,
+    data: model,
+    conditionSrc: conditionSrc,
   })
 }
 const editorChange = (newScriptCode) => {

@@ -46,6 +46,7 @@ import {listEnvVarByServer} from "@/services/environment";
 import {getResponseKey} from "@/utils/comm";
 import {send_request_get, send_request_post} from "@/views/component/debug/config";
 import cloneDeep from "lodash/cloneDeep";
+import {stringify} from "handsontable/helpers";
 
 export interface StateType {
     debugInfo: DebugInfo
@@ -263,7 +264,6 @@ export interface ModuleType extends StoreModuleType<StateType> {
         saveScript: Action<StateType, StateType>;
 
         addSnippet: Action<StateType, StateType>;
-        addSnippetForPost: Action<StateType, StateType>;
 
         listShareVar: Action<StateType, StateType>;
         removeShareVar: Action<StateType, StateType>;
@@ -952,7 +952,7 @@ const StoreModel: ModuleType = {
                         id: data.id,
                         value:cloneDeep(data)
                     })
-                } else if (scriptData.conditionSrc === ConditionSrc.PreCondition) {
+                } else if (scriptData.conditionSrc === ConditionSrc.PostCondition) {
                     commit('setPostConditionsDataObj',{
                         id: data.id,
                         value:data
@@ -1047,55 +1047,7 @@ const StoreModel: ModuleType = {
         },
 
         // snippets
-        async addSnippet({commit, dispatch, state}, { name, isForBenchmarkCase }: { name: string, isForBenchmarkCase?: boolean }) {
-            let line = ''
-            if (name === 'log') {
-                line = "log('test');"
-
-            } else if (name === 'set_mock_resp_code') {
-                line = "dt.response.statusCode = 404;"
-            } else if (name === 'set_mock_resp_field') {
-                line = "dt.response.data.field1 = 'val';"
-            } else if (name === 'set_mock_resp_text') {
-                line = "dt.response.data = dt.response.data.replace('old', 'new');"
-
-            } else if (name === 'send_request_get') {
-                line = send_request_get
-            } else if (name === 'send_request_post') {
-                line = send_request_post
-
-            } else if (name === 'assert_resp_status_Code') {
-                line = assert_resp_status_Code
-            } else if (name === 'assert_resp_json_field') {
-                line = assert_resp_json_field
-            } else if (name === 'assert_resp_content_contain') {
-                line = assert_resp_content_contain
-
-            } else {
-                const json = await getSnippet(name)
-                if (json.code === 0) {
-                    line = json.data.script
-                }
-            }
-            const lastScriptData = isForBenchmarkCase ? state.benchMarkCase.scriptData : state.scriptData;
-            let script = (lastScriptData.content ? lastScriptData.content: '') + '\n' + line
-            script = script.trim()
-
-            if (isForBenchmarkCase) {
-                commit('setBenchMarkCase', {
-                    scriptData: {
-                        ...state.benchMarkCase.scriptData,
-                        content: script,
-                    }
-                })
-                return true;
-            }
-            commit('setScriptContent', { content: script, isForBenchmarkCase });
-
-            return true;
-        },
-
-        async addSnippetForPost({commit, dispatch, state}, {name, data}) {
+        async addSnippet({commit, dispatch, state}, {name, data, conditionSrc}) {
             let line = ''
             if (name === 'log') {
                 line = "log('test');"
@@ -1124,13 +1076,22 @@ const StoreModel: ModuleType = {
                     line = json.data.script
                 }
             }
+
             // const scriptData = state.srcConditionsDataObj?.
             const {id,content} = data?.value || {};
             let script = (content ? content: '') + '\n' + line
             script = script.trim()
-            commit('setPostScriptContent', {
-                id:id,
-                content:script
+
+            let commitName = ''
+            if (conditionSrc === ConditionSrc.PreCondition) {
+                commitName = 'setPreScriptContent'
+            } else if (conditionSrc === ConditionSrc.PostCondition) {
+                commitName = 'setPostScriptContent'
+            }
+
+            commit(commitName, {
+                id: id,
+                content: script
             });
 
             return true;
