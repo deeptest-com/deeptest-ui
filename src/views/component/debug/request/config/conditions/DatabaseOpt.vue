@@ -147,7 +147,7 @@ const props = defineProps({
 
 const load = () => {
   console.log('load', props.condition)
-  store.dispatch('Debug/getDbOpt', props.condition)
+  store.dispatch('Debug/getDbOpt', Object.assign({conditionSrc}, props.condition))
 }
 load()
 

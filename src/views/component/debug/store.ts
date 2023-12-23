@@ -253,9 +253,6 @@ export interface ModuleType extends StoreModuleType<StateType> {
         saveExtractor: Action<StateType, StateType>;
         quickCreateExtractor: Action<StateType, StateType>; // usedBy code editor
 
-        getCookie: Action<StateType, StateType>;
-        saveCookie: Action<StateType, StateType>;
-
         getCheckpoint: Action<StateType, StateType>;
         saveCheckpoint: Action<StateType, StateType>;
 
@@ -888,36 +885,6 @@ const StoreModel: ModuleType = {
             }
         },
 
-        // cookie
-        async getCookie({commit}, cookieData: any) {
-            try {
-                const response = await getCookie(cookieData.entityId);
-                const {data} = response;
-
-                commit('setCookie', {
-                    info: data,
-                    isForBenchmarkCase: data.isForBenchmarkCase,
-                });
-                return true;
-            } catch (error) {
-                return false;
-            }
-        },
-        async saveCookie({commit, dispatch, state}, payload: any) {
-            try {
-                await saveCookie(payload);
-
-                dispatch('listCondition', {
-                    isForBenchmarkCase: payload.isForBenchmarkCase,
-                    conditionSrc: payload.conditionSrc,
-                });
-
-                return true;
-            } catch (error) {
-                return false;
-            }
-        },
-
         // checkpoint
         async getCheckpoint({commit}, checkpointData: any) {
             try {
@@ -970,16 +937,28 @@ const StoreModel: ModuleType = {
             try {
                 const response = await getScript(scriptData.entityId);
                 const {data} = response;
-                // 缓存当前数据
-                commit('setConditionsDataObj',{
-                    id: data.id,
-                    value:data
-                });
 
-                commit('setSrcConditionsDataObj',{
-                    id: data.id,
-                    value:cloneDeep(data)
-                })
+                // 缓存当前数据
+                if (scriptData.conditionSrc === ConditionSrc.PreCondition) {
+                    commit('setPreConditionsDataObj',{
+                        id: data.id,
+                        value:data
+                    })
+                    commit('setSrcPreConditionsDataObj',{
+                        id: data.id,
+                        value:cloneDeep(data)
+                    })
+                } else if (scriptData.conditionSrc === ConditionSrc.PreCondition) {
+                    commit('setPostConditionsDataObj',{
+                        id: data.id,
+                        value:data
+                    })
+                    commit('setSrcPostConditionsDataObj',{
+                        id: data.id,
+                        value:cloneDeep(data)
+                    })
+                }
+
                 return true;
             } catch (error) {
                 return false;
@@ -1013,14 +992,28 @@ const StoreModel: ModuleType = {
             try {
                 const response = await getDbOpt(dbConnData.entityId);
                 const {data} = response;
-                commit('setConditionsDataObj',{
-                    id: data.id,
-                    value:data
-                })
-                commit('setSrcConditionsDataObj',{
-                    id: data.id,
-                    value:cloneDeep(data)
-                })
+
+                // 缓存当前数据
+                if (dbConnData.conditionSrc === ConditionSrc.PreCondition) {
+                    commit('setPreConditionsDataObj',{
+                        id: data.id,
+                        value:data
+                    })
+                    commit('setSrcPreConditionsDataObj',{
+                        id: data.id,
+                        value:cloneDeep(data)
+                    })
+                } else if (dbConnData.conditionSrc === ConditionSrc.PreCondition) {
+                    commit('setPostConditionsDataObj',{
+                        id: data.id,
+                        value:data
+                    })
+                    commit('setSrcPostConditionsDataObj',{
+                        id: data.id,
+                        value:cloneDeep(data)
+                    })
+                }
+
                 return true;
             } catch (error) {
                 return false;

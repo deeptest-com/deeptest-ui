@@ -66,7 +66,7 @@ export default function useIMLeaveTip()  {
         store.commit('Debug/setDebugData', {});
         store.commit('Debug/setSrcDebugData',{});
         store.commit('Debug/clearPostConditionsDataObj');
-        store.commit('Debug/clearPreCondition');
+        store.commit('Debug/clearPreConditionsDataObj');
         store.commit('Debug/setDebugChange',{
             base: false,
             preScript: false,
