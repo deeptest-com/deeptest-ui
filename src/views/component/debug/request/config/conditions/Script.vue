@@ -118,7 +118,8 @@ const props = defineProps({
 
 const load = () => {
   console.log('load script ...', props.condition)
-  store.dispatch('Debug/getScript', props.condition)
+
+  store.dispatch('Debug/getScript', Object.assign({conditionSrc}, props.condition))
   store.dispatch('Snippet/listJslibNames')
 }
 

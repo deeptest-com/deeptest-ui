@@ -52,7 +52,6 @@ import {useI18n} from "vue-i18n";
 
 import {ConditionType} from "@/utils/enum";
 import Extractor from "./conditions/Extractor.vue";
-import Cookie from "./conditions/Cookie.vue";
 import Checkpoint from "./conditions/Checkpoint.vue";
 import PostScript from "./conditions/Script.vue";
 import DatabaseOpt from "./conditions/DatabaseOpt.vue";
