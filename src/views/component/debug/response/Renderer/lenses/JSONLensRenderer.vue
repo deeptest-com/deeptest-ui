@@ -81,8 +81,8 @@ import ResponseExtractor from "@/components/Editor/ResponseExtractor.vue";
 import GenerateFromResponse from "@/views/endpoint/components/Drawer/Define/GenerateFromResponse/index.vue";
 
 const usedBy = inject('usedBy') as UsedBy
-const src = inject('usedWith') as ConditionSrc
-const isForBenchmarkCase = inject('isForBenchmarkCase');
+const usedWith = inject('usedWith') as ConditionSrc
+const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
 
 const {t} = useI18n();
 const store = useStore<{  Debug: Debug }>();
@@ -148,13 +148,13 @@ const responseExtractorFinish = (conf) => {
   console.log('responseExtractorFinish')
 
   conf.type = conf.expressionType === 'regx' ? ExtractorType.regx : ExtractorType.jsonquery
-  conf.src = ExtractorSrc.body
+  conf.usedWith = ExtractorSrc.body
   conf.result = result.value
 
   const data = {
     conf,
     info: debugInfo.value,
-    conditionSrc: src,
+    conditionSrc: usedWith,
     isForBenchmarkCase: isForBenchmarkCase,
   } as any
 

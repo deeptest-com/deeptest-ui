@@ -116,8 +116,8 @@ const useForm = Form.useForm;
 const {t} = useI18n();
 
 const usedBy = inject('usedBy') as UsedBy
-const src = inject('usedWith') as ConditionSrc
-const isForBenchmarkCase = inject('isForBenchmarkCase');
+const usedWith = inject('usedWith') as ConditionSrc
+const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
 
 const props = defineProps({
   condition: {
@@ -206,7 +206,7 @@ const save = (item) => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
     model.value.projectId = debugData.value.projectId
-    model.value.conditionSrc = src
+    model.value.conditionSrc = usedWith
     model.value.isForBenchmarkCase = isForBenchmarkCase
 
     store.dispatch('Debug/saveExtractor', model.value).then((result) => {
