@@ -147,13 +147,17 @@ const props = defineProps({
 
 provide('conditionSrc', props.conditionSrc)
 const usedBy = inject('usedBy') as UsedBy
-const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
 
 const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const conditions = computed<any>(() => {
-  return store.state.Debug.benchMarkCase.conditions;
+  if (props.conditionSrc === ConditionSrc.PreCondition)
+    return store.state.Debug.benchMarkCase.preConditions
+  else if (props.conditionSrc === ConditionSrc.PostCondition)
+    return store.state.Debug.benchMarkCase.postConditions
+
+  return []
 });
 const activeCondition = computed<any>(() => {
   return store.state.Debug.benchMarkCase.activeCondition;
@@ -173,12 +177,8 @@ const list = async () => {
   console.log('list in alternative/condition/Condition')
 
   store.dispatch('Debug/listCondition', {
-    conditionSrc: ConditionSrc.PreCondition,
-    isForBenchmarkCase: isForBenchmarkCase,
-  });
-  store.dispatch('Debug/listCondition', {
-    conditionSrc: ConditionSrc.PostCondition,
-    isForBenchmarkCase: isForBenchmarkCase,
+    conditionSrc: props.conditionSrc,
+    isForBenchmarkCase: true,
   });
 }
 
@@ -191,7 +191,7 @@ const create = () => {
   store.dispatch('Debug/createCondition', {
     entityType: conditionType.value,
     ...debugInfo.value,
-    isForBenchmarkCase: isForBenchmarkCase,
+    isForBenchmarkCase: true,
     conditionSrc: props.conditionSrc,
   })
 }
@@ -204,7 +204,7 @@ const disable = (item) => {
   console.log('disable', item)
 
   item.conditionSrc = props.conditionSrc
-  item.isForBenchmarkCase = isForBenchmarkCase
+  item.isForBenchmarkCase = true
 
   store.dispatch('Debug/disableCondition', item)
 }
@@ -212,7 +212,7 @@ const remove = (item) => {
   console.log('remove', item)
 
   item.conditionSrc = props.conditionSrc
-  item.isForBenchmarkCase = isForBenchmarkCase
+  item.isForBenchmarkCase = true
 
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
     store.dispatch('Debug/removeCondition', item)
@@ -228,7 +228,7 @@ function move(_e: any) {
 
     entityType: '',
     conditionSrc: props.conditionSrc,
-    isForBenchmarkCase: isForBenchmarkCase,
+    isForBenchmarkCase: true,
   })
 }
 
