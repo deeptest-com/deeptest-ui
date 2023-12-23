@@ -138,8 +138,6 @@ import Swal from "sweetalert2";
 import IconSvg from "@/components/IconSvg";
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
 import {StateType as Debug} from "@/views/component/debug/store";
-import { StateType as ProjectSettingStateType } from "@/views/project-settings/store";
-import {StateType as ProjectStateType} from "@/store/project";
 
 import Exec from "./alternative/exec.vue";
 import {
@@ -176,7 +174,7 @@ const props = defineProps({
   },
 });
 
-const store = useStore<{ User: UserStateType, Debug: Debug, Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType, ProjectGlobal: ProjectStateType }>();
+const store = useStore<{ User: UserStateType, Debug: Debug, Endpoint: EndpointStateType }>();
 const currUser = computed(() => store.state.User.currentUser);
 const alternativeCases = computed<any>(() => store.state.Endpoint.alternativeCases);
 const endpointCase = computed<any>(() => store.state.Endpoint.caseDetail);

@@ -160,7 +160,7 @@ const props = defineProps({
   },
 })
 
-provide('usedWith', props.conditionSrc)
+provide('conditionSrc', props.conditionSrc)
 const usedBy = inject('usedBy') as UsedBy
 const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
 

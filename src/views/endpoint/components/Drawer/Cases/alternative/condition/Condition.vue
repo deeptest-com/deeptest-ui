@@ -138,7 +138,14 @@ import FullScreenPopup from "@/views/component/debug/request/config/ConditionPop
 
 const {t} = useI18n();
 
-provide('usedWith', props.conditionSrc)
+const props = defineProps({
+  conditionSrc: {
+    type: String,
+    required: true,
+  },
+})
+
+provide('conditionSrc', props.conditionSrc)
 const usedBy = inject('usedBy') as UsedBy
 const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
 
@@ -151,13 +158,6 @@ const conditions = computed<any>(() => {
 const activeCondition = computed<any>(() => {
   return store.state.Debug.benchMarkCase.activeCondition;
 });
-
-const props = defineProps({
-  conditionSrc: {
-    type: String,
-    required: true,
-  },
-})
 
 const fullscreen = ref(false)
 
