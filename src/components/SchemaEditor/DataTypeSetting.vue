@@ -1,10 +1,10 @@
 <template>
   <a-popover :title="null"
              trigger="click"
-             v-model:visible="visible"
+             :visible="visible"
              :overlayClassName="'data-type-setting-container'">
     <template #content>
-      <div class="content" v-for="(tabs,tabsIndex) in tabsList" :key="tabsIndex" v-show="!(activeTabsIndex > 0 && tabsIndex > 0)">
+      <div class="content" v-on-click-outside="clickOutside" v-for="(tabs,tabsIndex) in tabsList" :key="tabsIndex" v-show="!(activeTabsIndex > 0 && tabsIndex > 0)">
         <div class="header">
           <div class="item"
                v-for="(tab,tabIndex) in tabs"
@@ -142,9 +142,9 @@
         </div>
       </div>
     </template>
-    <a href="javascript:void(0)">
+    <span style="cursor: pointer;color: #1890ff" @click="visible = true">
       {{ typesLabel }}
-    </a>
+    </span>
   </a-popover>
   <a-tooltip>
     <template #title>
@@ -166,11 +166,16 @@ import {useStore} from "vuex";
 import {StateType as ServeStateType} from "@/store/serve";
 import debounce from "lodash.debounce";
 import { useRouter } from "vue-router";
-const props = defineProps(['value', 'serveId', 'isRefChildNode', 'isRoot']);
+import { vOnClickOutside } from '@vueuse/components'
+const props = defineProps(['value', 'isRefChildNode', 'isRoot']);
 const emit = defineEmits(['change']);
 const tabsList: any = ref([]);
 const visible: any = ref(false);
 const router = useRouter();
+
+const clickOutside = () => {
+  visible.value = false;
+}
 // 当前选中的顶层 tab index
 /**
  * 这里备注下：Components 和 Combine Schemas 两种类型，都是通过 tabsList[0] 来控制的，所以这里的 tabsIndex 也是通过 tabsList[0] 来控制的
@@ -233,7 +238,7 @@ function changeRef(tabsIndex, tabIndex, e) {
   if (e) {
     tabsList.value.splice(tabsIndex + 1);
   }
-}
+  }
 
 // ref 组件
 function changeCombineType(tabsIndex, tabIndex, e) {
@@ -311,7 +316,7 @@ function initTabsList(types: any, treeInfo: any) {
 }
 
 function getValueFromTabsList(tabsList: any) {
-  const result: any = [];
+    const result: any = [];
 
   tabsList.forEach((tabs: any) => {
     let activeTab = tabs.find((tab: any) => tab.active);
@@ -371,8 +376,8 @@ async function searchRefs(keyword) {
 function goViewComponent() {
   console.log('goViewComponent', props.value);
   const refStr = encodeURIComponent(props.value.ref);
-  const url = `${window.location.origin}/${router.currentRoute.value.params.projectNameAbbr}/project-setting/service-setting?sectab=service-component&serveId=${props.serveId}&refId=${refStr}`;
-  window.open(url, '_blank')
+  // const url = `${window.location.origin}/${router.currentRoute.value.params.projectNameAbbr}/project-setting/service-setting?sectab=service-component&refId=${refStr}`;
+  // window.open(url, '_blank')
 }
 
 watch(() => {

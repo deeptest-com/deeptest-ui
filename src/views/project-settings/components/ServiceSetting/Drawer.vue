@@ -22,9 +22,6 @@
                     <a-tab-pane key="service-version" tab="服务版本">
                         <ServiceVersion :serveId="formState.id" />
                     </a-tab-pane>
-                    <a-tab-pane key="service-component" tab="服务组件">
-                        <ServiceComponent :serveId="formState.id"  :refId="refId"/>
-                    </a-tab-pane>
                     <a-tab-pane key="service-security" tab="Security">
                         <ServiceSecurity :serveId="formState.id"/>
                     </a-tab-pane>
