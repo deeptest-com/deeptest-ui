@@ -73,6 +73,7 @@ import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import cloneDeep from "lodash/cloneDeep";
 
 const usedBy = inject('usedBy') as UsedBy
+const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
 const {t} = useI18n();
 
 const store = useStore<{  Debug: Debug }>()
@@ -132,7 +133,16 @@ watch(() => debugData.value.debugInterfaceId, (newVal) => {
 
 watch(() => { return debugData.value }, (val) => {
   console.log('watch debugData in debug/request/Config.vue')
+
   if (val.method) {
+    store.dispatch('Debug/listCondition', {
+      conditionSrc: ConditionSrc.PreCondition,
+      isForBenchmarkCase: isForBenchmarkCase,
+    });
+    store.dispatch('Debug/listCondition', {
+      conditionSrc: ConditionSrc.PostCondition,
+      isForBenchmarkCase: isForBenchmarkCase,
+    });
     store.dispatch('Debug/listAssertionCondition');
   }
 }, { immediate: true });
@@ -151,26 +161,49 @@ const {
   assertionConditionsDataObj,
   debugChangePostScript,
   debugChangeCheckpoint,
-    debugChangePreScript,
+  debugChangePreScript,
   resetDebugChange,
-    resetMockChange,
   scriptData,
 }  = useIMLeaveTip();
 
-const getEntityType = (id) => {
-  const cur = postConditionsList?.value?.find((item) => {
+const getEntityType = (id, conditionSrc) => {
+  let conditionsList = [] as any[]
+
+  if (conditionSrc === ConditionSrc.PreCondition) {
+    conditionsList = preConditionsList.value
+  } else if (conditionSrc === ConditionSrc.PreCondition) {
+    conditionsList = postConditionsList.value
+  }
+
+  const cur = conditionsList?.find((item) => {
     return item.entityId === id
   })
   return cur?.entityType;
 }
 const leaveSave =  async (event) => {
+  // 前置处理器缓存的数据 - 保存
+  if(Object.keys(preConditionsDataObj.value)?.length && debugChangePreScript.value){
+    Object.values(preConditionsDataObj.value).map(async (item:any) => {
+      item.debugInterfaceId = debugInfo.value.debugInterfaceId;
+      item.endpointInterfaceId = debugInfo.value.endpointInterfaceId;
+      item.projectId = debugData.value.projectId;
+      const entityType = getEntityType(item.id, ConditionSrc.PreCondition);
+      if(entityType === ConditionType.script){
+        await store.dispatch('Debug/leaveSaveScript', item)
+      }
+      if(entityType === ConditionType.extractor){
+        await store.dispatch('Debug/leaveSaveExtractor', item)
+      }
+    })
+  }
+
   // 后置处理器缓存的数据 - 保存
   if(Object.keys(postConditionsDataObj.value)?.length && debugChangePostScript.value){
     Object.values(postConditionsDataObj.value).map(async (item:any) => {
       item.debugInterfaceId = debugInfo.value.debugInterfaceId;
       item.endpointInterfaceId = debugInfo.value.endpointInterfaceId;
       item.projectId = debugData.value.projectId;
-      const entityType = getEntityType(item.id);
+      const entityType = getEntityType(item.id, ConditionSrc.PostCondition);
       if(entityType === ConditionType.script){
         await store.dispatch('Debug/leaveSaveScript', item)
       }
