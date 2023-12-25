@@ -1,10 +1,10 @@
 <template>
   <a-popover :title="null"
              trigger="click"
-             :visible="visible"
+             v-model:visible="visible"
              :overlayClassName="'data-type-setting-container'">
     <template #content>
-      <div class="content" v-on-click-outside="clickOutside" v-for="(tabs,tabsIndex) in tabsList" :key="tabsIndex" v-show="!(activeTabsIndex > 0 && tabsIndex > 0)">
+      <div class="content" v-for="(tabs,tabsIndex) in tabsList" :key="tabsIndex" v-show="!(activeTabsIndex > 0 && tabsIndex > 0)">
         <div class="header">
           <div class="item"
                v-for="(tab,tabIndex) in tabs"
@@ -142,9 +142,9 @@
         </div>
       </div>
     </template>
-    <span style="cursor: pointer;color: #1890ff" @click="visible = true">
+    <a-button style="color: #1890ff" type="link">
       {{ typesLabel }}
-    </span>
+    </a-button>
   </a-popover>
   <a-tooltip>
     <template #title>

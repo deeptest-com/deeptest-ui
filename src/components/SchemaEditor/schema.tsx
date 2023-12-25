@@ -375,7 +375,6 @@ export default defineComponent({
             return <>
                 <DataTypeSetting
                     value={tree}
-                    serveId={props.serveId}
                     isRefChildNode={isRefChildNode || false}
                     isRoot={isRoot || false}
                     onChange={dataTypeChange.bind(this, options)}/>
