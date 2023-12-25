@@ -332,7 +332,8 @@ function getValueFromTabsList(tabsList: any) {
         type: selectedRef?.type || '',
         ref: activeTab.value || '',
         name: selectedRef?.name || '',
-        content: null
+        content: null,
+        refId: selectedRef?.id,
       };
     } else if (activeTab.type === 'combine') {
       res = {

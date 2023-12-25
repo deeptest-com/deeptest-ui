@@ -124,7 +124,7 @@ const handleGenerateExample = async (examples) => {
   exampleStr.value = JSON.stringify(schemaDetail.value.examples);
 }
 
-const saveSchema = () => {
+const saveSchema = async () => {
   const object = {
     "name": schemaDetail.value.name,
     "id": schemaDetail.value.id,
@@ -133,7 +133,13 @@ const saveSchema = () => {
     "type": schemaType.value,
     "description": schemaDetail.value.description
   }
-  store.dispatch('Schema/saveSchema', object);
+  try {
+    await store.dispatch('Schema/saveSchema', object);
+    message.success('保存成功');
+  } catch(error) {
+    message.error('保存失败');
+  }
+  
 }
 
 const handleCancel = () => {
