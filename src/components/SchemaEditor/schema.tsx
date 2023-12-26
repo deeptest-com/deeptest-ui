@@ -31,7 +31,7 @@ import {notifyWarn} from "@/utils/notify";
 
 export default defineComponent({
     name: 'SchemeEditor',
-    props: ['value', 'contentStyle', 'serveId'],
+    props: ['value', 'contentStyle', 'projectId'],
     emits: ['change'],
     setup(props, {emit}) {
         const store = useStore<{ Endpoint, ServeGlobal: ServeStateType }>();

@@ -31,7 +31,7 @@
           @generateFromJSON="generateFromJSON"
           @changeContent="changeContent"
           @changeExamples="changeExamples"
-          :serveId="serveId"
+          :projectId="projectId"
           :contentStr="contentStr"
           :exampleStr="exampleStr"
           @generateExample="handleGenerateExample"
@@ -53,7 +53,7 @@ const selectedCodeDetail = computed<any>(() => store.state.Endpoint.selectedCode
 
 // 是否折叠,默认展开
 const collapse = ref(true);
-const props = defineProps(['serveId']);
+const props = defineProps(['projectId']);
 const emit = defineEmits([]);
 const activeResBodySchema: any = ref({
   content: null,

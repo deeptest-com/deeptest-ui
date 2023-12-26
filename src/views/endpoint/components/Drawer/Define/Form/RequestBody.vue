@@ -38,7 +38,7 @@
               @generateExample="handleGenerateExample"
               @changeContent="changeContent"
               @changeExamples="changeExamples"
-              :serveId="serveId"
+              :projectId="projectId"
               :contentStr="contentStr"
               :exampleStr="exampleStr"
               :tab-content-style="{width:'100%'}"/>
@@ -52,16 +52,12 @@
 import {computed, defineEmits, defineProps, onMounted, ref, watch,} from 'vue';
 import {useStore} from "vuex";
 import {mediaTypesOpts,} from '@/config/constant';
-import {Endpoint} from "@/views/endpoint/data";
 import {DownOutlined, RightOutlined} from '@ant-design/icons-vue';
 import SchemaEditor from '@/components/SchemaEditor/index.vue';
 
 const store = useStore<{ Endpoint, Debug, ProjectGlobal, User, ServeGlobal }>();
-const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const selectedMethodDetail = computed<any>(() => store.state.Endpoint.selectedMethodDetail);
-const currentUser: any = computed<Endpoint>(() => store.state.User.currentUser);
-const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
-const props = defineProps(['serveId']);
+const props = defineProps(['projectId']);
 const emit = defineEmits([]);
 // 是否折叠,默认展开
 const collapse = ref(true);
@@ -97,7 +93,7 @@ async function handleGenerateExample(examples: any) {
   const content = contentStr.value;
   const res = await store.dispatch('Endpoint/schema2example', {
     data: content,
-    serveId: props.serveId
+    projectId: props.projectId
   });
   const example = {
     name: `Example ${examples.length + 1}`,

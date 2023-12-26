@@ -62,7 +62,7 @@ import { notifySuccess } from "@/utils/notify";
 
 
 const store = useStore<{ Endpoint }>();
-const props = defineProps(['visible', 'contentStr', 'serveId']);
+const props = defineProps(['visible', 'contentStr', 'projectId']);
 const emits = defineEmits(["close"]);
 
 const content = computed(() => store.state.Endpoint.code);
@@ -107,7 +107,7 @@ const editorChange = (newScriptCode) => {
 
 
 async function generateCode() {
-    await store.dispatch('Endpoint/generateCode', { serveId: props.serveId, langType: langType.value, nameRule: nameRule.value, data: props.contentStr })
+    await store.dispatch('Endpoint/generateCode', { projectId: props.projectId, langType: langType.value, nameRule: nameRule.value, data: props.contentStr })
     timestamp.value = Date.now() + ''
 }
 

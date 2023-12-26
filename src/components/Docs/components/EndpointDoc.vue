@@ -144,7 +144,7 @@
   :visible="genCodeVisible"
   @close="close"
   :contentStr="contentStr"
-  :serveId="info?.serveId"
+  :projectId="info?.projectId"
   />
 </template>
 
@@ -169,6 +169,14 @@ const {text, copy, copied, isSupported} = useClipboard({});
 const info: any = computed(() => {
   return props.info;
 })
+
+watch(() => {
+  return props.info
+}, (newVal, oldValue) => {
+  if (newVal) {
+   console.error(newVal, oldValue)
+  }
+}, {immediate: true});
 
 const emit = defineEmits(['ok', 'close', 'refreshList']);
 

@@ -41,7 +41,7 @@
             @generateFromJSON="generateFromJSON"
             @generateExample="handleGenerateExample"
             @changeContent="handleContentChange"
-            :serveId="serveId"
+            :projectId="projectId"
             :tab-content-style="{ width: '100%' }"
             :contentStr="schemaDetail?.content"
             :exampleStr="exampleStr"/>
@@ -77,14 +77,14 @@ const mode = ref('form');
 const schemaType = ref('object');
 const exampleStr = ref('');
 const schemeVisibleKey = ref(1);
-const serveId = ref(0);
 const yamlCode = ref('');
 const loading = ref(false);
 
-const store = useStore<{ ProjectSetting: ProjectSettingStateType, Schema }>();
+const store = useStore<{ ProjectSetting: ProjectSettingStateType, Schema,ProjectGlobal }>();
 const schemaDetail = computed(() => store.state.Schema.schemaDetail);
 const activeSchemaTab = computed(() => store.state.Schema.activeSchema);
 const schemas = computed(() => store.state.Schema.schemas);
+const projectId = computed<any>(() => store.state.ProjectGlobal.currProject.id);
 
 const handleSwitchMode = async (e) => {
   if (e.target.value !== 'code') return;
