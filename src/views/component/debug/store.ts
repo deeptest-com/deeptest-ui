@@ -539,10 +539,14 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
-        async save({commit}, payload: any) {
+        async save({commit,state}, payload: any) {
             const resp = await  save(payload)
             if (resp.code === 0) {
                 commit('setDebugData', { ...resp.data, action: 'save' });
+                commit('setDebugInfo', {
+                    ...state.debugInfo,
+                    debugInterfaceId: resp.data.debugInterfaceId,
+                } as DebugInfo);
                 return true;
             } else {
                 return false
