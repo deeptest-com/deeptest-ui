@@ -78,7 +78,7 @@ const StoreModel: ModuleType = {
     },
     async createCategory({ rootState, dispatch }: any, payload) {
       try {
-        const { code, msg } = await createCategory({
+        const { code, msg, data } = await createCategory({
           ...payload,
           mode: 'child',
           type: 'schema',
@@ -86,7 +86,7 @@ const StoreModel: ModuleType = {
         });
         if (code === 0) {
           dispatch('loadCategory');
-          return Promise.resolve();
+          return Promise.resolve(data);
         }
         return Promise.reject(msg);
       } catch(error) {

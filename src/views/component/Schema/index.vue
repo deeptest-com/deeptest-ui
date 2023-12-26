@@ -163,11 +163,12 @@ const createCategoryOrSchema = async (nodeProps, createType) => {
     if (!targetId) {
       return Promise.reject('targetId not found');
     }
-    const data = await store.dispatch('Schema/saveSchema', {
+    const data = await store.dispatch('Schema/createCategory', {
       targetId,
       name: 'NewComponent',
+      isEntity: true,
     });
-    const newSchema = { id: data.categoryId, key: data.entityId, entityId: data.entityId, name: 'NewComponent', autoFocus: true };
+    const newSchema = { id: data.id, key: data.entityId, entityId: data.entityId, name: 'NewComponent', autoFocus: true };
     // 新建组件以后，设置当前选中tab以及tab列表
     store.commit('Schema/setActiveSchema', newSchema);
     schemas.value.push(newSchema)
