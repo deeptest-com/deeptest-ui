@@ -30,7 +30,7 @@
                     @blur="validate('sql', { trigger: 'blur' }).catch(() => {})"/>
       </a-form-item>
 
-      <a-form-item label="JSONPath" v-bind="validateInfos.jsonPath" required>
+      <a-form-item label="JSONPath">
         <a-input v-model:value="model.jsonPath" />
 
         <div class="tips">
@@ -42,7 +42,7 @@
 
       </a-form-item>
 
-      <a-form-item label="变量名称" v-bind="validateInfos.variable" required>
+      <a-form-item label="变量名称">
         <a-input-group compact>
           <a-input v-model:value="model.variable"
                    @change="onVarChanged"
@@ -120,12 +120,6 @@ const checkConn = async (rule: any, value: number) => {
 const rules = computed(() => { return {
   dbConnId: [
     { validator: checkConn, trigger: 'change' },
-  ],
-  variable: [
-    {required: true, message: '请输入变量名称', trigger: 'blur'},
-  ],
-  jsonPath: [
-    {required: true, message: '请输入JsonPath', trigger: 'blur'},
   ],
   sql: [
     {required: true, message: '请输入SQL语句', trigger: 'blur'},
