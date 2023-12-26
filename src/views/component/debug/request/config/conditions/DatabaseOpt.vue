@@ -107,9 +107,15 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 const responseData = computed<any>(() => store.state.Debug.responseData);
 const dbConns = computed<any>(() => store.state.Debug.dbConns);
 
-const {postConditionsDataObj} = useIMLeaveTip();
+const {preConditionsDataObj, postConditionsDataObj} = useIMLeaveTip();
 const model = computed<any>(() => {
-  return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
+  if (conditionSrc === ConditionSrc.PreCondition)
+    return preConditionsDataObj.value?.[props?.condition?.entityId] || {};
+
+  else if (conditionSrc === ConditionSrc.PostCondition)
+    return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
+
+  return {}
 });
 
 const checkConn = async (rule: any, value: number) => {

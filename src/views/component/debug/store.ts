@@ -1003,7 +1003,7 @@ const StoreModel: ModuleType = {
                         id: data.id,
                         value:cloneDeep(data)
                     })
-                } else if (dbConnData.conditionSrc === ConditionSrc.PreCondition) {
+                } else if (dbConnData.conditionSrc === ConditionSrc.PostCondition) {
                     commit('setPostConditionsDataObj',{
                         id: data.id,
                         value:data
