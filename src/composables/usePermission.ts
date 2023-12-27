@@ -22,10 +22,11 @@ export default function usePermission() {
   };
 
   const hasProjectAuth = (value: string | unknown) => {
-    if (!value) {
-      return true;
-    }
-    return unref(userRolesAuth).includes(value);
+    return true;
+    // if (!value) {
+    //   return true;
+    // }
+    // return unref(userRolesAuth).includes(value);
   };
 
   const setPermission = (value: string) => {

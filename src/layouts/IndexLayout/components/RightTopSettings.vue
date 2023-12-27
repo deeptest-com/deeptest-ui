@@ -64,7 +64,7 @@
       </a-dropdown>
 
       <!-- ::::消息通知 -->
-      <a-tooltip placement="bottom" title="消息通知" v-if="hasProjectAuth('p-api-notification')">
+      <a-tooltip placement="bottom" title="消息通知" v-if="!isWujieEnv && hasProjectAuth('p-api-notification')">
         <span class="operation-name message" @click="onMessageClick">
           <BellOutlined />
         </span>

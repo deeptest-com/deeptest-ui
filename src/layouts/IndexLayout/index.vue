@@ -28,7 +28,7 @@
           :routeItem="routeItem">
       </right-top>
 
-      <div class="leyan-container-right-top" v-if="isWujieEnv">
+      <div class="leyan-container-right-top" v-if="isWujieEnv" :style="rightTopStyle">
         <right-top-settings/>
       </div>
 
@@ -83,7 +83,7 @@ export default defineComponent({
     Left,
 
     RightTop,
-  },
+      },
   setup() {
     const store = useStore<{ Global: GlobalStateType; User: UserStateType; }>();
     const route = useRoute();
@@ -184,6 +184,19 @@ export default defineComponent({
       console.log('onChromeExtEvent')
     }
 
+    const rightTopStyle = computed(() => {
+      if (!isWujieEnv) {
+        return {};
+      }
+      const leyanRightTopEl = window.parent.document.querySelector('.vben-layout-header-action');
+      const { width = 0, height = 0 }: any = leyanRightTopEl?.getBoundingClientRect();
+      return {
+        top: 0,
+        right: `${width + 10}px`,
+        height: `${height}px`,
+      }
+    })
+
     return {
       collapsed,
       toggleCollapsed,
@@ -203,6 +216,7 @@ export default defineComponent({
       RightTopSettings,
       sendMsg,
       onChromeExtEvent,
+      rightTopStyle
     }
   }
 })
@@ -258,9 +272,22 @@ export default defineComponent({
 }
 .leyan-container-right-top{
   position: fixed;
-  width: 280px;
   top: 58px;
   right: -6px;
   background-color: #fff;
+  
+  .indexlayout-top-settings {
+    height: 100%;
+
+    .user-info {
+      height: 100%;
+
+      .indexlayout-top-usermenu {
+        height: 100%;
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
 }
 </style>

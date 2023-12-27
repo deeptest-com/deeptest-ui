@@ -3,12 +3,20 @@
       <router-view></router-view>
 
       <Notification></Notification>
+
+      <!-- 创建项目弹窗 -->
+    <CreateProjectModal
+        :visible="createProjectModalVisible"
+        @update:visible="createProjectModalVisible = false"
+        @handleSuccess="handleCreateSuccess"
+    />
     </a-config-provider>
 </template>
 <script lang="ts">
 import {defineComponent, computed, onMounted, watch, ref,onUnmounted} from "vue";
 import { useI18n } from "vue-i18n";
 import {useStore} from "vuex";
+import cloneDeep from "lodash/cloneDeep";
 import { antdMessages } from "@/config/i18n";
 import { setHtmlLang } from "@/utils/i18n";
 import Notification from "./components/others/Notification.vue";
@@ -21,6 +29,7 @@ import useIMLeaveTip   from "@/composables/useIMLeaveTip";
 import {Cache_Key_Agent_Local_Port, Cache_Key_Server_Url} from "@/utils/const";
 import {useRoute, useRouter} from "vue-router";
 import {useWujie} from "@/composables/useWujie";
+import CreateProjectModal from "@/components/CreateProjectModal/index.vue";
 import fixMonacoEditor from "@/utils/fixMonacoEditor";
 import {WebSocket} from "@/services/websocket";
 import {getCache, setCache} from "@/utils/localCache";
@@ -30,6 +39,7 @@ export default defineComponent({
   name: 'App',
   components: {
     Notification,
+    CreateProjectModal
   },
   setup() {
     const { locale } = useI18n();
@@ -37,9 +47,13 @@ export default defineComponent({
     const isLyEnv = isLeyan();
     const {isWujieEnv} = useWujie();
     const spinning = ref<boolean>(false);
+    const createProjectModalVisible = ref(false);
     // NOTICE: 以下代码仅适用于ly环境，其他环境删除即可
-    const store = useStore<{User: UserStateType,Endpoint,Debug}>();
+    const store = useStore<{User: UserStateType,Endpoint,Debug, ProjectGlobal}>();
     const currentUser = computed<CurrentUser>(()=> store.state.User.currentUser);
+    const currProject = computed(() => store.state.ProjectGlobal.currProject);
+    const projects = computed<any>(() => store.state.ProjectGlobal.projects);
+    const recentProjects = computed<any>(() => store.state.ProjectGlobal.recentProjects);
 
     watch(() => {
       return currentUser.value
@@ -85,12 +99,8 @@ export default defineComponent({
           console.log('832msg', msg)
 
           if (msg?.type === 'changeRouter') {
-            const leyenProjectName = await getCache(settings.leyanProjectName);
-            const isChangeProject = leyenProjectName !== msg?.data?.projectName;
-            console.log('832msg', leyenProjectName, msg?.data?.projectName, isChangeProject)
-
             // 切换项目了，需要重置数据
-            if(isChangeProject){
+            if(!currProject.value.id && msg?.data?.projectName){
                const result = await store.dispatch('ProjectGlobal/checkProjectAndUser', { project_code: msg?.data?.projectName });
               // 更新左侧菜单以及按钮权限
               await store.dispatch('Global/getPermissionMenuList', { currProject: result.id });
@@ -103,8 +113,33 @@ export default defineComponent({
           if (msg?.type === 'logout') {
            await store.dispatch('User/logout');
           }
-        })
 
+          if (msg?.type === 'fetchProjects') {
+            bus.$emit(settings.sendMsgToLeyan, {
+              type: 'fetchProjectSuccess',
+              data: {
+                projects: cloneDeep(projects.value),
+                recentProjects: cloneDeep(recentProjects.value),
+                currProject: cloneDeep(currProject.value),
+              }
+            })
+          }
+
+          if (msg?.type === 'changeProject') {
+            await store.dispatch("ProjectGlobal/changeProject", msg?.data?.project?.projectId);
+            await store.commit('Global/setPermissionMenuList', []);
+
+            // 更新左侧菜单以及按钮权限
+            await store.dispatch("Global/getPermissionMenuList", { currProjectId: msg?.data?.project?.projectId });
+          }
+
+          if (msg?.type === 'openCreateProject') {
+            createProjectModalVisible.value = true;
+          }
+        })
+        
+
+        // store.dispatch('ProjectGlobal/fetchProject');
         // 通知上层应用已经加载完毕
         bus?.$emit(settings.sendMsgToLeyan, {
           type: 'appMounted',
@@ -134,8 +169,23 @@ export default defineComponent({
       window.removeEventListener('beforeunload', onbeforeunloadCallback);
     })
 
+    const handleCreateSuccess = async () => {
+      createProjectModalVisible.value = false;
+      await store.dispatch("ProjectGlobal/fetchProject");
+      bus.$emit(settings.sendMsgToLeyan, {
+        type: 'fetchProjectSuccess',
+        data: {
+          projects: projects.value,
+          recentProjects: recentProjects.value,
+          currProject: currProject.value,
+        }
+      })
+    }
+
     return {
-      antdLocales
+      antdLocales,
+      createProjectModalVisible,
+      handleCreateSuccess
     }
   }
 })
