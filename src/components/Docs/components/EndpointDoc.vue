@@ -170,14 +170,6 @@ const info: any = computed(() => {
   return props.info;
 })
 
-watch(() => {
-  return props.info
-}, (newVal, oldValue) => {
-  if (newVal) {
-   console.error(newVal, oldValue)
-  }
-}, {immediate: true});
-
 const emit = defineEmits(['ok', 'close', 'refreshList']);
 
 const isInterface = computed(() => {

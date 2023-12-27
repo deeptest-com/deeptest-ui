@@ -162,12 +162,6 @@ const emit = defineEmits<{
 }>();
 
 
-watch(() => {
-  return props.projectId
-}, (newVal, oldValue) => {
-  console.error(newVal, oldValue)
-}, {immediate: true});
-
 const content: any = ref(null);
 const examples: any = ref([]);
 
