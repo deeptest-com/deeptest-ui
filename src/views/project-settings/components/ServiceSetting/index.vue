@@ -246,7 +246,7 @@ async function onDelete(record: any) {
 function goDocs(record: any) {
   const {isWujieEnv,parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
   if(isInLeyanWujieContainer){
-    window.open(`${parentOrigin}/dev/${projectName}/API/docsView?serveIds=${record.id}`, '_blank')
+    window.open(`${parentOrigin}/lyapi/${projectName}/docsView?serveIds=${record.id}`, '_blank')
     return;
   }
   window.open(`${window.location.origin}/docs/view?serveIds=${record.id}`, '_blank');

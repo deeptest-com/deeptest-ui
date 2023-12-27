@@ -1,5 +1,5 @@
 <template>
-  <div class="workbench" :class="isWujieEnv ? 'wujie-workbench' :''">
+  <div class="workbench">
       <StatisticHeader :params="cardData" :type="1"/>
       <List style="margin-top:16px"/>
   </div>

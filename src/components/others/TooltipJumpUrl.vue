@@ -22,7 +22,7 @@ const props = defineProps(['jumpUrl']);
 
 const jump = () => {
   if(isWujieEnv && projectName  && parentOrigin) {
-    const url = `${parentOrigin}/dev/${projectName}/settings/API?subKey=env-params-query`;
+    const url = `${parentOrigin}/lyapi/${projectName}/settings?subKey=env-params-query`;
     window.open(url, '_blank');
     return;
   }

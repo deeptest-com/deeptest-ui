@@ -60,7 +60,7 @@ const detailLink = computed(() => {
   const {params: {projectNameAbbr = ''}} = router.currentRoute.value;
   // 无界环境，使用父级域名跳转
   if(isInLeyanWujieContainer){
-    return `${parentOrigin}/dev/${projectName}/testing/TP/${projectNameAbbr}-TP-${currPlan.value.id}`;
+    return `${parentOrigin}/lyapi/${projectName}/TP/${projectNameAbbr}-TP-${currPlan.value.id}`;
   }
   return `${window.location.origin}/${projectNameAbbr}/TP/${projectNameAbbr}-TP-${currPlan.value.id}`;
 });

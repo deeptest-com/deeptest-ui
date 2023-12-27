@@ -232,7 +232,7 @@ async function shareDocs() {
   })
 
   if (res) {
-    source.value = isInLeyanWujieContainer?  `${parentOrigin}/dev/${projectName}/API/docsView?code=${res.code}` : `${window.location.origin}/docs/share?code=${res.code}`;
+    source.value = isInLeyanWujieContainer?  `${parentOrigin}/lyapi/${projectName}/docsView?code=${res.code}` : `${window.location.origin}/docs/share?code=${res.code}`;
     copyUrl();
   }
 }

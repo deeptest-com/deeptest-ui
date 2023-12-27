@@ -324,7 +324,7 @@ const detailLink = computed(() => {
   const {params: {projectNameAbbr = ''}} = router.currentRoute.value;
   // 无界环境，使用父级域名跳转
   if(isInLeyanWujieContainer){
-    return `${parentOrigin}/dev/${projectName}/API/IM/${endpointDetail.value?.serialNumber}`;
+    return `${parentOrigin}/lyapi/${projectName}/IM/${endpointDetail.value?.serialNumber}`;
   }
   return `${window.location.origin}/${projectNameAbbr}/IM/${endpointDetail.value?.serialNumber}`;
 })

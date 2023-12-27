@@ -387,7 +387,7 @@ function goViewComponent() {
   const refStr = encodeURIComponent(ref);
   // 无界环境，使用父级域名跳转
   if(isInLeyanWujieContainer){
-    const url = `${parentOrigin}/dev/${projectName}/settings/API?activeKey=service&sectab=service-component&serveId=${props.serveId}&refId=${refStr}`;
+    const url = `${parentOrigin}/lyapi/${projectName}/settings?activeKey=service&sectab=service-component&serveId=${props.serveId}&refId=${refStr}`;
     window.open(url, '_blank');
     return;
   }

@@ -1,5 +1,5 @@
 <template>
-  <div id="indexlayout">
+  <div :class="{'indexlayout': true, 'wujie-indexlayout': isWujieEnv}">
     <left
         v-if="!isWujieEnv"
         :collapsed="collapsed"
@@ -191,7 +191,7 @@ export default defineComponent({
       const leyanRightTopEl = window.parent.document.querySelector('.vben-layout-header-action');
       const { width = 0, height = 0 }: any = leyanRightTopEl?.getBoundingClientRect();
       return {
-        top: 0,
+        top: '-1px',
         right: `${width + 10}px`,
         height: `${height}px`,
       }
@@ -224,10 +224,14 @@ export default defineComponent({
 <style lang="less">
 @import '../../assets/css/variables.less';
 
-#indexlayout {
+.indexlayout {
   display: flex;
   height: 100vh;
   overflow: hidden;
+
+  &.wujie-indexlayout {
+    height: calc(100vh - 48px);
+  }
 }
 
 #indexlayout-right {
@@ -246,13 +250,12 @@ export default defineComponent({
       overflow: hidden;
       //padding: 16px;
       &.wujie-main{
-        padding: 0;
+        padding: 0 !important;
         position: relative;
         //top: -18px;
       }
       &.workspace-main{
-        padding: 0;
-      padding: 16px;
+        padding: 16px;
       }
 
       .hide-btn {

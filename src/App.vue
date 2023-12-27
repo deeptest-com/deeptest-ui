@@ -114,23 +114,23 @@ export default defineComponent({
            await store.dispatch('User/logout');
           }
 
-          if (msg?.type === 'fetchProjects') {
-            bus.$emit(settings.sendMsgToLeyan, {
-              type: 'fetchProjectSuccess',
-              data: {
-                projects: cloneDeep(projects.value),
-                recentProjects: cloneDeep(recentProjects.value),
-                currProject: cloneDeep(currProject.value),
-              }
-            })
-          }
+          // if (msg?.type === 'fetchProjects') {
+          //   bus.$emit(settings.sendMsgToLeyan, {
+          //     type: 'fetchProjectSuccess',
+          //     data: {
+          //       projects: cloneDeep(projects.value),
+          //       recentProjects: cloneDeep(recentProjects.value),
+          //       currProject: cloneDeep(currProject.value),
+          //     }
+          //   })
+          // }
 
           if (msg?.type === 'changeProject') {
-            await store.dispatch("ProjectGlobal/changeProject", msg?.data?.project?.projectId);
+            await store.dispatch("ProjectGlobal/changeProject", msg?.data?.project?.id);
             await store.commit('Global/setPermissionMenuList', []);
 
             // 更新左侧菜单以及按钮权限
-            await store.dispatch("Global/getPermissionMenuList", { currProjectId: msg?.data?.project?.projectId });
+            await store.dispatch("Global/getPermissionMenuList", { currProjectId: msg?.data?.project?.id });
           }
 
           if (msg?.type === 'openCreateProject') {
@@ -181,6 +181,23 @@ export default defineComponent({
         }
       })
     }
+
+    watch(() => {
+      return currProject.value.id;
+    }, val => {
+      if (val) {
+        setTimeout(() => {
+          bus?.$emit(settings.sendMsgToLeyan, {
+            type: 'fetchProjectSuccess',
+            data: {
+              projects: projects.value,
+              recentProjects: recentProjects.value,
+              currProject: currProject.value,
+            }
+          })
+        }, (600));
+      }
+    })
 
     return {
       antdLocales,

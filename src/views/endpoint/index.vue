@@ -379,7 +379,7 @@ const fetching = ref(false);
 function goDocs() {
   const {isWujieEnv,parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
   if(isInLeyanWujieContainer){
-    window.open(`${parentOrigin}/dev/${projectName}/API/docsView?endpointIds=${selectedRowIds.value.join(',')}`, '_blank')
+    window.open(`${parentOrigin}/lyapi/${projectName}/docsView?endpointIds=${selectedRowIds.value.join(',')}`, '_blank')
     return;
   }
   const viewURL = `docs/view?endpointIds=${selectedRowIds.value.join(',')}`

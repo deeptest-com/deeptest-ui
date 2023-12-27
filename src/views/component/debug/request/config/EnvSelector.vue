@@ -117,7 +117,7 @@ const handleRedirectEnv = (e) => {
   e.preventDefault();
   const {isWujieEnv,projectName,parentOrigin,isInLeyanWujieContainer} = useWujie();
   if(isWujieEnv && projectName && parentOrigin){
-    window.open(`${parentOrigin}/dev/${projectName}/settings/API?activeKey=env`, '_blank');
+    window.open(`${parentOrigin}/lyapi/${projectName}/settings?activeKey=env`, '_blank');
     return;
   }
 

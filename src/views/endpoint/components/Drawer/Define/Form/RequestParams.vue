@@ -207,7 +207,7 @@ const router = useRouter();
 function goEditSecurity() {
   const {isWujieEnv,parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
   if(isInLeyanWujieContainer){
-    window.open(`${parentOrigin}/dev/${projectName}/settings/API?activeKey=service&sectab=service-security&serveId=${endpointDetail.value.serveId}`, '_blank')
+    window.open(`${parentOrigin}/lyapi/${projectName}/settings?activeKey=service&sectab=service-security&serveId=${endpointDetail.value.serveId}`, '_blank')
     return;
   }
   window.open(`${window.location.origin}/${router.currentRoute.value.params.projectNameAbbr}/project-setting/service-setting?sectab=service-security&serveId=${endpointDetail.value.serveId}`, '_blank')

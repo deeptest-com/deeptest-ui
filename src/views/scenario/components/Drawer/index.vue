@@ -98,7 +98,7 @@ const detailLink = computed(() => {
 
   // 无界环境，使用父级域名跳转
   if(isInLeyanWujieContainer){
-    return `${parentOrigin}/dev/${projectName}/testing/TS/${detailResult.value?.serialNumber}`;
+    return `${parentOrigin}/lyapi/${projectName}/TS/${detailResult.value?.serialNumber}`;
   }
 
   return `${window.location.origin}/${projectNameAbbr}/TS/${detailResult.value.serialNumber}`;
