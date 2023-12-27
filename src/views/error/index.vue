@@ -22,8 +22,11 @@ import { watch, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ApplyProPermissionsModal from "@/components/ApplyProPermissions/index.vue";
 import {hideGlobalLoading} from "@/utils/handleLoad";
+import { useWujie } from '@/composables/useWujie';
 
 const router = useRouter();
+const { isWujieEnv } = useWujie();
+const bus = window?.$wujie?.bus;
 
 /**
  * 1. 用户访问无权限页面
@@ -33,6 +36,12 @@ const router = useRouter();
 const backHome = {
   text: '回到首页',
   action: () => {
+    if (isWujieEnv) {
+      bus.$emit('childRouterChanged', {
+        url: '/lyapi'
+      })
+      return;
+    }
     router.replace({
       path: '/'
     })
