@@ -347,6 +347,7 @@ async function selectExecEnv() {
 }
 
 async function execScenario(record: any) {
+  store.commit('Scenario/setNode', {});
   selectEnvVisible.value = true;
   selectedExecScenario.value = record;
   execEnvId.value = record.currEnvId;
@@ -470,7 +471,6 @@ const username = (user:string)=>{
   let result = userList.value.find(arrItem => arrItem.value == user);
   return result?.label || '-'
 }
-
 </script>
 
 <style lang="less" scoped>
