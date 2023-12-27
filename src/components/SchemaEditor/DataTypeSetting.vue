@@ -2,9 +2,10 @@
   <a-popover :title="null"
              trigger="click"
              v-model:visible="visible"
+             :destroyTooltipOnHide="true"
              :overlayClassName="'data-type-setting-container'">
     <template #content>
-      <div class="content" v-for="(tabs,tabsIndex) in tabsList" :key="tabsIndex" v-show="!(activeTabsIndex > 0 && tabsIndex > 0)">
+      <div class="content" v-on-click-outside="clickOutside" v-for="(tabs,tabsIndex) in tabsList" :key="tabsIndex" v-show="!(activeTabsIndex > 0 && tabsIndex > 0)">
         <div class="header">
           <div class="item"
                v-for="(tab,tabIndex) in tabs"
@@ -142,7 +143,7 @@
         </div>
       </div>
     </template>
-    <a-button style="color: #1890ff" type="link">
+    <a-button style="color: #1890ff" type="link" >
       {{ typesLabel }}
     </a-button>
   </a-popover>
@@ -173,7 +174,9 @@ const tabsList: any = ref([]);
 const visible: any = ref(false);
 const router = useRouter();
 
-const clickOutside = () => {
+const clickOutside = (e) => {
+  // console.log(8322,e);
+  // debugger;
   visible.value = false;
 }
 // 当前选中的顶层 tab index
