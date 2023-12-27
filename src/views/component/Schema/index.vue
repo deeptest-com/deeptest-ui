@@ -353,7 +353,8 @@ watch(() => {
 })
 
 defineExpose({
-  initTree
+  initTree,
+  loadCategory
 })
 </script>
 

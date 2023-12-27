@@ -522,6 +522,7 @@ async function handleImport() {
   console.log('success');
   showImportModal.value = false;
   refreshList('reset');
+  schema.value.loadCategory()
 }
 
 // 当前筛选条件，包括分类、服务、状态
