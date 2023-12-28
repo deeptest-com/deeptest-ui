@@ -1,6 +1,7 @@
 import { useRouter } from "vue-router";
 import useClipboard from "@/composables/useClipboard";
 import { notifySuccess } from "@/utils/notify";
+import { useWujie } from "@/composables/useWujie";
 
 interface SharePage {
   getShareLink: (...args: any[]) => string;
@@ -10,10 +11,12 @@ interface SharePage {
 function useSharePage(): SharePage {
   const router = useRouter();
   const { copy } = useClipboard({legacy: true});
+  const { isInLeyanWujieContainer, parentOrigin } = useWujie();
   const { params: { projectNameAbbr } } = router.currentRoute.value;
 
   const getShareLink = (record, pageType) => {
-    return `${window.location.origin}/${projectNameAbbr}/${pageType}/${record.serialNumber}`;
+    const prefix = isInLeyanWujieContainer ? `${parentOrigin}/lyapi` : window.location.origin;
+    return `${prefix}/${projectNameAbbr}/${pageType}/${record.serialNumber}`;
   };
 
   const share = (record, pageType) => {
