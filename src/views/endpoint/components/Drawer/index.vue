@@ -253,6 +253,7 @@ async function updateTitle(title) {
       {id: endpointDetail.value.id, name: title}
   );
   await store.dispatch('Endpoint/getEndpointDetail', {id: endpointDetail.value.id});
+  resetDefineChange();
 }
 
 async function changeDescription(description) {
