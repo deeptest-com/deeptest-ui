@@ -126,7 +126,7 @@ const responseExtractorFinish = (conf) => {
   console.log('responseExtractorFinish')
 
   conf.type = conf.expressionType
-  conf.usedWith = ExtractorSrc.body
+  conf.src = ExtractorSrc.body
   conf.result = result.value
 
   const data = {

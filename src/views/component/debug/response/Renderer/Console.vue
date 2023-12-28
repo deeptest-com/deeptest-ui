@@ -110,11 +110,9 @@ watch(responseData, (_newVal) => {
     padding: 5px;
     &.pass {
       color: #14945a;
-      background-color: #F1FAF4;
     }
     &.fail {
       color: #D8021A;
-      background-color: #FFECEE;
     }
   }
 }

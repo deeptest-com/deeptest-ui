@@ -216,7 +216,7 @@ const format = (item) => {
 }
 const disable = (item) => {
   console.log('disable', item)
-  store.dispatch('Debug/disablePostCondition', item)
+  store.dispatch('Debug/disableCondition', item)
 }
 const remove = (item) => {
   item.conditionSrc = props.conditionSrc
@@ -230,11 +230,12 @@ function move(_e: any) {
   const envIdList = conditions.value.map((e: EnvDataItem) => {
     return e.id;
   })
-  store.dispatch('Debug/movePostCondition', {
+  store.dispatch('Debug/moveCondition', {
     data: envIdList,
     info: debugInfo.value,
     isForBenchmarkCase: false,
     entityType: '',
+    conditionSrc: props.conditionSrc,
   })
 }
 

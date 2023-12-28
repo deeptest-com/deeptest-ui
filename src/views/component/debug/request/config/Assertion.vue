@@ -155,7 +155,7 @@ const format = (item) => {
 }
 const disable = (item) => {
   console.log('disable', item)
-  store.dispatch('Debug/disablePostCondition', {
+  store.dispatch('Debug/disableCondition', {
     ...item,
     isForBenchmarkCase: false
   })
@@ -174,7 +174,7 @@ function move(_e: any) {
   const envIdList = assertionConditions.value.map((e: EnvDataItem) => {
     return e.id;
   })
-  store.dispatch('Debug/movePostCondition', {
+  store.dispatch('Debug/moveCondition', {
     data: envIdList,
     isForBenchmarkCase: false,
     info: debugInfo.value,

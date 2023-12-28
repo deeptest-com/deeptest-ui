@@ -815,14 +815,18 @@ const StoreModel: ModuleType = {
         async moveCondition({commit, dispatch, state}, payload: any) {
             try {
                 await moveConditions(payload);
+
                 if (payload.entityType === ConditionType.checkpoint) {
-                    dispatch('listAssertionCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
+                    dispatch('listAssertionCondition', {
+                        isForBenchmarkCase: payload.isForBenchmarkCase
+                    });
                 } else {
                     dispatch('listCondition', {
                         isForBenchmarkCase: payload.isForBenchmarkCase,
                         conditionSrc: payload.conditionSrc,
                     });
                 }
+
                 return true;
 
             } catch (error) {
