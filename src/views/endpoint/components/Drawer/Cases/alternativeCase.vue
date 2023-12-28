@@ -158,6 +158,7 @@ import {StateType as UserStateType} from "@/store/user";
 import {getToken} from "@/utils/localToken";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import settings from "@/config/settings";
+import { setServeUrl } from "@/utils/url";
 
 const usedBy = UsedBy.CaseDebug
 provide('usedBy', usedBy)
@@ -393,7 +394,7 @@ const send = async () => {
 
   const callData = {
     userId: currUser.value.id,
-    serverUrl: process.env.VUE_APP_API_SERVER,
+    serverUrl: setServeUrl(process.env.VUE_APP_API_SERVER),
     token: await getToken(),
     data: data
   }

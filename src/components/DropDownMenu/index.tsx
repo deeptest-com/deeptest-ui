@@ -131,7 +131,7 @@ export const DropdownActionMenu = defineComponent({
           )} */}
           {dropdownList.value.length > 0 && (
             <DropdownList 
-              list={dropdownList.value.filter(e => hasPermission(e.auth || '') && ifShow(e, props))} 
+              list={dropdownList.value.filter(e => hasPermission(e.auth || '') || ifShow(e, props))} 
               record={record.value} 
               v-slots={slots} />
           )}

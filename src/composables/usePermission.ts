@@ -3,13 +3,16 @@ import { useStore } from "vuex";
 import { StateType as GlobalStateType } from "@/store/global";
 
 export default function usePermission() {
-  const store = useStore<{ Global:GlobalStateType }>();
+  const store = useStore<{ Global:GlobalStateType, User }>();
   const permissionMenuList = computed<any[]>(
     () => store.state.Global.permissionMenuList
   );
   const userRolesAuth = computed<any[]>(
     () => store.state.Global.userRolesAuth,
   );
+  const currUser = computed(() => {
+    return store.state.User.currentUser;
+  });
 
   const hasPermission = (value: string | unknown) => {
     if (!value) {
@@ -22,11 +25,19 @@ export default function usePermission() {
   };
 
   const hasProjectAuth = (value: string | unknown) => {
-    return true;
-    // if (!value) {
-    //   return true;
-    // }
-    // return unref(userRolesAuth).includes(value);
+    if (!value) {
+      return true;
+    }
+    return unref(userRolesAuth).includes(value);
+  };
+
+  /**
+   * 
+   * @param flag username or userid
+   * @returns boolean
+   */
+  const isCreator = (flag: string | number) => {
+    return (currUser.value.username || '') === flag || (currUser.value.id || '') === flag;
   };
 
   const setPermission = (value: string) => {
@@ -39,6 +50,7 @@ export default function usePermission() {
 
   return {
     hasPermission,
-    hasProjectAuth
+    hasProjectAuth,
+    isCreator
   };
 }

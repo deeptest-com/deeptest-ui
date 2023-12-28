@@ -1,5 +1,5 @@
 <template>
-  <div :class="{'indexlayout': true, 'wujie-indexlayout': isWujieEnv}">
+  <div id="indexlayout" :class="{'indexlayout': true, 'wujie-indexlayout': isWujieEnv}">
     <left
         v-if="!isWujieEnv"
         :collapsed="collapsed"

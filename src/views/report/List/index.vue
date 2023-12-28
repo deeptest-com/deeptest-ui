@@ -58,6 +58,7 @@ import ToolTipCell from '@/components/Table/tooltipCell.vue';
 import { DropdownActionMenu } from "@/components/DropDownMenu";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import useSharePage from "@/hooks/share";
+import usePermission from "@/composables/usePermission";
 
 
 defineProps({
@@ -73,6 +74,7 @@ defineProps({
 })
 const emits = defineEmits(['queryDetail', 'getList']);
 const { share }  = useSharePage();
+const { isCreator } = usePermission();
 const store = useStore<{ Report: StateType, ProjectGlobal: ProjectStateType }>();
 // 分页数据
 let pagination = computed<PaginationConfig>(() => store.state.Report.listResult.pagination);
@@ -145,6 +147,7 @@ const dropdownMenuList = [
     {
         label: '删除',
         action: (record) => handleDelete(record.id),
+        ifShow: record => isCreator(record.createUserId),
         auth: 'p-api-tr-del',
     },
 ];

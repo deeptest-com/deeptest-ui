@@ -200,13 +200,12 @@ const StoreModel: ModuleType = {
 
     async getUserRolesAuth({ commit }) {
       try {
-        commit('setRolesAuth', []);
-        // const result: any = await getUserRolesAuth();
-        // if (result.code === 0) {
-        //   commit('setRolesAuth', result.data);
-        //   return result.data;
-        // }
-        // return result;
+        const result: any = await getUserRolesAuth();
+        if (result.code === 0) {
+          commit('setRolesAuth', result.data);
+          return result.data;
+        }
+        return result;
       } catch(error) {
         return error;
       }

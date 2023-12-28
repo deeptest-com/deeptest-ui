@@ -191,7 +191,7 @@ interface DataType {
   address: string;
 }
 
-const { hasPermission } = usePermission();
+const { hasPermission, isCreator } = usePermission();
 const { share } = useSharePage();
 const store = useStore<{ Scenario: StateType, ProjectGlobal: ProjectStateType,Project }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -230,6 +230,9 @@ const dropdownMenuList = [
   {
     label: '删除',
     action: (record) => remove(record.id),
+    ifShow: (record) => {
+      return isCreator(record.createUserName || '');
+    },
     auth: 'p-api-ts-del',
   }
 ]

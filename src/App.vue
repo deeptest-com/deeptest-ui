@@ -30,6 +30,7 @@ import {Cache_Key_Agent_Local_Port, Cache_Key_Server_Url} from "@/utils/const";
 import {useRoute, useRouter} from "vue-router";
 import {useWujie} from "@/composables/useWujie";
 import CreateProjectModal from "@/components/CreateProjectModal/index.vue";
+import {getProjectLogo} from "@/components/CreateProjectModal";
 import fixMonacoEditor from "@/utils/fixMonacoEditor";
 import {WebSocket} from "@/services/websocket";
 import {getCache, setCache} from "@/utils/localCache";
@@ -88,6 +89,13 @@ export default defineComponent({
     const bus = window?.$wujie?.bus;
 
     const router = useRouter();
+
+    const setProjectLogo = (data: any[]) => {
+      return (data || []).map(e => ({
+        ...e,
+        logo: window.location.origin + getProjectLogo(e.logo)
+      }))
+    };
 
     onMounted(() => {
       setHtmlLang(locale.value);
@@ -175,8 +183,8 @@ export default defineComponent({
       bus.$emit(settings.sendMsgToLeyan, {
         type: 'fetchProjectSuccess',
         data: {
-          projects: projects.value,
-          recentProjects: recentProjects.value,
+          projects: setProjectLogo(projects.value),
+          recentProjects: setProjectLogo(recentProjects.value),
           currProject: currProject.value,
         }
       })
@@ -190,8 +198,8 @@ export default defineComponent({
           bus?.$emit(settings.sendMsgToLeyan, {
             type: 'fetchProjectSuccess',
             data: {
-              projects: projects.value,
-              recentProjects: recentProjects.value,
+              projects: setProjectLogo(projects.value),
+              recentProjects: setProjectLogo(recentProjects.value),
               currProject: currProject.value,
             }
           })

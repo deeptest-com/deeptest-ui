@@ -112,6 +112,7 @@ import {syncSourceMapToText} from "@/views/scenario/components/Design/config"
 import {notifyWarn} from "@/utils/notify";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import {getUuid} from "@/utils/string";
+import { setServeUrl } from "@/utils/url";
 const {
   isDebugChange,
   debugChangePreScript,
@@ -219,7 +220,7 @@ const send = async (e) => {
     data.environmentId = environmentId.value
     const callData = {
       execUuid: currUser.value.id + '@' + getUuid(),
-      serverUrl: process.env.VUE_APP_API_SERVER,
+      serverUrl: setServeUrl(process.env.VUE_APP_API_SERVER),
       token: await getToken(),
       data: {
         ...data,

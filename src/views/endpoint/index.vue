@@ -215,7 +215,7 @@ import {ChangedStatus,SourceType} from "@/utils/enum";
 import {useWujie} from "@/composables/useWujie";
 import usePermission from '@/composables/usePermission';
 
-const { hasPermission } = usePermission();
+const { hasPermission, isCreator } = usePermission();
 const {share} = useSharePage();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -341,6 +341,9 @@ const MenuList = [
   {
     auth: 'p-api-endpoint-del',
     label: '删除',
+    ifShow: (record) => {
+      return isCreator(record.createUser);
+    },
     action: (record: any) => del(record)
   },
   {

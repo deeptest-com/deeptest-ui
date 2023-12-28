@@ -110,7 +110,38 @@ import {notifyError} from "@/utils/notify";
 import useSharePage from "@/hooks/share";
 import usePermission from "@/composables/usePermission";
 
-const columns = [
+const { hasPermission, isCreator }  = usePermission();
+const { share } = useSharePage();
+const store = useStore<{ Plan: StateType, ProjectGlobal: ProjectStateType,Project }>();
+const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
+const nodeDataCategory = computed<any>(() => store.state.Plan.nodeDataCategory);
+const currPlan = computed<any>(() => store.state.Plan.currPlan);
+
+const list = computed<Plan[]>(() => store.state.Plan.listResult.list);
+let pagination = computed<PaginationConfig>(() => store.state.Plan.listResult.pagination);
+
+const userOptions = computed(() => {
+  if(!store.state.Project.userList) return [];
+  return store.state.Project.userList.map((item) => {
+    return {
+      label: item.name,
+      value: item.id,
+    };
+  });
+})
+const queryParams = reactive<any>({
+  keywords: '',
+  status: [],
+  adminId: [],
+});
+const loading = ref<boolean>(false);
+const createDrawerVisible = ref(false);
+const editDrawerVisible = ref(false); // 编辑弹窗控制visible
+const editTabActiveKey = ref('test-scenario'); // 打开编辑弹窗时,需要选中的tab
+const execReportVisible = ref(false);
+const envSelectVisible = ref(false); // 选择执行环境
+const searchInfo = reactive<any>({});
+  const columns = [
   {
     title: '编号',
     dataIndex: 'serialNumber',
@@ -188,41 +219,12 @@ const dropdownMenuList = [
   {
     label: '删除',
     action: (record) => remove(record.id),
+    ifShow: (record) => isCreator(record.createUserId),
     auth: 'p-api-tp-del',
   }
 ]
 
-const { hasPermission }  = usePermission();
-const { share } = useSharePage();
-const store = useStore<{ Plan: StateType, ProjectGlobal: ProjectStateType,Project }>();
-const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
-const nodeDataCategory = computed<any>(() => store.state.Plan.nodeDataCategory);
-const currPlan = computed<any>(() => store.state.Plan.currPlan);
 
-const list = computed<Plan[]>(() => store.state.Plan.listResult.list);
-let pagination = computed<PaginationConfig>(() => store.state.Plan.listResult.pagination);
-
-const userOptions = computed(() => {
-  if(!store.state.Project.userList) return [];
-  return store.state.Project.userList.map((item) => {
-    return {
-      label: item.name,
-      value: item.id,
-    };
-  });
-})
-const queryParams = reactive<any>({
-  keywords: '',
-  status: [],
-  adminId: [],
-});
-const loading = ref<boolean>(false);
-const createDrawerVisible = ref(false);
-const editDrawerVisible = ref(false); // 编辑弹窗控制visible
-const editTabActiveKey = ref('test-scenario'); // 打开编辑弹窗时,需要选中的tab
-const execReportVisible = ref(false);
-const envSelectVisible = ref(false); // 选择执行环境
-const searchInfo = reactive<any>({});
 // 筛选表单配置
 const filterSchemas = [
   {
