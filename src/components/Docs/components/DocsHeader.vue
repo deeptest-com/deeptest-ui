@@ -63,7 +63,13 @@
     </a-popover>
     <div class="space"/>
     <div class="action">
-      <a-dropdown class="version-info" style="width: 100px;" placement="bottomCenter">
+      <a-dropdown 
+        class="version-info" 
+        style="width: 100px;" 
+        placement="bottomRight" 
+        overlayClassName="version-drop-down-menu"
+        :getPopupContainer="triggerNode => triggerNode.parentNode"
+      >
         <a-button :size="'small'">
           文档版本：{{ currentVersion }}
           <DownOutlined/>
@@ -359,6 +365,12 @@ watch(() => {
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    position: relative;
+
+    :deep(.version-drop-down-menu) {
+      left: -40px !important;
+      top: 30px !important;
+    }
 
     .action-item {
       cursor: pointer;
