@@ -193,10 +193,20 @@ function changeVersion(docId) {
 .full-content {
   min-height: 100vh !important;
 
+  &.wujie-docs {
+    .doc-container {
+      height: calc(100vh - 106px);
+    }
+  }
+
   .doc-container {
     display: flex;
     top: 0;
     height: calc(100vh - 56px);
+
+    .left {
+      margin-left: 12px;
+    }
   }
 }
 
