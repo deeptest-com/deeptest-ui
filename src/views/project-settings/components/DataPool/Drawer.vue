@@ -73,7 +73,7 @@
 
 <script setup lang="ts">
 import {computed, defineEmits, defineProps, reactive, ref, watch} from 'vue';
-import {Form, notification} from 'ant-design-vue';
+import {Form, message} from 'ant-design-vue';
 import {useStore} from 'vuex';
 import {UploadOutlined} from '@ant-design/icons-vue';
 import HandsonTable from "@/components/sheet/handsontable.vue";
@@ -200,6 +200,7 @@ const onSubmit = async () => {
       action: formState.value.id > 0 ? 'update':'create'
     }).then(() => {
       // onClose();
+      message.success('保存成功')
     })
   }).catch(err => {
     console.log(err)

@@ -145,11 +145,11 @@ const dropMenuList = [
     label: 'Security',
     action: (record: any) => onOpenSecurity(record)
   },
-  {
-    auth: '',
-    label: '禁用',
-    action: (record: any) => onDisabled(record)
-  },
+  // {
+  //   auth: '',
+  //   label: '禁用',
+  //   action: (record: any) => onDisabled(record)
+  // },
   {
     auth: '',
     label: '复制',
