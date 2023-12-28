@@ -142,7 +142,10 @@ function genScriptLogs(msg) {
     }
 
     let desc = ''
-    if ((lines.length) > 0) desc = '，输出：'
+    if ((lines.length) > 0)
+      desc = '，输出：'
+    else
+      desc = '，输出为空。'
 
     lines.unshift(`<span class="normal">${results[1]}${desc}</span>`)
 
