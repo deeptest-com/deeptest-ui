@@ -49,7 +49,7 @@
                    :description="'请输入合适的关键词搜索文档'"/>
         </div>
       </template>
-      <div class="search">
+      <div class="search api-docs-search">
         <span class="left-divider"/>
         <SearchOutlined class="icon"/>
         <a-input class="search-input"
@@ -108,7 +108,8 @@ import {
   ref,
   defineProps,
   defineEmits,
-  computed, watch
+  computed, watch,
+  onMounted
 } from 'vue';
 import {
   DownOutlined,
@@ -202,13 +203,32 @@ function focus() {
   isFocus.value = true;
 }
 
-const visible = computed(() => {
-  return isFocus.value;
-})
+const visible = ref(false);
 
 function blur() {
   isFocus.value = false;
 }
+
+onMounted(() => {
+  document.addEventListener('click', (el: any) => {
+    const apiDocsSearchEl = document.querySelector('.api-docs-search');
+    const docsSearchPopover = document.querySelector('.deeptest-docs-search-popover');
+    if (keywords.value && apiDocsSearchEl && docsSearchPopover && !apiDocsSearchEl.contains(el.target) && !docsSearchPopover.contains(el.target)) {
+      visible.value = false;
+    }
+  })
+})
+
+watch(() => {
+  return [isFocus.value, keywords.value];
+}, val => {
+  const [inputFocus, searchKeyword] = val;
+  if (inputFocus || searchKeyword) {
+    visible.value = true;
+  } else {
+    visible.value = false;
+  }
+})
 
 
 watch(CtrlK, (v) => {
