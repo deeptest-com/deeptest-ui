@@ -2,7 +2,7 @@
   <div class="response-console-main" v-if="consoleLogs && consoleLogs.length">
     <div v-for="(item, index) in consoleLogs"
          :key="index"
-         :class="getResultClass(item.resultStatus)" class="item">
+         :class="getItemClass(item)" class="item">
 
       <span v-if="item.resultStatus===ResultStatus.Pass">
         <CheckCircleOutlined />
@@ -28,7 +28,8 @@
       </span>
       &nbsp;
       <span v-if="item.conditionEntityType === ConditionType.checkpoint">断言</span>
-      <span v-html="item.resultMsg"></span>
+
+      <span v-html="getResultMsg(item)" class="script-logs"></span>
 
       <template v-if="item.variables">
         ，
@@ -80,10 +81,97 @@ watch(responseData, (_newVal) => {
   }
 }, {deep: true, immediate: true})
 
+function getItemClass (item) {
+  const resultStatus = item.resultStatus
+
+  if (resultStatus===ResultStatus.Fail)
+    return 'fail'
+
+  if (item.conditionEntityType === 'script')
+    return ''
+
+  return resultStatus === ResultStatus.Pass? 'pass' : ''
+}
+
+const getResultMsg = (item) => {
+  console.log('getResultMsg')
+  const msg = item.resultMsg
+
+  if (item.conditionEntityType === 'script') {
+      return genScriptLogs(msg)
+  }
+
+  return msg
+}
+
+function genScriptLogs(msg) {
+  const results = msg.match(/(.+) JSON~(.*)~JSON/);
+
+  if (results?.length === 3) {
+    const lines = [] as string[]
+
+    if (results[2]) { // may be blank
+      const arr = JSON.parse(results[2])
+
+      arr.forEach((item, index) => {
+        if (item.indexOf('{') === 0) {
+          const obj = JSON.parse(item)
+          const cls = obj.success ? 'pass' : 'fail'
+          lines.push(`<div class="${cls} script-log child">${obj.msg}</div>`)
+
+        } else {
+          // Assertion Pass [Assertion 1].
+          // Assertion Failed [Assertion 1] AssertionError: check status code: expected 200 to equal 2001.
+          const assertResults = (item.trim()).match(/Assertion (.+) \[(.+)\](.*)\./);
+          console.log('assertResults', item, assertResults)
+
+          if (assertResults?.length === 4) { // chai assertion
+            const assertCls = assertResults[1].toLowerCase() === 'pass' ? 'pass' : 'fail'
+            const assertStatus = t(assertCls)
+            const checkpoint = assertResults[3] ? '，验证点' + assertResults[3].replace('AssertionError', '') : ''
+
+            lines.push(`<div class="${assertCls} script-log child">
+                        断言${assertResults[2]}${assertStatus}${checkpoint}。
+                      </div>`)
+
+          } else {
+            lines.push(`<div class="script-log child">${item}</div>`)
+          }
+        }
+      })
+    }
+
+    let desc = ''
+    if ((lines.length) > 0) desc = '，输出：'
+
+    lines.unshift(`<span class="normal">${results[1]}${desc}</span>`)
+
+    return lines.join('')
+  }
+}
+
 </script>
 
 <style lang="less">
 .response-console-main {
+  .item {
+      .script-logs {
+        .script-log {
+          &.child {
+            padding-left: 48px;
+          }
+          &.normal {
+            color: rgba(0, 0, 0, 0.65) !important;
+          }
+          &.pass {
+            color: #14945a;
+          }
+          &.fail {
+            color: #D8021A;
+          }
+        }
+      }
+    }
 }
 </style>
 
@@ -108,6 +196,10 @@ watch(responseData, (_newVal) => {
   .item {
     margin: 3px;
     padding: 5px;
+
+    .normal {
+      color: rgba(0, 0, 0, 0.65) !important;
+    }
     &.pass {
       color: #14945a;
     }
