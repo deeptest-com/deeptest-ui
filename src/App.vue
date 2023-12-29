@@ -116,22 +116,19 @@ export default defineComponent({
             if(msg?.data?.projectName){
               await setCache(settings.leyanProjectName, msg?.data?.projectName);
             }
+            if (currProject.value.id) {
+              bus?.$emit(settings.sendMsgToLeyan, {
+                type: 'fetchDynamicMenus',
+                data: {
+                  roleValue: (projects.value || []).find(pro => pro.id === currProject.value.id)?.roleName
+                }
+              })
+            }
             await router.push(msg?.data?.path);
           }
           if (msg?.type === 'logout') {
            await store.dispatch('User/logout');
           }
-
-          // if (msg?.type === 'fetchProjects') {
-          //   bus.$emit(settings.sendMsgToLeyan, {
-          //     type: 'fetchProjectSuccess',
-          //     data: {
-          //       projects: cloneDeep(projects.value),
-          //       recentProjects: cloneDeep(recentProjects.value),
-          //       currProject: cloneDeep(currProject.value),
-          //     }
-          //   })
-          // }
 
           if (msg?.type === 'changeProject') {
             await store.dispatch("ProjectGlobal/changeProject", msg?.data?.project?.id);
@@ -146,8 +143,6 @@ export default defineComponent({
           }
         })
         
-
-        // store.dispatch('ProjectGlobal/fetchProject');
         // 通知上层应用已经加载完毕
         bus?.$emit(settings.sendMsgToLeyan, {
           type: 'appMounted',
@@ -192,7 +187,7 @@ export default defineComponent({
 
     watch(() => {
       return currProject.value.id;
-    }, val => {
+    }, (val, oldv) => {
       if (val) {
         setTimeout(() => {
           bus?.$emit(settings.sendMsgToLeyan, {
@@ -201,6 +196,16 @@ export default defineComponent({
               projects: setProjectLogo(projects.value),
               recentProjects: setProjectLogo(recentProjects.value),
               currProject: currProject.value,
+            }
+          })
+        }, (600));
+      }
+      if (val && !oldv) {
+        setTimeout(() => {
+          bus?.$emit(settings.sendMsgToLeyan, {
+            type: 'fetchDynamicMenus',
+            data: {
+              roleValue: (projects.value || []).find(pro => pro.id === val)?.roleName
             }
           })
         }, (600));
