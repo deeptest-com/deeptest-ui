@@ -42,6 +42,7 @@ import {MoreOutlined} from "@ant-design/icons-vue";
 import {DropdownActionMenu} from "@/components/DropDownMenu/index";
 import usePermission from "@/composables/usePermission";
 import { useWujie } from "@/composables/useWujie";
+import settings from "@/config/settings";
 
 const router = useRouter();
 const store = useStore<{
@@ -55,6 +56,7 @@ const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currentUser = computed<any>(() => store.state.User.currentUser);
 const list = computed<any>(() => store.state.Home.queryResult.list);
 const bus = window?.$wujie?.bus;
+const projects = computed<any>(() => store.state.ProjectGlobal.projects);
 
 const filterList = computed(() => {
   const items = props?.activeKey === 0 ? list?.value?.projectList || [] : list?.value?.userProjectList || [];
@@ -186,8 +188,13 @@ async function goProject(item: any) {
   await store.dispatch("Global/getPermissionMenuList", { currProjectId: item.projectId });
 
   if (isWujieEnv && bus) {
-    bus.$emit('childRouterChanged', {
-      url: `${item.projectShortName}/workspace`
+
+    bus?.$emit(settings.sendMsgToLeyan, {
+      type: 'fetchDynamicMenus',
+      data: {
+        roleValue: (projects.value || []).find(pro => pro.id === item.projectId)?.roleName,
+        route: `${item.projectShortName}/workspace`,
+      }
     })
     return;
   }

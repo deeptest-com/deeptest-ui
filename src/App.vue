@@ -116,14 +116,6 @@ export default defineComponent({
             if(msg?.data?.projectName){
               await setCache(settings.leyanProjectName, msg?.data?.projectName);
             }
-            if (currProject.value.id) {
-              bus?.$emit(settings.sendMsgToLeyan, {
-                type: 'fetchDynamicMenus',
-                data: {
-                  roleValue: (projects.value || []).find(pro => pro.id === currProject.value.id)?.roleName
-                }
-              })
-            }
             await router.push(msg?.data?.path);
           }
           if (msg?.type === 'logout') {
@@ -136,6 +128,13 @@ export default defineComponent({
 
             // 更新左侧菜单以及按钮权限
             await store.dispatch("Global/getPermissionMenuList", { currProjectId: msg?.data?.project?.id });
+
+            bus?.$emit(settings.sendMsgToLeyan, {
+              type: 'fetchDynamicMenus',
+              data: {
+                roleValue: (projects.value || []).find(pro => pro.id === msg?.data?.project?.id)?.roleName
+              }
+            })
           }
 
           if (msg?.type === 'openCreateProject') {

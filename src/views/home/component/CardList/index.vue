@@ -87,6 +87,7 @@ import {getProjectLogo} from "@/components/CreateProjectModal";
 import {DropdownActionMenu} from "@/components/DropDownMenu/index";
 import usePermission from "@/composables/usePermission";
 import { useWujie } from "@/composables/useWujie";
+import settings from "@/config/settings";
 
 // 组件接收参数
 const props = defineProps({
@@ -108,6 +109,7 @@ const { hasProjectAuth } = usePermission();
 const { isWujieEnv } = useWujie();
 const ListItem = List.Item;
 const list = computed<any>(() => store.state.Home.queryResult.list);
+const projects = computed<any>(() => store.state.ProjectGlobal.projects);
 const bus = window?.$wujie?.bus;
 
 const filterList = computed(() => {
@@ -178,8 +180,12 @@ async function goProject(item: any) {
   // 更新左侧菜单以及按钮权限
   await store.dispatch("Global/getPermissionMenuList", { currProjectId: item.projectId });
   if (isWujieEnv && bus) {
-    bus.$emit('childRouterChanged', {
-      url: `${item.projectShortName}/workspace`
+    bus?.$emit(settings.sendMsgToLeyan, {
+      type: 'fetchDynamicMenus',
+      data: {
+        roleValue: (projects.value || []).find(pro => pro.id === item.projectId)?.roleName,
+        route: `${item.projectShortName}/workspace`
+      }
     })
     return;
   }
