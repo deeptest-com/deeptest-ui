@@ -10,19 +10,18 @@
           <exclamation-circle-outlined /> &nbsp;
         </template>
         <template v-else> <check-circle-outlined /> &nbsp; </template>
-        {{ invokeDetail.responseDefine }}
+        {{ invokeDetail.responseDefine.resultMsg || '' }}
       </span>
       </div>
     </template>
 
     <!-- 请求断言检查信息 -->
     <template v-if="invokeDetail.checkpoint && invokeDetail.checkpoint.length">
-      <div class="endpoint-expand-content" style="font-weight: bold;">断言结果2</div>
+      <div class="endpoint-expand-content" style="font-weight: bold;">断言结果</div>
       <div
         class="endpoint-expand-content"
         v-for="(item, index) in invokeDetail.checkpoint"
-        :key="index"
-      >
+        :key="index">
         <span :style="{color: resultMap[item.resultStatus] }">
           <template v-if="item.resultStatus === 'fail'">
             <exclamation-circle-outlined /> &nbsp;
@@ -32,6 +31,9 @@
         </span>
       </div>
     </template>
+
+    <div v-else class="endpoint-expand-content" style="font-weight: bold;">无断言</div>
+
     <!-- 请求未通过其他异常信息 -->
     <template v-if="invokeDetail.result">
       <div class="endpoint-expand-content">{{ invokeDetail.result || '' }}</div>

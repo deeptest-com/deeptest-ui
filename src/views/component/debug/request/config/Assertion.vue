@@ -164,7 +164,7 @@ const remove = (item) => {
   console.log('remove', item)
 
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
-    store.dispatch('Debug/removePostCondition', {
+    store.dispatch('Debug/removeCondition', {
       ...item,
       isForBenchmarkCase: false
     })

@@ -1,5 +1,5 @@
 <template>
-  <div class="post-condition-main">
+  <div class="condition-main">
     <div class="head">
       <a-row type="flex">
         <a-col flex="1">
@@ -265,7 +265,7 @@ onUnmounted(() => {
 </script>
 
 <style lang="less" scoped>
-.post-condition-main {
+.condition-main {
   height: 100%;
 
   .head {
