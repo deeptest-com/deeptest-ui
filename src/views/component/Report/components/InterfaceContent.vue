@@ -10,13 +10,14 @@
           <exclamation-circle-outlined /> &nbsp;
         </template>
         <template v-else> <check-circle-outlined /> &nbsp; </template>
-        {{ invokeDetail.responseDefine.resultMsg || '' }}
+        {{ invokeDetail.responseDefine }}
       </span>
       </div>
     </template>
+
     <!-- 请求断言检查信息 -->
     <template v-if="invokeDetail.checkpoint && invokeDetail.checkpoint.length">
-      <div class="endpoint-expand-content" style="font-weight: bold;">断言结果</div>
+      <div class="endpoint-expand-content" style="font-weight: bold;">断言结果2</div>
       <div
         class="endpoint-expand-content"
         v-for="(item, index) in invokeDetail.checkpoint"

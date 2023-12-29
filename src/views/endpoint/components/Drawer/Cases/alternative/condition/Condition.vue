@@ -165,8 +165,8 @@ const activeCondition = computed<any>(() => {
 
 const fullscreen = ref(false)
 
-const conditionType = ref(ConditionType.extractor)
-const conditionTypes = ref(getEnumSelectItems(ConditionType))
+const conditionType = ref(props.conditionSrc === ConditionSrc.PreCondition ? ConditionType.script : ConditionType.extractor)
+const conditionTypes = ref(getConditionTypes())
 
 const expand = (item) => {
   console.log('expand', item)
@@ -244,6 +244,18 @@ const openFullscreen = (item) => {
 const closeFullScreen = (item) => {
   console.log('closeFullScreen', item)
   fullscreen.value = false
+}
+
+function getConditionTypes() {
+  const items = getEnumSelectItems(ConditionType)
+
+  let ret = items.filter(item => ![ConditionType.checkpoint,ConditionType.cookie].includes(item.value))
+
+  if (props.conditionSrc === ConditionSrc.PreCondition) {
+    ret = ret.filter(item => [ConditionType.script,ConditionType.databaseOpt].includes(item.value))
+  }
+
+  return ret
 }
 
 onUnmounted(() => {
