@@ -150,8 +150,14 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const activeCondition = computed<any>(() => store.state.Debug.activeCondition);
 
-const conditions = computed<any>(() =>
-    store.state.Debug[props.conditionSrc === ConditionSrc.PreCondition ? 'preConditions' : 'postConditions'] || []);
+const conditions = computed<any>(() => {
+  if (props.conditionSrc === ConditionSrc.PreCondition)
+    return store.state.Debug.preConditions
+  else if (props.conditionSrc === ConditionSrc.PostCondition)
+    return store.state.Debug.postConditions
+
+  return []
+});
 
 const props = defineProps({
   conditionSrc: {
