@@ -78,7 +78,8 @@ import {
     updateCategory,
     removeCategory,
     moveCategory,
-    updateCategoryName
+    updateCategoryName,
+    copyCategory,
 } from "@/services/category";
 
 import {genNodeMap, getNodeMap} from "@/services/tree";
@@ -235,6 +236,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setIsMockChange:Mutation<StateType>;
         setDiffModalVisible:Mutation<StateType>;
         setListFunctionsByClass: Mutation<StateType>;
+
     };
     actions: {
         listEndpoint: Action<StateType, StateType>;
@@ -332,6 +334,9 @@ export interface ModuleType extends StoreModuleType<StateType> {
         importThirdPartyFunctions: Action<StateType, StateType>;
 
         updateServe: Action<StateType, StateType>;
+
+        cloneCategoryNode:Action<StateType, StateType>
+
     }
 }
 
@@ -1830,6 +1835,14 @@ const StoreModel: ModuleType = {
                 error.msg && message.error(error.msg);
                 return false;
             }
+        },
+        async cloneCategoryNode({dispatch,state}, targetId: number){
+            const response: any = await copyCategory(targetId);
+            if (response.code === 0) {
+                await dispatch('loadCategory');
+                return true;
+            }
+            return false
         }
     },
 };
