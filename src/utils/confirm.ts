@@ -11,9 +11,11 @@ export function confirmToDo(title, content, callback, confirmText?, cancelText?)
         okText: () => confirmText?confirmText:'确定',
         cancelText: () => cancelText?cancelText:'取消',
         onOk: async () => {
-            if (callback) callback()
+            if (callback) await callback()
+            Modal.destroyAll();
         },
         onCancel() {
+            Modal.destroyAll();
             console.log('Cancel');
         },
     });
@@ -29,8 +31,10 @@ export function confirmToDelete(title, content, callback, confirmText?, cancelTe
         cancelText: () => cancelText?cancelText:'取消',
         onOk: async () => {
             if (callback) callback()
+            Modal.destroyAll();
         },
         onCancel() {
+            Modal.destroyAll();
             console.log('Cancel');
         },
     });
@@ -45,8 +49,10 @@ export function confirmToSave(callback, title?, content?, confirmText?, cancelTe
         cancelText: () => cancelText?cancelText:'取消',
         onOk: async () => {
             if (callback) callback()
+            Modal.destroyAll();
         },
         onCancel() {
+            Modal.destroyAll();
             console.log('Cancel');
         },
     });
