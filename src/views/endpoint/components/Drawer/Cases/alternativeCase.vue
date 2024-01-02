@@ -160,6 +160,8 @@ import settings from "@/config/settings";
 
 const usedBy = UsedBy.CaseDebug
 provide('usedBy', usedBy)
+const isForBenchmarkCase = true
+provide('isForBenchmarkCase', isForBenchmarkCase)
 
 const {isDebugChange, resetDebugChange} = useIMLeaveTip();
 
@@ -223,11 +225,11 @@ const loadDebugData = async (data) => {
 
     store.dispatch('Debug/listCondition', {
       conditionSrc: ConditionSrc.PreCondition,
-      isForBenchmarkCase: true,
+      isForBenchmarkCase: isForBenchmarkCase,
     });
     store.dispatch('Debug/listCondition', {
       conditionSrc: ConditionSrc.PostCondition,
-      isForBenchmarkCase: true,
+      isForBenchmarkCase: isForBenchmarkCase,
     });
 
     await store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
@@ -404,7 +406,7 @@ const onReset = ({ type, params }: { type: string, params: any }) => {
           });
 
         } else {
-          store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
+          store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: isForBenchmarkCase });
         }
 
       }).catch(err => {

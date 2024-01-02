@@ -702,6 +702,7 @@ const StoreModel: ModuleType = {
         // conditions
         async listCondition({commit, state}, payload: {
             category: ConditionCategory, isForBenchmarkCase: boolean, conditionSrc: ConditionSrc }) {
+            console.log('listCondition in store')
 
             try {
                 const resp = await listConditions({
