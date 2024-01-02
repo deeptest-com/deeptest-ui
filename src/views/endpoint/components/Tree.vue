@@ -235,34 +235,6 @@ const tagModalMode = ref('new');
 
 // 删除分类
 async function deleteCategorie(node) {
-  /*
-  Modal.confirm({
-    title: () => '将级联删除分类下的所有子分类、接口定义、调试信息等',
-    icon: createVNode(ExclamationCircleOutlined),
-    content: () => '删除后无法恢复，请确认是否删除？',
-    okText: () => '确定',
-    okType: 'danger',
-    cancelText: () => '取消',
-    onOk: async () => {
-      const res = await store.dispatch('Endpoint/removeCategoryNode', {
-        id:node.id,
-        type:'endpoint',
-        projectId: await getCache(settings.currProjectId)
-      });
-      if (res) {
-        const isRoot = node.parentId === (treeDataCategory?.value || [])?.[0]?.id;
-        selectedKeys.value = isRoot ? [] : [node.parentId];
-        emit('select', isRoot ? null : node.parentId);//选中删除分类的父类
-        notifySuccess('删除成功');
-      } else {
-        notifyError('删除失败');
-      }
-    },
-    onCancel() {
-      console.log('Cancel');
-    },
-  });
-  */
 
   confirmToDelete('将级联删除分类下的所有子分类、接口定义、调试信息等','删除后无法恢复，请确认是否删除？',async () => {
       const res = await store.dispatch('Endpoint/removeCategoryNode', {
