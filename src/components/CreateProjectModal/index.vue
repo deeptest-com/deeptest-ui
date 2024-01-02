@@ -96,7 +96,7 @@ const props = defineProps<{
 const emits = defineEmits(["update:visible", "handleOk", "handleSuccess"]);
 const store = useStore<{ User: UserStateType; Project: ProjectStateType }>();
 const userListOptions = computed<SelectTypes["options"]>(
-    () => store.state.Project.userList
+    () => (store.state.Project.userList || []).filter(e => e.username !== 'admin')
 );
 const labelCol = {span: 6};
 const wrapperCol = {span: 14};
