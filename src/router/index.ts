@@ -21,7 +21,6 @@ import UserLayout from '@/layouts/UserLayout/index.vue';
 import BlankLayout from "@/layouts/BlankLayout.vue";
 import {useWujie} from "@/composables/useWujie";
 import {hideGlobalLoading, showGlobalLoading} from "@/utils/handleLoad";
-import {message} from "ant-design-vue";
 
 export const routes: RoutesDataItem[] = [
     {
@@ -234,7 +233,7 @@ router.onError(async (err) => {
       confirmButtonText: '重新加载'
     });
     if (swalresult.isConfirmed) {
-      window.location.reload();
+        isWujieEnv ? window.parent.location.reload() : window.location.reload();
     }
   }
 })
