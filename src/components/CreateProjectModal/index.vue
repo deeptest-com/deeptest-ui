@@ -87,6 +87,7 @@ import {SelectTypes} from "ant-design-vue/es/select";
 import {useStore} from "vuex";
 import {getProjectLogo, projectLogoList} from "./index";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import {useWujie} from "@/composables/useWujie";
 
 const useForm = Form.useForm;
 const props = defineProps<{
@@ -95,8 +96,9 @@ const props = defineProps<{
 }>();
 const emits = defineEmits(["update:visible", "handleOk", "handleSuccess"]);
 const store = useStore<{ User: UserStateType; Project: ProjectStateType }>();
+const { isInLeyanWujieContainer } = useWujie();
 const userListOptions = computed<SelectTypes["options"]>(
-    () => (store.state.Project.userList || []).filter(e => e.username !== 'admin')
+    () => (store.state.Project.userList || []).filter(e => isInLeyanWujieContainer ? e.username !== 'admin' : e.username !== '')
 );
 const labelCol = {span: 6};
 const wrapperCol = {span: 14};
