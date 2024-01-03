@@ -127,7 +127,7 @@ import {
   FullscreenOutlined } from '@ant-design/icons-vue';
 import draggable from 'vuedraggable'
 import Tips from "@/components/Tips/index.vue";
-import {ConditionType, UsedBy, ConditionSrc} from "@/utils/enum";
+import {ConditionType, UsedBy, ConditionSrc, ConditionCategory} from "@/utils/enum";
 import {EnvDataItem} from "@/views/project-settings/data";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
@@ -194,9 +194,11 @@ const expand = (item) => {
 
 const list = debounce(async () => {
   console.log('list in debug/request/config/Condition.vue', props.conditionSrc)
+
   await store.dispatch('Debug/listCondition', {
     conditionSrc: props.conditionSrc,
     isForBenchmarkCase: isForBenchmarkCase,
+    category: props.conditionSrc === ConditionSrc.PostCondition ? ConditionCategory.postCondition : '',
   })
 }, 300)
 

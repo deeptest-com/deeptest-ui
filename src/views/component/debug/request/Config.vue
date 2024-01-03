@@ -52,7 +52,7 @@
 <script setup lang="ts">
 import {computed, inject, ref, watch, onMounted,onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
-import {ConditionType, ConditionSrc, UsedBy} from "@/utils/enum";
+import {ConditionType, ConditionSrc, UsedBy, ConditionCategory} from "@/utils/enum";
 import {StateType as Debug} from "@/views/component/debug/store";
 
 import QueryParameters from "./config/QueryParameters.vue";
@@ -141,7 +141,8 @@ watch(() => { return debugData.value }, (val) => {
     });
     store.dispatch('Debug/listCondition', {
       conditionSrc: ConditionSrc.PostCondition,
-      isForBenchmarkCase: isForBenchmarkCase,
+      isForBenchmarkCase: ConditionCategory.postCondition,
+      category: ConditionCategory.postCondition,
     });
     store.dispatch('Debug/listAssertionCondition');
   }

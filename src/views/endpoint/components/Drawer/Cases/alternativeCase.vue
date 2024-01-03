@@ -129,7 +129,7 @@
 
 <script lang="ts" setup>
 import {computed, defineProps, provide, ref, watch, unref, onMounted, onUnmounted} from "vue";
-import {UsedBy, ConditionSrc} from "@/utils/enum";
+import {UsedBy, ConditionSrc, ConditionCategory} from "@/utils/enum";
 import {useStore} from "vuex";
 import cloneDeep from "lodash/cloneDeep";
 import { message, Modal } from "ant-design-vue";
@@ -230,6 +230,7 @@ const loadDebugData = async (data) => {
     store.dispatch('Debug/listCondition', {
       conditionSrc: ConditionSrc.PostCondition,
       isForBenchmarkCase: isForBenchmarkCase,
+      category: ConditionCategory.postCondition,
     });
 
     await store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
@@ -403,6 +404,7 @@ const onReset = ({ type, params }: { type: string, params: any }) => {
           store.dispatch('Debug/listCondition', {
             conditionSrc: ConditionSrc.PostCondition,
             isForBenchmarkCase: true,
+            category: ConditionCategory.postCondition,
           });
 
         } else {
@@ -492,19 +494,6 @@ onUnmounted(() => {
 const onClose = () => {
   execDrawerVisible.value = false;
 }
-
-// const handleOpen = () => {
-//   store.dispatch('Debug/listCondition', {
-//     conditionSrc: ConditionSrc.PreCondition,
-//     isForBenchmarkCase: true,
-//   });
-//   store.dispatch('Debug/listCondition', {
-//     conditionSrc: ConditionSrc.PostCondition,
-//     isForBenchmarkCase: true,
-//   });
-//
-//   store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
-// }
 
 </script>
 
