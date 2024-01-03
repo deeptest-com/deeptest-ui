@@ -18,10 +18,6 @@ export enum UsedBy {
     OpenAPIYaml = "openapi_yaml",
 }
 
-export enum UsedWith {
-    PostCondition = "post_condition",
-}
-
 export enum ProcessorInterfaceSrc {
     Define = "define",
     Case = "case",
@@ -173,6 +169,7 @@ export enum DataSrc {
 
 export enum ConditionCategory {
     result = 'result',
+    preCondition = 'preCondition',
     postCondition = 'postCondition',
     console = 'console',
     assert = 'assert'
@@ -184,9 +181,9 @@ export enum ConditionType {
     cookie = 'cookie',
     databaseOpt= 'databaseOpt'
 }
-export enum PreConditionType {
-    script = 'script',
-    databaseOpt= 'databaseOpt'
+export enum ConditionSrc {
+    PreCondition = "pre_condition",
+    PostCondition = "post_condition",
 }
 
 export enum ExtractorSrc {

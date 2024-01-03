@@ -2,7 +2,7 @@
   <div class="response-console-main" v-if="consoleLogs && consoleLogs.length">
     <div v-for="(item, index) in consoleLogs"
          :key="index"
-         :class="getResultClass(item.resultStatus)" class="item">
+         :class="getItemClass(item)" class="item">
 
       <span v-if="item.resultStatus===ResultStatus.Pass">
         <CheckCircleOutlined />
@@ -28,7 +28,8 @@
       </span>
       &nbsp;
       <span v-if="item.conditionEntityType === ConditionType.checkpoint">断言</span>
-      <span v-html="item.resultMsg"></span>
+
+      <span v-html="getResultMsg(item)" class="script-logs"></span>
 
       <template v-if="item.variables">
         ，
@@ -53,6 +54,7 @@ import IconSvg from "@/components/IconSvg";
 import Empty from "@/components/others/empty.vue";
 import {getResultClass} from "@/utils/dom";
 import {toJsonObj} from "@/utils/string";
+import {genScriptLogs} from "@/utils/console";
 
 const {t} = useI18n();
 
@@ -80,10 +82,51 @@ watch(responseData, (_newVal) => {
   }
 }, {deep: true, immediate: true})
 
+function getItemClass (item) {
+  const resultStatus = item.resultStatus
+
+  if (resultStatus===ResultStatus.Fail)
+    return 'fail'
+
+  if (item.conditionEntityType === 'script')
+    return ''
+
+  return resultStatus === ResultStatus.Pass? 'pass' : ''
+}
+
+const getResultMsg = (item) => {
+  console.log('getResultMsg')
+  const msg = item.resultMsg
+
+  if (item.conditionEntityType === 'script') {
+      return genScriptLogs(msg)
+  }
+
+  return msg
+}
+
 </script>
 
 <style lang="less">
 .response-console-main {
+  .item {
+      .script-logs {
+        .script-log {
+          &.child {
+            padding-left: 48px;
+          }
+          &.normal {
+            color: rgba(0, 0, 0, 0.65) !important;
+          }
+          &.pass {
+            color: #14945a;
+          }
+          &.fail {
+            color: #D8021A;
+          }
+        }
+      }
+    }
 }
 </style>
 
@@ -108,13 +151,15 @@ watch(responseData, (_newVal) => {
   .item {
     margin: 3px;
     padding: 5px;
+
+    .normal {
+      color: rgba(0, 0, 0, 0.65) !important;
+    }
     &.pass {
       color: #14945a;
-      background-color: #F1FAF4;
     }
     &.fail {
       color: #D8021A;
-      background-color: #FFECEE;
     }
   }
 }
