@@ -761,7 +761,9 @@ const StoreModel: ModuleType = {
                 } else {
                     await dispatch('listCondition', {
                         isForBenchmarkCase: payload.isForBenchmarkCase,
-                        conditionSrc: payload.conditionSrc });
+                        conditionSrc: payload.conditionSrc,
+                        category: payload.category,
+                    });
 
                     const conditions = payload.isForBenchmarkCase ?
                         (payload.src === ConditionSrc.PreCondition ? state.benchMarkCase.preConditions : state.benchMarkCase.postConditions) :
@@ -788,6 +790,7 @@ const StoreModel: ModuleType = {
                     dispatch('listCondition', {
                         isForBenchmarkCase: payload.isForBenchmarkCase,
                         conditionSrc: payload.conditionSrc,
+                        category: payload.category,
                     });
                 }
                 return true;
@@ -805,6 +808,7 @@ const StoreModel: ModuleType = {
                     dispatch('listCondition', {
                         isForBenchmarkCase: payload.isForBenchmarkCase,
                         conditionSrc: payload.conditionSrc,
+                        category: payload.category,
                     });
                 }
                 return true;

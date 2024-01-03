@@ -215,6 +215,7 @@ const create = () => {
     entityType: conditionType.value,
     isForBenchmarkCase: false,
     conditionSrc: props.conditionSrc,
+    category: props.conditionSrc === ConditionSrc.PostCondition ? ConditionCategory.postCondition : '',
   })
 }
 
@@ -224,10 +225,13 @@ const format = (item) => {
 }
 const disable = (item) => {
   console.log('disable', item)
+
+  item.category = props.conditionSrc === ConditionSrc.PostCondition ? ConditionCategory.postCondition : ''
   store.dispatch('Debug/disableCondition', item)
 }
 const remove = (item) => {
   item.conditionSrc = props.conditionSrc
+  item.category = props.conditionSrc === ConditionSrc.PostCondition ? ConditionCategory.postCondition : ''
   console.log('remove', item)
 
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
