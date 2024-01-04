@@ -14,7 +14,7 @@ import {
     getDbOpt,
     getExtractor,
     getInvocationAsInterface,
-    getInvocationLog,
+    getConsoleLog,
     getInvocationResult,
     getLastInvocationResp,
     getScript,
@@ -174,7 +174,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setRequest: Mutation<StateType>;
         setResponse: Mutation<StateType>;
         setResult: Mutation<StateType>;
-        setLog: Mutation<StateType>;
+        setConsoleLog: Mutation<StateType>;
 
         setInvocations: Mutation<StateType>;
         setServerId: Mutation<StateType>;
@@ -239,7 +239,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         listInvocation: Action<StateType, StateType>;
         getLastInvocationResp: Action<StateType, StateType>;
         getInvocationResult: Action<StateType, StateType>;
-        getInvocationLog: Action<StateType, StateType>;
+        getConsoleLog: Action<StateType, StateType>;
         getInvocationAsInterface: Action<StateType, StateType>;
         removeInvocation: Action<StateType, StateType>;
 
@@ -324,7 +324,7 @@ const StoreModel: ModuleType = {
         setResult(state, payload) {
             state.resultData = payload;
         },
-        setLog(state, payload) {
+        setConsoleLog(state, payload) {
             state.consoleData = payload;
         },
 
@@ -594,7 +594,7 @@ const StoreModel: ModuleType = {
             commit('setRequest', {});
             commit('setResponse', {});
             commit('setResult', []);
-            commit('setLog', []);
+            commit('setConsoleLog', []);
             commit('setInvocations', []);
         },
 
@@ -668,9 +668,9 @@ const StoreModel: ModuleType = {
             commit('setResult', response.data);
             return true;
         },
-        async getInvocationLog({commit, dispatch, state}, invokeId: number) {
-            const response = await getInvocationLog(invokeId);
-            commit('setLog', response.data);
+        async getConsoleLog({commit, dispatch, state}, invokeId: number) {
+            const response = await getConsoleLog(invokeId);
+            commit('setConsoleLog', response.data);
             return true;
         },
 
