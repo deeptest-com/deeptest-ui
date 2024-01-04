@@ -101,6 +101,9 @@ const DropdownList = defineComponent({
 })
 
 const ifShow = (actionItem: MenuItem, props) => {
+  if (!actionItem.ifShow) {
+    return false;
+  }
   if (typeof actionItem.ifShow === 'boolean') {
     return actionItem.ifShow;
   } 
@@ -131,7 +134,7 @@ export const DropdownActionMenu = defineComponent({
           )} */}
           {dropdownList.value.length > 0 && (
             <DropdownList 
-              list={dropdownList.value.filter(e => hasPermission(e.auth || '') && ifShow(e, props))} 
+              list={dropdownList.value.filter(e => hasPermission(e.auth || '') || ifShow(e, props))} 
               record={record.value} 
               v-slots={slots} />
           )}
