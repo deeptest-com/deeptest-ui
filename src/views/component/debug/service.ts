@@ -402,3 +402,10 @@ export async function saveResponseDefine(data): Promise<any> {
     });
 }
 
+export async function loadCurl(data): Promise<any> {
+    return request({
+        url: `/${apiPathInterface}/loadCurl`,
+        method: 'POST',
+        data: data,
+    });
+}

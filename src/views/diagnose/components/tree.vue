@@ -55,7 +55,10 @@
                             新建接口
                           </a-menu-item>
                           <a-menu-item v-if="nodeProps.dataRef.id !== -1" key="2" @click="edit(nodeProps)">
-                          {{'编辑' + (nodeProps.dataRef.type === 'interface' ? '接口' : '目录')}}
+                            {{'编辑' + (nodeProps.dataRef.type === 'interface' ? '接口' : '目录')}}
+                          </a-menu-item>
+                          <a-menu-item v-if="nodeProps.dataRef.type === 'interface'" key="copy_curl" @click="copyCurl(nodeProps)">
+                            复制为cURL
                           </a-menu-item>
                           <a-menu-item v-if="nodeProps.dataRef.id !== -1" key="3" @click="deleteNode(nodeProps.dataRef)">
                             {{'删除' + (nodeProps.dataRef.type === 'interface' ? '接口' : '目录')}}
@@ -134,13 +137,18 @@ import {confirmToDelete} from "@/utils/confirm";
 import debounce from "lodash.debounce";
 import InterfaceSelectionFromDefine from "@/views/component/InterfaceSelectionFromDefine/main.vue";
 import CurlImportModal from "./curl.vue";
-import {notifyError, notifySuccess} from "@/utils/notify";
+import {notifyError, notifySuccess, notifyWarn} from "@/utils/notify";
+import {loadCurl} from "@/views/component/debug/service";
+import {StateType as DebugStateType} from "@/views/component/debug/store";
+import {UsedBy} from "@/utils/enum";
 
-const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType, ProjectGlobal: ProjectStateType, ServeGlobal: ServeStateType }>();
+const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType,  Debug: DebugStateType,
+  ProjectGlobal: ProjectStateType, ServeGlobal: ServeStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const treeData = computed<any>(() => store.state.DiagnoseInterface.treeData);
 const treeDataMap = computed<any>(() => store.state.DiagnoseInterface.treeDataMap);
 const interfaceId = computed<any>(() => store.state.DiagnoseInterface.interfaceId);
+const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 
 const keywords = ref('');
 const replaceFields = {key: 'id'};
@@ -257,6 +265,24 @@ async function deleteNode(node) {
   confirmToDelete(title, context, () => {
     store.dispatch('DiagnoseInterface/removeInterface', {id: node.id, type: node.type});
   })
+}
+async function copyCurl(node) {
+  console.log('copyCurl', node)
+  const clipboard = navigator.clipboard;
+  if (!clipboard) {
+    notifyWarn('您的浏览器不支持复制内容到剪贴板。');
+    return
+  }
+
+  const resp = await loadCurl({
+    diagnoseId: node.dataRef.id,
+    environmentId: environmentId.value,
+    usedBy: UsedBy.DiagnoseDebug,
+  })
+  if (resp.code == 0) {
+    navigator.clipboard.writeText(resp.data)
+    notifySuccess('已赋值cURL命令到剪贴板。');
+  }
 }
 
 async function handleModalOk(model) {
@@ -409,7 +435,7 @@ watch(() => {
     }
   }
 
-  
+
   .nodata-tip {
     margin-left: 0 !important;
   }
