@@ -14,7 +14,7 @@ export default function usePermission() {
     return store.state.User.currentUser;
   });
 
-  const hasPermission = (value: string) => {
+  const hasPermission = (value: any) => {
     if (!value) {
       return true;
     }
