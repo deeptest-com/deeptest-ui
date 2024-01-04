@@ -81,7 +81,7 @@ import {computed, defineProps, inject, onBeforeUnmount, onMounted, reactive, wat
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import {Form, notification} from 'ant-design-vue';
-import {CheckpointType, ComparisonOperator, ExtractorSrc, ExtractorType, UsedBy} from "@/utils/enum";
+import {CheckpointType, ComparisonOperator, ConditionSrc, ExtractorSrc, ExtractorType, UsedBy} from "@/utils/enum";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {getEnumSelectItems} from "@/utils/comm";
 import {NotificationKeyCommon} from "@/utils/const";
@@ -92,10 +92,12 @@ import {notifyError, notifySuccess} from "@/utils/notify";
 import {listDbConn} from "@/views/project-settings/service";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 
-const useForm = Form.useForm;
-const usedBy = inject('usedBy') as UsedBy
-const isForBenchmarkCase = inject('isForBenchmarkCase');
 const {t} = useI18n();
+const useForm = Form.useForm;
+
+const usedBy = inject('usedBy') as UsedBy
+const conditionSrc = inject('conditionSrc') as ConditionSrc
+const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
 
 const store = useStore<{ Debug: Debug, ProjectGlobal }>();
 
@@ -105,9 +107,15 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 const responseData = computed<any>(() => store.state.Debug.responseData);
 const dbConns = computed<any>(() => store.state.Debug.dbConns);
 
-const {postConditionsDataObj} = useIMLeaveTip();
+const {preConditionsDataObj, postConditionsDataObj} = useIMLeaveTip();
 const model = computed<any>(() => {
-  return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
+  if (conditionSrc === ConditionSrc.PreCondition)
+    return preConditionsDataObj.value?.[props?.condition?.entityId] || {};
+
+  else if (conditionSrc === ConditionSrc.PostCondition)
+    return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
+
+  return {}
 });
 
 const checkConn = async (rule: any, value: number) => {
@@ -139,7 +147,7 @@ const props = defineProps({
 
 const load = () => {
   console.log('load', props.condition)
-  store.dispatch('Debug/getDbOpt', props.condition)
+  store.dispatch('Debug/getDbOpt', Object.assign({conditionSrc}, props.condition))
 }
 load()
 
@@ -157,6 +165,8 @@ const save = () => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
     model.value.projectId = debugData.value.projectId
+    model.value.conditionSrc = conditionSrc
+    model.value.isForBenchmarkCase = isForBenchmarkCase
 
     store.dispatch('Debug/saveDbOpt', model.value).then((result) => {
       if (result) {

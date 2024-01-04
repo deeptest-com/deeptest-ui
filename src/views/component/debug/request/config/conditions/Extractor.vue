@@ -104,7 +104,7 @@ import {computed, defineProps, inject, onBeforeUnmount, onMounted, reactive, wat
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import {Form, notification} from 'ant-design-vue';
-import {CheckpointType, ComparisonOperator, ExtractorSrc, ExtractorType, UsedBy} from "@/utils/enum";
+import {CheckpointType, ComparisonOperator, ConditionSrc, ExtractorSrc, ExtractorType, UsedBy} from "@/utils/enum";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {getEnumSelectItems} from "@/utils/comm";
 import {NotificationKeyCommon} from "@/utils/const";
@@ -113,9 +113,12 @@ import settings from "@/config/settings";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 const useForm = Form.useForm;
-const usedBy = inject('usedBy') as UsedBy
-const isForBenchmarkCase = inject('isForBenchmarkCase');
 const {t} = useI18n();
+
+const usedBy = inject('usedBy') as UsedBy
+const conditionSrc = inject('conditionSrc') as ConditionSrc
+const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
+
 const props = defineProps({
   condition: {
     type: Object,
@@ -203,6 +206,9 @@ const save = (item) => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
     model.value.projectId = debugData.value.projectId
+    model.value.conditionSrc = conditionSrc
+    model.value.isForBenchmarkCase = isForBenchmarkCase
+
     store.dispatch('Debug/saveExtractor', model.value).then((result) => {
       if (result) {
         notifySuccess(`保存成功`);

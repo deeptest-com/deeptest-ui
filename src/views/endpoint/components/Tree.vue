@@ -82,6 +82,7 @@ import settings from "@/config/settings";
 import { getUrlKey } from '@/utils/url';
 import {notifyError, notifySuccess, notifyWarn} from "@/utils/notify";
 import { DropdownActionMenu } from '@/components/DropDownMenu';
+import {confirmToDo} from "@/utils/confirm";
 
 const store = useStore<{ Endpoint: EndpointStateType, ProjectGlobal: ProjectStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -139,6 +140,10 @@ const ContextMenuList = [
   {
     label: '新建子分类',
     action: (_record: any) => newCategorie(_record),
+  },
+  {
+    label: '克隆',
+    action: (_record: any) => cloneCategorie(_record),
   },
   {
     label: '删除分类',
@@ -264,6 +269,17 @@ async function deleteCategorie(node) {
     },
   });
 
+}
+
+async function cloneCategorie(node){
+  confirmToDo(`确认复制目录【`+node.name+`】？`, '该目录下的子目录和接口定义将被复制', async () => {
+    const res = await store.dispatch('Endpoint/cloneCategoryNode',node.id)
+  if (res) {
+    notifySuccess('复制成功，稍后刷新页面查询复制结果');
+  }else {
+    notifyError('复制失败');
+  }
+  })
 }
 
 // 新建分类

@@ -180,7 +180,6 @@ const showBaseUrl = () => {
   return !notShow
 }
 
-
 const isShowSync = computed(() => {
   const ret = usedBy === UsedBy.ScenarioDebug && (
       debugData.value.processorInterfaceSrc !== ProcessorInterfaceSrc.Custom  &&
@@ -197,18 +196,11 @@ watch(debugData, (newVal) => {
   if (usedBy === UsedBy.InterfaceDebug || usedBy === UsedBy.CaseDebug) {
     debugData.value.url = debugData?.value.url || endpointDetail.value?.path || ''
   }
-    // debugData.value.baseUrl = currServe.value.url;
-  //debugData.value.serveId = currServe.value.serveId;
 }, {immediate: true, deep: true});
-
-const serverId = computed(() => {
-  return store.state.Debug.currServe.environmentId || 0
-});
 
 function changeServer(id) {
   store.dispatch('Debug/changeServer', { serverId: id,serveId:debugData.value.serveId, requestEnvVars: false })
 }
-
 
 const send = async (e) => {
   const data = prepareDataForRequest(debugData.value)

@@ -73,21 +73,22 @@ import MonacoEditor from "@/components/Editor/MonacoEditor.vue";
 import {MonacoOptions} from "@/utils/const";
 
 import {parseHtml, parseJson, testExpr} from "@/views/component/debug/service";
-import {ExtractorSrc, ExtractorType, UsedBy} from "@/utils/enum";
+import {ConditionSrc, ExtractorSrc, ExtractorType, UsedBy} from "@/utils/enum";
 import {StateType as Debug} from "@/views/component/debug/store";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import ResponseExtractor from "@/components/Editor/ResponseExtractor.vue";
 import GenerateFromResponse from "@/views/endpoint/components/Drawer/Define/GenerateFromResponse/index.vue";
 
-
-const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 const store = useStore<{  Debug: Debug }>();
-
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const responseData = computed<any>(() => store.state.Debug.responseData);
+
+const usedBy = inject('usedBy') as UsedBy
+const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
+
 const language = ref(responseData.value.contentLang)
 const content = ref(responseData.value.content)
 
@@ -103,7 +104,6 @@ const responseExtractorVisible = ref(false)
 const expr = ref('')
 const exprType = ref('')
 const result = ref('')
-
 
 const responseDataContent = computed(() => {
     return responseData.value.content;
@@ -152,6 +152,8 @@ const responseExtractorFinish = (conf) => {
   const data = {
     conf,
     info: debugInfo.value,
+    conditionSrc: ConditionSrc.PostCondition,
+    isForBenchmarkCase: isForBenchmarkCase,
   } as any
 
   store.dispatch('Debug/quickCreateExtractor', data).then((result) => {

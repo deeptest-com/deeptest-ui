@@ -116,7 +116,7 @@ function useCaseExecution(): CaseExecution {
                 item.respContent = JSON.stringify({ ...item.response, cookies: item.response.cookies || [] });
                 item.reqContent = JSON.stringify({ ...item.request.debugData, ...item.request });
                 item.detail = JSON.stringify({
-                    responseDefine: (item.response.consoleLogs || []).find(e => e.conditionEntityType === ""),
+                    // responseDefine: (item.response.consoleLogs || []).find(e => e.conditionEntityType === ""),
                     checkpoint: (item.response.consoleLogs || []).filter(e => e.conditionEntityType === ConditionType.checkpoint),
                 });
                 item.resultStatus = item.status;
