@@ -31,13 +31,16 @@
           <div @click="addSnippet('send_request_get')" class="dp-link-primary">发送GET请求</div>
           <div @click="addSnippet('send_request_post')" class="dp-link-primary">发送POST请求</div>
 
-          <div @click="addSnippet('set_mock_resp_code')" class="dp-link-primary">设置响应码</div>
-          <div @click="addSnippet('set_mock_resp_field')" class="dp-link-primary">修改JSON响应对象</div>
-          <div @click="addSnippet('set_mock_resp_text')" class="dp-link-primary">修改字符串响应内容</div>
+          <template v-if="conditionSrc==='post_condition'">
+            <div @click="addSnippet('set_mock_resp_code')" class="dp-link-primary">设置响应码</div>
+            <div @click="addSnippet('set_mock_resp_field')" class="dp-link-primary">修改JSON响应对象</div>
+            <div @click="addSnippet('set_mock_resp_text')" class="dp-link-primary">修改字符串响应内容</div>
 
-          <div @click="addSnippet('assert_resp_status_Code')" class="dp-link-primary">断言响应状态码为200</div>
-          <div @click="addSnippet('assert_resp_json_field')" class="dp-link-primary">断言JSON响应字段取值</div>
-          <div @click="addSnippet('assert_resp_content_contain')" class="dp-link-primary">断言HTML响应内容包含</div>
+            <div @click="addSnippet('assert_resp_status_Code')" class="dp-link-primary">断言响应状态码为200</div>
+            <div @click="addSnippet('assert_resp_json_field')" class="dp-link-primary">断言JSON响应字段取值</div>
+            <div @click="addSnippet('assert_resp_content_contain')" class="dp-link-primary">断言HTML响应内容包含</div>
+          </template>
+
         </div>
 
         <div class="title">
@@ -61,11 +64,11 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, inject, onBeforeUnmount, onMounted, reactive, ref, watch,onUnmounted} from "vue";
+import {computed, defineProps, inject, onBeforeUnmount, onMounted, reactive, ref, watch} from "vue";
 import {Form} from 'ant-design-vue';
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import {ConditionType, UsedBy} from "@/utils/enum";
+import {ConditionSrc, UsedBy} from "@/utils/enum";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {StateType as Snippet} from "@/store/snippet";
@@ -80,15 +83,24 @@ import {StateType as ProjectStateType} from "@/store/project";
 import cloneDeep from "lodash/cloneDeep";
 
 const useForm = Form.useForm;
+
 const usedBy = inject('usedBy') as UsedBy
-const isForBenchmarkCase = inject('isForBenchmarkCase');
+const conditionSrc = inject('conditionSrc') as ConditionSrc
+const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
+
 const {t} = useI18n();
 const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet: Snippet }>();
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 
-const {postConditionsDataObj, debugData, debugInfo} = useIMLeaveTip();
+const {preConditionsDataObj, postConditionsDataObj, debugData, debugInfo} = useIMLeaveTip();
 const model = computed<any>(() => {
-  return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
+  if (conditionSrc === ConditionSrc.PreCondition)
+    return preConditionsDataObj.value?.[props?.condition?.entityId] || {};
+
+  else if (conditionSrc === ConditionSrc.PostCondition)
+    return postConditionsDataObj.value?.[props?.condition?.entityId] || {};
+
+  return {}
 });
 
 onMounted(() => {
@@ -112,7 +124,8 @@ const props = defineProps({
 
 const load = () => {
   console.log('load script ...', props.condition)
-  store.dispatch('Debug/getScript', props.condition)
+
+  store.dispatch('Debug/getScript', Object.assign({conditionSrc}, props.condition))
   store.dispatch('Snippet/listJslibNames')
 }
 
@@ -133,9 +146,12 @@ const editorOptions = ref(Object.assign({
 ))
 
 const addSnippet = (snippetName) => {
-  store.dispatch('Debug/addSnippetForPost', {
-    name:snippetName,
-    data:model,
+  console.log('addSnippet')
+
+  store.dispatch('Debug/addSnippet', {
+    name: snippetName,
+    data: model,
+    conditionSrc: conditionSrc,
   })
 }
 const editorChange = (newScriptCode) => {
@@ -161,6 +177,8 @@ const save = (item) => {
   data.debugInterfaceId = debugInfo.value.debugInterfaceId
   data.endpointInterfaceId = debugInfo.value.endpointInterfaceId
   data.projectId = debugData.value.projectId
+  data.conditionSrc = conditionSrc
+  model.value.isForBenchmarkCase = isForBenchmarkCase
 
   store.dispatch('Debug/saveScript', data).then((result) => {
     if (result) {

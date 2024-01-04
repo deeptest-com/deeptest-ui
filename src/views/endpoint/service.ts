@@ -608,3 +608,11 @@ export async function importThirdPartyFunctions(data: any) {
         data
     })
 }
+
+export async function getThirdPartyFunctions(data: any) {
+    return request({
+        url: '/endpoint/getThirdPartyFunctions',
+        method: 'POST',
+        data
+    })
+}

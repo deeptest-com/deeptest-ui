@@ -14,9 +14,9 @@
         <TooltipCell :text="endpointData.name || ''" />
       </div>
     </div>
-   
+
     <div class="endpoint-code" v-if="endpointData.resultStatus !== 'loading'">
-      状态码: &nbsp; 
+      状态码: &nbsp;
       <span :style="{ color: `${responseCodeColorMap[resContent.statusCode]}` }">{{ resContent.statusCode }}</span>
     </div>
 

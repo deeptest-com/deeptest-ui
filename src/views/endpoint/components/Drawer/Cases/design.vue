@@ -46,6 +46,7 @@ import settings from "@/config/settings";
 import {Endpoint} from "@/views/endpoint/data";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 provide('usedBy', UsedBy.CaseDebug)
+provide('isForBenchmarkCase', false)
 const usedBy = UsedBy.CaseDebug
 
 const store = useStore<{ Debug: Debug, Endpoint: EndpointStateType, DiagnoseInterface: DiagnoseInterfaceStateType }>();

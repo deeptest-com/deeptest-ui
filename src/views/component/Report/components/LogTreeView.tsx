@@ -7,7 +7,6 @@ import InterfaceContent from "./InterfaceContent.vue";
 import AssertionContent from "./AssertionContent.vue";
 import CustomCodeContent from "./CustomCodeContent.vue";
 
-import LogContent from "./LogContent.vue";
 import {showArrowScenarioType,} from "@/views/scenario/components/Design/config";
 
 export default defineComponent({
