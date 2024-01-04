@@ -14,9 +14,12 @@ export default function usePermission() {
     return store.state.User.currentUser;
   });
 
-  const hasPermission = (value: string | unknown) => {
+  const hasPermission = (value: string) => {
     if (!value) {
       return true;
+    }
+    if (value.includes('p-project')) {
+      return false;
     }
     if (unref(permissionMenuList).length === 0) {
       return true;

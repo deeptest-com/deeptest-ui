@@ -85,32 +85,30 @@ const props = defineProps({
   },
 });
 
-const dropDownList = computed(() => {
- return [{
-    label: '申请加入',
-    action: (record) => emit("join", record),
-    auth: 'p-project-apply',
-    ifShow: (record) => record.accessible === 0,
-  },
-  {
-    label: '编辑',
-    action: (record) => emit("edit", record),
-    auth: 'p-project-edit',
-    ifShow: (record) => record.accessible === 1,
-  },
-  {
-    label: '删除',
-    action: (record) => emit("delete", record),
-    auth: 'p-project-del',
-    ifShow: (record) => record.accessible === 1,
-  },
-  {
-    label: '退出项目',
-    action: (record) => emit("exit", record),
-    auth: 'p-project-exit',
-    ifShow: (record) => record.accessible === 1,
-  }].filter(e => hasProjectAuth(e.auth));
-})
+const dropDownList = [{
+  label: '申请加入',
+  action: (record) => emit("join", record),
+  auth: 'p-project-apply',
+  ifShow: (record) => hasProjectAuth('p-project-apply') && record.accessible === 0,
+},
+{
+  label: '编辑',
+  action: (record) => emit("edit", record),
+  auth: 'p-project-edit',
+  ifShow: (record) => hasProjectAuth('p-project-edit') && record.accessible === 1,
+},
+{
+  label: '删除',
+  action: (record) => emit("delete", record),
+  auth: 'p-project-del',
+  ifShow: (record) => hasProjectAuth('p-project-del') && record.accessible === 1,
+},
+{
+  label: '退出项目',
+  action: (record) => emit("exit", record),
+  auth: 'p-project-exit',
+  ifShow: (record) => hasProjectAuth('p-project-exit') && record.accessible === 1,
+}]
 
 
 //暴露内部方法
