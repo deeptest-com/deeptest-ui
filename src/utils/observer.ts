@@ -2,9 +2,10 @@ import settings from "@/config/settings";
 
 // 监听 modal，drawer的显示与隐藏
 export const observer = new MutationObserver(mutationList => {
-  const modalRootEl: any = document.querySelector('.ant-modal-wrap');
+  const modalRootEl: any = document.querySelectorAll('.ant-modal-wrap');
   const drawerRootEl: any = document.querySelector('.ant-drawer');
-  if ((modalRootEl && modalRootEl.style.display !== 'none') || drawerRootEl) {
+  const findVisibleModal = [...modalRootEl || []].find(e => e.style.display !== 'none');
+  if (findVisibleModal || drawerRootEl) {
     // modal 显示
     window?.$wujie?.bus.$emit(settings.sendMsgToLeyan, {
       type: 'openModalOrDrawerEl'
