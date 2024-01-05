@@ -7,7 +7,7 @@ import { MenuItem, Recordable } from "./type";
 
 /**
  * props定义
- * 
+ *
  */
 const DropdownMenuProps = {
   dropdownList: {
@@ -42,6 +42,10 @@ const MenuItem = defineComponent({
     },
     record: {
       type: Object,
+    },
+    children: {
+      type: Array,
+      required: false,
     }
   },
   setup(props, ctx) {
@@ -57,6 +61,12 @@ const MenuItem = defineComponent({
       return permissionButtonMap.value[PermissionButtonType[`${props.auth}`]];
     });
 
+    const hasMoreThanOneChildren = computed(() => {
+      console.log('hasMoreThanOneChildren')
+      const len = props.children?.length
+      return len && len > 1
+    });
+
     const defaultTip = '暂无权限，请联系管理员';
 
     const handleClick = e => {
@@ -67,13 +77,27 @@ const MenuItem = defineComponent({
     };
 
     return () => {
-      return (
-        <a-menu-item class={{ 'lyapi-drop-menu-item': true, 'has-no-permission': !hasPermission.value }} onClick={e => handleClick(e)}>
-          <a-tooltip title={hasPermission.value ? null : (props.tip || defaultTip)} color="#1677ff">
-            {props.label}
-          </a-tooltip>
-        </a-menu-item>
-      )
+      if (!hasMoreThanOneChildren.value) {
+        return (
+          <a-menu-item class={{ 'lyapi-drop-menu-item': true, 'has-no-permission': !hasPermission.value }}
+                       onClick={e => handleClick(e)}>
+            <a-tooltip title={hasPermission.value ? null : (props.tip || defaultTip)} color="#1677ff">
+              {props.label}
+            </a-tooltip>
+          </a-menu-item>
+        )
+      } else {
+        return (
+          <a-sub-menu title={props.label} class={{'dp-action-submenu': true}}>
+            {
+              props.children?.map((e: any, index) => (
+                <MenuItem key={index} {...e} record={props.record} />
+              ))
+            }
+          </a-sub-menu>
+        )
+      }
+
     }
   },
 })
@@ -106,7 +130,6 @@ const DropdownList = defineComponent({
     }
   },
   setup(props, { slots }) {
-
     const vslots = {
       default: () => {
         return slots?.default?.() ||  <MoreOutlined />
@@ -127,7 +150,7 @@ const DropdownList = defineComponent({
     return () => {
       return (
         <a-dropdown v-slots={vslots} />
-      ) 
+      )
     };
   },
 })
@@ -135,7 +158,7 @@ const DropdownList = defineComponent({
 const ifShow = (actionItem: MenuItem, props) => {
   if (typeof actionItem.ifShow === 'boolean') {
     return actionItem.ifShow;
-  } 
+  }
   if (typeof actionItem.ifShow === 'function') {
     return actionItem.ifShow(props.record);
   }
@@ -151,7 +174,6 @@ export const DropdownActionMenu = defineComponent({
   setup(props, { slots }) {
     const { dropdownList, actionList, record } = toRefs(props);
 
-    
     return () => {
       return (
         <div class="drop-down-action-wrap">

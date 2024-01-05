@@ -69,10 +69,11 @@
                        :scroll="{ x: '1240px' || true }"
                        :columns="columns"
                        :data-source="list">
+
                 <template #colTitle="{record}">
                   <div class="customTitleColRender">
                     <div class="notice-icon">
-                      <a-tooltip v-if="record.changedStatus > ChangedStatus.NoChanged" :overlayClassName="'diff-custom-tooltip'">       
+                      <a-tooltip v-if="record.changedStatus > ChangedStatus.NoChanged" :overlayClassName="'diff-custom-tooltip'">
                         <template #title>
                         <span>{{record.changedStatus == ChangedStatus.Changed?'待处理':'已处理'}}，{{record.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a @click="showDiff(record.id)">查看详情</a></span>
                         </template>
@@ -110,6 +111,7 @@
                     />
                   </div>
                 </template>
+
                 <template #colServe="{record}">
                   <div class="customServeColRender">
                     <EditAndShowSelect
@@ -124,14 +126,17 @@
                     {{ username(record.createUser) }}
                   </div>
                 </template>
+
                 <template #colUpdateUser="{record}">
                   <div class="customTagsColRender">
                     {{ username(record.updateUser) }}
                   </div>
                 </template>
+
                 <template #updatedAt="{ record, column }">
                   <TooltipCell :text="record.updatedAt" :width="column.width"/>
                 </template>
+
                 <template #colPath="{text, record}">
                   <div class="customPathColRender">
                     <a-tag :color="getMethodColor(method)" v-for="(method, index) in (record.methods)" :key="index">
@@ -148,9 +153,11 @@
                     <span class="path-col" v-else> --- </span>
                   </div>
                 </template>
+
                 <template #action="{record}">
-                  <DropdownActionMenu :dropdownList="MenuList" :record="record"/>
+                  <DropdownActionMenu :dropdownList="getMenuItems(record)" :record="record"/>
                 </template>
+
               </a-table>
             </template>
           </EmptyCom>
@@ -226,7 +233,7 @@ import TooltipCell from '@/components/Table/tooltipCell.vue';
 import {DropdownActionMenu} from '@/components/DropDownMenu/index';
 
 import {getMethodColor} from '@/utils/interface';
-import {notifyError, notifySuccess} from "@/utils/notify";
+import {notifyError, notifySuccess, notifyWarn} from "@/utils/notify";
 import {equalObjectByLodash} from "@/utils/object";
 import useSharePage from '@/hooks/share';
 import Swal from "sweetalert2";
@@ -234,13 +241,15 @@ import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import Diff from "./components/Drawer/Define/Diff/index.vue";
-import {ChangedStatus,SourceType} from "@/utils/enum";
+import {ChangedStatus, SourceType, UsedBy} from "@/utils/enum";
+import {loadCurl} from "@/views/component/debug/service";
 
 
 const {share} = useSharePage();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
+const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 
 const list = computed<Endpoint[]>(() => store.state.Endpoint.listResult.list);
 let pagination = computed<PaginationConfig>(() => store.state.Endpoint.listResult.pagination);
@@ -320,33 +329,71 @@ const columns = [
     slots: {customRender: 'action'},
   },
 ];
-const MenuList = [
-  {
-    key: '1',
-    auth: 'ENDPOINT-COPY',
-    label: '克隆',
-    action: (record: any) => clone(record)
-  },
-  {
-    key: '2',
-    auth: '',
-    label: '分享链接',
-    action: (record: any) => share(record, 'IM')
-  },
+const getMenuItems = (record) => {
+  const items = [
+    {
+      key: '1',
+      auth: 'ENDPOINT-COPY',
+      label: '克隆',
+      action: (record: any) => clone(record)
+    },
+    {
+      key: '2',
+      auth: '',
+      label: '分享链接',
+      action: (record: any) => share(record, 'IM')
+    },
+    {
+      key: '3',
+      auth: 'ENDPOINT-DELETEE',
+      label: '删除',
+      action: (record: any) => del(record)
+    },
+    {
+      key: '4',
+      auth: 'ENDPOINT-OUTDATED',
+      label: '过期',
+      action: (record: any) => disabled(record)
+    },
+  ]
 
-  {
-    key: '3',
-    auth: 'ENDPOINT-DELETEE',
-    label: '删除',
-    action: (record: any) => del(record)
-  },
-  {
-    key: '4',
-    auth: 'ENDPOINT-OUTDATED',
-    label: '过期',
-    action: (record: any) => disabled(record)
-  },
-]
+  let copyCurlItem = {} as any
+
+  if (!record.methods || record.methods.length === 0) {
+    return items
+  }
+
+  if (record.methods.length === 1) {
+    const method = record.methods[0]
+    copyCurlItem = {
+      key: 'copyCurl',
+      auth: '',
+      label: `复制${method}为cURL`,
+      action: (record: any) => copyCurl(record, method)
+    }
+  } else {
+    copyCurlItem = {
+      key: 'copyCurl',
+      auth: '',
+      label: `复制为cURL`,
+      children: []
+    }
+
+    record.methods.forEach(method => {
+      copyCurlItem.children.push({
+        key: 'copyCurlChild-' + method,
+        auth: '',
+        label: method,
+        action: (record: any) => copyCurl(record, method)
+      })
+    })
+  }
+
+  items.splice(2, 0, copyCurlItem);
+
+  return items
+
+}
 
 const selectedRowKeys = ref<Key[]>([]);
 
@@ -458,6 +505,27 @@ async function editEndpoint(record) {
 
 async function clone(record: any) {
   await store.dispatch('Endpoint/copy', record);
+}
+
+async function copyCurl(record: any, method: string) {
+  console.log('copyCurl', record, method)
+
+  const clipboard = navigator.clipboard;
+  if (!clipboard) {
+    notifyWarn('您的浏览器不支持复制内容到剪贴板。');
+    return
+  }
+
+  const resp = await loadCurl({
+    endpointId: record.id,
+    interfaceMethod: method,
+    usedBy: UsedBy.InterfaceDebug,
+    environmentId: environmentId.value,
+  })
+  if (resp.code == 0) {
+    navigator.clipboard.writeText(resp.data)
+    notifySuccess('已赋值cURL命令到剪贴板。');
+  }
 }
 
 async function disabled(record: any) {

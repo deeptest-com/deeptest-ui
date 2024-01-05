@@ -8,15 +8,27 @@
 
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <% if (process.env.VUE_APP_DEPLOY_ENV !=='ly' ) { %>
-    <title>
-        <%= htmlWebpackPlugin.options.title %>
-    </title>
+        <title>
+            <%= htmlWebpackPlugin.options.title %>
+        </title>
+
+        <script>
+            var _hmt = _hmt || [];
+            (function() {
+                var hm = document.createElement("script");
+                hm.src = "https://hm.baidu.com/hm.js?324d7a711cc2f99a5a74d0c31a1b9cb0";
+                var s = document.getElementsByTagName("script")[0];
+                s.parentNode.insertBefore(hm, s);
+            })();
+        </script>
     <%} else { %>
-    <link rel="icon" href="<%= process.env.VUE_APP_DEPLOY_ENV_ICON %>">
-    <title>
-        <%= process.env.VUE_APP_DEPLOY_ENV_TITLE %>
-    </title>
+        <title>
+            <%= process.env.VUE_APP_DEPLOY_ENV_TITLE %>
+        </title>
+
+        <link rel="icon" href="<%= process.env.VUE_APP_DEPLOY_ENV_ICON %>">
     <% } %>
+
     <script>
         const env = '<%= process.env.VUE_APP_DEPLOY_ENV%>';
     </script>

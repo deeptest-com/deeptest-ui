@@ -65,8 +65,14 @@
 
           <a-tooltip title="复制" placement="top">
             <a-button type="link" @click="() => copy(record)">
-            <CopyOutlined />
-          </a-button>
+              <CopyOutlined />
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip title="复制为cURL" placement="top">
+            <a-button type="link" @click="copyCurl(record)">
+              <CopyOutlined />
+            </a-button>
           </a-tooltip>
 
           <a-tooltip title="删除" placement="top">
@@ -109,12 +115,13 @@ import {StateType as Endpoint} from "@/views/endpoint/store";
 import {StateType as Debug} from "@/views/component/debug/store";
 import {StateType as Project} from "@/views/project/store";
 
-import {notifyError, notifySuccess} from "@/utils/notify";
+import {notifyError, notifySuccess, notifyWarn} from "@/utils/notify";
 import {PaginationConfig} from "@/views/endpoint/data";
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import CaseEdit from "./edit.vue";
 import AutoGenCaseModal from "./alternative/autoGenCaseModal.vue";
 import TableExpandIconVue from "@/components/Table/TableExpandIcon.vue";
+import {loadCurl} from "@/views/component/debug/service";
 
 provide('usedBy', UsedBy.InterfaceDebug)
 const {t} = useI18n();
@@ -129,6 +136,7 @@ let pagination = computed<PaginationConfig>(() => store.state.Endpoint.caseList.
 
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
+const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 
 const props = defineProps({
   onDesign: {
@@ -200,6 +208,25 @@ const copy  = (record) => {
       notifyError(`复制失败`);
     }
   })
+}
+
+async function copyCurl(record) {
+  console.log('copyCurl', record)
+  const clipboard = navigator.clipboard;
+  if (!clipboard) {
+    notifyWarn('您的浏览器不支持复制内容到剪贴板。');
+    return
+  }
+
+  const resp = await loadCurl({
+    caseId: record.id,
+    usedBy: UsedBy.CaseDebug,
+    environmentId: environmentId.value,
+  })
+  if (resp.code == 0) {
+    navigator.clipboard.writeText(resp.data)
+    notifySuccess('已赋值cURL命令到剪贴板。');
+  }
 }
 
 const design = async (record: any) => {
