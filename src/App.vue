@@ -35,6 +35,7 @@ import fixMonacoEditor from "@/utils/fixMonacoEditor";
 import {WebSocket} from "@/services/websocket";
 import {getCache, setCache} from "@/utils/localCache";
 import store from "@/config/store";
+import { config, observer } from "./utils/observer";
 fixMonacoEditor();
 export default defineComponent({
   name: 'App',
@@ -149,6 +150,7 @@ export default defineComponent({
             path: router.currentRoute.value.path
           }
         })
+        observer.observe(document.body, config)
       }
     })
 
@@ -168,6 +170,7 @@ export default defineComponent({
       window.addEventListener('beforeunload', onbeforeunloadCallback);
     })
     onUnmounted(() => {
+      observer.disconnect();
       window.removeEventListener('beforeunload', onbeforeunloadCallback);
     })
 

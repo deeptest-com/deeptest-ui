@@ -6,6 +6,7 @@
       width="700px"
       :footer="null"
       :closable="true"
+      destroyOnClose
       :title="formState?.id ? '编辑项目' : '新建项目'"
       @cancel="handleCancel"
   >

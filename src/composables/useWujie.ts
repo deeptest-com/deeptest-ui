@@ -5,7 +5,7 @@ export const  useWujie = () => {
     const isWujieEnv = window?.__POWERED_BY_WUJIE__;
     const {projectName,parentOrigin,xToken,useClipboardFormWujie}:any = window?.$wujie?.props || {};
     // 可以在无界无界容器中打开
-    const isInLeyanWujieContainer =  isWujieEnv && projectName && parentOrigin && xToken;
+    const isInLeyanWujieContainer =  isWujieEnv && parentOrigin && xToken;
 
     const isLoading = ref(false);
 

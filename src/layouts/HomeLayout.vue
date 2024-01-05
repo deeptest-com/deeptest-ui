@@ -1,5 +1,5 @@
 <template>
-  <div class="home-wrap">
+  <div :class="{ 'home-wrap': true, 'wujie-home-wrap': isInLeyanWujieContainer }">
     <div class="home-header" v-if="!isWujieEnv">
       <div class="home-header-left" :class="{'leyan-logo':isLeyanEnv}" @click="handleRedirect">
       </div>
@@ -31,7 +31,9 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     let isLeyanEnv = isLeyan();
-    const { isWujieEnv } = useWujie();
+    const { isWujieEnv, isInLeyanWujieContainer } = useWujie();
+
+    console.error(isInLeyanWujieContainer);
 
     watch(() => {
       return router.currentRoute.value;
@@ -54,7 +56,8 @@ export default defineComponent({
     return {
       handleRedirect,
       isLeyanEnv,
-      isWujieEnv
+      isWujieEnv,
+      isInLeyanWujieContainer
     }
   }
 })
@@ -65,6 +68,11 @@ export default defineComponent({
   min-width: 1440px;
   height: 100vh;
   overflow: hidden;
+
+  &.wujie-home-wrap {
+    width: 100%;
+    min-width: unset;
+  }
 
   .home-header {
     width: 100%;

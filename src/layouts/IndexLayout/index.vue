@@ -231,6 +231,13 @@ export default defineComponent({
 
   &.wujie-indexlayout {
     height: calc(100vh - 48px);
+
+    #indexlayout-right {
+      .indexlayout-right-main {
+        min-width: unset;
+        width: 100%;
+      }
+    }
   }
 }
 
