@@ -33,8 +33,6 @@ export default defineComponent({
     let isLeyanEnv = isLeyan();
     const { isWujieEnv, isInLeyanWujieContainer } = useWujie();
 
-    console.error(isInLeyanWujieContainer);
-
     watch(() => {
       return router.currentRoute.value;
     }, (val: any) => {
