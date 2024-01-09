@@ -56,7 +56,7 @@
                 v-for="option in userListOptions"
                 :key="option.id+'-'+option.name"
                 :value="option.id"
-            >{{ option.label }}
+            >{{ option.label }}({{ option.email.split('@')[0] }})
             </a-select-option
             >
           </a-select>
