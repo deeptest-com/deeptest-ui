@@ -104,6 +104,7 @@ export default defineComponent({
       //  监听父应用传递过来的消息
       if(isWujieEnv){
         WebSocket.init(true);
+        store.dispatch('Project/getUserList')
         bus?.$on('sendMsgToLeyanAPI', async (msg: any) => {
           console.log('832msg', msg)
 
