@@ -18,6 +18,7 @@ import { tableProps } from "ant-design-vue/lib/table/interface";
 import { HolderOutlined } from '@ant-design/icons-vue';
 import Sortable from 'sortablejs';
 
+
 const props = defineProps({
   ...tableProps,
   sortable: {
@@ -29,6 +30,11 @@ const props = defineProps({
     type: Boolean,
     default: false,
     required: false,
+  },
+  rowSelection: {
+    type: Object,
+    default: null,
+    required: false,
   }
 });
 
@@ -38,15 +44,21 @@ const getProps = computed(() => {
   return { ...props };
 });
 
+/*
 const dataSource = computed(() => {
   return (props.dataSource || []).map((e: any) => ({
     ...e, 
-    checked: true,
+   // checked: true,
   }))
 });
+*/
+
+const  dataSource = computed(()=> props.dataSource || [])
 
 
 const checkedKeys = ref<number[]>([]);
+const selectRows = ref<any>([]);
+
 const checkedAll = computed(() => {
   return (props.dataSource || []).some((e: any) => unref(checkedKeys).includes(e.id))
 });
@@ -59,6 +71,10 @@ const handleCheckedAll = (e) => {
     checkedKeys.value = unref(dataSource).map(e => e.id);
   } else {
     checkedKeys.value = [];
+  }
+  if (props.rowSelection && props.rowSelection.onChange) {
+    const rows = unref(dataSource).filter(e => unref(checkedKeys).includes(e.id));
+    props.rowSelection.onChange(checkedKeys.value,rows);
   }
 }
 
@@ -145,9 +161,15 @@ const getSelectedRow = () => {
 
 onMounted(() => {
   initSortable();
+  if (props.rowSelection && props.rowSelection.selectedRowKeys) {
+    checkedKeys.value = props.rowSelection.selectedRowKeys;
+  }
 })
 
 defineExpose({
   getSelectedRow
 })
+
+
+
 </script>

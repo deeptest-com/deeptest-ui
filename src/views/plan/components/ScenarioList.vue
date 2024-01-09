@@ -21,7 +21,7 @@
             </a-form-item>
         </div>
     </div>
-    <a-table
+    <Table
         :row-selection="{
             selectedRowKeys: selectedRowKeys,
             onChange: onSelectChange
@@ -40,7 +40,9 @@
         :scroll="scroll"
         :loading="loading"
         :columns="columns"
-        :data-source="list">
+        :data-source="list"
+        :sortable="true"
+        >
         <template #name="{ record, column }">
             <ToolTipCell :text="record.name" :width="column.width" />
         </template>
@@ -60,7 +62,7 @@
                 移除
             </a-button>
         </template>
-    </a-table>
+    </Table>
     <RelationScenario
         :associate-modal-visible="associateModalVisible"
         @on-cancel="associateModalVisible = false"
@@ -73,7 +75,7 @@ import { useStore } from 'vuex';
 import { PlusOutlined } from '@ant-design/icons-vue';
 import RelationScenario from './RelationScenario.vue';
 import ToolTipCell from '@/components/Table/tooltipCell.vue';
-
+import Table from '@/components/Table/index.vue';
 import { StateType as PlanStateType } from '../store';
 import {message, Modal, notification} from 'ant-design-vue';
 import { planStatusColorMap, planStatusTextMap } from '@/config/constant';
@@ -127,6 +129,7 @@ const onSelectChange = (changableRowKeys: string[], rows: any) => {
     selectedRowKeys.value = changableRowKeys;
     selectedRowIds = rows.map((item: any) => item.id);
     emits('selectRowKeys', changableRowKeys);
+    console.error(selectedRowIds,rows)
 };
 
 const priorityOptions = ref<any>([
