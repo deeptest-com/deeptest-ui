@@ -31,7 +31,7 @@ const props = defineProps({
     default: false,
     required: false,
   },
-  rowSelection: {
+  customRowSelection: {
     type: Object,
     default: null,
     required: false,
@@ -40,24 +40,8 @@ const props = defineProps({
 
 const emits = defineEmits(['onSort']);
 
-const getProps = computed(() => {
-  return { ...props };
-});
-
-/*
-const dataSource = computed(() => {
-  return (props.dataSource || []).map((e: any) => ({
-    ...e, 
-   // checked: true,
-  }))
-});
-*/
-
 const  dataSource = computed(()=> props.dataSource || [])
-
-
-const checkedKeys = ref<number[]>([]);
-const selectRows = ref<any>([]);
+const checkedKeys = ref<number[]>(props.customRowSelection?.selectedRowKeys || []);
 
 const checkedAll = computed(() => {
   return (props.dataSource || []).some((e: any) => unref(checkedKeys).includes(e.id))
@@ -68,14 +52,12 @@ const indeterminate = computed(() => {
 
 const handleCheckedAll = (e) => {
   if (e.target.checked) {
-    checkedKeys.value = unref(dataSource).map(e => e.id);
+    checkedKeys.value = unref(dataSource).map((e: any) => e.id);
   } else {
     checkedKeys.value = [];
   }
-  if (props.rowSelection && props.rowSelection.onChange) {
-    const rows = unref(dataSource).filter(e => unref(checkedKeys).includes(e.id));
-    props.rowSelection.onChange(checkedKeys.value,rows);
-  }
+  const rows = unref(dataSource).filter(e => unref(checkedKeys).includes(e.id));
+  props.customRowSelection?.onChange(checkedKeys.value,rows);
 }
 
 const handleChecked = (e, record) => {
@@ -84,6 +66,8 @@ const handleChecked = (e, record) => {
   } else {
     checkedKeys.value = checkedKeys.value.filter(item => item !== record.id);
   }
+  const rows = unref(dataSource).filter((e: any) => unref(checkedKeys).includes(e.id));
+  props.customRowSelection?.onChange(checkedKeys.value,rows);
 }
 
 const basicColumns = computed(() => {
@@ -161,9 +145,6 @@ const getSelectedRow = () => {
 
 onMounted(() => {
   initSortable();
-  if (props.rowSelection && props.rowSelection.selectedRowKeys) {
-    checkedKeys.value = props.rowSelection.selectedRowKeys;
-  }
 })
 
 defineExpose({

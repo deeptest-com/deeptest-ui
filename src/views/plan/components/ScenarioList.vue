@@ -22,7 +22,7 @@
         </div>
     </div>
     <Table
-        :row-selection="{
+        :custom-row-selection="{
             selectedRowKeys: selectedRowKeys,
             onChange: onSelectChange
         }"
@@ -42,6 +42,7 @@
         :columns="columns"
         :data-source="list"
         :sortable="true"
+        :checkable="true"
         >
         <template #name="{ record, column }">
             <ToolTipCell :text="record.name" :width="column.width" />
