@@ -92,10 +92,10 @@ export async function getInvocationResult(invokeId: number): Promise<any> {
         params
     });
 }
-export async function getInvocationLog(invokeId: number): Promise<any> {
+export async function getConsoleLog(invokeId: number): Promise<any> {
     const params = {invokeId}
     return request({
-        url: `/${apiPathInvoke}/getLog`,
+        url: `/${apiPathInvoke}/getConsoleLog`,
         params
     });
 }
