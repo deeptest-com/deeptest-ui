@@ -1,4 +1,7 @@
 <template>
+  <div class="docs-top">
+    <RightTopSettings />
+  </div>
   <div class="container" :class="{'full-container':isDocsSharePage || isDocsViewPage}">
     <a-spin tip="加载中..." :spinning="loading">
       <Docs :show-menu="true"
@@ -16,7 +19,7 @@ import {
 } from 'vue';
 
 import Docs from '@/components/Docs/index.vue';
-
+import RightTopSettings from '@/layouts/IndexLayout/components/RightTopSettings.vue';
 import {useStore} from "vuex";
 
 const store = useStore<{ Docs, ProjectGlobal }>();
@@ -140,6 +143,7 @@ watch(() => {
 onMounted(async () => {
   if (isDocsSharePage || isDocsViewPage) {
     hideGlobalLoading();
+
     return;
   }
   await store.dispatch('Docs/getVersionList', {
@@ -161,6 +165,23 @@ watch(() => {return shareId.value}, async (newVal) => {
 
 </script>
 <style scoped lang="less">
+.docs-top {
+  height: 0;
+  overflow: hidden;
+  width: 100%;
+
+  .indexlayout-top-settings {
+    height: 0;
+
+    :deep(.user-info) {
+      height: 0;
+
+      .indexlayout-top-usermenu {
+        height: 0;
+      }
+    }
+  }
+}
 .container {
   background: #ffffff;
   height: 100%;
