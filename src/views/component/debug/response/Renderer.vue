@@ -90,7 +90,7 @@ watch(debugInfo, () => {
 }, {deep: true});
 
 watch(responseData, () => {
-  if (responseData.value.invokeId) store.dispatch("Debug/getInvocationLog", responseData.value.invokeId)
+  if (responseData.value.invokeId) store.dispatch("Debug/getConsoleLog", responseData.value.invokeId)
 }, {deep: true, immediate: true});
 
 const usedBy = inject('usedBy') as UsedBy

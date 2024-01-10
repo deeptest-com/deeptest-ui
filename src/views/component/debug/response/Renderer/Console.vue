@@ -31,12 +31,14 @@
 
       <span v-html="getResultMsg(item)" class="script-logs"></span>
 
-      <template v-if="item.variables">
-        ，
-        <span v-for="(v, k) in toJsonObj(item.variables)" :key="k">
-          {{k}} {{v === `<nil>` ? ' 未定义' : ` = ${v}`}}
-        </span>
-        。
+      <template v-if="item.conditionEntityType === ConditionType.checkpoint">
+        <template v-if="item.variables">
+          ，变量
+          <span v-for="(v, k, index) in toJsonObj(item.variables)" :key="k">
+            <template v-if="index > 0">，</template>
+            {{k}} {{v === '<nil>' ? ' 未定义' : ` = ${v}`}}
+          </span>
+        </template>。
       </template>
     </div>
   </div>
@@ -78,7 +80,7 @@ const consoleLogs = computed<any>(() => {
 watch(responseData, (_newVal) => {
   console.log('watch responseData in console tab, invokeId = ', responseData.value.invokeId)
   if (responseData.value.invokeId) {
-    store.dispatch("Debug/getInvocationLog", responseData.value.invokeId)
+    store.dispatch("Debug/getConsoleLog", responseData.value.invokeId)
   }
 }, {deep: true, immediate: true})
 
