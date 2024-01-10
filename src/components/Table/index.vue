@@ -87,7 +87,7 @@ const basicColumns = computed(() => {
       )
     },
     width: 60,
-    customRender({ record }) {
+    customRender:({ record })=> {
       return (
         <div class="selection-box">
           {props.sortable && (

@@ -15,7 +15,8 @@
             :show-scenario-operation="false"
             :selectedKeys="selectedScenarioIds"
             @refresh-list="getScenarioList"
-            @select-row-keys="handleSelectRowKeys" />
+            @select-row-keys="handleSelectRowKeys" 
+            />
     </a-modal>
 </template>
 <script setup lang="ts">
@@ -91,6 +92,7 @@ async function getScenarioList(params) {
     })
     loading.value = false;
 }
+
 
 watch(() => {
     return props.associateModalVisible;
