@@ -285,19 +285,7 @@ export default defineComponent({
   top: 58px;
   right: -6px;
   background-color: #fff;
-  
-  .indexlayout-top-settings {
-    height: 100%;
-
-    .user-info {
-      height: 100%;
-
-      .indexlayout-top-usermenu {
-        height: 100%;
-        display: flex;
-        align-items: center;
-      }
-    }
-  }
+  height: 0;
+  overflow: hidden;
 }
 </style>
