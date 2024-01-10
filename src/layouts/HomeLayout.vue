@@ -1,6 +1,6 @@
 <template>
   <div :class="{ 'home-wrap': true, 'wujie-home-wrap': isInLeyanWujieContainer }">
-    <div class="home-header" v-if="!isWujieEnv">
+    <div :class="{'home-header': true, 'hidden': isWujieEnv}">
       <div class="home-header-left" :class="{'leyan-logo':isLeyanEnv}" @click="handleRedirect">
       </div>
       <div class="home-header-right">
@@ -81,6 +81,11 @@ export default defineComponent({
     justify-content: space-between;
     padding-left: 24px;
     box-sizing: border-box;
+
+    &.hidden {
+      height: 0;
+      overflow: hidden;
+    }
 
     .home-header-left {
       width: 105px;

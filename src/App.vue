@@ -142,6 +142,10 @@ export default defineComponent({
           if (msg?.type === 'openCreateProject') {
             createProjectModalVisible.value = true;
           }
+
+          if (msg?.type === 'changeAgentEnv') {
+            store.commit('Global/setCurrAgent', msg?.data?.currAgent);
+          }
         })
         
         // 通知上层应用已经加载完毕

@@ -128,6 +128,7 @@ import {Cache_Key_Agent} from "@/utils/const";
 import {isLeyan} from "@/utils/comm";
 import {useWujie} from "@/composables/useWujie";
 import usePermission from "@/composables/usePermission";
+import settings from "@/config/settings";
 const {isWujieEnv} = useWujie();
 const { hasProjectAuth } = usePermission();
 const props = defineProps({
@@ -140,7 +141,8 @@ const props = defineProps({
 const {t} = useI18n();
 const router = useRouter();
 const store = useStore<{ User: UserStateType, Global: GlobalStateType }>();
-const {isFullscreen, enter, exit, toggle} = useFullscreen();
+const {isFullscreen, toggle} = useFullscreen();
+const bus = window?.$wujie?.bus;
 
 const agents = computed<any[]>(() => store.state.Global.agents);
 const currentUser = computed<CurrentUser>(() => store.state.User.currentUser);
@@ -236,6 +238,14 @@ onMounted(async () => {
   await store.dispatch('Global/getClientVersion');
   await store.dispatch('Global/listAgent');
   await store.commit('Global/setCurrAgent', null);
+  bus.$emit(settings.sendMsgToLeyan, {
+    type: 'initClientOrAgents',
+    data: {
+      clientDownloadUrlOpts: clientDownloadUrlOpts.value,
+      agents: agents.value,
+      currAgent: currentAgent.value,
+    }
+  });
 })
 
 const isAdmin = computed(() => {
