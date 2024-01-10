@@ -66,7 +66,7 @@
             </div>
 
             <div class="content" v-if="activeAssertion.id === +element.id">
-              <Checkpoint 
+              <Checkpoint
                 v-if="element.entityType === ConditionType.checkpoint"
                 :condition="activeAssertion"
                 :finish="list" />
@@ -76,7 +76,7 @@
       </draggable>
     </div>
 
-    <FullScreenPopup 
+    <FullScreenPopup
       v-if="fullscreen"
       :visible="fullscreen"
       :model="activeAssertion"
@@ -88,23 +88,23 @@
 import {computed, inject, ref, watch, provide, onUnmounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import { 
-  CheckCircleOutlined, 
+import {
+  CheckCircleOutlined,
   DeleteOutlined,
-  ClearOutlined, 
+  ClearOutlined,
   RightOutlined,
-  DownOutlined, 
-  CloseCircleOutlined, 
+  DownOutlined,
+  CloseCircleOutlined,
   FullscreenOutlined } from '@ant-design/icons-vue';
 import draggable from 'vuedraggable';
-import {ConditionType, UsedBy} from "@/utils/enum";
+import {ConditionSrc, ConditionType, UsedBy} from "@/utils/enum";
 import {EnvDataItem} from "@/views/project-settings/data";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import {confirmToDelete} from "@/utils/confirm";
 import {StateType as Debug} from "@/views/component/debug/store";
 import IconSvg from "@/components/IconSvg";
-import Checkpoint from "@/views/component/debug/request/config/conditions-post/Checkpoint.vue";
+import Checkpoint from "@/views/component/debug/request/config/conditions/Checkpoint.vue";
 import FullScreenPopup from "@/views/component/debug/request/config/ConditionPopup.vue";
 import TooltipCell from "@/components/Table/tooltipCell.vue";
 import Tips from "@/components/Tips/index.vue";
@@ -138,9 +138,10 @@ watch(debugData, async (newVal) => {
 
 const create = () => {
   console.log('create', ConditionType.checkpoint);
-  store.dispatch('Debug/createPostCondition', {
+  store.dispatch('Debug/createCondition', {
     entityType: ConditionType.checkpoint,
     ...debugInfo.value,
+    conditionSrc: ConditionSrc.PostCondition,
     isForBenchmarkCase: true,
   })
 }
@@ -151,7 +152,7 @@ const format = (item) => {
 }
 const disable = (item) => {
   console.log('disable', item)
-  store.dispatch('Debug/disablePostCondition', {
+  store.dispatch('Debug/disableCondition', {
     ...item,
     isForBenchmarkCase: true
   })
@@ -160,7 +161,7 @@ const remove = (item) => {
   console.log('remove', item)
 
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
-    store.dispatch('Debug/removePostCondition', {
+    store.dispatch('Debug/removeCondition', {
       ...item,
       isForBenchmarkCase: true
     })
@@ -170,7 +171,7 @@ function move(_e: any) {
   const envIdList = assertionConditions.value.map((e: EnvDataItem) => {
     return e.id;
   })
-  store.dispatch('Debug/movePostCondition', {
+  store.dispatch('Debug/moveCondition', {
     data: envIdList,
     isForBenchmarkCase: true,
     info: debugInfo.value,
@@ -195,8 +196,6 @@ const closeFullScreen = (item) => {
 onUnmounted(() => {
   store.commit('Debug/setActiveAssertion', {});
 })
-
-provide('isForBenchmarkCase', true);
 
 </script>
 

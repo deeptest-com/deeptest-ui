@@ -86,17 +86,19 @@
               <CaseFactor ref="caseFactor" />
             </a-tab-pane>
 
-            <a-tab-pane key="pre-condition" tab="预处理">
+            <a-tab-pane key="pre-condition" :tab="getTabTitle('pre-condition')">
               <CaseTips type="pre-condition" @reset="onReset" />
-              <ConditionPre v-if="activeKey === 'pre-condition'" />
+              <Condition v-if="activeKey === 'pre-condition'"
+                         :conditionSrc="ConditionSrc.PreCondition" />
             </a-tab-pane>
 
-            <a-tab-pane key="post-condition" :tab="getTabTtitle('post-condition')">
+            <a-tab-pane key="post-condition" :tab="getTabTitle('post-condition')">
               <CaseTips type="post-condition" @reset="onReset" />
-              <ConditionPost v-if="activeKey === 'post-condition'" />
+              <Condition v-if="activeKey === 'post-condition'"
+                         :conditionSrc="ConditionSrc.PostCondition" />
             </a-tab-pane>
 
-            <a-tab-pane key="assertion" :tab="getTabTtitle('assertion')">
+            <a-tab-pane key="assertion" :tab="getTabTitle('assertion')">
               <CaseTips type="assertion" @reset="onReset" />
               <Assertion v-if="activeKey === 'assertion'" />
             </a-tab-pane>
@@ -127,7 +129,7 @@
 
 <script lang="ts" setup>
 import {computed, defineProps, provide, ref, watch, unref, onMounted, onUnmounted} from "vue";
-import {UsedBy} from "@/utils/enum";
+import {UsedBy, ConditionSrc, ConditionCategory} from "@/utils/enum";
 import {useStore} from "vuex";
 import cloneDeep from "lodash/cloneDeep";
 import { message, Modal } from "ant-design-vue";
@@ -136,8 +138,6 @@ import Swal from "sweetalert2";
 import IconSvg from "@/components/IconSvg";
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
 import {StateType as Debug} from "@/views/component/debug/store";
-import { StateType as ProjectSettingStateType } from "@/views/project-settings/store";
-import {StateType as ProjectStateType} from "@/store/project";
 
 import Exec from "./alternative/exec.vue";
 import {
@@ -145,8 +145,7 @@ import {
   CaseFactor,
   CaseTips,
   SaveAlternative,
-  ConditionPost,
-  ConditionPre,
+  Condition,
   Assertion } from "./alternative";
 import EditAndShowField from "@/components/EditAndShow/index.vue";
 import Invocation from "@/views/component/debug/request/Invocation.vue";
@@ -161,6 +160,8 @@ import settings from "@/config/settings";
 
 const usedBy = UsedBy.CaseDebug
 provide('usedBy', usedBy)
+const isForBenchmarkCase = true
+provide('isForBenchmarkCase', isForBenchmarkCase)
 
 const {isDebugChange, resetDebugChange} = useIMLeaveTip();
 
@@ -175,20 +176,35 @@ const props = defineProps({
   },
 });
 
-const store = useStore<{ User: UserStateType, Debug: Debug, Endpoint: EndpointStateType, ProjectSetting: ProjectSettingStateType, ProjectGlobal: ProjectStateType }>();
+const store = useStore<{ User: UserStateType, Debug: Debug, Endpoint: EndpointStateType }>();
 const currUser = computed(() => store.state.User.currentUser);
 const alternativeCases = computed<any>(() => store.state.Endpoint.alternativeCases);
 const endpointCase = computed<any>(() => store.state.Endpoint.caseDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 
 // 备选用例因子的condition相关 用来显示tab上显示数量
+const preConditions = computed<any>(() => store.state.Debug.benchMarkCase.preConditions);
 const postConditions = computed<any>(() => store.state.Debug.benchMarkCase.postConditions);
 const assertionConditions = computed<any>(() => store.state.Debug.benchMarkCase.assertionConditions);
 
-const getTabTtitle = computed(() => {
+const getTabTitle = computed(() => {
   return type => {
-    const numbers = type === 'post-condition' ? unref(postConditions).length : unref(assertionConditions).length;
-    const title = type === 'post-condition' ? '后置处理' : '断言';
+    let numbers = 0
+    if (type === 'pre-condition')
+      numbers = unref(preConditions).length
+    else if (type === 'post-condition')
+      numbers = unref(postConditions).length
+    else
+      numbers = unref(assertionConditions).length;
+
+    let title = ''
+    if (type === 'pre-condition')
+      title = '前置处理'
+    else if (type === 'post-condition')
+      title = '后置处理'
+    else
+      title = '断言'
+
     return `${title}${numbers > 0 ? `(${numbers})` : ''}`;
   }
 });
@@ -206,9 +222,20 @@ const loadDebugData = async (data) => {
     loadingAlternativeCase.value = true;
     await store.dispatch('Debug/loadDataAndInvocations', data);
     resetDebugChange();
-    await store.dispatch('Debug/listPostCondition', { isForBenchmarkCase: true });
+
+    store.dispatch('Debug/listCondition', {
+      conditionSrc: ConditionSrc.PreCondition,
+      isForBenchmarkCase: isForBenchmarkCase,
+    });
+    store.dispatch('Debug/listCondition', {
+      conditionSrc: ConditionSrc.PostCondition,
+      isForBenchmarkCase: isForBenchmarkCase,
+      category: ConditionCategory.postCondition,
+    });
+
     await store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
     loadingAlternativeCase.value = false;
+
   } catch (err) {
     console.log('加载备选用例数据出错:', err);
   }
@@ -368,12 +395,22 @@ const onReset = ({ type, params }: { type: string, params: any }) => {
     onOk() {
       store.dispatch(`Endpoint/${type === 'pre-condition' ? 'resetPreConditions' : 'resetPostConditions'}`, params).then(() => {
         if (type === 'pre-condition') {
-          store.dispatch('Debug/getPreConditionScript', { isForBenchmarkCase: true })
+          store.dispatch('Debug/listCondition', {
+            conditionSrc: ConditionSrc.PreCondition,
+            isForBenchmarkCase: true,
+          });
+
         } else if (type === 'post-condition' ) {
-          store.dispatch('Debug/listPostCondition', { isForBenchmarkCase: true });
+          store.dispatch('Debug/listCondition', {
+            conditionSrc: ConditionSrc.PostCondition,
+            isForBenchmarkCase: true,
+            category: ConditionCategory.postCondition,
+          });
+
         } else {
-          store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
+          store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: isForBenchmarkCase });
         }
+
       }).catch(err => {
         notifyError(err);
       })
@@ -456,11 +493,6 @@ onUnmounted(() => {
 
 const onClose = () => {
   execDrawerVisible.value = false;
-}
-
-const handleOpen = () => {
-  store.dispatch('Debug/listPostCondition', { isForBenchmarkCase: true });
-  store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
 }
 
 </script>

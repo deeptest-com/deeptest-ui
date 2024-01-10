@@ -1,57 +1,52 @@
 import {Action, Mutation} from 'vuex';
 import {StoreModuleType} from "@/utils/store";
 
-import {
-    assert_resp_status_Code, assert_resp_json_field, assert_resp_content_contain
-} from './config'
+import {assert_resp_content_contain, assert_resp_json_field, assert_resp_status_Code} from './config'
 
 import {
+    call,
     clearShareVar,
-    quickCreateExtractor,
+    createConditions,
+    disableConditions,
+    generateCases,
     getCheckpoint,
+    getCookie,
+    getDbOpt,
     getExtractor,
     getInvocationAsInterface,
+    getConsoleLog,
+    getInvocationResult,
     getLastInvocationResp,
-
-    removeCheckpoint,
-    removeExtractor,
-    removeInvocation,
-    removeShareVar,
-    saveCheckpoint,
-    saveExtractor,
-    loadData,
-    call,
-    save,
+    getScript,
+    getSnippet,
+    listConditions,
     listInvocation,
     listShareVar,
-    getSnippet,
-    listPostConditions,
-
-    getScript,
+    loadData,
+    moveConditions,
+    quickCreateExtractor,
+    removeConditions,
+    removeInvocation,
+    removeShareVar,
+    save,
+    saveAsCase,
+    saveCheckpoint,
+    saveCookie,
+    saveDbOpt,
+    saveExtractor,
+    saveResponseDefine,
     saveScript,
-    removeScript,
-
-    createPostConditions,
-    removePostConditions,
-    movePostConditions,
-    disablePostConditions,
-    saveAsCase, generateCases,
-    getInvocationResult,
-    getInvocationLog,
-    getPreConditionScript,
-    saveResponseDefine, removeCookie, quickCreateCookie, saveCookie, getCookie,
-
-    getDbOpt, saveDbOpt, removeDbOpt,
 } from './service';
 
-import {serverList, changeServe, getVarsByEnv, listDbConn} from '@/views/project-settings/service';
-import {Checkpoint, Cookie, DebugInfo, Extractor, Interface, Response, Script} from "./data";
-import {ConditionCategory, ConditionType, UsedBy} from "@/utils/enum";
+import {changeServe, getVarsByEnv, listDbConn, serverList} from '@/views/project-settings/service';
+import {Checkpoint, Cookie, DebugInfo, Extractor, Response, Script} from "./data";
+import {ConditionCategory, ConditionSrc, ConditionType, UsedBy} from "@/utils/enum";
 import {ResponseData} from "@/utils/request";
 import {listEnvVarByServer} from "@/services/environment";
 import {getResponseKey} from "@/utils/comm";
 import {send_request_get, send_request_post} from "@/views/component/debug/config";
 import cloneDeep from "lodash/cloneDeep";
+import {stringify} from "handsontable/helpers";
 
 export interface StateType {
     debugInfo: DebugInfo
@@ -63,18 +58,22 @@ export interface StateType {
     responseData: Response;
     consoleData: any[];
     resultData: any[];
-
     invocationsData: any[];
 
     preConditions: any[];
+    preConditionsDataObj: any;
+    srcPreConditionsDataObj: any;
+
     postConditions: any[];
     postConditionsDataObj: any;
     srcPostConditionsDataObj: any;
+
+    activeCondition: any;
+
     assertionConditions: any[];
     assertionConditionsDataObj: any;
     srcAssertionConditionsDataObj: any;
     activeAssertion: any;
-    activePostCondition: any;
 
     extractorData: any;
     checkpointData: any;
@@ -88,10 +87,13 @@ export interface StateType {
     dbConns: any[];
 
     benchMarkCase: {
-        assertionConditions: any[];
+        preConditions: any[];
         postConditions: any[];
-        activePostCondition: any;
+        activeCondition: any;
+
         activeAssertion: any;
+
+        assertionConditions: any[];
         scriptData: any;
         dbOptData: any;
         extractorData: any;
@@ -113,14 +115,19 @@ const initState: StateType = {
     invocationsData: [],
 
     preConditions: [],
+    preConditionsDataObj: {},
+    srcPreConditionsDataObj: {},
+
     postConditions: [],
     postConditionsDataObj: {},
     srcPostConditionsDataObj: {},
+
+    activeCondition: {},
+
     assertionConditionsDataObj: {},
     srcAssertionConditionsDataObj: {},
     assertionConditions: [],
     activeAssertion: {},
-    activePostCondition: {},
 
     extractorData: {} as Extractor,
     checkpointData: {} as Checkpoint,
@@ -130,8 +137,7 @@ const initState: StateType = {
     cookieData: {} as Cookie,
     debugChange: {
         base: false,
-        preScript: false,
-        postCondition: false,
+        condition: false,
         checkpoint: false,
     },
     environmentsFromServers: [],
@@ -140,10 +146,13 @@ const initState: StateType = {
 
     // 备选用例临时数据存储
     benchMarkCase: {
-        assertionConditions: [],
+        preConditions: [],
         postConditions: [],
-        activePostCondition: {},
+        activeCondition: {},
+
+        assertionConditions: [],
         activeAssertion: {},
+
         scriptData: {} as Script,
         dbOptData: {},
         extractorData: {},
@@ -165,22 +174,25 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setRequest: Mutation<StateType>;
         setResponse: Mutation<StateType>;
         setResult: Mutation<StateType>;
-        setLog: Mutation<StateType>;
+        setConsoleLog: Mutation<StateType>;
 
         setInvocations: Mutation<StateType>;
         setServerId: Mutation<StateType>;
 
+        setPreConditions: Mutation<StateType>;
         setPostConditions: Mutation<StateType>;
         setAssertionConditions: Mutation<StateType>;
         setActiveAssertion: Mutation<StateType>;
-        setActivePostCondition: Mutation<StateType>;
+        setActiveCondition: Mutation<StateType>;
 
         setExtractor: Mutation<StateType>;
         setCheckpoint: Mutation<StateType>;
         setScript: Mutation<StateType>;
         setSrcScript: Mutation<StateType>;
-        setScriptContent: Mutation<StateType>;
+
+        setPreScriptContent: Mutation<StateType>;
         setPostScriptContent: Mutation<StateType>;
+
         setCookie: Mutation<StateType>;
 
         setPathParams: Mutation<StateType>;
@@ -201,13 +213,18 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setBenchMarkCase: Mutation<StateType>;
         setDebugChange: Mutation<StateType>;
 
+        setPreConditionsDataObj: Mutation<StateType>;
+        setSrcPreConditionsDataObj: Mutation<StateType>;
+        clearPreConditionsDataObj: Mutation<StateType>;
+        resetPreConditionsDataObj: Mutation<StateType>;
+
         setPostConditionsDataObj: Mutation<StateType>;
         setSrcPostConditionsDataObj: Mutation<StateType>;
-        setAssertionConditionsObj: Mutation<StateType>;
-        setSrcAssertionConditionsObj: Mutation<StateType>;
         clearPostConditionsDataObj: Mutation<StateType>;
         resetPostConditionsDataObj: Mutation<StateType>;
-        clearPreCondition: Mutation<StateType>;
+
+        setAssertionConditionsObj: Mutation<StateType>;
+        setSrcAssertionConditionsObj: Mutation<StateType>;
     };
     actions: {
         loadDataAndInvocations: Action<StateType, StateType>;
@@ -222,43 +239,31 @@ export interface ModuleType extends StoreModuleType<StateType> {
         listInvocation: Action<StateType, StateType>;
         getLastInvocationResp: Action<StateType, StateType>;
         getInvocationResult: Action<StateType, StateType>;
-        getInvocationLog: Action<StateType, StateType>;
+        getConsoleLog: Action<StateType, StateType>;
         getInvocationAsInterface: Action<StateType, StateType>;
         removeInvocation: Action<StateType, StateType>;
 
-        getPreConditionScript: Action<StateType, StateType>;
-        savePreConditionScript: Action<StateType, StateType>;
-
-        listPostCondition: Action<StateType, StateType>;
+        listCondition: Action<StateType, StateType>;
         listAssertionCondition: Action<StateType, StateType>;
-        createPostCondition: Action<StateType, StateType>;
-        removePostCondition: Action<StateType, StateType>;
-        disablePostCondition: Action<StateType, StateType>;
-        movePostCondition: Action<StateType, StateType>;
+        createCondition: Action<StateType, StateType>;
+        removeCondition: Action<StateType, StateType>;
+        disableCondition: Action<StateType, StateType>;
+        moveCondition: Action<StateType, StateType>;
 
         getExtractor: Action<StateType, StateType>;
         saveExtractor: Action<StateType, StateType>;
         quickCreateExtractor: Action<StateType, StateType>; // usedBy code editor
-        removeExtractor: Action<StateType, StateType>;
-
-        getCookie: Action<StateType, StateType>;
-        saveCookie: Action<StateType, StateType>;
-        quickCreateCookie: Action<StateType, StateType>;
-        removeCookie: Action<StateType, StateType>;
 
         getCheckpoint: Action<StateType, StateType>;
         saveCheckpoint: Action<StateType, StateType>;
-        removeCheckpoint: Action<StateType, StateType>;
-
-        getScript: Action<StateType, StateType>;
-        saveScript: Action<StateType, StateType>;
-        removeScript: Action<StateType, StateType>;
-        addSnippet: Action<StateType, StateType>;
-        addSnippetForPost: Action<StateType, StateType>;
 
         getDbOpt: Action<StateType, StateType>;
         saveDbOpt: Action<StateType, StateType>;
-        removeDbOpt: Action<StateType, StateType>;
+
+        getScript: Action<StateType, StateType>;
+        saveScript: Action<StateType, StateType>;
+
+        addSnippet: Action<StateType, StateType>;
 
         listShareVar: Action<StateType, StateType>;
         removeShareVar: Action<StateType, StateType>;
@@ -319,7 +324,7 @@ const StoreModel: ModuleType = {
         setResult(state, payload) {
             state.resultData = payload;
         },
-        setLog(state, payload) {
+        setConsoleLog(state, payload) {
             state.consoleData = payload;
         },
 
@@ -327,6 +332,13 @@ const StoreModel: ModuleType = {
             state.invocationsData = payload;
         },
 
+        setPreConditions(state, payload) {
+            if (payload.isForBenchmarkCase) {
+                state.benchMarkCase.preConditions = (payload.data || []).filter(e => !!e.isForBenchmarkCase);
+            } else {
+                state.preConditions = (payload.data || []).filter(e => !e.isForBenchmarkCase);
+            }
+        },
         setPostConditions(state, payload) {
             if (payload.isForBenchmarkCase) {
                 state.benchMarkCase.postConditions = (payload.data || []).filter(e => !!e.isForBenchmarkCase);
@@ -350,11 +362,11 @@ const StoreModel: ModuleType = {
                 state.activeAssertion = state.activeAssertion?.id === payload.id ? {} : payload;
             }
         },
-        setActivePostCondition(state, payload) {
+        setActiveCondition(state, payload) {
             if (payload.isForBenchmarkCase) {
-                state.benchMarkCase.activePostCondition = state.benchMarkCase.activePostCondition?.id === payload.id ? {} : payload;
+                state.benchMarkCase.activeCondition = state.benchMarkCase.activeCondition?.id === payload.id ? {} : payload;
             } else {
-                state.activePostCondition = state.activePostCondition?.id === payload.id ? {} : payload;
+                state.activeCondition = state.activeCondition?.id === payload.id ? {} : payload;
             }
         },
 
@@ -389,14 +401,13 @@ const StoreModel: ModuleType = {
                 state.cookieData = payload.info;
             }
         },
-        setScriptContent(state, payload) {
-            if (payload.isForBenchmarkCase) {
-                state.benchMarkCase.scriptData.content = payload.content;
-            } else {
-                state.scriptData.content = payload.content;
+
+        setPreScriptContent(state, {id,content}) {
+            const data = state.preConditionsDataObj?.[id];
+            if(data){
+                data.content = content;
             }
         },
-
         setPostScriptContent(state, {id,content}) {
             const data = state.postConditionsDataObj?.[id];
             if(data){
@@ -462,23 +473,34 @@ const StoreModel: ModuleType = {
                 ...payload
             }
         },
+
+        setPreConditionsDataObj(state, payload){
+            state.preConditionsDataObj[payload.id] = payload.value
+        },
+        setSrcPreConditionsDataObj(state, payload){
+            state.srcPreConditionsDataObj[payload.id] = payload.value
+        },
+        clearPreConditionsDataObj(state){
+            state.preConditionsDataObj = {}
+            state.srcPreConditionsDataObj = {}
+        },
+        resetPreConditionsDataObj(state){
+            state.srcPreConditionsDataObj = cloneDeep(state.preConditionsDataObj)
+        },
+
         setPostConditionsDataObj(state, payload){
             state.postConditionsDataObj[payload.id] = payload.value
         },
         setSrcPostConditionsDataObj(state, payload){
             state.srcPostConditionsDataObj[payload.id] = payload.value
         },
-        setAssertionConditionsObj(state, payload){
-            state.assertionConditionsDataObj[payload.id] = payload.value
-        },
-        setSrcAssertionConditionsObj(state, payload){
-            state.srcAssertionConditionsDataObj[payload.id] = payload.value
-        },
         clearPostConditionsDataObj(state){
             state.postConditionsDataObj = {}
             state.srcPostConditionsDataObj = {}
+
             state.assertionConditionsDataObj = {}
             state.srcAssertionConditionsDataObj = {}
+
             // state.srcScriptData = {};
             // state.scriptData = {};
         },
@@ -486,12 +508,13 @@ const StoreModel: ModuleType = {
             state.srcPostConditionsDataObj = cloneDeep(state.postConditionsDataObj)
             state.srcAssertionConditionsDataObj = cloneDeep(state.assertionConditionsDataObj)
         },
-        clearPreCondition(state){
-            state.srcScriptData = {};
-            state.scriptData = {};
-        },
 
-        // clear
+        setAssertionConditionsObj(state, payload){
+            state.assertionConditionsDataObj[payload.id] = payload.value
+        },
+        setSrcAssertionConditionsObj(state, payload){
+            state.srcAssertionConditionsDataObj[payload.id] = payload.value
+        },
     },
     actions: {
         // debug
@@ -539,14 +562,10 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
-        async save({commit,state}, payload: any) {
+        async save({commit}, payload: any) {
             const resp = await  save(payload)
             if (resp.code === 0) {
                 commit('setDebugData', { ...resp.data, action: 'save' });
-                commit('setDebugInfo', {
-                    ...state.debugInfo,
-                    debugInterfaceId: resp.data.debugInterfaceId,
-                } as DebugInfo);
                 return true;
             } else {
                 return false
@@ -575,7 +594,7 @@ const StoreModel: ModuleType = {
             commit('setRequest', {});
             commit('setResponse', {});
             commit('setResult', []);
-            commit('setLog', []);
+            commit('setConsoleLog', []);
             commit('setInvocations', []);
         },
 
@@ -595,10 +614,15 @@ const StoreModel: ModuleType = {
 
                 commit('putInvokedMap')
 
-                await dispatch('listShareVar');
+                dispatch('listShareVar');
+                dispatch('listAssertionCondition');
 
-                await dispatch('listPostCondition');
-                await dispatch('listAssertionCondition');
+                dispatch('listCondition', {
+                    isForBenchmarkCase: false,
+                    conditionSrc: ConditionSrc.PreCondition });
+                dispatch('listCondition', {
+                    isForBenchmarkCase: false,
+                    conditionSrc: ConditionSrc.PostCondition });
 
                 return true;
             } else {
@@ -644,9 +668,9 @@ const StoreModel: ModuleType = {
             commit('setResult', response.data);
             return true;
         },
-        async getInvocationLog({commit, dispatch, state}, invokeId: number) {
-            const response = await getInvocationLog(invokeId);
-            commit('setLog', response.data);
+        async getConsoleLog({commit, dispatch, state}, invokeId: number) {
+            const response = await getConsoleLog(invokeId);
+            commit('setConsoleLog', response.data);
             return true;
         },
 
@@ -676,47 +700,25 @@ const StoreModel: ModuleType = {
         },
 
         // conditions
-        async getPreConditionScript({commit, state}, payload?: { isForBenchmarkCase?: boolean }) {
+        async listCondition({commit, state}, payload: {
+            category: ConditionCategory, isForBenchmarkCase: boolean, conditionSrc: ConditionSrc }) {
+            console.log('listCondition in store')
+
             try {
-                const resp = await getPreConditionScript({
+                const resp = await listConditions({
                     debugInterfaceId: state.debugInfo.debugInterfaceId,
                     endpointInterfaceId: state.debugData.endpointInterfaceId,
                     usedBy: state.debugInfo.usedBy,
+
+                    conditionSrc: payload.conditionSrc,
+                    category: payload?.category,
                     isForBenchmarkCase: payload?.isForBenchmarkCase,
                 });
                 const {data} = resp;
-                commit('setScript', {
-                    data,
-                    isForBenchmarkCase: payload?.isForBenchmarkCase || false,
-                });
-                commit('setSrcScript',cloneDeep(data));
-                return true;
-            } catch (error) {
-                return false;
-            }
-        },
 
-        async savePreConditionScript({commit, dispatch, state}, payload: any) {
-            try {
-                await saveScript(payload);
-                await dispatch('getPreConditionScript');
-                return true
-            } catch (error) {
-                return false;
-            }
-        },
-
-
-        async listPostCondition({commit, state}, payload?: { isForBenchmarkCase: boolean }) {
-            try {
-                const resp = await listPostConditions({
-                    debugInterfaceId: state.debugInfo.debugInterfaceId,
-                    endpointInterfaceId: state.debugData.endpointInterfaceId,
-                    category: ConditionCategory.postCondition,
-                    usedBy: state.debugInfo.usedBy,
-                });
-                const {data} = resp;
-                commit('setPostConditions', {
+                const commitName = payload.conditionSrc === ConditionSrc.PreCondition ?
+                    'setPreConditions' : 'setPostConditions'
+                commit(commitName, {
                     isForBenchmarkCase: payload?.isForBenchmarkCase || false,
                     data
                 });
@@ -727,11 +729,11 @@ const StoreModel: ModuleType = {
         },
         async listAssertionCondition({commit, state}, payload?: { isForBenchmarkCase: boolean }) {
             try {
-                const resp = await listPostConditions({
+                const resp = await listConditions({
                     debugInterfaceId: state.debugInfo.debugInterfaceId,
                     endpointInterfaceId: state.debugData.endpointInterfaceId,
                     category: ConditionCategory.assert,
-                    usedBy: state.debugInfo.usedBy
+                    usedBy: state.debugInfo.usedBy,
                 });
 
                 const {data} = resp;
@@ -744,9 +746,9 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
-        async createPostCondition({commit, dispatch, state}, payload: any) {
+        async createCondition({commit, dispatch, state}, payload: any) {
             try {
-                await createPostConditions(payload);
+                await createConditions(payload);
 
                 if (payload.entityType === ConditionType.checkpoint) {
                     await dispatch('listAssertionCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
@@ -757,60 +759,81 @@ const StoreModel: ModuleType = {
                     }
 
                 } else {
-                    await dispatch('listPostCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
+                    await dispatch('listCondition', {
+                        isForBenchmarkCase: payload.isForBenchmarkCase,
+                        conditionSrc: payload.conditionSrc,
+                        category: payload.category,
+                    });
 
-                    const postConditions = payload.isForBenchmarkCase ? state.benchMarkCase.postConditions : state.postConditions;
-                    const len = postConditions.length
+                    const conditions = payload.isForBenchmarkCase ?
+                        (payload.src === ConditionSrc.PreCondition ? state.benchMarkCase.preConditions : state.benchMarkCase.postConditions) :
+                        (payload.src === ConditionSrc.PreCondition ? state.preConditions : state.postConditions)
+
+                    const len = conditions.length
                     if (len > 0) {
-                        commit('setActivePostCondition', postConditions[len-1]);
+                        commit('setActiveCondition', conditions[len-1]);
                     }
                 }
+
                 return true;
+
             } catch (error) {
                 return false;
             }
         },
-        async disablePostCondition({commit, dispatch, state}, payload: any) {
+        async disableCondition({commit, dispatch, state}, payload: any) {
             try {
-                await disablePostConditions(payload.id);
+                await disableConditions(payload.id);
                 if (payload.entityType === ConditionType.checkpoint) {
                     dispatch('listAssertionCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
                 } else {
-                    dispatch('listPostCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
+                    dispatch('listCondition', {
+                        isForBenchmarkCase: payload.isForBenchmarkCase,
+                        conditionSrc: payload.conditionSrc,
+                        category: payload.category,
+                    });
                 }
                 return true;
             } catch (error) {
                 return false;
             }
         },
-        async removePostCondition({commit, dispatch, state}, payload: any) {
+        async removeCondition({commit, dispatch, state}, payload: any) {
             try {
-                await removePostConditions(payload.id);
-                // 删除具体的数据
-                // 不需要，异步请求了
-                // commit('setPostConditionsDataObj',{
-                //     id: payload.id,
-                //     value:{}
-                // })
+                await removeConditions(payload.id);
+
                 if (payload.entityType === ConditionType.checkpoint) {
                     dispatch('listAssertionCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
                 } else {
-                    dispatch('listPostCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
+                    dispatch('listCondition', {
+                        isForBenchmarkCase: payload.isForBenchmarkCase,
+                        conditionSrc: payload.conditionSrc,
+                        category: payload.category,
+                    });
                 }
                 return true;
+
             } catch (error) {
                 return false;
             }
         },
-        async movePostCondition({commit, dispatch, state}, payload: any) {
+        async moveCondition({commit, dispatch, state}, payload: any) {
             try {
-                await movePostConditions(payload);
+                await moveConditions(payload);
+
                 if (payload.entityType === ConditionType.checkpoint) {
-                    dispatch('listAssertionCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
+                    dispatch('listAssertionCondition', {
+                        isForBenchmarkCase: payload.isForBenchmarkCase
+                    });
                 } else {
-                    dispatch('listPostCondition', { isForBenchmarkCase: payload.isForBenchmarkCase });
+                    dispatch('listCondition', {
+                        isForBenchmarkCase: payload.isForBenchmarkCase,
+                        conditionSrc: payload.conditionSrc,
+                    });
                 }
+
                 return true;
+
             } catch (error) {
                 return false;
             }
@@ -837,7 +860,11 @@ const StoreModel: ModuleType = {
         async saveExtractor({commit, dispatch, state}, payload: any) {
             try {
                 await saveExtractor(payload);
-                dispatch('listPostCondition');
+                dispatch('listCondition', {
+                    isForBenchmarkCase: payload.isForBenchmarkCase,
+                    conditionSrc: payload.conditionSrc,
+                });
+
                 return true;
             } catch (error) {
                 return false;
@@ -854,62 +881,13 @@ const StoreModel: ModuleType = {
         async quickCreateExtractor({commit, dispatch, state}, payload: any) {
             try {
                 await quickCreateExtractor(payload);
-                dispatch('listPostCondition');
                 dispatch('listShareVar');
-                return true;
-            } catch (error) {
-                return false;
-            }
-        },
-        async removeExtractor({commit, dispatch, state}, payload) {
-            try {
-                await removeExtractor(payload.id);
 
-                dispatch('listPostCondition');
-                return true;
-            } catch (error) {
-                return false;
-            }
-        },
-
-        // cookie
-        async getCookie({commit}, cookieData: any) {
-            try {
-                const response = await getCookie(cookieData.entityId);
-                const {data} = response;
-
-                commit('setCookie', {
-                    info: data,
-                    isForBenchmarkCase: data.isForBenchmarkCase,
+                dispatch('listCondition', {
+                    isForBenchmarkCase: payload.isForBenchmarkCase,
+                    conditionSrc: payload.conditionSrc,
                 });
-                return true;
-            } catch (error) {
-                return false;
-            }
-        },
-        async saveCookie({commit, dispatch, state}, payload: any) {
-            try {
-                await saveCookie(payload);
-                dispatch('listPostCondition');
-                return true;
-            } catch (error) {
-                return false;
-            }
-        },
-        async quickCreateCookie({commit, dispatch, state}, payload: any) {
-            try {
-                await quickCreateCookie(payload);
-                dispatch('listPostCondition');
-                return true;
-            } catch (error) {
-                return false;
-            }
-        },
-        async removeCookie({commit, dispatch, state}, payload) {
-            try {
-                await removeCookie(payload.id);
 
-                dispatch('listPostCondition');
                 return true;
             } catch (error) {
                 return false;
@@ -943,7 +921,12 @@ const StoreModel: ModuleType = {
         async saveCheckpoint({commit, dispatch, state}, payload: any) {
             try {
                 await saveCheckpoint(payload);
-                dispatch('listPostCondition');
+
+                dispatch('listCondition', {
+                    isForBenchmarkCase: payload.isForBenchmarkCase,
+                    conditionSrc: payload.conditionSrc,
+                });
+
                 return true
             } catch (error) {
                 return false;
@@ -957,32 +940,34 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
-        async removeCheckpoint({commit, dispatch, state}, id: number) {
-            try {
-                await removeCheckpoint(id);
-
-                dispatch('listPostCondition');
-                return true;
-            } catch (error) {
-                return false;
-            }
-        },
 
         // script
         async getScript({commit}, scriptData: any) {
             try {
                 const response = await getScript(scriptData.entityId);
                 const {data} = response;
-                // 缓存当前数据
-                commit('setPostConditionsDataObj',{
-                    id: data.id,
-                    value:data
-                });
 
-                commit('setSrcPostConditionsDataObj',{
-                    id: data.id,
-                    value:cloneDeep(data)
-                })
+                // 缓存当前数据
+                if (scriptData.conditionSrc === ConditionSrc.PreCondition) {
+                    commit('setPreConditionsDataObj',{
+                        id: data.id,
+                        value:data
+                    })
+                    commit('setSrcPreConditionsDataObj',{
+                        id: data.id,
+                        value:cloneDeep(data)
+                    })
+                } else if (scriptData.conditionSrc === ConditionSrc.PostCondition) {
+                    commit('setPostConditionsDataObj',{
+                        id: data.id,
+                        value:data
+                    })
+                    commit('setSrcPostConditionsDataObj',{
+                        id: data.id,
+                        value:cloneDeep(data)
+                    })
+                }
+
                 return true;
             } catch (error) {
                 return false;
@@ -991,8 +976,12 @@ const StoreModel: ModuleType = {
         async saveScript({commit, dispatch, state}, payload: any) {
             try {
                 await saveScript(payload);
-                // await commit('setSrcScript',cloneDeep(payload));
-                await dispatch('listPostCondition');
+
+                dispatch('listCondition', {
+                    isForBenchmarkCase: payload.isForBenchmarkCase,
+                    conditionSrc: payload.conditionSrc,
+                });
+
                 return true
             } catch (error) {
                 return false;
@@ -1006,30 +995,34 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
-        async removeScript({commit, dispatch, state}, id: number) {
-            try {
-                await removeScript(id);
-
-                dispatch('listPostCondition');
-                return true;
-            } catch (error) {
-                return false;
-            }
-        },
 
         // dbOpt
         async getDbOpt({commit}, dbConnData: any) {
             try {
                 const response = await getDbOpt(dbConnData.entityId);
                 const {data} = response;
-                commit('setPostConditionsDataObj',{
-                    id: data.id,
-                    value:data
-                })
-                commit('setSrcPostConditionsDataObj',{
-                    id: data.id,
-                    value:cloneDeep(data)
-                })
+
+                // 缓存当前数据
+                if (dbConnData.conditionSrc === ConditionSrc.PreCondition) {
+                    commit('setPreConditionsDataObj',{
+                        id: data.id,
+                        value:data
+                    })
+                    commit('setSrcPreConditionsDataObj',{
+                        id: data.id,
+                        value:cloneDeep(data)
+                    })
+                } else if (dbConnData.conditionSrc === ConditionSrc.PostCondition) {
+                    commit('setPostConditionsDataObj',{
+                        id: data.id,
+                        value:data
+                    })
+                    commit('setSrcPostConditionsDataObj',{
+                        id: data.id,
+                        value:cloneDeep(data)
+                    })
+                }
+
                 return true;
             } catch (error) {
                 return false;
@@ -1038,7 +1031,12 @@ const StoreModel: ModuleType = {
         async saveDbOpt({commit, dispatch, state}, payload: any) {
             try {
                 await saveDbOpt(payload);
-                dispatch('listPostCondition');
+
+                dispatch('listCondition', {
+                    isForBenchmarkCase: payload.isForBenchmarkCase,
+                    conditionSrc: payload.conditionSrc,
+                });
+
                 return true;
             } catch (error) {
                 return false;
@@ -1052,67 +1050,9 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
-        async removeDbOpt({commit, dispatch, state}, payload) {
-            try {
-                await removeDbOpt(payload.id);
-
-                dispatch('listPostCondition');
-                return true;
-            } catch (error) {
-                return false;
-            }
-        },
 
         // snippets
-        async addSnippet({commit, dispatch, state}, { name, isForBenchmarkCase }: { name: string, isForBenchmarkCase?: boolean }) {
-            let line = ''
-            if (name === 'log') {
-                line = "log('test');"
-
-            } else if (name === 'set_mock_resp_code') {
-                line = "dt.response.statusCode = 404;"
-            } else if (name === 'set_mock_resp_field') {
-                line = "dt.response.data.field1 = 'val';"
-            } else if (name === 'set_mock_resp_text') {
-                line = "dt.response.data = dt.response.data.replace('old', 'new');"
-
-            } else if (name === 'send_request_get') {
-                line = send_request_get
-            } else if (name === 'send_request_post') {
-                line = send_request_post
-
-            } else if (name === 'assert_resp_status_Code') {
-                line = assert_resp_status_Code
-            } else if (name === 'assert_resp_json_field') {
-                line = assert_resp_json_field
-            } else if (name === 'assert_resp_content_contain') {
-                line = assert_resp_content_contain
-
-            } else {
-                const json = await getSnippet(name)
-                if (json.code === 0) {
-                    line = json.data.script
-                }
-            }
-            const lastScriptData = isForBenchmarkCase ? state.benchMarkCase.scriptData : state.scriptData;
-            let script = (lastScriptData.content ? lastScriptData.content: '') + '\n' + line
-            script = script.trim()
-
-            if (isForBenchmarkCase) {
-                commit('setBenchMarkCase', {
-                    scriptData: {
-                        ...state.benchMarkCase.scriptData,
-                        content: script,
-                    }
-                })
-                return true;
-            }
-            commit('setScriptContent', { content: script, isForBenchmarkCase });
-
-            return true;
-        },
-
-        async addSnippetForPost({commit, dispatch, state}, {name, data}) {
+        async addSnippet({commit, dispatch, state}, {name, data, conditionSrc}) {
             let line = ''
             if (name === 'log') {
                 line = "log('test');"
@@ -1141,13 +1081,22 @@ const StoreModel: ModuleType = {
                     line = json.data.script
                 }
             }
-            // const scriptData = state.srcPostConditionsDataObj?.
+
+            // const scriptData = state.srcConditionsDataObj?.
             const {id,content} = data?.value || {};
             let script = (content ? content: '') + '\n' + line
             script = script.trim()
-            commit('setPostScriptContent', {
-                id:id,
-                content:script
+
+            let commitName = ''
+            if (conditionSrc === ConditionSrc.PreCondition) {
+                commitName = 'setPreScriptContent'
+            } else if (conditionSrc === ConditionSrc.PostCondition) {
+                commitName = 'setPostScriptContent'
+            }
+
+            commit(commitName, {
+                id: id,
+                content: script
             });
 
             return true;
