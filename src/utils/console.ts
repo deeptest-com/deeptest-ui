@@ -1,5 +1,7 @@
 
 export function genScriptLogs(msg) {
+    console.log('genScriptLogs')
+
     const results = msg.match(/(.+) JSON~(.*)~JSON/);
 
     if (results?.length === 3) {
@@ -11,8 +13,13 @@ export function genScriptLogs(msg) {
             arr.forEach((item, index) => {
                 if (item.indexOf('{') === 0) {
                     const obj = JSON.parse(item)
-                    const cls = obj.success ? 'pass' : 'fail'
-                    lines.push(`<div class="${cls} script-log child">${obj.msg}</div>`)
+
+                    if (obj.isCustomObj) { // e.x. gen by jsErrMsg method when script execution
+                        const cls = obj.success ? 'pass' : 'fail'
+                        lines.push(`<div class="${cls} script-log child">${obj.msg}</div>`)
+                    } else {
+                        lines.push(`<div class="script-log child">${item}</div>`)
+                    }
 
                 } else {
                     // Assertion Pass [Assertion 1].

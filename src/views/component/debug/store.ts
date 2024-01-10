@@ -829,6 +829,7 @@ const StoreModel: ModuleType = {
                     dispatch('listCondition', {
                         isForBenchmarkCase: payload.isForBenchmarkCase,
                         conditionSrc: payload.conditionSrc,
+                        category: payload.category,
                     });
                 }
 
