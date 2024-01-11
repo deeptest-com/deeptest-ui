@@ -52,7 +52,7 @@ const ErrorInfoMap = {
   10700: {
     title: '项目不存在',
     desc: '抱歉，访问的项目不存在',
-    actionList: [backHome]
+    actionList: !isWujieEnv ? [backHome] : []
   },
   10600: {
     title: '无权访问',
@@ -63,12 +63,12 @@ const ErrorInfoMap = {
         applyProPermissionsModalVisible.value = true;
       },
       type: 'default',
-    }, backHome]
+    }, !isWujieEnv ? backHome : null].filter((e: any) => ![null, undefined].includes(e))
   },
   403: {
     title: '无权访问',
     desc: '抱歉，您无权访问此页面',
-    actionList: [backHome]
+    actionList:  !isWujieEnv ? [backHome] : []
   }
 }
 
