@@ -1,9 +1,13 @@
 <template>
   <div class="custom-code-content">
     <a-tabs v-model:activeKey="activeKey">
+
+      <a-tab-pane key="assertion" tab="断言">
+        {{detail.assertions}}
+      </a-tab-pane>
+
       <a-tab-pane key="output" tab="控制台">
-        定制代码执行<span v-if="detail.result" class="success">成功</span><span v-else class="fail">失败</span>，
-        输出{{detail.output}}。
+        <span v-html="getResultMsg()" class="script-logs"></span>
       </a-tab-pane>
 
       <a-tab-pane key="content" tab="代码" force-render>
@@ -43,6 +47,7 @@ import {
 import {MonacoOptions} from "@/utils/const";
 import IconSvg from "@/components/IconSvg";
 import MonacoEditor from "@/components/Editor/MonacoEditor.vue";
+import {genScriptLogs} from "@/utils/console";
 
 const props = defineProps({
   data: {
@@ -71,7 +76,41 @@ watch(() => props.data, (newVal) => {
   timestamp.value = Date.now() + ''
 }, {immediate: true, deep: true})
 
+const getResultMsg = () => {
+  console.log('getResultMsg')
+
+  const msg = '定制代码执行' + (detail.value.result ? '成功' : '失败') +
+      ' JSON~'
+      + detail.value.output +
+      '~JSON'
+
+  const ret = genScriptLogs(msg)
+
+  return ret
+}
+
 </script>
+
+<style lang="less">
+.custom-code-content {
+  .script-logs {
+    .script-log {
+      &.child {
+        padding-left: 28px;
+      }
+      &.normal {
+        color: rgba(0, 0, 0, 0.65) !important;
+      }
+      &.pass {
+        color: #14945a;
+      }
+      &.fail {
+        color: #D8021A;
+      }
+    }
+  }
+}
+</style>
 
 <style scoped lang="less">
 .custom-code-content {
