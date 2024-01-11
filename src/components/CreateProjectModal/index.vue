@@ -15,6 +15,7 @@
         class="custom-center-form"
         :model="formStateRef"
         :wrapper-col="wrapperCol"
+        :label-col="{ style: { width: isInLeyanWujieContainer ? '110px' : '82px' } }"
       >
         <a-form-item label="项目名称" v-bind="validateInfos.name">
                     <a-input
@@ -53,14 +54,58 @@
               :filter-option="filterOption"
           >
             <a-select-option
-                v-for="option in userListOptions"
-                :key="option.id+'-'+option.name"
-                :value="option.id"
-            >{{ option.label }}({{ option.email.split('@')[0] }})
-            </a-select-option
-            >
+              v-for="option in userListOptions"
+              :key="option.id+'-'+option.name"
+              :value="option.id"
+            >{{ option.label }}
+            </a-select-option>
           </a-select>
         </a-form-item>
+        <template v-if="isInLeyanWujieContainer">
+          <!-- ly wujie环境下 展示所属产品  -->
+          <a-form-item label="所属产品">
+            <div class="project-edit-pd">
+              <a-select
+                v-model:value="formStateRef.productId"
+                show-search
+                placeholder="请选择所属产品"
+                optionFilterProp="label"
+                mode="multiple"
+                :filter-option="filterOption"
+              >
+                <a-select-option
+                  v-for="option in userListOptions"
+                  :key="option.id+'-'+option.name"
+                  :value="option.id"
+                >{{ option.label }}
+                </a-select-option>
+              </a-select>
+              <a-button type="primary" :icon="h(PlusOutlined)"></a-button>
+            </div>
+          </a-form-item>
+          <!-- ly wujie环境下 展示所属空间  -->
+          <a-form-item label="承接研发空间">
+            <div class="project-edit-pd">
+              <a-select
+                v-model:value="formStateRef.spaceId"
+                show-search
+                placeholder="请选择承接研发空间"
+                optionFilterProp="label"
+                mode="multiple"
+                :filter-option="filterOption"
+              >
+                <a-select-option
+                  v-for="option in userListOptions"
+                  :key="option.id+'-'+option.name"
+                  :value="option.id"
+              >{{ option.label }}({{ option.email.split('@')[0] }})
+              </a-select-option
+              >
+              </a-select>
+              <a-checkbox v-model:checked="formStateRef.sync">同步空间成员</a-checkbox>
+            </div>
+          </a-form-item>
+        </template>
         <a-form-item label="示例数据">
           <a-switch v-model:checked="formStateRef.includeExample"/>
         </a-form-item>
@@ -79,10 +124,10 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineEmits, defineProps, reactive, ref, watch} from "vue";
+import {computed, defineEmits, defineProps, reactive, ref, watch, h} from "vue";
 import {Form, message, notification} from "ant-design-vue";
+import { PlusOutlined } from "@ant-design/icons-vue";
 import {StateType as UserStateType} from "@/store/user";
-import { CustomLabel } from "@/components/Form/label";
 import {StateType as ProjectStateType} from "@/views/project/store";
 import {SelectTypes} from "ant-design-vue/es/select";
 import {useStore} from "vuex";
@@ -101,7 +146,6 @@ const { isInLeyanWujieContainer } = useWujie();
 const userListOptions = computed<SelectTypes["options"]>(
     () => (store.state.Project.userList || []).filter(e => isInLeyanWujieContainer ? e.username !== 'admin' : e.username !== '')
 );
-const labelCol = {span: 6};
 const wrapperCol = {span: 14};
 const projectInfo = {
   name: "",
@@ -113,7 +157,13 @@ const projectInfo = {
   includeExample: true,
 };
 
-const formStateRef = reactive(props.formState || projectInfo);
+const wujieExtraInfo = {
+  spaceId: null,
+  productId: null,
+  sync: false,
+}
+
+const formStateRef = reactive(props.formState || ( isInLeyanWujieContainer ? { ...projectInfo, wujieExtraInfo } : projectInfo ));
 const loading = ref(false);
 
 const filterOption = (input: string, option: any) => {
@@ -178,16 +228,18 @@ const handleSelectLogo = (item: any) => {
   formStateRef.logo = item.imgName;
 };
 
-watch(
-    () => props.visible,
-    (val) => {
-      if (val) {
-        store.dispatch("Project/getUserList");
-        if (!props?.formState?.id) {
-          resetFields();
-        }
-      }
-    }, {immediate: true});
+watch(() => props.visible,
+  (val) => {
+  if (val) {
+    store.dispatch("Project/getUserList");
+    if (!props?.formState?.id) {
+      resetFields();
+    }
+  }
+}, {immediate: true});
+
+// todo: 主应用 通过props传递 一些数据
+
 </script>
 
 <style scoped lang="less">
@@ -247,6 +299,16 @@ watch(
   :deep(.edit-button .ant-col) {
     margin: 0;
     flex: none;
+  }
+
+  .project-edit-pd {
+    display: flex;
+    align-items: center;
+
+    :deep(.ant-select) {
+      flex: 1;
+      margin-right: 10px;
+    }
   }
 }
 </style>

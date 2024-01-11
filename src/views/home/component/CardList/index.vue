@@ -152,7 +152,7 @@ const dropDownList = [{
   action: (record) => emit("exit", record),
   auth: 'p-project-exit',
   ifShow: (record) => hasProjectAuth('p-project-exit') && record.accessible === 1,
-}]
+}];
 
 watch(() => props?.searchValue, (val) => {
   current.value = 1;

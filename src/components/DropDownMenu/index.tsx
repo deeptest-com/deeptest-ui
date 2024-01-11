@@ -122,6 +122,8 @@ export const DropdownActionMenu = defineComponent({
   setup(props, { slots }) {
     const { dropdownList, actionList, record } = toRefs(props);
     const { hasPermission }  = usePermission();
+
+    const newDropDownList = dropdownList.value.filter(e => hasPermission(e.auth || '') || ifShow(e, props))
     
     return () => {
       return (
@@ -132,9 +134,9 @@ export const DropdownActionMenu = defineComponent({
           {actionList.value.length > 0 && (
             <a-divider type="vertical" />
           )} */}
-          {dropdownList.value.length > 0 && (
+          {dropdownList.value.length > 0 && newDropDownList.length > 0 && (
             <DropdownList 
-              list={dropdownList.value.filter(e => hasPermission(e.auth || '') || ifShow(e, props))} 
+              list={newDropDownList} 
               record={record.value} 
               v-slots={slots} />
           )}
