@@ -32,7 +32,7 @@ function createProjectGuard(router) {
           })
         }
       } else {
-        await store.dispatch('Global/getPermissionList', { projectId: result.id });
+        await store.dispatch('Global/getPermissionMenuList', { currProjectId: result.id });
       }
       return next();
     }

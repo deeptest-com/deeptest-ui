@@ -46,7 +46,7 @@ import {
 } from 'vue';
 import {useStore} from "vuex";
 import { useRouter } from "vue-router";
-import { useClipboard } from '@vueuse/core';
+import useClipboard from "@/composables/useClipboard";
 
 import { notifySuccess } from '@/utils/notify';
 import bus from "@/utils/eventBus";
@@ -69,7 +69,7 @@ const props = defineProps({
 
 const emit = defineEmits(['ok', 'close', 'refreshList']);
 const store = useStore<{ Global}>();
-const { copy } = useClipboard({});
+const { copy } = useClipboard({legacy: true});
 const router = useRouter();
 
 const contentRef: any = ref(null)
@@ -100,6 +100,7 @@ const toDetail = (url: string) => {
 };
 const shareLink = (url: string) => {
   copy(url);
+
   notifySuccess('复制成功，项目成员可通过此链接访问');
 }
 

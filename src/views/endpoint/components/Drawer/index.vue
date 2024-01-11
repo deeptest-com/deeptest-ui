@@ -12,7 +12,7 @@
         :show-share="true"
         @update-title="updateTitle" >
         <template #custom>
-          <div class="diff-tag" v-if="endpointDetail.changedStatus > ChangedStatus.NoChanged" >   
+          <div class="diff-tag" v-if="endpointDetail.changedStatus > ChangedStatus.NoChanged" >
           <a-tag :color="endpointDetail.changedStatus == ChangedStatus.Changed?'warning':''">
             <template #icon>
               <WarningFilled v-if="endpointDetail.changedStatus == ChangedStatus.Changed"  @click="showDiff(endpointDetail.id)" :style="{color: '#fb8b06'}" />
@@ -104,6 +104,7 @@ import {EndpointTabsList} from '@/config/constant';
 import cloneDeep from "lodash/cloneDeep";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
+import {useWujie} from "@/composables/useWujie";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import {WarningFilled,InfoCircleOutlined } from '@ant-design/icons-vue';
 import {ChangedStatus,SourceType} from "@/utils/enum";
@@ -252,6 +253,7 @@ async function updateTitle(title) {
       {id: endpointDetail.value.id, name: title}
   );
   await store.dispatch('Endpoint/getEndpointDetail', {id: endpointDetail.value.id});
+  resetDefineChange();
 }
 
 async function changeDescription(description) {
@@ -317,8 +319,14 @@ async function save() {
   }, 200);
 }
 
+
+const {projectName,parentOrigin,isWujieEnv,isInLeyanWujieContainer} = useWujie();
 const detailLink = computed(() => {
   const {params: {projectNameAbbr = ''}} = router.currentRoute.value;
+  // 无界环境，使用父级域名跳转
+  if(isInLeyanWujieContainer){
+    return `${parentOrigin}/lyapi/${projectName}/IM/${endpointDetail.value?.serialNumber}`;
+  }
   return `${window.location.origin}/${projectNameAbbr}/IM/${endpointDetail.value?.serialNumber}`;
 })
 

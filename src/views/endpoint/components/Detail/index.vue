@@ -128,6 +128,7 @@ async function updateTitle(title) {
       {id: imDetail.value.id, name: title}
   );
   await store.dispatch('Endpoint/getEndpointDetail', {id: imDetail.value.id});
+  resetDefineChange();
 }
 
 async function changeDescription(description) {

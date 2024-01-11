@@ -87,11 +87,13 @@ import {StateType as Endpoint} from "../../endpoint/store";
 import {StateType as GlobalStateType} from "@/store/global";
 import {getRightTabPanelPosition} from "@/utils/dom";
 import {UsedBy} from "@/utils/enum";
+import { useWujie } from "@/composables/useWujie";
 const usedBy = inject('usedBy') as UsedBy
 
 const {t} = useI18n();
 const store = useStore<{  Debug: Debug, Endpoint: Endpoint, ProjectGlobal: ProjectGlobal, Global: GlobalStateType }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
+const { isInLeyanWujieContainer } = useWujie();
 
 const props = defineProps({
   onSaveDebugData: {
@@ -149,8 +151,8 @@ const posStyleHis = ref({})
 
 const changeRightTab = () => {
   console.log('changeRightTab')
-  posStyleEnv.value = getRightTabPanelPosition('env-tab')
-  posStyleHis.value = getRightTabPanelPosition('his-tab')
+  posStyleEnv.value = getRightTabPanelPosition('env-tab', isInLeyanWujieContainer)
+  posStyleHis.value = getRightTabPanelPosition('his-tab', isInLeyanWujieContainer)
 }
 
 const closeRightTab = () => {

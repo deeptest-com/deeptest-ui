@@ -34,23 +34,8 @@
                 </span>
               <span class="tree-title-text" v-else>{{ nodeProps.title }}</span>
               <span class="more-icon" v-if="nodeProps.id !== -1">
-                  <a-dropdown>
-                       <MoreOutlined/>
-                      <template #overlay>
-                        <a-menu>
-                          <a-menu-item key="0" @click="newCategorie(nodeProps)">
-                             新建子分类
-                          </a-menu-item>
-                          <a-menu-item :disabled="nodeProps.id === -1" key="1" @click="deleteCategorie(nodeProps)">
-                            删除分类
-                          </a-menu-item>
-                          <a-menu-item :disabled="nodeProps.id === -1" key="1" @click="editCategorie(nodeProps)">
-                            编辑分类
-                          </a-menu-item>
-                        </a-menu>
-                      </template>
-                    </a-dropdown>
-                </span>
+                <DropdownActionMenu :dropdown-list="ContextMenuList" :record="nodeProps"/>
+              </span>
             </div>
           </template>
         </a-tree>
@@ -89,6 +74,7 @@ import {setSelectedKey} from "@/utils/cache";
 import {StateType as PlanStateType} from "@/views/plan/store";
 import {filterTree, filterByKeyword} from "@/utils/tree";
 import {notifyError, notifySuccess, notifyWarn} from "@/utils/notify";
+import { DropdownActionMenu } from '@/components/DropDownMenu';
 
 const store = useStore<{ Plan: PlanStateType, ProjectGlobal: ProjectStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -147,6 +133,25 @@ const treeData: any = computed(() => {
 });
 
 /**
+ * 分类下拉菜单
+ */
+ const ContextMenuList = [
+  {
+    label: '新建子分类',
+    action: (_record: any) => newCategorie(_record),
+  },
+  {
+    label: '删除分类',
+    auth: 'p-api-tp-del',
+    action: (_record: any) => deleteCategorie(_record),
+  },
+  {
+    label: '编辑分类',
+    action: (_record: any) => editCategorie(_record),
+  }
+];
+
+/**
  * 搜索结果为空时展示
  */
  const showKeywordsTip = computed(() => {
@@ -160,8 +165,8 @@ async function loadCategories() {
 
 watch(() => {
   return currProject.value;
-}, async (newVal) => {
-  if (newVal?.id) {
+}, async (newVal, oldVal) => {
+  if (newVal?.id !== oldVal?.id) {
     searchValue.value = '';
     store.commit('Plan/setTreeDataCategory', {});
     await loadCategories();
@@ -333,11 +338,6 @@ async function onDrop(info: DropEvent) {
     notifyError('移动失败');
   }
 }
-
-onMounted(async () => {
-  await loadCategories();
-  // expandAll();
-})
 
 </script>
 

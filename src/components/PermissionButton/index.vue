@@ -1,5 +1,4 @@
 <template>
-  <!-- 权限按钮 -->
   <!-- 这里判断当前页面按钮是否在权限列表中,反之则提示用户 -->
   <a-tooltip :title="disabled ? disabledTooltip : null" color="#1677ff">
     <a-button
@@ -25,87 +24,37 @@
   </a-tooltip>
 </template>
 <script setup lang="ts">
-import { defineProps, defineEmits, computed, ref, watch } from "vue";
-import { useStore } from "vuex";
-import { StateType as GlobalStateType } from "@/store/global";
-import { PermissionButtonType } from "@/types/permission";
+import { defineProps, defineEmits, computed } from "vue";
+import usePermission from "@/composables/usePermission";
 
 const props = defineProps<{
-  code: String;
-  text: String;
-  disabled?: Boolean;
-  type?: String;
-  htmlType?: String;
-  danger?: Boolean;
-  size?: String;
-  loading?: Boolean;
-  dataCreateUser?: String;
-  action?: String;
-  tip?: String;
+  code?: string;
+  text: string;
+  disabled?: boolean;
+  type?: string;
+  htmlType?: string;
+  danger?: boolean;
+  size?: string;
+  loading?: boolean;
+  dataCreateUser?: string;
+  action?: string;
+  tip?: string;
 }>();
 
 const emits = defineEmits(["handleAccess"]);
 const disabledTooltip = computed(() => props.tip || "暂无权限，请联系管理员");
-const store = useStore<{ Global: GlobalStateType; User; ProjectGlobal }>();
-const permissionButtonMap = computed<any[]>(
-  () => store.state.Global.permissionButtonMap
-);
+const { hasPermission } = usePermission();
 const disabled = computed(() => {
-  console.log(props);
   if (props.disabled) {
     return true;
   }
-  if (permissionButtonMap.value && Object.keys(permissionButtonMap.value).length > 0) {
-    const permission = !hasPermission();
-    return permission;
-  }
-  return false;
+  return !hasPermission(props.code);
 });
-const currentUser = computed<any>(() => store.state.User.currentUser);
-const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 
 const handleClick = (e) => {
   e.preventDefault();
   emits("handleAccess");
 };
 
-const hasPermission = () => {
-  // let hasPermissionButton = false
-  // let filterUserName = ["undefined", "", currentUser.value.username]
-  // if (currentUser.value.sysRoles.indexOf('admin') != -1) {
-  //   return true
-  // }
-  // if (currentUser.value.projectRoles[currProject.value.id] == 'admin') {
-  //   return true
-  // }
-  // if (permissionButtonMap.value[PermissionButtonType[`${props.code}`]] && props.action != 'delete') {
-  //   return true
-  // }
-  // if (permissionButtonMap.value[PermissionButtonType[`${props.code}`]] && props.action == 'delete' && filterUserName.indexOf(props.dataCreateUser) > -1)  {
-  //   return true
-  // }
-  if (!props.code) {
-    return true;
-  }
-  const hasPermissionButton =
-    permissionButtonMap.value[PermissionButtonType[`${props.code}`]];
-  return hasPermissionButton;
-};
 
 </script>
-<style scoped lang="less">
-.permission-btn {
-  
-  &.envDetail-btn {
-    margin-bottom: 16px;
-  }
-
-  &.action-new {
-    margin-right: 8px;
-  }
-
-  &.save-btn {
-    margin-right: 16px;
-  }
-}
-</style>

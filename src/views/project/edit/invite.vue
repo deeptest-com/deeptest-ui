@@ -10,19 +10,19 @@
 
       <a-form class="custom-center-form" :label-col="{ style: { width: '68px' } }" :wrapper-col="wrapperCol" ref="formRef">
         <a-form-item label="用户名" v-bind="validateInfos.userId">
-                <a-select v-model:value="modelRef.userId" show-search @change="selectUser" :options="options" optionFilterProp="label"
+                <a-select placeholder="请选择用户" v-model:value="modelRef.userId" show-search @change="selectUser" :options="options" optionFilterProp="label"
                           @blur="validate('userId', { trigger: 'blur' }).catch(() => {})">
                 </a-select>
               </a-form-item>
 
         <a-form-item label="角色" v-bind="validateInfos.roleName">
-                <a-select v-model:value="modelRef.roleName" show-search
+                <a-select placeholder="请选择角色" v-model:value="modelRef.roleName" show-search
                  @blur="validate('roleName', { trigger: 'blur' }).catch(() => {})">
                  <a-select-option  v-for="(option,key) in roles" :key=key :value="option.value">{{option.label}}</a-select-option>
                 </a-select>
         </a-form-item>
 
-        <a-form-item label="邮箱" v-bind="validateInfos.email" >
+        <a-form-item placeholder="请输入邮箱" label="邮箱" v-bind="validateInfos.email" >
           <a-input v-model:value="modelRef.email" />
         </a-form-item>
       </a-form>

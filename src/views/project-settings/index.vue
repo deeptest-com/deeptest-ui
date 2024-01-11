@@ -1,16 +1,20 @@
 <template>
   <div class="container">
-    <Tab />
+    <Tab v-if="!isWujieEnv"/>
     <router-view></router-view>
   </div>
 </template>
 <script setup lang="ts">
 
-import { ref, watch } from 'vue';
+import {onMounted, ref, watch} from 'vue';
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { StateType as ProjectSettingStateType } from './store';
 import Tab from './components/common/Tab.vue';
+import {useWujie} from "@/composables/useWujie";
+import settings from "@/config/settings";
+
+const { isWujieEnv,  } = useWujie();
 
 const router = useRouter();
 
@@ -41,6 +45,10 @@ watch(() => {
 }, {
   immediate: true
 })
+
+
+
+
 </script>
 
 <style scoped lang="less">
