@@ -1,5 +1,6 @@
 import {defineComponent, ref, watch,} from 'vue';
 import './LogTreeView.less';
+
 import ScenarioHeader from "./ScenarioHeader.vue";
 import InterfaceHeader from "./InterfaceHeader.vue";
 import ProcessorHeader from "./ProcessorHeader.vue";

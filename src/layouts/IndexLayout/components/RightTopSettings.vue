@@ -4,12 +4,13 @@
 
       <!--  客户端下载 -->
       <template v-if="!isElectronEnv">
-        <a-dropdown placement="bottomRight" v-if="isLyEnv">
+        <a-dropdown v-if="isLyEnv" placement="bottomRight">
           <a class="indexlayout-top-usermenu ant-dropdown-link" style="margin-right: 4px;margin-left: 4px;">
             <DesktopOutlined type="top-right-web" class="top-right-icon-desktop"/>
-            <span class="operation-name">{{ '客户端下载' }}</span>
+            <span class="operation-name">客户端下载</span>
             <DownOutlined class="user-icon"/>
           </a>
+
           <template #overlay>
             <a-menu @click="downloadClient">
               <a-menu-item v-for="client in clientDownloadUrlOpts" :key="client.value">
@@ -21,7 +22,8 @@
 
         <span v-else>
           <CloudDownloadOutlined class="user-icon" style="color: #c0c4cc;" />
-          <a href="https://deeptest.com/setup.html" target="_blank" style="color: #fff;">
+
+          <a href="https://deeptest.com/setup.html" target="_blank" style="color: #8A8A8A;">
             客户端下载
           </a>
         </span>
