@@ -1,7 +1,10 @@
 import { createApp } from 'vue';
+// import
 
-// 全局样式
 import '@/assets/css/global.less';
+
+import fixMonacoEditor from "@/utils/fixMonacoEditor";
+
 
 // 引入 Antd
 import Antd from 'ant-design-vue';
@@ -19,7 +22,7 @@ import i18n from '@/config/i18n';
 import _ from "lodash";
 import mitt, {Emitter} from "@/utils/mitt";
 import { setupRouterGuard } from './router/guard';
-
+fixMonacoEditor();
 const app = createApp(App);
 app.use(store);
 app.use(router)

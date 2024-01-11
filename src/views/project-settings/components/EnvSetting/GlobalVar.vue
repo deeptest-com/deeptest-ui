@@ -1,7 +1,6 @@
 <template>
     <div class="title">全局变量</div>
     <PermissionButton
-        code="ADD-GLOBAL-VARIABLE"
         class="envDetail-btn"
         text="添加"
         @handle-access="addGlobalVar">
@@ -43,7 +42,6 @@
                         </template>
                         <template #customAction="{ index }">
                             <PermissionButton
-                                code="DELETE-GLOBAL-VARIABLE"
                                 type="text"
                                 size="small"
                                 :danger="true"
@@ -56,7 +54,6 @@
             </EmptyCom>
             <div class="envDetail-footer">
                 <PermissionButton
-                    code="SAVE-GLOBAL-VARIABLE"
                     type="primary"
                     html-type="submit"
                     class="save-btn"
@@ -168,7 +165,7 @@ watch(() => {
     align-items: center;
     justify-content: flex-end;
 
-    .save-btn {
+    :deep(.save-btn) {
         margin-right: 16px;
     }
 }

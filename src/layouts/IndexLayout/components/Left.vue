@@ -17,7 +17,7 @@
           :onOpenChange="onOpenChange"
           :menuData="menuData">
       </sider-menu>
-      <div v-if="hasSettingPermission" :class="['settings', isActive ? 'settings-active' : '' ]" @click="handleRedirect">
+      <div v-if="hasPermission('p-setting-api')" :class="['settings', isActive ? 'settings-active' : '' ]" @click="handleRedirect">
         <div class="settings-menu">
           <Icon :type="isActive ? 'settings-active' : 'settings'" />
           <span class="left-menu-title">项目设置</span>
@@ -42,6 +42,7 @@ import {RoutesDataItem} from '@/utils/routes';
 import SiderMenu from './SiderMenu.vue';
 import Icon from "./Icon.vue";
 import {isLeyan} from "@/utils/comm";
+import usePermission from "@/composables/usePermission";
 
 export default defineComponent({
   name: 'Left',
@@ -91,18 +92,11 @@ export default defineComponent({
   setup(props) {
     let isLeyanEnv = isLeyan();
     const router = useRouter();
+    const { hasPermission } = usePermission();
     const store = useStore<{ Global: GlobalStateType, ProjectGlobal: ProjectGlobalStateType }>();
-    const permissionRouteMenuMap = computed(() => store.state.Global.permissionMenuMap);
     const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
     const isActive = computed(() => {
       return router.currentRoute.value.path.includes('project-setting');
-    });
-
-    const hasSettingPermission = computed(() => {
-      if (permissionRouteMenuMap.value && permissionRouteMenuMap.value['project-setting']) {
-        return true;
-      }
-      return false;
     });
 
     const handleRedirect = () => {
@@ -113,7 +107,7 @@ export default defineComponent({
       isLeyanEnv,
       isActive,
       handleRedirect,
-      hasSettingPermission,
+      hasPermission,
     };
   }
 

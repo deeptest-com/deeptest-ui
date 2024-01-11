@@ -1,6 +1,6 @@
 <template>
-  <div class="home-wrap">
-    <div class="home-header">
+  <div :class="{ 'home-wrap': true, 'wujie-home-wrap': isInLeyanWujieContainer }">
+    <div :class="{'home-header': true, 'hidden': isWujieEnv}">
       <div class="home-header-left" :class="{'leyan-logo':isLeyanEnv}" @click="handleRedirect">
       </div>
       <div class="home-header-right">
@@ -21,7 +21,7 @@ import UserSetting from './IndexLayout/components/RightTopSettings.vue';
 import RightTopUpdate from './IndexLayout/components/RightTopUpdate.vue';
 import settings from '@/config/settings';
 import {isLeyan} from "@/utils/comm";
-
+import {useWujie} from "@/composables/useWujie";
 export default defineComponent({
   name: 'HomeLayout',
   components: {
@@ -31,6 +31,7 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     let isLeyanEnv = isLeyan();
+    const { isWujieEnv, isInLeyanWujieContainer } = useWujie();
 
     watch(() => {
       return router.currentRoute.value;
@@ -48,9 +49,13 @@ export default defineComponent({
       router.push('/');
     }
 
+
+
     return {
       handleRedirect,
-      isLeyanEnv
+      isLeyanEnv,
+      isWujieEnv,
+      isInLeyanWujieContainer
     }
   }
 })
@@ -62,6 +67,11 @@ export default defineComponent({
   height: 100vh;
   overflow: hidden;
 
+  &.wujie-home-wrap {
+    width: 100%;
+    min-width: unset;
+  }
+
   .home-header {
     width: 100%;
     height: 64px;
@@ -71,6 +81,11 @@ export default defineComponent({
     justify-content: space-between;
     padding-left: 24px;
     box-sizing: border-box;
+
+    &.hidden {
+      height: 0;
+      overflow: hidden;
+    }
 
     .home-header-left {
       width: 105px;

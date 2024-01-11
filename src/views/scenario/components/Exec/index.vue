@@ -60,6 +60,7 @@ import {momentUtc} from "@/utils/datetime";
 import {CurrentUser, StateType as UserStateType} from "@/store/user";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import {getUuid} from "@/utils/string";
+import { setServeUrl } from "@/utils/url";
 
 const props = defineProps<{
   execDrawerVisible: boolean;
@@ -105,7 +106,7 @@ const execStart = async () => {
   const data = {
     userId: currUser.value.id,
     execUuid: execUuid.value,
-    serverUrl: process.env.VUE_APP_API_SERVER,
+    serverUrl: setServeUrl(process.env.VUE_APP_API_SERVER),
     token: await getToken(),
     scenarioId: scenarioId.value,
     environmentId: currEnvId.value,
