@@ -2,9 +2,11 @@
   <div class="scenario-list-main">
     <div class="filter-header">
       <div class="left">
-        <a-space :size="16">
-          <a-button type="primary" @click="() => edit(0)">新建场景</a-button>
-        </a-space>
+        <PermissionButton
+          v-if="hasPermission('')"
+          type="primary"
+          :text="'新建场景'"
+          @handle-access="edit(0)" />
       </div>
       <div class="right">
         <a-form :layout="'inline'" class="filter-items">
@@ -174,8 +176,11 @@ import EditAndShowSelect from '@/components/EditAndShowSelect/index.vue';
 import Select from '@/components/Select/index.vue';
 import TooltipCell from '@/components/Table/tooltipCell.vue';
 import { DropdownActionMenu } from "@/components/DropDownMenu";
+import PermissionButton from '@/components/PermissionButton/index.vue';
+
 import {notifyError, notifySuccess} from "@/utils/notify";
 import useSharePage from "@/hooks/share";
+import usePermission from "@/composables/usePermission";
 
 type Key = ColumnProps['key'];
 
@@ -186,6 +191,7 @@ interface DataType {
   address: string;
 }
 
+const { hasPermission, isCreator } = usePermission();
 const { share } = useSharePage();
 const store = useStore<{ Scenario: StateType, ProjectGlobal: ProjectStateType,Project }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -224,7 +230,10 @@ const dropdownMenuList = [
   {
     label: '删除',
     action: (record) => remove(record.id),
-    auth: '',
+    ifShow: (record) => {
+      return isCreator(record.createUserName || '');
+    },
+    auth: 'p-api-ts-del',
   }
 ]
 
@@ -232,11 +241,14 @@ watch(nodeDataCategory, () => {
   getList(1, nodeDataCategory.value?.id || 0);
 }, {deep: false})
 
-watch(currProject, () => {
-  console.log('watch currProject', currProject.value.id)
-  getList(1, nodeDataCategory.value.id);
-  queryParams.type = queryParams.status = queryParams.priority = queryParams.keywords = ""
-}, {deep: false})
+watch(() => {
+  return currProject.value;
+}, (val) => {
+  if (val.id) {
+    getList(1, nodeDataCategory.value.id);
+    queryParams.type = queryParams.status = queryParams.priority = queryParams.keywords = ""
+  }
+ }, {deep: false})
 
 watch(queryParams, () => {
   getList(1, nodeDataCategory.value?.id || 0);
@@ -250,7 +262,6 @@ onMounted(async () => {
 const loading = ref<boolean>(true);
 
 const getList = debounce(async (current: number, categoryId: number): Promise<void> => {
-  console.log('getList')
   loading.value = true;
   await store.dispatch('Scenario/listScenario', {
     categoryId,

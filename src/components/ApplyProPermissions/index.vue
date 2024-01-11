@@ -31,7 +31,7 @@
             <a-select-option
               v-for="(option, key) in roles"
               :key="key"
-              :value="item.projectId + '-' + option.name"
+              :value="option.name"
               >{{ option.displayName }}</a-select-option
             >
           </a-select>
@@ -104,9 +104,9 @@ const submitForm = async () => {
   validate()
     .then(async () => {
       let res = await applyJoin({
-        projectId: formStateRef.projectId.split("-")[0]*1,
+        projectId: props.item.projectId,
         description: formStateRef.description,
-        projectRoleName: formStateRef.projectId.split("-")[1],
+        projectRoleName: formStateRef.projectId,
       });
       if (res.code === 0) {
         notifySuccess("申请成功");

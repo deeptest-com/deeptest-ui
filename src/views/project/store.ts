@@ -168,7 +168,7 @@ const StoreModel: ModuleType = {
             const { data } = response;
             if (response.code === 0) {
                 data.result.forEach((item) => {
-                    item.label = item.name;
+                    item.label = item.name + `(${item.email.split('@')[0]})`;
                     item.value = item.id
                 })
                 commit('setNotExistedUserList',data.result);

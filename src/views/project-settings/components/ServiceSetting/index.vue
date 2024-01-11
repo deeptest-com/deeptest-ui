@@ -68,6 +68,7 @@ import Drawer from './Drawer.vue';
 import { StateType as ProjectStateType } from "@/store/project";
 import { StateType as ProjectSettingStateType } from '../../store';
 import { serviceColumns } from '../../config';
+import {useWujie} from "@/composables/useWujie";
 
 const store = useStore<{ ProjectGlobal: ProjectStateType, ProjectSetting: ProjectSettingStateType,Project }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -129,44 +130,37 @@ const rules = {
 
 const dropMenuList = [
 {
-    key: '1',
-    auth: 'ENDPOINT-COPY',
+    auth: 'endpoint-copy',
     label: '服务组件',
     action: (record: any) => onOpenComponent(record)
   },
   {
-    key: '2',
     auth: '',
     label: '服务版本',
     action: (record: any) => onOpenVersion(record)
   },
 
   {
-    key: '3',
     auth: '',
     label: 'Security',
     action: (record: any) => onOpenSecurity(record)
   },
+  // {
+  //   auth: '',
+  //   label: '禁用',
+  //   action: (record: any) => onDisabled(record)
+  // },
   {
-    key: '4',
-    auth: '',
-    label: '禁用',
-    action: (record: any) => onDisabled(record)
-  },
-  {
-    key: '5',
     auth: '',
     label: '复制',
     action: (record: any) => onCopy(record)
   },
   {
-    key: '6',
     auth: '',
     label: '删除',
     action: (record: any) => onDelete(record)
   },
   {
-    key: '7',
     auth: '',
     label: '查看文档',
     action: (record: any) => goDocs(record)
@@ -250,6 +244,11 @@ async function onDelete(record: any) {
 
 /*查看选中的接口文档*/
 function goDocs(record: any) {
+  const {isWujieEnv,parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
+  if(isInLeyanWujieContainer){
+    window.open(`${parentOrigin}/lyapi/${projectName}/docsView?serveIds=${record.id}`, '_blank')
+    return;
+  }
   window.open(`${window.location.origin}/docs/view?serveIds=${record.id}`, '_blank');
 }
 

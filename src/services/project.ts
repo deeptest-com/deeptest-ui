@@ -45,3 +45,11 @@ export async function checkProjectAndUser(params) {
         params,
     })
 }
+
+export async function getUserMenuList(params: { currProjectId: number }) {
+    return request({
+        url: `/${apiPath}/menus/userMenuListNew`,
+        method: 'get',
+        params,
+    })
+}

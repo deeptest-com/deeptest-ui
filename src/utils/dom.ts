@@ -105,17 +105,17 @@ export const resizeHandler = debounce(() => {
     bus.emit(settings.eventEditorAction, {act: settings.eventTypeContainerHeightChanged})
 }, 50);
 
-export function hasClass( elements, cName ){
+export function hasClass( elements:any, cName:any ){
     if (!elements) return false
     return !!elements.className.match( new RegExp( "(\\s|^)" + cName + "(\\s|$)") )
 }
-export function addClass(elements, cName){
+export function addClass(elements:any, cName:any){
     if (!elements) return
     if( !hasClass( elements,cName ) ){
         elements.className += " " + cName
     }
 }
-export function removeClass( elements, cName ){
+export function removeClass( elements:any, cName:any ){
     if (!elements) return
     if( hasClass( elements,cName ) ){
         elements.className = elements.className.replace( new RegExp( "(\\s|^)" + cName + "(\\s|$)" ), " " )
@@ -182,21 +182,17 @@ export function getContextMenuStyle2(e) {
     return style
 }
 
-export function getRightTabPanelPosition(tabId) {
-    // console.log('getRightTabPanelPosition', tabId)
-
+export function getRightTabPanelPosition(tabId, isInLeyanWujieContainer?: boolean) {
     let ret = {}
-
     const elem = document.getElementById(tabId)
-    const isDiagnose = location.href.includes('diagnose/index'); // 快捷调试
-
+    console.error('aaaaa');
     if (elem) {
         const pos = elem.getBoundingClientRect()
         const top = getRightTabTop()
         ret = {
-            top: getRightTabTop() + 'px',
-            left: (pos.left + pos.width + 10 * 2 + (!isDiagnose ? 16 : 0) - 360) + 'px',
-            height: (document.body.clientHeight - top) + 'px',
+            top: getRightTabTop() + (isInLeyanWujieContainer ? 48 : 0) + 'px',
+            left: (pos.left + pos.width + 10 * 2 - 360) + 'px',
+            height: ((isInLeyanWujieContainer ? window.parent.document.body.clientHeight :document.body.clientHeight) - top - (isInLeyanWujieContainer ? 48 : 0)) + 'px',
         }
     }
 

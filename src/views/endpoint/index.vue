@@ -9,38 +9,15 @@
           <div class="top-action">
             <div class="top-action-left">
               <PermissionButton
-                  class="action-new"
-                  text="新建接口"
-                  code="ENDPOINT-ADD"
-                  type="primary"
-                  :loading="loading"
-                  action="create"
-                  @handle-access="handleCreateEndPoint"/>
-              <a-dropdown :trigger="['hover']" :placement="'bottomLeft'">
-                <a class="ant-dropdown-link" @click.prevent>
-                  <a-button>批量操作</a-button>
-                </a>
-                <template #overlay>
-                  <a-menu style="margin-top: 8px;">
-                    <a-menu-item key="0">
-                      <a-button type="link" :size="'small'" href="javascript:void (0)" @click="importApi">导入接口
-                      </a-button>
-                    </a-menu-item>
-                    <a-menu-item key="2">
-                      <a-button :disabled="!hasSelected" :size="'small'" type="link" @click="goDocs">查看文档</a-button>
-                    </a-menu-item>
-                    <a-menu-item key="3">
-                      <a-button :disabled="!hasSelected" :size="'small'" type="link"
-                                @click="showPublishDocsModal = true">发布文档
-                      </a-button>
-                    </a-menu-item>
-                    <a-menu-item key="4">
-                      <a-button :disabled="!hasSelected" type="link" :size="'small'" @click="batchUpdate">批量修改
-                      </a-button>
-                    </a-menu-item>
-                  </a-menu>
-                </template>
-              </a-dropdown>
+                v-if="hasPermission('')"
+                class="action-new"
+                text="新建接口"
+                type="primary"
+                :loading="loading"
+                @handle-access="handleCreateEndPoint"/>
+              <DropdownActionMenu :dropdown-list="BulkMenuList">
+                <a-button>批量操作</a-button>
+              </DropdownActionMenu>
             </div>
             <div class="top-search-filter">
               <TableFilter @filter="handleTableFilter" ref="filter"/>
@@ -72,7 +49,7 @@
                 <template #colTitle="{record}">
                   <div class="customTitleColRender">
                     <div class="notice-icon">
-                      <a-tooltip v-if="record.changedStatus > ChangedStatus.NoChanged" :overlayClassName="'diff-custom-tooltip'">       
+                      <a-tooltip v-if="record.changedStatus > ChangedStatus.NoChanged" :overlayClassName="'diff-custom-tooltip'">
                         <template #title>
                         <span>{{record.changedStatus == ChangedStatus.Changed?'待处理':'已处理'}}，{{record.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a @click="showDiff(record.id)">查看详情</a></span>
                         </template>
@@ -235,8 +212,10 @@ import settings from "@/config/settings";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import Diff from "./components/Drawer/Define/Diff/index.vue";
 import {ChangedStatus,SourceType} from "@/utils/enum";
+import {useWujie} from "@/composables/useWujie";
+import usePermission from '@/composables/usePermission';
 
-
+const { hasPermission, isCreator } = usePermission();
 const {share} = useSharePage();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -320,33 +299,59 @@ const columns = [
     slots: {customRender: 'action'},
   },
 ];
+
+// 批量操作下拉菜单
+const BulkMenuList = computed(() => [
+  {
+    label: '导入接口',
+    action: (_record: any) => importApi()
+  },
+  {
+    label: '查看文档',
+    disabled: !hasSelected.value,
+    action: (_record: any) => goDocs()
+  },
+
+  {
+    label: '发布文档',
+    disabled: !hasSelected.value,
+    action: (_record: any) => {
+      showPublishDocsModal.value = true
+    }
+  },
+  {
+    label: '批量修改',
+    disabled: !hasSelected.value,
+    action: (_record: any) => batchUpdate()
+  },
+]);
+
 const MenuList = [
   {
-    key: '1',
-    auth: 'ENDPOINT-COPY',
+    auth: '',
     label: '克隆',
     action: (record: any) => clone(record)
   },
   {
-    key: '2',
     auth: '',
     label: '分享链接',
     action: (record: any) => share(record, 'IM')
   },
 
   {
-    key: '3',
-    auth: 'ENDPOINT-DELETEE',
+    auth: 'p-api-endpoint-del',
     label: '删除',
+    ifShow: (record) => {
+      return isCreator(record.createUser);
+    },
     action: (record: any) => del(record)
   },
   {
-    key: '4',
-    auth: 'ENDPOINT-OUTDATED',
+    auth: '',
     label: '过期',
     action: (record: any) => disabled(record)
   },
-]
+];
 
 const selectedRowKeys = ref<Key[]>([]);
 
@@ -375,10 +380,16 @@ const fetching = ref(false);
 
 /*查看选中的接口文档*/
 function goDocs() {
-  window.open(`${window.location.origin}/docs/view?endpointIds=${selectedRowIds.value.join(',')}`, '_blank');
+  const {isWujieEnv,parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
+  if(isInLeyanWujieContainer){
+    window.open(`${parentOrigin}/lyapi/${projectName}/docsView?endpointIds=${selectedRowIds.value.join(',')}`, '_blank')
+    return;
+  }
+  const viewURL = `docs/view?endpointIds=${selectedRowIds.value.join(',')}`
+  window.open(`${window.location.origin}/${viewURL}`, '_blank');
 }
 
-const showPublishDocsModal: any = ref(false)
+const showPublishDocsModal: boolean = ref(false)
 
 // 发布文档版本
 async function publishDocs() {
@@ -830,14 +841,14 @@ function showDiff(id: number) {
   box-sizing: border-box;
   overflow: hidden;
 
-  .ant-btn {
-    margin-right: 16px;
-  }
-
   .top-action-left {
     min-width: 220px;
     display: flex;
     align-items: center;
+
+    :deep(.action-new) {
+      margin-right: 8px;
+    }
   }
 }
 

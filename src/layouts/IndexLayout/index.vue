@@ -1,6 +1,7 @@
 <template>
-  <div id="indexlayout">
+  <div id="indexlayout" :class="{'indexlayout': true, 'wujie-indexlayout': isWujieEnv}">
     <left
+        v-if="!isWujieEnv"
         :collapsed="collapsed"
         :topNavEnable="topNavEnable"
         :belongTopMenu="belongTopMenu"
@@ -14,8 +15,10 @@
     <div
         id="indexlayout-right"
         :class="{'fiexd-header': headFixed}">
+
       <right-top
           :collapsed="collapsed"
+          v-if="!isWujieEnv"
           :tabNavEnable="tabNavEnable"
           :topNavEnable="topNavEnable"
           :belongTopMenu="belongTopMenu"
@@ -25,7 +28,11 @@
           :routeItem="routeItem">
       </right-top>
 
-      <div class="indexlayout-right-main">
+      <div class="leyan-container-right-top" v-if="isWujieEnv">
+        <right-top-settings/>
+      </div>
+
+      <div class="indexlayout-right-main" :class="{'wujie-main':isWujieEnv,'workspace-main':isWorkSpacePage}">
         <permission :roles="routeItem.roles">
           <router-view></router-view>
         </permission>
@@ -44,7 +51,7 @@
 <script lang="ts">
 import {computed, defineComponent, nextTick, onMounted, ref, watch} from "vue";
 import {useStore} from 'vuex';
-import {useRoute} from 'vue-router';
+import {useRoute, useRouter} from "vue-router";
 import {StateType as GlobalStateType} from '@/store/global';
 import {StateType as UserStateType} from "@/store/user";
 import {
@@ -64,20 +71,29 @@ import IndexLayoutRoutes from './routes';
 import Permission from '@/components/Permission/index.vue';
 import Left from '@/layouts/IndexLayout/components/Left.vue';
 import RightTop from '@/layouts/IndexLayout/components/RightTop.vue';
+import RightTopSettings from '@/layouts/IndexLayout/components/RightTopSettings.vue';
+import {useWujie} from "@/composables/useWujie";
 import {ScopeDeeptest} from "@/utils/const";
 
 export default defineComponent({
   name: 'IndexLayout',
   components: {
+    RightTopSettings,
     Permission,
     Left,
+
     RightTop,
-  },
+      },
   setup() {
     const store = useStore<{ Global: GlobalStateType; User: UserStateType; }>();
     const route = useRoute();
-    
+    const router = useRouter();
+    const path: any = router.currentRoute.value.path;
+
+
     const version = ref('')
+
+    const {isWujieEnv} = useWujie();
 
     onMounted(() => {
       console.log('onMounted')
@@ -151,6 +167,8 @@ export default defineComponent({
     // 设置title
     useTitle(routeItem);
 
+    const isWorkSpacePage =  path.includes('/workspace');
+
     const sendMsg = () => {
       console.log('sendMsg')
       const data = {
@@ -166,6 +184,19 @@ export default defineComponent({
       console.log('onChromeExtEvent')
     }
 
+    const rightTopStyle = computed(() => {
+      if (!isWujieEnv) {
+        return {};
+      }
+      const leyanRightTopEl = window.parent.document.querySelector('.vben-layout-header-action');
+      const { width = 0, height = 0 }: any = leyanRightTopEl?.getBoundingClientRect();
+      return {
+        top: '-1px',
+        right: `${width + 10}px`,
+        height: `${height}px`,
+      }
+    })
+
     return {
       collapsed,
       toggleCollapsed,
@@ -180,8 +211,12 @@ export default defineComponent({
       version,
       onOpenChange,
       routeItem,
+      isWujieEnv,
+      isWorkSpacePage,
+      RightTopSettings,
       sendMsg,
       onChromeExtEvent,
+      rightTopStyle
     }
   }
 })
@@ -189,10 +224,21 @@ export default defineComponent({
 <style lang="less">
 @import '../../assets/css/variables.less';
 
-#indexlayout {
+.indexlayout {
   display: flex;
   height: 100vh;
   overflow: hidden;
+
+  &.wujie-indexlayout {
+    height: calc(100vh - 48px);
+
+    #indexlayout-right {
+      .indexlayout-right-main {
+        min-width: unset;
+        width: 100%;
+      }
+    }
+  }
 }
 
 #indexlayout-right {
@@ -209,7 +255,15 @@ export default defineComponent({
       flex: 1;
       min-width: 1217px;
       overflow: hidden;
-      padding: 16px;
+      //padding: 16px;
+      &.wujie-main{
+        padding: 0 !important;
+        position: relative;
+        //top: -18px;
+      }
+      &.workspace-main{
+        padding: 16px;
+      }
 
       .hide-btn {
         position: fixed;
@@ -225,5 +279,13 @@ export default defineComponent({
 .indexlayout-main-conent {
   margin: 24px;
   position: relative;
+}
+.leyan-container-right-top{
+  position: fixed;
+  top: 58px;
+  right: -6px;
+  background-color: #fff;
+  height: 0;
+  overflow: hidden;
 }
 </style>
