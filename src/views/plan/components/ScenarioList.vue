@@ -21,8 +21,8 @@
             </a-form-item>
         </div>
     </div>
-    <a-table
-        :row-selection="{
+    <Table
+        :custom-row-selection="{
             selectedRowKeys: selectedRowKeys,
             onChange: onSelectChange
         }"
@@ -40,7 +40,11 @@
         :scroll="scroll"
         :loading="loading"
         :columns="columns"
-        :data-source="list">
+        :data-source="list"
+        :sortable="sortable"
+        :checkable="checkable"
+        @on-sort="handleSort"
+        >
         <template #name="{ record, column }">
             <ToolTipCell :text="record.name" :width="column.width" />
         </template>
@@ -60,7 +64,7 @@
                 移除
             </a-button>
         </template>
-    </a-table>
+    </Table>
     <RelationScenario
         :associate-modal-visible="associateModalVisible"
         @on-cancel="associateModalVisible = false"
@@ -73,7 +77,7 @@ import { useStore } from 'vuex';
 import { PlusOutlined } from '@ant-design/icons-vue';
 import RelationScenario from './RelationScenario.vue';
 import ToolTipCell from '@/components/Table/tooltipCell.vue';
-
+import Table from '@/components/Table/index.vue';
 import { StateType as PlanStateType } from '../store';
 import {message, Modal, notification} from 'ant-design-vue';
 import { planStatusColorMap, planStatusTextMap } from '@/config/constant';
@@ -111,21 +115,31 @@ const props = defineProps({
         type: Array as PropType<any[]>,
         default: () => [],
         required: false,
-    }
+    },
+    sortable:{
+        type: Boolean,
+        default: false,
+        required: false
+    },
+    checkable: {
+        type: Boolean,
+        default: true,
+        required: false
+    },  
 })
 
-const emits = defineEmits(['selectRowKeys', 'refreshList']);
+const emits = defineEmits(['selectRowKeys', 'refreshList','handleSort']);
 const store = useStore<{ Plan: PlanStateType,Project }>();
 const currPlan = computed<any>(() => store.state.Plan.detailResult);
 const members = computed(() => store.state.Plan.members);
 const associateModalVisible = ref(false);
 const selectedRowKeys = ref<any[]>(props.selectedKeys || []); // Check here to configure the default column
-let selectedRowIds = reactive<any[]>([]);
+let selectedRowIds = ref<any[]>([]);
 const userList = computed<any>(() => store.state.Project.userList);
 
 const onSelectChange = (changableRowKeys: string[], rows: any) => {
     selectedRowKeys.value = changableRowKeys;
-    selectedRowIds = rows.map((item: any) => item.id);
+    selectedRowIds.value = rows.map((item: any) => item.id);
     emits('selectRowKeys', changableRowKeys);
 };
 
@@ -161,7 +175,7 @@ const handleChange = (value: string) => {
 };
 
 const handleRemove = async (record?: any) => {
-    if (!record && selectedRowIds.length === 0) {
+    if (!record && selectedRowIds.value.length === 0) {
       notifyWarn('请先选择要删除的关联场景');
         return;
     }
@@ -172,7 +186,7 @@ const handleRemove = async (record?: any) => {
             if (record && record.id) {
                 scenarioIds.push(record.id);
             } else {
-                scenarioIds = selectedRowIds;
+                scenarioIds = selectedRowIds.value;
             }
             const params = { scenarioIds };
             console.log('解除关联场景: --', params);
@@ -202,6 +216,14 @@ watch(() => {
 }, val => {
     selectedRowKeys.value = val;
 })
+
+const handleSort = (opt:any)=>{
+  //console.error(opt)
+  emits('handleSort', opt);
+}
+
+
+
 </script>
 <style scoped lang="less">
 .table-filter {
