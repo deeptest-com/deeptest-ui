@@ -156,10 +156,12 @@ function handleJoin(item) {
     content: "您还没有该项目的访问权限，是否申请更多角色权限？",
     okText: "申请权限",
     cancelText: "取消",
+    maskClosable: true,
     onOk: async () => {
       applyProPermissionsModalVisible.value = true;
       applyItem.value = item;
     },
+    onCancel() {}
   });
 }
 
