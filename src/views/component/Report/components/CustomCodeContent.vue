@@ -3,7 +3,19 @@
     <a-tabs v-model:activeKey="activeKey">
 
       <a-tab-pane key="assertion" tab="断言">
-        {{detail.assertions}}
+        <div v-for="(item, index) in assertions" :key="index"
+             :class="item.status" class="item">
+
+          <span>
+            <CheckCircleOutlined v-if="item.status==='pass'" />
+            <CloseCircleOutlined v-else />
+          </span>&nbsp;
+
+          <span>
+            {{item.content}}
+          </span>
+
+        </div>
       </a-tab-pane>
 
       <a-tab-pane key="output" tab="控制台">
@@ -41,13 +53,13 @@
 <script setup lang="ts">
 import { defineProps, ref, computed, watch } from "vue";
 import {
-  ExclamationCircleOutlined,
+  CloseCircleOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons-vue";
 import {MonacoOptions} from "@/utils/const";
 import IconSvg from "@/components/IconSvg";
 import MonacoEditor from "@/components/Editor/MonacoEditor.vue";
-import {genScriptLogs} from "@/utils/console";
+import {genScriptLogs, getChaiAssertion} from "@/utils/console";
 
 const props = defineProps({
   data: {
@@ -70,6 +82,22 @@ const editorOptions = ref(Object.assign({
     enabled: true
   },
 }, MonacoOptions));
+
+const assertions = computed(() => {
+  const arr = JSON.parse(detail.value.output)
+
+  const ret = []  as any[]
+
+  arr.forEach((item, index) => {
+    const assertion = getChaiAssertion(item)
+
+    if (assertion) {
+      ret.push(assertion)
+    }
+  })
+
+  return ret
+})
 
 const timestamp = ref('')
 watch(() => props.data, (newVal) => {
