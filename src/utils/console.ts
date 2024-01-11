@@ -25,11 +25,10 @@ export function genScriptLogs(msg) {
                     const assertion = getChaiAssertion(item)
 
                     if (assertion) { // chai assertion
-                        const assertCls = assertion.status === 'pass' ? 'pass' : 'fail'
-                        const assertStatus = assertCls === 'pass' ? '成功' : '失败';
+                        const assertStatus = assertion.status === 'pass' ? '成功' : '失败';
                         const checkpoint = assertion.checkpoint ? '，验证点' + assertion.checkpoint.replace('AssertionError', '') : ''
 
-                        lines.push(`<div class="${assertCls} script-log child">
+                        lines.push(`<div class="${assertion.status} script-log child">
                         断言${assertion.name}${assertStatus}${checkpoint}。
                       </div>`)
 
