@@ -256,7 +256,7 @@ const columns = [
     title: '标签',
     dataIndex: 'tags',
     slots: {customRender: 'colTags'},
-    width: 200,
+    width: 150,
   },
   {
     title: '所属服务',
