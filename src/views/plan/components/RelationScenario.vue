@@ -32,7 +32,7 @@ const props = defineProps<{
 const store = useStore<{ Plan: PlanStateType }>();
 const emits = defineEmits(['onCancel', 'onOk']);
 const scenarioLists = computed<any[]>(() => store.state.Plan.scenarios.list);
-const currPlan = computed<any>(() => store.state.Plan.detailResult);
+const currPlan = computed<any>(() => store.state.Plan.currPlan);
 let pagination = computed<any>(() => store.state.Plan.scenarios.pagination);
 let queryParams = reactive<any>({
   keywords: '', enabled: '1',
@@ -85,6 +85,7 @@ async function onOk() {
 }
 
 async function getScenarioList(params) {
+    console.error(queryParams)
     loading.value = true;
     await store.dispatch('Plan/getScenarioList', {
         ...queryParams,
