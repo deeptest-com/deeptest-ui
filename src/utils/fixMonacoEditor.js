@@ -14,7 +14,9 @@ function getWorkerUrl (moduleId, label) {
     'leyan-test.rysaas.cn': 'http://leyanapi-test.nancalcloud.com',
     'leyan.nancalcloud.com':'http://leyanapi.nancalcloud.com',
   };
-  const basepath = hostMap[parentOrigin] || 'http://leyanapi-dev.nancalcloud.com';
+  const matchResult = parentOrigin.match(/^(http|https):\/\//);
+  const parentProtocol = matchResult[0];
+  const basepath = hostMap[parentOrigin.split(parentProtocol)[1]] || 'http://leyanapi-dev.nancalcloud.com';
   let url = `${basepath}/editor.worker.js`;
 
   if (label === 'json') {
