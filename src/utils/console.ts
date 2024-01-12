@@ -1,5 +1,7 @@
 
 export function genScriptLogs(msg) {
+    console.log('genScriptLogs')
+
     const results = msg.match(/(.+) JSON~(.*)~JSON/);
 
     if (results?.length === 3) {
@@ -11,22 +13,23 @@ export function genScriptLogs(msg) {
             arr.forEach((item, index) => {
                 if (item.indexOf('{') === 0) {
                     const obj = JSON.parse(item)
-                    const cls = obj.success ? 'pass' : 'fail'
-                    lines.push(`<div class="${cls} script-log child">${obj.msg}</div>`)
+
+                    if (obj.isCustomObj) { // e.x. gen by jsErrMsg method when script execution
+                        const cls = obj.success ? 'pass' : 'fail'
+                        lines.push(`<div class="${cls} script-log child">${obj.msg}</div>`)
+                    } else {
+                        lines.push(`<div class="script-log child">${item}</div>`)
+                    }
 
                 } else {
-                    // Assertion Pass [Assertion 1].
-                    // Assertion Failed [Assertion 1] AssertionError: check status code: expected 200 to equal 2001.
-                    const assertResults = (item.trim()).match(/Assertion (.+) \[(.+)\](.*)\./);
-                    console.log('assertResults', item, assertResults)
+                    const assertion = getChaiAssertion(item)
 
-                    if (assertResults?.length === 4) { // chai assertion
-                        const assertCls = assertResults[1].toLowerCase() === 'pass' ? 'pass' : 'fail'
-                        const assertStatus = assertCls === 'pass' ? '成功' : '失败';
-                        const checkpoint = assertResults[3] ? '，验证点' + assertResults[3].replace('AssertionError', '') : ''
+                    if (assertion) { // chai assertion
+                        const assertStatus = assertion.status === 'pass' ? '成功' : '失败';
+                        const checkpoint = assertion.checkpoint ? '，验证点' + assertion.checkpoint.replace('AssertionError', '') : ''
 
-                        lines.push(`<div class="${assertCls} script-log child">
-                        断言${assertResults[2]}${assertStatus}${checkpoint}。
+                        lines.push(`<div class="${assertion.status} script-log child">
+                        断言${assertion.name}${assertStatus}${checkpoint}。
                       </div>`)
 
                     } else {
@@ -46,4 +49,24 @@ export function genScriptLogs(msg) {
 
         return lines.join('')
     }
+}
+
+export function getChaiAssertion(msg) {
+    console.log('getChaiAssertion')
+
+    // Assertion Pass [Assertion 1].
+    // Assertion Failed [Assertion 1] AssertionError: check status code: expected 200 to equal 2001.
+    const assertResults = (msg.trim()).match(/Assertion (.+) \[(.+)\](.*)\./);
+    // console.log('assertResults', msg, assertResults)
+
+    if (assertResults?.length === 4) {
+        const status = assertResults[1].toLowerCase() === 'pass' ? 'pass' : 'fail'
+        const name = assertResults[2]
+        const checkpoint = assertResults[2]
+        const content = msg
+
+        return {status, name, checkpoint, content}
+    }
+
+    return null
 }

@@ -16,12 +16,11 @@
     </template>
 
     <!-- 请求断言检查信息 -->
-    <template v-if="invokeDetail.checkpoint && invokeDetail.checkpoint.length">
+    <template v-if="checkpointsWithTheOnesInPostScripts && checkpointsWithTheOnesInPostScripts.length">
       <div class="endpoint-expand-content" style="font-weight: bold;">断言结果</div>
-      <div
-        class="endpoint-expand-content"
-        v-for="(item, index) in invokeDetail.checkpoint"
-        :key="index">
+      <div class="endpoint-expand-content"
+           v-for="(item, index) in checkpointsWithTheOnesInPostScripts"
+           :key="index">
         <span :style="{color: resultMap[item.resultStatus] }">
           <template v-if="item.resultStatus === 'fail'">
             <exclamation-circle-outlined /> &nbsp;
@@ -46,6 +45,7 @@ import {
   ExclamationCircleOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons-vue";
+import {ConditionType} from "@/utils/enum";
 
 const props = defineProps({
   collapseKey: {
@@ -62,6 +62,18 @@ const invokeDetail = computed(() => {
     ? JSON.parse(props.endpointData.detail)
     : { };
 });
+
+const checkpointsWithTheOnesInPostScripts = computed(() => {
+  const ret = [] as any[]
+
+  props.endpointData.postConditions.forEach(item => {
+    if (item.type === 'checkpoint') {
+      ret.push(item.raw)
+    }
+  })
+
+  return ret
+})
 
 const resultMap = {
   fail: '#f5222d',
