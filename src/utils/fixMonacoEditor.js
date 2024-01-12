@@ -9,14 +9,14 @@ const {parentOrigin} =useWujie();
 function getWorkerUrl (moduleId, label) {
 
   const hostMap = {
-    'localhost:3100': 'http://localhost:8000',
-    'leyan-dev.rysaas.cn': 'http://leyanapi-dev.nancalcloud.com',
-    'leyan-test.rysaas.cn': 'http://leyanapi-test.nancalcloud.com',
-    'leyan.nancalcloud.com':'http://leyanapi.nancalcloud.com',
+    'localhost:3100': 'localhost:8000',
+    'leyan-dev.rysaas.cn': 'leyanapi-dev.nancalcloud.com',
+    'leyan-test.rysaas.cn': 'leyanapi-test.nancalcloud.com',
+    'leyan.nancalcloud.com':'leyanapi.nancalcloud.com',
   };
   const matchResult = parentOrigin.match(/^(http|https):\/\//);
   const parentProtocol = matchResult[0];
-  const basepath = hostMap[parentOrigin.split(parentProtocol)[1]] || 'http://leyanapi-dev.nancalcloud.com';
+  const basepath = parentProtocol +  (hostMap[parentOrigin.split(parentProtocol)[1]] || 'leyanapi-dev.nancalcloud.com');
   let url = `${basepath}/editor.worker.js`;
 
   if (label === 'json') {
