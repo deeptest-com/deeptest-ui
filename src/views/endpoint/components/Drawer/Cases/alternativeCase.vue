@@ -150,18 +150,16 @@ import {
 import EditAndShowField from "@/components/EditAndShow/index.vue";
 import Invocation from "@/views/component/debug/request/Invocation.vue";
 import DebugConfig  from "@/views/component/debug/config.vue";
-import EnvSelector from "@/views/component/EnvSelector/index.vue";
 import { prepareDataForRequest } from "@/views/component/debug/service";
 import { notifyError, notifySuccess } from "@/utils/notify";
 import {StateType as UserStateType} from "@/store/user";
 import {getToken} from "@/utils/localToken";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import settings from "@/config/settings";
+import { setServeUrl } from "@/utils/url";
 
 const usedBy = UsedBy.CaseDebug
 provide('usedBy', usedBy)
-const isForBenchmarkCase = true
-provide('isForBenchmarkCase', isForBenchmarkCase)
 
 const {isDebugChange, resetDebugChange} = useIMLeaveTip();
 
@@ -225,11 +223,11 @@ const loadDebugData = async (data) => {
 
     store.dispatch('Debug/listCondition', {
       conditionSrc: ConditionSrc.PreCondition,
-      isForBenchmarkCase: isForBenchmarkCase,
+      isForBenchmarkCase: false,
     });
     store.dispatch('Debug/listCondition', {
       conditionSrc: ConditionSrc.PostCondition,
-      isForBenchmarkCase: isForBenchmarkCase,
+      isForBenchmarkCase: false,
       category: ConditionCategory.postCondition,
     });
 
@@ -408,7 +406,7 @@ const onReset = ({ type, params }: { type: string, params: any }) => {
           });
 
         } else {
-          store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: isForBenchmarkCase });
+          store.dispatch('Debug/listAssertionCondition', { isForBenchmarkCase: true });
         }
 
       }).catch(err => {
@@ -430,7 +428,7 @@ const send = async () => {
 
   const callData = {
     userId: currUser.value.id,
-    serverUrl: process.env.VUE_APP_API_SERVER,
+    serverUrl: setServeUrl(process.env.VUE_APP_API_SERVER),
     token: await getToken(),
     data: data
   }

@@ -1,5 +1,5 @@
 <template>
-  <div class="sys-agent-list-main">
+  <div class="sys-agent-list-main" :class="{'wujie-main':isWujieEnv}">
     <a-card :bordered="false">
       <template #title>
         <a-button type="primary" @click="() => edit(0)">新建执行代理</a-button>
@@ -92,8 +92,11 @@ import EditAndShowField from '@/components/EditAndShow/index.vue';
 import EmptyComp from '@/components/TableEmpty/index.vue';
 import EditDrawer from './drawer.vue';
 import debounce from "lodash.debounce";
+import {useWujie} from "@/composables/useWujie";
 
 const {t} = useI18n();
+
+const {isWujieEnv} = useWujie();
 
 const store = useStore<{ SysSetting: SysSettingStateType }>();
 const models = computed<any>(() => store.state.SysSetting.agentModels);
@@ -149,7 +152,10 @@ function onClose() {
 
 <style scoped lang="less">
 .sys-agent-list-main {
-  margin: 20px;
+  //margin: 20px;
+  &.wujie-main{
+    margin: 0;
+  }
 
   .search {
     width: 270px; margin-left: 16px

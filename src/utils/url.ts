@@ -11,3 +11,8 @@ export function addSepIfNeeded(url){
 
     return url
 }
+
+export function setServeUrl(url) {
+    const ifNeedPrefix = !/^http/.test(url);
+    return `${ifNeedPrefix ? window.location.origin : ''}${url}`;
+}

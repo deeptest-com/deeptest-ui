@@ -25,9 +25,10 @@
 
       <div class="url"
            :class="[isPathValid  ? '' :  'dp-field-error' ]">
-        <a-tooltip
-          :overlayClassName="getOverlayClassName()"
-          placement="bottom"
+        <a-tooltip 
+          :overlayStyle="getOverlayStyle()"
+          placement="bottom" 
+      
           :visible="!isPathValid"
           :title="'请输入合法的路径,以http(s)开头'">
           <a-input placeholder="请输入http(s)://开头的地址"
@@ -111,6 +112,7 @@ import {syncSourceMapToText} from "@/views/scenario/components/Design/config"
 import {notifyWarn} from "@/utils/notify";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import {getUuid} from "@/utils/string";
+import { setServeUrl } from "@/utils/url";
 const {
   isDebugChange,
   debugChangePreScript,
@@ -186,8 +188,8 @@ const isShowSync = computed(() => {
   return ret
 })
 
-const getOverlayClassName = () => {
-  return `${usedBy === UsedBy.DiagnoseDebug ? 'dp-field-error-tooltip' : ''} dp-tip-small`
+const getOverlayStyle = () => {
+  return usedBy === UsedBy.DiagnoseDebug ? { 'zIndex': 999 } : usedBy === UsedBy.ScenarioDebug ? { 'zIndex': '1001' } : {};
 }
 
 watch(debugData, (newVal) => {
@@ -210,7 +212,7 @@ const send = async (e) => {
     data.environmentId = environmentId.value
     const callData = {
       execUuid: currUser.value.id + '@' + getUuid(),
-      serverUrl: process.env.VUE_APP_API_SERVER,
+      serverUrl: setServeUrl(process.env.VUE_APP_API_SERVER),
       token: await getToken(),
       data: {
         ...data,

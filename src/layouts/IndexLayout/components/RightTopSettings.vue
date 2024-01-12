@@ -49,7 +49,7 @@
         </template>
       </a-dropdown>
 
-      <a-dropdown placement="bottomRight" v-if="isAdmin">
+      <a-dropdown placement="bottomRight" v-if="isAdmin && !isWujieEnv" >
         <a class="indexlayout-top-sysmenu ant-dropdown-link operation-name message" style="margin-right: 6px;margin-left: 8px;">
           <SettingOutlined class="top-right-icon-desktop"/>
         </a>
@@ -58,7 +58,7 @@
             <a-menu-item key="agentManage">
               代理管理
             </a-menu-item>
-            <a-menu-item key="userManage">
+            <a-menu-item key="userManage" v-if="hasProjectAuth('p-api-setting-usermanage')">
               用户管理
             </a-menu-item>
           </a-menu>
@@ -66,13 +66,13 @@
       </a-dropdown>
 
       <!-- ::::消息通知 -->
-      <a-tooltip placement="bottom" title="消息通知">
+      <a-tooltip placement="bottom" title="消息通知" v-if="!isWujieEnv && hasProjectAuth('p-api-notification')">
         <span class="operation-name message" @click="onMessageClick">
           <BellOutlined />
         </span>
       </a-tooltip>
 
-      <a-tooltip placement="bottom" @click="toggle">
+      <a-tooltip placement="bottom" @click="toggle" v-if="!isWujieEnv">
         <template #title>{{ isFullscreen ? '退出全屏' : '全屏' }}</template>
         <a-button type="text" class="share-btn">
           <FullscreenOutlined v-if="isFullscreen"
@@ -83,7 +83,7 @@
       </a-tooltip>
 
       <!-- ::::用户信息 -->
-      <a-dropdown placement="bottomRight">
+      <a-dropdown placement="bottomRight" v-if="!isWujieEnv">
         <a class="indexlayout-top-usermenu ant-dropdown-link" style="margin-right: 6px;margin-left: 8px;">
           <UserOutlined class="user-icon"/>
           <span class="operation-name">{{ currentUser.name }}</span>
@@ -128,7 +128,11 @@ import {useFullscreen} from '@vueuse/core';
 import {StateType as GlobalStateType} from "@/store/global";
 import {Cache_Key_Agent} from "@/utils/const";
 import {isLeyan} from "@/utils/comm";
-
+import {useWujie} from "@/composables/useWujie";
+import usePermission from "@/composables/usePermission";
+import settings from "@/config/settings";
+const {isWujieEnv} = useWujie();
+const { hasProjectAuth } = usePermission();
 const props = defineProps({
   theme: {
     required: false,
@@ -139,7 +143,8 @@ const props = defineProps({
 const {t} = useI18n();
 const router = useRouter();
 const store = useStore<{ User: UserStateType, Global: GlobalStateType }>();
-const {isFullscreen, enter, exit, toggle} = useFullscreen();
+const {isFullscreen, toggle} = useFullscreen();
+const bus = window?.$wujie?.bus;
 
 const agents = computed<any[]>(() => store.state.Global.agents);
 const currentUser = computed<CurrentUser>(() => store.state.User.currentUser);
@@ -154,6 +159,8 @@ const onMenuClick = (event: any) => {
   } else if (key === 'logout') {
     store.dispatch('User/logout').then((res) => {
       if (res === true) {
+        store.commit('ProjectGlobal/saveProjects', {});
+        store.commit('Global/setPermissionMenuList', []);
         router.replace({
           path: '/user/login',
           query: {
@@ -233,6 +240,14 @@ onMounted(async () => {
   await store.dispatch('Global/getClientVersion');
   await store.dispatch('Global/listAgent');
   await store.commit('Global/setCurrAgent', null);
+  bus.$emit(settings.sendMsgToLeyan, {
+    type: 'initClientOrAgents',
+    data: {
+      clientDownloadUrlOpts: clientDownloadUrlOpts.value,
+      agents: agents.value,
+      currAgent: currentAgent.value,
+    }
+  });
 })
 
 const isAdmin = computed(() => {

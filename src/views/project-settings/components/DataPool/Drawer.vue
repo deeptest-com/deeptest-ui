@@ -73,7 +73,7 @@
 
 <script setup lang="ts">
 import {computed, defineEmits, defineProps, reactive, ref, watch} from 'vue';
-import {Form, notification} from 'ant-design-vue';
+import {Form} from 'ant-design-vue';
 import {useStore} from 'vuex';
 import {UploadOutlined} from '@ant-design/icons-vue';
 import HandsonTable from "@/components/sheet/handsontable.vue";
@@ -87,7 +87,7 @@ import {StateType as ProjectStateType} from "@/store/project";
 import {StateType as ProjectSettingStateType} from '../../store';
 import {DatapoolDetail} from '../../data';
 import {uploadRequest} from "@/utils/upload";
-import {notifyWarn} from "@/utils/notify";
+import {notifyWarn, notifySuccess} from "@/utils/notify";
 
 const useForm = Form.useForm;
 const store = useStore<{ ProjectGlobal: ProjectStateType, ProjectSetting: ProjectSettingStateType }>();
@@ -200,6 +200,7 @@ const onSubmit = async () => {
       action: formState.value.id > 0 ? 'update':'create'
     }).then(() => {
       // onClose();
+      notifySuccess('保存成功');
     })
   }).catch(err => {
     console.log(err)

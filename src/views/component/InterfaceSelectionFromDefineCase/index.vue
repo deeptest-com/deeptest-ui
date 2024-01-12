@@ -8,7 +8,7 @@
         wrapClassName="modal-tree-selection"
         width="600px">
       <div class="interface-selection-main">
-          <Tree :selectInterfaces="onSelectInterfaces" />
+          <Tree ref="interfaceSelTree" />
       </div>
   
       <template #footer>
@@ -23,6 +23,7 @@
   import debounce from "lodash.debounce";
   
   import Tree from "./tree.vue"
+import { message } from "ant-design-vue";
   
   const props = defineProps({
     onFinish: {
@@ -34,14 +35,15 @@
       required: true,
     },
   })
-  
-  const selectInterfaces = ref([])
-  const onSelectInterfaces = (data:any) => {
-    console.log('onSelectInterfaces', data)
-    selectInterfaces.value = data
-  }
-  
-  const onSubmit = debounce( async () => props.onFinish(selectInterfaces.value) ,300)
+  const interfaceSelTree = ref();
+  const onSubmit = debounce( async () => {
+    const selectedNodes = interfaceSelTree.value.getSelectedTreeNodes();
+    if (selectedNodes.length === 0) {
+      message.error('请选择导入的用例');
+      return;
+    }
+    props.onFinish(selectedNodes)
+  },300)
   
   const onCancel = () => {
     console.log('onCancel')

@@ -36,25 +36,7 @@
                 </span>
               <span class="tree-title-text" v-else>{{ nodeProps.title }}</span>
               <span class="more-icon" v-if="nodeProps.id !== -1">
-                  <a-dropdown>
-                       <MoreOutlined/>
-                      <template #overlay>
-                        <a-menu>
-                          <a-menu-item key="0" @click="newCategorie(nodeProps)">
-                             新建子分类
-                          </a-menu-item>
-                          <a-menu-item :disabled="nodeProps.id === -1 " key="1" @click="cloneCategorie(nodeProps)">
-                            克隆
-                          </a-menu-item>
-                          <a-menu-item :disabled="nodeProps.id === -1 " key="1" @click="deleteCategorie(nodeProps)">
-                            删除分类
-                          </a-menu-item>
-                          <a-menu-item :disabled="nodeProps.id === -1" key="1" @click="editCategorie(nodeProps)">
-                            编辑分类
-                          </a-menu-item>
-                        </a-menu>
-                      </template>
-                    </a-dropdown>
+                <DropdownActionMenu :dropdown-list="ContextMenuList" :record="nodeProps" />
                 </span>
             </div>
           </template>
@@ -99,7 +81,8 @@ import {getCache} from "@/utils/localCache";
 import settings from "@/config/settings";
 import { getUrlKey } from '@/utils/url';
 import {notifyError, notifySuccess, notifyWarn} from "@/utils/notify";
-import {confirmToDo} from "@/utils/confirm";
+import { DropdownActionMenu } from '@/components/DropDownMenu';
+import {confirmToDo,confirmToDelete} from "@/utils/confirm";
 
 const store = useStore<{ Endpoint: EndpointStateType, ProjectGlobal: ProjectStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -149,6 +132,30 @@ const treeData: any = computed(() => {
   }
   return [];
 });
+
+/**
+ * 分类下拉菜单
+ */
+const ContextMenuList = [
+  {
+    label: '新建子分类',
+    action: (_record: any) => newCategorie(_record),
+  },
+  {
+    label: '克隆',
+    action: (_record: any) => cloneCategorie(_record),
+  },
+  {
+    label: '删除分类',
+    auth: 'p-api-endpoint-del',
+    action: (_record: any) => deleteCategorie(_record),
+  },
+  {
+    label: '编辑分类',
+    action: (_record: any) => editCategorie(_record),
+  }
+]
+
 
 /**
  * 默认空列表展示
@@ -235,14 +242,8 @@ const tagModalMode = ref('new');
 
 // 删除分类
 async function deleteCategorie(node) {
-  Modal.confirm({
-    title: () => '将级联删除分类下的所有子分类、接口定义、调试信息等',
-    icon: createVNode(ExclamationCircleOutlined),
-    content: () => '删除后无法恢复，请确认是否删除？',
-    okText: () => '确定',
-    okType: 'danger',
-    cancelText: () => '取消',
-    onOk: async () => {
+
+  confirmToDelete('将级联删除分类下的所有子分类、接口定义、调试信息等','删除后无法恢复，请确认是否删除？',async () => {
       const res = await store.dispatch('Endpoint/removeCategoryNode', {
         id:node.id,
         type:'endpoint',
@@ -256,11 +257,8 @@ async function deleteCategorie(node) {
       } else {
         notifyError('删除失败');
       }
-    },
-    onCancel() {
-      console.log('Cancel');
-    },
-  });
+    })
+
 
 }
 

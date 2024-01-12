@@ -18,7 +18,7 @@
         <template #header></template>
         <template #renderItem="{ item }">
           <ListItem>
-            <Card class="card" @click="goProject(item)">
+            <Card class="card" @click="e => goProject(item, e)">
               <div class="card-title">
                 <div class="title">
                   <img :src="getProjectLogo(item?.logo)" alt=""/>
@@ -29,7 +29,7 @@
                     }}</span>
                 </div>
 
-                <div class="action">
+                <div :ref="el => projectAction[item.projectId] = el" class="action" @click="e => e.preventDefault()" v-if="dropDownList.length > 0">
                   <DropdownActionMenu :dropdown-list="dropDownList" :record="item">
                     <EllipsisOutlined key="ellipsis"/>
                   </DropdownActionMenu>
@@ -85,6 +85,9 @@ import {useStore} from "vuex";
 import {StateType} from "../../store";
 import {getProjectLogo} from "@/components/CreateProjectModal";
 import {DropdownActionMenu} from "@/components/DropDownMenu/index";
+import usePermission from "@/composables/usePermission";
+import { useWujie } from "@/composables/useWujie";
+import settings from "@/config/settings";
 
 // 组件接收参数
 const props = defineProps({
@@ -102,8 +105,12 @@ const props = defineProps({
 });
 const router = useRouter();
 const store = useStore<{ Home: StateType }>();
+const { hasProjectAuth } = usePermission();
+const { isWujieEnv } = useWujie();
 const ListItem = List.Item;
 const list = computed<any>(() => store.state.Home.queryResult.list);
+const projects = computed<any>(() => store.state.ProjectGlobal.projects);
+const bus = window?.$wujie?.bus;
 
 const filterList = computed(() => {
   const items = props?.activeKey === 0 ? list?.value?.projectList || [] : list?.value?.userProjectList || [];
@@ -119,34 +126,33 @@ const filterList = computed(() => {
 const loading = ref(true);
 // 分页相关
 const current = ref(1);
+const projectAction = ref({});
 const total = computed(() => filterList.value.length);
 
-const dropDownList = [
-  {
-    label: '申请加入',
-    action: (record) => emit("join", record),
-    auth: '',
-    ifShow: (record) => record.accessible === 0,
-  },
-  {
-    label: '编辑',
-    action: (record) => emit("edit", record),
-    auth: '',
-    ifShow: (record) => record.accessible === 1,
-  },
-  {
-    label: '删除',
-    action: (record) => emit("delete", record),
-    auth: '',
-    ifShow: (record) => record.accessible === 1,
-  },
-  {
-    label: '退出项目',
-    action: (record) => emit("exit", record),
-    auth: '',
-    ifShow: (record) => record.accessible === 1,
-  }
-]
+const dropDownList = [{
+  label: '申请加入',
+  action: (record) => emit("join", record),
+  auth: 'p-project-apply',
+  ifShow: (record) => hasProjectAuth('p-project-apply') && record.accessible === 0,
+},
+{
+  label: '编辑',
+  action: (record) => emit("edit", record),
+  auth: 'p-project-edit',
+  ifShow: (record) => hasProjectAuth('p-project-edit') && record.accessible === 1,
+},
+{
+  label: '删除',
+  action: (record) => emit("delete", record),
+  auth: 'p-project-del',
+  ifShow: (record) => hasProjectAuth('p-project-del') && record.accessible === 1,
+},
+{
+  label: '退出项目',
+  action: (record) => emit("exit", record),
+  auth: 'p-project-exit',
+  ifShow: (record) => hasProjectAuth('p-project-exit') && record.accessible === 1,
+}]
 
 watch(() => props?.searchValue, (val) => {
   current.value = 1;
@@ -163,14 +169,28 @@ async function handleJoin(item) {
   emit("join", item);
 }
 
-async function goProject(item: any) {
+async function goProject(item: any, e) {
+  if (projectAction.value[item.projectId].contains(e.target)) {
+    return;
+  }
   if (item?.accessible === 0) {
     handleJoin(item);
     return false;
   }
   await store.dispatch("ProjectGlobal/changeProject", item?.projectId);
+  await store.commit('Global/setPermissionMenuList', []);
   // 更新左侧菜单以及按钮权限
-  await store.dispatch("Global/getPermissionList", { projectId: item.projectId });
+  await store.dispatch("Global/getPermissionMenuList", { currProjectId: item.projectId });
+  if (isWujieEnv && bus) {
+    bus?.$emit(settings.sendMsgToLeyan, {
+      type: 'fetchDynamicMenus',
+      data: {
+        roleValue: (projects.value || []).find(pro => pro.id === item.projectId)?.roleName,
+        route: `${item.projectShortName}/workspace`
+      }
+    })
+    return;
+  }
   router.push(`/${item.projectShortName}/workspace`);
 }
 </script>
