@@ -218,7 +218,6 @@ watch(() => {
 })
 
 const handleSort = (opt:any)=>{
-  //console.error(opt)
   emits('handleSort', opt);
 }
 

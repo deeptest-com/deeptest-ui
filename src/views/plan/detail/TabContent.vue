@@ -98,5 +98,7 @@ const handleSort = async (opt)=>{
     destinationId:planScenarioList.value[opt.newIndex].refId, 
     sourceId:planScenarioList.value[opt.oldIndex].refId,
   });
+
+  await getScenarioList({planId: planDetail.value.id});
 }
 </script>
