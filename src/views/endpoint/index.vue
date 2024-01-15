@@ -243,7 +243,7 @@ const columns = [
     title: '接口名称',
     dataIndex: 'title',
     slots: {customRender: 'colTitle'},
-    width: 250,
+    width: 300,
   },
   {
     title: '接口路径',
