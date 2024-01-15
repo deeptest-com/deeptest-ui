@@ -17,6 +17,13 @@ dt.sendRequest(postRequest, (error, response) => {
 });
 `;
 
+export const assert_common = `
+var variable_code = dt.variables.get('code');
+dt.test('Assertion Name', () => {
+  dt.expect(variable_code, 'check variable value').to.equal(200);
+});
+`;
+
 export const assert_resp_status_Code = `
 dt.test('Assertion 1', () => {
   dt.expect(dt.response.statusCode, 'check status code').to.equal(200);

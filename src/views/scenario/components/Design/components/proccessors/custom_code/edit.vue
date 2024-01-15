@@ -30,6 +30,8 @@
 
           <div @click="addSnippet('send_request_get')" class="dp-link-primary">发送GET请求</div>
           <div @click="addSnippet('send_request_post')" class="dp-link-primary">发送POST请求</div>
+
+          <div @click="addSnippet('assert_common')" class="dp-link-primary">断言</div>
         </div>
 
         <div class="title">
@@ -53,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref, watch, inject, defineEmits, onMounted} from "vue";
+import {computed, ref, watch, inject, defineEmits, onMounted, provide} from "vue";
 import {useStore} from "vuex";
 import {MonacoOptions, NotificationKeyCommon} from "@/utils/const";
 
@@ -68,6 +70,8 @@ import Tips from "@/components/Tips/index.vue";
 import {StateType as ProjectStateType} from "@/store/project";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
+
+provide('conditionSrc', 'scenario_custom_code')
 
 const store = useStore<{ ProjectGlobal: ProjectStateType, Scenario: ScenarioStateType, Snippet: Snippet }>();
 
