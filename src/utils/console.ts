@@ -26,7 +26,7 @@ export function genScriptLogs(msg) {
 
                     if (assertion) { // chai assertion
                         const assertStatus = assertion.status === 'pass' ? '成功' : '失败';
-                        const checkpoint = assertion.checkpoint ? '，验证点' + assertion.checkpoint.replace('AssertionError', '') : ''
+                        const checkpoint = assertion.checkpoint ? '，验证点' + assertion.checkpoint.replace('AssertionError:', '') : ''
 
                         lines.push(`<div class="${assertion.status} script-log child">
                         断言${assertion.name}${assertStatus}${checkpoint}。
@@ -62,7 +62,7 @@ export function getChaiAssertion(msg) {
     if (assertResults?.length === 4) {
         const status = assertResults[1].toLowerCase() === 'pass' ? 'pass' : 'fail'
         const name = assertResults[2]
-        const checkpoint = assertResults[2]
+        const checkpoint = assertResults[3]
         const content = msg
 
         return {status, name, checkpoint, content}
