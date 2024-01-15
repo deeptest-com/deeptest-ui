@@ -31,7 +31,7 @@ export default function usePermission() {
     if (!value) {
       return true;
     }
-    return unref(permissionMenuList).includes(value);
+    return unref(userRolesAuth).includes(value);
   };
 
   /**

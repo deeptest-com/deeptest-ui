@@ -4,7 +4,6 @@
 
 import {useWujie} from "@/composables/useWujie";
 
-const {parentOrigin} =useWujie();
 
 function getWorkerUrl (moduleId, label) {
 
@@ -14,9 +13,15 @@ function getWorkerUrl (moduleId, label) {
     'leyan-test.rysaas.cn': 'leyanapi-test.nancalcloud.com',
     'leyan.nancalcloud.com':'leyanapi.nancalcloud.com',
   };
-  const matchResult = parentOrigin.match(/^(http|https):\/\//);
-  const parentProtocol = matchResult[0];
-  const basepath = parentProtocol +  (hostMap[parentOrigin.split(parentProtocol)[1]] || 'leyanapi-dev.nancalcloud.com');
+  const {parentOrigin, appUrl} =useWujie();
+  let basepath = '';
+  if (!appUrl) {
+    const matchResult = parentOrigin.match(/^(http|https):\/\//);
+    const parentProtocol = matchResult[0];
+    basepath = parentProtocol +  (hostMap[parentOrigin.split(parentProtocol)[1]] || 'leyanapi-dev.nancalcloud.com');
+  } else {
+    basepath = appUrl;
+  }
   let url = `${basepath}/editor.worker.js`;
 
   if (label === 'json') {

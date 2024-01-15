@@ -61,25 +61,22 @@
             </a-select-option>
           </a-select>
         </a-form-item>
-        <template v-if="isInLeyanWujieContainer">
-          <!-- ly wujie环境下 展示所属产品  -->
+        <template v-if="isInLeyanWujieContainer || isElectronEnv">
+          <!-- ly wujie环境 或 客户端下 展示所属产品  -->
           <a-form-item label="所属产品">
             <div class="project-edit-pd">
-              <a-select
-                v-model:value="formStateRef.productId"
+              <a-tree-select
+                v-model:value="formStateRef.products"
                 show-search
                 placeholder="请选择所属产品"
                 optionFilterProp="label"
+                tree-checkable
                 mode="multiple"
-                :filter-option="filterOption"
-              >
-                <a-select-option
-                  v-for="option in userListOptions"
-                  :key="option.id+'-'+option.name"
-                  :value="option.id"
-                >{{ option.label }}
-                </a-select-option>
-              </a-select>
+                :maxTagCount="10"
+                :tree-data="lyProducts"
+                labelInValue
+                :replaceFields="{ title: 'name',value:'id'}"
+              />
               <a-button type="primary" :icon="h(PlusOutlined)"></a-button>
             </div>
           </a-form-item>
@@ -87,22 +84,17 @@
           <a-form-item label="承接研发空间">
             <div class="project-edit-pd">
               <a-select
-                v-model:value="formStateRef.spaceId"
+                v-model:value="formStateRef.spaces"
                 show-search
                 placeholder="请选择承接研发空间"
                 optionFilterProp="label"
                 mode="multiple"
-                :filter-option="filterOption"
-              >
-                <a-select-option
-                  v-for="option in userListOptions"
-                  :key="option.id+'-'+option.name"
-                  :value="option.id"
-              >{{ option.label }}({{ option.email.split('@')[0] }})
-              </a-select-option
-              >
-              </a-select>
-              <a-checkbox v-model:checked="formStateRef.sync">同步空间成员</a-checkbox>
+                :options="lySpaces"
+                :maxTagCount="10"
+                labelInValue
+                :filter-option="filterSpaceOption"
+              />
+              <a-checkbox v-model:checked="formStateRef.syncMembers">同步空间成员</a-checkbox>
             </div>
           </a-form-item>
         </template>
@@ -110,9 +102,8 @@
           <a-switch v-model:checked="formStateRef.includeExample"/>
         </a-form-item>
 
-        <a-form-item label="项目简介" v-bind="validateInfos.desc">
-          <a-textarea v-model:value="formStateRef.desc"
-                      @blur="validate('desc', { trigger: 'blur' }).catch(() => {})"/>
+        <a-form-item label="项目简介">
+          <a-textarea v-model:value="formStateRef.desc"/>
         </a-form-item>
         <a-form-item :wrapper-col="{ span: 12, offset: 18 }">
           <a-button type="primary" @click.prevent="submitForm" :loading="loading">确定</a-button>
@@ -124,7 +115,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineEmits, defineProps, reactive, ref, watch, h} from "vue";
+import {computed, defineEmits, defineProps, reactive, ref, watch, h, onMounted} from "vue";
 import {Form, message, notification} from "ant-design-vue";
 import { PlusOutlined } from "@ant-design/icons-vue";
 import {StateType as UserStateType} from "@/store/user";
@@ -134,6 +125,7 @@ import {useStore} from "vuex";
 import {getProjectLogo, projectLogoList} from "./index";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import {useWujie} from "@/composables/useWujie";
+import { isElectronEnv } from "@/utils/agentEnv";
 
 const useForm = Form.useForm;
 const props = defineProps<{
@@ -146,6 +138,8 @@ const { isInLeyanWujieContainer } = useWujie();
 const userListOptions = computed<SelectTypes["options"]>(
     () => (store.state.Project.userList || []).filter(e => isInLeyanWujieContainer ? e.username !== 'admin' : e.username !== '')
 );
+const lyProducts = ref([]);
+const lySpaces = ref([]);
 const wrapperCol = {span: 14};
 const projectInfo = {
   name: "",
@@ -158,9 +152,9 @@ const projectInfo = {
 };
 
 const wujieExtraInfo = {
-  spaceId: null,
-  productId: null,
-  sync: false,
+  spaces: null,
+  products: null,
+  syncMembers: false,
 }
 
 const formStateRef = reactive(props.formState || ( isInLeyanWujieContainer ? { ...projectInfo, wujieExtraInfo } : projectInfo ));
@@ -173,6 +167,12 @@ const filterOption = (input: string, option: any) => {
     return true
   }
 };
+
+const filterSpaceOption = (input: string, option: any) => {
+  if (option.label.includes(input)) {
+    return true
+  }
+}
 
 const rulesRef = reactive({
   name: [
@@ -188,7 +188,7 @@ const rulesRef = reactive({
     },
   ],
   adminId: [{required: true, message: "请选择管理员"}],
-  desc: [{max: 180, message: "项目简介应小于180位", trigger: "blur"}],
+  // desc: [{max: 180, message: "项目简介应小于180位", trigger: "blur"}],
 });
 
 const selectLogoKey = ref("default_logo1");
@@ -200,7 +200,12 @@ const submitForm = async () => {
   loading.value = true;
   validate()
       .then(() => {
-        store.dispatch("Project/saveProject", {...formStateRef}).then(() => {
+        console.error(formStateRef);
+        store.dispatch("Project/saveProject", {
+          ...formStateRef, 
+          products: (formStateRef.products || []).map(e => e.value),
+          spaces: (formStateRef.spaces || []).map(e => e.value),
+        }).then(() => {
           loading.value = false;
           notifySuccess("保存成功");
           emits("handleSuccess");
@@ -228,6 +233,16 @@ const handleSelectLogo = (item: any) => {
   formStateRef.logo = item.imgName;
 };
 
+const getProjectDetail = async(id: number) => {
+  try {
+    const result = await store.dispatch('Global/getIntegrationDetail', { projectId: id });
+    formStateRef.products = (result.products || []).map(e => ({ ...e, label: e.name, value: e.id }));
+    formStateRef.spaces = (result.spaces || []).map(e => ({ ...e, label: e.name, value: e.nameEngAbbr }));
+  } catch(error) {
+    console.log(error);
+  }
+};  
+
 watch(() => props.visible,
   (val) => {
   if (val) {
@@ -235,11 +250,37 @@ watch(() => props.visible,
     if (!props?.formState?.id) {
       resetFields();
     }
+
   }
 }, {immediate: true});
 
-// todo: 主应用 通过props传递 一些数据
+watch(() => {
+  return props.formState;
+}, val => {
+  if (val?.id && (isInLeyanWujieContainer || isElectronEnv)) {
+    formStateRef.products = [];
+    formStateRef.spaces = [];
+    formStateRef.syncMembers = false;
+    // wujie环境下，获取所属产品/所属研发空间
+    getProjectDetail(val.id);
+  }
+}, {
+  immediate: true
+})
 
+onMounted(async () => {
+  console.error(isInLeyanWujieContainer);
+  if (isInLeyanWujieContainer || isElectronEnv) {
+    try {
+      const products = await store.dispatch('Global/getLyProducts');
+      const spaces = await store.dispatch('Global/getLySpaces');
+      lyProducts.value = (products || []).map(e => ({ ...e, children: e.children || [], }));
+      lySpaces.value = (spaces || []).map(e => ({ ...e, label: e.name, value: e.nameEngAbbr }));
+    } catch(error) {
+      console.log(error);
+    }
+  }
+})
 </script>
 
 <style scoped lang="less">

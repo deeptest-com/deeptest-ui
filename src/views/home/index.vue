@@ -51,6 +51,7 @@
 
       <!-- 创建项目弹窗 -->
       <CreateProjectModal
+          v-if="createProjectModalVisible"
           :visible="createProjectModalVisible"
           :formState="formState"
           @update:visible="createProjectModalVisible = false"
@@ -112,6 +113,9 @@ let formState = ref({
   adminId: "",
   includeExample: false,
   desc: "",
+  products: [],
+  spaces: [],
+  syncMembers: false,
 });
 
 onMounted(async () => {
@@ -166,8 +170,19 @@ function handleJoin(item) {
 }
 
 function handleOpenAdd() {
+  formState.value = {
+    id: 0,
+    logo: "",
+    name: "",
+    shortName: "",
+    adminId: "",
+    includeExample: false,
+    desc: "",
+    products: [],
+    spaces: [],
+    syncMembers: false,
+  };
   createProjectModalVisible.value = true;
-  formState.value.id = 0;
 }
 
 function handleOpenEdit(item) {
@@ -178,6 +193,7 @@ function handleOpenEdit(item) {
   formState.value.adminId = item.adminId;
   formState.value.includeExample = item.includeExample;
   formState.value.desc = item.projectDescr;
+  formState.value.syncMembers = item.syncMembers || false;
   createProjectModalVisible.value = true;
 }
 

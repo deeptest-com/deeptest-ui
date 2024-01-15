@@ -7,7 +7,7 @@ import router from '@/router';
 import {getConfigByKey, getServerConfig} from "@/services/config";
 import {getClientVersion} from "@/services/static";
 import {listAgent} from "@/views/sys-settings/service";
-import { getUserMenuList } from '@/services/project';
+import { getUserIntegrationDetail, getUserMenuList, getUserProducts, getUserSpaces } from '@/services/project';
 import {Cache_Key_Agent} from "@/utils/const";
 import {getCache, setCache} from "@/utils/localCache";
 import { getUserRolesAuth } from '@/services/role';
@@ -32,6 +32,12 @@ export interface StateType {
   clientVersion: string;
   permissionMenuList: string[];
   userRolesAuth: string[];
+}
+
+interface ResponseState {
+  code: number;
+  data?: any;
+  msg?: string;
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -59,6 +65,11 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
     listAgent: Action<StateType, StateType>;
     getUserRolesAuth: Action<StateType, StateType>;
+
+    // ly  wujie内相关的接口
+    getLyProducts: Action<StateType, StateType>;
+    getLySpaces: Action<StateType, StateType>;
+    getIntegrationDetail: Action<StateType, StateType>;
   };
 }
 
@@ -215,6 +226,42 @@ const StoreModel: ModuleType = {
       } catch(error) {
         return error;
       }
+    },
+
+    async getLyProducts() {
+      try {
+        const { code, data, msg }: any = await getUserProducts({ page: 1, pageSize: 9999 });
+        if (code === 0) {
+          return Promise.resolve(data);
+        }
+        return Promise.reject(msg);
+      } catch(error: any) {
+        return Promise.reject(error?.message || error);
+      }
+    },
+
+    async getLySpaces() {
+      try {
+        const { code, data, msg }: any = await getUserSpaces();
+        if (code === 0) {
+          return Promise.resolve(data);
+        }
+        return Promise.reject(msg);
+      } catch(error: any) {
+        return Promise.reject(error?.message || error);
+      }
+    },
+
+    async getIntegrationDetail(_, payload) {
+      try {
+        const { code, data, msg }: any = await getUserIntegrationDetail(payload);
+        if (code === 0) {
+          return Promise.resolve(data);
+        }
+        return Promise.reject(msg);
+      } catch(error: any) {
+        return Promise.reject(error?.message || error);
+      } 
     }
   }
 }
