@@ -343,7 +343,7 @@ const StoreModel: ModuleType = {
             if (payload.isForBenchmarkCase) {
                 state.benchMarkCase.postConditions = (payload.data || []).filter(e => !!e.isForBenchmarkCase);
             } else {
-                state.postConditions = (payload.data || []).filter(e => !e.isForBenchmarkCase);
+                state.postConditions = (payload.data || []).filter(e => !e.isForBenchmarkCase && e.entityType != ConditionType.checkpoint);
             }
         },
         setAssertionConditions(state, payload) {
