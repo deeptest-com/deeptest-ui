@@ -77,7 +77,7 @@
                 labelInValue
                 :replaceFields="{ title: 'name',value:'id'}"
               />
-              <a-button type="primary" :icon="h(PlusOutlined)"></a-button>
+              <a-button @click="handleToProducts" type="primary" :icon="h(PlusOutlined)"></a-button>
             </div>
           </a-form-item>
           <!-- ly wujie环境下 展示所属空间  -->
@@ -135,7 +135,7 @@ const props = defineProps<{
 }>();
 const emits = defineEmits(["update:visible", "handleOk", "handleSuccess"]);
 const store = useStore<{ User: UserStateType; Project: ProjectStateType }>();
-const { isInLeyanWujieContainer } = useWujie();
+const { isInLeyanWujieContainer, parentOrigin } = useWujie();
 const isLy = isLeyan();
 const userListOptions = computed<SelectTypes["options"]>(
     () => (store.state.Project.userList || []).filter(e => isInLeyanWujieContainer ? e.username !== 'admin' : e.username !== '')
@@ -244,6 +244,28 @@ const getProjectDetail = async(id: number) => {
     console.log(error);
   }
 };  
+
+const handleToProducts = () => {
+  if (isInLeyanWujieContainer) {
+    window.open(`${parentOrigin}/pd/list`);
+    return;
+  }
+  if (process.env.NODE_ENV === 'development') {
+    window.open(`https://leyan-dev.rysaas.cn/pd/list`);
+    return;
+  }
+  const originMap = {
+    'dev': 'https://leyan-dev.rysaas.cn',
+    'test': 'http://leyan-test.rysaas.cn',
+    'prod': 'https://leyan.nancalcloud.com'
+  };
+  const matchResult = window.location.href.match(/leyanapi-(\w+)/);
+  if (matchResult) {
+    window.open(`${matchResult[1] === 'dev' ? originMap['dev'] : originMap['test']}/pd/list`);
+  } else {
+    window.open(`${originMap['prod']}/pd/list`);
+  }
+}
 
 watch(() => props.visible,
   (val) => {
