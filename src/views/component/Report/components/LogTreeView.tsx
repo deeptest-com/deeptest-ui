@@ -73,7 +73,7 @@ export default defineComponent({
             }
 
             function renderContent(log) {
-                if (log.processorCategory === 'processor_interface' && log.detail !== undefined && log.detail !== '{}') {
+                if (log.processorCategory === 'processor_interface' ) {
                     return <InterfaceContent endpointData={log} />
                 } else if (log.processorCategory === 'processor_assertion') {
                     return <AssertionContent data={log} />
@@ -112,7 +112,7 @@ export default defineComponent({
                 return <a-collapse-panel
                     key={log.id}
                     header={renderHeader(log)}
-                    showArrow={showArrowScenarioType.includes(log.processorType) || (log.processorCategory === 'processor_interface' && log.detail !== undefined && log.detail !== '{}')}>
+                    showArrow={showArrowScenarioType.includes(log.processorType) || (log.processorCategory === 'processor_interface' )}>
                     {renderContent(log)}
                     {
                         log?.logs?.map((item, itemIndex, srcLog) => {
