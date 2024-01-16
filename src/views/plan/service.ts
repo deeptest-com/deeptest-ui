@@ -93,3 +93,13 @@ export async function removeScenarios(planId: number, payload: ScenariosIdsData)
         data: payload,
     });
 }
+
+
+// 移动场景
+export async function moveScenario(data:any): Promise<any> {
+    return request({
+        url: `/${apiPath}/moveScenario`,
+        method: 'PUT',
+        data: data,
+    });
+}

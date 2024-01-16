@@ -7,7 +7,6 @@
         <a-row type="flex">
           <a-col flex="100px" class="envDetail-btn">
             <PermissionButton
-                code="ADD-GLOBAL-PARAM"
                 text="添加"
                 @handle-access="addGlobalParams">
               <template #before>
@@ -61,7 +60,6 @@
                 </template>
                 <template #customAction="{ index }">
                   <PermissionButton
-                      code="DELETE-GLOBAL-PARAM"
                       type="text"
                       size="small"
                       :danger="true"
@@ -77,10 +75,8 @@
 
     <div class="envDetail-footer">
       <PermissionButton
-          class="save-btn"
           html-type="submit"
           type="primary"
-          code="SAVE-GLOBAL-PARAM"
           text="保存"
           @handle-access="handleSaveGlobalParams">
       </PermissionButton>
@@ -210,7 +206,7 @@ watch(() => {
   align-items: center;
   justify-content: flex-end;
 
-  .save-btn {
+  :deep(.save-btn) {
     margin-right: 16px;
   }
 }

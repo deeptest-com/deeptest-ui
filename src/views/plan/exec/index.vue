@@ -53,6 +53,7 @@ import {
   , statisticData, initData, progressStatus, progressValue, updatePlanRes, updateStatFromLog,
 } from '@/composables/useExecLogs';
 import {getUuid} from "@/utils/string";
+import { setServeUrl } from '@/utils/url';
 
 const props = defineProps<{
   drawerVisible: boolean
@@ -113,7 +114,7 @@ const execStart = async () => {
   const data = {
     userId: currUser.value.id,
     execUuid: execUuid.value,
-    serverUrl: process.env.VUE_APP_API_SERVER,
+    serverUrl: setServeUrl(process.env.VUE_APP_API_SERVER),
     token: token,
     planId: currPlan.value?.id,
     environmentId: currEnvId.value

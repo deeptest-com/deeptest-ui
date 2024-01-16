@@ -4,12 +4,13 @@ import { StoreModuleType } from "@/utils/store";
 import { TabNavItem } from '@/utils/routes';
 import settings from '@/config/settings';
 import router from '@/router';
-import { getPermissionMenuList } from '@/services/project';
 import {getConfigByKey, getServerConfig} from "@/services/config";
 import {getClientVersion} from "@/services/static";
 import {listAgent} from "@/views/sys-settings/service";
+import { getUserMenuList } from '@/services/project';
 import {Cache_Key_Agent} from "@/utils/const";
 import {getCache, setCache} from "@/utils/localCache";
+import { getUserRolesAuth } from '@/services/role';
 
 export interface StateType {
   // 左侧展开收起
@@ -23,14 +24,14 @@ export interface StateType {
   // 头部tab导航列表
   headTabNavList: TabNavItem[];
 
-  permissionMenuMap: any;
-  permissionButtonMap: any;
   serverConfig: any;
   configInfo: any,
   agents: any[],
   currAgent: any,
   spinning:boolean;
   clientVersion: string;
+  permissionMenuList: string[];
+  userRolesAuth: string[];
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -41,21 +42,23 @@ export interface ModuleType extends StoreModuleType<StateType> {
     setHeadFixed: Mutation<StateType>;
     setTabNavEnable: Mutation<StateType>;
     setHeadTabNavList: Mutation<StateType>;
-    setPermissionMenuAndBtn: Mutation<StateType>;
     setServerConfig: Mutation<StateType>;
     setConfigByKey: Mutation<StateType>;
     setClientVersion: Mutation<StateType>;
     setSpinning: Mutation<StateType>;
     setAgents: Mutation<StateType>;
     setCurrAgent: Mutation<StateType>;
+    setPermissionMenuList: Mutation<StateType>;
+    setRolesAuth: Mutation<StateType>;
   };
   actions: {
-    getPermissionList: Action<StateType, StateType>;
     getServerConfig: Action<StateType, StateType>;
     getConfigByKey: Action<StateType, StateType>;
     getClientVersion: Action<StateType, StateType>;
+    getPermissionMenuList: Action<StateType, StateType>;
 
     listAgent: Action<StateType, StateType>;
+    getUserRolesAuth: Action<StateType, StateType>;
   };
 }
 
@@ -72,14 +75,14 @@ const initState: StateType = {
       menu: settings.homeRouteItem
     }
   ],
-  permissionMenuMap: null,
-  permissionButtonMap: null,
   serverConfig: {},
   configInfo: {},
   agents: [],
   currAgent: {},
   spinning:false,
   clientVersion: '0.0.1',
+  permissionMenuList: [],
+  userRolesAuth: [],
 };
 
 const StoreModel: ModuleType = {
@@ -103,11 +106,6 @@ const StoreModel: ModuleType = {
     },
     setHeadTabNavList(state, payload) {
       state.headTabNavList = payload;
-    },
-    setPermissionMenuAndBtn(state, payload) {
-      const { permissionButtonMap, permissionMenuMap } = payload;
-      state.permissionButtonMap = permissionButtonMap;
-      state.permissionMenuMap = permissionMenuMap
     },
     setServerConfig(state, payload) {
       state.serverConfig = payload
@@ -140,28 +138,14 @@ const StoreModel: ModuleType = {
 
       await setCache(Cache_Key_Agent, state.currAgent)
     },
+    setPermissionMenuList(state, payload) {
+      state.permissionMenuList = payload;
+    },
+    setRolesAuth(state, payload) {
+      state.userRolesAuth = payload;
+    }
   },
   actions: {
-    async getPermissionList({ commit }, payload: any) {
-      const menuData = {};
-      const buttonData = {};
-      try {
-        const result = await getPermissionMenuList(payload);
-        if (result.code === 0 && result.data.result) {
-          result.data.result.forEach(e => {
-            if (e.type === 'menu') {
-              menuData[e.code] = e;
-            } else if (e.type === 'button') {
-              buttonData[e.code] = e;
-            }
-          })
-        }
-        commit('setPermissionMenuAndBtn', { permissionButtonMap: buttonData, permissionMenuMap: menuData });
-        return { menuData, buttonData };
-      } catch(error) {
-        return { menuData, buttonData };
-      }
-    },
     async getServerConfig({ commit }) {
       const result = await getServerConfig();
 
@@ -197,6 +181,39 @@ const StoreModel: ModuleType = {
       const result = await getClientVersion();
       if (result?.version) {
         commit('setClientVersion',result.version);
+      }
+    },
+
+    async getPermissionMenuList({ commit, rootState }: any, payload: any) {
+      try {
+        const { code, data }: any = await getUserMenuList(payload);
+        if (code === 0) {
+          commit('setPermissionMenuList', data || []);
+          window?.$wujie?.bus.$emit(settings.sendMsgToLeyan, {
+            type: 'initLeyanAPIMenu',
+            data: {
+              menu: data || []
+            }
+          })
+          return true;
+        } else {
+          return false;
+        }
+      } catch(_err) {
+        return false;
+      }
+    },
+
+    async getUserRolesAuth({ commit }) {
+      try {
+        const result: any = await getUserRolesAuth();
+        if (result.code === 0) {
+          commit('setRolesAuth', result.data);
+          return result.data;
+        }
+        return result;
+      } catch(error) {
+        return error;
       }
     }
   }

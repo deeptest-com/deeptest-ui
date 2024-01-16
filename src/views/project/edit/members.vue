@@ -47,7 +47,6 @@
           <template #role="{ record }">
             <div class="customTitleColRender">
               <a-select
-                  :disabled="currentUser.projectRoles[currProject.id] !== 'admin' && currentUser.sysRoles.indexOf('admin') === -1"
                   :value="record.roleId"
                   style="width: 100px"
                   :size="'small'"
@@ -73,7 +72,6 @@
             <a-button
                 type="link"
                 @click="() => remove(record.id)"
-                :disabled="currentUser.projectRoles[currProject.id] !== 'admin' && currentUser.sysRoles.indexOf('admin') === -1"
             >移除
             </a-button
             >
@@ -153,7 +151,7 @@ const columns = [
     slots: {customRender: "email"},
   },
   {
-    title: "操作1",
+    title: "操作",
     key: "action",
     width: 260,
     slots: {customRender: "action"},
@@ -162,7 +160,6 @@ const columns = [
 
 
 onMounted(() => {
-  console.log("onMounted");
   getMembers(1);
   getRoles()
   store.dispatch("User/fetchUserProjectRole");

@@ -248,6 +248,7 @@ function move(_e: any) {
     isForBenchmarkCase: false,
     entityType: '',
     conditionSrc: props.conditionSrc,
+    category: props.conditionSrc === ConditionSrc.PostCondition ? ConditionCategory.postCondition : '',
   })
 }
 

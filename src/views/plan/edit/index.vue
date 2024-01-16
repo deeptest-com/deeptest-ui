@@ -2,8 +2,8 @@
   <DrawerLayout :visible="editDrawerVisible" @close="onCancel" :stickyKey="stickyKey">
     <!-- 头部信息  -->
     <template #header>
-      <DetailHeader 
-        :show-action="true" 
+      <DetailHeader
+        :show-action="true"
         :show-detail="true"
         :show-share="true"
         :share-link="detailLink"
@@ -37,6 +37,7 @@ import TabContent from "../detail/TabContent.vue";
 
 import {StateType as PlanStateType} from '../store';
 import { notifyError } from "@/utils/notify";
+import {useWujie} from "@/composables/useWujie";
 
 const props = defineProps<{
   editDrawerVisible: Boolean
@@ -54,9 +55,13 @@ const activeKey = ref<string>('test-scenario');
 const loading = ref(false);
 
 const stickyKey = ref(0);
-
+const {projectName,parentOrigin,isWujieEnv,isInLeyanWujieContainer} = useWujie();
 const detailLink = computed(() => {
-  const { params: { projectNameAbbr } } = router.currentRoute.value;
+  const {params: {projectNameAbbr = ''}} = router.currentRoute.value;
+  // 无界环境，使用父级域名跳转
+  if(isInLeyanWujieContainer){
+    return `${parentOrigin}/lyapi/${projectName}/TP/${projectNameAbbr}-TP-${currPlan.value.id}`;
+  }
   return `${window.location.origin}/${projectNameAbbr}/TP/${projectNameAbbr}-TP-${currPlan.value.id}`;
 });
 
