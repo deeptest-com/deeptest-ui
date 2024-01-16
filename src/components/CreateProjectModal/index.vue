@@ -15,7 +15,7 @@
         class="custom-center-form"
         :model="formStateRef"
         :wrapper-col="wrapperCol"
-        :label-col="{ style: { width: isInLeyanWujieContainer ? '110px' : '82px' } }"
+        :label-col="{ style: { width: isLy ? '110px' : '82px' } }"
       >
         <a-form-item label="项目名称" v-bind="validateInfos.name">
                     <a-input
@@ -61,7 +61,7 @@
             </a-select-option>
           </a-select>
         </a-form-item>
-        <template v-if="isInLeyanWujieContainer || isElectronEnv">
+        <template v-if="isLy">
           <!-- ly wujie环境 或 客户端下 展示所属产品  -->
           <a-form-item label="所属产品">
             <div class="project-edit-pd">
@@ -126,6 +126,7 @@ import {getProjectLogo, projectLogoList} from "./index";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import {useWujie} from "@/composables/useWujie";
 import { isElectronEnv } from "@/utils/agentEnv";
+import { isLeyan } from "@/utils/comm";
 
 const useForm = Form.useForm;
 const props = defineProps<{
@@ -135,6 +136,7 @@ const props = defineProps<{
 const emits = defineEmits(["update:visible", "handleOk", "handleSuccess"]);
 const store = useStore<{ User: UserStateType; Project: ProjectStateType }>();
 const { isInLeyanWujieContainer } = useWujie();
+const isLy = isLeyan();
 const userListOptions = computed<SelectTypes["options"]>(
     () => (store.state.Project.userList || []).filter(e => isInLeyanWujieContainer ? e.username !== 'admin' : e.username !== '')
 );
@@ -157,7 +159,7 @@ const wujieExtraInfo = {
   syncMembers: false,
 }
 
-const formStateRef = reactive(props.formState || ( isInLeyanWujieContainer ? { ...projectInfo, wujieExtraInfo } : projectInfo ));
+const formStateRef = reactive(props.formState || ( isLy ? { ...projectInfo, wujieExtraInfo } : projectInfo ));
 const loading = ref(false);
 
 const filterOption = (input: string, option: any) => {
@@ -257,7 +259,7 @@ watch(() => props.visible,
 watch(() => {
   return props.formState;
 }, val => {
-  if (val?.id && (isInLeyanWujieContainer || isElectronEnv)) {
+  if (val?.id && isLy) {
     formStateRef.products = [];
     formStateRef.spaces = [];
     formStateRef.syncMembers = false;
@@ -269,8 +271,7 @@ watch(() => {
 })
 
 onMounted(async () => {
-  console.error(isInLeyanWujieContainer);
-  if (isInLeyanWujieContainer || isElectronEnv) {
+  if (isLy) {
     try {
       const products = await store.dispatch('Global/getLyProducts');
       const spaces = await store.dispatch('Global/getLySpaces');
