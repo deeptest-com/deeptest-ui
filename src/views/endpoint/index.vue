@@ -468,7 +468,10 @@ async function editEndpoint(record) {
  */
 
 async function clone(record: any) {
-  await store.dispatch('Endpoint/copy', record);
+  fetching.value = true
+  const res = await store.dispatch('Endpoint/copy', record);
+  fetching.value = false
+  notifySuccess('复制成功');
 }
 
 async function disabled(record: any) {
@@ -483,11 +486,13 @@ async function del(record: any) {
     okType: 'danger',
     cancelText: () => '取消',
     onOk: async () => {
+      fetching.value = true
       const res = await store.dispatch('Endpoint/del', record);
       // // 删除后重新拉取列表，根据当前页面和当前筛选条件
       // await loadList(pagination.value.current, pagination.value.pageSize, filterState.value);
       // // 重新拉取目录树
       // await store.dispatch('Endpoint/loadCategory');
+      fetching.value = false
       if (res) {
         notifySuccess('删除成功');
       } else {

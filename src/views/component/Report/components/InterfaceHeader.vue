@@ -49,6 +49,7 @@
       :data="endpointData"
       :response-drawer-visible="logResponseDetailVisible"
       @onClose="logResponseDetailVisible = false" />
+
   </div>
 </template>
 <script setup lang="ts">
