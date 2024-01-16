@@ -134,7 +134,6 @@ export const DropdownActionMenu = defineComponent({
       if (e.show !== null && e.show !== undefined) {
         return checkShow(e, props);
       }
-      console.error(hasPermission(e.auth || '') && ifShow(e, props));
       return hasPermission(e.auth || '') && ifShow(e, props);
     };
     
