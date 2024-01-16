@@ -230,8 +230,8 @@ const dropdownMenuList = [
   {
     label: '删除',
     action: (record) => remove(record.id),
-    ifShow: (record) => {
-      return isCreator(record.createUserName || '');
+    show: (record) => {
+      return hasPermission('p-api-ts-del') || isCreator(record.createUserName || '');
     },
     auth: 'p-api-ts-del',
   }

@@ -74,7 +74,7 @@ defineProps({
 })
 const emits = defineEmits(['queryDetail', 'getList']);
 const { share }  = useSharePage();
-const { isCreator } = usePermission();
+const { isCreator, hasPermission } = usePermission();
 const store = useStore<{ Report: StateType, ProjectGlobal: ProjectStateType }>();
 // 分页数据
 let pagination = computed<PaginationConfig>(() => store.state.Report.listResult.pagination);
@@ -147,7 +147,7 @@ const dropdownMenuList = [
     {
         label: '删除',
         action: (record) => handleDelete(record.id),
-        ifShow: record => isCreator(record.createUserId),
+        show: record => hasPermission('p-api-tr-del') || isCreator(record.createUserId),
         auth: 'p-api-tr-del',
     },
 ];

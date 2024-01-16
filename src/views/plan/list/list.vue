@@ -219,7 +219,7 @@ const dropdownMenuList = [
   {
     label: '删除',
     action: (record) => remove(record.id),
-    ifShow: (record) => isCreator(record.createUserId),
+    show: (record) => hasPermission('p-api-tp-del') || isCreator(record.createUserId),
     auth: 'p-api-tp-del',
   }
 ]
