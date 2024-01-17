@@ -74,7 +74,7 @@ if (isWujieEnv && xToken) {
 }
 
 if (isWujieEnv && user.token) {
-    console.log("lecang","user.token")
+    console.log("lecang",user.token)
     request.defaults.headers['Token'] = user.token;
 }
 
