@@ -188,10 +188,9 @@ async function goProject(item: any) {
   if (isWujieEnv && bus) {
 
     bus?.$emit(settings.sendMsgToLeyan, {
-      type: 'fetchDynamicMenus',
+      type: 'changeParentRouter',
       data: {
-        roleValue: (projects.value || []).find(pro => pro.id === item.projectId)?.roleName,
-        route: `${item.projectShortName}/workspace`,
+        url: `${item.projectShortName}/workspace`,
       }
     })
     return;
