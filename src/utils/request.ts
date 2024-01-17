@@ -12,7 +12,7 @@ import {getCache} from '@/utils/localCache';
 import {isLeyan} from "@/utils/comm";
 import {getCachedServerUrl} from "@/utils/serverEnv";
 import {useWujie} from "@/composables/useWujie";
-const {xToken,isWujieEnv} = useWujie()
+const {xToken,isWujieEnv,user} = useWujie()
 
 export interface ResponseData {
     code: number;
@@ -71,6 +71,11 @@ if (isWujieEnv && xToken) {
     request.defaults.headers['X-API-Origin'] = org;
     requestAgent.defaults.headers['X-API-Origin'] = org;
     requestStatic.defaults.headers['X-API-Origin'] = org;
+}
+
+if (isWujieEnv && user.token) {
+    console.log("lecang","user.token")
+    request.defaults.headers['Token'] = user.token;
 }
 
 // 全局设置 - post请求头
