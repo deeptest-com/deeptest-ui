@@ -194,6 +194,7 @@ const create = () => {
     ...debugInfo.value,
     isForBenchmarkCase: true,
     conditionSrc: props.conditionSrc,
+    category: props.conditionSrc === ConditionSrc.PostCondition ? ConditionCategory.postCondition : '',
   })
 }
 
@@ -205,6 +206,7 @@ const disable = (item) => {
   console.log('disable', item)
 
   item.conditionSrc = props.conditionSrc
+  item.category = props.conditionSrc === ConditionSrc.PostCondition ? ConditionCategory.postCondition : ''
   item.isForBenchmarkCase = true
 
   store.dispatch('Debug/disableCondition', item)
@@ -213,6 +215,7 @@ const remove = (item) => {
   console.log('remove', item)
 
   item.conditionSrc = props.conditionSrc
+  item.category = props.conditionSrc === ConditionSrc.PostCondition ? ConditionCategory.postCondition : ''
   item.isForBenchmarkCase = true
 
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
@@ -229,6 +232,7 @@ function move(_e: any) {
 
     entityType: '',
     conditionSrc: props.conditionSrc,
+    category: props.conditionSrc === ConditionSrc.PostCondition ? ConditionCategory.postCondition : '',
     isForBenchmarkCase: true,
   })
 }

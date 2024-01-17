@@ -1,5 +1,6 @@
 <template>
   <div class="dp-enpoint-tree-main">
+    <a-spin :spinning="spinning">
     <div class="dp-tree-container">
       <div class="tag-filter-form">
         <a-input-search
@@ -41,12 +42,14 @@
             </div>
           </template>
         </a-tree>
+     
         <div v-if="!treeData.length" class="nodata-tip">
           <div v-if="showKeywordsTip">搜索结果为空 ~</div>
           <a-spin v-else/>
         </div>
       </div>
     </div>
+  </a-spin>
     <!--  创建接口 Tag  -->
     <CreateCategoryModal
         :visible="createTagModalVisible"
@@ -92,6 +95,8 @@ const createTagModalVisible = ref(false);
 const searchValue = ref('');
 const expandedKeys = ref<number[]>([]);
 const autoExpandParent = ref<boolean>(false);
+const spinning = ref(false)
+
 let selectedKeys = ref<number[]>([]);
 const emit = defineEmits(['select']);
 const treeItemRef = ref({});
@@ -244,6 +249,7 @@ const tagModalMode = ref('new');
 async function deleteCategorie(node) {
 
   confirmToDelete('将级联删除分类下的所有子分类、接口定义、调试信息等','删除后无法恢复，请确认是否删除？',async () => {
+    spinning.value = true;
       const res = await store.dispatch('Endpoint/removeCategoryNode', {
         id:node.id,
         type:'endpoint',
@@ -257,6 +263,7 @@ async function deleteCategorie(node) {
       } else {
         notifyError('删除失败');
       }
+      spinning.value = false;
     })
 
 
@@ -264,12 +271,14 @@ async function deleteCategorie(node) {
 
 async function cloneCategorie(node){
   confirmToDo(`确认复制目录【`+node.name+`】？`, '该目录下的子目录和接口定义将被复制', async () => {
+    spinning.value = true;
     const res = await store.dispatch('Endpoint/cloneCategoryNode',node.id)
   if (res) {
     notifySuccess('复制成功，稍后刷新页面查询复制结果');
   }else {
     notifyError('复制失败');
   }
+  spinning.value = false;
   })
 }
 

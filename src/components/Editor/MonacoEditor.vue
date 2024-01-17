@@ -112,7 +112,7 @@ export default defineComponent({
         const loadJsLibs = async () => {
           const typeFiles = []
 
-          if (conditionSrc === ConditionSrc.PostCondition) {
+          if (conditionSrc === ConditionSrc.PostCondition || conditionSrc === ConditionSrc.ScenarioCustomCode) {
             const chaiDeclareSnippet = 'chai.d'
             const chaiDeclareJson = await getSnippet(chaiDeclareSnippet)
             if (chaiDeclareJson.code === 0 && !!chaiDeclareJson.data?.script) {
@@ -120,8 +120,16 @@ export default defineComponent({
             }
           }
 
-          const declareSnippet = usedBy == UsedBy.MockData ?
-              'mock.d' : conditionSrc === ConditionSrc.PostCondition ? 'deeptest-post.d' : 'deeptest.d'
+          let declareSnippet = ''
+          if (usedBy == UsedBy.MockData) {
+            declareSnippet = 'mock.d'
+          } else if (conditionSrc === ConditionSrc.PostCondition) {
+            declareSnippet = 'deeptest-post.d'
+          } else if (conditionSrc === ConditionSrc.ScenarioCustomCode) {
+            declareSnippet = 'deeptest-scenario-custom-code.d'
+          } else {
+            declareSnippet = 'deeptest.d'
+          }
 
           const defaultDeclareJson = await getSnippet(declareSnippet)
           if (defaultDeclareJson.code === 0 && !!defaultDeclareJson.data?.script) {

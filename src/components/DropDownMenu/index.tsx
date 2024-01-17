@@ -101,9 +101,6 @@ const DropdownList = defineComponent({
 })
 
 const ifShow = (actionItem: MenuItem, props) => {
-  if (!actionItem.ifShow) {
-    return false;
-  }
   if (typeof actionItem.ifShow === 'boolean') {
     return actionItem.ifShow;
   } 
@@ -111,6 +108,15 @@ const ifShow = (actionItem: MenuItem, props) => {
     return actionItem.ifShow(props.record);
   }
   return true;
+}
+
+const checkShow = (actionItem: MenuItem, props) => {
+  if (typeof actionItem.show === 'boolean') {
+    return actionItem.show;
+  } 
+  if (typeof actionItem.show === 'function') {
+    return actionItem.show(props.record);
+  }
 }
 
 /**
@@ -123,7 +129,15 @@ export const DropdownActionMenu = defineComponent({
     const { dropdownList, actionList, record } = toRefs(props);
     const { hasPermission }  = usePermission();
 
-    const newDropDownList = dropdownList.value.filter(e => hasPermission(e.auth || '') || ifShow(e, props))
+    const filterAction = (e, props) => {
+      console.error(e.show);
+      if (e.show !== null && e.show !== undefined) {
+        return checkShow(e, props);
+      }
+      return hasPermission(e.auth || '') && ifShow(e, props);
+    };
+
+    const newDropDownList = dropdownList.value.filter(e => filterAction(e, props));
     
     return () => {
       return (

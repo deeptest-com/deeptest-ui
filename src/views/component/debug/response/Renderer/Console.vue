@@ -1,46 +1,50 @@
 <template>
   <div class="response-console-main" v-if="consoleLogs && consoleLogs.length">
-    <div v-for="(item, index) in consoleLogs"
-         :key="index"
-         :class="getItemClass(item)" class="item">
 
-      <span v-if="item.resultStatus===ResultStatus.Pass">
-        <CheckCircleOutlined />
-      </span>
-      <span v-if="item.resultStatus===ResultStatus.Fail">
-        <CloseCircleOutlined />
-      </span>&nbsp;
+    <template v-for="(item, index) in consoleLogs"
+              :key="index">
+      <div  v-if="item.type !== 'script'" :class="getItemClass(item)" class="item">
 
-      <span>
-        <icon-svg v-if="item.conditionEntityType === ConditionType.extractor"
-                  type="variable"
-                  class="icon variable" />
-        <icon-svg v-if="item.conditionEntityType === ConditionType.checkpoint"
-                  type="checkpoint"
-                  class="icon"  />
-        <icon-svg v-if="item.conditionEntityType === ConditionType.script"
-                  type="script"
-                  class="icon"  />
+        <span v-if="item.resultStatus===ResultStatus.Pass">
+          <CheckCircleOutlined />
+        </span>
+        <span v-if="item.resultStatus===ResultStatus.Fail">
+          <CloseCircleOutlined />
+        </span>&nbsp;
 
-        <icon-svg v-if="item.conditionEntityType === ConditionType.databaseOpt"
-                  type="db-opt"
-                  class="icon"  />
-      </span>
-      &nbsp;
-      <span v-if="item.conditionEntityType === ConditionType.checkpoint">断言</span>
+        <span>
+          <icon-svg v-if="item.conditionEntityType === ConditionType.extractor"
+                    type="variable"
+                    class="icon variable" />
+          <icon-svg v-if="item.conditionEntityType === ConditionType.checkpoint"
+                    type="checkpoint"
+                    class="icon"  />
+          <icon-svg v-if="item.conditionEntityType === ConditionType.script"
+                    type="script"
+                    class="icon"  />
 
-      <span v-html="getResultMsg(item)" class="script-logs"></span>
+          <icon-svg v-if="item.conditionEntityType === ConditionType.databaseOpt"
+                    type="db-opt"
+                    class="icon"  />
+        </span>
+        &nbsp;
+        <span v-if="item.conditionEntityType === ConditionType.checkpoint">断言</span>
 
-      <template v-if="item.conditionEntityType === ConditionType.checkpoint">
-        <template v-if="item.variables">
-          ，变量
-          <span v-for="(v, k, index) in toJsonObj(item.variables)" :key="k">
-            <template v-if="index > 0">，</template>
-            {{k}} {{v === '<nil>' ? ' 未定义' : ` = ${v}`}}
-          </span>
-        </template>。
-      </template>
-    </div>
+        <span v-html="getResultMsg(item)" class="script-logs"></span>
+
+        <template v-if="item.conditionEntityType === ConditionType.checkpoint">
+          <template v-if="item.variables">
+            ，变量
+            <span v-for="(v, k, index) in toJsonObj(item.variables)" :key="k">
+              <template v-if="index > 0">，</template>
+              {{k}} {{v === '<nil>' ? ' 未定义' : ` = ${v}`}}
+            </span>
+          </template>。
+        </template>
+      </div>
+
+    </template>
+
   </div>
   <Empty :desc="'暂无数据'" style="margin-top: 100px" v-else/>
 </template>
@@ -67,7 +71,7 @@ const props = defineProps<{
 const store = useStore<{  Debug: Debug }>();
 const responseData = computed<any>(() => props.data || store.state.Debug.responseData);
 const consoleData = computed<any>(() => {
-  if (props.data?.consoleData?.length) {
+  if (props.data?.consoleData?.length) { // for page in scenario report, a consoleData prop passed
     return props.data.consoleData;
   }
   return store.state.Debug.consoleData;

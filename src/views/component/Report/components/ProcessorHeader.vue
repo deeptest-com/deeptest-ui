@@ -65,6 +65,7 @@
       <template v-if="record.processorType === 'processor_assertion_default'">
         <p class="text">断言表达式：<code>{{ `${detail?.expression}` }}</code></p>
       </template>
+
       <!-- ::::自定义代码 -->
       <template v-if="record.processorType === 'processor_custom_code'">
         <p class="text"></p>
