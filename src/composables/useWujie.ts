@@ -9,7 +9,7 @@ export const  useWujie = () => {
 
     const isLoading = ref(false);
 
-
+    console.log("wujie",window?.$wujie?.props)
     return {
         isLoading,
         isWujieEnv,
