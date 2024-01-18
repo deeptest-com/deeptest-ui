@@ -63,20 +63,27 @@ const requestStatic = axios.create({
 // 如果是嵌入到乐研中，需要设置请求头 xToken ，用于嵌入乐研的权限验证
 if (isWujieEnv && xToken) {
 
-    request.defaults.headers['X-Token'] = xToken;
-    requestAgent.defaults.headers['X-Token'] = xToken;
-    requestStatic.defaults.headers['X-Token'] = xToken;
+    if (xToken) {
+        request.defaults.headers['X-Token'] = xToken;
+        requestAgent.defaults.headers['X-Token'] = xToken;
+        requestStatic.defaults.headers['X-Token'] = xToken;
+    }
 
+    //乐仓token
+    if (user.token) {
+        console.log("lecang",user.token)
+        request.defaults.headers['Token'] = user.token;
+        requestAgent.defaults.headers['Token'] = user.token;
+        requestStatic.defaults.headers['Token'] = user.token;
+    }
+
+   
     const org = window.location.origin;
     request.defaults.headers['X-API-Origin'] = org;
     requestAgent.defaults.headers['X-API-Origin'] = org;
     requestStatic.defaults.headers['X-API-Origin'] = org;
 }
 
-if (isWujieEnv && user.token) {
-    console.log("lecang",user.token)
-    request.defaults.headers['Token'] = user.token;
-}
 
 // 全局设置 - post请求头
 // request.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';

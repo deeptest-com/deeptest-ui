@@ -3,7 +3,7 @@ import {computed, ref} from 'vue';
 
 export const  useWujie = () => {
     const isWujieEnv = window?.__POWERED_BY_WUJIE__;
-    const {projectName,parentOrigin,xToken,useClipboardFormWujie,user}:any = window?.$wujie?.props || {};
+    const {projectName,parentOrigin,xToken,useClipboardFormWujie,user,util}:any = window?.$wujie?.props || {};
     // 可以在无界无界容器中打开
     const isInLeyanWujieContainer =  isWujieEnv && parentOrigin && xToken;
 
@@ -18,6 +18,7 @@ export const  useWujie = () => {
         xToken,
         useClipboardFormWujie,
         isInLeyanWujieContainer,
-        user
+        user,
+        util
     }
 }
