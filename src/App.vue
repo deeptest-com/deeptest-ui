@@ -149,14 +149,12 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      setHtmlLang(locale.value);
-
+      setHtmlLang(locale.value); 
       //  监听父应用传递过来的消息
       if(isWujieEnv){
         WebSocket.init(true);
         store.dispatch('Project/getUserList')
         listenSubApp()
-        
         // 通知上层应用已经加载完毕
         bus?.$emit(settings.sendMsgToLeyan, {
           type: 'appMounted',
@@ -212,16 +210,6 @@ export default defineComponent({
               projects: setProjectLogo(projects.value),
               recentProjects: setProjectLogo(recentProjects.value),
               currProject: currProject.value,
-            }
-          })
-        }, (600));
-      }
-      if (val && !oldv) {
-        setTimeout(() => {
-          bus?.$emit(settings.sendMsgToLeyan, {
-            type: 'fetchDynamicMenus',
-            data: {
-              roleValue: (projects.value || []).find(pro => pro.id === val)?.roleName
             }
           })
         }, (600));
