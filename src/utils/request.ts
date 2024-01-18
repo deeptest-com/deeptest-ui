@@ -61,7 +61,7 @@ const requestStatic = axios.create({
 });
 
 // 如果是嵌入到乐研中，需要设置请求头 xToken ，用于嵌入乐研的权限验证
-if (isWujieEnv && xToken) {
+if (isWujieEnv) {
 
     if (xToken) {
         request.defaults.headers['X-Token'] = xToken;
@@ -70,7 +70,7 @@ if (isWujieEnv && xToken) {
     }
 
     //乐仓token
-    if (user.token) {
+    if (user?.token) {
         console.log("lecang",user.token)
         request.defaults.headers['Token'] = user.token;
         requestAgent.defaults.headers['Token'] = user.token;
