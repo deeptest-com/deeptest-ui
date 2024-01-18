@@ -87,6 +87,8 @@ import {NotificationKeyCommon} from "@/utils/const";
 import {CurrentUser, StateType as UserStateType} from "@/store/user";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import usePermission from "@/composables/usePermission";
+import { setCache } from "@/utils/localCache";
+import settings from "@/config/settings";
 
 // 获取当前登录用户信息
 const router = useRouter();
@@ -125,6 +127,8 @@ onMounted(async () => {
   await getHearderData();
   await getList(1);
   await store.dispatch("User/fetchCurrent");
+  setCache(settings.currProjectId, 0);
+  store.dispatch('Global/getPermissionMenuList', { currProjectId: 0 });
 });
 
 const getHearderData = async (): Promise<void> => {

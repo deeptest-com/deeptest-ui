@@ -63,7 +63,7 @@
         </a-form-item>
         <template v-if="isLy">
           <!-- ly wujie环境 或 客户端下 展示所属产品  -->
-          <a-form-item label="所属产品">
+          <a-form-item label="所属产品" v-bind="validateInfos.products">
             <div class="project-edit-pd">
               <a-tree-select
                 v-model:value="formStateRef.products"
@@ -190,6 +190,7 @@ const rulesRef = reactive({
     },
   ],
   adminId: [{required: true, message: "请选择管理员"}],
+  products: [{required: true, message: "请选择所属产品"}],
   // desc: [{max: 180, message: "项目简介应小于180位", trigger: "blur"}],
 });
 
