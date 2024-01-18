@@ -51,7 +51,7 @@ const store = useStore<{
   User: UserStateType;
 }>();
 const { hasProjectAuth } = usePermission();
-const { isWujieEnv } = useWujie();
+const { isInLeyanWujieContainer,isInLecangWujieContainer } = useWujie();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currentUser = computed<any>(() => store.state.User.currentUser);
 const list = computed<any>(() => store.state.Home.queryResult.list);
@@ -185,7 +185,15 @@ async function goProject(item: any) {
   // 更新左侧菜单以及按钮权限
   await store.dispatch("Global/getPermissionMenuList", { currProjectId: item.projectId });
 
-  if (isWujieEnv && bus) {
+
+   //乐仓重新打开信息页面
+ if (isInLecangWujieContainer) {
+    window.open(`/${item.projectShortName}/workspace`, '_blank');
+    return 
+  }
+  
+
+  if (isInLeyanWujieContainer) {
 
     bus?.$emit(settings.sendMsgToLeyan, {
       type: 'changeParentRouter',
