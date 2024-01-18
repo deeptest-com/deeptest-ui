@@ -130,7 +130,6 @@ export const DropdownActionMenu = defineComponent({
     const { hasPermission }  = usePermission();
 
     const filterAction = (e, props) => {
-      console.error(e.show);
       if (e.show !== null && e.show !== undefined) {
         return checkShow(e, props);
       }

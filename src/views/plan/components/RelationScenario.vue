@@ -85,7 +85,6 @@ async function onOk() {
 }
 
 async function getScenarioList(params) {
-    console.error(queryParams)
     loading.value = true;
     await store.dispatch('Plan/getScenarioList', {
         ...queryParams,
