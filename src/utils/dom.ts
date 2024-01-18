@@ -185,7 +185,6 @@ export function getContextMenuStyle2(e) {
 export function getRightTabPanelPosition(tabId, isInLeyanWujieContainer?: boolean) {
     let ret = {}
     const elem = document.getElementById(tabId)
-    console.error('aaaaa');
     if (elem) {
         const pos = elem.getBoundingClientRect()
         const top = getRightTabTop()
