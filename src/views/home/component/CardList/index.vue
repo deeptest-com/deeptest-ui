@@ -189,6 +189,7 @@ async function goProject(item: any, e) {
   }
 
   if (isInLeyanWujieContainer) {
+    console.log("isInLeyanWujieContainer-bus",bus)
     bus?.$emit(settings.sendMsgToLeyan, {
       type: 'fetchDynamicMenus',
       data: {
