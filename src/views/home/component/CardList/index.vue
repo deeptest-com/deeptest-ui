@@ -106,7 +106,7 @@ const props = defineProps({
 const router = useRouter();
 const store = useStore<{ Home: StateType }>();
 const { hasProjectAuth } = usePermission();
-const { isWujieEnv,user,util } = useWujie();
+const { isInLeyanWujieContainer,isInLecangWujieContainer } = useWujie();
 const ListItem = List.Item;
 const list = computed<any>(() => store.state.Home.queryResult.list);
 const projects = computed<any>(() => store.state.ProjectGlobal.projects);
@@ -183,12 +183,12 @@ async function goProject(item: any, e) {
   await store.dispatch("Global/getPermissionMenuList", { currProjectId: item.projectId });
 
  //乐仓重新打开信息页面
- if (isWujieEnv && user?.token) {
+ if (isInLecangWujieContainer) {
     window.open(`/${item.projectShortName}/workspace`, '_blank');
     return 
   }
 
-  if (isWujieEnv && bus) {
+  if (isInLeyanWujieContainer) {
     bus?.$emit(settings.sendMsgToLeyan, {
       type: 'fetchDynamicMenus',
       data: {
