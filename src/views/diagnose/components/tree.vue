@@ -249,7 +249,7 @@ async function copyCurl(node) {
   }
 
   const resp = await loadCurl({
-    diagnoseId: node.dataRef.id,
+    diagnoseId: node.id,
     environmentId: environmentId.value,
     usedBy: UsedBy.DiagnoseDebug,
   })
