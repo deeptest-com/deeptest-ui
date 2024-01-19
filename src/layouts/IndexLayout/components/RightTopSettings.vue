@@ -240,7 +240,7 @@ onMounted(async () => {
   await store.dispatch('Global/getClientVersion');
   await store.dispatch('Global/listAgent');
   await store.commit('Global/setCurrAgent', null);
-  bus.$emit(settings.sendMsgToLeyan, {
+  bus?.$emit(settings.sendMsgToLeyan, {
     type: 'initClientOrAgents',
     data: {
       clientDownloadUrlOpts: clientDownloadUrlOpts.value,

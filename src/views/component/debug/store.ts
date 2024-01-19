@@ -622,7 +622,9 @@ const StoreModel: ModuleType = {
                     conditionSrc: ConditionSrc.PreCondition });
                 dispatch('listCondition', {
                     isForBenchmarkCase: false,
-                    conditionSrc: ConditionSrc.PostCondition });
+                    conditionSrc: ConditionSrc.PostCondition,
+                    category:ConditionCategory.postCondition,
+                 });
 
                 return true;
             } else {

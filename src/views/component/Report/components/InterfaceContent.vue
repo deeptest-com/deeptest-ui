@@ -65,11 +65,14 @@ const invokeDetail = computed(() => {
 
 const checkpointsWithTheOnesInPostScripts = computed(() => {
   const ret = [] as any[]
+
   props.endpointData.postConditions?.forEach(item => {
     if (item.type === 'checkpoint') {
       ret.push(item.raw)
     }
   })
+
+  props.endpointData?.interfaceCheckpointsResult?.length > 0 && ret.push(...props.endpointData.interfaceCheckpointsResult)
   return ret
 })
 
