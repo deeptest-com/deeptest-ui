@@ -106,7 +106,7 @@ const props = defineProps({
 const router = useRouter();
 const store = useStore<{ Home: StateType }>();
 const { hasProjectAuth } = usePermission();
-const { isWujieEnv } = useWujie();
+const { isInLeyanWujieContainer,isInLecangWujieContainer } = useWujie();
 const ListItem = List.Item;
 const list = computed<any>(() => store.state.Home.queryResult.list);
 const projects = computed<any>(() => store.state.ProjectGlobal.projects);
@@ -133,25 +133,25 @@ const dropDownList = [{
   label: '申请加入',
   action: (record) => emit("join", record),
   auth: 'p-project-apply',
-  ifShow: (record) => hasProjectAuth('p-project-apply') && record.accessible === 0,
+  show: (record) => hasProjectAuth('p-project-apply') && record.accessible === 0,
 },
 {
   label: '编辑',
   action: (record) => emit("edit", record),
   auth: 'p-project-edit',
-  ifShow: (record) => hasProjectAuth('p-project-edit') && record.accessible === 1,
+  show: (record) => hasProjectAuth('p-project-edit') && record.accessible === 1,
 },
 {
   label: '删除',
   action: (record) => emit("delete", record),
   auth: 'p-project-del',
-  ifShow: (record) => hasProjectAuth('p-project-del') && record.accessible === 1,
+  show: (record) => hasProjectAuth('p-project-del') && record.accessible === 1,
 },
 {
   label: '退出项目',
   action: (record) => emit("exit", record),
   auth: 'p-project-exit',
-  ifShow: (record) => hasProjectAuth('p-project-exit') && record.accessible === 1,
+  show: (record) => hasProjectAuth('p-project-exit') && record.accessible === 1,
 }]
 
 watch(() => props?.searchValue, (val) => {
@@ -181,7 +181,15 @@ async function goProject(item: any, e) {
   await store.commit('Global/setPermissionMenuList', []);
   // 更新左侧菜单以及按钮权限
   await store.dispatch("Global/getPermissionMenuList", { currProjectId: item.projectId });
-  if (isWujieEnv && bus) {
+
+ //乐仓重新打开信息页面
+ if (isInLecangWujieContainer) {
+    window.open(`/${item.projectShortName}/workspace`, '_blank');
+    return 
+  }
+
+  if (isInLeyanWujieContainer) {
+    console.log("isInLeyanWujieContainer-bus",bus)
     bus?.$emit(settings.sendMsgToLeyan, {
       type: 'fetchDynamicMenus',
       data: {
@@ -191,6 +199,8 @@ async function goProject(item: any, e) {
     })
     return;
   }
+
+ 
   router.push(`/${item.projectShortName}/workspace`);
 }
 </script>

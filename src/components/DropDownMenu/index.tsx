@@ -101,9 +101,6 @@ const DropdownList = defineComponent({
 })
 
 const ifShow = (actionItem: MenuItem, props) => {
-  if (!actionItem.ifShow) {
-    return false;
-  }
   if (typeof actionItem.ifShow === 'boolean') {
     return actionItem.ifShow;
   } 
@@ -111,6 +108,15 @@ const ifShow = (actionItem: MenuItem, props) => {
     return actionItem.ifShow(props.record);
   }
   return true;
+}
+
+const checkShow = (actionItem: MenuItem, props) => {
+  if (typeof actionItem.show === 'boolean') {
+    return actionItem.show;
+  } 
+  if (typeof actionItem.show === 'function') {
+    return actionItem.show(props.record);
+  }
 }
 
 /**
@@ -122,6 +128,13 @@ export const DropdownActionMenu = defineComponent({
   setup(props, { slots }) {
     const { dropdownList, actionList, record } = toRefs(props);
     const { hasPermission }  = usePermission();
+
+    const filterAction = (e, props) => {
+      if (e.show !== null && e.show !== undefined) {
+        return checkShow(e, props);
+      }
+      return hasPermission(e.auth || '') && ifShow(e, props);
+    };
     
     return () => {
       return (
@@ -134,7 +147,7 @@ export const DropdownActionMenu = defineComponent({
           )} */}
           {dropdownList.value.length > 0 && (
             <DropdownList 
-              list={dropdownList.value.filter(e => hasPermission(e.auth || '') || ifShow(e, props))} 
+              list={dropdownList.value.filter(e => filterAction(e, props))} 
               record={record.value} 
               v-slots={slots} />
           )}

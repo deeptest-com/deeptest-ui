@@ -341,8 +341,8 @@ const MenuList = [
   {
     auth: 'p-api-endpoint-del',
     label: '删除',
-    ifShow: (record) => {
-      return isCreator(record.createUser);
+    show: (record) => {
+      return hasPermission('p-api-endpoint-del') || isCreator(record.createUser);
     },
     action: (record: any) => del(record)
   },
