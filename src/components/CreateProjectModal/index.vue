@@ -7,7 +7,7 @@
       :footer="null"
       :closable="true"
       destroyOnClose
-      :title="formState?.id ? '编辑项目' : '新建项目'"
+      :title="formState?.id ? '编辑API管理项目' : '创建API管理项目'"
       @cancel="handleCancel"
   >
     <div class="project-edit-main">
@@ -15,7 +15,7 @@
         class="custom-center-form"
         :model="formStateRef"
         :wrapper-col="wrapperCol"
-        :label-col="{ style: { width: isLy ? '110px' : '82px' } }"
+        :label-col="{ style: { width: isLy ? '130px' : '82px' } }"
       >
         <a-form-item label="项目名称" v-bind="validateInfos.name">
                     <a-input
@@ -63,7 +63,15 @@
         </a-form-item>
         <template v-if="isLy">
           <!-- ly wujie环境 或 客户端下 展示所属产品  -->
-          <a-form-item label="所属产品" v-bind="validateInfos.products">
+          <a-form-item v-bind="validateInfos.products">
+            <template #label>
+              <div class="create-project-label">
+                所属产品
+                <a-tooltip placement="top" title="所属产品数据来自产品管理，请联系管理员创建">
+                  <QuestionCircleOutlined />
+                </a-tooltip>
+              </div>
+            </template>
             <div class="project-edit-pd">
               <a-tree-select
                 v-model:value="formStateRef.products"
@@ -81,7 +89,15 @@
             </div>
           </a-form-item>
           <!-- ly wujie环境下 展示所属空间  -->
-          <a-form-item label="承接研发空间">
+          <a-form-item>
+            <template #label>
+              <div class="create-project-label">
+                承接研发空间
+                <a-tooltip placement="top" title="承接研发空间来自研发空间，请联系管理员创建">
+                  <QuestionCircleOutlined />
+                </a-tooltip>
+              </div>
+            </template>
             <div class="project-edit-pd">
               <a-select
                 v-model:value="formStateRef.spaces"
@@ -117,7 +133,7 @@
 <script lang="ts" setup>
 import {computed, defineEmits, defineProps, reactive, ref, watch, h, onMounted} from "vue";
 import {Form, message, notification} from "ant-design-vue";
-import { PlusOutlined } from "@ant-design/icons-vue";
+import { PlusOutlined, QuestionCircleOutlined } from "@ant-design/icons-vue";
 import {StateType as UserStateType} from "@/store/user";
 import {StateType as ProjectStateType} from "@/views/project/store";
 import {SelectTypes} from "ant-design-vue/es/select";
