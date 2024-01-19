@@ -1,4 +1,4 @@
-import { PropType, defineComponent, toRefs } from "vue";
+import { PropType, computed, defineComponent, toRefs } from "vue";
 import "./index.less";
 import { MoreOutlined } from "@ant-design/icons-vue";
 import { MenuItem, Recordable } from "./type";
@@ -136,7 +136,7 @@ export const DropdownActionMenu = defineComponent({
       return hasPermission(e.auth || '') && ifShow(e, props);
     };
 
-    const newDropDownList = dropdownList.value.filter(e => filterAction(e, props));
+    const newDropDownList = computed(() => dropdownList.value.filter(e => filterAction(e, props)));
     
     return () => {
       return (
@@ -147,9 +147,9 @@ export const DropdownActionMenu = defineComponent({
           {actionList.value.length > 0 && (
             <a-divider type="vertical" />
           )} */}
-          {dropdownList.value.length > 0 && newDropDownList.length > 0 && (
+          {dropdownList.value.length > 0 && newDropDownList.value.length > 0 && (
             <DropdownList 
-              list={newDropDownList} 
+              list={newDropDownList.value} 
               record={record.value} 
               v-slots={slots} />
           )}

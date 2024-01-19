@@ -16,7 +16,7 @@
           {{ text.length > 16 ? text.substring(0, 16) + "..." : text }}
         </div>
       </template>
-      <template v-if="dropDownList.length > 0" #action="{ record }">
+      <template #action="{ record }">
         <DropdownActionMenu :dropdown-list="dropDownList" :record="record">
           <MoreOutlined/>
         </DropdownActionMenu>
@@ -88,27 +88,23 @@ const props = defineProps({
 const dropDownList = [{
   label: '申请加入',
   action: (record) => emit("join", record),
-  auth: 'p-project-apply',
   show: (record) => hasProjectAuth('p-project-apply') && record.accessible === 0,
 },
 {
   label: '编辑',
   action: (record) => emit("edit", record),
-  auth: 'p-project-edit',
   show: (record) => hasProjectAuth('p-project-edit') && record.accessible === 1,
 },
 {
   label: '删除',
   action: (record) => emit("delete", record),
-  auth: 'p-project-del',
   show: (record) => hasProjectAuth('p-project-del') && record.accessible === 1,
 },
 {
   label: '退出项目',
   action: (record) => emit("exit", record),
-  auth: 'p-project-exit',
   show: (record) => hasProjectAuth('p-project-exit') && record.accessible === 1,
-}]
+}];
 
 
 //暴露内部方法
