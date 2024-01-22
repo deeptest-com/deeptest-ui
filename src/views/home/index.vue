@@ -124,11 +124,11 @@ onMounted(async () => {
   if (router.currentRoute.value?.query?.type == 'all') {
     activeKey.value = 0
   }
+  await store.dispatch("User/fetchCurrent");
   await setCache(settings.currProjectId, 0);
   await store.dispatch('Global/getPermissionMenuList', { currProjectId: 0 });
   await getHearderData();
   await getList(1);
-  await store.dispatch("User/fetchCurrent");
   
 });
 

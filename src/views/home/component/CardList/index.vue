@@ -105,7 +105,7 @@ const props = defineProps({
 });
 const router = useRouter();
 const store = useStore<{ Home: StateType }>();
-const { hasProjectAuth } = usePermission();
+const { hasProjectAuth, isCreator } = usePermission();
 const { isInLeyanWujieContainer,isInLecangWujieContainer } = useWujie();
 const ListItem = List.Item;
 const list = computed<any>(() => store.state.Home.queryResult.list);
@@ -132,19 +132,17 @@ const total = computed(() => filterList.value.length);
 const dropDownList = [{
   label: '申请加入',
   action: (record) => emit("join", record),
-  show: (record) => {
-    return hasProjectAuth('p-project-apply') && record.accessible === 0;
-  },
+  show: (record) => record.accessible === 0,
 },
 {
   label: '编辑',
   action: (record) => emit("edit", record),
-  show: (record) => hasProjectAuth('p-project-edit') && record.accessible === 1,
+  show: (record) => hasProjectAuth('p-project-edit') || isCreator(record.adminId),
 },
 {
   label: '删除',
   action: (record) => emit("delete", record),
-  show: (record) => hasProjectAuth('p-project-del') && record.accessible === 1,
+  show: (record) => hasProjectAuth('p-project-del') || isCreator(record.adminId),
 },
 {
   label: '退出项目',

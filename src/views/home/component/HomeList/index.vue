@@ -50,7 +50,7 @@ const store = useStore<{
   Home: StateType;
   User: UserStateType;
 }>();
-const { hasProjectAuth } = usePermission();
+const { hasProjectAuth, isCreator } = usePermission();
 const { isInLeyanWujieContainer,isInLecangWujieContainer } = useWujie();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currentUser = computed<any>(() => store.state.User.currentUser);
@@ -88,17 +88,17 @@ const props = defineProps({
 const dropDownList = [{
   label: '申请加入',
   action: (record) => emit("join", record),
-  show: (record) => hasProjectAuth('p-project-apply') && record.accessible === 0,
+  show: (record) => record.accessible === 0,
 },
 {
   label: '编辑',
   action: (record) => emit("edit", record),
-  show: (record) => hasProjectAuth('p-project-edit') && record.accessible === 1,
+  show: (record) => hasProjectAuth('p-project-edit') || isCreator(record.adminId),
 },
 {
   label: '删除',
   action: (record) => emit("delete", record),
-  show: (record) => hasProjectAuth('p-project-del') && record.accessible === 1,
+  show: (record) => hasProjectAuth('p-project-del') || isCreator(record.adminId),
 },
 {
   label: '退出项目',
