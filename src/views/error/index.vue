@@ -79,9 +79,11 @@ const projectInfo = ref<any>(null);
 
 const handleSuccess = () => {
   applyProPermissionsModalVisible.value = false;
-  setTimeout(() => {
-    router.replace('/');
-  }, 500);
+  if (!isWujieEnv) {
+    setTimeout(() => {
+      router.replace('/');
+    }, 500);
+  }
 }
 
 watch(() => {
