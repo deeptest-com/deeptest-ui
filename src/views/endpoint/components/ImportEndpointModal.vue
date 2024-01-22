@@ -148,13 +148,15 @@
       <span v-if="modelRef.dataSyncType === 1" class="form-tip"><WarningOutlined /> 完全覆盖会导致通过平台上的接口定义更新被覆盖，请谨慎使用</span>
       </a-form-item>
       <a-form-item label="接口路径规则" name="addServicePrefix" v-if="modelRef.driverType === 'lzos'">
-        <a-checkbox v-model:checked="modelRef.addServicePrefix">智能体所属服务名作为路径第一级</a-checkbox><br>
-          <span v-if="modelRef.addServicePrefix">
-           接口路径导入为：/服务名/智能体名/消息名，例如：/acnsvr/Agent/CancelCollectItem
-          </span>
-          <span v-else>
-           接口路径导入为：/智能体名/消息名，例如：/Agent/CancelCollectItem
-          </span>
+        <div class="add-service-prefix">
+          <a-checkbox v-model:checked="modelRef.addServicePrefix">智能体所属服务名作为路径第一级</a-checkbox><br>
+        </div>
+        <span v-if="modelRef.addServicePrefix">
+          接口路径导入为：/服务名/智能体名/消息名，例如：/acnsvr/Agent/CancelCollectItem
+        </span>
+        <span v-else>
+          接口路径导入为：/智能体名/消息名，例如：/Agent/CancelCollectItem
+        </span>
       </a-form-item>
 
     </a-form>
@@ -518,6 +520,10 @@ watch(() => {
 
 .message-tooltip {
   min-width: 266px;
+}
+
+.add-service-prefix {
+  line-height: 32px;
 }
 </style>
 
