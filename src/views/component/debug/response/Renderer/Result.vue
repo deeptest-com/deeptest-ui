@@ -58,7 +58,7 @@ const responseDataForDefine = computed(
     return ret
     }
     )
-const responseDataForAssert = computed(()=>resultData.value.filter((item:any)=>item.conditionEntityType=="checkpoint"))
+const responseDataForAssert = computed(()=>resultData.value.filter((item:any)=>item.conditionEntityType=="checkpoint" && item.resultStatus !== ""))
 
 
 watch(responseData, (newVal) => {

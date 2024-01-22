@@ -7,11 +7,12 @@ import router from '@/router';
 import i18n from "@/config/i18n";
 import bus from "@/utils/eventBus";
 import settings from '@/config/settings';
-import {getToken} from '@/utils/localToken';
+import {getToken, setToken} from '@/utils/localToken';
 import {getCache} from '@/utils/localCache';
 import {isLeyan} from "@/utils/comm";
 import {getCachedServerUrl} from "@/utils/serverEnv";
-
+import {useWujie} from "@/composables/useWujie";
+const {xToken,isWujieEnv,user} = useWujie()
 
 export interface ResponseData {
     code: number;
@@ -59,6 +60,31 @@ const requestStatic = axios.create({
     baseURL: staticUrl
 });
 
+// 如果是嵌入到乐研中，需要设置请求头 xToken ，用于嵌入乐研的权限验证
+if (isWujieEnv) {
+
+    if (xToken) {
+        request.defaults.headers['X-Token'] = xToken;
+        requestAgent.defaults.headers['X-Token'] = xToken;
+        requestStatic.defaults.headers['X-Token'] = xToken;
+    }
+
+    //乐仓token
+    if (user?.token) {
+        console.log("lecang",user.token)
+        request.defaults.headers['Token'] = user.token;
+        requestAgent.defaults.headers['Token'] = user.token;
+        requestStatic.defaults.headers['Token'] = user.token;
+    }
+
+   
+    const org = window.location.origin;
+    request.defaults.headers['X-API-Origin'] = org;
+    requestAgent.defaults.headers['X-API-Origin'] = org;
+    requestStatic.defaults.headers['X-API-Origin'] = org;
+}
+
+
 // 全局设置 - post请求头
 // request.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
 
@@ -102,6 +128,12 @@ requestAgent.interceptors.request.use(
 const responseInterceptors = async (axiosResponse: AxiosResponse) => {
     console.log('=== response ===', axiosResponse.config.url, axiosResponse)
     const res: ResponseData = axiosResponse.data;
+    // 如果是无界环境，响应头里有token，需要更新本地token
+    const {authorization} = axiosResponse?.headers;
+    if (authorization && isWujieEnv) {
+        // debugger;
+        await setToken(authorization);
+    }
     const {code, token} = res;
 
     // 自定义状态码验证

@@ -8,7 +8,10 @@
           :scroll="{ x: 1240 }"
           :loading="loading"
           :pagination="scenarioPagination"
-          @refresh-list="getScenarioList"/>
+          @refresh-list="getScenarioList"
+          @handle-sort="handleSort"
+          :sortable="true"
+          />
     </div>
     <div style="padding-top: 20px" v-if="activeKey === 'test-report'">
       <ReportList />
@@ -86,5 +89,16 @@ async function getScenarioList(params: any) {
   loading.value = true;
   await store.dispatch('Plan/getRelationScenarios', {...params, planId: planDetail.value.id});
   loading.value = false;
+}
+
+const handleSort = async (opt)=>{
+ 
+ await store.dispatch('Plan/moveScenario', {
+    planId: planDetail.value.id,
+    destinationId:planScenarioList.value[opt.newIndex].refId, 
+    sourceId:planScenarioList.value[opt.oldIndex].refId,
+  });
+
+  await getScenarioList({planId: planDetail.value.id});
 }
 </script>

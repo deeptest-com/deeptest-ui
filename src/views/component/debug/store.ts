@@ -343,7 +343,7 @@ const StoreModel: ModuleType = {
             if (payload.isForBenchmarkCase) {
                 state.benchMarkCase.postConditions = (payload.data || []).filter(e => !!e.isForBenchmarkCase);
             } else {
-                state.postConditions = (payload.data || []).filter(e => !e.isForBenchmarkCase);
+                state.postConditions = (payload.data || []).filter(e => !e.isForBenchmarkCase && e.entityType != ConditionType.checkpoint);
             }
         },
         setAssertionConditions(state, payload) {
@@ -622,7 +622,9 @@ const StoreModel: ModuleType = {
                     conditionSrc: ConditionSrc.PreCondition });
                 dispatch('listCondition', {
                     isForBenchmarkCase: false,
-                    conditionSrc: ConditionSrc.PostCondition });
+                    conditionSrc: ConditionSrc.PostCondition,
+                    category:ConditionCategory.postCondition,
+                 });
 
                 return true;
             } else {
@@ -829,6 +831,7 @@ const StoreModel: ModuleType = {
                     dispatch('listCondition', {
                         isForBenchmarkCase: payload.isForBenchmarkCase,
                         conditionSrc: payload.conditionSrc,
+                        category: payload.category,
                     });
                 }
 

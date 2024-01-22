@@ -1,7 +1,7 @@
 <template>
   <div class="tree-main">
     <div class="tree-filters">
-      <a-select 
+      <a-select
         style="margin-right: 20px; width: 100%"
         :bordered="true"
         :showArrow="true"
@@ -28,6 +28,7 @@
           checkable
           :tree-data="treeData"
           :replaceFields="fieldNames"
+          :checkedKeys="checkedKeys"
           @check="onChecked"
       >
 
@@ -39,9 +40,9 @@
           <span v-if="nodeProps.dataRef.type == 'dir' || nodeProps.dataRef.type == ''"><FolderOpenOutlined  style="margin-right: 4px"/> {{nodeProps.dataRef.name+' ('+nodeProps.dataRef.count+')'}}</span>
           <span v-if="nodeProps.dataRef.type == 'endpoint'"><ApiOutlined  style="margin-right: 4px"/> {{nodeProps.dataRef.name}}</span>
           <span v-if="nodeProps.dataRef.type == 'case'">
-            <ShareAltOutlined style="margin-right: 4px" /> 
-            <a-tag 
-              class="method-tag" 
+            <ShareAltOutlined style="margin-right: 4px" />
+            <a-tag
+              class="method-tag"
               style="margin-right: 8px;"
               :color="getMethodColor(nodeProps.dataRef.method || 'GET', nodeProps.dataRef.disable)">
               {{ nodeProps.dataRef.method || "GET" }}
@@ -59,7 +60,7 @@
                       </div>
                         --->
         </template>
-  
+
       </a-tree>
 
       <div v-if="!treeData.length" class="nodata-tip">
@@ -73,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, onMounted, ref, watch} from 'vue';
+import {computed, defineProps, onMounted, ref, defineExpose} from 'vue';
 import {CaretDownOutlined,FolderOpenOutlined,ApiOutlined,ShareAltOutlined} from '@ant-design/icons-vue';
 import {useStore} from "vuex";
 
@@ -98,14 +99,6 @@ const treeData = computed<any>(() => {
 })
 const treeDataMap = computed<any>(() => store.state.Endpoint.caseTreeMap);
 
-
-const props = defineProps({
-  selectInterfaces: {
-    type: Function,
-    required: true,
-  },
-})
-
 const fieldNames = {
   title: 'name',
   key: 'id',
@@ -113,16 +106,15 @@ const fieldNames = {
 
 const serves = ref([] as any[]);
 const serveIds = ref([] as number[]);
+const checkedKeys = ref([]);
 
-
-const onChecked = (checkedKeys, e) => {
-  console.log('onChecked', checkedKeys,treeDataMap.value)  
-  const selectedNodes = getSelectedTreeNode(checkedKeys, treeDataMap.value)
-  props.selectInterfaces(selectedNodes)
-
-  console.log('selectedNodes', selectedNodes)
+const onChecked = (keys) => {
+  checkedKeys.value = keys;
 }
 
+const getSelectedTreeNodes = () => {
+  return getSelectedTreeNode(checkedKeys.value, treeDataMap.value)
+}
 
 const loadServe = async () => {
   await listServe().then((json) => {
@@ -137,11 +129,10 @@ const loadServe = async () => {
 
 onMounted(async () => {
   await loadServe()
-  selectServe()
+  await loadTreeData()
 })
 
 const searchValue = ref('');
-const expandedKeys = ref<number[]>([]);
 
 async function loadTreeData(serveIds:number[]) {
   if (currProject?.value?.id > 0 ) {
@@ -156,29 +147,9 @@ const selectServe = () => {
   loadTreeData(serveIds.value)
 }
 
-
-// 展开所有
-function expandAll() {
-  const keys: any = [];
-  const data = treeData.value;
-
-  function fn(arr: any) {
-    if (!Array.isArray(arr)) {
-      return;
-    }
-    arr.forEach((item, index) => {
-      keys.push(item.id);
-      if (Array.isArray(item.children)) {
-        fn(item.children)
-      }
-    });
-  }
-
-  fn(data);
-  expandedKeys.value = keys;
-}
-
-
+defineExpose({
+  getSelectedTreeNodes
+})
 </script>
 
 <style scoped lang="less">

@@ -155,7 +155,7 @@
                 </template>
 
                 <template #action="{record}">
-                  <DropdownActionMenu :dropdownList="getMenuItems(record)" :record="record"/>
+                  <DropdownActionMenu :dropdownList="MenuList" :record="record"/>
                 </template>
 
               </a-table>
@@ -241,9 +241,10 @@ import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import Diff from "./components/Drawer/Define/Diff/index.vue";
-import {ChangedStatus, SourceType, UsedBy} from "@/utils/enum";
+import {ChangedStatus,SourceType, UsedBy} from "@/utils/enum";
 import {loadCurl} from "@/views/component/debug/service";
-
+import {useWujie} from "@/composables/useWujie";
+import usePermission from '@/composables/usePermission';
 
 const {share} = useSharePage();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project }>();
@@ -343,6 +344,7 @@ const getMenuItems = (record) => {
       label: '分享链接',
       action: (record: any) => share(record, 'IM')
     },
+
     {
       key: '3',
       auth: 'ENDPOINT-DELETEE',
@@ -392,7 +394,6 @@ const getMenuItems = (record) => {
   items.splice(2, 0, copyCurlItem);
 
   return items
-
 }
 
 const selectedRowKeys = ref<Key[]>([]);
@@ -422,10 +423,16 @@ const fetching = ref(false);
 
 /*查看选中的接口文档*/
 function goDocs() {
-  window.open(`${window.location.origin}/docs/view?endpointIds=${selectedRowIds.value.join(',')}`, '_blank');
+  const {isWujieEnv,parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
+  if(isInLeyanWujieContainer){
+    window.open(`${parentOrigin}/lyapi/${projectName}/docsView?endpointIds=${selectedRowIds.value.join(',')}`, '_blank')
+    return;
+  }
+  const viewURL = `docs/view?endpointIds=${selectedRowIds.value.join(',')}`
+  window.open(`${window.location.origin}/${viewURL}`, '_blank');
 }
 
-const showPublishDocsModal: any = ref(false)
+const showPublishDocsModal = ref(false)
 
 // 发布文档版本
 async function publishDocs() {
@@ -504,7 +511,10 @@ async function editEndpoint(record) {
  */
 
 async function clone(record: any) {
-  await store.dispatch('Endpoint/copy', record);
+  fetching.value = true
+  const res = await store.dispatch('Endpoint/copy', record);
+  fetching.value = false
+  notifySuccess('复制成功');
 }
 
 async function copyCurl(record: any, method: string) {
@@ -540,11 +550,13 @@ async function del(record: any) {
     okType: 'danger',
     cancelText: () => '取消',
     onOk: async () => {
+      fetching.value = true
       const res = await store.dispatch('Endpoint/del', record);
       // // 删除后重新拉取列表，根据当前页面和当前筛选条件
       // await loadList(pagination.value.current, pagination.value.pageSize, filterState.value);
       // // 重新拉取目录树
       // await store.dispatch('Endpoint/loadCategory');
+      fetching.value = false
       if (res) {
         notifySuccess('删除成功');
       } else {
@@ -906,6 +918,10 @@ function showDiff(id: number) {
     min-width: 220px;
     display: flex;
     align-items: center;
+  }
+
+  :deep(.action-new) {
+    margin-right: 8px;
   }
 }
 

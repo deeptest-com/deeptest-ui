@@ -13,17 +13,17 @@ import { useI18n } from "vue-i18n";
 import { RoutesDataItem, vueRoutes } from '@/utils/routes';
 import IndexLayoutRoutes from '@/layouts/IndexLayout/routes';
 import { StateType as GlobalStateType } from "@/store/global";
-import { RouteMenuType } from '@/types/permission';
 import { useRouter } from 'vue-router';
+import usePermission from '@/composables/usePermission';
 
 const { t } = useI18n();
 const store = useStore<{ Global: GlobalStateType }>();
 const menuData: RoutesDataItem[] = vueRoutes(IndexLayoutRoutes);
-const permissionRouteMenuMap = computed(() => store.state.Global.permissionMenuMap);
+const { hasPermission } = usePermission();
 const tabs = computed(() => {
   const projectSettingMenu = menuData.find(e => e.path.includes('project-setting'));
   const routeList = projectSettingMenu?.children?.slice(1);
-  return routeList?.filter(routeItem => !routeItem.hidden && permissionRouteMenuMap.value && permissionRouteMenuMap.value[RouteMenuType[`${routeItem.meta?.code}`]]);
+  return routeList?.filter(routeItem => !routeItem.hidden &&  hasPermission(routeItem.meta?.code));
 });
 const router = useRouter();
 
@@ -43,7 +43,6 @@ watch(() => {
     const currPath = path.replace(router.currentRoute.value.params.projectNameAbbr, ':projectNameAbbr');
     const find = list?.find((route: any) => currPath.includes(route.path));
     activeRoute.value = find && find.path;
-    console.log(activeRoute.value);
   }
 }, {
   immediate: true,

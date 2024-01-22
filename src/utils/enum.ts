@@ -184,6 +184,7 @@ export enum ConditionType {
 export enum ConditionSrc {
     PreCondition = "pre_condition",
     PostCondition = "post_condition",
+    ScenarioCustomCode = "scenario_custom_code",
 }
 
 export enum ExtractorSrc {

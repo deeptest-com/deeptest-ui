@@ -141,7 +141,7 @@ watch(() => { return debugData.value }, (val) => {
     });
     store.dispatch('Debug/listCondition', {
       conditionSrc: ConditionSrc.PostCondition,
-      isForBenchmarkCase: ConditionCategory.postCondition,
+      isForBenchmarkCase: isForBenchmarkCase,
       category: ConditionCategory.postCondition,
     });
     store.dispatch('Debug/listAssertionCondition');

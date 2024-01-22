@@ -38,7 +38,8 @@ import {getNodeMap} from "@/services/tree";
 import {getSnippet} from "@/views/component/debug/service";
 import {
     send_request_get,
-    send_request_post
+    send_request_post,
+    assert_common,
 } from "@/views/component/debug/config";
 
 export interface StateType {
@@ -565,6 +566,7 @@ const StoreModel: ModuleType = {
             }
         },
         async addSnippet({commit, dispatch, state}, name: string) {
+            console.log('addSnippet')
             let script = ''
 
             if (name === 'log') {
@@ -574,7 +576,8 @@ const StoreModel: ModuleType = {
                 script = send_request_get
             } else if (name === 'send_request_post') {
                 script = send_request_post
-
+            } else if (name === 'assert_common') {
+                script = assert_common
             } else {
                 const json = await getSnippet(name)
                 if (json.code === 0) {

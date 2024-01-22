@@ -156,7 +156,7 @@ import Security from "./Security.vue"
 import Securitys from "./Securitys.vue"
 import SchemaViewer from "@/components/SchemaViewer/index.vue";
 import {CopyOutlined} from '@ant-design/icons-vue';
-import {useClipboard, useFullscreen} from '@vueuse/core'
+import useClipboard from "@/composables/useClipboard";
 import {message, notification} from "ant-design-vue";
 import {notifySuccess} from "@/utils/notify";
 import IconSvg from "@/components/IconSvg";
@@ -165,7 +165,7 @@ const props = defineProps<{
   info: Object;
   onlyShowDocs?: boolean;
 }>();
-const {text, copy, copied, isSupported} = useClipboard({});
+const {text, copy} = useClipboard({legacy: true});
 const info: any = computed(() => {
   return props.info;
 })
