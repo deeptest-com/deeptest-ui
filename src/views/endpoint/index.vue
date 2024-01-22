@@ -600,6 +600,7 @@ watch(() => currProject.value.id, async (newVal, oldVal) => {
     store.commit('Endpoint/clearFilterState');
     filter.value?.resetFields()
     store.dispatch('Schema/loadCategory');
+    await store.dispatch('Endpoint/getMockExpressions');
   }
 }, {
   immediate: true
