@@ -96,6 +96,7 @@ import {useI18n} from "vue-i18n";
 import {getToken} from "@/utils/localToken";
 import {StateType as UserStateType} from "@/store/user";
 import {getUuid} from "@/utils/string";
+import { setServeUrl } from "@/utils/url";
 const { t } = useI18n();
 
 const router = useRouter();
@@ -116,7 +117,7 @@ const execStart = async () => {
   const data = {
     userId: currUser.value.id,
     execUuid: execUuid.value,
-    serverUrl: process.env.VUE_APP_API_SERVER,
+    serverUrl: setServeUrl(process.env.VUE_APP_API_SERVER),
     token: await getToken(),
     planId: planId.value,
   }

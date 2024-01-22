@@ -11,6 +11,7 @@ import { computed, ComputedRef, defineComponent, onMounted, Ref, ref, unref, wat
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { StateType as UserStateType, CurrentUser } from "@/store/user";
+import {showGlobalLoading,hideGlobalLoading} from "@/utils/handleLoad";
 
 interface SecurityLayoutSetupData {
     isLogin: ComputedRef<boolean>;
@@ -48,7 +49,7 @@ export default defineComponent({
                 })
                 return;
             }
-
+            await store.dispatch('Global/getUserRolesAuth');
             isReady.value = true;
         }
 
@@ -63,13 +64,10 @@ export default defineComponent({
             return unref(isReady);
         }, val => {
             if (!val) return;
-            const appLoadingEl = document.getElementsByClassName('app-loading');
-            if (appLoadingEl[0]) {
-                appLoadingEl[0].classList.add('hide');
-                setTimeout(() => {
-                    document.body?.removeChild(appLoadingEl[0]);
-                }, 600);
-            }
+
+            // 隐藏全局loading
+            hideGlobalLoading();
+
         })
 
         return {

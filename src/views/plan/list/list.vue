@@ -2,44 +2,14 @@
   <div class="plan-list-main">
     <a-card :bordered="false">
       <template #title>
-        <a-button type="primary" @click="() => create()">新建</a-button>
+        <PermissionButton
+          v-if="hasPermission('')"
+          type="primary"
+          :text="'新建'"
+          @handle-access="create()" />
       </template>
       <template #extra>
-        <a-form :layout="'inline'">
-          <a-form-item :label="null" style="margin-bottom: 0;">
-            <Select
-                :placeholder="'请选择负责人'"
-                :options="userOptions || []"
-                :value="queryParams.adminId || []"
-                style="width: 180px;"
-                @change="(e) => {
-                 changeAdminId(e);
-              }"
-            />
-          </a-form-item>
-          <a-form-item :label="null" style="margin-bottom: 0;">
-            <Select
-                :placeholder="'请选择状态'"
-                :options="planStatusOptions || []"
-                :value="queryParams.status || []"
-                style="width: 180px;"
-                @change="(e) => {
-                 changeStatus(e);
-              }"
-            />
-          </a-form-item>
-          <a-form-item :label="null" style="margin-bottom: 0;">
-            <a-input-search
-                allowClear
-                @change="onSearch"
-                @search="onSearch"
-                v-model:value="queryParams.keywords"
-                placeholder="输入关键字搜索"
-                style="width:270px;margin-left: 16px;" />
-          </a-form-item>
-        </a-form>
-
-
+        <FilterSelect :schemas="filterSchemas" :search-info="searchInfo" />
       </template>
 
       <div>
@@ -132,13 +102,46 @@ import { PaginationConfig, Plan } from '../data.d';
 import { StateType } from "../store";
 import { momentUtc } from "@/utils/datetime";
 import { planStatusColorMap, planStatusTextMap, planStatusOptions } from "@/config/constant";
-
+import PermissionButton from '@/components/PermissionButton/index.vue';
 import Select from '@/components/Select/index.vue';
 import { DropdownActionMenu } from "@/components/DropDownMenu";
+import { FilterSelect } from "@/components/FilterSelect/index";
 import {notifyError} from "@/utils/notify";
 import useSharePage from "@/hooks/share";
+import usePermission from "@/composables/usePermission";
 
-const columns = [
+const { hasPermission, isCreator }  = usePermission();
+const { share } = useSharePage();
+const store = useStore<{ Plan: StateType, ProjectGlobal: ProjectStateType,Project }>();
+const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
+const nodeDataCategory = computed<any>(() => store.state.Plan.nodeDataCategory);
+const currPlan = computed<any>(() => store.state.Plan.currPlan);
+
+const list = computed<Plan[]>(() => store.state.Plan.listResult.list);
+let pagination = computed<PaginationConfig>(() => store.state.Plan.listResult.pagination);
+
+const userOptions = computed(() => {
+  if(!store.state.Project.userList) return [];
+  return store.state.Project.userList.map((item) => {
+    return {
+      label: item.name,
+      value: item.id,
+    };
+  });
+})
+const queryParams = reactive<any>({
+  keywords: '',
+  status: [],
+  adminId: [],
+});
+const loading = ref<boolean>(false);
+const createDrawerVisible = ref(false);
+const editDrawerVisible = ref(false); // 编辑弹窗控制visible
+const editTabActiveKey = ref('test-scenario'); // 打开编辑弹窗时,需要选中的tab
+const execReportVisible = ref(false);
+const envSelectVisible = ref(false); // 选择执行环境
+const searchInfo = reactive<any>({});
+  const columns = [
   {
     title: '编号',
     dataIndex: 'serialNumber',
@@ -216,45 +219,60 @@ const dropdownMenuList = [
   {
     label: '删除',
     action: (record) => remove(record.id),
-    auth: '',
+    show: (record) => hasPermission('p-api-tp-del') || isCreator(record.createUserId),
+    auth: 'p-api-tp-del',
   }
 ]
-const { share } = useSharePage();
-const store = useStore<{ Plan: StateType, ProjectGlobal: ProjectStateType,Project }>();
-const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
-const nodeDataCategory = computed<any>(() => store.state.Plan.nodeDataCategory);
-const currPlan = computed<any>(() => store.state.Plan.currPlan);
 
-const list = computed<Plan[]>(() => store.state.Plan.listResult.list);
-let pagination = computed<PaginationConfig>(() => store.state.Plan.listResult.pagination);
 
-const userOptions = computed(() => {
-  if(!store.state.Project.userList) return [];
-  return store.state.Project.userList.map((item) => {
-    return {
-      label: item.name,
-      value: item.id,
-    };
-  });
-})
-const queryParams = reactive<any>({
-  keywords: '',
-  status: [],
-  adminId: [],
-});
-const loading = ref<boolean>(false);
-const createDrawerVisible = ref(false);
-const editDrawerVisible = ref(false); // 编辑弹窗控制visible
-const editTabActiveKey = ref('test-scenario'); // 打开编辑弹窗时,需要选中的tab
-const execReportVisible = ref(false);
-const envSelectVisible = ref(false); // 选择执行环境
+// 筛选表单配置
+const filterSchemas = [
+  {
+    field: 'adminId',
+    component: 'LSelect',
+    componentProps: {
+      placeholder: '请选择负责人',
+      options: computed(() => userOptions.value),
+      onChange: (v) => {
+        console.log('当前选择的负责人', v);
+      }
+    }
+  },
+  {
+    field: 'status',
+    component: 'LSelect',
+    componentProps: {
+      placeholder: '请选择状态',
+      options: [],
+      onChange: (v) => {
+        console.log('当前选择的状态', v);
+      }
+    }
+  },
+  {
+    field: 'keywords',
+    component: 'InputSearch',
+    componentProps: {
+      placeholder: '请输入关键字搜索',
+      onChange: (v) => {
+        console.log('当前选择关键字', v);
+      }
+    }
+  },
+];
+
+watch(() => {
+  return searchInfo;
+}, () => {
+  getList(1);
+}, { deep: true })
 
 const getList = debounce(async (current: number): Promise<void> => {
   loading.value = true;
   await store.dispatch('Plan/listPlan', {
-    keywords: queryParams.keywords.trim(),
-    status: queryParams.status?.join(',') || '',
-    adminId: queryParams.adminId?.join(',') || '',
+    keywords: (searchInfo.keywords || '').trim(),
+    status: (searchInfo?.status || [])?.join(',') || '',
+    adminId: (searchInfo?.adminId || [])?.join(',') || '',
     categoryId: nodeDataCategory.value?.id || 0,
     pageSize: pagination.value.pageSize,
     page: current,
@@ -362,20 +380,6 @@ const remove = (id: number) => {
   });
 }
 
-function changeStatus(e) {
-  queryParams.status = e;
-  getList(1);
-}
-
-function changeAdminId(e) {
-  queryParams.adminId = e;
-  getList(1);
-}
-
-const onSearch = () => {
-  getList(1);
-};
-
 watch(() => {
   return nodeDataCategory.value?.id || 0;
 }, async (val) => {
@@ -386,21 +390,9 @@ watch(() => {
   return currProject.value;
 }, async (val) => {
   if (val.id) {
-    queryParams.status = queryParams.adminId = []
-    queryParams.keywords = ""
     await getList(1);
   }
 }, { immediate: true });
-
-watch(
-  ()=>[createDrawerVisible.value, editDrawerVisible.value],
-  async (newValue) => {
-    if (!newValue[0] || !newValue[1]) {
-      await store.dispatch('Plan/loadCategory');
-    }
-  },
-  {  immediate: true }
-);
 
 onMounted(async () => {
   await store.dispatch('Project/getUserList');

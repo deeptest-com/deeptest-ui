@@ -1,61 +1,48 @@
 <template>
   <div class="tree-container">
-    <div class="tag-filter-form">
-      <a-input-search
-          class="search-input"
-          v-model:value="searchValue"
-          placeholder="输入关键字过滤"/>
-      <div class="add-btn" @click="newCategory(treeDataCategory?.[0])">
-        <PlusOutlined style="font-size: 16px;"/>
+    <div class="tree-con">
+      <div class="tag-filter-form">
+        <a-input-search
+            class="search-input"
+            v-model:value="searchValue"
+            placeholder="输入关键字过滤"/>
+        <div class="add-btn" @click="newCategory(treeDataCategory?.[0])">
+          <PlusOutlined style="font-size: 16px;"/>
+        </div>
       </div>
-    </div>
-    <div class="tree-content">
-      <a-tree
-          class="deeptest-tree"
-          draggable
-          blockNode
-          showIcon
-          :expandedKeys="expandedKeys"
-          :auto-expand-parent="autoExpandParent"
-          @drop="onDrop"
-          @expand="onExpand"
-          @select="selectTreeItem"
-          :tree-data="treeData">
-        <template #switcherIcon>
-          <CaretDownOutlined/>
-        </template>
-        <template #title="nodeProps">
-          <div class="tree-title" :draggable="nodeProps.id === -1">
-              <span class="tree-title-text" v-if="nodeProps.title.indexOf(searchValue) > -1">
-                {{ nodeProps.title.substr(0, nodeProps.title.indexOf(searchValue)) }}
-                <span style="color: #f50">{{ searchValue }}</span>
-                {{ nodeProps.title.substr(nodeProps.title.indexOf(searchValue) + searchValue.length) }}
+      <div style="margin: 0 8px 16px 8px;">
+        <a-tree
+            class="deeptest-tree"
+            draggable
+            blockNode
+            showIcon
+            :expandedKeys="expandedKeys"
+            :auto-expand-parent="autoExpandParent"
+            @drop="onDrop"
+            @expand="onExpand"
+            @select="selectTreeItem"
+            :tree-data="treeData">
+          <template #switcherIcon>
+            <CaretDownOutlined/>
+          </template>
+          <template #title="nodeProps">
+            <div class="tree-title" :draggable="nodeProps.id === -1">
+                <span class="tree-title-text" v-if="nodeProps.title.indexOf(searchValue) > -1">
+                  {{ nodeProps.title.substr(0, nodeProps.title.indexOf(searchValue)) }}
+                  <span style="color: #f50">{{ searchValue }}</span>
+                  {{ nodeProps.title.substr(nodeProps.title.indexOf(searchValue) + searchValue.length) }}
+                </span>
+              <span class="tree-title-text" v-else>{{ nodeProps.title }}</span>
+              <span class="more-icon" v-if="nodeProps.id !== -1">
+                <DropdownActionMenu :dropdown-list="ContextMenuList" :record="nodeProps" />
               </span>
-            <span class="tree-title-text" v-else>{{ nodeProps.title }}</span>
-            <span class="more-icon" v-if="nodeProps.id !== -1">
-                <a-dropdown>
-                      <MoreOutlined/>
-                    <template #overlay>
-                      <a-menu>
-                        <a-menu-item key="0" @click="newCategory(nodeProps)">
-                            新建子分类
-                        </a-menu-item>
-                        <a-menu-item :disabled="nodeProps.id === -1" key="1" @click="deleteCategory(nodeProps)">
-                          删除分类
-                        </a-menu-item>
-                        <a-menu-item :disabled="nodeProps.id === -1" key="1" @click="editCategory(nodeProps)">
-                          编辑分类
-                        </a-menu-item>
-                      </a-menu>
-                    </template>
-                  </a-dropdown>
-              </span>
-          </div>
-        </template>
-      </a-tree>
-      <div v-if="!treeData.length" class="nodata-tip">
-        <div v-if="showKeywordsTip">搜索结果为空 ~</div>
-        <a-spin v-else/>
+            </div>
+          </template>
+        </a-tree>
+        <div v-if="!treeData.length" class="nodata-tip">
+          <div v-if="showKeywordsTip">搜索结果为空 ~</div>
+          <a-spin v-else/>
+        </div>
       </div>
     </div>
   </div>
@@ -87,6 +74,7 @@ import {setSelectedKey} from "@/utils/cache";
 import {StateType as ScenarioStateType} from "@/views/scenario/store";
 import {filterTree, filterByKeyword} from "@/utils/tree";
 import {notifyError, notifySuccess, notifyWarn} from "@/utils/notify";
+import { DropdownActionMenu } from '@/components/DropDownMenu';
 
 const store = useStore<{ Scenario: ScenarioStateType, ProjectGlobal: ProjectStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -143,6 +131,25 @@ const treeData: any = computed(() => {
 });
 
 /**
+ * 分类下拉菜单
+ */
+const ContextMenuList = [
+  {
+    label: '新建子分类',
+    action: (_record: any) => newCategory(_record),
+  },
+  {
+    label: '删除分类',
+    auth: 'p-api-ts-del',
+    action: (_record: any) => deleteCategory(_record),
+  },
+  {
+    label: '编辑分类',
+    action: (_record: any) => editCategory(_record),
+  }
+]
+
+/**
  * 搜索结果为空时展示
  */
  const showKeywordsTip = computed(() => {
@@ -157,8 +164,8 @@ async function loadCategorys() {
 // 切换项目  重置搜索关键词/重置分类列表
 watch(() => {
   return currProject.value;
-}, async (newVal) => {
-  if (newVal?.id) {
+}, async (newVal, oldVal) => {
+  if (newVal?.id && newVal?.id !== oldVal?.id) {
     store.commit('Scenario/setTreeDataCategory', {});
     searchValue.value = '';
     await loadCategorys();
@@ -336,12 +343,6 @@ async function onDrop(info: DropEvent) {
     notifyError('移动失败');
   }
 }
-
-onMounted(async () => {
-  await loadCategorys();
-  // expandAll();
-})
-
 </script>
 
 <style scoped lang="less">

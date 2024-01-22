@@ -15,7 +15,8 @@
             :show-scenario-operation="false"
             :selectedKeys="selectedScenarioIds"
             @refresh-list="getScenarioList"
-            @select-row-keys="handleSelectRowKeys" />
+            @select-row-keys="handleSelectRowKeys" 
+            />
     </a-modal>
 </template>
 <script setup lang="ts">
@@ -31,7 +32,7 @@ const props = defineProps<{
 const store = useStore<{ Plan: PlanStateType }>();
 const emits = defineEmits(['onCancel', 'onOk']);
 const scenarioLists = computed<any[]>(() => store.state.Plan.scenarios.list);
-const currPlan = computed<any>(() => store.state.Plan.detailResult);
+const currPlan = computed<any>(() => store.state.Plan.currPlan);
 let pagination = computed<any>(() => store.state.Plan.scenarios.pagination);
 let queryParams = reactive<any>({
   keywords: '', enabled: '1',
@@ -91,6 +92,7 @@ async function getScenarioList(params) {
     })
     loading.value = false;
 }
+
 
 watch(() => {
     return props.associateModalVisible;

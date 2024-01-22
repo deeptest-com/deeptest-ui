@@ -44,18 +44,18 @@ export const DrawerAction = defineComponent({
       switch(action) {
         case 'detail':
           toDetail(props.detailLink);
-          break;  
+          break;
         case 'share':
           shareLink(props.shareLink);
-          break;  
+          break;
         case 'exitFullScreen':
           setFullScreen(false);
-          break;  
+          break;
         case 'fullScreen':
           setFullScreen(true);
-          break;  
+          break;
         default:
-          break;      
+          break;
       }
     }
 
@@ -64,21 +64,21 @@ export const DrawerAction = defineComponent({
         <div class="drawer-action" onClick={e => handleClick(e)}>
           {props.showDetail &&  (
             <div class="drawer-action-item" data-action="detail">
-              <a-tooltip placement="top" title="详情">
+              <a-tooltip placement="bottom" title="详情">
                 <SelectOutlined />
               </a-tooltip>
             </div>
           )}
           {props.showShare &&  (
             <div class="drawer-action-item" data-action="share">
-              <a-tooltip placement="top" title="分享链接">
+              <a-tooltip placement="bottom" title="分享链接">
                 <ShareAltOutlined />
               </a-tooltip>
             </div>
           )}
           {props.showFullScreen &&  (
             <div class="drawer-action-item" data-action={isFullScreen.value ? 'exitFullScreen' : 'fullScreen'}>
-              <a-tooltip placement="top" title={isFullScreen.value ? '退出全屏' : '全屏'}>
+              <a-tooltip placement="bottom" title={isFullScreen.value ? '退出全屏' : '全屏'}>
                 {isFullScreen.value ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
               </a-tooltip>
             </div>

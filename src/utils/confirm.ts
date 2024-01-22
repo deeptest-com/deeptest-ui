@@ -11,7 +11,7 @@ export function confirmToDo(title, content, callback, confirmText?, cancelText?)
         okText: () => confirmText?confirmText:'确定',
         cancelText: () => cancelText?cancelText:'取消',
         onOk: async () => {
-            if (callback) callback()
+            if (callback) await callback()
         },
         onCancel() {
             console.log('Cancel');

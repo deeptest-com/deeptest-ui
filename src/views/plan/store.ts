@@ -13,6 +13,7 @@ import {
     removeScenarios,
     clonePlan,
     listScenario,
+    moveScenario
 } from './service';
 
 import { get as getExecDetail } from '../report/service';
@@ -124,6 +125,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         getExecDetail: Action<StateType, StateType>;
         setExecResult: Action<StateType, StateType>;
         initExecResult: Action<StateType, StateType>;
+        moveScenario: Action<StateType, StateType>;
     }
 }
 
@@ -521,6 +523,13 @@ const StoreModel: ModuleType = {
 
         async initExecResult({ commit }) {
             commit('setExecResult', { basicInfoList: [], statisticData: {}, scenarioReports: [], progressValue: 10, progressStatus: 'in_progress' });
+        },
+        async moveScenario({ commit }, payload: any) {
+            const jsn = await moveScenario(payload);
+            if (jsn.code === 0) {
+                return true;
+            }
+            return false;
         }
     }
 };

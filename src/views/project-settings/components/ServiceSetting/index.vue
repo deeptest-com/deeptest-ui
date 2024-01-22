@@ -68,6 +68,7 @@ import Drawer from './Drawer.vue';
 import { StateType as ProjectStateType } from "@/store/project";
 import { StateType as ProjectSettingStateType } from '../../store';
 import { serviceColumns } from '../../config';
+import {useWujie} from "@/composables/useWujie";
 
 const store = useStore<{ ProjectGlobal: ProjectStateType, ProjectSetting: ProjectSettingStateType,Project }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -139,6 +140,11 @@ const dropMenuList = [
     label: 'Security',
     action: (record: any) => onOpenSecurity(record)
   },
+  // {
+  //   auth: '',
+  //   label: '禁用',
+  //   action: (record: any) => onDisabled(record)
+  // },
   {
     auth: '',
     label: '禁用',
@@ -238,6 +244,11 @@ async function onDelete(record: any) {
 
 /*查看选中的接口文档*/
 function goDocs(record: any) {
+  const {isWujieEnv,parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
+  if(isInLeyanWujieContainer){
+    window.open(`${parentOrigin}/lyapi/${projectName}/docsView?serveIds=${record.id}`, '_blank')
+    return;
+  }
   window.open(`${window.location.origin}/docs/view?serveIds=${record.id}`, '_blank');
 }
 

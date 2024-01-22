@@ -11,14 +11,9 @@
 </template>
 <script setup lang="ts">
 import { onMounted } from 'vue';
+import {hideGlobalLoading} from "@/utils/handleLoad";
 
 onMounted(() => {
-    const appLoadingEl = document.getElementsByClassName('app-loading');
-    if (appLoadingEl[0]) {
-        appLoadingEl[0].classList.add('hide');
-        setTimeout(() => {
-            document.body.removeChild(appLoadingEl[0]);
-        }, 600)
-    } 
+    hideGlobalLoading();
 })
 </script>

@@ -50,3 +50,7 @@ export async function moveCategory(data: any): Promise<any> {
         data: data,
     });
 }
+
+export async function copyCategory(id: number): Promise<any> {
+    return request({url: `/${apiPath}/copy/${id}`});
+}

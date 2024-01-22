@@ -21,6 +21,8 @@ module.exports = {
     devServer: {
         port: VUE_APP_PORT || 8000,
         disableHostCheck: true,
+        https:false,
+        headers: { "Access-Control-Allow-Origin": "*" },
         before: function(app, server) {
             if(NODE_ENV === 'development' && VUE_APP_MOCK === 'true') {
                 // parse app.body
@@ -82,7 +84,8 @@ module.exports = {
         config.plugin('monaco-editor').use(MonacoWebpackPlugin, [
             {
                 languages: [
-                    'javascript', 'typescript',
+                    'javascript',
+                    'typescript',
                     'html',
                     'xml',
                     'json',

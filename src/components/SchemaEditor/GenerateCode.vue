@@ -1,10 +1,10 @@
 <template>
-    <a-modal 
-        wrapClassName="generate-code-modal" 
-        width="800px" 
-        :visible="visible" 
-        title="生成代码" 
-        @cancel="handleCancel" 
+    <a-modal
+        wrapClassName="generate-code-modal"
+        width="800px"
+        :visible="visible"
+        title="生成代码"
+        @cancel="handleCancel"
         :footer="null">
         <div class="container">
             <div class="left">
@@ -34,15 +34,15 @@
                     </a-button>
                 </div>
                 <div class="code-box">
-                    <MonacoEditor 
-                        theme="vs" 
-                        language="typescript" 
-                        class="editor" 
-                        v-if="showCode" 
+                    <MonacoEditor
+                        theme="vs"
+                        language="typescript"
+                        class="editor"
+                        v-if="showCode"
                         :value="content"
-                        :timestamp="timestamp" 
-                        :options="editorOptions" 
-                        :height="600" 
+                        :timestamp="timestamp"
+                        :options="editorOptions"
+                        :height="600"
                         @change="editorChange" />
                 </div>
             </div>
@@ -57,7 +57,7 @@ import IconSvg from "@/components/IconSvg";
 import { MonacoOptions } from "@/utils/const";
 import { useStore } from "vuex";
 import { CopyOutlined } from '@ant-design/icons-vue';
-import { useClipboard } from '@vueuse/core'
+import useClipboard from "@/composables/useClipboard";
 import { notifySuccess } from "@/utils/notify";
 
 
@@ -66,7 +66,7 @@ const props = defineProps(['visible', 'contentStr', 'projectId']);
 const emits = defineEmits(["close"]);
 
 const content = computed(() => store.state.Endpoint.code);
-const { copy } = useClipboard({ content });
+const { copy } = useClipboard({ content ,legacy: true});
 const showCode = ref(false);
 const langType = ref('typeScript');
 const nameRule = ref('lowerCase');
@@ -157,7 +157,7 @@ function change() {
         width: 200px;
         padding: 20px;
         border-right: 1px solid #f0f0f0;
-        
+
 
         .left-item {
             display: flex;

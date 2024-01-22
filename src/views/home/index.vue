@@ -17,6 +17,7 @@
                 style="width: 200px; margin-right: 20px"
                 placeholder="请输入项目名称搜索"/>
             <a-button
+                v-if="hasProjectAuth('p-project-create')"
                 type="primary"
                 style="margin-right: 20px"
                 @click="handleOpenAdd">新建项目
@@ -84,9 +85,11 @@ import {removeMember} from "@/views/project/service";
 import {NotificationKeyCommon} from "@/utils/const";
 import {CurrentUser, StateType as UserStateType} from "@/store/user";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import usePermission from "@/composables/usePermission";
 
 // 获取当前登录用户信息
 const router = useRouter();
+const { hasProjectAuth } = usePermission();
 const store = useStore<{ Home: StateType, User: UserStateType }>();
 const currentUser = computed<CurrentUser>(() => store.state.User.currentUser);
 const cardData = computed<any>(() => store.state.Home.cardData);
@@ -145,15 +148,20 @@ const handleSuccess = async () => {
 
 
 function handleJoin(item) {
+  if (!hasProjectAuth('p-project-apply')) {
+    return;
+  }
   Modal.confirm({
     title: "提示",
     content: "您还没有该项目的访问权限，是否申请更多角色权限？",
     okText: "申请权限",
     cancelText: "取消",
+    maskClosable: true,
     onOk: async () => {
       applyProPermissionsModalVisible.value = true;
       applyItem.value = item;
     },
+    onCancel() {}
   });
 }
 

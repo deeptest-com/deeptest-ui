@@ -37,13 +37,13 @@ import {Tooltip} from 'ant-design-vue'
 
 
 const props = defineProps(['placeholder', 'value', 'width', 'options', 'filterOptions', 'showSearch', 'width']);
-const emits = defineEmits(['change', 'focus']);
+const emits = defineEmits(['change', 'focus', 'update:value']);
 
 const visible = ref(false)
 
 const options = computed(() => props.options)
 
-const values = computed(() => props?.value || [])
+const values = ref(props?.value || [])
 
 const optionsMap = computed(() => {
   let map = new Map()
@@ -69,8 +69,9 @@ const maxTagPlaceholder = (omittedValues) => {
 }
 
 const change = (e) => {
-  //values.value = e
-  emits('change', e)
+  values.value = e
+  emits('update:value', e);
+  emits('change', e);
 }
 
 const focus = () => {
@@ -81,6 +82,8 @@ const focus = () => {
 
 const close = (key) => {
   const selectValue = values.value.filter(arrItem => arrItem != key);
+  values.value = selectValue;
+  emits('update:value', selectValue);
   emits('change', selectValue);
 }
 

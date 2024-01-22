@@ -16,7 +16,7 @@
           {{ text.length > 16 ? text.substring(0, 16) + "..." : text }}
         </div>
       </template>
-      <template #action="{ record }">
+      <template v-if="dropDownList.length > 0" #action="{ record }">
         <DropdownActionMenu :dropdown-list="dropDownList" :record="record">
           <MoreOutlined/>
         </DropdownActionMenu>
@@ -40,6 +40,9 @@ import {StateType as UserStateType} from "@/store/user";
 import {StateType as ProjectStateType} from "@/store/project";
 import {MoreOutlined} from "@ant-design/icons-vue";
 import {DropdownActionMenu} from "@/components/DropDownMenu/index";
+import usePermission from "@/composables/usePermission";
+import { useWujie } from "@/composables/useWujie";
+import settings from "@/config/settings";
 
 const router = useRouter();
 const store = useStore<{
@@ -47,10 +50,13 @@ const store = useStore<{
   Home: StateType;
   User: UserStateType;
 }>();
-
+const { hasProjectAuth } = usePermission();
+const { isInLeyanWujieContainer,isInLecangWujieContainer } = useWujie();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currentUser = computed<any>(() => store.state.User.currentUser);
 const list = computed<any>(() => store.state.Home.queryResult.list);
+const bus = window?.$wujie?.bus;
+const projects = computed<any>(() => store.state.ProjectGlobal.projects);
 
 const filterList = computed(() => {
   const items = props?.activeKey === 0 ? list?.value?.projectList || [] : list?.value?.userProjectList || [];
@@ -79,32 +85,30 @@ const props = defineProps({
   },
 });
 
-const dropDownList = [
-  {
-    label: '申请加入',
-    action: (record) => emit("join", record),
-    auth: '',
-    ifShow: (record) => record.accessible === 0,
-  },
-  {
-    label: '编辑',
-    action: (record) => emit("edit", record),
-    auth: '',
-    ifShow: (record) => record.accessible === 1,
-  },
-  {
-    label: '删除',
-    action: (record) => emit("delete", record),
-    auth: '',
-    ifShow: (record) => record.accessible === 1,
-  },
-  {
-    label: '退出项目',
-    action: (record) => emit("exit", record),
-    auth: '',
-    ifShow: (record) => record.accessible === 1,
-  }
-]
+const dropDownList = [{
+  label: '申请加入',
+  action: (record) => emit("join", record),
+  auth: 'p-project-apply',
+  show: (record) => hasProjectAuth('p-project-apply') && record.accessible === 0,
+},
+{
+  label: '编辑',
+  action: (record) => emit("edit", record),
+  auth: 'p-project-edit',
+  show: (record) => hasProjectAuth('p-project-edit') && record.accessible === 1,
+},
+{
+  label: '删除',
+  action: (record) => emit("delete", record),
+  auth: 'p-project-del',
+  show: (record) => hasProjectAuth('p-project-del') && record.accessible === 1,
+},
+{
+  label: '退出项目',
+  action: (record) => emit("exit", record),
+  auth: 'p-project-exit',
+  show: (record) => hasProjectAuth('p-project-exit') && record.accessible === 1,
+}]
 
 
 //暴露内部方法
@@ -176,10 +180,30 @@ async function goProject(item: any) {
     return false;
   }
   await store.dispatch("ProjectGlobal/changeProject", item?.projectId);
+  await store.commit('Global/setPermissionMenuList', []);
 
   // 更新左侧菜单以及按钮权限
-  await store.dispatch("Global/getPermissionList", { projectId: item.projectId });
+  await store.dispatch("Global/getPermissionMenuList", { currProjectId: item.projectId });
 
+
+   //乐仓重新打开信息页面
+ if (isInLecangWujieContainer) {
+    window.open(`/${item.projectShortName}/workspace`, '_blank');
+    return 
+  }
+  
+
+  if (isInLeyanWujieContainer) {
+
+    bus?.$emit(settings.sendMsgToLeyan, {
+      type: 'fetchDynamicMenus',
+      data: {
+        roleValue: (projects.value || []).find(pro => pro.id === item.projectId)?.roleName,
+        route: `${item.projectShortName}/workspace`,
+      }
+    })
+    return;
+  }
   router.push(`/${item.projectShortName}/workspace`);
 }
 

@@ -124,7 +124,7 @@ export default defineComponent({
                 const fieldsValue = await validate<LoginParamsType>();
                 const res: boolean = await store.dispatch('UserLogin/login', fieldsValue);
                 if (res === true) {
-                  notifySuccess(t('page.user.login.form.login-success'));
+                    notifySuccess(t('page.user.login.form.login-success'));
 
                     const { redirect, ...query } = currentRoute.value.query;
                     router.replace({

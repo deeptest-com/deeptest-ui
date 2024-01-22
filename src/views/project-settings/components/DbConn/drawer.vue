@@ -125,7 +125,7 @@ const onCancel = () => {
 
 const rulesRef = reactive({
   name: [
-    {required: true, message: '请输入诉苦局连接名称', trigger: 'blur'},
+    {required: true, message: '请输入数据库连接名称', trigger: 'blur'},
   ],
   type: [
     {required: true, message: '请选择数据库类型', trigger: 'blur'},
