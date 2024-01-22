@@ -55,10 +55,14 @@ const MenuItem = defineComponent({
     });
 
     const hasPermission = computed(() => {
-      if (!props.auth) {
-        return true;
-      }
-      return permissionButtonMap.value[PermissionButtonType[`${props.auth}`]];
+      console.log('===', props.auth)
+
+      return true
+
+      // if (!props.auth) {
+      //   return true;
+      // }
+      // return permissionButtonMap.value[PermissionButtonType[`${props.auth}`]];
     });
 
     const hasMoreThanOneChildren = computed(() => {
