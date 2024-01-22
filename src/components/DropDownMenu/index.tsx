@@ -1,13 +1,13 @@
-import { PropType, defineComponent, VNode, toRefs, computed } from "vue";
-import { useStore } from "vuex";
-import { PermissionButtonType } from "@/types/permission";
+import { PropType, defineComponent, toRefs } from "vue";
 import "./index.less";
 import { MoreOutlined } from "@ant-design/icons-vue";
 import { MenuItem, Recordable } from "./type";
+import usePermission from "@/composables/usePermission";
+
 
 /**
  * props定义
- *
+ * 
  */
 const DropdownMenuProps = {
   dropdownList: {
@@ -24,87 +24,27 @@ const DropdownMenuProps = {
   } // 当前操作项
 };
 
-const MenuItem = defineComponent({
-  name: 'MenuItem',
-  props: {
-    auth: {
-      type: String,
-    },
-    label: {
-      type: String,
-    },
-    action: {
-      type: Function as PropType<(...args: any[]) => void>
-    },
-    tip: {
-      type: String,
-      required: false,
-    },
-    record: {
-      type: Object,
-    },
-    children: {
-      type: Array,
-      required: false,
+const RenderMenuItem = ({ item, record }: { item: MenuItem, record: Recordable }) => {
+  const handleClick = (_e?: any) => {
+    if (item.disabled) {
+      _e.preventDefault();
+      return;
     }
-  },
-  setup(props, ctx) {
-    const store = useStore();
-    const permissionButtonMap = computed(() => {
-      return store.state.Global.permissionButtonMap;
-    });
+    item.action?.(record);
+  };
 
-    const hasPermission = computed(() => {
-      console.log('===', props.auth)
-
-      return true
-
-      // if (!props.auth) {
-      //   return true;
-      // }
-      // return permissionButtonMap.value[PermissionButtonType[`${props.auth}`]];
-    });
-
-    const hasMoreThanOneChildren = computed(() => {
-      console.log('hasMoreThanOneChildren')
-      const len = props.children?.length
-      return len && len > 1
-    });
-
-    const defaultTip = '暂无权限，请联系管理员';
-
-    const handleClick = e => {
-      if (!hasPermission.value) {
-        return;
-      }
-      props.action?.(props.record);
-    };
-
-    return () => {
-      if (!hasMoreThanOneChildren.value) {
-        return (
-            <a-menu-item class={{'lyapi-drop-menu-item': true, 'has-no-permission': !hasPermission.value}}
-                         onClick={e => handleClick(e)}>
-              <a-tooltip title={hasPermission.value ? null : (props.tip || defaultTip)} color="#1677ff">
-                {props.label}
-              </a-tooltip>
-            </a-menu-item>
-        )
-      }
-      else {
-        return (
-            <a-sub-menu title={props.label} class={{'dp-action-submenu': true}}>
-              {
-                props.children?.map((e: any, index) => (
-                    <MenuItem key={index} {...e} record={props.record} />
-                ))
-              }
-            </a-sub-menu>
-        )
-      }
+  const renderContent = () => {
+    if (typeof item.label === 'function') {
+      return item.label(record);
     }
-  },
-})
+    return item.label;
+  };
+  return (
+    <a-menu-item class={{ 'lyapi-drop-menu-item': true, 'has-no-permission': item.disabled }} onClick={e => handleClick(e)}>
+      <span>{renderContent()}</span> 
+    </a-menu-item>
+  )
+}
 
 
 const ActionList = (opts: { list: MenuItem[], record: Recordable}) => {
@@ -144,7 +84,7 @@ const DropdownList = defineComponent({
           <a-menu>
             {
               props.list.map((e: any, index) => (
-                <MenuItem key={index} {...e} record={props.record} />
+                RenderMenuItem({ item: e, record: props.record })
               ))
             }
           </a-menu>
@@ -155,7 +95,7 @@ const DropdownList = defineComponent({
     return () => {
       return (
         <a-dropdown v-slots={vslots} />
-      )
+      ) 
     };
   },
 })
@@ -163,11 +103,20 @@ const DropdownList = defineComponent({
 const ifShow = (actionItem: MenuItem, props) => {
   if (typeof actionItem.ifShow === 'boolean') {
     return actionItem.ifShow;
-  }
+  } 
   if (typeof actionItem.ifShow === 'function') {
     return actionItem.ifShow(props.record);
   }
   return true;
+}
+
+const checkShow = (actionItem: MenuItem, props) => {
+  if (typeof actionItem.show === 'boolean') {
+    return actionItem.show;
+  } 
+  if (typeof actionItem.show === 'function') {
+    return actionItem.show(props.record);
+  }
 }
 
 /**
@@ -178,8 +127,15 @@ export const DropdownActionMenu = defineComponent({
   props: DropdownMenuProps,
   setup(props, { slots }) {
     const { dropdownList, actionList, record } = toRefs(props);
+    const { hasPermission }  = usePermission();
 
-
+    const filterAction = (e, props) => {
+      if (e.show !== null && e.show !== undefined) {
+        return checkShow(e, props);
+      }
+      return hasPermission(e.auth || '') && ifShow(e, props);
+    };
+    
     return () => {
       return (
         <div class="drop-down-action-wrap">
@@ -190,7 +146,10 @@ export const DropdownActionMenu = defineComponent({
             <a-divider type="vertical" />
           )} */}
           {dropdownList.value.length > 0 && (
-            <DropdownList list={dropdownList.value.filter(e => ifShow(e, props))} record={record.value} v-slots={slots} />
+            <DropdownList 
+              list={dropdownList.value.filter(e => filterAction(e, props))} 
+              record={record.value} 
+              v-slots={slots} />
           )}
         </div>
       )
