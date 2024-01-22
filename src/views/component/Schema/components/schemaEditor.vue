@@ -115,6 +115,7 @@ const handleExampleChange = (examples) => {
 const handleGenerateExample = async (examples) => {
   const result = await store.dispatch('ProjectSetting/generateExample', {
     data: schemaDetail.value.content,
+    projectId: projectId.value,
   })
   const example: any = {
     name: `Example ${examples.length + 1}`,

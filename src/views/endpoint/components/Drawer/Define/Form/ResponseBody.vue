@@ -89,8 +89,9 @@ async function generateFromJSON(JSONStr?: string) {
 
 async function handleGenerateExample(examples: any) {
   const content = contentStr.value;
+  console.error(props)
   const res = await store.dispatch('Endpoint/schema2example',
-      {data: content, serveId: props.serveId,}
+      {data: content, projectId: props.projectId,}
   );
   const example = {
     name: `Example ${examples.length + 1}`,
