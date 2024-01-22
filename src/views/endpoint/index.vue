@@ -155,7 +155,7 @@
                 </template>
 
                 <template #action="{record}">
-                  <DropdownActionMenu :dropdownList="MenuList" :record="record"/>
+                  <DropdownActionMenu :dropdownList="getMenuItems(record)" :record="record"/>
                 </template>
 
               </a-table>
@@ -518,7 +518,7 @@ async function clone(record: any) {
 }
 
 async function copyCurl(record: any, method: string) {
-  console.log('copyCurl', record, method)
+  // console.log('copyCurl', record, method)
 
   const clipboard = navigator.clipboard;
   if (!clipboard) {
