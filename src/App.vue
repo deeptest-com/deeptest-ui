@@ -7,6 +7,7 @@
       <!-- 创建项目弹窗 -->
     <CreateProjectModal
         v-if="createProjectModalVisible"
+        :formState="formState"
         :visible="createProjectModalVisible"
         @update:visible="createProjectModalVisible = false"
         @handleSuccess="handleCreateSuccess"
@@ -57,6 +58,18 @@ export default defineComponent({
     const currProject = computed(() => store.state.ProjectGlobal.currProject);
     const projects = computed<any>(() => store.state.ProjectGlobal.projects);
     const recentProjects = computed<any>(() => store.state.ProjectGlobal.recentProjects);
+    const formState = ref({
+      id: 0,
+      logo: "",
+      name: "",
+      shortName: "",
+      adminId: "",
+      includeExample: false,
+      desc: "",
+      products: [],
+      spaces: [],
+      syncMembers: false,
+    });
 
     watch(() => {
       return currentUser.value
@@ -219,7 +232,8 @@ export default defineComponent({
     return {
       antdLocales,
       createProjectModalVisible,
-      handleCreateSuccess
+      handleCreateSuccess,
+      formState
     }
   }
 })
