@@ -155,7 +155,7 @@
     <template #title>
       <span>{{`编辑组件 ${props?.value?.ref}`}}</span>
     </template>
-    <span class="viewComponent" style="margin-left:4px" @click="goViewComponent">
+    <span class="viewComponent" style="margin-left:4px">
       <LinkOutlined v-if="props?.value?.ref"/>
     </span>
   </a-tooltip>
@@ -400,6 +400,7 @@ const {projectName,parentOrigin,isWujieEnv,isInLeyanWujieContainer} = useWujie()
  * 查看组件
  * */
 function goViewComponent() {
+  
   console.log('goViewComponent', props.value);
   const {type, ref} = props.value;
   const refStr = encodeURIComponent(ref);
@@ -411,6 +412,7 @@ function goViewComponent() {
   }
   const url = `${window.location.origin}/${router.currentRoute.value.params.projectNameAbbr}/project-setting/service-setting?sectab=service-component&serveId=${props.serveId}&refId=${refStr}`;
   window.open(url, '_blank');
+  
 
 }
 
@@ -435,7 +437,6 @@ watch(() => {
   else {
     // 仅选择类型改变了才触发change事件
     // 需要兼容 选择ref 的场景
-    console.error('getValueFromTabsList');
     const value = getValueFromTabsList(tabsList.value);
     // 如果是 ref, 则直接返回, ref的优先级高于 type
     const newTypes = value.map((item: any) => item.ref || item.type);
