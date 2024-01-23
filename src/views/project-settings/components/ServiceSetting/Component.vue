@@ -367,7 +367,7 @@ async function handleGenerateExample(examples: any) {
   const content = contentStr.value;
   const result = await store.dispatch('ProjectSetting/generateExample', {
     data: content,
-    projectId: props.serveId,
+    serveId: props.serveId,
   })
   const example = {
     name: `Example ${examples.length + 1}`,

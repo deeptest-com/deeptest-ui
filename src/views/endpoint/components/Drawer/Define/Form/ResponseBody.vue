@@ -89,7 +89,6 @@ async function generateFromJSON(JSONStr?: string) {
 
 async function handleGenerateExample(examples: any) {
   const content = contentStr.value;
-  console.error(props)
   const res = await store.dispatch('Endpoint/schema2example',
       {data: content, projectId: props.projectId,}
   );
@@ -97,7 +96,7 @@ async function handleGenerateExample(examples: any) {
     name: `Example ${examples.length + 1}`,
     content: JSON.stringify(res),
   };
-  if(!activeResBodySchema.value?.examples) {
+  if(!activeResBodySchema.value?.examples || !Array.isArray(activeResBodySchema.value?.examples)) {
     activeResBodySchema.value.examples = [];
   }
   activeResBodySchema.value.examples?.push(example)

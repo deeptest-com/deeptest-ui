@@ -99,7 +99,7 @@ async function handleGenerateExample(examples: any) {
     name: `Example ${examples.length + 1}`,
     content: JSON.stringify(res),
   };
-  if(!activeReqBodySchema?.value?.examples?.length) {
+  if(!activeReqBodySchema?.value?.examples?.length ) {
     activeReqBodySchema.value.examples = []
   }
   // debugger;
