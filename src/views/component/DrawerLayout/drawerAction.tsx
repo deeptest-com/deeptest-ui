@@ -1,5 +1,8 @@
 import { defineComponent, inject } from 'vue';
 import { FullscreenExitOutlined, FullscreenOutlined, SelectOutlined, ShareAltOutlined } from '@ant-design/icons-vue';
+import IconSvg from "@/components/IconSvg";
+import SiderMenu from "@/layouts/IndexLayout/components/SiderMenu.vue";
+import Icon from "@/layouts/IndexLayout/components/Icon.vue";
 
 export const DrawerAction = defineComponent({
   name: 'DrawerAction',
@@ -24,11 +27,23 @@ export const DrawerAction = defineComponent({
       default: '',
       required: false,
     },
+    showCopyCurl: {
+      type: Boolean,
+      default: false,
+      required: false,
+    },
+    copyCurl: {
+      type: Function,
+      required: false,
+    },
     detailLink: {
       type: String,
       default: '',
       required: false,
     }
+  },
+  components: {
+    IconSvg,
   },
   setup(props, ctx) {
     const toDetail = inject('toDetail', (_url: string) => {});
@@ -54,6 +69,9 @@ export const DrawerAction = defineComponent({
         case 'fullScreen':
           setFullScreen(true);
           break;
+        case 'copyCurl':
+          props.copyCurl && props.copyCurl();
+          break;
         default:
           break;
       }
@@ -75,6 +93,13 @@ export const DrawerAction = defineComponent({
                 <ShareAltOutlined />
               </a-tooltip>
             </div>
+          )}
+          {props.showCopyCurl &&  (
+              <div class="drawer-action-item" data-action="copyCurl">
+                <a-tooltip placement="bottom" title="复制为cURL">
+                  <icon-svg type="copy-as" class="icon dp-link" />
+                </a-tooltip>
+              </div>
           )}
           {props.showFullScreen &&  (
             <div class="drawer-action-item" data-action={isFullScreen.value ? 'exitFullScreen' : 'fullScreen'}>

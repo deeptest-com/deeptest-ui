@@ -52,7 +52,7 @@
           </a-row>
           <RequestParams/>
           <!-- 增加请求体 -->
-          <RequestBody v-if="showRequestBody" :serveId="endpointDetail.serveId"/>
+          <RequestBody v-if="showRequestBody" :xserveId="endpointDetail.serveId"/>
           <!-- 响应定义  -->
           <Response :serveId="endpointDetail.serveId"/>
         </div>
