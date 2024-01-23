@@ -29,7 +29,7 @@
                     }}</span>
                 </div>
 
-                <div :ref="el => projectAction[item.projectId] = el" class="action" @click="e => e.preventDefault()" v-if="dropDownList.length > 0">
+                <div :data-project-id="item.projectId" class="project-item-action" @click="e => e.preventDefault()">
                   <DropdownActionMenu :dropdown-list="dropDownList" :record="item">
                     <EllipsisOutlined key="ellipsis"/>
                   </DropdownActionMenu>
@@ -166,7 +166,8 @@ async function handleJoin(item) {
 }
 
 async function goProject(item: any, e) {
-  if (projectAction.value[item.projectId].contains(e.target)) {
+  const el = [...document.querySelectorAll('.project-item-action')]?.find((e: any) => e?.dataset?.projectId === item.projectId + '');
+  if (el?.contains(e.target)) {
     return;
   }
   if (item?.accessible === 0) {
