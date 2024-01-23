@@ -108,8 +108,9 @@ const handleClick = (keys, evt) => {
   if (evt.node.dataRef?.entityId === 0) {
     return;
   }
-  store.commit('Schema/setActiveSchema', { ...evt.node.dataRef, key: evt.node?.dataRef?.entityId });
-  store.commit('Schema/setSchemas', uniquArrray([...store.state.Schema.schemas, evt.node.dataRef]));
+  let activeSchema = { ...evt.node.dataRef, key: evt.node?.dataRef?.entityId }
+  store.commit('Schema/setActiveSchema', activeSchema);
+  store.commit('Schema/setSchemas', uniquArrray([...store.state.Schema.schemas, activeSchema]));
   store.dispatch('Schema/querySchema', { id: evt.node.dataRef?.entityId });
   emits('select');
 };
@@ -197,6 +198,7 @@ const delCategory = (nodeProps) => {
       if (nodeProps.dataRef.children) {
         store.dispatch('Schema/removeSchemaTabs', { data: nodeProps.dataRef.children })
       }
+
     } catch(error: any) {
       const msg = typeof error === 'string' ? error : (error.message || '');
       msg && message.error(msg);
@@ -206,7 +208,7 @@ const delCategory = (nodeProps) => {
 
 const copy = async(nodeProps) => {
   try {
-    await store.dispatch('Schema/copySchema', nodeProps.dataRef?.entityId);
+    await store.dispatch('Schema/copySchema', nodeProps.dataRef?.id);
     message.success('克隆成功');
   } catch(error: any) {
     const msg = typeof error === 'string' ? error : (error.message || '');
@@ -256,7 +258,7 @@ const dropDownMenuList = [
           await store.dispatch('Schema/deleteSchema', {
             id: record.dataRef.entityId,
           });
-          store.dispatch('Schema/removeActiveSchema', record.dataRef?.entityId);
+          await store.dispatch('Schema/removeActiveSchema', record.dataRef?.entityId);
         } catch(_error) {
           message.error('删除失败');
         }

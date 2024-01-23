@@ -3,7 +3,7 @@ import { PropType, defineComponent, ref, defineExpose, Ref, computed, reactive, 
 import cloneDeep from "lodash/cloneDeep";
 import { DropdownActionMenu } from "../DropDownMenu";
 import "./index.less";
-import { filterByKeyword } from "@/utils/tree";
+import {filterByKeyword, findPath} from "@/utils/tree";
 
 const CategoryTreeProps = {
   categoryType: { // 目录树类型
@@ -114,7 +114,7 @@ const CategoryTree = defineComponent({
   props: CategoryTreeProps,
   setup(props, { expose, slots }) {
     const searchValue = ref('');
-    const expandedKeys = ref([]);
+    const expandedKeys = ref<number[]>([]);
     const checkedKeys = ref([]);
     const selectedKeys = ref<any>([]);
     const autoExpandParent = ref(false);
@@ -164,6 +164,7 @@ const CategoryTree = defineComponent({
 
     const setSelectedKeys = (key) => {
       selectedKeys.value = [key];
+      expandedKeys.value = findPath(key,data.value)
     }
 
     const renderEmptyContent = () => {

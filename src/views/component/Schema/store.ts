@@ -1,8 +1,8 @@
 import {Mutation, Action} from 'vuex';
 import cloneDeep from "lodash/cloneDeep";
 import {StoreModuleType} from "@/utils/store";
-import { createCategory, loadCategory, moveCategory, removeCategory, updateCategory } from '@/services/category';
-import { copySchema, deleteSchema, getSchemaDetail, saveSchema } from '@/views/project-settings/service';
+import { createCategory, loadCategory, moveCategory, removeCategory, updateCategory,copyCategory } from '@/services/category';
+import { deleteSchema, getSchemaDetail, saveSchema } from '@/views/project-settings/service';
 import { getAllSchemaId } from '@/utils/schema';
 
 export interface StateType {
@@ -85,7 +85,7 @@ const StoreModel: ModuleType = {
           projectId: rootState.ProjectGlobal.currPorject?.id
         });
         if (code === 0) {
-          dispatch('loadCategory');
+         await dispatch('loadCategory');
           return Promise.resolve(data);
         }
         return Promise.reject(msg);
@@ -144,9 +144,11 @@ const StoreModel: ModuleType = {
         return Promise.reject(error);
       }
     },
+
+
     async copySchema({ commit, dispatch }, id: number) {
       try {
-        const { code, data, msg } = await copySchema(id);
+        const { code, data, msg } = await copyCategory(id);
         if (code === 0) {
           dispatch('loadCategory');
           // commit('setSchemaCategory', data);
@@ -191,7 +193,7 @@ const StoreModel: ModuleType = {
       commit('setSchemas', []);
       commit('setSchemaDetail', {});
     },
-    async removeSchemaTabs({ commit, state }, { data }) {
+    async removeSchemaTabs({ commit,dispatch, state }, { data }) {
       const removeSchemaIds = getAllSchemaId(data); // 该目录下所有的schema
       const newTabs = state.schemas.filter(e => !removeSchemaIds.includes(e.entityId)); // 找出不属于指定删除目录下的schema tabs
       commit('setSchemas', newTabs);
