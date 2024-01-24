@@ -136,7 +136,8 @@ const StoreModel: ModuleType = {
       try {
         const { code, data, msg } = await saveSchema(payload);
         if (code === 0) {
-          dispatch('loadCategory');
+         await dispatch('loadCategory');
+          commit('setSchemaDetail', {...state.schemaDetail,...payload});
           return Promise.resolve(data);
         }
         return Promise.reject(msg);
