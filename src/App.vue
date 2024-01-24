@@ -6,6 +6,8 @@
 
       <!-- 创建项目弹窗 -->
     <CreateProjectModal
+        v-if="createProjectModalVisible"
+        :formState="formState"
         :visible="createProjectModalVisible"
         @update:visible="createProjectModalVisible = false"
         @handleSuccess="handleCreateSuccess"
@@ -56,6 +58,18 @@ export default defineComponent({
     const currProject = computed(() => store.state.ProjectGlobal.currProject);
     const projects = computed<any>(() => store.state.ProjectGlobal.projects);
     const recentProjects = computed<any>(() => store.state.ProjectGlobal.recentProjects);
+    const formState = ref({
+      id: 0,
+      logo: "",
+      name: "",
+      shortName: "",
+      adminId: "",
+      includeExample: false,
+      desc: "",
+      products: [],
+      spaces: [],
+      syncMembers: false,
+    });
 
     watch(() => {
       return currentUser.value
@@ -98,56 +112,62 @@ export default defineComponent({
       }))
     };
 
-    onMounted(() => {
-      setHtmlLang(locale.value);
+    const listenSubApp = () => {
+      bus?.$on('sendMsgToLeyanAPI', async (msg: any) => {
+        console.log('832msg', msg)
 
+        if (msg?.type === 'changeRouter') {
+          // 切换项目了，需要重置数据
+          if((!currProject.value.id || msg?.data?.needCheckProject) && msg?.data?.projectName){
+              const result = await store.dispatch('ProjectGlobal/checkProjectAndUser', { project_code: msg?.data?.projectName });
+            // 更新左侧菜单以及按钮权限
+            if([10600, 10700, 403].includes(result.code || '')) {
+              router.replace(`/error/${result.code}?projectId=${result.data.id}&projectName=${result.data.name}`)
+              return;
+            }
+            await store.dispatch('Global/getPermissionMenuList', { currProject: result.id });
+          }
+          if(msg?.data?.projectName){
+            await setCache(settings.leyanProjectName, msg?.data?.projectName);
+          }
+          await router.push(msg?.data?.path);
+        }
+        if (msg?.type === 'logout') {
+          await store.dispatch('User/logout');
+        }
+
+        if (msg?.type === 'changeProject') {
+          await store.dispatch("ProjectGlobal/changeProject", msg?.data?.project?.id);
+          await store.commit('Global/setPermissionMenuList', []);
+
+          // 更新左侧菜单以及按钮权限
+          await store.dispatch("Global/getPermissionMenuList", { currProjectId: msg?.data?.project?.id });
+
+          bus?.$emit(settings.sendMsgToLeyan, {
+            type: 'fetchDynamicMenus',
+            data: {
+              roleValue: (projects.value || []).find(pro => pro.id === msg?.data?.project?.id)?.roleName
+            }
+          })
+        }
+
+        if (msg?.type === 'openCreateProject') {
+          createProjectModalVisible.value = true;
+        }
+
+        if (msg?.type === 'changeAgentEnv') {
+          store.commit('Global/setCurrAgent', msg?.data?.currAgent);
+        }
+      })
+    }
+
+    onMounted(() => {
+      setHtmlLang(locale.value); 
       //  监听父应用传递过来的消息
       if(isWujieEnv){
         WebSocket.init(true);
         store.dispatch('Project/getUserList')
-        bus?.$on('sendMsgToLeyanAPI', async (msg: any) => {
-          console.log('832msg', msg)
-
-          if (msg?.type === 'changeRouter') {
-            // 切换项目了，需要重置数据
-            if(!currProject.value.id && msg?.data?.projectName){
-               const result = await store.dispatch('ProjectGlobal/checkProjectAndUser', { project_code: msg?.data?.projectName });
-              // 更新左侧菜单以及按钮权限
-              await store.dispatch('Global/getPermissionMenuList', { currProject: result.id });
-            }
-            if(msg?.data?.projectName){
-              await setCache(settings.leyanProjectName, msg?.data?.projectName);
-            }
-            await router.push(msg?.data?.path);
-          }
-          if (msg?.type === 'logout') {
-           await store.dispatch('User/logout');
-          }
-
-          if (msg?.type === 'changeProject') {
-            await store.dispatch("ProjectGlobal/changeProject", msg?.data?.project?.id);
-            await store.commit('Global/setPermissionMenuList', []);
-
-            // 更新左侧菜单以及按钮权限
-            await store.dispatch("Global/getPermissionMenuList", { currProjectId: msg?.data?.project?.id });
-
-            bus?.$emit(settings.sendMsgToLeyan, {
-              type: 'fetchDynamicMenus',
-              data: {
-                roleValue: (projects.value || []).find(pro => pro.id === msg?.data?.project?.id)?.roleName
-              }
-            })
-          }
-
-          if (msg?.type === 'openCreateProject') {
-            createProjectModalVisible.value = true;
-          }
-
-          if (msg?.type === 'changeAgentEnv') {
-            store.commit('Global/setCurrAgent', msg?.data?.currAgent);
-          }
-        })
-        
+        listenSubApp()
         // 通知上层应用已经加载完毕
         bus?.$emit(settings.sendMsgToLeyan, {
           type: 'appMounted',
@@ -207,22 +227,13 @@ export default defineComponent({
           })
         }, (600));
       }
-      if (val && !oldv) {
-        setTimeout(() => {
-          bus?.$emit(settings.sendMsgToLeyan, {
-            type: 'fetchDynamicMenus',
-            data: {
-              roleValue: (projects.value || []).find(pro => pro.id === val)?.roleName
-            }
-          })
-        }, (600));
-      }
     })
 
     return {
       antdLocales,
       createProjectModalVisible,
-      handleCreateSuccess
+      handleCreateSuccess,
+      formState
     }
   }
 })

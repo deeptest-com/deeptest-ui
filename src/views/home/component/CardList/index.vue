@@ -29,7 +29,7 @@
                     }}</span>
                 </div>
 
-                <div :ref="el => projectAction[item.projectId] = el" class="action" @click="e => e.preventDefault()" v-if="dropDownList.length > 0">
+                <div :data-project-id="item.projectId" class="project-item-action" @click="e => e.preventDefault()">
                   <DropdownActionMenu :dropdown-list="dropDownList" :record="item">
                     <EllipsisOutlined key="ellipsis"/>
                   </DropdownActionMenu>
@@ -105,7 +105,7 @@ const props = defineProps({
 });
 const router = useRouter();
 const store = useStore<{ Home: StateType }>();
-const { hasProjectAuth } = usePermission();
+const { hasProjectAuth, isCreator } = usePermission();
 const { isInLeyanWujieContainer,isInLecangWujieContainer } = useWujie();
 const ListItem = List.Item;
 const list = computed<any>(() => store.state.Home.queryResult.list);
@@ -132,27 +132,23 @@ const total = computed(() => filterList.value.length);
 const dropDownList = [{
   label: '申请加入',
   action: (record) => emit("join", record),
-  auth: 'p-project-apply',
-  show: (record) => hasProjectAuth('p-project-apply') && record.accessible === 0,
+  show: (record) => record.accessible === 0,
 },
 {
   label: '编辑',
   action: (record) => emit("edit", record),
-  auth: 'p-project-edit',
-  show: (record) => hasProjectAuth('p-project-edit') && record.accessible === 1,
+  show: (record) => hasProjectAuth('p-project-edit') || isCreator(record.adminId),
 },
 {
   label: '删除',
   action: (record) => emit("delete", record),
-  auth: 'p-project-del',
-  show: (record) => hasProjectAuth('p-project-del') && record.accessible === 1,
+  show: (record) => hasProjectAuth('p-project-del') || isCreator(record.adminId),
 },
 {
   label: '退出项目',
   action: (record) => emit("exit", record),
-  auth: 'p-project-exit',
   show: (record) => hasProjectAuth('p-project-exit') && record.accessible === 1,
-}]
+}];
 
 watch(() => props?.searchValue, (val) => {
   current.value = 1;
@@ -170,7 +166,8 @@ async function handleJoin(item) {
 }
 
 async function goProject(item: any, e) {
-  if (projectAction.value[item.projectId].contains(e.target)) {
+  const el = [...document.querySelectorAll('.project-item-action')]?.find((e: any) => e?.dataset?.projectId === item.projectId + '');
+  if (el?.contains(e.target)) {
     return;
   }
   if (item?.accessible === 0) {
@@ -189,12 +186,10 @@ async function goProject(item: any, e) {
   }
 
   if (isInLeyanWujieContainer) {
-    console.log("isInLeyanWujieContainer-bus",bus)
     bus?.$emit(settings.sendMsgToLeyan, {
-      type: 'fetchDynamicMenus',
+      type: 'changeParentRouter',
       data: {
-        roleValue: (projects.value || []).find(pro => pro.id === item.projectId)?.roleName,
-        route: `${item.projectShortName}/workspace`
+        url: `${item.projectShortName}/workspace`
       }
     })
     return;

@@ -56,7 +56,7 @@
       <!-- Swagger -->
       <template v-else-if="modelRef.driverType === 'swagger'">
         <a-form-item label="导入方式" name="openUrlImport">
-          <a-radio-group 
+          <a-radio-group
             :options="openUrlImportOpts"
             v-model:value="modelRef.openUrlImport"/>
         </a-form-item>
@@ -117,7 +117,7 @@
               allow-clear/>
           </template>
         </Empty>
-        
+
       </a-form-item>
       <a-form-item label="所属服务" name="serveId">
         <SelectServe v-if="visible" @change="change"/>
@@ -147,6 +147,18 @@
         placeholder="请选择"/>
       <span v-if="modelRef.dataSyncType === 1" class="form-tip"><WarningOutlined /> 完全覆盖会导致通过平台上的接口定义更新被覆盖，请谨慎使用</span>
       </a-form-item>
+      <a-form-item label="接口路径规则" name="addServicePrefix" v-if="modelRef.driverType === 'lzos'">
+        <div class="add-service-prefix">
+          <a-checkbox v-model:checked="modelRef.addServicePrefix">智能体所属服务名作为路径第一级</a-checkbox><br>
+        </div>
+        <span v-if="modelRef.addServicePrefix">
+          接口路径导入为：/服务名/智能体名/消息名，例如：/acnsvr/Agent/CancelCollectItem
+        </span>
+        <span v-else>
+          接口路径导入为：/智能体名/消息名，例如：/Agent/CancelCollectItem
+        </span>
+      </a-form-item>
+
     </a-form>
   </a-modal>
 
@@ -240,6 +252,7 @@ const modelRef = reactive<any>({
   // 智能体厂
   classCode: '',
   functionCodes: [],
+  addServicePrefix: true
 });
 
 const searchValue = ref('');
@@ -351,8 +364,8 @@ function ok() {
     .validate()
     .then(async () => {
       confirmLoading.value = true;
-      const { filePath, openUrlImport, functionCodes, classCode, ...rest } = modelRef;
-      const params = modelRef.driverType === 'lzos' ? { filePath, classCode, functionCodes, ...rest } : { filePath, openUrlImport, ...rest };
+      const { filePath, openUrlImport, functionCodes, classCode,addServicePrefix, ...rest } = modelRef;
+      const params = modelRef.driverType === 'lzos' ? { filePath, classCode, functionCodes,addServicePrefix, ...rest } : { filePath, openUrlImport, ...rest };
 
       const res = await store.dispatch('Endpoint/importEndpointData', {
         ...params,
@@ -364,7 +377,7 @@ function ok() {
         notifyWarn('异步导入中，稍后请刷新列表查看导入结果');
         reset();
         emit('ok');
-      } 
+      }
     })
     .catch((error: ValidateErrorEntity) => {
       console.log('error', error);
@@ -507,6 +520,10 @@ watch(() => {
 
 .message-tooltip {
   min-width: 266px;
+}
+
+.add-service-prefix {
+  line-height: 32px;
 }
 </style>
 

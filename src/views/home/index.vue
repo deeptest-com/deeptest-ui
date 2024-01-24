@@ -51,6 +51,7 @@
 
       <!-- 创建项目弹窗 -->
       <CreateProjectModal
+          v-if="createProjectModalVisible"
           :visible="createProjectModalVisible"
           :formState="formState"
           @update:visible="createProjectModalVisible = false"
@@ -86,6 +87,8 @@ import {NotificationKeyCommon} from "@/utils/const";
 import {CurrentUser, StateType as UserStateType} from "@/store/user";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import usePermission from "@/composables/usePermission";
+import { setCache } from "@/utils/localCache";
+import settings from "@/config/settings";
 
 // 获取当前登录用户信息
 const router = useRouter();
@@ -112,15 +115,21 @@ let formState = ref({
   adminId: "",
   includeExample: false,
   desc: "",
+  products: [],
+  spaces: [],
+  syncMembers: false,
 });
 
 onMounted(async () => {
   if (router.currentRoute.value?.query?.type == 'all') {
     activeKey.value = 0
   }
+  await store.dispatch("User/fetchCurrent");
+  await setCache(settings.currProjectId, 0);
+  await store.dispatch('Global/getPermissionMenuList', { currProjectId: 0 });
   await getHearderData();
   await getList(1);
-  await store.dispatch("User/fetchCurrent");
+  
 });
 
 const getHearderData = async (): Promise<void> => {
@@ -166,8 +175,19 @@ function handleJoin(item) {
 }
 
 function handleOpenAdd() {
+  formState.value = {
+    id: 0,
+    logo: "",
+    name: "",
+    shortName: "",
+    adminId: "",
+    includeExample: false,
+    desc: "",
+    products: [],
+    spaces: [],
+    syncMembers: false,
+  };
   createProjectModalVisible.value = true;
-  formState.value.id = 0;
 }
 
 function handleOpenEdit(item) {
@@ -178,6 +198,7 @@ function handleOpenEdit(item) {
   formState.value.adminId = item.adminId;
   formState.value.includeExample = item.includeExample;
   formState.value.desc = item.projectDescr;
+  formState.value.syncMembers = item.syncMembers || false;
   createProjectModalVisible.value = true;
 }
 
