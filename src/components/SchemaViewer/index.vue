@@ -30,6 +30,8 @@ const props = defineProps(['contentStr', 'examplesStr', 'components', 'contentTy
 const examples: any = ref([]);
 const content: any = ref<any>(null);
 
+
+
 watch(() => {
   return props.contentStr
 }, (newVal) => {

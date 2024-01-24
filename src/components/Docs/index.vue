@@ -85,6 +85,7 @@ const serviceList = computed(() => {
           ...interfaceItem,
           endpointInfo: endpoint,
           serveInfo: item,
+          components:props?.data?.components,
           serveId: item.id,
         });
       })
