@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import request from '@/utils/request';
 
 const apiPath = 'projects';
@@ -49,6 +50,29 @@ export async function checkProjectAndUser(params) {
 export async function getUserMenuList(params: { currProjectId: number }) {
     return request({
         url: `/${apiPath}/menus/userMenuListNew`,
+        method: 'get',
+        params,
+    })
+}
+
+export async function getUserProducts(params: { page: Number, pageSize: Number }) {
+    return request({
+        url: `/${apiPath}/userProducts`,
+        method: 'get',
+        params,
+    })
+}
+
+export async function getUserSpaces() {
+    return request({
+        url: `/${apiPath}/userSpaces`,
+        method: 'get',
+    })
+}
+
+export async function getUserIntegrationDetail(params: { projectId: number }) {
+    return request({
+        url: `/${apiPath}/integrationDetail`,
         method: 'get',
         params,
     })

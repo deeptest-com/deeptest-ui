@@ -36,10 +36,7 @@
 
         <div class="title">
           自定义脚本库<Tips title="导入第三方/自定义JavaScript类库，可以在自定义脚本中，通过 moduleName.funcName(参数)的形式来调用自定义函数。" />：
-          <router-link :to="'/'+currProject.shortName+'/project-setting/jslib'"
-                       target="_blank" class="dp-link-primary">
-            前往添加
-          </router-link>
+          <span class="dp-link-primary" @click="addJslib">前往添加</span>
         </div>
         <div>
           <ul style="margin-left: 16px;">
@@ -70,6 +67,7 @@ import Tips from "@/components/Tips/index.vue";
 import {StateType as ProjectStateType} from "@/store/project";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
+import { useWujie } from "@/composables/useWujie";
 
 provide('conditionSrc', 'scenario_custom_code')
 
@@ -78,6 +76,7 @@ const store = useStore<{ ProjectGlobal: ProjectStateType, Scenario: ScenarioStat
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const modelRef: any = computed<boolean>(() => store.state.Scenario.nodeData);
 const jslibNames = computed<any>(() => store.state.Snippet.jslibNames);
+const { isInLeyanWujieContainer, parentOrigin } = useWujie();
 
 const emits = defineEmits(['cancel']);
 
@@ -124,6 +123,12 @@ const addSnippet = (snippetName) => {
 }
 const editorChange = (newScriptCode) => {
   modelRef.value.content = newScriptCode;
+}
+
+const addJslib = () => {
+  const prefix = isInLeyanWujieContainer ? `${parentOrigin}/lyapi` : window.location.origin;
+  const suffix = isInLeyanWujieContainer ? '/settings?activeKey=jslib' : '/project-setting/jslib'; 
+  window.open(`${prefix}/${currProject.value.shortName}${suffix}`, '_blank');
 }
 
 const timestamp = ref('')
