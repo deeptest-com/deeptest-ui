@@ -57,29 +57,31 @@
         </template>
 
         <template #action="{ record }">
-          <a-tooltip title="备选用例" placement="top">
-            <a-button v-if="record.caseType === 'benchmark'" type="link" @click="() => props.showBenchMark(record)">
-              <AppstoreAddOutlined />
-            </a-button>
-          </a-tooltip>
+          <div style="width: 116px; text-align: right;">
+            <a-tooltip title="备选用例" placement="top">
+              <a-button v-if="record.caseType === 'benchmark'" type="link" @click="() => props.showBenchMark(record)">
+                <AppstoreAddOutlined />
+              </a-button>
+            </a-tooltip>
 
-          <a-tooltip title="复制" placement="top">
-            <a-button type="link" @click="() => copy(record)">
-              <CopyOutlined />
-            </a-button>
-          </a-tooltip>
+            <a-tooltip title="克隆" placement="top">
+              <a-button type="link" @click="() => copy(record)">
+                <IconSvg type="clone" />
+              </a-button>
+            </a-tooltip>
 
-          <a-tooltip title="复制为cURL" placement="top">
-            <a-button type="link" @click="copyCurl(record)">
-              <CopyOutlined />
-            </a-button>
-          </a-tooltip>
+            <a-tooltip title="复制为cURL" placement="top">
+              <a-button type="link" @click="copyCurl(record)">
+                <CopyOutlined />
+              </a-button>
+            </a-tooltip>
 
-          <a-tooltip title="删除" placement="top">
-            <a-button type="link" @click="() => remove(record)">
-            <DeleteOutlined />
-          </a-button>
-          </a-tooltip>
+            <a-tooltip title="删除" placement="top">
+              <a-button type="link" @click="() => remove(record)">
+              <DeleteOutlined />
+            </a-button>
+            </a-tooltip>
+          </div>
         </template>
 
       </a-table>
@@ -110,6 +112,7 @@ import {DeleteOutlined, CopyOutlined, AppstoreAddOutlined} from '@ant-design/ico
 import {momentUtc} from '@/utils/datetime';
 import debounce from "lodash.debounce";
 import {confirmToDelete} from "@/utils/confirm";
+import IconSvg from "@/components/IconSvg";
 
 import {StateType as Endpoint} from "@/views/endpoint/store";
 import {StateType as Debug} from "@/views/component/debug/store";
@@ -305,7 +308,7 @@ const columns = [
   {
     title: '操作',
     key: 'action',
-    width: 200,
+    width: 160,
     slots: {customRender: 'action'},
   },
 ];

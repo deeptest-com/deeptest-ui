@@ -1,5 +1,11 @@
 import { defineComponent, inject } from 'vue';
-import { FullscreenExitOutlined, FullscreenOutlined, SelectOutlined, ShareAltOutlined } from '@ant-design/icons-vue';
+import {
+  FullscreenExitOutlined,
+  FullscreenOutlined,
+  MoreOutlined,
+  SelectOutlined,
+  ShareAltOutlined
+} from '@ant-design/icons-vue';
 import IconSvg from "@/components/IconSvg";
 import SiderMenu from "@/layouts/IndexLayout/components/SiderMenu.vue";
 import Icon from "@/layouts/IndexLayout/components/Icon.vue";
@@ -45,7 +51,7 @@ export const DrawerAction = defineComponent({
   components: {
     IconSvg,
   },
-  setup(props, ctx) {
+  setup(props, { slots }) {
     const toDetail = inject('toDetail', (_url: string) => {});
     const shareLink = inject('shareLink', (_url: string) => {});
     const setFullScreen = inject('setFullScreen', (_value: boolean) => {});
@@ -60,24 +66,54 @@ export const DrawerAction = defineComponent({
         case 'detail':
           toDetail(props.detailLink);
           break;
-        case 'share':
-          shareLink(props.shareLink);
-          break;
         case 'exitFullScreen':
           setFullScreen(false);
           break;
         case 'fullScreen':
           setFullScreen(true);
           break;
-        case 'copyCurl':
-          props.copyCurl && props.copyCurl();
-          break;
         default:
           break;
       }
     }
 
+    const menuClick = (e) => {
+      console.log(e.key)
+      if (e.key === 'copyShare') {
+        shareLink(props.shareLink)
+      } else if (e.key === 'copyCurl') {
+        props.copyCurl && props.copyCurl()
+      }
+    }
+
     return () => {
+      const copyCurlTooltipSlots = {
+        default: () => {
+          return <icon-svg type="copy-as" class="icon dp-link"/>
+        },
+        title: () => {
+          return ('复制')
+        }
+      }
+
+      const copyCurlSlots = {
+        default: () => {
+          return <a-tooltip placement="right" v-slots={copyCurlTooltipSlots} />
+        },
+        overlay: () => {
+          return (
+              <a-menu onClick={e => menuClick(e)}>
+                <a-menu-item key="copyShare">
+                  <span>共享链接</span>
+                </a-menu-item>
+                <a-menu-item key="copyCurl">
+                  <span>cURL</span>
+                </a-menu-item>
+              </a-menu>
+          )
+        }
+      }
+
       return (
         <div class="drawer-action" onClick={e => handleClick(e)}>
           {props.showDetail &&  (
@@ -95,11 +131,9 @@ export const DrawerAction = defineComponent({
             </div>
           )}
           {props.showCopyCurl &&  (
-              <div class="drawer-action-item" data-action="copyCurl">
-                <a-tooltip placement="bottom" title="复制为cURL">
-                  <icon-svg type="copy-as" class="icon dp-link" />
-                </a-tooltip>
-              </div>
+            <div class="drawer-action-item">
+              <a-dropdown placement="bottomRight" v-slots={copyCurlSlots} />
+            </div>
           )}
           {props.showFullScreen &&  (
             <div class="drawer-action-item" data-action={isFullScreen.value ? 'exitFullScreen' : 'fullScreen'}>

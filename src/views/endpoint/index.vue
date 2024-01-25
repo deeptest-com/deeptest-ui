@@ -370,7 +370,7 @@ const getMenuItems = (record) => {
     copyCurlItem = {
       key: 'copyCurl',
       auth: '',
-      label: `复制${method}为cURL`,
+      label: `复制为cURL`,
       action: (record: any) => copyCurl(record, method)
     }
   } else {

@@ -25,10 +25,10 @@
 
       <div class="url"
            :class="[isPathValid  ? '' :  'dp-field-error' ]">
-        <a-tooltip 
+        <a-tooltip
           :overlayStyle="getOverlayStyle()"
-          placement="bottom" 
-      
+          placement="bottom"
+
           :visible="!isPathValid"
           :title="'请输入合法的路径,以http(s)开头'">
           <a-input placeholder="请输入http(s)://开头的地址"
@@ -78,7 +78,7 @@
       <div v-if="isShowCopyCurl" class="copy-as">
         <a-tooltip>
           <template #title>复制为cURL</template>
-          <icon-svg type="copy-as" class="icon dp-link"
+          <icon-svg type="copy-as" class="dp-link-black"
                     @click="copyCurl" />
         </a-tooltip>
       </div>

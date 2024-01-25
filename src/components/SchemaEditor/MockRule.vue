@@ -1,11 +1,5 @@
 <script lang="ts" setup>
-import {
-  ArrowUpOutlined,
-  ArrowDownOutlined,
-  CopyOutlined,
-} from '@ant-design/icons-vue';
 import {computed, defineProps, defineEmits, ref, watch} from "vue";
-// import EditAndShowSelect from "@/components/EditAndShowSelect/index.vue";
 import {useStore} from "vuex";
 import {StateType as ServeStateType} from "@/store/serve";
 
