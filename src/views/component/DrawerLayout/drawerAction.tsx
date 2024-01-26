@@ -123,13 +123,6 @@ export const DrawerAction = defineComponent({
               </a-tooltip>
             </div>
           )}
-          {props.showShare &&  (
-            <div class="drawer-action-item" data-action="share">
-              <a-tooltip placement="bottom" title="分享链接">
-                <ShareAltOutlined />
-              </a-tooltip>
-            </div>
-          )}
           {props.showCopyCurl &&  (
             <div class="drawer-action-item">
               <a-dropdown placement="bottomRight" v-slots={copyCurlSlots} />
