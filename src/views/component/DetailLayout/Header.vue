@@ -14,7 +14,7 @@
 
   <DrawerAction
     v-if="showAction"
-    :show-full-screen="true"
+    :show-full-screen="showFullScreen"
     :show-share="showShare"
     :share-link="shareLink"
     :showCopyCurl="showCopyCurl"
@@ -70,6 +70,11 @@ import { DrawerAction } from "@/views/component/DrawerLayout/drawerAction";
     default: '',
     required: false,
   },
+   showFullScreen: {
+     type: Boolean,
+     default: true,
+     required: false,
+   },
    showCopyCurl: {
      type: Boolean,
      default: false,

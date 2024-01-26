@@ -2,13 +2,9 @@ import { defineComponent, inject } from 'vue';
 import {
   FullscreenExitOutlined,
   FullscreenOutlined,
-  MoreOutlined,
   SelectOutlined,
-  ShareAltOutlined
 } from '@ant-design/icons-vue';
 import IconSvg from "@/components/IconSvg";
-import SiderMenu from "@/layouts/IndexLayout/components/SiderMenu.vue";
-import Icon from "@/layouts/IndexLayout/components/Icon.vue";
 
 export const DrawerAction = defineComponent({
   name: 'DrawerAction',
@@ -55,7 +51,7 @@ export const DrawerAction = defineComponent({
     const toDetail = inject('toDetail', (_url: string) => {});
     const shareLink = inject('shareLink', (_url: string) => {});
     const setFullScreen = inject('setFullScreen', (_value: boolean) => {});
-    const isFullScreen: any = inject('isFullScreen');
+    const isFullScreen: any = inject('isFullScreen', false);
 
     const handleClick = e => {
       e.preventDefault();
@@ -98,7 +94,7 @@ export const DrawerAction = defineComponent({
 
       const copyCurlSlots = {
         default: () => {
-          return <a-tooltip placement="right" v-slots={copyCurlTooltipSlots} />
+          return <a-tooltip placement={props.showFullScreen ? 'right' : 'top'} v-slots={copyCurlTooltipSlots} />
         },
         overlay: () => {
           return (

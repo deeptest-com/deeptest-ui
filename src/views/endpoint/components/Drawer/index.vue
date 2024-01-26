@@ -114,6 +114,7 @@ import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import {WarningFilled,InfoCircleOutlined } from '@ant-design/icons-vue';
 import {ChangedStatus, SourceType, UsedBy} from "@/utils/enum";
 import {loadCurl} from "@/views/component/debug/service";
+import {doCopyCurl} from "@/services/curl";
 
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal, Global,Debug }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
@@ -345,35 +346,7 @@ const showCopyCurl = computed(() => {
 })
 const copyCurl = async () => {
   console.log('copyCurl', selectedMethodDetail.value, debugData.value)
-
-  const clipboard = navigator.clipboard;
-  if (!clipboard) {
-    notifyWarn('您的浏览器不支持复制内容到剪贴板。');
-    return
-  }
-
-  let resp = {} as any
-
-  if (debugData.value.method) {
-     resp = await loadCurl({
-      debugInterfaceId: debugData.value.debugInterfaceId,
-      endpointInterfaceId: debugData.value.endpointInterfaceId,
-      usedBy: debugData.value.usedBy,
-      environmentId: environmentId.value,
-    })
-
-  } else if (selectedMethodDetail.value.method) {
-    resp = await loadCurl({
-      endpointInterfaceId: selectedMethodDetail.value.id,
-      usedBy: UsedBy.InterfaceDebug,
-      environmentId: environmentId.value,
-    })
-  }
-
-  if (resp.code == 0) {
-    navigator.clipboard.writeText(resp.data)
-    notifySuccess('已赋值cURL命令到剪贴板。');
-  }
+  doCopyCurl(selectedMethodDetail.value, debugData.value, environmentId.value)
 }
 
 provide('notScrollIntoView', true);
