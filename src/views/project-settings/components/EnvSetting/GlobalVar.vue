@@ -149,12 +149,6 @@ watch(() => {
     font-size: 18px;
     margin-bottom: 16px;
 }
-
-.envDetail-btn {
-    margin-top: 16px;
-    margin-bottom: 16px;
-}
-
 .envDetail-footer {
     height: 60px;
     position: absolute;
