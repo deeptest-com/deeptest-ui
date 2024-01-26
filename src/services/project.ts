@@ -47,7 +47,7 @@ export async function checkProjectAndUser(params) {
     })
 }
 
-export async function getUserMenuList(params: { currProjectId: number }) {
+export async function getUserMenuList(params?: { currProjectId: number }) {
     return request({
         url: `/${apiPath}/menus/userMenuListNew`,
         method: 'get',

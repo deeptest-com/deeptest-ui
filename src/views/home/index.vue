@@ -125,8 +125,7 @@ onMounted(async () => {
     activeKey.value = 0
   }
   await store.dispatch("User/fetchCurrent");
-  await setCache(settings.currProjectId, 0);
-  await store.dispatch('Global/getPermissionMenuList', { currProjectId: 0 });
+  await store.dispatch('Global/getPermissionMenuList');
   await getHearderData();
   await getList(1);
   
