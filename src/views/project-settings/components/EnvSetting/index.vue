@@ -289,6 +289,10 @@ watch(() => {
   .envDetail {
     padding: 8px;
   }
+
+  :deep(.envDetail-btn) {
+    margin-bottom: 16px;
+  }
 }
 
 .var-icon {
