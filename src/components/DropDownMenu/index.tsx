@@ -154,6 +154,8 @@ export const DropdownActionMenu = defineComponent({
       return hasPermission(e.auth || '') && ifShow(e, props);
     };
 
+    const newDropDownList = computed(() => dropdownList.value.filter(e => filterAction(e, props)));
+
     return () => {
       return (
         <div class="drop-down-action-wrap">
@@ -163,9 +165,9 @@ export const DropdownActionMenu = defineComponent({
           {actionList.value.length > 0 && (
             <a-divider type="vertical" />
           )} */}
-          {dropdownList.value.length > 0 && (
+          {dropdownList.value.length > 0 && newDropDownList.value.length > 0 && (
             <DropdownList
-              list={dropdownList.value.filter(e => filterAction(e, props))}
+              list={newDropDownList.value}
               record={record.value}
               v-slots={slots} />
           )}

@@ -36,13 +36,18 @@ const currPlan = computed<any>(() => store.state.Plan.currPlan);
 let pagination = computed<any>(() => store.state.Plan.scenarios.pagination);
 let queryParams = reactive<any>({
   keywords: '', enabled: '1',
-  planId: currPlan.value.id,
+  planId: currPlan.value?.id,
   page: pagination.value.current, pageSize: pagination.value.pageSize
 });
 const selectedScenarioIds = ref<number[]>([]);
 const loading = ref<boolean>(false);
 
 const columns: any[] = reactive([
+    {
+        title: '编号',
+        dataIndex: 'serialNumber',
+        width: 150,
+    },
     {
         title: '用例名称',
         dataIndex: 'name',

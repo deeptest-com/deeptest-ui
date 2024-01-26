@@ -290,10 +290,10 @@ const importInterfaces = (target) => {
   importTarget.value = target
   interfaceSelectionVisible.value = true
 }
-const interfaceSelectionFinish = (interfaceIds) => {
+const interfaceSelectionFinish = async (interfaceIds) => {
   console.log('interfaceSelectionFinish', interfaceIds, importTarget.value)
 
-  store.dispatch('DiagnoseInterface/importInterfaces', {
+  await store.dispatch('DiagnoseInterface/importInterfaces', {
     interfaceIds: interfaceIds,
     targetId: importTarget.value.id,
   }).then((newNode) => {

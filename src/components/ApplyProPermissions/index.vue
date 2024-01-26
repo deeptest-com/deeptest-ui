@@ -104,7 +104,7 @@ const submitForm = async () => {
   validate()
     .then(async () => {
       let res = await applyJoin({
-        projectId: props.item.projectId,
+        projectId: props.item.projectId * 1,
         description: formStateRef.description,
         projectRoleName: formStateRef.projectId,
       });
