@@ -9,7 +9,6 @@ import bus from "@/utils/eventBus";
 import settings from '@/config/settings';
 import {getToken, setToken} from '@/utils/localToken';
 import {getCache} from '@/utils/localCache';
-import {isLeyan} from "@/utils/comm";
 import {getCachedServerUrl} from "@/utils/serverEnv";
 import {useWujie} from "@/composables/useWujie";
 const {xToken,isWujieEnv,user} = useWujie()
@@ -31,17 +30,9 @@ export interface ResultErr {
  * 配置request请求时的默认参数
  */
 export const getUrls = () => {
-    const isElectron = !!window.require
-    const nodeEnv = process.env.NODE_ENV
-    console.log(`isElectron=${isElectron}, nodeEnv=${nodeEnv}, locationHref=${window.location.href}`)
-
     const serverUrl = process.env.VUE_APP_API_SERVER;
     const agentUrl = process.env.VUE_APP_API_AGENT;
     const staticUrl = process.env.VUE_APP_API_STATIC;
-    console.log(`serverUrl=${serverUrl}, agentUrl=${agentUrl}`)
-
-    console.log(process.env)
-
     return {serverUrl, agentUrl,staticUrl}
 }
 
@@ -102,12 +93,12 @@ const requestInterceptors = async (config: AxiosRequestConfig & { cType?: boolea
     if (jwtToken) {
         config.headers[settings.ajaxHeadersTokenKey] = 'Bearer ' + jwtToken;
     }
-
     // 加随机数清除缓存
     config.params = {...config.params, ts: Date.now()};
     if (!config.params.currProjectId) {
         const projectId = await getCache(settings.currProjectId);
-        config.params = {...config.params, currProjectId: projectId, lang: i18n.global.locale.value};
+        const { pathname = '' } = window.location;
+        config.params = {...config.params, currProjectId: pathname === '/' ? 0 : projectId, lang: i18n.global.locale.value};
     }
 
     console.log('=== request ===', config.url, config)

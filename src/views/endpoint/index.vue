@@ -9,13 +9,12 @@
           <div class="top-action">
             <div class="top-action-left">
               <PermissionButton
-                  class="action-new"
-                  text="新建接口"
-                  code="ENDPOINT-ADD"
-                  type="primary"
-                  :loading="loading"
-                  action="create"
-                  @handle-access="handleCreateEndPoint"/>
+                v-if="hasPermission('')"
+                class="action-new"
+                text="新建接口"
+                type="primary"
+                :loading="loading"
+                @handle-access="handleCreateEndPoint"/>
               <a-dropdown :trigger="['hover']" :placement="'bottomLeft'">
                 <a class="ant-dropdown-link" @click.prevent>
                   <a-button>批量操作</a-button>
@@ -246,6 +245,7 @@ import {loadCurl} from "@/views/component/debug/service";
 import {useWujie} from "@/composables/useWujie";
 import usePermission from '@/composables/usePermission';
 
+const { hasPermission, isCreator } = usePermission();
 const {share} = useSharePage();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -333,27 +333,26 @@ const columns = [
 const getMenuItems = (record) => {
   const items = [
     {
-      key: '1',
-      auth: 'ENDPOINT-COPY',
+      auth: '',
       label: '克隆',
       action: (record: any) => clone(record)
     },
     {
-      key: '2',
       auth: '',
       label: '分享链接',
       action: (record: any) => share(record, 'IM')
     },
 
     {
-      key: '3',
-      auth: 'ENDPOINT-DELETEE',
+      auth: 'p-api-endpoint-del',
       label: '删除',
+      show: (record) => {
+        return hasPermission('p-api-endpoint-del') || isCreator(record.createUser);
+      },
       action: (record: any) => del(record)
     },
     {
-      key: '4',
-      auth: 'ENDPOINT-OUTDATED',
+      auth: '',
       label: '过期',
       action: (record: any) => disabled(record)
     },

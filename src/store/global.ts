@@ -195,7 +195,7 @@ const StoreModel: ModuleType = {
       }
     },
 
-    async getPermissionMenuList({ commit, rootState }: any, payload: any) {
+    async getPermissionMenuList({ commit, rootState }: any, payload?: any) {
       try {
         const { code, data }: any = await getUserMenuList(payload);
         if (code === 0) {
