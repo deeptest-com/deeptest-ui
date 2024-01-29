@@ -1065,12 +1065,11 @@ const StoreModel: ModuleType = {
                 projectId: rootState.ProjectGlobal.currProject.id,
             });
             if (res.code === 0) {
-                res.data.result.forEach((item: any) => {
+                return res.data.result.map((item: any) => {
                     item.label = item.ref;
-                    item.value = item.ref;
-
-                })
-                return res.data.result;
+                    item.value = item.id;
+                    return item;
+                });
             } else {
                 return null;
             }

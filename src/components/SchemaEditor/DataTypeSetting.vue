@@ -110,6 +110,7 @@
                       :value="tab.value || null"
                       placeholder="Select Components"
                       :getPopupContainer="(triggerNode) => getPopupContainer(triggerNode)"
+                      :filter-option="false"
                       style="width: 100%"/>
                 </a-form-item>
               </a-form>
@@ -161,7 +162,7 @@
   </a-tooltip>
 </template>
 <script lang="ts" setup>
-import {ref, defineProps, defineEmits, watch, reactive, toRaw, computed, onMounted} from 'vue';
+import {ref, defineProps, defineEmits, watch, computed} from 'vue';
 import {
   LinkOutlined
 } from '@ant-design/icons-vue';
@@ -330,7 +331,7 @@ function initTabsList(types: any, treeInfo: any) {
 }
 
 function getValueFromTabsList(tabsList: any) {
-    const result: any = [];
+  const result: any = [];
 
   tabsList.forEach((tabs: any) => {
     let activeTab = tabs.find((tab: any) => tab.active);
@@ -341,10 +342,10 @@ function getValueFromTabsList(tabsList: any) {
     }
     let res: any = {};
     if (activeTab.type === '$ref') {
-      const selectedRef: any = refsOptions.value.find((ref: any) => ref.value === activeTab.value);
+      const selectedRef: any = refsOptions.value.find((ref: any) => ref.id === activeTab.value);
       res = {
         type: selectedRef?.type || '',
-        ref: activeTab.value || '',
+        ref: selectedRef?.ref || '',
         name: selectedRef?.name || '',
         content: null,
         refId: selectedRef?.id,
@@ -378,11 +379,9 @@ async function searchRefs(keyword) {
   //TODO 加缓存，否则会重复拿数据
   debounce(async () => {
     refsOptions.value = await store.dispatch('Endpoint/getAllRefs', {
-      page: 1,
       name: keyword,
-      pageSize: 20
     });
-  }, 500)();
+    }, 300)();
 }
 
 
