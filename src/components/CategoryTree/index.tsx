@@ -1,5 +1,6 @@
-import { CaretDownOutlined, FolderOpenOutlined, FolderOutlined, PlusOutlined } from "@ant-design/icons-vue";
-import { PropType, defineComponent, ref, defineExpose, Ref, computed, reactive, watch } from "vue";
+import { Tree } from "ant-design-vue-v3";
+import { PlusOutlined } from "@ant-design/icons-vue";
+import { PropType, defineComponent, ref, computed } from "vue";
 import cloneDeep from "lodash/cloneDeep";
 import { DropdownActionMenu } from "../DropDownMenu";
 import "./index.less";
@@ -90,14 +91,6 @@ const renderMore = (nodeProps, props) => {
   )
 };
 
-const renderFolderIcon = (nodeProps) => {
-  return (
-    <span class="tree-icon">
-      { nodeProps.expanded  ? <FolderOutlined /> : <FolderOpenOutlined /> }
-    </span>
-  );
-};
-
 const setTreeDataKey = (data) => {
   if (!data) {
     return null;
@@ -119,8 +112,22 @@ const CategoryTree = defineComponent({
     const selectedKeys = ref<any>([]);
     const autoExpandParent = ref(false);
     const data = computed(() => {
-      return [...filterByKeyword(setTreeDataKey(props.treeData || []), searchValue.value, 'name')];
+      return [...filterByKeyword(setTreeDataKey(removeSlotsAttribute(props.treeData || [])), searchValue.value, 'name')];
     });
+
+    const removeSlotsAttribute = (data: any[]) => {
+      return data.map(e => {
+        if (e.slots) {
+          delete e.slots;
+        }
+        if (e.children) {
+          e.children = removeSlotsAttribute(e.children);
+        }
+        return e;
+      })
+    }
+
+    const TreeNode = ref<InstanceType<typeof Tree>>();
 
     const initTree = () => {
       expandedKeys.value = [];
@@ -128,9 +135,6 @@ const CategoryTree = defineComponent({
     }
 
     const vSlots = {
-      switcherIcon: () => {
-        return <CaretDownOutlined/>;
-      },
       title: (nodeProps) => {
         return (
           <div class="tree-title" draggable={props.nodeDraggable(nodeProps)}>
@@ -148,6 +152,7 @@ const CategoryTree = defineComponent({
         return;
       }
       selectedKeys.value = keys;
+      scrollToSelectedNode();
       props?.onTreeNodeClicked(keys, evt);
     };
 
@@ -165,6 +170,7 @@ const CategoryTree = defineComponent({
     const setSelectedKeys = (key) => {
       selectedKeys.value = [key];
       expandedKeys.value = findPath(key,data.value)
+      scrollToSelectedNode();
     }
 
     const renderEmptyContent = () => {
@@ -177,7 +183,20 @@ const CategoryTree = defineComponent({
       searchValue.value = e.target.value;
     };
 
-    expose({ initTree, setSelectedKeys });
+    const scrollToSelectedNode = () => {
+      const treeInstance: any = TreeNode.value;
+      if (treeInstance && selectedKeys.value.length > 0) {
+        treeInstance.scrollTo({ key: selectedKeys.value[0], align: 'top' })
+      } 
+    };
+
+    const getVirtualHeight = () => {
+      const el = document.querySelector('.category-tree-container');
+      const { height }: any = el?.getBoundingClientRect();
+      return height - 52;
+    };
+
+    expose({ initTree, setSelectedKeys, scrollToSelectedNode });
     return () => {
       return (
         <div class="category-tree-container">
@@ -200,8 +219,8 @@ const CategoryTree = defineComponent({
           </div>
           {data.value.length > 0 ? (
             <div class="category-tree">
-              <a-tree 
-                searchValue={searchValue.value}
+              <Tree
+                ref={TreeNode}
                 draggable={props.draggable}
                 checkable={props.checked}
                 expandedKeys={expandedKeys.value}
@@ -209,10 +228,12 @@ const CategoryTree = defineComponent({
                 selectedKeys={selectedKeys.value}
                 autoExpandParent={autoExpandParent.value}
                 treeData={data.value}
+                height={getVirtualHeight()}
                 showIcon={props.showIcon}
                 onSelect={(keys, evt) => selectedNode(keys, evt)}
                 onDrop={(...args) => props.onTreeNodeDrop(args[0])}
                 onExpand={(keys) => expand(keys)}
+                virtual={true}
                 v-slots={vSlots}
               />
             </div>

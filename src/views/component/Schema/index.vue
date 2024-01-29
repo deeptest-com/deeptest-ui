@@ -363,15 +363,16 @@ defineExpose({
 <style lang="less" scoped>
 .schema-container {
   position: absolute;
-  bottom: 0;
+  bottom: 32px;
   left: 0;
   width: 100%;
-  height: 32px;
+  // height: 32px;
+  height: 66.6666%;
   background: #fff;
   overflow: hidden;
   transition: all .2s ease-in-out;
   box-shadow: 0 2px 8px #00000026;
-
+  transform: translateY(100%);
   .schema-inlet {
     height: 32px;
     line-height: 32px;
@@ -380,6 +381,7 @@ defineExpose({
     align-items: center;
     position: relative;
     cursor: pointer;
+    border-bottom: 1px solid #e7e7e7;
 
     .schema-icon,.schema-expand-icon {
       display: flex;
@@ -401,25 +403,19 @@ defineExpose({
   }
   
   .schema-content {
-    height: 0;
+    height: calc(100% - 32px);
+
+    .schema-loading {
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
   }
 
   &.expanded {
-    height: 66.6666%;
-
-    .schema-inlet {
-      border-bottom: 1px solid #e7e7e7;
-    }
-    .schema-content {
-      height: calc(100% - 32px);
-
-      .schema-loading {
-        height: 200px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-    }
+    transform: translateY(0);
+    bottom: 0;
   }
 }
 </style>
