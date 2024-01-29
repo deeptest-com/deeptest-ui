@@ -14,14 +14,14 @@ export const doCopyCurl = async (selectedMethodDetail, debugData, environmentId)
 
     let resp = {} as any
 
-     if (selectedMethodDetail.method) {
+     if (selectedMethodDetail?.method) {
         resp = await loadCurl({
             endpointInterfaceId: selectedMethodDetail.id,
             usedBy: UsedBy.InterfaceDebug,
             environmentId: environmentId,
             fromDefine: true,
         })
-    }else if (debugData.method) {
+    }else if (debugData?.method) {
         resp = await loadCurl({
             debugInterfaceId: debugData.debugInterfaceId,
             endpointInterfaceId: debugData.endpointInterfaceId,

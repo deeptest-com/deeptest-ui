@@ -97,6 +97,7 @@ const globalActiveTab = computed(()=>store.state.Endpoint.globalActiveTab);
 
 const selectedMethodDetail = computed<any>(() => store.state.Endpoint.selectedMethodDetail);
 const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
+const selectedMethod =  computed<any>(() => store.state.Endpoint.selectedMethod);
 
 /**
  * 页面渲染时
@@ -471,6 +472,7 @@ onUnmounted(() => {
 }, {
   deep: true
 });
+
 </script>
 <style lang="less" scoped>
 .tab-pane {
