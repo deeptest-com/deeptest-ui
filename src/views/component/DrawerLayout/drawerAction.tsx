@@ -103,7 +103,7 @@ export const DrawerAction = defineComponent({
                   <span>共享链接</span>
                 </a-menu-item>
                 <a-menu-item key="copyCurl">
-                  <span>cURL</span>
+                  <span>接口定义cURL</span>
                 </a-menu-item>
               </a-menu>
           )
