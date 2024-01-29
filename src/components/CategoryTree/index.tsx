@@ -192,8 +192,11 @@ const CategoryTree = defineComponent({
 
     const getVirtualHeight = () => {
       const el = document.querySelector('.category-tree-container');
-      const { height }: any = el?.getBoundingClientRect();
-      return height - 52;
+      if (el) {
+        const { height }: any = el?.getBoundingClientRect();
+        return height - 52;
+      }
+      return 400;
     };
 
     expose({ initTree, setSelectedKeys, scrollToSelectedNode });
