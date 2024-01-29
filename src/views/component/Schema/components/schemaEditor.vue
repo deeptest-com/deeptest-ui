@@ -190,6 +190,7 @@ watch(() => {
 }, (newVal, oldVal) => {
   if ((newVal.id && newVal?.id) !== oldVal?.id) {
     loading.value = true;
+    activeSchemaTab.value.autoFocus = false;
 
     setTimeout(() => {
       loading.value = false;
