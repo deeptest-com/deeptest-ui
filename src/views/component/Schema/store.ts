@@ -153,7 +153,7 @@ const StoreModel: ModuleType = {
         if (code === 0) {
           dispatch('loadCategory');
           // commit('setSchemaCategory', data);
-          return Promise.resolve();
+          return Promise.resolve(data);
         }
         return Promise.reject(msg);
       } catch(error) {

@@ -208,7 +208,13 @@ const delCategory = (nodeProps) => {
 
 const copy = async(nodeProps) => {
   try {
-    await store.dispatch('Schema/copySchema', nodeProps.dataRef?.id);
+    const data = await store.dispatch('Schema/copySchema', nodeProps.dataRef?.id);
+    const newSchema = { id: data.id, key: data.entityId, entityId: data.entityId, name: data.name, autoFocus: true };
+    // 新建组件以后，设置当前选中tab以及tab列表
+    store.commit('Schema/setActiveSchema', newSchema);
+    schemas.value.push(newSchema)
+    store.dispatch('Schema/querySchema', { id: data.entityId });
+    emits('select');
     message.success('克隆成功');
   } catch(error: any) {
     const msg = typeof error === 'string' ? error : (error.message || '');
