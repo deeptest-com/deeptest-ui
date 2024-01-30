@@ -50,11 +50,11 @@ const del = (record) => {
 }
 
 const actionList = [
-  {
-    label: '立即导入',
-    customRender: <ImportOutlined />,
-    action: autoImport
-  },
+  // {
+  //   label: '立即导入',
+  //   customRender: <ImportOutlined />,
+  //   action: autoImport
+  // },
   {
     label: '复制',
     customRender: <CopyOutlined />,

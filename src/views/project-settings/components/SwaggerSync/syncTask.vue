@@ -29,6 +29,30 @@
           <a-form-item label="环境URL" name="filePath">
             <a-input v-model:value="modelRef.filePath" placeholder="请输入智能体厂环境URL地址，如 https://lzos.rysaas.cn"/>
           </a-form-item>
+          <a-form-item label="所属工程">
+            <template v-slot:label>
+              所属工程
+              <a-tooltip placement="topLeft" overlayClassName="message-tooltip">
+                <template v-slot:title>
+                  <div>该服务下的所有外部消息将被定时批量同步</div>
+                </template>
+              <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)" />
+              </a-tooltip>
+            </template>
+            <a-select
+              @focus="handleFocus"
+              v-model:value="modelRef.functionCodes"
+              mode="multiple"
+              :options="functionCodesOpts"
+              :max-tag-count="1"
+              show-search
+              :filter-option="filterOption"
+              placeholder="请选择乐仓工程">
+              <template v-if="fetching" #notFoundContent>
+                <a-spin size="small" />
+              </template>
+            </a-select>
+          </a-form-item>
           <a-form-item name="functionCodes">
             <template v-slot:label>
               服务名
@@ -47,55 +71,38 @@
               :max-tag-count="1"
               show-search
               :filter-option="filterOption"
-              placeholder="请选择待同步的消息">
+              placeholder="请选择智能体厂服务">
               <template v-if="fetching" #notFoundContent>
                 <a-spin size="small" />
               </template>
             </a-select>
           </a-form-item>
+
+          <span class="form-header-title">数据筛选条件</span>
+          <a-form-item label="消息类型">
+            <a-select
+                v-model:value="modelRef.messageType"
+                :options="messageTypeOpts"
+                placeholder="请选择"/>
+          </a-form-item>
+          <a-form-item label="继承父类">
+            <a-select
+              v-model:value="modelRef.inheritType"
+              :options="inheritTypeOpts"
+              mode="multiple"
+              placeholder="请选择"/>
+          </a-form-item>
+          <a-form-item label="允许重写">
+            <a-select
+              v-model:value="modelRef.rewrite"
+              :options="rewriteOpts"
+              placeholder="请选择"/>
+          </a-form-item>
         </template>
         <!-- Swagger -->
         <template v-else-if="modelRef.driverType === 'swagger'">
-          <a-form-item label="导入方式" name="openUrlImport">
-            <a-radio-group
-              :options="openUrlImportOpts"
-              v-model:value="modelRef.openUrlImport"/>
-          </a-form-item>
-          <a-form-item label="上传文件" v-if="!modelRef.openUrlImport" name="filePath">
-            <a-spin tip="上传中..." :spinning="uploading">
-              <a-upload
-                :fileList="fileList"
-                accept=".json,.yaml,.yml"
-                :remove="handleRemove"
-                @change="handleChangeFile"
-                :before-upload="beforeUpload">
-                <a-button>
-                  <upload-outlined></upload-outlined>
-                  点击上传文件
-                </a-button>
-              </a-upload>
-            </a-spin>
-          </a-form-item>
-          <a-form-item label="Swagger URL" v-if="modelRef.openUrlImport" name="filePath">
-            <a-input v-model:value="modelRef.filePath" />
-          </a-form-item>
-        </template>
-        <!-- PostMan -->
-        <template v-else>
-          <a-form-item label="上传文件" v-if="!modelRef.openUrlImport" name="filePath">
-            <a-spin tip="上传中..." :spinning="uploading">
-              <a-upload
-                :fileList="fileList"
-                accept=".json,.yaml,.yml"
-                :remove="handleRemove"
-                @change="handleChangeFile"
-                :before-upload="beforeUpload">
-                <a-button>
-                  <upload-outlined></upload-outlined>
-                  点击上传文件
-                </a-button>
-              </a-upload>
-            </a-spin>
+          <a-form-item label="Swagger URL" name="filePath">
+            <a-input v-model:value="modelRef.filePath" placeholder="请输入swagger url" />
           </a-form-item>
         </template>
         <span class="form-header-title">导入设置</span>
@@ -176,10 +183,21 @@
           </template>
           <a-input v-model:value="modelRef.cron" type="textarea" placeholder="请输入Linux定时任务表达式"/>
         </a-form-item>
+        <a-form-item label="接口路径规则" name="addServicePrefix" v-if="modelRef.driverType === 'lzos'">
+          <div class="add-service-prefix">
+            <a-checkbox v-model:checked="modelRef.addServicePrefix">智能体所属服务名作为路径第一级</a-checkbox><br>
+          </div>
+          <span v-if="modelRef.addServicePrefix">
+            接口路径导入为：/服务名/智能体名/消息名，例如：/acnsvr/Agent/CancelCollectItem
+          </span>
+          <span v-else>
+            接口路径导入为：/智能体名/消息名，例如：/Agent/CancelCollectItem
+          </span>
+        </a-form-item>
       </a-form>
     </div>
     <div class="sync-task-footer">
-      <a-button type="default" @click="autoImport">立即导入</a-button>
+      <!-- <a-button type="default" @click="autoImport">立即导入</a-button> -->
       <a-button type="default" @click="cancel">取消</a-button>
       <a-button type="primary" @click="ok">确定</a-button>
     </div>
@@ -228,6 +246,51 @@ const driverTypeOpts = [
   },
 ];
 
+const messageTypeOpts = [
+  {
+    label: '内部',
+    value: 'swagger',
+  },
+  {
+    label: '外部',
+    value: 'lzos',
+  },
+  {
+    label: '全部',
+    value: 'lzos',
+  },
+];
+
+const inheritTypeOpts = [
+  {
+    label: '继承并重写',
+    value: 'swagger',
+  },
+  {
+    label: '继承未重写',
+    value: 'lzos',
+  },
+  {
+    label: '自身',
+    value: 'lzos',
+  },
+];
+
+const rewriteOpts = [
+  {
+    label: '是',
+    value: 'swagger',
+  },
+  {
+    label: '否',
+    value: 'lzos',
+  },
+  {
+    label: '全部',
+    value: 'lzos',
+  },
+];
+
 const dataSyncTypeOpts = [
   {
     label: '智能合并',
@@ -240,17 +303,6 @@ const dataSyncTypeOpts = [
   {
     label: '完全覆盖',
     value: 1,
-  }
-];
-
-const openUrlImportOpts = [
-  {
-    label: '文件导入',
-    value: false,
-  },
-  {
-    label: 'URL导入',
-    value: true,
   }
 ];
 
@@ -545,6 +597,8 @@ watch(() => {
 .sync-task-form {
   padding: 20px;
   padding-bottom: 0;
+  max-height: 600px;
+  overflow-y: scroll;
 }
 
 .sync-task-footer {
