@@ -1058,20 +1058,24 @@ const StoreModel: ModuleType = {
         },
         // 获取可选组件信息
         async getAllRefs({commit, rootState}: any, payload: any) {
-            const res = await getSchemaList({
-                ...payload,
-                "pageSize": 60,
-                projectId: rootState.ProjectGlobal.currProject.id,
-            });
-            if (res.code === 0) {
-                const result = res.data.result.map((item: any) => {
-                    item.label = item.ref;
-                    item.value = item.id;
-                    return item;
+            try {
+                const res = await getSchemaList({
+                    ...payload,
+                    "pageSize": 60,
+                    projectId: rootState.ProjectGlobal.currProject.id,
                 });
-                return { page: res.data.page, result };
-            } else {
-                return { page: 1, result: [] };
+                if (res.code === 0) {
+                    const result = res.data.result.map((item: any) => {
+                        item.label = item.ref;
+                        item.value = item.id;
+                        return item;
+                    });
+                    return Promise.resolve({ page: res.data.page, result });
+                } else {
+                    return Promise.reject(res.msg);
+                }
+            } catch(error) {
+                return Promise.reject(error);
             }
         },
         // 获取可选组件信息
