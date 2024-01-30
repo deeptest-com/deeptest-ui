@@ -33,6 +33,6 @@ export const doCopyCurl = async (selectedMethodDetail, debugData, environmentId)
 
     if (resp.code == 0) {
         navigator.clipboard.writeText(resp.data)
-        notifySuccess('已赋值cURL命令到剪贴板。');
+        notifySuccess('已复制cURL命令到剪贴板。');
     }
 }
