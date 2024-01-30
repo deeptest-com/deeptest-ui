@@ -22,4 +22,5 @@ export type MenuItem = {
   key?: string;
   action: (...args: any[]) => void,
   tip?: string;
+  customRender?: JSX.Element;
 } 

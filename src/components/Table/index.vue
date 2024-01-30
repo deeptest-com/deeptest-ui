@@ -106,7 +106,7 @@ const basicColumns = computed(() => {
   return [
     {...prefixColumn},
     ...columns,
-  ]
+  ].filter(e => JSON.stringify(e) !== '{}')
 });
 
 const initSortable = () => {
