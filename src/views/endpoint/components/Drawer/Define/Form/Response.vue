@@ -213,26 +213,28 @@ function handleCodeOptionsChange(code: string) {
   if (selectedCodes.value.includes(code)) {
     return;
   }
-  selectedCodes.value.push(code);
-  selectedMethodDetail.value.responseCodes = selectedCodes.value.toString();
+  const lastSelectedCodes = selectedCodes.value;
+  lastSelectedCodes.push(code);
+  selectedMethodDetail.value.responseCodes = lastSelectedCodes.toString();
   store.commit('Endpoint/setSelectedMethodDetail', selectedMethodDetail.value);
 }
 
 function confirmDeleteCode() {
-  if (!selectedCodes.value.includes(selectedCode.value)) {
+  const lastSelectedCodes = selectedCodes.value;
+  if (!lastSelectedCodes.includes(selectedCode.value)) {
     return;
   }
   if (selectedCode.value === '200') {
     notifyWarn('200状态码不可删除');
     return;
   }
-  const index = selectedCodes.value.findIndex((item) => {
+  const index = lastSelectedCodes.findIndex((item) => {
     return item === selectedCode.value;
   })
-  selectedCodes.value.splice(index, 1);
+  lastSelectedCodes.splice(index, 1);
   selectedMethodDetail.value.responseBodies = selectedMethodDetail.value.responseBodies.filter(item=>item.code!=selectedCode.value)
   selectedCode.value = selectedMethodDetail.value.responseBodies.length? selectedMethodDetail.value.responseBodies[0].code : '200';
-  selectedMethodDetail.value.responseCodes = [...selectedCodes.value].toString();
+  selectedMethodDetail.value.responseCodes = [...lastSelectedCodes].toString();
   store.commit('Endpoint/setSelectedMethodDetail', selectedMethodDetail.value);
 }
 
@@ -360,14 +362,14 @@ function handleResHeaderChange(data) {
 
 .select-code-con {
   display: flex;
-  width: 750px;
-  overflow-x: scroll;
+  overflow: hidden;
 
   .select-code-group {
     display: flex;
     height: 37px;
     max-width: 700px;
     overflow-x: scroll;
+    overflow-y: hidden;
   }
 
   .select-code-options {
