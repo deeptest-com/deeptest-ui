@@ -111,13 +111,18 @@ import debounce from "lodash.debounce";
 import InterfaceSelectionFromDefine from "@/views/component/InterfaceSelectionFromDefine/main.vue";
 import { DropdownActionMenu } from '@/components/DropDownMenu';
 import CurlImportModal from "./curl.vue";
-import {notifyError, notifySuccess} from "@/utils/notify";
+import {notifyError, notifySuccess, notifyWarn} from "@/utils/notify";
+import {loadCurl} from "@/views/component/debug/service";
+import {StateType as DebugStateType} from "@/views/component/debug/store";
+import {UsedBy} from "@/utils/enum";
 
-const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType, ProjectGlobal: ProjectStateType, ServeGlobal: ServeStateType }>();
+const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType,  Debug: DebugStateType,
+  ProjectGlobal: ProjectStateType, ServeGlobal: ServeStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const treeData = computed<any>(() => store.state.DiagnoseInterface.treeData);
 const treeDataMap = computed<any>(() => store.state.DiagnoseInterface.treeDataMap);
 const interfaceId = computed<any>(() => store.state.DiagnoseInterface.interfaceId);
+const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 
 const keywords = ref('');
 const replaceFields = {key: 'id'};
@@ -235,6 +240,24 @@ async function deleteNode(node) {
     store.dispatch('DiagnoseInterface/removeInterface', {id: node.id, type: node.type});
   })
 }
+async function copyCurl(node) {
+  console.log('copyCurl', node)
+  const clipboard = navigator.clipboard;
+  if (!clipboard) {
+    notifyWarn('您的浏览器不支持复制内容到剪贴板。');
+    return
+  }
+
+  const resp = await loadCurl({
+    diagnoseId: node.id,
+    environmentId: environmentId.value,
+    usedBy: UsedBy.DiagnoseDebug,
+  })
+  if (resp.code == 0) {
+    navigator.clipboard.writeText(resp.data)
+    notifySuccess('已复制cURL命令到剪贴板。');
+  }
+}
 
 async function handleModalOk(model) {
   console.log('handleModalOk')
@@ -350,6 +373,11 @@ const DropdownMenuList = [
     label: '新建接口',
     ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
     action: (nodeProps) => create(nodeProps.dataRef?.id, 'interface'),
+  },
+  {
+    label: '复制为cURL',
+    ifShow: (nodeProps) => nodeProps.dataRef?.type === 'interface',
+    action: (nodeProps) => copyCurl(nodeProps.dataRef),
   },
   {
     label: (nodeProps) => {
