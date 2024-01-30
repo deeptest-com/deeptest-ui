@@ -111,6 +111,7 @@
                       placeholder="Select Components"
                       :getPopupContainer="(triggerNode) => getPopupContainer(triggerNode)"
                       :filter-option="false"
+                      @popupScroll="popupScroll"
                       style="width: 100%"/>
                 </a-form-item>
               </a-form>
@@ -168,6 +169,7 @@ import {
 } from '@ant-design/icons-vue';
 import {schemaSettingInfo, typeOpts, combineSchemaOpts, combineTypes} from "./config";
 import cloneDeep from "lodash/cloneDeep";
+import { SelectProps } from 'ant-design-vue/es/select';
 import {useStore} from "vuex";
 import {StateType as ServeStateType} from "@/store/serve";
 import debounce from "lodash.debounce";
@@ -374,15 +376,32 @@ function getValueFromTabsList(tabsList: any) {
 
 const store = useStore<{ Endpoint, ServeGlobal: ServeStateType }>();
 const refsOptions: any = ref([]);
+const searchValue = ref('');
+const searchPage = ref(1);
 
-async function searchRefs(keyword) {
-  //TODO 加缓存，否则会重复拿数据
-  debounce(async () => {
-    refsOptions.value = await store.dispatch('Endpoint/getAllRefs', {
-      name: keyword,
-    });
-    }, 300)();
+const searchRefs = debounce(async (keyword) => {
+  searchValue.value = keyword;
+  getRefsList();
+}, 300);
+
+const getRefsList = async () => {
+  const { page, result }: any = await store.dispatch('Endpoint/getAllRefs', {
+    name: searchValue.value,
+    page: searchPage.value,
+  });
+  if ((result || []).length === 0) {
+    searchPage.value = page - 1;
+  }
+  refsOptions.value = refsOptions.value.concat(result || []);
 }
+
+const popupScroll = debounce(async (evt) => {
+  const { scrollTop, clientHeight, scrollHeight } = evt.target;
+  if (scrollTop + clientHeight + 100 > scrollHeight) {
+    searchPage.value ++;
+    getRefsList();
+  }
+}, 300);
 
 
 // const {isWujieEnv} = useWujie();
@@ -421,7 +440,7 @@ watch(() => {
 
   // 打开时，初始化数据
   if (visible.value) {
-    await searchRefs('');
+    await getRefsList();
   }
 
   let {type, types} = props.value || {};

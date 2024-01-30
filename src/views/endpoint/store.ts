@@ -1060,18 +1060,18 @@ const StoreModel: ModuleType = {
         async getAllRefs({commit, rootState}: any, payload: any) {
             const res = await getSchemaList({
                 ...payload,
-                "page": 1,
-                "pageSize": 100,
+                "pageSize": 60,
                 projectId: rootState.ProjectGlobal.currProject.id,
             });
             if (res.code === 0) {
-                return res.data.result.map((item: any) => {
+                const result = res.data.result.map((item: any) => {
                     item.label = item.ref;
                     item.value = item.id;
                     return item;
                 });
+                return { page: res.data.page, result };
             } else {
-                return null;
+                return { page: 1, result: [] };
             }
         },
         // 获取可选组件信息
