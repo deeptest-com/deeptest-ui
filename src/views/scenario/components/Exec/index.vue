@@ -61,6 +61,8 @@ import {CurrentUser, StateType as UserStateType} from "@/store/user";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import {getUuid} from "@/utils/string";
 import { setServeUrl } from "@/utils/url";
+import {loadProjectEnvVars} from "@/utils/cache";
+import {StateType as ProjectStateType} from "@/store/project";
 
 const props = defineProps<{
   execDrawerVisible: boolean;
@@ -68,11 +70,12 @@ const props = defineProps<{
 
 const emits = defineEmits(['onClose'])
 
-const store = useStore<{ User: UserStateType, Report: ReportStateType, Scenario: ScenarioStateType, Debug: DebugStateType, Global: GlobalStateType, Exec: ExecStatus, ProjectSetting, Environment }>();
+const store = useStore<{ User: UserStateType, ProjectGlobal: ProjectStateType, Report: ReportStateType, Scenario: ScenarioStateType, Debug: DebugStateType, Global: GlobalStateType, Exec: ExecStatus, ProjectSetting, Environment }>();
 const currUser = computed(() => store.state.User.currentUser);
 const nodeData = computed<any>(() => store.state.Scenario.nodeData);
 const detailResult = computed<any>(() => store.state.Scenario.detailResult);
 const currentUser:any = computed<CurrentUser>(()=> store.state.User.currentUser);
+const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currEnvId = computed(() => store.state.ProjectSetting.selectEnvId);
 const envList = computed(() => store.state.ProjectSetting.envList);
 const scenarioId = computed(() => {
@@ -114,7 +117,8 @@ const execStart = async () => {
   console.log('****** send exec scenario ws data', data);
   WebSocket.sentMsg(execUuid.value, JSON.stringify({
     act: 'execScenario',
-    scenarioExecReq: data
+    scenarioExecReq: data,
+    localVarsCache: await loadProjectEnvVars(currProject.value.id),
   }))
 }
 const stopExec = () => {

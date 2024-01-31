@@ -7,6 +7,7 @@ import {getToken} from "@/utils/localToken";
 import {getUuid} from "@/utils/string";
 import { ConditionType } from '@/utils/enum';
 import { setServeUrl } from '@/utils/url';
+import {loadProjectEnvVars} from "@/utils/cache";
 
 interface CaseExecution {
     progressStatus: Ref<any>;
@@ -162,7 +163,8 @@ function useCaseExecution(): CaseExecution {
         console.log('****** send exec cases ws data', data);
         WebSocket.sentMsg(execUuid.value, JSON.stringify({
             act: 'execCases',
-            casesExecReq: data
+            casesExecReq: data,
+            localVarsCache: await loadProjectEnvVars(currProject.value.id),
         }))
     }
     const execStop = () => {

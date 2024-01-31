@@ -25,10 +25,10 @@
 
       <div class="url"
            :class="[isPathValid  ? '' :  'dp-field-error' ]">
-        <a-tooltip 
+        <a-tooltip
           :overlayStyle="getOverlayStyle()"
-          placement="bottom" 
-      
+          placement="bottom"
+
           :visible="!isPathValid"
           :title="'请输入合法的路径,以http(s)开头'">
           <a-input placeholder="请输入http(s)://开头的地址"
@@ -113,13 +113,16 @@ import {notifyWarn} from "@/utils/notify";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import {getUuid} from "@/utils/string";
 import { setServeUrl } from "@/utils/url";
+import {StateType as ProjectStateType} from "@/store/project";
+import {loadProjectEnvVars} from "@/utils/cache";
 const {
   isDebugChange,
   debugChangePreScript,
   debugChangePostScript,
   debugChangeCheckpoint} = useIMLeaveTip();
-const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal, User }>();
+const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, ProjectGlobal: ProjectStateType, Global: GlobalStateType, ServeGlobal, User }>();
 const currUser = computed(() => store.state.User.currentUser);
+const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currServe = computed(() => store.state.Debug.currServe);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
@@ -217,7 +220,8 @@ const send = async (e) => {
       data: {
         ...data,
         baseUrl: currServe.value.url,
-      }
+      },
+      localVarsCache: await loadProjectEnvVars(currProject.value.id)
     }
     await store.dispatch('Debug/call', callData).finally(()=>{
       store.commit("Global/setSpinning",false)

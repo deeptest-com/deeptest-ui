@@ -97,11 +97,14 @@ import {getToken} from "@/utils/localToken";
 import {StateType as UserStateType} from "@/store/user";
 import {getUuid} from "@/utils/string";
 import { setServeUrl } from "@/utils/url";
+import {StateType as ProjectStateType} from "@/store/project";
+import {loadProjectEnvVars} from "@/utils/cache";
 const { t } = useI18n();
 
 const router = useRouter();
-const store = useStore<{ User: UserStateType, Plan: PlanStateType, Global: GlobalStateType, Exec: ExecStatus; }>();
+const store = useStore<{ User: UserStateType, ProjectGlobal: ProjectStateType, Plan: PlanStateType, Global: GlobalStateType, Exec: ExecStatus; }>();
 const currUser = computed(() => store.state.User.currentUser);
+const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const collapsed = computed<boolean>(()=> store.state.Global.collapsed);
 
 const planId = ref(+router.currentRoute.value.params.id)
@@ -124,7 +127,8 @@ const execStart = async () => {
   console.log('****** send exec plan ws data', data);
   WebSocket.sentMsg(execUuid.value, JSON.stringify({
     act: 'execPlan',
-    planExecReq: data
+    planExecReq: data,
+    localVarsCache: await loadProjectEnvVars(currProject.value.id),
   }))
 }
 const stopExec = () => {
@@ -170,7 +174,7 @@ const OnWebSocketMsg = (data: any) => {
     result.value = wsMsg.data
     console.log('=====', result.value)
     return
-  } else if (wsMsg.category != '') { // update status
+  } else if (wsMsg.category + '' !== '') { // update status
     execResult.value.progressStatus = wsMsg.category
     if (wsMsg.category === 'in_progress') {
       result.value = {}

@@ -157,6 +157,8 @@ import {getToken} from "@/utils/localToken";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import settings from "@/config/settings";
 import { setServeUrl } from "@/utils/url";
+import {loadProjectEnvVars} from "@/utils/cache";
+import {StateType as ProjectStateType} from "@/store/project";
 
 const usedBy = UsedBy.CaseDebug
 provide('usedBy', usedBy)
@@ -174,8 +176,9 @@ const props = defineProps({
   },
 });
 
-const store = useStore<{ User: UserStateType, Debug: Debug, Endpoint: EndpointStateType }>();
+const store = useStore<{ User: UserStateType, ProjectGlobal: ProjectStateType, Debug: Debug, Endpoint: EndpointStateType }>();
 const currUser = computed(() => store.state.User.currentUser);
+const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const alternativeCases = computed<any>(() => store.state.Endpoint.alternativeCases);
 const endpointCase = computed<any>(() => store.state.Endpoint.caseDetail);
 const debugData = computed<any>(() => store.state.Debug.debugData);
@@ -430,7 +433,8 @@ const send = async () => {
     userId: currUser.value.id,
     serverUrl: setServeUrl(process.env.VUE_APP_API_SERVER),
     token: await getToken(),
-    data: data
+    data: data,
+    localVarsCache: await loadProjectEnvVars(currProject.value.id),
   }
   await store.dispatch('Debug/call', callData).finally(()=>{
     baseCaseSending.value = false;
