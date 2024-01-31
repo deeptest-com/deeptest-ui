@@ -155,7 +155,7 @@
   </a-popover>
   <a-tooltip>
     <template #title>
-      <span>{{`编辑组件 ${props?.value?.ref}`}}</span>
+      <span>{{props?.value?.ref}}</span>
     </template>
     <span class="viewComponent" style="margin-left:4px">
       <LinkOutlined v-if="props?.value?.ref"/>
