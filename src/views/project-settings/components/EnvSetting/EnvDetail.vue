@@ -112,7 +112,7 @@
     </a-form>
     <a-modal v-model:visible="addServiceModalVisible" title="关联服务" @ok="handleAddServiceOk">
         <a-form-item class="select-service" :labelCol="{ span: 6 }" :wrapperCol="{ span: 16 }" label="请选择服务">
-            <Select :value="selectedService" :options="serviceOptions" :showSearch="true" :filterOptions="filterOptions" placeholder="请选择服务" style="width: 200px" @change="handleSelect" />
+            <Select v-if="addServiceModalVisible" v-model:value="selectedService" :options="serviceOptions" :showSearch="true" :filterOptions="filterOptions" placeholder="请选择服务" style="width: 200px" @change="handleSelect" />
         </a-form-item>
 
     </a-modal>
@@ -154,6 +154,7 @@ const rules = {
 
 // 添加服务弹窗操作
 async function addService() {
+    selectedService.value = [];
     addServiceModalVisible.value = true;
 }
 
