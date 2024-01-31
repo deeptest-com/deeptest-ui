@@ -14,7 +14,7 @@
       <a-form-item label="分类名称" name="title">
         <a-input placeholder="请输入分类名称" v-model:value="formState.title"/>
       </a-form-item>
-      <a-form-item label="父分类" name="targetId">
+      <a-form-item v-if="modalType === 'create'" label="父分类" name="targetId">
         <a-tree-select
           @change="selectedCategory"
           :value="formState.targetId"
