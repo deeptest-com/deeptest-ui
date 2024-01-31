@@ -186,7 +186,7 @@ const CategoryTree = defineComponent({
     const scrollToSelectedNode = () => {
       const treeInstance: any = TreeNode.value;
       if (treeInstance && selectedKeys.value.length > 0) {
-        treeInstance.scrollTo({ key: selectedKeys.value[0], align: 'top' })
+        treeInstance.scrollTo({ key:  expandedKeys.value.length > 0 ? expandedKeys.value[0] : selectedKeys.value[0], align: 'top' })
       } 
     };
 
