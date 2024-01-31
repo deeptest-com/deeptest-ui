@@ -8,7 +8,6 @@
 import {computed, inject} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import {CopyOutlined} from '@ant-design/icons-vue';
 import {UsedBy} from "@/utils/enum";
 import ParamGrid from "../../comp/param-grid.vue";
 const usedBy = inject('usedBy') as UsedBy

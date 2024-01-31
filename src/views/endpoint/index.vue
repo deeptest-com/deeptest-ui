@@ -128,7 +128,7 @@
                     </div>
                   </template>
                   <template #action="{record}">
-                    <DropdownActionMenu :dropdownList="MenuList" :record="record"/>
+                    <DropdownActionMenu :dropdownList="getMenuItems(record)" :record="record"/>
                   </template>
                 </a-table>
               </template>
@@ -207,7 +207,7 @@ import TooltipCell from '@/components/Table/tooltipCell.vue';
 import {DropdownActionMenu} from '@/components/DropDownMenu/index';
 
 import {getMethodColor} from '@/utils/interface';
-import {notifyError, notifySuccess} from "@/utils/notify";
+import {notifyError, notifySuccess, notifyWarn} from "@/utils/notify";
 import {equalObjectByLodash} from "@/utils/object";
 import useSharePage from '@/hooks/share';
 import Swal from "sweetalert2";
@@ -216,7 +216,8 @@ import settings from "@/config/settings";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import Diff from "./components/Drawer/Define/Diff/index.vue";
 import { SchemaTree, SchemaContent } from '../component/Schema';
-import {ChangedStatus,SourceType} from "@/utils/enum";
+import {ChangedStatus,SourceType, UsedBy} from "@/utils/enum";
+import {loadCurl} from "@/views/component/debug/service";
 import {useWujie} from "@/composables/useWujie";
 import usePermission from '@/composables/usePermission';
 
@@ -225,6 +226,7 @@ const {share} = useSharePage();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project, Schema }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
+const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 
 const list = computed<Endpoint[]>(() => store.state.Endpoint.listResult.list);
 let pagination = computed<PaginationConfig>(() => store.state.Endpoint.listResult.pagination);
@@ -250,7 +252,7 @@ const columns = [
     title: '接口名称',
     dataIndex: 'title',
     slots: {customRender: 'colTitle'},
-    width: 300,
+    width: 250,
   },
   {
     title: '接口路径',
@@ -263,7 +265,7 @@ const columns = [
     title: '标签',
     dataIndex: 'tags',
     slots: {customRender: 'colTags'},
-    width: 150,
+    width: 200,
   },
   {
     title: '所属服务',
@@ -333,32 +335,71 @@ const BulkMenuList = computed(() => [
   },
 ]);
 
-const MenuList = [
-  {
-    auth: '',
-    label: '克隆',
-    action: (record: any) => clone(record)
-  },
-  {
-    auth: '',
-    label: '分享链接',
-    action: (record: any) => share(record, 'IM')
-  },
 
-  {
-    auth: 'p-api-endpoint-del',
-    label: '删除',
-    show: (record) => {
-      return hasPermission('p-api-endpoint-del') || isCreator(record.createUser);
+const getMenuItems = (record) => {
+  const items = [
+    {
+      auth: '',
+      label: '克隆',
+      action: (record: any) => clone(record)
     },
-    action: (record: any) => del(record)
-  },
-  {
-    auth: '',
-    label: '过期',
-    action: (record: any) => disabled(record)
-  },
-];
+    {
+      auth: '',
+      label: '分享链接',
+      action: (record: any) => share(record, 'IM')
+    },
+
+    {
+      auth: 'p-api-endpoint-del',
+      label: '删除',
+      show: (record) => {
+        return hasPermission('p-api-endpoint-del') || isCreator(record.createUser);
+      },
+      action: (record: any) => del(record)
+    },
+    {
+      auth: '',
+      label: '过期',
+      action: (record: any) => disabled(record)
+    },
+  ]
+
+  let copyCurlItem = {} as any
+
+  if (!record.methods || record.methods.length === 0) {
+    return items
+  }
+
+  if (record.methods.length === 1) {
+    const method = record.methods[0]
+    copyCurlItem = {
+      key: 'copyCurl',
+      auth: '',
+      label: `复制为cURL`,
+      action: (record: any) => copyCurl(record, method)
+    }
+  } else {
+    copyCurlItem = {
+      key: 'copyCurl',
+      auth: '',
+      label: `复制为cURL`,
+      children: []
+    }
+
+    record.methods.forEach(method => {
+      copyCurlItem.children.push({
+        key: 'copyCurlChild-' + method,
+        auth: '',
+        label: method,
+        action: (record: any) => copyCurl(record, method)
+      })
+    })
+  }
+
+  items.splice(2, 0, copyCurlItem);
+
+  return items
+}
 
 const selectedRowKeys = ref<Key[]>([]);
 
@@ -396,7 +437,7 @@ function goDocs() {
   window.open(`${window.location.origin}/${viewURL}`, '_blank');
 }
 
-const showPublishDocsModal: boolean = ref(false)
+const showPublishDocsModal = ref(false)
 
 // 发布文档版本
 async function publishDocs() {
@@ -479,6 +520,27 @@ async function clone(record: any) {
   const res = await store.dispatch('Endpoint/copy', record);
   fetching.value = false
   notifySuccess('复制成功');
+}
+
+async function copyCurl(record: any, method: string) {
+  // console.log('copyCurl', record, method)
+
+  const clipboard = navigator.clipboard;
+  if (!clipboard) {
+    notifyWarn('您的浏览器不支持复制内容到剪贴板。');
+    return
+  }
+
+  const resp = await loadCurl({
+    endpointId: record.id,
+    interfaceMethod: method,
+    usedBy: UsedBy.InterfaceDebug,
+    environmentId: environmentId.value,
+  })
+  if (resp.code == 0) {
+    navigator.clipboard.writeText(resp.data)
+    notifySuccess('已复制cURL命令到剪贴板。');
+  }
 }
 
 async function disabled(record: any) {
@@ -883,14 +945,18 @@ watch(() => {
   box-sizing: border-box;
   overflow: hidden;
 
+  .ant-btn {
+    margin-right: 16px;
+  }
+
   .top-action-left {
     min-width: 220px;
     display: flex;
     align-items: center;
+  }
 
-    :deep(.action-new) {
-      margin-right: 8px;
-    }
+  :deep(.action-new) {
+    margin-right: 8px;
   }
 }
 

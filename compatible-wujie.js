@@ -1,4 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('node:fs');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('node:path');
 
 const domPath = path.resolve('./', './node_modules/monaco-editor/esm/vs/base/browser/dom.js');

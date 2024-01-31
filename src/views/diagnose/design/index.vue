@@ -98,6 +98,7 @@ watch((interfaceData), async (newVal) => {
   }
 
   loadDebugData()
+
   activeTabKey.value = ''+interfaceData.value.id
 }, { immediate: true, deep: true })
 

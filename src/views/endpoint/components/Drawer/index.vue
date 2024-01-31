@@ -8,18 +8,23 @@
         :show-action="true"
         :detail-link="detailLink"
         :share-link="detailLink"
+        :show-copy-curl="showCopyCurl"
+        :copy-curl="copyCurl"
         :show-detail="true"
         :show-share="true"
         @update-title="updateTitle" >
         <template #custom>
           <div class="diff-tag" v-if="endpointDetail.changedStatus > ChangedStatus.NoChanged" >
-          <a-tag :color="endpointDetail.changedStatus == ChangedStatus.Changed?'warning':''">
-            <template #icon>
-              <WarningFilled v-if="endpointDetail.changedStatus == ChangedStatus.Changed"  @click="showDiff(endpointDetail.id)" :style="{color: '#fb8b06'}" />
-              <InfoCircleOutlined  v-if="endpointDetail.changedStatus == ChangedStatus.IgnoreChanged"  @click="showDiff(endpointDetail.id)" :style="{color: '#c6c6c6'}" />
-          </template>
-          {{endpointDetail.changedStatus == ChangedStatus.Changed?'待处理':'已处理'}}，{{endpointDetail.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a style="color:#427EE6;" @click="showDiff(endpointDetail.id)">查看详情</a></a-tag>
-        </div>
+            <a-tag :color="endpointDetail.changedStatus == ChangedStatus.Changed?'warning':''">
+              <template #icon>
+                <WarningFilled v-if="endpointDetail.changedStatus == ChangedStatus.Changed"  @click="showDiff(endpointDetail.id)" :style="{color: '#fb8b06'}" />
+
+                <InfoCircleOutlined  v-if="endpointDetail.changedStatus == ChangedStatus.IgnoreChanged"  @click="showDiff(endpointDetail.id)" :style="{color: '#c6c6c6'}" />
+              </template>
+
+              {{endpointDetail.changedStatus == ChangedStatus.Changed?'待处理':'已处理'}}，{{endpointDetail.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a style="color:#427EE6;" @click="showDiff(endpointDetail.id)">查看详情</a>
+            </a-tag>
+          </div>
        </template>
       </DetailHeader>
     </template>
@@ -98,8 +103,8 @@ import EndpointMock from './Mock/index.vue';
 import Docs from '@/components/Docs/index.vue';
 import DrawerLayout from "@/views/component/DrawerLayout/index.vue";
 import {Endpoint} from "@/views/endpoint/data";
-import {notifySuccess} from "@/utils/notify";
-import {DetailHeader, DetailTabHeader} from '@/views/component/DetailLayout';
+import {notifySuccess, notifyWarn} from "@/utils/notify";
+import {DetailHeader, DetailTabHeader} from '@/views/component/DetailLayout/index.ts';
 import {EndpointTabsList} from '@/config/constant';
 import cloneDeep from "lodash/cloneDeep";
 import bus from "@/utils/eventBus";
@@ -107,12 +112,18 @@ import settings from "@/config/settings";
 import {useWujie} from "@/composables/useWujie";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import {WarningFilled,InfoCircleOutlined } from '@ant-design/icons-vue';
-import {ChangedStatus,SourceType} from "@/utils/enum";
+import {ChangedStatus, SourceType, UsedBy} from "@/utils/enum";
+import {loadCurl} from "@/views/component/debug/service";
+import {doCopyCurl} from "@/services/curl";
 
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal, Global,Debug }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const isDefineChange: any = computed<Endpoint>(() => store.state.Endpoint.isDefineChange);
+
+const selectedMethodDetail = computed<any>(() => store.state.Endpoint.selectedMethodDetail);
 const debugData: any = computed<Endpoint>(() => store.state.Debug.debugData);
+const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
+
 const props = defineProps({
   visible: {
     required: true,
@@ -329,6 +340,14 @@ const detailLink = computed(() => {
   }
   return `${window.location.origin}/${projectNameAbbr}/IM/${endpointDetail.value?.serialNumber}`;
 })
+
+const showCopyCurl = computed(() => {
+  return true // activeTabKey.value === 'request' && endpointDetail.value?.id
+})
+const copyCurl = async () => {
+  console.log('copyCurl', selectedMethodDetail.value, debugData.value)
+  doCopyCurl(selectedMethodDetail.value, debugData.value, environmentId.value)
+}
 
 provide('notScrollIntoView', true);
 

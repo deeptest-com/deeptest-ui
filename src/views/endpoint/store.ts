@@ -936,12 +936,14 @@ const StoreModel: ModuleType = {
             }
         },
         // 用于新建接口时选择接口分类
-        async updateEndpointDetail({commit, dispatch}, payload: any) {
+        async updateEndpointDetail({commit, dispatch,state}, payload: any) {
             try {
                 const res = await saveEndpoint({
                     ...payload
                 });
                 await dispatch("getEndpointDetail", {id: payload.id})
+                const selectedMethodDetail =  state.endpointDetail.interfaces.find(arrItem => arrItem.method == state.selectedMethodDetail.method )
+                selectedMethodDetail && commit('setSelectedMethodDetail', selectedMethodDetail);
                 await dispatch('loadList', {projectId: payload.projectId});
             }catch (e){
                 console.log(e)
