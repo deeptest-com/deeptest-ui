@@ -440,7 +440,7 @@ watch(() => {
 
   // 打开时，初始化数据
   if (visible.value) {
-    await getRefsList();
+    getRefsList();
   }
 
   let {type, types} = props.value || {};
