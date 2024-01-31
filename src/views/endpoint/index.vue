@@ -7,7 +7,7 @@
           <SchemaTree ref="schema" @select="showSchema" />
         </template>
         <template #right>
-          <div v-if="!openSchemaTab" style="min-width: 1080px;overflow-x:scroll ">
+          <div v-if="!openSchemaTab" style="min-width: 1080px">
             <div class="top-action">
               <div class="top-action-left">
                 <PermissionButton

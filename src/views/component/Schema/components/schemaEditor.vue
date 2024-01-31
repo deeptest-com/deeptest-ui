@@ -208,6 +208,8 @@ watch(() => {
 
   .schema-editor-content {
     flex: 1;
+    overflow-y: scroll;
+    scrollbar-width: none;
   }
 }
 .schema-header {

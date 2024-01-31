@@ -38,9 +38,9 @@
   }
 
   .ant-tree-node-content-wrapper {
-    width: calc(100% - 24px);
     display: inline-flex;
     align-items: center;
+    flex: 1;
     
 
     .ant-tree-title {
@@ -52,12 +52,13 @@
     position: relative;
     display: flex;
     .tree-title-text {
-      width: 100%;
       padding-right: 16px;
       display: inline-block;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      flex: 1;
+      width: 200px;
     }
     .more-icon {
       position: absolute;

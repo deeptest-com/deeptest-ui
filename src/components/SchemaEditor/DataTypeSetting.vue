@@ -476,7 +476,6 @@ watch(() => {
 
 .content {
   width: 480px;
-  overflow-y: scroll;
 }
 
 :deep(.ant-input-number) {
@@ -548,6 +547,7 @@ watch(() => {
   .ant-popover-inner {
     max-height: 480px;
     overflow-y: scroll;
+    scrollbar-width: none;
   }
 }
 </style>

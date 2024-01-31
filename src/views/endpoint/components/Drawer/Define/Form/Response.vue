@@ -370,6 +370,7 @@ function handleResHeaderChange(data) {
     max-width: 700px;
     overflow-x: scroll;
     overflow-y: hidden;
+    scrollbar-width: none;
   }
 
   .select-code-options {
