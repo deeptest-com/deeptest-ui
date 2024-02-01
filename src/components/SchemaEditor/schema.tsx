@@ -137,6 +137,7 @@ export default defineComponent({
             keys.forEach((item) => {
                 newObj[item] = parent.properties[item] || parent.properties[oldKey];
             })
+            console.error(newObj);
             parent.properties = {...newObj};
             data.value = addExtraViewInfo(data.value);
         }
@@ -404,6 +405,7 @@ export default defineComponent({
             return <>
                 <span class={'baseInfoKey'}
                       contenteditable={!isRefChildNode}
+                      key={`${keyIndex}_${keyName}`}
                       onPaste={pasteKeyName}
                       onKeydown={keyNameKeyDown.bind(this, keyName, keyIndex, items)}
                       onBlur={updateKeyName.bind(this, keyName, keyIndex, items)}>
