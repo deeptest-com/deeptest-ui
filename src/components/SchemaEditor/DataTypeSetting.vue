@@ -111,7 +111,6 @@
                       placeholder="Select Components"
                       :getPopupContainer="(triggerNode) => getPopupContainer(triggerNode)"
                       :filter-option="false"
-                      @popupScroll="popupScroll"
                       style="width: 100%"/>
                 </a-form-item>
               </a-form>
@@ -129,7 +128,6 @@
                       }"
                       show-search
                       allowClear
-                      @search="searchRefs"
                       :value="tab.value || null"
                       :getPopupContainer="(triggerNode) => getPopupContainer(triggerNode)"
                       placeholder="Select an option below to combine your schemas"
@@ -376,33 +374,14 @@ function getValueFromTabsList(tabsList: any) {
 
 const store = useStore<{ Endpoint, ServeGlobal: ServeStateType }>();
 const refsOptions: any = ref([]);
-const searchValue = ref('');
-const searchPage = ref(1);
 
 const searchRefs = debounce(async (keyword) => {
-  searchValue.value = keyword;
-  getRefsList();
-}, 300);
-
-const getRefsList = async () => {
-  const { page, result }: any = await store.dispatch('Endpoint/getAllRefs', {
-    name: searchValue.value,
-    page: searchPage.value,
+  const { result }: any = await store.dispatch('Endpoint/getAllRefs', {
+    name: keyword,
+    page: 1,
   });
-  if ((result || []).length === 0) {
-    searchPage.value = page - 1;
-  }
-  refsOptions.value = refsOptions.value.concat(result || []);
-}
-
-const popupScroll = debounce(async (evt) => {
-  const { scrollTop, clientHeight, scrollHeight } = evt.target;
-  if (scrollTop + clientHeight + 100 > scrollHeight) {
-    searchPage.value ++;
-    getRefsList();
-  }
+  refsOptions.value = result || [];
 }, 300);
-
 
 // const {isWujieEnv} = useWujie();
 const {projectName,parentOrigin,isWujieEnv,isInLeyanWujieContainer} = useWujie();
@@ -440,7 +419,7 @@ watch(() => {
 
   // 打开时，初始化数据
   if (visible.value) {
-    getRefsList();
+    searchRefs('');
   }
 
   let {type, types} = props.value || {};

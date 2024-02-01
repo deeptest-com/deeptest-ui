@@ -1063,7 +1063,8 @@ const StoreModel: ModuleType = {
             try {
                 const res = await getSchemaList({
                     ...payload,
-                    "pageSize": 60,
+                    page: 1,
+                    pageSize: 200,
                     projectId: rootState.ProjectGlobal.currProject.id,
                 });
                 if (res.code === 0) {
