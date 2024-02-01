@@ -70,9 +70,17 @@
           同步
           <a-tooltip>
             <template #title><span>从源{{syncSourceMapToText[debugData.processorInterfaceSrc]}}中同步数据到当前场景步骤，包括请求参数、前后置处理器和断言</span></template>
-          <QuestionCircleOutlined />
-        </a-tooltip>
+            <QuestionCircleOutlined />
+          </a-tooltip>
         </a-button>
+      </div>
+
+      <div v-if="isShowCopyCurl" class="copy-as">
+        <a-tooltip>
+          <template #title>复制为cURL</template>
+          <icon-svg type="copy-as" class="dp-link-black"
+                    @click="copyCurl" />
+        </a-tooltip>
       </div>
     </div>
 
@@ -93,7 +101,7 @@ import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import IconSvg from "@/components/IconSvg";
 import {Methods, ProcessorInterfaceSrc, UsedBy} from "@/utils/enum";
-import {prepareDataForRequest} from "@/views/component/debug/service";
+import {loadCurl, prepareDataForRequest} from "@/views/component/debug/service";
 import {NotificationKeyCommon} from "@/utils/const"
 
 import {StateType as GlobalStateType} from "@/store/global";
@@ -109,7 +117,7 @@ import settings from "@/config/settings";
 import EnvSelector from "./config/EnvSelector.vue";
 import {handlePathLinkParams} from "@/utils/dom";
 import {syncSourceMapToText} from "@/views/scenario/components/Design/config"
-import {notifyWarn} from "@/utils/notify";
+import {notifySuccess, notifyWarn} from "@/utils/notify";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import {getUuid} from "@/utils/string";
 import { setServeUrl } from "@/utils/url";
@@ -125,6 +133,7 @@ const currUser = computed(() => store.state.User.currentUser);
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currServe = computed(() => store.state.Debug.currServe);
 const debugData = computed<any>(() => store.state.Debug.debugData);
+const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 
@@ -187,6 +196,11 @@ const isShowSync = computed(() => {
   const ret = usedBy === UsedBy.ScenarioDebug && (
       debugData.value.processorInterfaceSrc !== ProcessorInterfaceSrc.Custom  &&
       debugData.value.processorInterfaceSrc !== ProcessorInterfaceSrc.Curl)
+
+  return ret
+})
+const isShowCopyCurl = computed(() => {
+  const ret = usedBy === UsedBy.DiagnoseDebug || usedBy === UsedBy.InterfaceDebug || usedBy === UsedBy.CaseDebug
 
   return ret
 })
@@ -323,6 +337,28 @@ function validatePath() {
   return isMatch
 }
 
+async function copyCurl() {
+  console.log('copyCurl', debugInfo.value)
+  const clipboard = navigator.clipboard;
+  if (!clipboard) {
+    notifyWarn('您的浏览器不支持复制内容到剪贴板。');
+    return
+  }
+
+  const resp = await loadCurl({
+    debugInterfaceId: debugInfo.value.debugInterfaceId,
+    endpointInterfaceId: debugInfo.value.endpointInterfaceId,
+    caseId: debugInfo.value.caseInterfaceId,
+    diagnoseId: debugInfo.value.diagnoseInterfaceId,
+    usedBy: debugInfo.value.usedBy,
+    environmentId: environmentId.value,
+  })
+  if (resp.code == 0) {
+    navigator.clipboard.writeText(resp.data)
+    notifySuccess('已复制cURL命令到剪贴板。');
+  }
+}
+
 onMounted(() => {
   // 离开前保存数据
   bus.on(settings.eventLeaveDebugSaveData, save);
@@ -384,6 +420,12 @@ onUnmounted(() => {
       width: 80px;
     }
 
+    .copy-as {
+      margin: 0 8px;
+      line-height: 32px;
+      font-size: 18px;
+      width: 20px;
+    }
   }
 }
 

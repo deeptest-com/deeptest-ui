@@ -2,10 +2,9 @@
 import {
   ArrowUpOutlined,
   ArrowDownOutlined,
-  CopyOutlined,
 } from '@ant-design/icons-vue';
 import {computed, defineProps, defineEmits} from "vue";
-
+import IconSvg from "@/components/IconSvg";
 
 const props = defineProps<{
   isFirst: boolean ,
@@ -56,7 +55,7 @@ const disableCopy = computed(() => {
   <a-tooltip placement="topLeft" :title="disableCopy ? null :  '复制'" arrow-point-at-center>
     <a-button :size="'small'" :disabled="disableCopy" type="text" @click="emit('copy')">
       <template #icon>
-        <CopyOutlined/>
+        <IconSvg type="clone" />
       </template>
     </a-button>
   </a-tooltip>
