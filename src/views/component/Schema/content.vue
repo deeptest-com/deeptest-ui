@@ -41,7 +41,11 @@ const onEdit = (targetKey: string | MouseEvent, action: string) => {
   store.dispatch('Schema/removeActiveSchema', targetKey);
 };
 
-const changeTab = (evt) => {
+const changeTab = async (evt) => {
+  await store.commit('Schema/setActiveSchema', {
+    ...activeSchema.value,
+    autoFocus: false,
+  });
   const curr = tabs.value.find(e => e.key === evt);
   store.dispatch('Schema/querySchema', { id: curr.entityId });
   store.commit('Schema/setSchemas', tabs.value.map(e => ({ ...e, autoFocus: false })));
