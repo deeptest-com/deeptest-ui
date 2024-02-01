@@ -137,7 +137,6 @@ export default defineComponent({
             keys.forEach((item) => {
                 newObj[item] = parent.properties[item] || parent.properties[oldKey];
             })
-            console.error(newObj);
             parent.properties = {...newObj};
             data.value = addExtraViewInfo(data.value);
         }
