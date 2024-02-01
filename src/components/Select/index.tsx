@@ -74,7 +74,7 @@ export default defineComponent({
         }
         
         function canClose(e :any) {
-          debugger
+          //debugger
         //  const indexlayout = document.getElementById('indexlayout');
        //   if (indexlayout != null && indexlayout.contains(e.target)) {
        //     visible.value = false

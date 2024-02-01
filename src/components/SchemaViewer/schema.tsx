@@ -30,7 +30,7 @@ export default defineComponent({
                 if (!tree.content) {
                     const result: any = (props.components || []).find((item: any) => item.id === tree.refId);
                     // 处理引用组件的信息
-                    debugger
+                    //debugger
                     handleRefInfo(tree, result);
                     data.value = addExtraViewInfo(data.value);
                     tree.extraViewInfo.isExpand = true;
