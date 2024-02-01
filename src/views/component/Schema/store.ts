@@ -97,7 +97,7 @@ const StoreModel: ModuleType = {
       try {
         const { code, data, msg } = await updateCategory(payload);
         if (code === 0) {
-          dispatch('loadCategory');
+          await dispatch('loadCategory');
           // commit('setSchemaCategory', data);
           return Promise.resolve();
         }
@@ -110,7 +110,7 @@ const StoreModel: ModuleType = {
       try {
         const { code, data, msg } = await moveCategory(payload);
         if (code === 0) {
-          dispatch('loadCategory');
+          await dispatch('loadCategory');
           // commit('setSchemaCategory', data);
           return Promise.resolve();
         }
@@ -123,7 +123,7 @@ const StoreModel: ModuleType = {
       try {
         const { code, data, msg } = await removeCategory(payload.id, payload.type);
         if (code === 0) {
-          dispatch('loadCategory');
+          await dispatch('loadCategory');
           // commit('setSchemaCategory', data);
           return Promise.resolve();
         }
@@ -151,8 +151,7 @@ const StoreModel: ModuleType = {
       try {
         const { code, data, msg } = await copyCategory(id);
         if (code === 0) {
-          dispatch('loadCategory');
-          // commit('setSchemaCategory', data);
+          await dispatch('loadCategory');
           return Promise.resolve(data);
         }
         return Promise.reject(msg);
@@ -164,7 +163,7 @@ const StoreModel: ModuleType = {
       try {
         const { code, data, msg } = await deleteSchema(payload.id);
         if (code === 0) {
-          dispatch('loadCategory');
+          await dispatch('loadCategory');
           // commit('setSchemaCategory', data);
           return Promise.resolve();
         }
