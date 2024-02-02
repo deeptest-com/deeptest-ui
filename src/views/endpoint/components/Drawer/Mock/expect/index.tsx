@@ -1,7 +1,8 @@
 import { createVNode, ref } from "vue";
 import { Modal } from "ant-design-vue";
-import { CopyOutlined, DeleteOutlined, ExclamationCircleOutlined, HolderOutlined } from "@ant-design/icons-vue";
+import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons-vue";
 import store from '@/config/store';
+import IconSvg from "@/components/IconSvg";
 
 import TooltipCell from "@/components/Table/tooltipCell.vue";
 import { momentUtc } from "@/utils/datetime";
@@ -106,7 +107,7 @@ export const exceptColumns = [
         <div class="except-action">
           <a-tooltip placement="top" title="克隆">
             <span class="except-action-item" onClick={() => handleClone(record)}>
-              <CopyOutlined />
+              <IconSvg type="clone" />
             </span>
           </a-tooltip>
           <a-tooltip placement="top" title="删除">

@@ -5,9 +5,14 @@
         :serial-number="imDetail?.serialNumber || ''"
         :name="imDetail?.title || ''"
         @update-title="updateTitle"
-        :show-action="false"
+        :show-action="true"
+        :showCopyCurl="true"
+        :copy-curl="copyCurl"
+        :show-full-screen="false"
+        :share-link="detailLink"
       />
     </template>
+
     <template #basicInfo>
       <EndpointBasicInfo
         @changeStatus="changeStatus"
@@ -71,19 +76,28 @@ import EndpointCases from '../Drawer/Cases/index.vue';
 import EndpointMock from '../Drawer/Mock/index.vue';
 import IconSvg from "@/components/IconSvg";
 import Docs from '@/components/Docs/index.vue';
-import { DetailHeader, DetailLayout, DetailTabHeader } from '@/views/component/DetailLayout';
+import { DetailHeader, DetailLayout, DetailTabHeader } from '@/views/component/DetailLayout/index.ts';
 import { EndpointTabsList } from '@/config/constant';
-import { notifySuccess } from '@/utils/notify';
+import {notifySuccess, notifyWarn} from '@/utils/notify';
 import {StateType as ServeStateType} from "@/store/serve";
 import {equalObjectByLodash} from "@/utils/object";
 import Swal from "sweetalert2";
 import settings from "@/config/settings";
 import bus from "@/utils/eventBus";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
+import {loadCurl} from "@/views/component/debug/service";
+import {UsedBy} from "@/utils/enum";
+import {doCopyCurl} from "@/services/curl";
+import useClipboard from "@/composables/useClipboard";
+import {useWujie} from "@/composables/useWujie";
 const router = useRouter();
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal: ServeStateType, Global ,Debug}>();
 const imDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const globalActiveTab = computed(()=>store.state.Endpoint.globalActiveTab);
+
+const selectedMethodDetail = computed<any>(() => store.state.Endpoint.selectedMethodDetail);
+const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
+const selectedMethod =  computed<any>(() => store.state.Endpoint.selectedMethod);
 
 /**
  * 页面渲染时
@@ -411,6 +425,28 @@ onBeforeRouteLeave(async (to, from,next) => {
   }
 })
 
+const copyCurl = async () => {
+  console.log('copyCurl', selectedMethodDetail.value, debugData.value)
+  doCopyCurl(selectedMethodDetail.value, debugData.value, environmentId.value)
+}
+
+// for share link
+const {projectName,parentOrigin,isWujieEnv,isInLeyanWujieContainer} = useWujie();
+const detailLink = computed(() => {
+  const {params: {projectNameAbbr = ''}} = router.currentRoute.value;
+  // 无界环境，使用父级域名跳转
+  if(isInLeyanWujieContainer){
+    return `${parentOrigin}/lyapi/${projectName}/IM/${endpointDetail.value?.serialNumber}`;
+  }
+  return `${window.location.origin}/${projectNameAbbr}/IM/${endpointDetail.value?.serialNumber}`;
+})
+const { copy } = useClipboard({legacy: true});
+const shareLink = (url: string) => {
+  copy(url);
+  notifySuccess('复制成功，项目成员可通过此链接访问');
+}
+provide('shareLink', shareLink);
+
 // 离开页面时，重置数据
 onUnmounted(() => {
   clearDefineChange();
@@ -436,6 +472,7 @@ onUnmounted(() => {
 }, {
   deep: true
 });
+
 </script>
 <style lang="less" scoped>
 .tab-pane {

@@ -14,7 +14,6 @@
           </template>
         </a-select>
       </div>
-
       <div id="env-selector">
         <EnvSelector :show="showBaseUrl()"
                      :serveId="debugData.serveId"
@@ -78,6 +77,14 @@
         </a-tooltip>
         </a-button>
       </div>
+
+      <div v-if="isShowCopyCurl" class="copy-as">
+        <a-tooltip>
+          <template #title>复制为cURL</template>
+          <icon-svg type="copy-as" class="dp-link-black"
+                    @click="copyCurl" />
+        </a-tooltip>
+      </div>
     </div>
 
     <ContextMenu
@@ -90,13 +97,15 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, inject, onMounted, onUnmounted, PropType, ref, watch} from "vue";
+import {computed, defineProps, inject, onMounted, onUnmounted, PropType, ref, watch, Teleport} from "vue";
+import {notification} from 'ant-design-vue';
 import {QuestionCircleOutlined} from '@ant-design/icons-vue';
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import IconSvg from "@/components/IconSvg";
 import {Methods, ProcessorInterfaceSrc, UsedBy} from "@/utils/enum";
-import {prepareDataForRequest, showBaseUrlOrNot} from "@/views/component/debug/service";
+import {prepareDataForRequest, loadCurl, showBaseUrlOrNot} from "@/views/component/debug/service";
+import {NotificationKeyCommon} from "@/utils/const"
 
 import {StateType as GlobalStateType} from "@/store/global";
 import {StateType as DebugStateType} from "@/views/component/debug/store";
@@ -111,7 +120,7 @@ import settings from "@/config/settings";
 import EnvSelector from "./config/EnvSelector.vue";
 import {handlePathLinkParams} from "@/utils/dom";
 import {syncSourceMapToText} from "@/views/scenario/components/Design/config"
-import {notifyWarn} from "@/utils/notify";
+import {notifySuccess, notifyWarn} from "@/utils/notify";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import {getUuid} from "@/utils/string";
 import { setServeUrl } from "@/utils/url";
@@ -127,6 +136,7 @@ const currUser = computed(() => store.state.User.currentUser);
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currServe = computed(() => store.state.Debug.currServe);
 const debugData = computed<any>(() => store.state.Debug.debugData);
+const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 
@@ -182,6 +192,12 @@ const isShowSync = computed(() => {
   const ret = usedBy === UsedBy.ScenarioDebug && (
       debugData.value.processorInterfaceSrc !== ProcessorInterfaceSrc.Custom  &&
       debugData.value.processorInterfaceSrc !== ProcessorInterfaceSrc.Curl)
+
+  return ret
+})
+
+const isShowCopyCurl = computed(() => {
+  const ret = usedBy === UsedBy.DiagnoseDebug || usedBy === UsedBy.InterfaceDebug || usedBy === UsedBy.CaseDebug
 
   return ret
 })
@@ -309,12 +325,35 @@ function pathUpdated(e) {
   store.commit('Debug/setPathParams', ret)
 }
 
+
 const isPathValid = computed(() => {return validatePath()})
 function validatePath() {
   const regx = /^https?:\/\/.+$/g;
   const isMatch = showBaseUrl() || regx.test(debugData.value?.url)
 
   return isMatch
+}
+
+async function copyCurl() {
+  console.log('copyCurl', debugInfo.value)
+  const clipboard = navigator.clipboard;
+  if (!clipboard) {
+    notifyWarn('您的浏览器不支持复制内容到剪贴板。');
+    return
+  }
+
+  const resp = await loadCurl({
+    debugInterfaceId: debugInfo.value.debugInterfaceId,
+    endpointInterfaceId: debugInfo.value.endpointInterfaceId,
+    caseId: debugInfo.value.caseInterfaceId,
+    diagnoseId: debugInfo.value.diagnoseInterfaceId,
+    usedBy: debugInfo.value.usedBy,
+    environmentId: environmentId.value,
+  })
+  if (resp.code == 0) {
+    navigator.clipboard.writeText(resp.data)
+    notifySuccess('已复制cURL命令到剪贴板。');
+  }
 }
 
 onMounted(() => {
@@ -378,6 +417,12 @@ onUnmounted(() => {
       width: 80px;
     }
 
+    .copy-as {
+      margin: 0 8px;
+      line-height: 32px;
+      font-size: 18px;
+      width: 20px;
+    }
   }
 }
 

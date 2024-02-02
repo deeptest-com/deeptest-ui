@@ -3,7 +3,7 @@ import request from '@/utils/request';
 import {requestToAgent} from '@/utils/request';
 import {DebugInfo, Interface, OAuth20} from "./data";
 import {isInArray} from "@/utils/array";
-import {ConditionCategory, ConditionSrc, ProcessorInterfaceSrc, UsedBy} from "@/utils/enum";
+import {ConditionCategory, ConditionSrc, UsedBy} from "@/utils/enum";
 import {getToken} from "@/utils/localToken";
 import {getAgentUrl} from '@/utils/agentEnv';
 const apiPath = 'debugs';
@@ -398,6 +398,14 @@ export async function saveResponseDefine(data): Promise<any> {
     return request({
         url: `/${apiResponseDefine}`,
         method:'PUT',
+        data: data,
+    });
+}
+
+export async function loadCurl(data): Promise<any> {
+    return request({
+        url: `/${apiPathInterface}/loadCurl`,
+        method: 'POST',
         data: data,
     });
 }
