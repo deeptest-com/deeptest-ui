@@ -3,7 +3,7 @@ import request from '@/utils/request';
 import {requestToAgent} from '@/utils/request';
 import {DebugInfo, Interface, OAuth20} from "./data";
 import {isInArray} from "@/utils/array";
-import {ConditionCategory, ConditionSrc, UsedBy} from "@/utils/enum";
+import {ConditionCategory, ConditionSrc, ProcessorInterfaceSrc, UsedBy} from "@/utils/enum";
 import {getToken} from "@/utils/localToken";
 import {getAgentUrl} from '@/utils/agentEnv';
 const apiPath = 'debugs';
@@ -402,3 +402,13 @@ export async function saveResponseDefine(data): Promise<any> {
     });
 }
 
+export const showBaseUrlOrNot = (debugData) => {
+    const notShow = debugData.usedBy === UsedBy.DiagnoseDebug
+        || (debugData.usedBy === UsedBy.ScenarioDebug &&
+            (debugData.processorInterfaceSrc === ProcessorInterfaceSrc.Diagnose ||
+                debugData.processorInterfaceSrc === ProcessorInterfaceSrc.Custom  ||
+                debugData.processorInterfaceSrc === ProcessorInterfaceSrc.Curl
+            ))
+
+    return !notShow
+}

@@ -14,8 +14,12 @@
           </template>
         </a-select>
       </div>
+
       <div id="env-selector">
-        <EnvSelector :show="showBaseUrl()" :serveId="debugData.serveId" @change="changeServer" :disabled="usedBy === UsedBy.ScenarioDebug" />
+        <EnvSelector :show="showBaseUrl()"
+                     :serveId="debugData.serveId"
+                     @change="changeServer"
+                     :disabled="usedBy === UsedBy.ScenarioDebug" />
       </div>
       <div v-if="showBaseUrl()" class="base-url">
         <a-input placeholder="请输入地址"
@@ -86,15 +90,13 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, inject, onMounted, onUnmounted, PropType, ref, watch, Teleport} from "vue";
-import {notification} from 'ant-design-vue';
+import {computed, defineProps, inject, onMounted, onUnmounted, PropType, ref, watch} from "vue";
 import {QuestionCircleOutlined} from '@ant-design/icons-vue';
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import IconSvg from "@/components/IconSvg";
 import {Methods, ProcessorInterfaceSrc, UsedBy} from "@/utils/enum";
-import {prepareDataForRequest} from "@/views/component/debug/service";
-import {NotificationKeyCommon} from "@/utils/const"
+import {prepareDataForRequest, showBaseUrlOrNot} from "@/views/component/debug/service";
 
 import {StateType as GlobalStateType} from "@/store/global";
 import {StateType as DebugStateType} from "@/views/component/debug/store";
@@ -173,14 +175,7 @@ const {t} = useI18n();
 const {showContextMenu, contextMenuStyle, onContextMenuShow, onMenuClick} = useVariableReplace('endpointInterfaceUrl')
 
 const showBaseUrl = () => {
-  const notShow = debugData.value.usedBy === UsedBy.DiagnoseDebug
-      || (debugData.value.usedBy === UsedBy.ScenarioDebug &&
-                (debugData.value.processorInterfaceSrc === ProcessorInterfaceSrc.Diagnose ||
-                  debugData.value.processorInterfaceSrc === ProcessorInterfaceSrc.Custom  ||
-                  debugData.value.processorInterfaceSrc === ProcessorInterfaceSrc.Curl
-                  ))
-
-  return !notShow
+  return showBaseUrlOrNot(debugData.value)
 }
 
 const isShowSync = computed(() => {
@@ -313,7 +308,6 @@ function pathUpdated(e) {
   const ret = handlePathLinkParams(path, debugData.value?.pathParams)
   store.commit('Debug/setPathParams', ret)
 }
-
 
 const isPathValid = computed(() => {return validatePath()})
 function validatePath() {
