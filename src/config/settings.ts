@@ -46,6 +46,7 @@ export interface SettingsType {
     settings: string;
     expandedKeys: string;
     selectedKey: string;
+    projectEnvVarsKey: string;
     skippedVersion: string;
     ignoreUtil: string,
 
@@ -126,6 +127,7 @@ const settings: SettingsType = {
     settings: 'settings',
     expandedKeys: 'deeptest-expandedKeys',
     selectedKey: 'deeptest-selectedKey',
+    projectEnvVarsKey: 'deeptest-projectEnvVarsKey',
     skippedVersion: 'skippedVersion',
     ignoreUtil: 'ignoreUtil',
 

@@ -1,6 +1,6 @@
 <template>
   <span class="tips-main">
-    <a-tooltip overlayClassName="dp-tip-small dp-tip-white">
+    <a-tooltip :overlayClassName="'dp-tip-small dp-tip-white ' + classes">
       <template #title>
         <div class="tips">
           <div>{{title}}</div>
@@ -25,6 +25,10 @@ const props = defineProps({
     type: String
   },
   section: {
+    required: false,
+    type: String
+  },
+  classes: {
     required: false,
     type: String
   },
