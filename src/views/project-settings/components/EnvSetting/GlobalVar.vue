@@ -126,12 +126,11 @@ async function handleSaveGlobalVars() {
     try {
         await formRef.value.validateFields();
 
-        globalVarsData.value.forEach((item, index) => {
-          console.log('setProjectEnvVar', item)
-          setProjectEnvVar(item.projectId, 0, item.name, localValueMap.value[item.name])
-        })
+        for (const item of globalVarsData.value) {
+          await setProjectEnvVar(item.projectId, 0, item.name, localValueMap.value[item.name])
+        }
 
-        await store.dispatch('ProjectSetting/saveGlobalVars');
+      await store.dispatch('ProjectSetting/saveGlobalVars');
 
     } catch (ex) {
       console.log(ex);
