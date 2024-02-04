@@ -24,7 +24,7 @@
 
                         <template #customLocalTitle>
                           私有值
-                          <Tips title="仅存放在用户本地，不会同步到服务器，也不会在项目成员之间共享，适合存放token、账号密码等敏感数据。注意：清除浏览器/文件缓存时会把变量的本地值清除。"
+                          <Tips title="仅存放在用户本地，不会同步到服务器，也不会在项目成员之间共享，适合存放token、账号密码等个人敏感数据。注意：清除浏览器缓存时会把变量的私有值清除。"
                                 classes="dp-tip-wide" />
                         </template>
                         <template #customLocalValue="{ record, index }">
