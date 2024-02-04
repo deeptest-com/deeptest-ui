@@ -203,11 +203,11 @@ function handleAddServiceOk() {
     selectedService.value = [];
 }
 
-const toAddEnvData = () => {
-  activeEnvDetail.value.vars.forEach((item, index) => {
-    console.log('999', item, index)
-    setProjectEnvVar(item.projectId, item.environmentId, item.name, localValueMap.value[item.name])
-  })
+const toAddEnvData = async () => {
+  for (const item of activeEnvDetail.value.vars) {
+    console.log('999', item)
+    await setProjectEnvVar(item.projectId, item.environmentId, item.name, localValueMap.value[item.name])
+  }
 
   addEnvData()
 }
