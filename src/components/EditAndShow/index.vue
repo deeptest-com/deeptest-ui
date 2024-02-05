@@ -153,6 +153,9 @@ watch(() => {return props.autoFocus}, (newVal) => {
     }
   }
 
+  &.text-bolder {
+    font-weight: bolder;
+  }
   &.show-on-hover {
     .edit-icon {
       display: none;

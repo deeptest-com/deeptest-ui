@@ -1,12 +1,11 @@
 <template>
   <div :class="{'schema-container': true, 'expanded': expand}" ref="schemaNode" :style="prefixStyle">
     <div class="schema-inlet" @click="expand = !expand">
-      <span class="schema-icon"> <SettingOutlined />
+      <span class="schema-icon"> <IconSvg type="model" style="font-size: 18px;"/>
       </span>
       <span class="schema-title">数据组件({{ count }})</span>
       <span class="schema-expand-icon">
-        <ArrowDownOutlined v-if="expand" />
-        <ArrowUpOutlined v-else/>
+        <IconSvg :type="expand ? 'expand' : 'collapse'" style="font-size: 20px;" />
       </span>
     </div>
     <div class="schema-content">
@@ -14,7 +13,7 @@
         <a-spin tip="loading..." :spinning="loading" />
       </div>
       <Tree 
-        v-else
+      v-else
         ref="schemaTree"
         category-type="schema" 
         :checked="false" 
@@ -37,7 +36,7 @@
         </template>
         <template #nodeIcon>
           <span class="tree-icon">
-            <SettingOutlined />
+            <IconSvg type="model" class="dp-icon-large"/>
           </span>
         </template>
       </Tree>
@@ -59,6 +58,7 @@ import { message } from 'ant-design-vue';
 import { useStore } from 'vuex';
 import _ from "lodash";
 import cloneDeep from "lodash/cloneDeep";
+import IconSvg from '@/components/IconSvg';
 import Tree from '@/components/CategoryTree/index';
 import { CreateModal } from './components';
 import { StateType as SchemaStateType } from './store';
@@ -67,8 +67,20 @@ import { confirmToDelete } from '@/utils/confirm';
 const emits = defineEmits(['select']);
 const store = useStore<{ Schema: SchemaStateType, ProjectGlobal }>();
 const treeData = computed<any>(() => {
-  return store.state.Schema.schemaTreeData?.children || [];
+  return setTitle(store.state.Schema.schemaTreeData?.children || []);
 });
+
+const setTitle = (data: any[]) => {
+  return data.map((e: any) => {
+    if (e.entityId === 0) {
+      e.name = `${e.name}(${e.count})`
+    }
+    if (e.children) {
+      e.children = setTitle(e.children);
+    }
+    return cloneDeep(e);
+  })
+};
 
 const count = computed<any>(() => {
   return store.state.Schema.schemaTreeData?.count || 0;
@@ -155,7 +167,7 @@ const showMore = (node) => {
 const createCategoryOrSchema = async (nodeProps, createType) => {
   if (createType === 'category') {
     modalType.value = 'create';
-    selectedCategory.value = nodeProps.dataRef ? { targetId: nodeProps.dataRef.id, title: '' } : { targetId: treeDataCategory.value.id, title: '' };
+    selectedCategory.value = nodeProps.dataRef ? { targetId: nodeProps.dataRef.id, title: '' } : { targetId: treeDataCategory.value?.id, title: '' };
     visible.value = true;
     return;
   } 
@@ -282,12 +294,12 @@ const rootDownMenuList = [
   {
     auth: '',
     label: '新建数据组件',
-    action: record => createCategoryOrSchema(record, 'schema')
+    action: () => createCategoryOrSchema({}, 'schema')
   },
   {
     auth: '',
     label: '新建分类',
-    action: record => createCategoryOrSchema(record, 'category')
+    action: () => createCategoryOrSchema({}, 'category')
   },
 ]
 
@@ -391,7 +403,9 @@ defineExpose({
     align-items: center;
     position: relative;
     cursor: pointer;
-    border-bottom: 1px solid #e7e7e7;
+    border: 1px solid #e7e7e7;
+    background: rgba(242, 242, 242, 1);
+    font-weight: bold;
 
     .schema-icon,.schema-expand-icon {
       display: flex;

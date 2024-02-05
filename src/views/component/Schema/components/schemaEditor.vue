@@ -4,7 +4,8 @@
       <!-- header编辑 -->
       <div class="schema-header">
         <div class="schema-header-left">
-          <EditAndShowField 
+          <EditAndShowField
+            :custom-class="'text-bolder'"
             @cancel="handleCancel"
             :auto-focus="activeSchemaTab.autoFocus" 
             :value="schemaDetail?.name || ''" 
@@ -18,7 +19,7 @@
       </div>
       <!-- 描述编辑 -->
       <div class="schema-header">
-        <div class="schema-header-left">
+        <div class="schema-header-left" style="flex: 1;margin-right: 100px;">
           <EditAndShowField 
             :custom-class="'text-gray'"
             :value="schemaDetail?.description || ''" 
