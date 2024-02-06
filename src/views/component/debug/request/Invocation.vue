@@ -15,7 +15,10 @@
         </a-select>
       </div>
       <div id="env-selector">
-        <EnvSelector :show="showBaseUrl()" :serveId="debugData.serveId" @change="changeServer" :disabled="usedBy === UsedBy.ScenarioDebug" />
+        <EnvSelector :show="showBaseUrl()"
+                     :serveId="debugData.serveId"
+                     @change="changeServer"
+                     :disabled="usedBy === UsedBy.ScenarioDebug" />
       </div>
       <div v-if="showBaseUrl()" class="base-url">
         <a-input placeholder="请输入地址"
@@ -70,8 +73,8 @@
           同步
           <a-tooltip>
             <template #title><span>从源{{syncSourceMapToText[debugData.processorInterfaceSrc]}}中同步数据到当前场景步骤，包括请求参数、前后置处理器和断言</span></template>
-            <QuestionCircleOutlined />
-          </a-tooltip>
+          <QuestionCircleOutlined />
+        </a-tooltip>
         </a-button>
       </div>
 
@@ -101,7 +104,7 @@ import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import IconSvg from "@/components/IconSvg";
 import {Methods, ProcessorInterfaceSrc, UsedBy} from "@/utils/enum";
-import {loadCurl, prepareDataForRequest} from "@/views/component/debug/service";
+import {prepareDataForRequest, loadCurl, showBaseUrlOrNot} from "@/views/component/debug/service";
 import {NotificationKeyCommon} from "@/utils/const"
 
 import {StateType as GlobalStateType} from "@/store/global";
@@ -121,13 +124,16 @@ import {notifySuccess, notifyWarn} from "@/utils/notify";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import {getUuid} from "@/utils/string";
 import { setServeUrl } from "@/utils/url";
+import {StateType as ProjectStateType} from "@/store/project";
+import {loadProjectEnvVars} from "@/utils/cache";
 const {
   isDebugChange,
   debugChangePreScript,
   debugChangePostScript,
   debugChangeCheckpoint} = useIMLeaveTip();
-const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal, User }>();
+const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, ProjectGlobal: ProjectStateType, Global: GlobalStateType, ServeGlobal, User }>();
 const currUser = computed(() => store.state.User.currentUser);
+const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currServe = computed(() => store.state.Debug.currServe);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
@@ -179,14 +185,7 @@ const {t} = useI18n();
 const {showContextMenu, contextMenuStyle, onContextMenuShow, onMenuClick} = useVariableReplace('endpointInterfaceUrl')
 
 const showBaseUrl = () => {
-  const notShow = debugData.value.usedBy === UsedBy.DiagnoseDebug
-      || (debugData.value.usedBy === UsedBy.ScenarioDebug &&
-                (debugData.value.processorInterfaceSrc === ProcessorInterfaceSrc.Diagnose ||
-                  debugData.value.processorInterfaceSrc === ProcessorInterfaceSrc.Custom  ||
-                  debugData.value.processorInterfaceSrc === ProcessorInterfaceSrc.Curl
-                  ))
-
-  return !notShow
+  return showBaseUrlOrNot(debugData.value)
 }
 
 const isShowSync = computed(() => {
@@ -196,6 +195,7 @@ const isShowSync = computed(() => {
 
   return ret
 })
+
 const isShowCopyCurl = computed(() => {
   const ret = usedBy === UsedBy.DiagnoseDebug || usedBy === UsedBy.InterfaceDebug || usedBy === UsedBy.CaseDebug
 
@@ -231,7 +231,8 @@ const send = async (e) => {
       data: {
         ...data,
         baseUrl: currServe.value.url,
-      }
+      },
+      localVarsCache: await loadProjectEnvVars(currProject.value.id)
     }
     await store.dispatch('Debug/call', callData).finally(()=>{
       store.commit("Global/setSpinning",false)

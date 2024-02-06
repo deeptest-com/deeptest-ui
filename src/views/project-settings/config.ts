@@ -8,18 +8,16 @@ const globalVarsColumns = [
         placeholder: ''
     },
     {
-        title: '远程值',
         dataIndex: 'remoteValue',
         key: 'remoteValue',
-        slots: { customRender: 'customRemoteValue' },
+        slots: {title: 'customRemoteTitle',  customRender: 'customRemoteValue' },
         type: 'input',
         placeholder: ''
     },
     {
-        title: '本地值',
         dataIndex: 'localValue',
         key: 'localValue',
-        slots: { customRender: 'customLocalValue' },
+        slots: {title: 'customLocalTitle', customRender: 'customLocalValue' },
         type: 'input',
         placeholder: ''
     },

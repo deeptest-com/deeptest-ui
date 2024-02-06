@@ -1201,16 +1201,16 @@ const StoreModel: ModuleType = {
                 commit('setCurrServe', res.data.currServer);
             }
         },
-        async getEnvVarsByEnv({ state }) {
+        async getEnvVarsByEnv({ state }, envId) {
             try {
                 if (!state.currServe.environmentId) {
                     return false;
                 }
-                const res = await getVarsByEnv(state.currServe.environmentId);
+                const res = await getVarsByEnv(envId);
                 if (res.code === 0) {
                     return res.data;
                 }
-                return false;
+                return [];
             } catch (error) {
                 return false;
             }
