@@ -11,7 +11,7 @@ import {getToken, setToken} from '@/utils/localToken';
 import {getCache} from '@/utils/localCache';
 import {getCachedServerUrl} from "@/utils/serverEnv";
 import {useWujie} from "@/composables/useWujie";
-const {xToken,isWujieEnv,user} = useWujie()
+const {xToken,tenantId,isWujieEnv,user} = useWujie()
 
 export interface ResponseData {
     code: number;
@@ -58,6 +58,12 @@ if (isWujieEnv) {
         request.defaults.headers['X-Token'] = xToken;
         requestAgent.defaults.headers['X-Token'] = xToken;
         requestStatic.defaults.headers['X-Token'] = xToken;
+    }
+
+    if (tenantId) {
+        request.defaults.headers['tenantId'] = tenantId;
+        requestAgent.defaults.headers['tenantId'] = tenantId;
+        requestStatic.defaults.headers['tenantId'] = tenantId;
     }
 
     //乐仓token
