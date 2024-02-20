@@ -321,7 +321,7 @@ function initTabsList(types: any, treeInfo: any) {
       defaultTabs[0].value = treeInfo?.type || 'string';
 
       defaultTabs[1].active = true;
-      defaultTabs[1].value = treeInfo?.ref;
+      defaultTabs[1].value = treeInfo?.ref.replace('#/components/schemas/', '');
 
       defaultTabs[2].active = false;
       defaultTabs[2].value = 'allOf';
