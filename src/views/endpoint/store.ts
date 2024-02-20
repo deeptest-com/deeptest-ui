@@ -1069,7 +1069,7 @@ const StoreModel: ModuleType = {
                 });
                 if (res.code === 0) {
                     const result = res.data.result.map((item: any) => {
-                        item.label = item.ref;
+                        item.label = item.ref.replace('#/components/schemas/', '');
                         item.value = item.id;
                         return item;
                     });
