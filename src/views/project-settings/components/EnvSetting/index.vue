@@ -71,7 +71,7 @@ import draggable from 'vuedraggable'
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { StateType as ProjectStateType } from "@/store/project";
-import { StateType as ProjectSettingStateType } from "@/views/ProjectSetting/store";
+import { StateType as ProjectSettingStateType } from "@/views/project-settings/store";
 import { EnvDataItem } from '../../data';
 import { useGlobalEnv } from '../../hooks/useGlobalEnv';
 

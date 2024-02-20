@@ -440,10 +440,11 @@ export async function getMock(): Promise<any> {
     });
 }
 
-export async function getVarsByEnv(envId: number): Promise<any> {
+export async function getVarsByEnv(envId): Promise<any> {
     return request({
-        url: `/environments/envVars/byEnv?envId=${envId}`,
-        method: 'get'
+        url: `/environments/envVars/byEnv`,
+        method: 'get',
+        params: {envId}
     })
 }
 
