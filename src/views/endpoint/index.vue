@@ -220,6 +220,7 @@ import {ChangedStatus,SourceType, UsedBy} from "@/utils/enum";
 import {loadCurl} from "@/views/component/debug/service";
 import {useWujie} from "@/composables/useWujie";
 import usePermission from '@/composables/usePermission';
+import { uniquArray } from "@/utils/array";
 
 const { hasPermission, isCreator } = usePermission();
 const {share} = useSharePage();
@@ -647,6 +648,18 @@ async function handleTableFilter(state) {
   }
 }
 
+const setActiveSchema = () => {
+  const { query }: any = router.currentRoute.value;
+  if (query.ref) {
+    const ref = JSON.parse(query.ref);
+    let activeSchema = { ...ref, key: ref.entityId };
+    store.commit('Schema/setActiveSchema', activeSchema);
+    store.commit('Schema/setSchemas', uniquArray([...store.state.Schema.schemas, activeSchema]));
+    store.dispatch('Schema/querySchema', { id: ref?.entityId });
+    openSchemaTab.value = true;
+  }
+}
+
 const filter = ref()
 
 watch(() => currProject.value.id, async (newVal, oldVal) => {
@@ -663,8 +676,9 @@ watch(() => currProject.value.id, async (newVal, oldVal) => {
     await store.dispatch('Endpoint/getEndpointTagList');
     store.commit('Endpoint/clearFilterState');
     filter.value?.resetFields()
-    store.dispatch('Schema/loadCategory');
+    await store.dispatch('Schema/loadCategory');
     await store.dispatch('Endpoint/getMockExpressions');
+    setActiveSchema();
   }
 }, {
   immediate: true

@@ -153,9 +153,9 @@
   </a-popover>
   <a-tooltip>
     <template #title>
-      <span>{{props?.value?.ref}}</span>
+      <span>{{`编辑组件 ${props?.value?.ref}`}}</span>
     </template>
-    <span class="viewComponent" style="margin-left:4px">
+    <span class="viewComponent" style="margin-left:4px" @click="goViewComponent">
       <LinkOutlined v-if="props?.value?.ref"/>
     </span>
   </a-tooltip>
@@ -175,9 +175,15 @@ import { useRouter } from "vue-router";
 import { vOnClickOutside } from '@vueuse/components'
 import {useWujie} from "@/composables/useWujie";
 import { findParentNodeByX } from '@/utils/dom';
+import { notifyError } from '@/utils/notify';
 
 const props = defineProps(['value', 'serveId','isRefChildNode', 'isRoot']);
 const emit = defineEmits(['change']);
+const store = useStore<{ Endpoint, ServeGlobal: ServeStateType, Schema }>();
+const schemaNodeTree = computed<any>(() => {
+  return store.state.Schema.schemaTreeData?.children;
+});
+const activeSchema = computed(() => store.state.Schema.activeSchema);
 const tabsList: any = ref([]);
 const visible: any = ref(false);
 const router = useRouter();
@@ -370,9 +376,6 @@ function getValueFromTabsList(tabsList: any) {
   })
   return result;
 }
-
-
-const store = useStore<{ Endpoint, ServeGlobal: ServeStateType }>();
 const refsOptions: any = ref([]);
 
 const searchRefs = debounce(async (keyword) => {
@@ -393,24 +396,53 @@ const {projectName,parentOrigin,isWujieEnv,isInLeyanWujieContainer} = useWujie()
 //   }
 //   return `${window.location.origin}/${projectNameAbbr}/IM/${endpointDetail.value?.serialNumber}`;
 // })
+
+const findNodeByRefId = (entityId: number, schemaNodes: any[]) => {
+  for (let i = 0; i < schemaNodes.length; i ++ ) {
+    if (schemaNodes[i].entityId === entityId) {
+      return schemaNodes[i];
+    } else if (Array.isArray(schemaNodes[i].children) && schemaNodes[i].children.length > 0){
+      return findNodeByRefId(entityId, schemaNodes[i].children);
+    }
+  }
+};
+
+const uniquArrray = (data) => {
+  const obj = {};
+  const _data = cloneDeep(data);
+  _data.forEach((e, index) => {
+    if (!obj[e.entityId]) {
+      obj[e.entityId] = e;
+    } else {
+      _data.splice(index, 1)
+    }
+  })
+  return _data;
+};
+
 /**
- * 查看组件
+ * 查看组件. 以下处理为临时方案
  * */
 function goViewComponent() {
-  
-  console.log('goViewComponent', props.value);
-  const {type, ref} = props.value;
-  const refStr = encodeURIComponent(ref);
-  // 无界环境，使用父级域名跳转
-  if(isInLeyanWujieContainer){
-    const url = `${parentOrigin}/lyapi/${projectName}/settings?activeKey=service&sectab=service-component&serveId=${props.serveId}&refId=${refStr}`;
-    window.open(url, '_blank');
+  const { refId } = props.value;
+  // 找出schema对应的节点信息
+  const schemaNode = findNodeByRefId(refId, schemaNodeTree.value);
+  if (!schemaNode) {
+    notifyError('引用的数据组件不存在/已删除');
     return;
   }
-  const url = `${window.location.origin}/${router.currentRoute.value.params.projectNameAbbr}/project-setting/service-setting?sectab=service-component&serveId=${props.serveId}&refId=${refStr}`;
-  window.open(url, '_blank');
+  if (activeSchema.value.id) {
+    // 当前是处于 查看 组件tab中，去查看与该组件关联的组件信息， 无需跳转，新增tab即可
+    store.commit('Schema/setActiveSchema', { ...schemaNode, key: refId });
+    store.commit('Schema/setSchemas', uniquArrray([...store.state.Schema.schemas, schemaNode]));
+    store.dispatch('Schema/querySchema', { id: refId });
+  } else {
+    // 当前是 查看接口定义详情抽屉或单独详情页. 需单独打开一个页面展示
+    const { entityId, id, name }: any = schemaNode || {};
+    const prefixUrl = isInLeyanWujieContainer ? `${parentOrigin}/lyapi` : window.location.origin;
+    window.open(`${prefixUrl}/${router.currentRoute.value.params.projectNameAbbr}/IM?ref=${JSON.stringify(schemaNode ? { entityId, id, name } : {})}`, '_blank');
+  }
   
-
 }
 
 watch(() => {

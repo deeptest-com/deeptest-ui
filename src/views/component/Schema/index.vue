@@ -56,6 +56,7 @@ import { ref, computed, onMounted, watch, defineEmits, defineExpose } from 'vue'
 import { SettingOutlined, ArrowDownOutlined, ArrowUpOutlined, FolderOutlined, FolderOpenOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import _ from "lodash";
 import cloneDeep from "lodash/cloneDeep";
 import IconSvg from '@/components/IconSvg';
@@ -101,6 +102,7 @@ const loading = ref(false);
 const selectedCategory = ref<any>({ title: '', targetId: '', id: 0 });
 const visible = ref(false);
 const modalType = ref('create');
+const router = useRouter();
 
 const uniquArrray = (data) => {
   const obj = {};
@@ -374,6 +376,15 @@ watch(() => {
   }
 }, {
   immediate: true,
+})
+
+onMounted(() => {
+  const { query } = router.currentRoute.value;
+  if (query.ref) {
+    setTimeout(() => {
+      expand.value = true;
+    }, 1000);
+  }
 })
 
 defineExpose({
