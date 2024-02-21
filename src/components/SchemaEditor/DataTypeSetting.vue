@@ -151,14 +151,14 @@
       {{ typesLabel }}
     </a-button>
   </a-popover>
-  <a-tooltip>
+  <!-- <a-tooltip>
     <template #title>
       <span>{{`编辑组件 ${props?.value?.ref}`}}</span>
     </template>
     <span class="viewComponent" style="margin-left:4px" @click="goViewComponent">
       <LinkOutlined v-if="props?.value?.ref"/>
     </span>
-  </a-tooltip>
+  </a-tooltip> -->
 </template>
 <script lang="ts" setup>
 import {ref, defineProps, defineEmits, watch, computed} from 'vue';
