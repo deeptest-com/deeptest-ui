@@ -7,200 +7,197 @@
     :footer="null"
     :bodyStyle="{ padding: 0 }"
     >
-    <div class="sync-task-form">
-      <a-form
-        ref="formRef"
-        :model="modelRef"
-        :rules="rulesRef"
-        :label-col="{ style: { width: '140px' } }">
-        <a-form-item label="任务名" name="driverType">
-          <a-input v-model:value="modelRef.taskName" placeholder="请输入定时同步任务名称" />
-        </a-form-item>
-        <span class="form-header-title">数据源选择</span>
-        <a-form-item label="接口数据来源" name="driverType">
-          <a-select
-            @change="handleDriverTypeChanged"
-            v-model:value="modelRef.driverType"
-            :options="driverTypeOpts"
-            placeholder="请选择"/>
-        </a-form-item>
-        <!-- 智能体厂 -->
-        <template v-if="modelRef.driverType === 'lzos'">
-          <a-form-item label="环境URL" name="filePath">
-            <a-input v-model:value="modelRef.filePath" placeholder="请输入智能体厂环境URL地址，如 https://lzos.rysaas.cn"/>
+    <a-spin tip="loading....." :spinning="spinning">
+      <div class="sync-task-form">
+        <a-form
+          ref="formRef"
+          :model="modelRef"
+          :rules="rulesRef"
+          :label-col="{ style: { width: '140px' } }">
+          <a-form-item label="任务名" name="name">
+            <a-input v-model:value="modelRef.name" placeholder="请输入定时同步任务名称" />
           </a-form-item>
-          <a-form-item label="所属工程">
-            <template v-slot:label>
-              所属工程
-              <a-tooltip placement="topLeft" overlayClassName="message-tooltip">
-                <template v-slot:title>
-                  <div>该服务下的所有外部消息将被定时批量同步</div>
-                </template>
-              <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)" />
-              </a-tooltip>
-            </template>
+          <span class="form-header-title">数据源选择</span>
+          <a-form-item label="接口数据来源" name="source">
             <a-select
-              @focus="handleFocus"
-              v-model:value="modelRef.functionCodes"
-              mode="multiple"
-              :options="functionCodesOpts"
-              :max-tag-count="1"
-              show-search
-              :filter-option="filterOption"
-              placeholder="请选择乐仓工程">
-              <template v-if="fetching" #notFoundContent>
-                <a-spin size="small" />
-              </template>
-            </a-select>
-          </a-form-item>
-          <a-form-item name="functionCodes">
-            <template v-slot:label>
-              服务名
-              <a-tooltip placement="topLeft" overlayClassName="message-tooltip">
-                <template v-slot:title>
-                  <div>该服务下的所有外部消息将被定时批量同步</div>
-                </template>
-              <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)" />
-              </a-tooltip>
-            </template>
-            <a-select
-              @focus="handleFocus"
-              v-model:value="modelRef.functionCodes"
-              mode="multiple"
-              :options="functionCodesOpts"
-              :max-tag-count="1"
-              show-search
-              :filter-option="filterOption"
-              placeholder="请选择智能体厂服务">
-              <template v-if="fetching" #notFoundContent>
-                <a-spin size="small" />
-              </template>
-            </a-select>
-          </a-form-item>
-
-          <span class="form-header-title">数据筛选条件</span>
-          <a-form-item label="消息类型">
-            <a-select
-                v-model:value="modelRef.messageType"
-                :options="messageTypeOpts"
-                placeholder="请选择"/>
-          </a-form-item>
-          <a-form-item label="继承父类">
-            <a-select
-              v-model:value="modelRef.inheritType"
-              :options="inheritTypeOpts"
-              mode="multiple"
+              @change="handleDriverTypeChanged"
+              v-model:value="modelRef.source"
+              :options="driverTypeOpts"
               placeholder="请选择"/>
           </a-form-item>
-          <a-form-item label="允许重写">
-            <a-select
-              v-model:value="modelRef.rewrite"
-              :options="rewriteOpts"
-              placeholder="请选择"/>
-          </a-form-item>
-        </template>
-        <!-- Swagger -->
-        <template v-else-if="modelRef.driverType === 'swagger'">
-          <a-form-item label="Swagger URL" name="filePath">
-            <a-input v-model:value="modelRef.filePath" placeholder="请输入swagger url" />
-          </a-form-item>
-        </template>
-        <span class="form-header-title">导入设置</span>
-        <a-form-item label="导入至分类" name="categoryId">
-          <Empty :loading="loading">
-            <template #content>
-              <a-tree-select
-                @change="selectedCategory"
-                :value="modelRef.categoryId"
-                v-model:searchValue="searchValue"
+          <!-- 智能体厂 -->
+          <template v-if="modelRef.source === 'lecang'">
+            <a-form-item label="环境URL" :name="['lecangReq', 'url']">
+              <a-input v-model:value="modelRef.lecangReq.url" placeholder="请输入智能体厂环境URL地址，如 https://lzos.rysaas.cn"/>
+            </a-form-item>
+            <a-form-item label="所属工程">
+              <template v-slot:label>
+                所属工程
+                <a-tooltip placement="topLeft" overlayClassName="message-tooltip">
+                  <template v-slot:title>
+                    <div>该服务下的所有外部消息将被定时批量同步</div>
+                  </template>
+                <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)" />
+                </a-tooltip>
+              </template>
+              <a-select
+                @focus="handleEngineerFocus"
+                v-model:value="modelRef.lecangReq.engineeringCode"
+                :options="cronEngineeringOptions"
                 show-search
-                :multiple="false"
-                :treeData="treeData"
-                :treeDefaultExpandAll="true"
-                :filterTreeNode="false"
-                :replaceFields="{ title: 'name',value:'id'}"
-                :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-                placeholder="请选择分类目录"
-                @search="handleTreeSelectSearch"
-                allow-clear/>
-            </template>
-          </Empty>
-
-        </a-form-item>
-        <a-form-item label="所属服务" name="serveId">
-          <SelectServe v-if="visible" @change="change" />
-        </a-form-item>
-        <a-form-item name="dataSyncType">
-          <template v-slot:label>
-          数据合并策略
-          <a-tooltip placement="topLeft" arrow-point-at-center overlayClassName="memo-tooltip">
-            <template v-slot:title>
-              当存在相同接口时（路径和方法定义相同），可采用不同的合并策略：<br>
-              <span class="title">智能合并</span><br>
-              自上次导入之后：<br>
-              1.仅有一侧接口有变更，平台保留变更后的接口定义；<br>
-              2.若两侧均有变更，则标记不一致，用户需手动处理。<br>
-              <span class="title">新增</span><br>
-              全新导入，即使存在相同接口，也创建新的接口定义。<br>
-              <span class="title">完全覆盖</span><br>
-              不保留平台中的接口变更，完全使用导入的数据进行覆盖，包括接口所属分类目录。<br>
-              仅限相同数据源导入的接口，通过平台创建的接口定义不会被合并。<br>
-          </template>
-          <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)" />
-          </a-tooltip>
-        </template>
-        <a-select
-          v-model:value="modelRef.dataSyncType"
-          :options="dataSyncTypeOpts"
-          placeholder="请选择"/>
-        <span v-if="modelRef.dataSyncType === 1" class="form-tip"><WarningOutlined /> 完全覆盖会导致通过平台上的接口定义更新被覆盖，请谨慎使用</span>
-        </a-form-item>
-        <a-form-item label="是否开启定时同步" name="serveId">
-          <a-switch v-model:checked="modelRef.autoSync"/>
-        </a-form-item>
-        <a-form-item name="serveId">
-          <template #label>
-            Cron表达式
-            <a-tooltip placement="topLeft" arrow-point-at-center overlayClassName="memo-tooltip" style="min-width: 800px">
-              <template #title>
-                <span
-                    class="title">Cron表达式是一种用于指定任务在某个时间点或周期性执行的字符串表达式。表达式包含6个参数，每个参数代表不同的时间单位和取值范围</span><br>
-                <pre style="background-color: black; margin-bottom: 0px;">
-    *    *    *    *    *    *
-    ┬    ┬    ┬    ┬    ┬    ┬
-    │    │    │    │    │    │
-    │    │    │    │    │    └ day of week (0 - 7) (0 or 7 is Sun)
-    │    │    │    │    └───── month (1 - 12)
-    │    │    │    └────────── day of month (1 - 31)
-    │    │    └─────────────── hour (0 - 23)
-    │    └──────────────────── minute (0 - 59)
-    └───────────────────────── second (0 - 59, OPTIONAL)
-              </pre>
-
+                :filter-option="filterOption"
+                placeholder="请选择乐仓工程">
+                <template v-if="fetching" #notFoundContent>
+                  <a-spin size="small" />
+                </template>
+              </a-select>
+            </a-form-item>
+            <a-form-item :name="['lecangReq', 'serviceCodes']">
+              <template v-slot:label>
+                服务名
+                <a-tooltip placement="topLeft" overlayClassName="message-tooltip">
+                  <template v-slot:title>
+                    <div>该服务下的所有外部消息将被定时批量同步</div>
+                  </template>
+                <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)" />
+                </a-tooltip>
               </template>
-              <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)"/>
+              <a-select
+                @focus="handleServiceFocus"
+                v-model:value="modelRef.lecangReq.serviceCodes"
+                mode="multiple"
+                :options="cronServesOptions"
+                :max-tag-count="3"
+                show-search
+                :filter-option="filterOption"
+                placeholder="请选择智能体厂服务">
+                <template v-if="fetching" #notFoundContent>
+                  <a-spin size="small" />
+                </template>
+              </a-select>
+            </a-form-item>
+
+            <span class="form-header-title">数据筛选条件</span>
+            <a-form-item label="消息类型">
+              <a-select
+                  v-model:value="modelRef.lecangReq.messageType"
+                  :options="messageTypeOpts"
+                  placeholder="请选择"/>
+            </a-form-item>
+            <a-form-item label="继承父类">
+              <a-select
+                v-model:value="modelRef.lecangReq.extendOverride"
+                :options="inheritTypeOpts"
+                mode="multiple"
+                placeholder="请选择"/>
+            </a-form-item>
+            <a-form-item label="允许重写">
+              <a-select
+                v-model:value="modelRef.lecangReq.overridable"
+                :options="rewriteOpts"
+                placeholder="请选择"/>
+            </a-form-item>
+          </template>
+          <!-- Swagger -->
+          <template v-else-if="modelRef.source === 'swagger'">
+            <a-form-item label="Swagger URL" :name="['swaggerReq', 'url']">
+              <a-input v-model:value="modelRef.swaggerReq.url" placeholder="请输入swagger url" />
+            </a-form-item>
+          </template>
+          <span class="form-header-title">导入设置</span>
+          <a-form-item label="导入至分类" name="categoryId">
+            <Empty :loading="loading">
+              <template #content>
+                <a-tree-select
+                  @change="selectedCategory"
+                  :value="modelRef.categoryId"
+                  v-model:searchValue="searchValue"
+                  show-search
+                  :multiple="false"
+                  :treeData="treeData"
+                  :treeDefaultExpandAll="true"
+                  :filterTreeNode="false"
+                  :replaceFields="{ title: 'name',value:'id'}"
+                  :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                  placeholder="请选择分类目录"
+                  @search="handleTreeSelectSearch"
+                  allow-clear/>
+              </template>
+            </Empty>
+
+          </a-form-item>
+          <a-form-item label="所属服务" name="serveId">
+            <SelectServe v-if="visible" @change="change" />
+          </a-form-item>
+          <a-form-item name="sync">
+            <template v-slot:label>
+            数据合并策略
+            <a-tooltip placement="topLeft" arrow-point-at-center overlayClassName="memo-tooltip">
+              <template v-slot:title>
+                当存在相同接口时（路径和方法定义相同），可采用不同的合并策略：<br>
+                <span class="title">智能合并</span><br>
+                自上次导入之后：<br>
+                1.仅有一侧接口有变更，平台保留变更后的接口定义；<br>
+                2.若两侧均有变更，则标记不一致，用户需手动处理。<br>
+                <span class="title">新增</span><br>
+                全新导入，即使存在相同接口，也创建新的接口定义。<br>
+                <span class="title">完全覆盖</span><br>
+                不保留平台中的接口变更，完全使用导入的数据进行覆盖，包括接口所属分类目录。<br>
+                仅限相同数据源导入的接口，通过平台创建的接口定义不会被合并。<br>
+            </template>
+            <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)" />
             </a-tooltip>
           </template>
-          <a-input v-model:value="modelRef.cron" type="textarea" placeholder="请输入Linux定时任务表达式"/>
-        </a-form-item>
-        <a-form-item label="接口路径规则" name="addServicePrefix" v-if="modelRef.driverType === 'lzos'">
-          <div class="add-service-prefix">
-            <a-checkbox v-model:checked="modelRef.addServicePrefix">智能体所属服务名作为路径第一级</a-checkbox><br>
-          </div>
-          <span v-if="modelRef.addServicePrefix">
-            接口路径导入为：/服务名/智能体名/消息名，例如：/acnsvr/Agent/CancelCollectItem
-          </span>
-          <span v-else>
-            接口路径导入为：/智能体名/消息名，例如：/Agent/CancelCollectItem
-          </span>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="sync-task-footer">
-      <!-- <a-button type="default" @click="autoImport">立即导入</a-button> -->
-      <a-button type="default" @click="cancel">取消</a-button>
-      <a-button type="primary" @click="ok">确定</a-button>
-    </div>
+          <a-select
+            v-model:value="modelRef.dataSyncType"
+            :options="dataSyncTypeOpts"
+            placeholder="请选择"/>
+          <span v-if="modelRef.dataSyncType === 1" class="form-tip"><WarningOutlined /> 完全覆盖会导致通过平台上的接口定义更新被覆盖，请谨慎使用</span>
+          </a-form-item>
+          <a-form-item name="cron">
+            <template #label>
+              Cron表达式
+              <a-tooltip placement="topLeft" arrow-point-at-center overlayClassName="memo-tooltip" style="min-width: 800px">
+                <template #title>
+                  <span
+                      class="title">Cron表达式是一种用于指定任务在某个时间点或周期性执行的字符串表达式。表达式包含6个参数，每个参数代表不同的时间单位和取值范围</span><br>
+                  <pre style="background-color: black; margin-bottom: 0px;">
+      *    *    *    *    *    *
+      ┬    ┬    ┬    ┬    ┬    ┬
+      │    │    │    │    │    │
+      │    │    │    │    │    └ day of week (0 - 7) (0 or 7 is Sun)
+      │    │    │    │    └───── month (1 - 12)
+      │    │    │    └────────── day of month (1 - 31)
+      │    │    └─────────────── hour (0 - 23)
+      │    └──────────────────── minute (0 - 59)
+      └───────────────────────── second (0 - 59, OPTIONAL)
+                </pre>
+
+                </template>
+                <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)"/>
+              </a-tooltip>
+            </template>
+            <a-input v-model:value="modelRef.cron" type="textarea" placeholder="请输入Linux定时任务表达式"/>
+          </a-form-item>
+          <a-form-item label="接口路径规则" name="addServicePrefix" v-if="modelRef.driverType === 'lzos'">
+            <div class="add-service-prefix">
+              <a-checkbox v-model:checked="modelRef.addServicePrefix">智能体所属服务名作为路径第一级</a-checkbox><br>
+            </div>
+            <span v-if="modelRef.addServicePrefix">
+              接口路径导入为：/服务名/智能体名/消息名，例如：/acnsvr/Agent/CancelCollectItem
+            </span>
+            <span v-else>
+              接口路径导入为：/智能体名/消息名，例如：/Agent/CancelCollectItem
+            </span>
+          </a-form-item>
+        </a-form>
+      </div>
+      <div class="sync-task-footer">
+        <!-- <a-button type="default" @click="autoImport">立即导入</a-button> -->
+        <a-button type="default" @click="cancel">取消</a-button>
+        <a-button type="primary" @click="ok">确定</a-button>
+      </div>
+    </a-spin>
   </a-modal>
 
 </template>
@@ -212,14 +209,15 @@ import {
   defineEmits,
   reactive,
   computed, watch,
+  onMounted
 } from 'vue';
 import {useStore} from "vuex";
 import cloneDeep from "lodash/cloneDeep";
-import {UploadOutlined,QuestionCircleOutlined, WarningOutlined} from '@ant-design/icons-vue';
-import {notifyWarn} from "@/utils/notify";
+import {QuestionCircleOutlined, WarningOutlined} from '@ant-design/icons-vue';
 import Empty from '@/components/TableEmpty/index.vue';
 import SelectServe from '@/views/endpoint/components/SelectServe/index.vue';
 import { filterByKeyword } from '@/utils/tree';
+import { message } from 'ant-design-vue';
 
 const store = useStore<{ Endpoint }>();
 const treeDataCategory = computed<any>(() => {
@@ -231,6 +229,10 @@ const props = defineProps({
     required: true,
     type: Boolean,
   },
+  taskId: {
+    required: false,
+    type: Number,
+  }
 })
 
 const emit = defineEmits(['ok', 'cancel']);
@@ -242,52 +244,52 @@ const driverTypeOpts = [
   },
   {
     label: '智能体厂',
-    value: 'lzos',
+    value: 'lecang',
   },
 ];
 
 const messageTypeOpts = [
   {
     label: '内部',
-    value: 'swagger',
+    value: 'inner',
   },
   {
     label: '外部',
-    value: 'lzos',
+    value: 'outside',
   },
   {
     label: '全部',
-    value: 'lzos',
+    value: '',
   },
 ];
 
 const inheritTypeOpts = [
   {
     label: '继承并重写',
-    value: 'swagger',
+    value: 'extend_override',
   },
   {
     label: '继承未重写',
-    value: 'lzos',
+    value: 'extend_not_override',
   },
   {
     label: '自身',
-    value: 'lzos',
+    value: 'not_extend',
   },
 ];
 
 const rewriteOpts = [
   {
     label: '是',
-    value: 'swagger',
+    value: 'YES',
   },
   {
     label: '否',
-    value: 'lzos',
+    value: 'NO',
   },
   {
     label: '全部',
-    value: 'lzos',
+    value: '',
   },
 ];
 
@@ -307,44 +309,46 @@ const dataSyncTypeOpts = [
 ];
 
 const treeData: any = ref([]);
-
+const spinning = ref(false);
 const loading = ref(false);
 
 const modelRef = reactive<any>({
-  taskName: '',
-  categoryId: null as any,
-  driverType: null,
-  dataSyncType: null,   //数据同步方式 枚举值 full_cover：完全覆盖 copy_add：复制新增
-  openUrlImport: false,  //开启url导入
-  filePath: null, //文件路径
-  serveId:null,
-  // 智能体厂
-  classCode: '',
-  functionCodes: [],
-  addServicePrefix: true,
-  cron: '',
-  autoSync: false,
+  "cron": "* * * * *",
+  "lecangReq": {
+    "addServicePrefix": true,
+    "categoryId": null,
+    "engineeringCode": null,
+    "extendOverride": ['extend_override', 'not_extend'],
+    serveId: null,
+    "messageType": "",
+    "overridable": "",
+    "serviceCodes": [],
+    "url": ""
+  },
+  "name": "",
+  "source": null,
+  "swaggerReq": {
+    "serveId": null,
+    "categoryId": null,
+    "url": ""
+  },
+  syncType: 1,
 });
 
 const searchValue = ref('');
 
 const confirmLoading = ref(false);
 
-const functionCodesOpts = computed(() => {
-  if (!modelRef.filePath || !modelRef.classCode) {
-    return [];
-  }
-  return store.state.Endpoint.thirdFunctionList;
-});
-
+const cronServesOptions = ref([]);
+const cronEngineeringOptions = ref([]);
 const rulesRef = computed(() => ({
-  "taskName": [
+  "name": [
     {
       required: true,
       message: '请填写定时同步名称',
     }
   ],
-  "driverType": [
+  "source": [
     {
       required: true,
       message: '请选择数据源',
@@ -356,7 +360,7 @@ const rulesRef = computed(() => ({
       message: '请选择所属分类目录',
     }
   ],
-  "dataSyncType":  [
+  "syncType":  [
     {
       required: true,
       message: '请选择数据同步方式',
@@ -368,28 +372,37 @@ const rulesRef = computed(() => ({
       message: '请选择所属服务',
     }
   ],
-  "classCode": [
+  "messageType": [
     {
       required: true,
-      message: '请选择智能体模型类',
+      message: '请选择智能体厂服务名',
     }
   ],
-  "functionCodes": [
-    {
-      required: true,
-      message: '请选择待同步的消息',
-    }
-  ],
-  "filePath": [
-    {
-      required: true,
-      message: modelRef.driverType === 'lzos' ? '请输入智能体厂环境url地址' : modelRef.openUrlImport ? '请输入Swagger Url' : '请选择文件',
-    }
-  ],
+  "lecangReq": {
+    "serviceCodes": [
+      {
+        required: true,
+        message: '请选择智能体厂服务名',
+      }
+    ],
+    "url": [
+      {
+        required: true,
+        message: modelRef.driverType === 'lzos' ? '请输入智能体厂环境url地址' : modelRef.openUrlImport ? '请输入Swagger Url' : '请选择文件',
+      }
+    ]
+  },
+  "swaggerReq": {
+    "url": [
+      {
+        required: true,
+        message: modelRef.driverType === 'lzos' ? '请输入智能体厂环境url地址' : modelRef.openUrlImport ? '请输入Swagger Url' : '请选择文件',
+      }
+    ]
+  }
 }));
 
 const formRef = ref();
-const spinning = ref<boolean>(false);
 
 const handleDriverTypeChanged = (v) => {
   modelRef.dataSyncType = v === 'lzos' ? 1 : 2;
@@ -401,19 +414,56 @@ const handleDriverTypeChanged = (v) => {
  */
 const fetching = ref(false);
 
-const handleFocus = async () => {
+const handleEngineerFocus = async () => {
   formRef.value
     .validateFields([
-      'filePath',
-      'classCode'
+      'lecangReq.url',
     ])
     .then(async () => {
       fetching.value = true;
-      await store.dispatch('Endpoint/listFunctionsByThirdPartyClass', {
-        filePath: modelRef.filePath,
-        classCode: modelRef.classCode
-      });
+      try {
+        
+        const result = await store.dispatch('ProjectSetting/getCronAllEngineeringOptions', {
+          url: modelRef.lecangReq.url,
+        });
+        cronEngineeringOptions.value = (result || []).map(e => ({
+          ...e,
+          value: e.code,
+          label: e.name,
+        }));
+        setTimeout(() => {
+          fetching.value = false;
+        }, 500);
+      } catch(error) {
+        fetching.value = false;
+        return Promise.reject(error);
+      }
       fetching.value = false;
+    })
+    .catch(err => {
+      console.log('error', err);
+    })
+};
+
+const handleServiceFocus = async () => {
+  formRef.value
+    .validateFields([
+      'lecangReq.url',
+    ])
+    .then(async () => {
+      fetching.value = true;
+      const result = await store.dispatch('ProjectSetting/getCronAllServesOptions', {
+        url: modelRef.lecangReq.url,
+        engineeringCode: modelRef.lecangReq.engineeringCode,
+      });
+      cronServesOptions.value = (result || []).map(e => ({
+        ...e,
+        value: e.code,
+        label: e.name,
+      }));
+      setTimeout(() => {
+        fetching.value = false;
+      }, 500);
     })
     .catch(err => {
       console.log('error', err);
@@ -426,35 +476,26 @@ const filterOption = (input: string, option: any) => {
   }
 };
 
-const handleClassCodeChanged = () => {
-  Object.assign(modelRef, {
-    functionCodes: [],
-  })
-}
-
 function ok() {
   if (uploading.value) {
     return;
   }
-  spinning.value = true
   formRef.value
     .validate()
     .then(async () => {
       confirmLoading.value = true;
-      const { filePath, openUrlImport, functionCodes, classCode,addServicePrefix, ...rest } = modelRef;
-      const params = modelRef.driverType === 'lzos' ? { filePath, classCode, functionCodes,addServicePrefix, ...rest } : { filePath, openUrlImport, ...rest };
-
-      const res = await store.dispatch('Endpoint/importEndpointData', {
-        ...params,
-        categoryId: modelRef.categoryId || -1,
-        "sourceType": 2,
-      });
-      confirmLoading.value = false;
-      if (res) {
-        notifyWarn('异步导入中，稍后请刷新列表查看导入结果');
-        reset();
-        emit('ok');
-      }
+      console.log(modelRef);
+      // const res = await store.dispatch('ProjectSetting/getCronAllServesOptions', {
+      //   ...params,
+      //   categoryId: modelRef.categoryId || -1,
+      //   "sourceType": 2,
+      // });
+      // confirmLoading.value = false;
+      // if (res) {
+      //   notifyWarn('异步导入中，稍后请刷新列表查看导入结果');
+      //   reset();
+      //   emit('ok');
+      // }
     })
     .catch((error: ValidateErrorEntity) => {
       console.log('error', error);
@@ -545,12 +586,44 @@ const autoImport = () => {
   console.log('立即导入');
 }
 
+const initCronProject = () => {
+
+}
+
+const getCronProjectDetail = async () => {
+  spinning.value = true;
+  try {
+    const result = await store.dispatch('ProjectSetting/getCronProjecDetail', { id: props.taskId });
+    setTimeout(() => {
+      spinning.value = false;
+    }, 200);
+    spinning.value = false;
+    console.log(result);
+  } catch(error) {
+    message.error('获取定时任务详情失败');
+    spinning.value = false;
+  }
+}
+
 watch(() => {
   return treeDataCategory.value;
 }, (val) => {
   treeData.value = val;
 })
 
+watch(() => {
+  return props.taskId;
+}, (val) => {
+  if (val) {
+    getCronProjectDetail();
+  } else {
+    initCronProject();
+  }
+})
+
+onMounted(() => {
+  store.dispatch('Endpoint/loadCategory');
+})
 </script>
 
 <style lang="less" scoped>

@@ -44,13 +44,10 @@ module.exports = {
     },
     // 修改webpack的配置
     configureWebpack: {
-        // 不需要打包的插件
-        externals: {
-            // 'vue': 'Vue',
-            // 'vue-router': 'VueRouter',
-        }
+      
     },
     chainWebpack(config) {
+        console.error(config.optimization.minimize);
         // 内置的 svg Rule 添加 exclude
         config.module
             .rule('svg')
