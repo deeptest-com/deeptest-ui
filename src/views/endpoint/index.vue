@@ -691,6 +691,7 @@ async function refreshList(resetPage?: string) {
 // 页面路由卸载时，清空搜索条件
 onUnmounted(async () => {
   store.commit('Endpoint/clearFilterState');
+  store.dispatch('Schema/initSchema');
 })
 
 function paneResizeStop(pane, resizer, size) {
