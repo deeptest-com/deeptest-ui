@@ -129,11 +129,6 @@ const rules = {
 };
 
 const dropMenuList = [
-{
-    auth: 'endpoint-copy',
-    label: '服务组件',
-    action: (record: any) => onOpenComponent(record)
-  },
   {
     auth: '',
     label: '服务版本',
@@ -150,6 +145,11 @@ const dropMenuList = [
   //   label: '禁用',
   //   action: (record: any) => onDisabled(record)
   // },
+  {
+    auth: '',
+    label: '禁用',
+    action: (record: any) => onDisabled(record)
+  },
   {
     auth: '',
     label: '复制',

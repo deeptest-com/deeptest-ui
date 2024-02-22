@@ -6,6 +6,7 @@ import {
   InfoCircleTwoTone
 } from '@ant-design/icons-vue';
 import {computed, defineProps, defineEmits, ref, watch} from "vue";
+import { vOnClickOutside } from '@vueuse/components';
 
 const props = defineProps<{
   isFirst?: boolean | undefined,
@@ -49,6 +50,10 @@ const isRequired = computed(() => {
   return !!(extraViewInfo && extraViewInfo?.parent?.required?.includes(extraViewInfo?.keyName));
 });
 
+const clickOutSide = () => {
+  visible.value = false;
+}
+
 const description = ref('');
 watch(() => {
   return props.value
@@ -84,7 +89,7 @@ watch(() => {
              placement="left"
              :overlayClassName="'container'">
     <template #content>
-      <div class="content">
+      <div class="content" v-on-click-outside="clickOutSide">
         <a-input v-model:value="description"
                  :disabled="isRefChildNode"
                  placeholder="请输入描述信息"/>

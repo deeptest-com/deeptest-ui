@@ -52,9 +52,9 @@
           </a-row>
           <RequestParams/>
           <!-- 增加请求体 -->
-          <RequestBody v-if="showRequestBody" :serveId="endpointDetail.serveId"/>
+          <RequestBody v-if="showRequestBody" :projectId="endpointDetail.projectId"/>
           <!-- 响应定义  -->
-          <Response :serveId="endpointDetail.serveId"/>
+          <Response :projectId="endpointDetail.projectId"/>
         </div>
         <div class="no-defined" v-else>
           <a-button type="primary" @click="addEndpoint">
@@ -98,6 +98,7 @@ const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpoi
 const interfaceDetail = computed<any>(() => store.state.Endpoint.selectedMethodDetail);
 const interfaceMethodToObjMap = computed<any>(() => store.state.Endpoint.interfaceMethodToObjMap);
 const currentUser: any = computed<Endpoint>(() => store.state.User.currentUser);
+
 
 const selectedMethod = ref('')
 

@@ -319,3 +319,29 @@ export function getResultClass (resultStatus) {
     return resultStatus===ResultStatus.Pass? 'pass':
         resultStatus===ResultStatus.Fail ? 'fail' : ''
 }
+
+
+export const findParentNodeByX = (
+    node: Element,
+    opts: {
+        class?: string;
+        id?: string;
+    } = {}
+): Element | undefined => {
+    const { class: className, id } = opts;
+    if (className) {
+        for (let i = 0; i < node.classList.length; i++) {
+        const item = node.classList[i];
+        if (className == item) {
+            return node;
+        }
+        }
+    }
+    if (id && node.id === id) {
+        return node;
+    }
+    if (node == document.body) {
+        return node;
+    }
+    return findParentNodeByX(node.parentNode as Element, opts);
+};

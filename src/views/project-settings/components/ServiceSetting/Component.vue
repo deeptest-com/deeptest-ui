@@ -238,11 +238,10 @@ watch(() => {
   return props.refId
 },async (newVal) => {
   if(newVal){
-    let record = dataSource.value.find(arrItem => arrItem.ref == newVal);
+        let record = dataSource.value.find(arrItem => arrItem.ref == newVal);
     if(!record?.ref){
        record = await store.dispatch('Endpoint/getRefDetail', {
-        ref: newVal,
-        serveId: props.serveId
+        id: newVal,
       })
     }
     if(record?.ref){

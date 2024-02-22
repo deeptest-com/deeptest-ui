@@ -31,7 +31,7 @@ import {notifyWarn} from "@/utils/notify";
 
 export default defineComponent({
     name: 'SchemeEditor',
-    props: ['value', 'contentStyle', 'serveId'],
+    props: ['value', 'contentStyle', 'projectId'],
     emits: ['change'],
     setup(props, {emit}) {
         const store = useStore<{ Endpoint, ServeGlobal: ServeStateType }>();
@@ -43,8 +43,7 @@ export default defineComponent({
                 // 如果没有引用组件内容，需要获取组件详情
                 if (!tree.content) {
                     const result = await store.dispatch('Endpoint/getRefDetail', {
-                        ref: tree.ref,
-                        serveId: props.serveId
+                        id: tree.refId,
                     })
                     // 处理引用组件的信息
                     handleRefInfo(tree, result);
@@ -319,7 +318,7 @@ export default defineComponent({
         }, (newVal: any) => {
             try {
                 nextTick(() => {
-                    let obj = JSON.parse(newVal);
+                    let obj = newVal ? JSON.parse(newVal) : '';
                     obj = obj ? obj : {type: 'object'};
                     data.value = addExtraViewInfo(obj);
                 })
@@ -376,7 +375,6 @@ export default defineComponent({
             return <>
                 <DataTypeSetting
                     value={tree}
-                    serveId={props.serveId}
                     isRefChildNode={isRefChildNode || false}
                     isRoot={isRoot || false}
                     onChange={dataTypeChange.bind(this, options)}/>
@@ -406,6 +404,7 @@ export default defineComponent({
             return <>
                 <span class={'baseInfoKey'}
                       contenteditable={!isRefChildNode}
+                      key={`${keyIndex}_${keyName}`}
                       onPaste={pasteKeyName}
                       onKeydown={keyNameKeyDown.bind(this, keyName, keyIndex, items)}
                       onBlur={updateKeyName.bind(this, keyName, keyIndex, items)}>

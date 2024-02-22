@@ -19,7 +19,7 @@ export async function createCategory(data): Promise<any> {
         data: data,
     });
 }
-export async function updateCategory(id: number, params: any): Promise<any> {
+export async function updateCategory(params: any): Promise<any> {
     return request({
         url: `/${apiPath}`,
         method: 'PUT',

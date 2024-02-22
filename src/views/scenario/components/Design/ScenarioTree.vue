@@ -848,6 +848,8 @@ onUnmounted(() => {
 <style lang="less" scoped>
 .scenario-tree-main {
   background: #ffffff;
+  height: 100%;
+  padding-top: 8px;
 
   :deep(.ant-tree-child-tree-open:has(.tree-title.dp-tree-border)) {
     position: relative;
@@ -887,11 +889,6 @@ onUnmounted(() => {
     }
   }
 }
-
-.tree-filter {
-  margin-top: 8px;
-}
-
 .plus-icon {
   margin: 0 12px 0 6px;
   cursor: pointer;
