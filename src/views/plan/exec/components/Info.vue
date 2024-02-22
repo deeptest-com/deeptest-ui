@@ -125,20 +125,20 @@ const execStart = async () => {
     planId: planId.value,
   }
   console.log('****** send exec plan ws data', data);
-  WebSocket.sentMsg(execUuid.value, JSON.stringify({
+  WebSocket.sentMsg(execUuid.value, {
     act: 'execPlan',
     planExecReq: data,
     localVarsCache: await loadProjectEnvVars(currProject.value.id),
-  }))
+  })
 }
 const stopExec = () => {
-  WebSocket.sentMsg(execUuid.value, JSON.stringify({
+  WebSocket.sentMsg(execUuid.value, {
     act: 'stop',
     execReq: {
       execUuid: execUuid.value,
       planId: planId.value,
     }
-  }))
+  })
 };
 const execCancel = () => {
   console.log('execCancel')
