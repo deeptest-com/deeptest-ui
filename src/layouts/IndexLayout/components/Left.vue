@@ -173,10 +173,7 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-
-    &::-webkit-scrollbar{
-      width: 0;
-    }
+    scrollbar-width: none;
 
     .settings {
       width: 100%;

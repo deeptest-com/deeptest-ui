@@ -80,6 +80,7 @@ watch(() => {
   .description-text {
     cursor: pointer;
     overflow: scroll;
+    scrollbar-width: none;
   }
 
   .description-edit {

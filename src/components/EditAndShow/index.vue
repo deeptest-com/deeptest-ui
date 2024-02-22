@@ -20,7 +20,7 @@
 
   <div :class="['editor','show-on-hover', customClass]" v-else>
     <span class="title" @click.stop="handleClick">
-      {{fieldValue === 0 ? '0' : (fieldValue === '' ? '空' : fieldValue)}}
+      {{fieldValue === 0 ? '0' : (fieldValue === '' ? (emptyText || '空') : fieldValue)}}
     </span> &nbsp;&nbsp;
 
     <span class="edit-icon">
@@ -44,9 +44,8 @@ import {
 } from '@ant-design/icons-vue';
 import { vOnClickOutside } from '@vueuse/components';
 import {notifyWarn} from "@/utils/notify";
-import TooltipCell from '../Table/tooltipCell.vue';
 const isEditing = ref(false);
-const fieldValue = ref('');
+const fieldValue = ref<any>('');
 const editor = ref(null);
 const props = defineProps({
   value: {
@@ -80,9 +79,14 @@ const props = defineProps({
     required: false,
     default: true,
     type: Boolean,
+  },
+  emptyText: {
+    required: false,
+    default: '',
+    type: String
   }
 })
-const emit = defineEmits(['update', 'edit']);
+const emit = defineEmits(['update', 'edit', 'cancel']);
 
 function updateField() {
   if (!props.canEmpty && !fieldValue.value) {
@@ -102,6 +106,7 @@ function edit() {
 function cancelEdit() {
   fieldValue.value = props.value;
   isEditing.value = false;
+  emit('cancel');
 }
 
 function handleClick() {
@@ -142,6 +147,15 @@ watch(() => {return props.autoFocus}, (newVal) => {
     color: #447DFD;
   }
 
+  &.text-gray {
+    .title {
+      color: #b0b0b0;
+    }
+  }
+
+  &.text-bolder {
+    font-weight: bolder;
+  }
   &.show-on-hover {
     .edit-icon {
       display: none;

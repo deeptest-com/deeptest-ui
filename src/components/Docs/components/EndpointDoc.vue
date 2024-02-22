@@ -85,7 +85,7 @@
           <p v-if="info.requestBody.description">{{ info.requestBody.description }}</p>
           <SchemaViewer
               :examples-str="info?.requestBody?.examples"
-              :components="info?.serveInfo?.component"
+              :components="info?.components"
               :contentType="info?.requestBody?.schemaItem?.type"
               :contentStr="info?.requestBody?.schemaItem?.content"/>
         </div>
@@ -132,7 +132,7 @@
           </h3>
           <p v-if="res.description">{{ res.description }}</p>
           <SchemaViewer :examples-str="res?.examples"
-                        :components="info?.serveInfo?.component"
+                        :components="info?.components"
                         :contentType="res?.schemaItem?.type"
                         :contentStr="res?.schemaItem?.content"/>
         </div>
@@ -144,7 +144,7 @@
   :visible="genCodeVisible"
   @close="close"
   :contentStr="contentStr"
-  :serveId="info?.serveId"
+  :projectId="info?.projectId"
   />
 </template>
 

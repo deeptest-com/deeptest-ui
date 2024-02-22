@@ -768,7 +768,7 @@ const StoreModel: ModuleType = {
         async updateCategoryNode({commit}, payload: any) {
             try {
                 const {id, ...params} = payload;
-                await updateCategory(id, {...params});
+                await updateCategory({...params});
                 return true;
             } catch (error) {
                 return false;
@@ -799,7 +799,7 @@ const StoreModel: ModuleType = {
             commit('setTreeDataMapItemPropCategory', payload);
         },
         async saveCategory({commit, dispatch, state}, payload: any) {
-            const res = await updateCategory(payload.id, payload);
+            const res = await updateCategory(payload);
             if (res.code === 0) {
                 // commit('setCategory', res.data);
                 await dispatch('loadCategory');
@@ -1059,21 +1059,26 @@ const StoreModel: ModuleType = {
             }
         },
         // 获取可选组件信息
-        async getAllRefs({commit}, payload: any) {
-            const res = await getSchemaList({
-                ...payload,
-                "page": 1,
-                "pageSize": 100
-            });
-            if (res.code === 0) {
-                res.data.result.forEach((item: any) => {
-                    item.label = item.ref;
-                    item.value = item.ref;
-
-                })
-                return res.data.result;
-            } else {
-                return null;
+        async getAllRefs({commit, rootState}: any, payload: any) {
+            try {
+                const res = await getSchemaList({
+                    ...payload,
+                    page: 1,
+                    pageSize: 200,
+                    projectId: rootState.ProjectGlobal.currProject.id,
+                });
+                if (res.code === 0) {
+                    const result = res.data.result.map((item: any) => {
+                        item.label = item.ref.replace('#/components/schemas/', '');
+                        item.value = item.id;
+                        return item;
+                    });
+                    return Promise.resolve({ page: res.data.page, result });
+                } else {
+                    return Promise.reject(res.msg);
+                }
+            } catch(error) {
+                return Promise.reject(error);
             }
         },
         // 获取可选组件信息
