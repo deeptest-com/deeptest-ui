@@ -405,6 +405,11 @@ const formRef = ref();
 
 const handleDriverTypeChanged = (v) => {
   modelRef.syncType = v === 'lecang' ? 1 : 2;
+  if (v === 'lecang') {
+    if (!modelRef.lecangReq.serviceCodes) {
+      modelRef.lecangReq.serviceCodes = [];
+    }
+  }
 }
 
 /**
@@ -622,7 +627,7 @@ const getCronProjectDetail = async () => {
     }, 200);
     spinning.value = false;
     const reqInfo = result.source === 'lecang' ? result.lecangReq : result.swaggerReq;
-    result.lecangReq.extendOverride = result.lecangReq.extendOverride.split(',');
+    result.lecangReq.extendOverride = result.lecangReq.extendOverride ? result.lecangReq.extendOverride.split(',') : ['extend_override', 'not_extend'];
     // result.lecangReq.serviceCodes = result.lecangReq.serviceCodes.split(',');
     if (result.lecangReq.url) {
       const serviceCodes = result.lecangReq.serviceCodes;

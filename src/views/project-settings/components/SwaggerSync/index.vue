@@ -123,15 +123,16 @@ const actionList = [
 
 const columns: any = [{
   title: '任务名',
-  width: 150,
+  width: 200,
   key: 'name',
   customRender: ({ record }) => {
-    return <span style="color:#1677ff;cursor: pointer;display:block;max-width: 150px" onClick={() => createOrUpdate(record)}>
+    return <span style="color:#1677ff;cursor: pointer;display:block;max-width: 200px" onClick={() => createOrUpdate(record)}>
       <TooltipCell text={record.name} tip={record.name} />
     </span>
   }
 },{
   title: '数据源',
+  width: 150,
   key: 'source',
   customRender: ({ record }) => {
     return <span>{ driverTypeOpts.find(e => e.value === record.source)?.label }</span>
