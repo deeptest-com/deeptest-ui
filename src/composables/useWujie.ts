@@ -10,6 +10,8 @@ export const  useWujie = () => {
     const isInLecangWujieContainer = isWujieEnv && user && user?.token
 
     const isLoading = ref(false);
+
+    console.log(window?.$wujie.props);
     return {
         isLoading,
         isWujieEnv,
