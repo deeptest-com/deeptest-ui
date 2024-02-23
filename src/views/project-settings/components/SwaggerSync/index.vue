@@ -20,7 +20,7 @@
       }"
     />
   </a-card>
-  <SyncTaskModal :visible="syncTaskVisible" @cancel="syncTaskVisible = false" :task-id="currTaskId" @ok="addSyncTaskSuccess" />
+  <SyncTaskModal :visible="syncTaskVisible" @cancel="closeSyncTask" :task-id="currTaskId" @ok="addSyncTaskSuccess" />
 </template>
 
 <script setup lang="tsx">
@@ -181,7 +181,13 @@ const listCronProject = (e?:{ current?: number, pageSize?: number }) => {
 
 const addSyncTaskSuccess = () => {
   syncTaskVisible.value = false;
+  currTaskId.value = 0;
   listCronProject();
+}
+
+const closeSyncTask = () => {
+  syncTaskVisible.value = false;
+  currTaskId.value = 0;
 }
 
 const syncTaskVisible = ref(false);
