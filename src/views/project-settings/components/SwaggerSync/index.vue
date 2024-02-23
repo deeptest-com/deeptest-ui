@@ -126,7 +126,7 @@ const columns: any = [{
   width: 150,
   key: 'name',
   customRender: ({ record }) => {
-    return <span style="color:#1677ff;cursor: pointer;display:block" onClick={() => createOrUpdate(record)}>
+    return <span style="color:#1677ff;cursor: pointer;display:block;max-width: 150px" onClick={() => createOrUpdate(record)}>
       <TooltipCell text={record.name} tip={record.name} />
     </span>
   }
