@@ -490,6 +490,9 @@ function ok() {
       if (modelRef.id) {
         paramsData.id = modelRef.id;
       }
+      if (modelRef.switch) {
+        paramsData.switch = modelRef.switch;
+      }
       const extraData = modelRef.source === 'lecang' ? {
         "lecangReq": {
           ...modelRef.lecangReq,
@@ -630,7 +633,7 @@ const getCronProjectDetail = async () => {
       ...result,
       syncType: reqInfo.syncType,
       serveId: reqInfo.serveId,
-      categoryId: reqInfo.categoryId,
+      categoryId: reqInfo.categoryId === -1 ? null : reqInfo.categoryId,
     })
   } catch(error) {
     message.error('获取定时任务详情失败');
