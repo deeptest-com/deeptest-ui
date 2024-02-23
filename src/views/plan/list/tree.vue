@@ -45,14 +45,14 @@
         </div>
       </div>
     </div>
-    <!--  创建接口 Tag  -->
-    <CreateCategoryModal
-        :visible="createTagModalVisible"
-        :nodeInfo="currentNode"
-        :mode="tagModalMode"
-        @cancel="handleCancelTagModalCancel"
-        @ok="handleTagModalOk"/>
   </div>
+  <!--  创建接口 Tag  -->
+  <CreateCategoryModal
+    :visible="createTagModalVisible"
+    :nodeInfo="currentNode"
+    :mode="tagModalMode"
+    @cancel="handleCancelTagModalCancel"
+    @ok="handleTagModalOk"/>
 </template>
 <script setup lang="ts">
 import {
@@ -343,8 +343,15 @@ async function onDrop(info: DropEvent) {
 
 <style scoped lang="less">
 .tree-container {
-  //margin: 16px;
   background: #ffffff;
+  padding-top: 8px;
+  height: 100%;
+
+  .tree-content {
+    height: calc(100% - 50px);
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
 }
 
 .tag-filter-form {
@@ -352,7 +359,6 @@ async function onDrop(info: DropEvent) {
   justify-content: center;
   align-items: center;
   height: 50px;
-  margin-top: 8px;
   .search-input {
     margin-left: 16px;
     margin-right: 8px;
@@ -364,55 +370,6 @@ async function onDrop(info: DropEvent) {
     cursor: pointer;
   }
 }
-
-.content {
-  display: flex;
-  width: 100%;
-
-  .left {
-    width: 300px;
-    border-right: 1px solid #f0f0f0;
-  }
-
-  .right {
-    flex: 1
-  }
-}
-
-.action-new {
-  margin-right: 8px;
-}
-
-.top-action {
-  height: 60px;
-  display: flex;
-  align-items: center;
-  margin-left: 16px;
-
-  .ant-btn {
-    margin-right: 16px;
-  }
-}
-
-.action-btns {
-  display: flex;
-}
-
-.customTitleColRender {
-  display: flex;
-
-  .edit {
-    margin-left: 8px;
-    cursor: pointer;
-  }
-}
-
-.form-item-con {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .tree-title {
   position: relative;
 

@@ -101,7 +101,7 @@ const requestInterceptors = async (config: AxiosRequestConfig & { cType?: boolea
         config.params = {...config.params, currProjectId: pathname === '/' ? 0 : projectId, lang: i18n.global.locale.value};
     }
 
-    // console.log('=== request ===', config.url, config)
+    console.log('=== request ===', config.url, config)
     return config;
 }
 request.interceptors.request.use(
@@ -117,7 +117,7 @@ requestAgent.interceptors.request.use(
  * 响应拦截器
  */
 const responseInterceptors = async (axiosResponse: AxiosResponse) => {
-    // console.log('=== response ===', axiosResponse.config.url, axiosResponse)
+    console.log('=== response ===', axiosResponse.config.url, axiosResponse)
     const res: ResponseData = axiosResponse.data;
     // 如果是无界环境，响应头里有token，需要更新本地token
     const {authorization} = axiosResponse?.headers;
@@ -147,7 +147,7 @@ requestAgent.interceptors.response.use(
  * 异常处理程序
  */
 const errorHandler = (axiosResponse: AxiosResponse) => {
-    // console.log('=== ERROR ===', axiosResponse)
+    console.log('=== ERROR ===', axiosResponse)
 
     if (!axiosResponse) axiosResponse = {status: 500} as AxiosResponse
 

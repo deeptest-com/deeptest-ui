@@ -69,9 +69,9 @@ function flattenTree(tree) {
     return nodes;
 }
 
-function findParentIds(nodeId, tree) {
+export function findParentIds(nodeId, tree) {
     let current: any = tree.find(node => node.id === nodeId);
-    const parentIds: Array<string> = [];
+    const parentIds: Array<any> = [];
     while (current && current.parentId) {
         parentIds.unshift(current.parentId); // unshift 方法可以将新元素添加到数组的开头
         current = tree.find(node => node.id === current.parentId);
@@ -133,4 +133,23 @@ function hasChildrenByKeyword(node, keyword, field = 'title') {
     traverse(node);
     return result;
 }
+
+export function findPath(nodeId: number, nodes:any[]) :number[] {
+
+    for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        if (node.id === nodeId) {
+            return [node.id];
+        }
+        if (node.children) {
+            const path = findPath(nodeId, node.children);
+            if (path.length > 0) {
+                return [node.id, ...path];
+            }
+        }
+    }
+
+    return []
+   
+} 
 

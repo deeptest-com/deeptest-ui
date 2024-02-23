@@ -185,8 +185,8 @@ export async function getSchemaList(data: SchemaListReqParams): Promise<any> {
 export async function getSchemaDetail(data: SchemaDetailReqParams): Promise<any> {
     return request({
         url: `/serves/schema/detail`,
-        method: 'post',
-        data: data
+        method: 'get',
+        params: data
     });
 }
 /**
@@ -440,10 +440,11 @@ export async function getMock(): Promise<any> {
     });
 }
 
-export async function getVarsByEnv(envId: number): Promise<any> {
+export async function getVarsByEnv(envId): Promise<any> {
     return request({
-        url: `/environments/envVars/byEnv?envId=${envId}`,
-        method: 'get'
+        url: `/environments/envVars/byEnv`,
+        method: 'get',
+        params: {envId}
     })
 }
 

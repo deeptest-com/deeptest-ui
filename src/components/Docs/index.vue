@@ -85,6 +85,7 @@ const serviceList = computed(() => {
           ...interfaceItem,
           endpointInfo: endpoint,
           serveInfo: item,
+          components:props?.data?.components,
           serveId: item.id,
         });
       })
@@ -181,6 +182,8 @@ function changeVersion(docId) {
 
     .left {
       margin-left: 12px;
+      height: 100%;
+      overflow-y: scroll;
     }
 
     .only-docs {

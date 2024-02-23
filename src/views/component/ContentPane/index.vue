@@ -66,7 +66,6 @@ const handlePaneResize = (...args) => {
     }
 
     .left {
-      overflow-y: scroll;
       position: relative;
       min-width: 150px;
       width: 250px;

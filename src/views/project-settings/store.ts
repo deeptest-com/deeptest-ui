@@ -592,7 +592,7 @@ const StoreModel: ModuleType = {
         },
 
         async deleteSchema({ dispatch }, data: BasicSchemaParams) {
-            const { id, serveId, name } = data;
+            const { id, projectId, name } = data;
             const res = await deleteSchema(id);
             if (res.code === 0) {
                 notifySuccess('删除成功');
@@ -602,11 +602,11 @@ const StoreModel: ModuleType = {
             }
         },
         async copySchema({ dispatch }, params: BasicSchemaParams) {
-            const { id, serveId, name } = params;
+            const { id, projectId, name } = params;
             const res = await copySchema(id);
             if (res.code === 0) {
                 notifySuccess('复制成功');
-                await dispatch('getSchemaList', { serveId, name });
+                await dispatch('getSchemaList', { projectId, name });
             } else {
                 notifyError('复制失败');
             }
@@ -630,8 +630,8 @@ const StoreModel: ModuleType = {
             }
             return null;
         },
-        async generateExample({ dispatch }, { data,serveId }: BasicSchemaParams) {
-            const res = await schema2example({ data,serveId });
+        async generateExample({ dispatch }, { data,projectId }: BasicSchemaParams) {
+            const res = await schema2example({ data,projectId });
             if (res.code === 0) {
                 return res.data;
             }

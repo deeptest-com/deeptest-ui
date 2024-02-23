@@ -2,176 +2,201 @@
   <a-popover :title="null"
              trigger="click"
              v-model:visible="visible"
+             :destroyTooltipOnHide="true"
              :overlayClassName="'data-type-setting-container'">
     <template #content>
-      <div class="content" v-for="(tabs,tabsIndex) in tabsList" :key="tabsIndex" v-show="!(activeTabsIndex > 0 && tabsIndex > 0)">
-        <div class="header">
-          <div class="item"
-               v-for="(tab,tabIndex) in tabs"
-               @click="() => {
-                 if(isDisabled){
-                    return;
-                 }
-                  selectTab(tabs,tabIndex)
-               }"
-               :class="tab.active ? 'active' : ''"
-               :key="tab.value">
-            {{ tabsIndex === 0 ? tab.label : tab.subLabel }}
+      <div class="data-type-setting-popover-container" v-on-click-outside="clickOutside">
+        <div class="content" v-for="(tabs,tabsIndex) in tabsList" :key="tabsIndex" v-show="!(activeTabsIndex > 0 && tabsIndex > 0)">
+          <div class="header">
+            <div class="item"
+                v-for="(tab,tabIndex) in tabs"
+                @click="() => {
+                  if(isDisabled){
+                      return;
+                  }
+                    selectTab(tabs,tabIndex)
+                }"
+                :class="tab.active ? 'active' : ''"
+                :key="tab.value">
+              {{ tabsIndex === 0 ? tab.label : tab.subLabel }}
+            </div>
           </div>
-        </div>
-        <div class="main">
-          <div class="item"
-               v-for="(tab,tabIndex) in tabs"
-               v-show="tab.active"
-               :key="tab.value">
-            <a-radio-group
-                :size="'small'"
-                class="select-type-btn"
-                v-if="tab.active"
-                :disabled="isDisabled"
-                v-model:value="tab.value"
-                @change="(event) => changeType(tabsIndex,tab, event)"
-                button-style="solid">
-              <a-radio-button
-                  v-for="item in tab.props"
-                  :key="item.value"
-                  :value="item.value">{{ item.label }}
-              </a-radio-button>
-            </a-radio-group>
-            <!-- ::::基本类型设置 -->
-            <a-form :layout="'vertical'" v-if="tab.type === 'type' && tab.active">
-              <div v-for="(item,itemIndex) in tab.props" :key="itemIndex">
-                <div v-if="item.value === tab.value">
-                  <div class="card-title">{{ item.props.label }}</div>
-                  <a-row
-                      class="card-content"
-                      type="flex"
-                      justify="space-between"
-                      align="top">
-                    <a-col class="col" v-for="opt in item.props.options" :span="11" :key="opt.name">
-                      <a-form-item
-                          class="col-form-item"
-                          :labelAlign="'right'"
-                          :label="opt.label">
-                        <a-select
-                            :disabled="isDisabled"
-                            v-if="opt.component === 'selectTag'"
-                            v-model:value="opt.value"
-                            mode="tags"
-                            :placeholder="opt.placeholder"
-                        />
-                        <a-select
-                            v-if="opt.component === 'select'"
-                            v-model:value="opt.value"
-                            :disabled="isDisabled"
-                            :options="opt.options"
-                            :placeholder="opt.placeholder"
-                        />
-                        <a-input
-                            v-if="opt.component === 'input'"
-                            v-model:value="opt.value"
-                            :disabled="isDisabled"
-                            :placeholder="opt.placeholder"
-                        />
-                        <a-input-number
-                            v-if="opt.component === 'inputNumber'"
-                            id="inputNumber"
-                            :disabled="isDisabled"
-                            :placeholder="opt.placeholder"
-                            v-model:value="opt.value"
-                        />
-                        <a-switch
-                            v-if="opt.component === 'switch'"
-                            :disabled="isDisabled"
-                            v-model:checked="opt.value"/>
-                      </a-form-item>
-                    </a-col>
-                  </a-row>
+          <div class="main">
+            <div class="item"
+                v-for="(tab,tabIndex) in tabs"
+                v-show="tab.active"
+                :key="tab.value">
+              <a-radio-group
+                  :size="'small'"
+                  class="select-type-btn"
+                  v-if="tab.active"
+                  :disabled="isDisabled"
+                  v-model:value="tab.value"
+                  @change="(event) => changeType(tabsIndex,tab, event)"
+                  button-style="solid">
+                <a-radio-button
+                    v-for="item in tab.props"
+                    :key="item.value"
+                    :value="item.value">{{ item.label }}
+                </a-radio-button>
+              </a-radio-group>
+              <!-- ::::基本类型设置 -->
+              <a-form :layout="'vertical'" v-if="tab.type === 'type' && tab.active">
+                <div v-for="(item,itemIndex) in tab.props" :key="itemIndex">
+                  <div v-if="item.value === tab.value">
+                    <div class="card-title">{{ item.props.label }}</div>
+                    <a-row
+                        class="card-content"
+                        type="flex"
+                        justify="space-between"
+                        align="top">
+                      <a-col class="col" v-for="opt in item.props.options" :span="11" :key="opt.name">
+                        <a-form-item
+                            class="col-form-item"
+                            :labelAlign="'right'"
+                            :label="opt.label">
+                          <a-select
+                              :disabled="isDisabled"
+                              v-if="opt.component === 'selectTag'"
+                              v-model:value="opt.value"
+                              mode="tags"
+                              :placeholder="opt.placeholder"
+                          />
+                          <a-select
+                              v-if="opt.component === 'select'"
+                              v-model:value="opt.value"
+                              :disabled="isDisabled"
+                              :options="opt.options"
+                              :placeholder="opt.placeholder"
+                          />
+                          <a-input
+                              v-if="opt.component === 'input'"
+                              v-model:value="opt.value"
+                              :disabled="isDisabled"
+                              :placeholder="opt.placeholder"
+                          />
+                          <a-input-number
+                              v-if="opt.component === 'inputNumber'"
+                              id="inputNumber"
+                              :disabled="isDisabled"
+                              :placeholder="opt.placeholder"
+                              v-model:value="opt.value"
+                          />
+                          <a-switch
+                              v-if="opt.component === 'switch'"
+                              :disabled="isDisabled"
+                              v-model:checked="opt.value"/>
+                        </a-form-item>
+                      </a-col>
+                    </a-row>
+                  </div>
                 </div>
-              </div>
-            </a-form>
-            <!-- ::::引用类型设置 -->
-            <a-form :layout="'vertical'" style="margin-bottom: 16px;" v-if="tab.type === '$ref' && tab.active">
-              <a-form-item
-                  class="col-form-item"
-                  :labelAlign="'right'"
-                  :label="'请选择组件'">
-                <a-select
-                    :options="refsOptions"
-                    :disabled="isDisabled"
-                    @change="(e) => {
-                      changeRef(tabsIndex,tabIndex,e);
-                    }"
-                    show-search
-                    allowClear
-                    @search="searchRefs"
-                    :value="tab.value || null"
-                    placeholder="Select Components"
-                    style="width: 100%"/>
-              </a-form-item>
-            </a-form>
-            <!-- ::::组合schema -->
-            <a-form :layout="'vertical'" style="margin-bottom: 16px;" v-if="tab.type === 'combine' && tab.active">
-              <a-form-item
-                  class="col-form-item"
-                  :labelAlign="'right'"
-                  :label="'请选择复合关键字'">
-                <a-select
-                    :options="combineSchemaOpts"
-                    :disabled="isDisabled"
-                    @change="(e) => {
-                      changeCombineType(tabsIndex,tabIndex,e);
-                    }"
-                    show-search
-                    allowClear
-                    @search="searchRefs"
-                    :value="tab.value || null"
-                    placeholder="Select an option below to combine your schemas"
-                    style="width: 100%"/>
-              </a-form-item>
+              </a-form>
+              <!-- ::::引用类型设置 -->
+              <a-form :layout="'vertical'" style="margin-bottom: 16px;" v-if="tab.type === '$ref' && tab.active">
+                <a-form-item
+                    class="col-form-item"
+                    :labelAlign="'right'"
+                    :label="'请选择组件'">
+                  <a-select
+                      :options="refsOptions"
+                      :disabled="isDisabled"
+                      @change="(e) => {
+                        changeRef(tabsIndex,tabIndex,e);
+                      }"
+                      show-search
+                      allowClear
+                      @search="searchRefs"
+                      :value="tab.value || null"
+                      placeholder="Select Components"
+                      :getPopupContainer="(triggerNode) => getPopupContainer(triggerNode)"
+                      :filter-option="false"
+                      style="width: 100%"/>
+                </a-form-item>
+              </a-form>
+              <!-- ::::组合schema -->
+              <a-form :layout="'vertical'" style="margin-bottom: 16px;" v-if="tab.type === 'combine' && tab.active">
+                <a-form-item
+                    class="col-form-item"
+                    :labelAlign="'right'"
+                    :label="'请选择复合关键字'">
+                  <a-select
+                      :options="combineSchemaOpts"
+                      :disabled="isDisabled"
+                      @change="(e) => {
+                        changeCombineType(tabsIndex,tabIndex,e);
+                      }"
+                      show-search
+                      allowClear
+                      :value="tab.value || null"
+                      :getPopupContainer="(triggerNode) => getPopupContainer(triggerNode)"
+                      placeholder="Select an option below to combine your schemas"
+                      style="width: 100%"/>
+                </a-form-item>
 
-              <div style="margin-top: 12px;margin-left: 20px;">
-                <ul>
-                  <li><a-typography-text type="secondary"><span class="form-item-info">all of：</span>根据所有子模式验证值</a-typography-text></li>
-                  <li><a-typography-text type="secondary"><span class="form-item-info">one of:</span> 根据其中一个子模式验证值</a-typography-text></li>
-                  <li><a-typography-text type="secondary"><span class="form-item-info">any of：</span>根据任意（一个或多个）子模式验证值</a-typography-text></li>
-                </ul>
-              </div>
-            </a-form>
+                <div style="margin-top: 12px;margin-left: 20px;">
+                  <ul>
+                    <li><a-typography-text type="secondary"><span class="form-item-info">all of：</span>根据所有子模式验证值</a-typography-text></li>
+                    <li><a-typography-text type="secondary"><span class="form-item-info">one of:</span> 根据其中一个子模式验证值</a-typography-text></li>
+                    <li><a-typography-text type="secondary"><span class="form-item-info">any of：</span>根据任意（一个或多个）子模式验证值</a-typography-text></li>
+                  </ul>
+                </div>
+              </a-form>
+            </div>
           </div>
         </div>
       </div>
     </template>
-    <a href="javascript:void(0)">
+    <a-button style="color: #1890ff" type="link" >
       {{ typesLabel }}
-    </a>
+    </a-button>
   </a-popover>
-  <a-tooltip>
+  <!-- <a-tooltip>
     <template #title>
       <span>{{`编辑组件 ${props?.value?.ref}`}}</span>
     </template>
     <span class="viewComponent" style="margin-left:4px" @click="goViewComponent">
       <LinkOutlined v-if="props?.value?.ref"/>
     </span>
-  </a-tooltip>
+  </a-tooltip> -->
 </template>
 <script lang="ts" setup>
-import {ref, defineProps, defineEmits, watch, reactive, toRaw, computed, onMounted} from 'vue';
+import {ref, defineProps, defineEmits, watch, computed} from 'vue';
 import {
   LinkOutlined
 } from '@ant-design/icons-vue';
 import {schemaSettingInfo, typeOpts, combineSchemaOpts, combineTypes} from "./config";
 import cloneDeep from "lodash/cloneDeep";
+import { SelectProps } from 'ant-design-vue/es/select';
 import {useStore} from "vuex";
 import {StateType as ServeStateType} from "@/store/serve";
 import debounce from "lodash.debounce";
 import { useRouter } from "vue-router";
+import { vOnClickOutside } from '@vueuse/components'
 import {useWujie} from "@/composables/useWujie";
-const props = defineProps(['value', 'serveId', 'isRefChildNode', 'isRoot']);
+import { findParentNodeByX } from '@/utils/dom';
+import { notifyError } from '@/utils/notify';
+
+const props = defineProps(['value', 'serveId','isRefChildNode', 'isRoot']);
 const emit = defineEmits(['change']);
+const store = useStore<{ Endpoint, ServeGlobal: ServeStateType, Schema }>();
+const schemaNodeTree = computed<any>(() => {
+  return store.state.Schema.schemaTreeData?.children;
+});
+const activeSchema = computed(() => store.state.Schema.activeSchema);
 const tabsList: any = ref([]);
 const visible: any = ref(false);
 const router = useRouter();
+
+const getPopupContainer = (triggerNode) => {
+  return findParentNodeByX(triggerNode.parentNode, { class: 'data-type-setting-popover-container' })
+}
+
+const clickOutside = (e) => {
+  // console.log(8322,e);
+  // debugger;
+  visible.value = false;
+}
 // 当前选中的顶层 tab index
 /**
  * 这里备注下：Components 和 Combine Schemas 两种类型，都是通过 tabsList[0] 来控制的，所以这里的 tabsIndex 也是通过 tabsList[0] 来控制的
@@ -234,7 +259,7 @@ function changeRef(tabsIndex, tabIndex, e) {
   if (e) {
     tabsList.value.splice(tabsIndex + 1);
   }
-}
+  }
 
 // ref 组件
 function changeCombineType(tabsIndex, tabIndex, e) {
@@ -296,7 +321,7 @@ function initTabsList(types: any, treeInfo: any) {
       defaultTabs[0].value = treeInfo?.type || 'string';
 
       defaultTabs[1].active = true;
-      defaultTabs[1].value = treeInfo?.ref;
+      defaultTabs[1].value = treeInfo?.ref.replace('#/components/schemas/', '');
 
       defaultTabs[2].active = false;
       defaultTabs[2].value = 'allOf';
@@ -323,12 +348,13 @@ function getValueFromTabsList(tabsList: any) {
     }
     let res: any = {};
     if (activeTab.type === '$ref') {
-      const selectedRef: any = refsOptions.value.find((ref: any) => ref.value === activeTab.value);
+      const selectedRef: any = refsOptions.value.find((ref: any) => ref.id === activeTab.value);
       res = {
         type: selectedRef?.type || '',
-        ref: activeTab.value || '',
+        ref: selectedRef?.ref || '',
         name: selectedRef?.name || '',
-        content: null
+        content: null,
+        refId: selectedRef?.id,
       };
     } else if (activeTab.type === 'combine') {
       res = {
@@ -350,23 +376,15 @@ function getValueFromTabsList(tabsList: any) {
   })
   return result;
 }
-
-
-const store = useStore<{ Endpoint, ServeGlobal: ServeStateType }>();
 const refsOptions: any = ref([]);
 
-async function searchRefs(keyword) {
-  //TODO 加缓存，否则会重复拿数据
-  debounce(async () => {
-    refsOptions.value = await store.dispatch('Endpoint/getAllRefs', {
-      "serveId": props.serveId,
-      page: 1,
-      name: keyword,
-      pageSize: 20
-    });
-  }, 500)();
-}
-
+const searchRefs = debounce(async (keyword) => {
+  const { result }: any = await store.dispatch('Endpoint/getAllRefs', {
+    name: keyword,
+    page: 1,
+  });
+  refsOptions.value = result || [];
+}, 300);
 
 // const {isWujieEnv} = useWujie();
 const {projectName,parentOrigin,isWujieEnv,isInLeyanWujieContainer} = useWujie();
@@ -378,21 +396,53 @@ const {projectName,parentOrigin,isWujieEnv,isInLeyanWujieContainer} = useWujie()
 //   }
 //   return `${window.location.origin}/${projectNameAbbr}/IM/${endpointDetail.value?.serialNumber}`;
 // })
+
+const findNodeByRefId = (entityId: number, schemaNodes: any[]) => {
+  for (let i = 0; i < schemaNodes.length; i ++ ) {
+    if (schemaNodes[i].entityId === entityId) {
+      return schemaNodes[i];
+    } else if (Array.isArray(schemaNodes[i].children) && schemaNodes[i].children.length > 0){
+      return findNodeByRefId(entityId, schemaNodes[i].children);
+    }
+  }
+};
+
+const uniquArrray = (data) => {
+  const obj = {};
+  const _data = cloneDeep(data);
+  _data.forEach((e, index) => {
+    if (!obj[e.entityId]) {
+      obj[e.entityId] = e;
+    } else {
+      _data.splice(index, 1)
+    }
+  })
+  return _data;
+};
+
 /**
- * 查看组件
+ * 查看组件. 以下处理为临时方案
  * */
 function goViewComponent() {
-  console.log('goViewComponent', props.value);
-  const {type, ref} = props.value;
-  const refStr = encodeURIComponent(ref);
-  // 无界环境，使用父级域名跳转
-  if(isInLeyanWujieContainer){
-    const url = `${parentOrigin}/lyapi/${projectName}/settings?activeKey=service&sectab=service-component&serveId=${props.serveId}&refId=${refStr}`;
-    window.open(url, '_blank');
+  const { refId } = props.value;
+  // 找出schema对应的节点信息
+  const schemaNode = findNodeByRefId(refId, schemaNodeTree.value);
+  if (!schemaNode) {
+    notifyError('引用的数据组件不存在/已删除');
     return;
   }
-  const url = `${window.location.origin}/${router.currentRoute.value.params.projectNameAbbr}/project-setting/service-setting?sectab=service-component&serveId=${props.serveId}&refId=${refStr}`;
-  window.open(url, '_blank');
+  if (activeSchema.value.id) {
+    // 当前是处于 查看 组件tab中，去查看与该组件关联的组件信息， 无需跳转，新增tab即可
+    store.commit('Schema/setActiveSchema', { ...schemaNode, key: refId });
+    store.commit('Schema/setSchemas', uniquArrray([...store.state.Schema.schemas, schemaNode]));
+    store.dispatch('Schema/querySchema', { id: refId });
+  } else {
+    // 当前是 查看接口定义详情抽屉或单独详情页. 需单独打开一个页面展示
+    const { entityId, id, name }: any = schemaNode || {};
+    const prefixUrl = isInLeyanWujieContainer ? `${parentOrigin}/lyapi` : window.location.origin;
+    window.open(`${prefixUrl}/${router.currentRoute.value.params.projectNameAbbr}/IM?ref=${JSON.stringify(schemaNode ? { entityId, id, name } : {})}`, '_blank');
+  }
+  
 }
 
 watch(() => {
@@ -401,7 +451,7 @@ watch(() => {
 
   // 打开时，初始化数据
   if (visible.value) {
-    await searchRefs('');
+    searchRefs('');
   }
 
   let {type, types} = props.value || {};
@@ -437,7 +487,6 @@ watch(() => {
 
 .content {
   width: 480px;
-  overflow-y: scroll;
 }
 
 :deep(.ant-input-number) {
@@ -509,6 +558,7 @@ watch(() => {
   .ant-popover-inner {
     max-height: 480px;
     overflow-y: scroll;
+    scrollbar-width: none;
   }
 }
 </style>

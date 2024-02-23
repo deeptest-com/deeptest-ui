@@ -109,6 +109,7 @@ onMounted(async () => {
   const tempArr = imSerialNumber.split('-');
   const id = tempArr[tempArr.length - 1];
   try {
+    await store.dispatch('Schema/loadCategory');
     await store.dispatch('Endpoint/getEndpointDetail', { id });
     // 打开抽屉详情时，拉取mock表达式列表
     await store.dispatch('Endpoint/getMockExpressions');
