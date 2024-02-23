@@ -219,7 +219,6 @@ const submitForm = async () => {
   loading.value = true;
   validate()
       .then(() => {
-        console.error(formStateRef);
         store.dispatch("Project/saveProject", {
           ...formStateRef, 
           products: (formStateRef.products || []).map(e => e.value),

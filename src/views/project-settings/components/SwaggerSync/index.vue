@@ -1,7 +1,7 @@
 <template>
   <a-card :bordered="false">
     <template #title>
-      <a-button type="primary" @click="createOrUpdate">新建连接</a-button>
+      <a-button type="primary" @click="createOrUpdate">新建定时任务</a-button>
     </template>
     <BasicTable
       :sortable="false"
@@ -9,10 +9,18 @@
       :data-source="list"
       :columns="columns"
       :row-key="record => record.id"
-      :pagination="pagination"
+      :pagination="{
+        ...pagination,
+        onChange: (page) => {
+          listCronProject({ current: page });
+        },
+        onShowSizeChange: (_page, size) => {
+          listCronProject({ pageSize: size });
+        },
+      }"
     />
   </a-card>
-  <SyncTaskModal :visible="syncTaskVisible" @cancel="syncTaskVisible = false" :task-id="currTaskId" />
+  <SyncTaskModal :visible="syncTaskVisible" @cancel="syncTaskVisible = false" :task-id="currTaskId" @ok="addSyncTaskSuccess" />
 </template>
 
 <script setup lang="tsx">
@@ -25,11 +33,10 @@ import { momentUtc } from '@/utils/datetime';
 import SyncTaskModal from './syncTask.vue';
 import { notifyError, notifySuccess } from '@/utils/notify';
 import { confirmToDelete } from '@/utils/confirm';
-import create from '@ant-design/icons-vue/lib/components/IconFont';
+import TooltipCell from '@/components/Table/tooltipCell.vue';
 
 const store = useStore<{ ProjectSetting }>();
 const list = computed(() => {
-  console.error(store.state.ProjectSetting.cronProjectListResult);
   return store.state.ProjectSetting.cronProjectListResult.list;
 })
 
@@ -62,10 +69,7 @@ const copy = async (record) => {
   try {
     await store.dispatch('ProjectSetting/copyCronProject', { id: record.id });
     notifySuccess('克隆成功');
-    await store.dispatch('ProjectSetting/getCronProjectList', {
-      page: pagination.value.current,
-      pageSize: pagination.value.pageSize,
-    });
+    listCronProject();
   } catch (error) {
     notifyError('克隆失败');
   }
@@ -76,10 +80,7 @@ const del = async (record) => {
     try {
       await store.dispatch('ProjectSetting/delCronProject', { id: record.id });
       notifySuccess('删除成功');
-      await store.dispatch('ProjectSetting/getCronProjectList', {
-        page: pagination.value.current,
-        pageSize: pagination.value.pageSize,
-      });
+      listCronProject();
     } catch (error) {
       notifyError('删除失败');
     }
@@ -125,7 +126,9 @@ const columns: any = [{
   width: 150,
   key: 'name',
   customRender: ({ record }) => {
-    return <span style="color:#1677ff;cursor: pointer" onClick={() => createOrUpdate(record)}>{ record.name }</span>
+    return <span style="color:#1677ff;cursor: pointer;display:block" onClick={() => createOrUpdate(record)}>
+      <TooltipCell text={record.name} tip={record.name} />
+    </span>
   }
 },{
   title: '数据源',
@@ -168,13 +171,23 @@ const columns: any = [{
   }
 }];
 
+const listCronProject = (e?:{ current?: number, pageSize?: number }) => {
+  const { current, pageSize } = e || {};
+  store.dispatch('ProjectSetting/getCronProjectList', {
+    page: current || pagination.value.current,
+    pageSize: pageSize || pagination.value.pageSize,
+  })
+}
+
+const addSyncTaskSuccess = () => {
+  syncTaskVisible.value = false;
+  listCronProject();
+}
+
 const syncTaskVisible = ref(false);
 
 onMounted(() => {
-  store.dispatch('ProjectSetting/getCronProjectList', {
-    page: 1,
-    pageSize: 20,
-  })
+  listCronProject({ current: 1 });
 })
 
 </script>

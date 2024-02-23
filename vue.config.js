@@ -47,7 +47,6 @@ module.exports = {
       
     },
     chainWebpack(config) {
-        console.error(config.optimization.minimize);
         // 内置的 svg Rule 添加 exclude
         config.module
             .rule('svg')

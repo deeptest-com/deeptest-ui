@@ -42,7 +42,7 @@
               </template>
               <a-select
                 @focus="handleEngineerFocus"
-                v-model:value="modelRef.lecangReq.engineeringCode"
+                v-model:value="modelRef.lecangReq.engineering"
                 :options="cronEngineeringOptions"
                 show-search
                 :filter-option="filterOption"
@@ -69,6 +69,7 @@
                 :options="cronServesOptions"
                 :max-tag-count="3"
                 show-search
+                labelInValue
                 :filter-option="filterOption"
                 placeholder="请选择智能体厂服务">
                 <template v-if="fetching" #notFoundContent>
@@ -129,7 +130,7 @@
           <a-form-item label="所属服务" name="serveId">
             <SelectServe v-if="visible" @change="change" />
           </a-form-item>
-          <a-form-item name="sync">
+          <a-form-item name="syncType">
             <template v-slot:label>
             数据合并策略
             <a-tooltip placement="topLeft" arrow-point-at-center overlayClassName="memo-tooltip">
@@ -149,10 +150,10 @@
             </a-tooltip>
           </template>
           <a-select
-            v-model:value="modelRef.dataSyncType"
+            v-model:value="modelRef.syncType"
             :options="dataSyncTypeOpts"
             placeholder="请选择"/>
-          <span v-if="modelRef.dataSyncType === 1" class="form-tip"><WarningOutlined /> 完全覆盖会导致通过平台上的接口定义更新被覆盖，请谨慎使用</span>
+          <span v-if="modelRef.syncType === 1" class="form-tip"><WarningOutlined /> 完全覆盖会导致通过平台上的接口定义更新被覆盖，请谨慎使用</span>
           </a-form-item>
           <a-form-item name="cron">
             <template #label>
@@ -179,11 +180,11 @@
             </template>
             <a-input v-model:value="modelRef.cron" type="textarea" placeholder="请输入Linux定时任务表达式"/>
           </a-form-item>
-          <a-form-item label="接口路径规则" name="addServicePrefix" v-if="modelRef.driverType === 'lzos'">
+          <a-form-item label="接口路径规则" v-if="modelRef.source === 'lecang'">
             <div class="add-service-prefix">
-              <a-checkbox v-model:checked="modelRef.addServicePrefix">智能体所属服务名作为路径第一级</a-checkbox><br>
+              <a-checkbox v-model:checked="modelRef.lecangReq.addServicePrefix">智能体所属服务名作为路径第一级</a-checkbox><br>
             </div>
-            <span v-if="modelRef.addServicePrefix">
+            <span v-if="modelRef.lecangReq.addServicePrefix">
               接口路径导入为：/服务名/智能体名/消息名，例如：/acnsvr/Agent/CancelCollectItem
             </span>
             <span v-else>
@@ -316,10 +317,8 @@ const modelRef = reactive<any>({
   "cron": "* * * * *",
   "lecangReq": {
     "addServicePrefix": true,
-    "categoryId": null,
-    "engineeringCode": null,
+    "engineering": null,
     "extendOverride": ['extend_override', 'not_extend'],
-    serveId: null,
     "messageType": "",
     "overridable": "",
     "serviceCodes": [],
@@ -328,11 +327,11 @@ const modelRef = reactive<any>({
   "name": "",
   "source": null,
   "swaggerReq": {
-    "serveId": null,
-    "categoryId": null,
     "url": ""
   },
+  categoryId: null,
   syncType: 1,
+  serveId: null,
 });
 
 const searchValue = ref('');
@@ -388,7 +387,7 @@ const rulesRef = computed(() => ({
     "url": [
       {
         required: true,
-        message: modelRef.driverType === 'lzos' ? '请输入智能体厂环境url地址' : modelRef.openUrlImport ? '请输入Swagger Url' : '请选择文件',
+        message: '请输入智能体厂环境url地址',
       }
     ]
   },
@@ -396,7 +395,7 @@ const rulesRef = computed(() => ({
     "url": [
       {
         required: true,
-        message: modelRef.driverType === 'lzos' ? '请输入智能体厂环境url地址' : modelRef.openUrlImport ? '请输入Swagger Url' : '请选择文件',
+        message: '请输入Swagger Url',
       }
     ]
   }
@@ -405,8 +404,7 @@ const rulesRef = computed(() => ({
 const formRef = ref();
 
 const handleDriverTypeChanged = (v) => {
-  modelRef.dataSyncType = v === 'lzos' ? 1 : 2;
-  modelRef.filePath = '';
+  modelRef.syncType = v === 'lecang' ? 1 : 2;
 }
 
 /**
@@ -422,7 +420,6 @@ const handleEngineerFocus = async () => {
     .then(async () => {
       fetching.value = true;
       try {
-        
         const result = await store.dispatch('ProjectSetting/getCronAllEngineeringOptions', {
           url: modelRef.lecangReq.url,
         });
@@ -454,7 +451,7 @@ const handleServiceFocus = async () => {
       fetching.value = true;
       const result = await store.dispatch('ProjectSetting/getCronAllServesOptions', {
         url: modelRef.lecangReq.url,
-        engineeringCode: modelRef.lecangReq.engineeringCode,
+        engineering: modelRef.lecangReq.engineering,
       });
       cronServesOptions.value = (result || []).map(e => ({
         ...e,
@@ -484,18 +481,47 @@ function ok() {
     .validate()
     .then(async () => {
       confirmLoading.value = true;
-      console.log(modelRef);
-      // const res = await store.dispatch('ProjectSetting/getCronAllServesOptions', {
-      //   ...params,
-      //   categoryId: modelRef.categoryId || -1,
-      //   "sourceType": 2,
-      // });
-      // confirmLoading.value = false;
-      // if (res) {
-      //   notifyWarn('异步导入中，稍后请刷新列表查看导入结果');
-      //   reset();
-      //   emit('ok');
-      // }
+      const paramsData: any = {
+        "cron": modelRef.cron,
+        "configId": modelRef.configId,
+        "name": modelRef.name,
+        "source": modelRef.source,
+      }
+      if (modelRef.id) {
+        paramsData.id = modelRef.id;
+      }
+      const extraData = modelRef.source === 'lecang' ? {
+        "lecangReq": {
+          ...modelRef.lecangReq,
+          "categoryId": modelRef.categoryId,
+          "serveId": modelRef.serveId,
+          "syncType": modelRef.syncType,
+          extendOverride: modelRef.lecangReq.extendOverride.join(','),
+          serviceCodes: modelRef.lecangReq.serviceCodes.map(e => e.value).join(','),
+        },
+      } : {
+        "swaggerReq": {
+          ...modelRef.swaggerReq,
+          "serveId": modelRef.serveId,
+          "syncType": modelRef.syncType,
+          "categoryId": modelRef.categoryId,
+        }
+      }
+      console.log({
+        ...paramsData,
+        ...extraData,
+      });
+      try {
+      await store.dispatch('ProjectSetting/saveCronProject', {
+          ...paramsData,
+          ...extraData,
+        });
+        confirmLoading.value = false;
+        emit('ok');
+      } catch(err) {
+        confirmLoading.value = false;
+        return Promise.reject(err);
+      }
     })
     .catch((error: ValidateErrorEntity) => {
       console.log('error', error);
@@ -559,16 +585,6 @@ watch(() => {
   deep: true
 })
 
-function handleChangeFile() {
-  console.log('handleChangeFile', fileList.value)
-}
-
-function handleRemove() {
-  // console.log('handleRemove', fileList.value);
-  fileList.value = [];
-  modelRef.filePath = null;
-}
-
 const change = (val)=>{
   modelRef.serveId = val
 }
@@ -586,8 +602,12 @@ const autoImport = () => {
   console.log('立即导入');
 }
 
-const initCronProject = () => {
-
+const getLecangServeCodes = async (url, serviceCodes) => {
+  try {
+    const result = await store.dispatch('ProjectSetting/getCronAllServesList', { url });
+    modelRef.lecangReq.serviceCodes = result.filter(e => serviceCodes.split(',').includes(e.code)).map(e => ({ value: e.code, label: e.name }));
+  // eslint-disable-next-line no-empty
+  } catch(_) { }
 }
 
 const getCronProjectDetail = async () => {
@@ -598,7 +618,20 @@ const getCronProjectDetail = async () => {
       spinning.value = false;
     }, 200);
     spinning.value = false;
-    console.log(result);
+    const reqInfo = result.source === 'lecang' ? result.lecangReq : result.swaggerReq;
+    result.lecangReq.extendOverride = result.lecangReq.extendOverride.split(',');
+    // result.lecangReq.serviceCodes = result.lecangReq.serviceCodes.split(',');
+    if (result.lecangReq.url) {
+      const serviceCodes = result.lecangReq.serviceCodes;
+      result.lecangReq.serviceCodes = [];
+      getLecangServeCodes(result.lecangReq.url, serviceCodes);
+    }
+    Object.assign(modelRef, {
+      ...result,
+      syncType: reqInfo.syncType,
+      serveId: reqInfo.serveId,
+      categoryId: reqInfo.categoryId,
+    })
   } catch(error) {
     message.error('获取定时任务详情失败');
     spinning.value = false;
@@ -616,8 +649,6 @@ watch(() => {
 }, (val) => {
   if (val) {
     getCronProjectDetail();
-  } else {
-    initCronProject();
   }
 })
 
