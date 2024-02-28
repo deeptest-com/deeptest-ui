@@ -940,10 +940,14 @@ const StoreModel: ModuleType = {
             }
         },
 
-        async getCronProjectList({ commit, state }, payload) {
+        async getCronProjectList({ commit, state, dispatch }, payload) {
             const res: any = await getCronProjectList(payload);
             const { code, data } = res;
             if (code === 0) {
+                if (data.result.length === 0 && payload.page > 1) {
+                    dispatch('getCronProjectList', { ...payload, page: payload.page - 1 });
+                    return;
+                }
                 commit('setCronProjectList', {
                     list: data.result || [],
                     pagination: {

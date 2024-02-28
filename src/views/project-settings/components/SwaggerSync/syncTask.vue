@@ -30,7 +30,7 @@
             <a-form-item label="环境URL" :name="['lecangReq', 'url']">
               <a-input v-model:value="modelRef.lecangReq.url" placeholder="请输入智能体厂环境URL地址，如 https://lzos.rysaas.cn"/>
             </a-form-item>
-            <a-form-item label="所属工程">
+            <a-form-item label="所属工程" :name="['lecangReq', 'engineering']">
               <template v-slot:label>
                 所属工程
                 <a-tooltip placement="topLeft" overlayClassName="message-tooltip">
@@ -46,6 +46,7 @@
                 :options="cronEngineeringOptions"
                 show-search
                 :filter-option="filterOption"
+                @change="handleEngineerChanged"
                 placeholder="请选择乐仓工程">
                 <template v-if="fetching" #notFoundContent>
                   <a-spin size="small" />
@@ -389,7 +390,13 @@ const rulesRef = computed(() => ({
         required: true,
         message: '请输入智能体厂环境url地址',
       }
-    ]
+    ],
+    "engineering": [
+      {
+        required: true,
+        message: '请选择智能体厂所属工程',
+      }
+    ],
   },
   "swaggerReq": {
     "url": [
@@ -447,10 +454,15 @@ const handleEngineerFocus = async () => {
     })
 };
 
+const handleEngineerChanged = async () => {
+  modelRef.lecangReq.serviceCodes = [];
+}
+
 const handleServiceFocus = async () => {
   formRef.value
     .validateFields([
       'lecangReq.url',
+      'lecangReq.engineering',
     ])
     .then(async () => {
       fetching.value = true;
@@ -610,9 +622,9 @@ const autoImport = () => {
   console.log('立即导入');
 }
 
-const getLecangServeCodes = async (url, serviceCodes) => {
+const getLecangServeCodes = async (url, serviceCodes, engineering) => {
   try {
-    const result = await store.dispatch('ProjectSetting/getCronAllServesList', { url });
+    const result = await store.dispatch('ProjectSetting/getCronAllServesOptions', { url, engineering });
     modelRef.lecangReq.serviceCodes = result.filter(e => serviceCodes.split(',').includes(e.code)).map(e => ({ value: e.code, label: e.name }));
   // eslint-disable-next-line no-empty
   } catch(_) { }
@@ -632,7 +644,7 @@ const getCronProjectDetail = async () => {
     if (result.lecangReq.url) {
       const serviceCodes = result.lecangReq.serviceCodes;
       result.lecangReq.serviceCodes = [];
-      getLecangServeCodes(result.lecangReq.url, serviceCodes);
+      getLecangServeCodes(result.lecangReq.url, serviceCodes, result.lecangReq.engineering);
     }
     Object.assign(modelRef, {
       ...result,
@@ -657,6 +669,28 @@ watch(() => {
 }, (val) => {
   if (val) {
     getCronProjectDetail();
+  } else {
+    console.log('val', val);
+    Object.assign(modelRef, {
+      "cron": "* * * * *",
+      "lecangReq": {
+        "addServicePrefix": true,
+        "engineering": null,
+        "extendOverride": ['extend_override', 'not_extend'],
+        "messageType": "",
+        "overridable": "",
+        "serviceCodes": [],
+        "url": ""
+      },
+      "name": "",
+      "source": null,
+      "swaggerReq": {
+        "url": ""
+      },
+      categoryId: null,
+      syncType: 1,
+      serveId: null,
+    })
   }
 })
 

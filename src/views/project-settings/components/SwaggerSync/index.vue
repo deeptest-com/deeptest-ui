@@ -1,7 +1,7 @@
 <template>
   <a-card :bordered="false">
-    <template #title>
-      <a-button type="primary" @click="createOrUpdate">新建定时任务</a-button>
+    <template #extra>
+      <a-button type="primary" @click="createOrUpdate">新建</a-button>
     </template>
     <BasicTable
       :sortable="false"
@@ -148,7 +148,7 @@ const columns: any = [{
   width: 250,
   key: 'updatedAt',
   customRender: ({ record }) => {
-    return <span>{  momentUtc(record.updatedAt) }</span>
+    return <span>{  record.execTime ? momentUtc(record.execTime) : '' }</span>
   }
 },{
   title: '创建人',
