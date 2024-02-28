@@ -20,7 +20,7 @@
       }"
     />
   </a-card>
-  <SyncTaskModal :visible="syncTaskVisible" @cancel="closeSyncTask" :task-id="currTaskId" @ok="addSyncTaskSuccess" />
+  <SyncTaskModal v-if="syncTaskVisible" :visible="syncTaskVisible" @cancel="closeSyncTask" :task-id="currTaskId" @ok="addSyncTaskSuccess" />
 </template>
 
 <script setup lang="tsx">

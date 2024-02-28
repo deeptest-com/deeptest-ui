@@ -498,7 +498,11 @@ function ok() {
     .validate()
     .then(async () => {
       confirmLoading.value = true;
+      const taskInfo = cloneDeep(modelRef);
+      delete taskInfo.lecangReq;
+      delete taskInfo.swaggerReq;
       const paramsData: any = {
+        ...taskInfo,
         "cron": modelRef.cron,
         "configId": modelRef.configId,
         "name": modelRef.name,
@@ -532,9 +536,9 @@ function ok() {
         ...extraData,
       });
       try {
-      await store.dispatch('ProjectSetting/saveCronProject', {
-          ...paramsData,
-          ...extraData,
+        await store.dispatch('ProjectSetting/saveCronProject', {
+        ...paramsData,
+        ...extraData,
         });
         confirmLoading.value = false;
         emit('ok');
@@ -669,29 +673,9 @@ watch(() => {
 }, (val) => {
   if (val) {
     getCronProjectDetail();
-  } else {
-    console.log('val', val);
-    Object.assign(modelRef, {
-      "cron": "* * * * *",
-      "lecangReq": {
-        "addServicePrefix": true,
-        "engineering": null,
-        "extendOverride": ['extend_override', 'not_extend'],
-        "messageType": "",
-        "overridable": "",
-        "serviceCodes": [],
-        "url": ""
-      },
-      "name": "",
-      "source": null,
-      "swaggerReq": {
-        "url": ""
-      },
-      categoryId: null,
-      syncType: 1,
-      serveId: null,
-    })
   }
+}, {
+  immediate: true,
 })
 
 onMounted(() => {
