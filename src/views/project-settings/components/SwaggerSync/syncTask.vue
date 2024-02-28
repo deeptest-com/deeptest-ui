@@ -220,6 +220,7 @@ import Empty from '@/components/TableEmpty/index.vue';
 import SelectServe from '@/views/endpoint/components/SelectServe/index.vue';
 import { filterByKeyword } from '@/utils/tree';
 import { message } from 'ant-design-vue';
+import { isSaas } from '@/utils/comm';
 
 const store = useStore<{ Endpoint }>();
 const treeDataCategory = computed<any>(() => {
@@ -243,12 +244,14 @@ const driverTypeOpts = [
   {
     label: 'Swagger(OpenAPI)',
     value: 'swagger',
+    show: true,
   },
   {
     label: '智能体厂',
     value: 'lecang',
+    show: !isSaas()
   },
-];
+].filter(e => e.show);
 
 const messageTypeOpts = [
   {

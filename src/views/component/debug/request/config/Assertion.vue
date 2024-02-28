@@ -7,7 +7,7 @@
         </a-col>
 
         <a-col flex="100px" class="dp-right">
-          <Tips section="assert" title="针对响应的检查点断言" />
+          <Tips v-if="!isLeyan()" section="assert" title="针对响应的检查点断言" />
         </a-col>
       </a-row>
     </div>
@@ -111,6 +111,7 @@ import TooltipCell from "@/components/Table/tooltipCell.vue";
 import draggable from 'vuedraggable'
 import Tips from "@/components/Tips/index.vue";
 import {equalObjectByLodash} from "@/utils/object";
+import {isLeyan} from "@/utils/comm";
 
 const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);

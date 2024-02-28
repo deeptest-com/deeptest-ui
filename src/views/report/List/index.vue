@@ -18,7 +18,7 @@
                 return `共 ${total} 条数据`;
             },
         }"
-        :scroll="{ x: 1240 }"
+        :scroll="{ x: 1240, y }"
         class="dp-table">
         <template #serialNumber="{ record }">
             <span>{{ record.serialNumber }}</span>
@@ -59,6 +59,7 @@ import { DropdownActionMenu } from "@/components/DropDownMenu";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import useSharePage from "@/hooks/share";
 import usePermission from "@/composables/usePermission";
+import { useWujie } from "@/composables/useWujie";
 
 
 defineProps({
@@ -75,11 +76,18 @@ defineProps({
 const emits = defineEmits(['queryDetail', 'getList']);
 const { share }  = useSharePage();
 const { isCreator, hasPermission } = usePermission();
+const { isInLeyanWujieContainer } = useWujie();
 const store = useStore<{ Report: StateType, ProjectGlobal: ProjectStateType }>();
 // 分页数据
 let pagination = computed<PaginationConfig>(() => store.state.Report.listResult.pagination);
 // 表格选中项
 const selectedRowKeys = ref<Key[]>([]);
+const y = computed(() => {
+    if (isInLeyanWujieContainer) {
+        return window.parent.window.innerHeight - 240;
+    }
+    return null;
+});
 
 type Key = ColumnProps['key'];
 
