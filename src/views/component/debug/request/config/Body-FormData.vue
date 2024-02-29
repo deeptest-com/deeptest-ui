@@ -43,7 +43,7 @@
 
             <a-row v-if="item.type==='file'" class="file-col">
               <a-col flex="2" class="filename">{{getFileName(item.value)}}
-                <span class="delete-button" @click="clearFile(idx)">
+                <span v-if="getFileName(item.value)" class="delete-button" @click="clearFile(idx)">
                   <DeleteOutlined />
                 </span>
               </a-col>
