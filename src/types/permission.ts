@@ -23,6 +23,7 @@ export enum RouteMenuType {
     "DOCS" = "docs",
     "TS" = "ts",
     "TP" = "tp",
+    "PT" = "pt",
     "TR" = "tr",
 
     "PROJECT-SETTING" = "project-setting",

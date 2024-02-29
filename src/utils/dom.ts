@@ -345,3 +345,12 @@ export const findParentNodeByX = (
     }
     return findParentNodeByX(node.parentNode as Element, opts);
 };
+
+export function scrollTo(id: string): void {
+    const elem = document.getElementById(id)
+    if (elem) {
+        setTimeout(function(){
+            elem.scrollTop = elem.scrollHeight + 100;
+        },300);
+    }
+}

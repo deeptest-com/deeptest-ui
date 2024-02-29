@@ -33,6 +33,7 @@ export default {
   'index-layout.menu.debug': '快捷调试',
   'index-layout.menu.ts': '测试开发',
   'index-layout.menu.tp': '测试计划',
+  'index-layout.menu.pt': '性能测试',
   'index-layout.menu.tr': '测试报告',
   'index-layout.menu.project.setting': '项目设置',
   'index-layout.menu.project.setting.var': '全局变量',

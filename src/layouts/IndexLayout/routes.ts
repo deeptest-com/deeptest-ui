@@ -146,6 +146,25 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
   },
 
   {
+    title: 'index-layout.menu.pt',
+    path: '/:projectNameAbbr/PT',
+    redirect: '/:projectNameAbbr/PT',
+    component: BlankLayout,
+    children: [
+      {
+        icon: 'pt',
+        title: 'index-layout.menu.pt',
+        path: '',
+        component: () => import('@/views/performance/index.vue'),
+        hidden: false,
+        meta: {
+          code: 'p-api-tp'
+        }
+      },
+    ],
+  },
+
+  {
     title: 'index-layout.menu.tr',
     path: '/:projectNameAbbr/TR',
     redirect: '/:projectNameAbbr/TR',

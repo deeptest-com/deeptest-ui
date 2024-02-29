@@ -33,6 +33,7 @@ export enum VarScope {
 }
 
 export enum WsMsgCategory {
+    NotStart = "not_start",
     InProgress = "in_progress",
     End = "end",
     Result = "result",
