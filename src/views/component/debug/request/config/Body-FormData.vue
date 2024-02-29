@@ -41,28 +41,23 @@
                      v-model:value="item.value"
                      class="dp-bg-input-transparent" />
 
-            <a-row v-if="item.type==='file'">
-              <a-col flex="1" class="filename">{{getFileName(item.value)}}</a-col>
-
-              <a-col flex="100px" class="upload-buttons">
+            <a-row v-if="item.type==='file'" class="file-col">
+              <a-col flex="2" class="filename">{{getFileName(item.value)}}
+                <span class="delete-button" @click="clearFile(idx)">
+                  <DeleteOutlined />
+                </span>
+              </a-col>
+              <a-col flex="30px" class="upload-buttons">
                 <div v-if="isElectron">
-                  <a-button
-                        @click="uploadByElectron(idx)">
-                      <UploadOutlined />
-                  </a-button>
+                  <span
+                    @click="uploadByElectron(idx)">
+                    <UploadOutlined />
+                  </span>
                 </div>
 
-                <div v-else>
-                  <a-upload
-                            :beforeUpload="uploadByPage"
-                            :customRequest="afterUploadByPage(idx)"
-                            :showUploadList="false"
-                            accept="*.*">
-                    <a-button>
-                      <UploadOutlined/>
-                    </a-button>
-                  </a-upload>
-                </div>
+                <span v-else @click="uploadFile(idx)">
+                  <UploadOutlined/>
+                </span>
               </a-col>
             </a-row>
 
@@ -92,7 +87,7 @@
         </a-row>
       </div>
     </div>
-
+    <input class="dp-upload-file" ref="dpUploadFile" type="file"/>
   </div>
 </template>
 
@@ -118,7 +113,7 @@ import {getUrls} from "@/utils/request";
 import {getToken} from "@/utils/localToken";
 import {uploadRequest} from "@/utils/upload";
 const store = useStore<{  Debug: Debug }>();
-
+const dpUploadFile = ref();
 const debugData = computed<any>(() => store.state.Debug.debugData);
 
 const onFormDataChange = (idx) => {
@@ -134,16 +129,13 @@ const add = () => {
   debugData.value.bodyFormData.push({type: 'text'} as BodyFormDataItem)
 }
 const removeAll = () => {
-  console.log('removeAll', debugData.value.bodyFormData)
   debugData.value.bodyFormData = [{type: 'text'} as BodyFormDataItem]
 }
 
 const disable = (idx) => {
-  console.log('enable', idx)
   debugData.value.bodyFormData[idx].disabled = !debugData.value.bodyFormData[idx].disabled
 }
 const remove = (idx) => {
-  console.log('remove')
   debugData.value.bodyFormData.splice(idx, 1)
   const len = debugData.value.bodyFormData.length
   if (len == 0 || !!debugData.value.bodyFormData[len-1].name) {
@@ -157,7 +149,6 @@ const insert = (idx) => {
 
 const selectedItemIndex = ref(0)
 
-let uploadPath = ref('')
 const isElectron = ref(!!window.require)
 let ipcRenderer = undefined as any
 
@@ -166,7 +157,6 @@ if (isElectron.value && !ipcRenderer) {
   ipcRenderer = window.require('electron').ipcRenderer
 
   ipcRenderer.on(settings.electronMsgReplay, (event, result) => {
-    console.log('from electron: ', result)
     if (result.code === 0) {
       // data.value = result.data.data
       debugData.value.bodyFormData[selectedItemIndex.value].value = result.data.path
@@ -186,20 +176,20 @@ const uploadByElectron = async (index) => {
   }
   ipcRenderer.send(settings.electronMsg, data)
 }
-const uploadByPage = (file, fileList) => {
-  console.log('uploadByPage', file, fileList)
 
-  uploadRequest(file, {}).then((res) => {
-    uploadPath.value = res.path
-  })
+const uploadFile = (idx) => {
+  dpUploadFile.value.click();
+  dpUploadFile.value.onchange = e => {
+    const file = e.target.files[0];
 
-  return false
+    uploadRequest(file, {}).then((res) => {
+      debugData.value.bodyFormData[idx].value = res.path;
+    })
+  }
 }
-const afterUploadByPage = (index) => {
-  console.log('afterUploadByPage', index)
-  if (!uploadPath.value) return
 
-  debugData.value.bodyFormData[index].value = uploadPath.value
+const clearFile = (idx) => {
+  debugData.value.bodyFormData[idx].value = '';
 }
 
 const getFileName = (path) => {
@@ -208,10 +198,6 @@ const getFileName = (path) => {
   }
   return path.replace(/^.*[\\\\/]/, '')
 }
-
-onMounted(() => {
-  console.log('onMounted')
-})
 
 </script>
 
@@ -237,13 +223,8 @@ onMounted(() => {
       }
     }
     .ant-btn {
-      position: absolute;
-      right: 0;
-      z-index: 99;
-
       background: transparent;
       color: rgba(0, 0, 0, 0.65);
-      border-color: #d9d9d9;
       &:hover, &:active {
         background: transparent;
         color: rgba(0, 0, 0, 0.65);
@@ -254,6 +235,48 @@ onMounted(() => {
 
   .head-title {
     text-indent:10px;
+  }
+}
+
+.dp-upload-file {
+  width: 20px;
+  height: 20px;
+  position: fixed;
+  top: -1000px;
+  left: -1000px;
+  z-index: -1000;
+  opacity: 0;
+}
+
+.file-col {
+  .upload-buttons {
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: row;
+    padding-right: 16px;
+
+    span {
+      cursor: pointer;
+    }
+  }
+
+  .filename {
+    .delete-button {
+      position: absolute;
+      right: 16px;
+      top: 0;
+    }
+  }
+
+  .delete-button {
+    display: none;
+    cursor: pointer;
+  }
+
+  .filename:hover {
+    .delete-button {
+      display: block;
+    }
   }
 }
 
