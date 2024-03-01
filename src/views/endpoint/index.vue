@@ -221,6 +221,9 @@ import {loadCurl} from "@/views/component/debug/service";
 import {useWujie} from "@/composables/useWujie";
 import usePermission from '@/composables/usePermission';
 import { uniquArray } from "@/utils/array";
+import useCopy from "@/composables/useClipboard";
+
+const { copy } = useCopy();
 
 const { hasPermission, isCreator } = usePermission();
 const {share} = useSharePage();
@@ -526,12 +529,6 @@ async function clone(record: any) {
 async function copyCurl(record: any, method: string) {
   // console.log('copyCurl', record, method)
 
-  const clipboard = navigator.clipboard;
-  if (!clipboard) {
-    notifyWarn('您的浏览器不支持复制内容到剪贴板。');
-    return
-  }
-
   const resp = await loadCurl({
     endpointId: record.id,
     interfaceMethod: method,
@@ -539,7 +536,7 @@ async function copyCurl(record: any, method: string) {
     environmentId: environmentId.value,
   })
   if (resp.code == 0) {
-    navigator.clipboard.writeText(resp.data)
+    copy(resp.data)
     notifySuccess('已复制cURL命令到剪贴板。');
   }
 }
@@ -908,7 +905,7 @@ function showDiff(id: number) {
 /*************************************************
  * :::: schema数据组件相关
  ************************************************/
-const openSchemaTab = ref(false); 
+const openSchemaTab = ref(false);
 const schema = ref();
 
 const showSchema = () => {

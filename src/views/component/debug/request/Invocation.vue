@@ -126,11 +126,14 @@ import {getUuid} from "@/utils/string";
 import { setServeUrl } from "@/utils/url";
 import {StateType as ProjectStateType} from "@/store/project";
 import {loadProjectEnvVars} from "@/utils/cache";
+import useCopy from "@/composables/useClipboard";
 const {
   isDebugChange,
   debugChangePreScript,
   debugChangePostScript,
   debugChangeCheckpoint} = useIMLeaveTip();
+const { copy } = useCopy();
+
 const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, ProjectGlobal: ProjectStateType, Global: GlobalStateType, ServeGlobal, User }>();
 const currUser = computed(() => store.state.User.currentUser);
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -339,11 +342,6 @@ function validatePath() {
 
 async function copyCurl() {
   console.log('copyCurl', debugInfo.value)
-  const clipboard = navigator.clipboard;
-  if (!clipboard) {
-    notifyWarn('您的浏览器不支持复制内容到剪贴板。');
-    return
-  }
 
   const resp = await loadCurl({
     debugInterfaceId: debugInfo.value.debugInterfaceId,
@@ -354,7 +352,7 @@ async function copyCurl() {
     environmentId: environmentId.value,
   })
   if (resp.code == 0) {
-    navigator.clipboard.writeText(resp.data)
+    copy(resp.data)
     notifySuccess('已复制cURL命令到剪贴板。');
   }
 }
