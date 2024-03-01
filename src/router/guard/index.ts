@@ -1,5 +1,6 @@
 import store from '@/config/store';
 import { notifyError } from '@/utils/notify';
+import {useWujie} from "@/composables/useWujie";
 
 export function setupRouterGuard(router) {
   createProjectGuard(router);
@@ -8,7 +9,8 @@ export function setupRouterGuard(router) {
 
 function createProjectGuard(router) {
   router.beforeEach(async (to, _, next) => {
-    if (process.env.VUE_APP_DEPLOY_ENV === 'ly-saas') {
+    const {isWujieEnv} = useWujie();
+    if (process.env.VUE_APP_DEPLOY_ENV === 'ly-saas' && isWujieEnv) {
       window.location.replace(window.location.origin);
       return;
     }
