@@ -97,8 +97,8 @@ const StoreModel: ModuleType = {
                     list: newResult || [],
                     pagination: {
                         ...initState.listResult.pagination,
-                        current: params.page,
-                        pageSize: params.pageSize,
+                        current: page,
+                        pageSize: pageSize,
                         total: total || 0,
                     },
                 });
