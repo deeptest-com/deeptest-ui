@@ -114,9 +114,9 @@
             </div>
           </a-form-item>
         </template>
-        <a-form-item label="示例数据">
+        <!-- <a-form-item label="示例数据">
           <a-switch v-model:checked="formStateRef.includeExample"/>
-        </a-form-item>
+        </a-form-item> -->
 
         <a-form-item label="项目简介">
           <a-textarea v-model:value="formStateRef.desc"/>
