@@ -20,6 +20,7 @@ import {
     remove,
 } from './service';
 import {getNodeMap} from "@/services/tree";
+import {getNode} from "@/views/scenario/service";
 
 export interface StateType {
     listResult: QueryResult;
@@ -29,6 +30,9 @@ export interface StateType {
     treeDataCategory: any[];
     treeDataMapCategory: any,
     nodeDataCategory: any;
+
+    nodeData: any;
+    planCount: number,
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -43,6 +47,9 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setQueryParams: Mutation<StateType>;
         setList: Mutation<StateType>;
         setDetail: Mutation<StateType>;
+
+        setNode: Mutation<StateType>;
+        increasePlanCount: Mutation<StateType>;
     };
     actions: {
         loadCategory: Action<StateType, StateType>;
@@ -60,6 +67,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
         savePlan: Action<StateType, StateType>;
         removePlan: Action<StateType, StateType>;
         updateCategoryId: Action<StateType, StateType>;
+
+        getNode: Action<StateType, StateType>;
     }
 }
 
@@ -80,6 +89,9 @@ const initState: StateType = {
     },
     detailResult: {} as PerformanceTestPlan,
     queryParams: {},
+
+    nodeData: {},
+    planCount: 0,
 };
 
 const StoreModel: ModuleType = {
@@ -115,6 +127,13 @@ const StoreModel: ModuleType = {
         },
         setDetail(state, payload) {
             state.detailResult = payload;
+        },
+
+        setNode(state, data) {
+            state.nodeData = data;
+        },
+        increasePlanCount(state) {
+            state.planCount += 1;
         },
     },
     actions: {
@@ -231,7 +250,7 @@ const StoreModel: ModuleType = {
             }
         },
         async getPlan({commit}, id: number) {
-            commit('increasePerformanceTestPlanCount')
+            commit('increasePlanCount')
 
             if (id === 0) {
                 commit('setDetail', {
@@ -279,6 +298,24 @@ const StoreModel: ModuleType = {
                 return res;
             }
             return false;
+        },
+
+        async getNode({commit}, payload: any) {
+            try {
+                if (!payload) {
+                    commit('setNode', {});
+                    return true;
+                }
+
+                const response = await getNode(payload.id);
+                const {data} = response;
+
+
+                commit('setNode', data);
+                return true;
+            } catch (error) {
+                return false;
+            }
         },
     }
 };

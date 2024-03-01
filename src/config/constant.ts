@@ -1454,6 +1454,16 @@ export const DetailBreadcrumbMap = {
             breadcrumbName: '开发详情',
         }
     ],
+    'pt-detail': [
+        {
+            path: '/:projectNameAbbr/PT',
+            breadcrumbName: '性能测试',
+        },
+        {
+            path: '/:projectNameAbbr/PT/:tsSerialNumber',
+            breadcrumbName: '计划详情',
+        }
+    ],
     'plan-detail':  [
         {
             path: '/:projectNameAbbr/TP',

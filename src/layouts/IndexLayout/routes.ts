@@ -158,9 +158,20 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/performance/index.vue'),
         hidden: false,
         meta: {
-          code: 'p-api-tp'
+          code: 'p-api-pt'
         }
       },
+      {
+        icon: 'test',
+        title: 'index-layout.menu.pt',
+        path: ':ptSerialNumber',
+        component: () => import('@/views/performance/components/Detail/index.vue'),
+        hidden: false,
+        meta: {
+          code: 'p-api-pt',
+          type: 'pt-detail'
+        }
+      }
     ],
   },
 

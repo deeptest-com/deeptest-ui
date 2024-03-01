@@ -98,9 +98,18 @@
   </div>
 
   <Create :visible="isEditVisible"
-                  @cancel="isEditVisible = false"
-                  :onFinish="onEditFinish">
+          @cancel="isEditVisible = false"
+          :onFinish="onEditFinish">
   </Create>
+
+  <div v-if="drawerVisible">
+    <DrawerDetail
+        :destroyOnClose="true"
+        :visible="drawerVisible"
+        :drawerTabKey="drawerTabKey"
+        @refreshList="refreshList"
+        @close="drawerVisible = false;"/>
+  </div>
 
 </template>
 
@@ -124,11 +133,11 @@ import EditAndShowSelect from '@/components/EditAndShowSelect/index.vue';
 import Select from '@/components/Select/index.vue';
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 
-import {PaginationConfig, QueryParams, PerformanceTestPlan} from '../data.d';
 import {StateType as ProjectStateType} from "@/store/project";
-import {StateType} from "../store";
-
-import Create from "./create.vue";
+import {PaginationConfig, QueryParams, PerformanceTestPlan} from '../../data.d';
+import {StateType} from "../../store";
+import Create from "../Create/index.vue";
+import DrawerDetail from "../Drawer/index.vue";
 
 const { hasPermission, isCreator } = usePermission();
 const { share } = useSharePage();
@@ -160,7 +169,7 @@ const dropdownMenuList = [
   },
   {
     label: '分享链接',
-    action: (record) => share(record, 'TS'),
+    action: (record) => share(record, 'PT'),
     auth: '',
   },
   {
@@ -267,26 +276,10 @@ async function editPerformanceTestPlan(record: any, tab: string) {
   await store.dispatch('Performance/getPlan', record.id);
 }
 
-const execEnvId = ref<number | null>(null);
-async function cancelSelectExecEnv(record: any) {
-  selectEnvVisible.value = false;
-  selectedExecPerformanceTestPlan.value = null;
-  execEnvId.value = null;
-}
-
-async function selectExecEnv() {
-  selectEnvVisible.value = false;
-  execVisible.value = true;
-  await store.dispatch('Performance/getPerformanceTestPlan', selectedExecPerformanceTestPlan?.value?.id);
-  // 执行完后，会修改列表的字段，所以需要重新拉取列表
-  await refreshList();
-}
-
 async function execPerformanceTestPlan(record: any) {
   store.commit('Performance/setNode', {});
   selectEnvVisible.value = true;
   selectedExecPerformanceTestPlan.value = record;
-  execEnvId.value = record.currEnvId;
   await store.dispatch('PerformanceTestPlan/getPerformanceTestPlan', record.id);
 }
 
