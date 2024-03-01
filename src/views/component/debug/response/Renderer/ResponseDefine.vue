@@ -8,7 +8,7 @@
             </template>
         <QuestionCircleOutlined />
       </a-tooltip>&nbsp;
-      <a-switch size="small" v-model:checked="formState.open" @change="change"/>
+      <a-switch size="small" :checked="false" :disabled="true" @change="change"/>
    </div>
    <div class="codes">
     <a-select
@@ -17,6 +17,7 @@
         @change="select"
         :size="'small'"
         style="width: 80px;"
+        :disabled="true"
 
         ></a-select>
    </div>
