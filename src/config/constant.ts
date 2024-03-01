@@ -995,6 +995,9 @@ export const endpointStatus = new Map([[0, '未知'], [1, '设计中'], [2, '开
 export const scenarioStatus = new Map([['disabled', '已禁用'],['draft', '草稿'], ['executed', '已执行'], ['to_execute', '待执行']]);
 export const scenarioStatusColorMap = new Map([['disabled', 'error'],['draft', 'warning'], ['executed', 'success'], ['to_execute', 'processing']]);
 
+export const performanceTestPlanStatus = new Map([['disabled', '已禁用'],['draft', '草稿'], ['executed', '已执行'], ['to_execute', '待执行']]);
+export const performanceTestPlanStatusColorMap = new Map([['disabled', 'error'],['draft', 'warning'], ['executed', 'success'], ['to_execute', 'processing']]);
+
 export const scenarioPriority = new Map([['P0', 'P0'],["P1", "P1"], ["P2", "P2"], ["P3", "P3"], ["P4", "P4"]]);
 
 export const serveStatus = new Map([[0, '未知'], [1, '新建'], [2, '设计中'], [3, '已发布'], [4, '已禁用']])
@@ -1242,6 +1245,25 @@ export const scenarioStatusOptions = [
     }
 ];
 
+export const performanceTestPlanStatusOptions = [
+    {
+        label: '已禁用',
+        value: 'disabled'
+    },
+    {
+        label: '草稿',
+        value: 'draft'
+    },
+    {
+        label: '已执行',
+        value: 'executed'
+    },
+    {
+        label: '待执行',
+        value: 'to_execute'
+    }
+];
+
 export const priorityOptions = [
     {
         label: 'P0',
@@ -1357,7 +1379,7 @@ export const responseHeaderOptions = [
 ];
 
 /**
- * 测试计划，接口定义，测试开发的抽屉内tab切换列表 
+ * 测试计划，接口定义，测试开发的抽屉内tab切换列表
  */
 export const ScenarioTabList = [
     {
