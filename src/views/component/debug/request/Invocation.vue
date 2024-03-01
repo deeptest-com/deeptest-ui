@@ -197,7 +197,10 @@ const isShowSync = computed(() => {
 })
 
 const isShowCopyCurl = computed(() => {
-  const ret = usedBy === UsedBy.DiagnoseDebug || usedBy === UsedBy.InterfaceDebug || usedBy === UsedBy.CaseDebug
+  const ret = usedBy === UsedBy.DiagnoseDebug ||
+      usedBy === UsedBy.ScenarioDebug ||
+      usedBy === UsedBy.InterfaceDebug ||
+      usedBy === UsedBy.CaseDebug
 
   return ret
 })
