@@ -10,7 +10,7 @@ export function setupRouterGuard(router) {
 function createProjectGuard(router) {
   router.beforeEach(async (to, _, next) => {
     const {isWujieEnv} = useWujie();
-    if (process.env.VUE_APP_DEPLOY_ENV === 'ly-saas' && isWujieEnv) {
+    if (process.env.VUE_APP_DEPLOY_ENV === 'ly-saas' && !isWujieEnv) {
       window.location.replace(window.location.origin);
       return;
     }
