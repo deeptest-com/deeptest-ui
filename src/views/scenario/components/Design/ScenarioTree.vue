@@ -161,7 +161,9 @@ import TooltipCell from "@/components/Table/tooltipCell.vue";
 import {notifySuccess, notifyWarn} from "@/utils/notify";
 import {loadCurl} from "@/views/component/debug/service";
 import {StateType as DebugStateType} from "@/views/component/debug/store";
+import useCopy from "@/composables/useClipboard";
 
+const { copy } = useCopy();
 const store = useStore<{ Scenario: ScenarioStateType; Debug: DebugStateType; }>();
 const treeData = computed<any>(() => store.state.Scenario.treeData);
 const treeDataNeedRender = computed<any>(() => {
@@ -652,17 +654,7 @@ const copyNode = () => {
 }
 
 const copyCurl = async () => {
-  // store.commit("Global/setSpinning", true)
-
   const node = treeDataMap.value[targetModelId];
-  console.log('copyCurl', node)
-
-  const clipboard = navigator.clipboard;
-  if (!clipboard) {
-    notifyWarn('您的浏览器不支持复制内容到剪贴板。');
-    return
-  }
-
   const resp = await loadCurl({
     debugInterfaceId: node.entityId,
     caseId: node.id,
@@ -670,7 +662,7 @@ const copyCurl = async () => {
     environmentId: environmentId.value,
   })
   if (resp.code == 0) {
-    navigator.clipboard.writeText(resp.data)
+    copy(resp.data)
     notifySuccess('已复制cURL命令到剪贴板。');
   }
 }
