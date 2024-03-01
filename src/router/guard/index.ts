@@ -5,8 +5,13 @@ export function setupRouterGuard(router) {
   createProjectGuard(router);
 }
 
+
 function createProjectGuard(router) {
   router.beforeEach(async (to, _, next) => {
+    if (process.env.VUE_APP_DEPLOY_ENV === 'ly-saas') {
+      window.location.replace(window.location.origin);
+      return;
+    }
     const { params: { projectNameAbbr } } = to;
     let toPath = to.path;
     toPath = toPath.toLocaleUpperCase();
