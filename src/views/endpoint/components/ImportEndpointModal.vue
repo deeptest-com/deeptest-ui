@@ -201,16 +201,19 @@ const driverTypeOpts = [
   {
     label: 'Swagger(OpenAPI)',
     value: 'swagger',
+    show: true,
   },
   {
     label: 'Postman',
     value: 'postman',
+    show: true,
   },
   {
     label: '智能体厂',
     value: 'lzos',
+    show: process.env.VUE_APP_DEPLOY_ENV !== 'ly-saas',
   },
-];
+].filter(e => e.show);
 
 const dataSyncTypeOpts = [
   {
