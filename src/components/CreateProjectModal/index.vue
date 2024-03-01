@@ -13,25 +13,24 @@
     <div class="project-edit-main">
       <a-form
         class="custom-center-form"
-        ref="createProjectForm"
         :model="formStateRef"
-        :rules="rulesRef"
         :wrapper-col="wrapperCol"
         :label-col="{ style: { width: isLy ? '130px' : '82px' } }"
       >
-        <a-form-item label="项目名称" name="name">
+        <a-form-item label="项目名称" v-bind="validateInfos.name">
                     <a-input
               v-model:value="formStateRef.name"
               placeholder="请输入项目名称"
+              @blur="validate('name', { trigger: 'blur' }).catch(() => {})"
           />
         </a-form-item>
-        <a-form-item label="英文缩写" name="shortName">
+        <a-form-item label="英文缩写" v-bind="validateInfos.shortName">
                     <a-input 
             v-model:value="formStateRef.shortName"
             placeholder="大写英文字母开头,仅限字母和数字,<=10位"
-             />
+            @blur="validate('shortName', { trigger: 'blur' }).catch(() => {})" />
         </a-form-item>
-        <a-form-item label="logo" name="logo">
+        <a-form-item label="logo" v-bind="validateInfos.logo">
                     <div class="logo-picker">
             <div :class="{
                 'logo-picker-item': true,
@@ -45,11 +44,12 @@
             </div>
           </div>
         </a-form-item>
-        <a-form-item label="管理员" name="adminId">
+        <a-form-item label="管理员" v-bind="validateInfos.adminId">
           <a-select
               v-model:value="formStateRef.adminId"
               show-search
               placeholder="请选择管理员"
+              @blur="validate('adminId', { trigger: 'blur' }).catch(() => {})"
               optionFilterProp="label"
               :filter-option="filterOption"
           >
@@ -63,7 +63,7 @@
         </a-form-item>
         <template v-if="isLy">
           <!-- ly wujie环境 或 客户端下 展示所属产品  -->
-          <a-form-item name="products">
+          <a-form-item v-bind="validateInfos.products">
             <template #label>
               <div class="create-project-label">
                 所属产品
@@ -167,14 +167,16 @@ const projectInfo = {
   shortName: "",
   adminId: null,
   includeExample: true,
+};
+
+const wujieExtraInfo = {
   spaces: null,
   products: null,
   syncMembers: false,
-};
+}
 
-const formStateRef = reactive(props.formState || projectInfo);
+const formStateRef = reactive(props.formState || ( isLy ? { ...projectInfo, wujieExtraInfo } : projectInfo ));
 const loading = ref(false);
-const createProjectForm = ref();
 
 const filterOption = (input: string, option: any) => {
   let optionArr = option.key.split('-')
@@ -215,8 +217,9 @@ const {validate, validateInfos, resetFields} = useForm(
 );
 const submitForm = async () => {
   loading.value = true;
-  createProjectForm.value.validate()
+  validate()
       .then(() => {
+        console.error(formStateRef);
         store.dispatch("Project/saveProject", {
           ...formStateRef, 
           products: (formStateRef.products || []).map(e => e.value),
@@ -286,7 +289,7 @@ watch(() => props.visible,
   if (val) {
     store.dispatch("Project/getUserList");
     if (!props?.formState?.id) {
-      // createProjectForm.value.resetFields();
+      resetFields();
     }
 
   }

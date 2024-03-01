@@ -56,7 +56,6 @@
 
     <!-- 创建项目弹窗 -->
     <CreateProjectModal
-        v-if="createProjectModalVisible"
         :visible="createProjectModalVisible"
         @update:visible="createProjectModalVisible = false"
         @handleSuccess="handleCreateSuccess"
