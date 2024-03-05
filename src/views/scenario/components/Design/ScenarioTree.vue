@@ -9,7 +9,8 @@
             v-model:value="keywords"/>
         <TreeMenu @selectMenu="selectMenu" :treeNode="treeData?.[0]">
           <template #button>
-            <PlusOutlined class="plus-icon" @click.prevent.stop/>
+            <PlusOutlined v-if="designFor === DesignScenarioFor.FunctionalTest"
+                          class="plus-icon" @click.prevent.stop/>
           </template>
         </TreeMenu>
       </div>

@@ -10,6 +10,9 @@ export const loopIteratorTypes = ['processor_loop_time', 'processor_loop_in', 'p
  * 仅显示禁用和删除的操作的类型，即叶子节点
  * */
 export const onlyShowDisableAndDeleteTypes = [
+    'processor_performance_runners_default',
+    'processor_performance_scenarios_default',
+
     'processor_time_default',
     // cookie 相关
     'processor_cookie_get',
@@ -222,33 +225,37 @@ export const DESIGN_MENU_CONFIG = [
         title: '分割线',
         hideInNodeTypes: ['processor_root_default',...onlyShowDisableAndDeleteTypes],
     },
-    //    复制
+    //    克隆
     {
         key: 'copy',
         title: '克隆',
         // icon: 'arrange-disabled',
-        hideInNodeTypes: ['processor_root_default', 'processor_logic_else'],
+        hideInNodeTypes: ['processor_performance_runners_default', 'processor_performance_scenarios_default',
+                          'processor_root_default', 'processor_logic_else'],
     },
     //    禁用
     {
         key: 'disable',
         title: '禁用',
         // icon: 'arrange-disabled',
-        hideInNodeTypes: ['processor_root_default'],
+        hideInNodeTypes: ['processor_performance_runners_default', 'processor_performance_scenarios_default',
+                          'processor_root_default'],
     },
     //    禁用
     {
         key: 'enable',
         title: '启用',
         // icon: 'arrange-enable',
-        hideInNodeTypes: ['processor_root_default'],
+        hideInNodeTypes: ['processor_performance_runners_default', 'processor_performance_scenarios_default',
+                          'processor_root_default'],
     },
     // 删除
     {
         key: 'remove',
         title: '删除',
         // icon: 'arrange-delete',
-        hideInNodeTypes: ['processor_root_default'],
+        hideInNodeTypes: ['processor_performance_runners_default', 'processor_performance_scenarios_default',
+                          'processor_root_default'],
     },
 ]
 
@@ -461,6 +468,11 @@ export const needHandleShowName = [
     'processor_logic_if',
     'processor_logic_else',
     'processor_interface_default',
+
+    'processor_performance_runners_default',
+    'processor_performance_runner_default',
+    'processor_performance_scenarios_default',
+    'processor_performance_scenario_default',
 ]
 
 /**
