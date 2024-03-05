@@ -83,6 +83,7 @@ const rulesRef = reactive({
     {required: true, message: '请输入权重数字，系统会按其占合计的百分比来分配施压比率。', trigger: 'blur'},
   ],
 })
+
 const {resetFields, validate, validateInfos} = useForm(formState, rulesRef);
 
 const submit = debounce(async () => {

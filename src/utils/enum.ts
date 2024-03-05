@@ -6,12 +6,6 @@ export enum  ResultStatus {
     Unknown = "unknown",
 }
 
-export const designForKey = 'designFor'
-export enum DesignScenarioFor {
-    FunctionalTest = "functional_test",
-    PerformanceTest = "performance_test",
-}
-
 export enum UsedBy {
     InterfaceDebug = "interface_debug",
     ScenarioDebug = "scenario_debug",
@@ -22,6 +16,17 @@ export enum UsedBy {
     MockResp = "mock_resp",
 
     OpenAPIYaml = "openapi_yaml",
+}
+
+export const designForKey = 'designFor'
+export enum DesignScenarioFor {
+    FunctionalTest = "functional_test",
+    PerformanceTest = "performance_test",
+}
+
+export enum PerformanceGeneratorType {
+    Constant = "constant",
+    Ramp = "ramp",
 }
 
 export enum ProcessorInterfaceSrc {
@@ -268,3 +273,4 @@ export enum SourceType {
     SwaggerImport = 2,
     ThirdPartySync = 3
 }
+
