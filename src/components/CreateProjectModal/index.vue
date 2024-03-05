@@ -156,7 +156,7 @@ const isLy = isLeyan();
 const userListOptions = computed<SelectTypes["options"]>(
     () => (store.state.Project.userList || []).filter(e => isInLeyanWujieContainer ? e.username !== 'admin' : e.username !== '')
 );
-const isSaas = process.env.VUE_APP_DEPLOY_ENV;
+const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
 const lyProducts = ref([]);
 const lySpaces = ref([]);
 const wrapperCol = {span: 14};
