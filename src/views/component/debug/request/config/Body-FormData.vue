@@ -184,7 +184,7 @@ const uploadFile = (idx) => {
 
     uploadRequest(file, {}).then((res) => {
       debugData.value.bodyFormData[idx].value = res.path;
-      e.target.value = '';
+      dpUploadFile.value.value = '';
     })
   }
 }
