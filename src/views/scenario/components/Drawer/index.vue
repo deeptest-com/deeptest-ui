@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineEmits, defineProps, ref, watch,} from 'vue';
+import {computed, defineEmits, defineProps, provide, ref, watch,} from 'vue';
 import {useStore} from "vuex";
 import { useRouter } from 'vue-router';
 
@@ -70,12 +70,14 @@ import EnvSelector from "@/views/component/EnvSelector/index.vue";
 import ExecListDetail from "./ExecListDetail.vue";
 import DrawerLayout from "@/views/component/DrawerLayout/index.vue";
 import { DetailHeader, DetailTabHeader } from "@/views/component/DetailLayout";
-import {ProcessorInterfaceSrc} from "@/utils/enum";
+import {designForKey, DesignScenarioFor, ProcessorInterfaceSrc} from "@/utils/enum";
 import { ScenarioTabList } from '../../config';
 import {useWujie} from "@/composables/useWujie";
 const store = useStore<{ Debug: Debug, Scenario: ScenarioStateType, ProjectGlobal, ServeGlobal, Report }>();
 const detailResult: any = computed<Scenario>(() => store.state.Scenario.detailResult);
 const debugData = computed<any>(() => store.state.Debug.debugData);
+
+provide(designForKey, DesignScenarioFor.FunctionalTest)
 
 const props = defineProps({
   visible: {

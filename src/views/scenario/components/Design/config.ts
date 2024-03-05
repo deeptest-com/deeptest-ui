@@ -37,6 +37,19 @@ export const onlyShowDisableAndDeleteTypes = [
  * */
 export const DESIGN_MENU_CONFIG = [
     {
+        key: 'processor_performance_runner_default',
+        title: '添加执行节点',
+        showInNodeTypes: ['processor_performance_runners_default'],
+        children: [],
+    },
+    {
+        key: 'processor_performance_scenario_default',
+        title: '添加性能场景',
+        showInNodeTypes: ['processor_performance_scenarios_default'],
+        children: [],
+    },
+
+    {
         key: 'addInterface',
         title: ' 添加请求',
         // icon: 'arrange-interface',
@@ -254,6 +267,8 @@ export const DESIGN_TYPE_ICON_MAP = {
     'diagnose': 'arrange-debug',
     'custom': 'arrange-http',
     'curl': 'arrange-url',
+
+    'processor_performance_runner_default': 'arrange-group',
     'processor_group_default': 'arrange-group',
     "processor_variable_set": "arrange-add",
     "processor_variable_clear": "arrange-add",
@@ -284,15 +299,21 @@ export const DESIGN_TYPE_ICON_MAP = {
  * 根据 菜单的key 对应的分类，用于保存场景编排时，根据分类保存到不同的字段
  * */
 export const menuKeyMapToProcessorCategory = {
-    'processor_group_default': 'processor_group',
-    'processor_cookie_get': 'processor_cookie',
-    'processor_cookie_set': 'processor_cookie',
-    'processor_cookie_clear': 'processor_cookie',
     "add-child-interface-define": "processor_interface",
     "add-child-interface-case": "processor_interface",
     "add-child-interface-diagnose": "processor_interface",
     "add-child-interface-custom": "processor_interface",
     "add-child-interface-curl": "processor_interface",
+
+    'processor_performance_runners_default': "processor_performance_runners",
+    'processor_performance_scenarios_default': "processor_performance_scenarios",
+    'processor_performance_runner_default': "processor_performance_runner",
+    'processor_performance_scenario_default': "processor_performance_scenario",
+
+    'processor_group_default': 'processor_group',
+    'processor_cookie_get': 'processor_cookie',
+    'processor_cookie_set': 'processor_cookie',
+    'processor_cookie_clear': 'processor_cookie',
     "processor_loop_time": "processor_loop",
     "processor_loop_until": "processor_loop",
     "processor_loop_range": "processor_loop",
@@ -320,6 +341,9 @@ export const menuKeyMapToProcessorCategory = {
  * 展示目录竖线的场景编排类型，即目录类型
  * */
 export const showLineScenarioType = [
+    'processor_performance_runners_default',
+    'processor_performance_scenarios_default',
+
     'processor_group_default',
     'processor_loop_time',
     'processor_loop_until',
@@ -333,7 +357,9 @@ export const showLineScenarioType = [
  * 用于在场景执行日志在是否展示箭头
  * */
 export const showArrowScenarioType = [
-    // 'processor_interface_default',
+    'processor_performance_runners_default',
+    'processor_performance_scenarios_default',
+
     'processor_group_default',
     'processor_loop_time',
     'processor_loop_until',
@@ -383,6 +409,10 @@ export const scenarioTypeMapToText = {
     'diagnose': '接口调试导入',
     'custom': '自定义请求',
     'curl': 'cURL导入',
+
+    'processor_performance_runners_default': '性能测试执行节点',
+    'processor_performance_scenarios_default': '性能测试场景',
+
     'processor_group_default': '分组',
     'processor_time_default': '等待时间',
     'processor_print_default': '输出',

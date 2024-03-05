@@ -62,8 +62,7 @@ export async function loadExecResult(scenarioId): Promise<any> {
 }
 
 // scenario tree
-export async function loadScenario(scenarioId): Promise<any> {
-    const params = {scenarioId}
+export async function loadScenario(params): Promise<any> {
     return request({
         url: `/${apiPath}/load`,
         method: 'get',

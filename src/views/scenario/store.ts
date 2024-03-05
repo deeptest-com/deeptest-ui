@@ -41,6 +41,7 @@ import {
     send_request_post,
     assert_common,
 } from "@/views/component/debug/config";
+import {DesignScenarioFor} from "@/utils/enum";
 
 export interface StateType {
     scenarioId: number;
@@ -51,6 +52,7 @@ export interface StateType {
     detailResult: Scenario;
     queryParams: any;
 
+    designFor: DesignScenarioFor,
     treeData: Scenario[];
     treeDataMap: any,
     nodeData: any;
@@ -89,6 +91,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setQueryParams: Mutation<StateType>;
 
         // tree of scenario nodes
+        setDesignFor: Mutation<StateType>;
         setTreeData: Mutation<StateType>;
         setTreeDataMap: Mutation<StateType>;
         setTreeDataMapItem: Mutation<StateType>;
@@ -195,6 +198,7 @@ const initState: StateType = {
     detailResult: {} as Scenario,
     queryParams: {},
 
+    designFor: DesignScenarioFor.FunctionalTest,
     treeData: [],
     treeDataMap: {},
     nodeData: {},
@@ -249,6 +253,10 @@ const StoreModel: ModuleType = {
         },
         setReportsDetail(state, payload) {
             state.reportsDetail = payload;
+        },
+
+        setDesignFor(state, payload) {
+            state.designFor = payload;
         },
         setTreeData(state, data) {
             state.treeData = [data];
@@ -452,8 +460,8 @@ const StoreModel: ModuleType = {
         },
 
         // scenario tree
-        async loadScenario({commit}, scenarioId) {
-            const response = await loadScenario(scenarioId);
+        async loadScenario({commit, state}, scenarioId) {
+            const response = await loadScenario({designFor: state.designFor, scenarioId: scenarioId});
             if (response.code != 0) return;
 
             const {data} = response;

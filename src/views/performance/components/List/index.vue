@@ -136,13 +136,14 @@ import EditAndShowField from '@/components/EditAndShow/index.vue';
 import {StateType as ProjectStateType} from "@/store/project";
 import {PaginationConfig, QueryParams, PerformanceTestPlan} from '../../data.d';
 import {StateType} from "../../store";
+import {StateType as ScenarioStateType} from "@/views/scenario/store";
 import Create from "../Create/index.vue";
 import DrawerDetail from "../Drawer/index.vue";
 
 const { hasPermission, isCreator } = usePermission();
 const { share } = useSharePage();
 
-const store = useStore<{ Performance: StateType, ProjectGlobal: ProjectStateType, Project }>();
+const store = useStore<{ Performance: StateType, Scenario: ScenarioStateType, ProjectGlobal: ProjectStateType, Project }>();
 const userList = computed<any>(() => store.state.Project.userList);
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const nodeDataCategory = computed<any>(() => store.state.Performance.nodeDataCategory);
@@ -272,7 +273,9 @@ async function editPerformanceTestPlan(record: any, tab: string) {
   drawerVisible.value = true;
   drawerTabKey.value = tab;
 
-  await store.dispatch('Performance/getNode', null) // clear right page
+  await store.dispatch('Scenario/getNode', null) // clear right page
+  await store.commit('Scenario/increaseScenarioCount')
+
   await store.dispatch('Performance/getPlan', record.id);
 }
 

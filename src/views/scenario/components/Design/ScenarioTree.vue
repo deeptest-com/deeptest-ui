@@ -102,6 +102,7 @@
         @ok="handleEditModalOk"
         @cancel="handleEditModalCancel"/>
 
+    <!--  导入弹窗  -->
     <InterfaceSelectionFromDefine
         v-if="interfaceSelectionVisible && interfaceSelectionSrc.includes(ProcessorInterfaceSrc.Define)"
         :onFinish="endpointInterfaceIdsSelectionFinish"
@@ -112,27 +113,32 @@
         :onFinish="diagnoseInterfaceNodesSelectionFinish"
         :onCancel="interfaceSelectionCancel"/>
 
-    <!--  Curl导入弹窗  -->
-    <InterfaceImportFromCurl
-        v-if="interfaceSelectionVisible && interfaceSelectionSrc.includes(ProcessorInterfaceSrc.Curl)"
-        @onFinish="interfaceImportFromCurlFinish"
-        @onCancel="interfaceImportFromCurlCancel"/>
-
     <InterfaceSelectionFromDefineCase
         v-if="interfaceSelectionVisible && interfaceSelectionSrc.includes(ProcessorInterfaceSrc.Case)"
         :onFinish="endpointCaseSelectionFinish"
         :onCancel="endpointCaseSelectionCancel"/>
 
+    <InterfaceImportFromCurl
+        v-if="interfaceSelectionVisible && interfaceSelectionSrc.includes(ProcessorInterfaceSrc.Curl)"
+        @onFinish="interfaceImportFromCurlFinish"
+        @onCancel="interfaceImportFromCurlCancel"/>
+
   </div>
 </template>
 <script setup lang="ts">
-import {computed, onMounted, onUnmounted, ref, watch, getCurrentInstance} from "vue";
+import {computed, onMounted, onUnmounted, ref, watch, getCurrentInstance, inject} from "vue";
 import {Modal} from 'ant-design-vue';
 import {useStore} from "vuex";
 import debounce from "lodash.debounce";
 import {confirmToDelete} from "@/utils/confirm";
 import {filterTree, filterByKeyword} from "@/utils/tree";
-import {ProcessorInterface, ProcessorInterfaceSrc} from "@/utils/enum";
+import {
+  designForKey,
+  DesignScenarioFor,
+  ProcessorInterface,
+  ProcessorInterfaceSrc,
+  UsedBy
+} from "@/utils/enum";
 import {
   DESIGN_TYPE_ICON_MAP,
   menuKeyMapToProcessorCategory,
@@ -147,7 +153,6 @@ import {expandAllKeys, expandOneKey} from "@/services/tree";
 import TreeMenu from "./components/TreeMenu/index.vue";
 import IconSvg from "@/components/IconSvg";
 import {getExpandedKeys, setExpandedKeys} from "@/utils/cache";
-import {StateType as ScenarioStateType} from "../../store";
 import {isRoot, isInterface} from "../../service";
 import {Scenario} from "@/views/scenario/data";
 import EditModal from "./components/edit.vue";
@@ -160,8 +165,21 @@ import {showLineScenarioType, onlyShowDisableAndDeleteTypes, loopIteratorTypes} 
 import TooltipCell from "@/components/Table/tooltipCell.vue";
 import {notifyWarn} from "@/utils/notify";
 
-const store = useStore<{ Scenario: ScenarioStateType; }>();
+import {StateType as ScenarioStateType} from "../../store";
+import {StateType as PerformanceStateType} from "@/views/scenario/store";
+
+const designFor = inject(designForKey) as DesignScenarioFor
+
+const store = useStore<{ Scenario: ScenarioStateType; Performance: PerformanceStateType }>();
+const detailResult = computed<Scenario>(() => {
+  return designFor === DesignScenarioFor.FunctionalTest ?
+      store.state.Scenario.detailResult : store.state.Performance.detailResult
+})
 const treeData = computed<any>(() => store.state.Scenario.treeData);
+const treeDataMap = computed<any>(() => store.state.Scenario.treeDataMap)
+const scenarioProcessorIdForDebug = computed<number>(() => store.state.Scenario.scenarioProcessorIdForDebug)
+const scenarioCount = computed<any>(() => store.state.Scenario.scenarioCount)
+
 const treeDataNeedRender = computed<any>(() => {
   const children = cloneDeep(treeData.value?.[0]?.children);
   if (children?.length > 0) {
@@ -182,11 +200,6 @@ const showAddTip = computed(() => {
   return !children?.length;
 })
 
-const treeDataMap = computed<any>(() => store.state.Scenario.treeDataMap)
-const detailResult = computed<Scenario>(() => store.state.Scenario.detailResult)
-const scenarioProcessorIdForDebug = computed<number>(() => store.state.Scenario.scenarioProcessorIdForDebug)
-const scenarioCount = computed<any>(() => store.state.Scenario.scenarioCount)
-
 watch(scenarioCount, () => {
   console.log('watch scenarioCount', scenarioCount.value)
   selectedKeys.value = []
@@ -201,11 +214,9 @@ watch(treeData, () => {
   getExpandedKeysCall()
 })
 
-watch(() => {
-  return detailResult.value.id
-}, async (newVal) => {
+watch(() => {return detailResult.value.id}, async (newVal) => {
   if (newVal) {
-    // loadTree();
+    await store.commit('Scenario/setDesignFor', designFor);
     await store.dispatch('Scenario/loadScenario', newVal);
   }
 }, {
@@ -357,10 +368,13 @@ const menuClick = (menuKey: string, targetId: number) => {
  * 选中的菜单key，对应的处理器类型
  * */
 function selectMenu(menuInfo, treeNode) {
+  console.log('selectMenu', menuInfo, treeNode)
+
   targetModelId = treeNode?.id;
   const key = menuInfo.key;
   let mode = 'child';
   const processorType = key;
+
   // 检验必要字段
   if (!targetModelId) return;
   if (!key) return;
@@ -394,6 +408,7 @@ function selectMenu(menuInfo, treeNode) {
 
   const processorCategory = menuKeyMapToProcessorCategory[key];
   if (!processorCategory) return;
+
   const targetProcessorId = targetModelId
   const targetProcessorCategory = treeDataMap.value[targetModelId].entityCategory
   const targetProcessorType = treeDataMap.value[targetModelId].entityType
@@ -523,6 +538,7 @@ const addNode = (mode, processorCategory, processorType,
 
   // 如果是添加接口，会弹框选择接口类型
   if (processorCategory === 'interface' || processorCategory === 'processor_interface') { // show popup to select a interface
+
     interfaceSelectionSrc.value = processorType.substr(processorType.lastIndexOf('-') + 1)
     if (interfaceSelectionSrc.value === '' + ProcessorInterfaceSrc.Custom) { // show interface create popup
       currentNode.value = {

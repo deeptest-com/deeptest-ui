@@ -6,6 +6,12 @@ export enum  ResultStatus {
     Unknown = "unknown",
 }
 
+export const designForKey = 'designFor'
+export enum DesignScenarioFor {
+    FunctionalTest = "functional_test",
+    PerformanceTest = "performance_test",
+}
+
 export enum UsedBy {
     InterfaceDebug = "interface_debug",
     ScenarioDebug = "scenario_debug",

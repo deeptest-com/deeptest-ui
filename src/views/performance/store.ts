@@ -19,39 +19,42 @@ import {
     save,
     remove,
 } from './service';
+
 import {getNodeMap} from "@/services/tree";
-import {getNode} from "@/views/scenario/service";
+
+import {assert_common, send_request_get, send_request_post} from "@/views/component/debug/config";
+import {getSnippet} from "@/views/component/debug/service";
 
 export interface StateType {
-    listResult: QueryResult;
-    detailResult: PerformanceTestPlan;
-    queryParams: any;
-
+    // category tree
     treeDataCategory: any[];
     treeDataMapCategory: any,
     nodeDataCategory: any;
 
-    nodeData: any;
-    planCount: number,
+    // plan list
+    listResult: QueryResult;
+    detailResult: PerformanceTestPlan;
+    queryParams: any;
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
     state: StateType;
     mutations: {
+        // category tree
         setTreeDataCategory: Mutation<StateType>;
         setTreeDataMapCategory: Mutation<StateType>;
         setTreeDataMapItemCategory: Mutation<StateType>;
         setTreeDataMapItemPropCategory: Mutation<StateType>;
-        setNodeCategory: Mutation<StateType>;
 
+        // plan list
         setQueryParams: Mutation<StateType>;
         setList: Mutation<StateType>;
         setDetail: Mutation<StateType>;
 
-        setNode: Mutation<StateType>;
-        increasePlanCount: Mutation<StateType>;
+        setNodeCategory: Mutation<StateType>;
     };
     actions: {
+        // category tree
         loadCategory: Action<StateType, StateType>;
         getCategoryNode: Action<StateType, StateType>;
         createCategoryNode: Action<StateType, StateType>;
@@ -62,21 +65,23 @@ export interface ModuleType extends StoreModuleType<StateType> {
         saveTreeMapItemPropCategory: Action<StateType, StateType>;
         updateCategoryName: Action<StateType, StateType>;
 
+        // plan list
         listPlan: Action<StateType, StateType>;
         getPlan: Action<StateType, StateType>;
         savePlan: Action<StateType, StateType>;
         removePlan: Action<StateType, StateType>;
         updateCategoryId: Action<StateType, StateType>;
-
-        getNode: Action<StateType, StateType>;
     }
 }
 
 const initState: StateType = {
+    // category tree
     treeDataCategory: [],
     treeDataMapCategory: {},
     nodeDataCategory: {},
 
+    // plan list
+    queryParams: {},
     listResult: {
         list: [],
         pagination: {
@@ -88,10 +93,6 @@ const initState: StateType = {
         },
     },
     detailResult: {} as PerformanceTestPlan,
-    queryParams: {},
-
-    nodeData: {},
-    planCount: 0,
 };
 
 const StoreModel: ModuleType = {
@@ -101,6 +102,7 @@ const StoreModel: ModuleType = {
         ...initState
     },
     mutations: {
+        // category true
         setTreeDataCategory(state, data) {
             state.treeDataCategory = [data];
         },
@@ -119,6 +121,7 @@ const StoreModel: ModuleType = {
             state.nodeDataCategory = data;
         },
 
+        // plan list
         setQueryParams(state, payload) {
             state.queryParams = payload;
         },
@@ -127,13 +130,6 @@ const StoreModel: ModuleType = {
         },
         setDetail(state, payload) {
             state.detailResult = payload;
-        },
-
-        setNode(state, data) {
-            state.nodeData = data;
-        },
-        increasePlanCount(state) {
-            state.planCount += 1;
         },
     },
     actions: {
@@ -224,7 +220,7 @@ const StoreModel: ModuleType = {
             }
         },
 
-        // performance test plan
+        // plan list
         async listPlan({commit, dispatch}, params: QueryParams) {
             try {
                 const response: ResponseData = await query(params);
@@ -250,8 +246,6 @@ const StoreModel: ModuleType = {
             }
         },
         async getPlan({commit}, id: number) {
-            commit('increasePlanCount')
-
             if (id === 0) {
                 commit('setDetail', {
                     ...initState.detailResult,
@@ -298,24 +292,6 @@ const StoreModel: ModuleType = {
                 return res;
             }
             return false;
-        },
-
-        async getNode({commit}, payload: any) {
-            try {
-                if (!payload) {
-                    commit('setNode', {});
-                    return true;
-                }
-
-                const response = await getNode(payload.id);
-                const {data} = response;
-
-
-                commit('setNode', data);
-                return true;
-            } catch (error) {
-                return false;
-            }
         },
     }
 };

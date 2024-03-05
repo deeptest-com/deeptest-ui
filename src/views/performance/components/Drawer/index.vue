@@ -20,6 +20,7 @@
         <BasicInfo />
       </template>
 
+      <!-- 标签页头 -->
       <template #tabHeader>
         <DetailTabHeader
           :tab-list="PlanTabList"
@@ -32,40 +33,42 @@
         </DetailTabHeader>
       </template>
 
+      <!-- 标签内容 -->
       <template #tabContent>
         <div class="tab-pane" :style="activeKey !== '1' ? { padding: '16px'} : null">
           <Design v-if="activeKey === '1'" :id="detailResult?.id"/>
-
-<!--      <ExecList v-if="activeKey === '2'" @showDetail="showDetail"/>
-
-          <PlanList v-if="activeKey === '3'" :linked="true"/>-->
+          <!-- <ExecList v-if="activeKey === '2'" @showDetail="showDetail"/> -->
         </div>
       </template>
     </DrawerLayout>
 
-<!--<ScenarioExec :exec-drawer-visible="execDrawerVisible" @on-close="execDrawerVisible = false" />
-
-    <ExecListDetail :exec-list-detail-visible="execListDetailVisible" @on-close="execListDetailVisible = false"/>-->
+    <!--
+    <ScenarioExec :exec-drawer-visible="execDrawerVisible" @on-close="execDrawerVisible = false" />
+    <ExecListDetail :exec-list-detail-visible="execListDetailVisible" @on-close="execListDetailVisible = false" />
+    -->
   </div>
 </template>
 
 <script lang="ts" setup>
-import {computed, defineEmits, defineProps, ref, watch,} from 'vue';
+import {computed, defineEmits, defineProps, provide, ref, watch,} from 'vue';
 import {useStore} from "vuex";
 import { useRouter } from 'vue-router';
 
+import {useWujie} from "@/composables/useWujie";
 import DrawerLayout from "@/views/component/DrawerLayout/index.vue";
 import { DetailHeader, DetailTabHeader } from "@/views/component/DetailLayout";
 
+import { PlanTabList } from '../../config';
 import {PerformanceTestPlan} from "../../data";
 import {StateType} from "../../store";
 import BasicInfo from '../Detail/BasicInfo.vue';
-import Design from "../Design/index.vue"
+import Design from "@/views/scenario/components/Design/index.vue"
+import {designForKey, DesignScenarioFor} from "@/utils/enum";
 
-import { PlanTabList } from '../../config';
-import {useWujie} from "@/composables/useWujie";
 const store = useStore<{ Performance: StateType }>()
 const detailResult: any = computed<PerformanceTestPlan>(() => store.state.Performance.detailResult)
+
+provide(designForKey, DesignScenarioFor.PerformanceTest)
 
 const props = defineProps({
   visible: {

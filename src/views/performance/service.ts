@@ -3,7 +3,7 @@ import {QueryParams} from "./data";
 
 const apiPath = 'performanceTestPlans';
 
-// for management
+// plan list
 export async function query(params?: QueryParams): Promise<any> {
     return request({
         url: `/${apiPath}`,

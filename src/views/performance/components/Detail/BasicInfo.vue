@@ -1,6 +1,7 @@
 <template>
-  <a-descriptions :size="'small'" :title="null" :column="4">
+  <a-descriptions :size="'small'" :title="null">
     <a-descriptions-item label="创建人">{{ username(detailResult?.createUserName) }}</a-descriptions-item>
+
     <a-descriptions-item label="状态">
       <EditAndShowSelect
         :label="scenarioStatus.get(detailResult?.status) || '未设置'"
@@ -8,6 +9,7 @@
         :options="scenarioStatusOptions"
         @update="(val) => handleChange('status',val)" />
     </a-descriptions-item>
+
     <a-descriptions-item label="分类">
       <EditAndShowTreeSelect
           :label="categoryLabel"
@@ -17,11 +19,10 @@
                handleChange('categoryId',val)
             }"/>
     </a-descriptions-item>
-    <a-descriptions-item label=""></a-descriptions-item>
 
     <a-descriptions-item label="创建时间">{{ momentUtc(detailResult?.createdAt) }}</a-descriptions-item>
     <a-descriptions-item label="最近更新">{{ momentUtc(detailResult?.updatedAt) }}</a-descriptions-item>
-    <a-descriptions-item label="描述" :span="4">
+    <a-descriptions-item label="描述">
       <EditDescription :minRows="2" :maxRows="6" :description="detailResult.desc" @confirm="v => handleChange('desc', v)" />
     </a-descriptions-item>
   </a-descriptions>
@@ -29,20 +30,14 @@
 <script lang="ts" setup>
 
 import { defineEmits, computed } from 'vue';
-import {
-  scenarioStatus,
-  scenarioPriority,
-  scenarioStatusOptions,
-  priorityOptions,
-  testTypeMap,
-  testTypeOptions
-} from '@/config/constant';
+import {momentUtc} from '@/utils/datetime';
+import {scenarioStatus, scenarioPriority, scenarioStatusOptions, priorityOptions, testTypeMap, testTypeOptions} from '@/config/constant';
 import {useStore} from "vuex";
-import {PerformanceTestPlan} from "@/views/Performance/data";
 import EditAndShowSelect from '@/components/EditAndShowSelect/index.vue';
 import EditAndShowTreeSelect from '@/components/EditAndShowTreeSelect/index.vue';
 import EditDescription from '@/components/EditAndShow/descriptions.vue';
-import {momentUtc} from '@/utils/datetime';
+
+import {PerformanceTestPlan} from "@/views/Performance/data";
 
 const store = useStore<{ Performance,Project }>();
 const detailResult: any = computed<PerformanceTestPlan>(() => store.state.Performance.detailResult);
