@@ -275,7 +275,9 @@ export const DESIGN_TYPE_ICON_MAP = {
     'custom': 'arrange-http',
     'curl': 'arrange-url',
 
-    'processor_performance_runner_default': 'arrange-group',
+    'processor_performance_runner_default': 'arrange-performance-runner',
+    'processor_performance_scenario_default': 'arrange-performance-scenario',
+
     'processor_group_default': 'arrange-group',
     "processor_variable_set": "arrange-add",
     "processor_variable_clear": "arrange-add",
@@ -417,8 +419,8 @@ export const scenarioTypeMapToText = {
     'custom': '自定义请求',
     'curl': 'cURL导入',
 
-    'processor_performance_runners_default': '性能测试执行节点',
-    'processor_performance_scenarios_default': '性能测试场景',
+    'processor_performance_runner_default': '新节点',
+    'processor_performance_scenario_default': '新场景',
 
     'processor_group_default': '分组',
     'processor_time_default': '等待时间',
@@ -470,9 +472,7 @@ export const needHandleShowName = [
     'processor_interface_default',
 
     'processor_performance_runners_default',
-    'processor_performance_runner_default',
     'processor_performance_scenarios_default',
-    'processor_performance_scenario_default',
 ]
 
 /**
