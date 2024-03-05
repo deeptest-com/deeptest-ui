@@ -33,6 +33,9 @@
     <ProcessorDataDefault    v-else-if="selectedNode.processorType === 'processor_data_default'" />
     <ProcessorCustomCode v-else-if="selectedNode.processorType === 'processor_custom_code'" />
 
+    <ProcessorRunner v-else-if="selectedNode.processorType === 'processor_performance_runner_default'" />
+    <ProcessorScenario v-else-if="selectedNode.processorType === 'processor_performance_scenario_default'" />
+
     <span v-else>
       <a-empty style="margin-top: 100px;" :description="'请先在左侧目录上选择编排场景'"/>
     </span>
@@ -77,6 +80,9 @@ import ProcessorCookieClear from "./proccessors/cookie/clear.vue"
 
 import ProcessorDataDefault   from "./proccessors/data/default.vue"
 import ProcessorCustomCode from "./proccessors/custom_code/default.vue"
+
+import ProcessorRunner   from "./proccessors/performance/runner.vue"
+import ProcessorScenario from "./proccessors/performance/scenario.vue"
 
 const router = useRouter();
 const store = useStore<{ Scenario: ScenarioStateType; }>();
