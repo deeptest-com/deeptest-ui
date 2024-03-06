@@ -1,5 +1,5 @@
 <template>
-  <div class="processor_performance_ scenario-main  dp-processors-container">
+  <div class="processor_performance_scenario-main dp-processors-container">
     <ProcessorHeader />
 
     <a-card :bordered="false">
@@ -19,6 +19,51 @@
                      label="虚拟用户数">
           <a-input-number v-model:value="modelRef.target" :min="1" class="dp-per100"
                           @blur="validate('target', { trigger: 'blur' }).catch(() => {})" />
+        </a-form-item>
+
+        <a-form-item v-if="modelRef.generateType === PerformanceGenerateType.Ramp"
+                     class="stages">
+          <div class="dp-param-grid">
+            <div class="head">
+              <a-row type="flex">
+                <a-col flex="1" class="title">时长(秒)</a-col>
+                <a-col flex="1" class="title">加载数量</a-col>
+
+                <a-col flex="80px" class="dp-right">
+                  <Tips section="performance-stage" title="维护虚拟用户加载阶段" />
+
+                  <a-tooltip @click="addStage" overlayClassName="dp-tip-small">
+                    <template #title>新增</template>
+                    <PlusOutlined class="dp-icon-btn dp-trans-80"/>
+                  </a-tooltip>
+                </a-col>
+              </a-row>
+            </div>
+
+            <div class="params">
+              <a-row v-for="(item, idx) in modelRef.stages" :key="idx" type="flex" class="param">
+                <a-col flex="1">
+                  {{ modelRef.duration }}
+                </a-col>
+
+                <a-col flex="1">
+                  {{ modelRef.target }}
+                </a-col>
+
+                <a-col flex="80px" class="dp-right dp-icon-btn-container">
+                  <a-tooltip @click="removeStage(idx)" overlayClassName="dp-tip-small">
+                    <template #title>移除</template>
+                    <DeleteOutlined class="dp-icon-btn dp-trans-80"/>
+                  </a-tooltip>
+
+                  <a-tooltip @click="insertStage(idx)" overlayClassName="dp-tip-small">
+                    <template #title>插入</template>
+                    <PlusOutlined class="dp-icon-btn dp-trans-80"/>
+                  </a-tooltip>
+                </a-col>
+              </a-row>
+            </div>
+          </div>
         </a-form-item>
 
         <a-form-item label="完成目标" name="goal" v-bind="validateInfos.goal">
@@ -77,6 +122,9 @@ import ProcessorHeader from '../../common/ProcessorHeader.vue';
 import debounce from "lodash.debounce";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import {CheckpointType, PerformanceGenerateType, PerformanceGoalType} from "@/utils/enum";
+import {requestHeaderOptions} from "@/config/constant";
+import {CheckCircleOutlined, CloseCircleOutlined, DeleteOutlined, PlusOutlined} from "@ant-design/icons-vue";
+import Tips from "@/components/Tips/index.vue";
 const useForm = Form.useForm;
 
 const store = useStore<{ Scenario: ScenarioStateType; }>()
@@ -137,6 +185,16 @@ const reset = () => {
   resetFields();
 };
 
+const addStage = (idx) => {
+  console.log('addStage')
+}
+const insertStage = (idx) => {
+  console.log('insertStage')
+}
+const removeStage = (idx) => {
+  console.log('removeStage')
+}
+
 onMounted(() => {
   console.log('onMounted')
   if (!modelRef.value.generateType) modelRef.value.generateType = 'constant'
@@ -148,6 +206,22 @@ onMounted(() => {
   if (!modelRef.value.responseTime) modelRef.value.responseTime = 6
   if (!modelRef.value.qps) modelRef.value.qps = 0
   if (!modelRef.value.failRate) modelRef.value.failRate = 0.1
+
+  if (!modelRef.value.stages) modelRef.value.stages = [{duration: 3, target: 10}]
 })
 
 </script>
+
+<style lang="less" scoped>
+.processor_performance_scenario-main {
+  .stages {
+    padding: 0 16px;
+    .dp-param-grid {
+      .ant-col {
+        padding: 0 10px;
+        line-height: 32px;
+      }
+    }
+  }
+}
+</style>
