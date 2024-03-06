@@ -7,7 +7,7 @@
 
           <a-form-item label="Cookie名称" v-bind="validateInfos.cookieName">
             <a-input v-model:value="modelRef.cookieName"
-                     @blur="validate('cookieName', { trigger: 'blur' }).catch(() => {})"/>
+                     @blur="validate('cookieName', { trigger: 'blur' }).catch(() => {})" />
           </a-form-item>
 
           <a-form-item label="Cookie域">

@@ -50,9 +50,6 @@ watch(nodeData, (val: any) => {
 },{immediate: true});
 
 const rulesRef = reactive({
-  name: [
-    {required: true, message: '请输入名称', trigger: 'blur'},
-  ],
   generateType: [
     {required: true, message: '请输入加压方式', trigger: 'blur'},
   ],

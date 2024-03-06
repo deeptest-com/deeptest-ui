@@ -64,14 +64,15 @@
                 <!-- 节点名称 -->
                 <span class="title-text"
                       v-if="dataRef.name && needHandleShowName.includes(dataRef.entityType)">
-                      <TooltipCell :text="dataRef.name" :custom-class="`${dataRef.disable ? 'disabled' : ''}`" />
+                  <TooltipCell :text="dataRef.name" :custom-class="`${dataRef.disable ? 'disabled' : ''}`" />
                 </span>
                 <!-- 分组 显示 分组实际名称或者分组 -->
                 <span class="title-text"
-                      v-else-if="dataRef.entityType === 'processor_group_default'">
-                      <TooltipCell :text="dataRef.name || '分组'" :custom-class="`${dataRef.disable ? 'disabled' : ''}`" />
+                      v-else-if="needShowNameOrTypeName.includes(dataRef.entityType)">
+                  <TooltipCell :text="`${ dataRef.name ? `${dataRef.name}` : `${scenarioTypeMapToText[dataRef.entityType]}` }`" />
                 </span>
-                <span class="title-text" v-else-if= "!needHandleShowName.includes(dataRef.entityType)">
+                <span class="title-text"
+                      v-else-if= "!needHandleShowName.includes(dataRef.entityType)">
                   <TooltipCell
                     :text="`${dataRef.name ? `${scenarioTypeMapToText[dataRef.entityType]} - ${dataRef.name}` : `${scenarioTypeMapToText[dataRef.entityType]}`}`"
                     :custom-class="`${dataRef.disable ? 'disabled' : ''}`" />
@@ -145,7 +146,7 @@ import {
   menuKeyMapToProcessorCategory,
   scenarioTypeMapToBindText,
   scenarioTypeMapToText,
-  needHandleShowName
+  needHandleShowName, needShowNameOrTypeName
 } from "./config";
 import {getMethodColor} from "@/utils/dom";
 import {DropEvent, TreeDragEvent} from "ant-design-vue/es/tree/Tree";

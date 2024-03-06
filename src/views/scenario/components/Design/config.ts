@@ -463,7 +463,7 @@ export const scenarioTypeMapToBindText = {
     // 'curl': 'cURL导入',
 }
 /**
- * 需要特殊处理的节点的名称
+ * 节点名称前显示类型
  * */
 export const needHandleShowName = [
     // if
@@ -473,6 +473,16 @@ export const needHandleShowName = [
 
     'processor_performance_runners_default',
     'processor_performance_scenarios_default',
+    'processor_performance_runner_default',
+    'processor_performance_scenario_default',
+]
+/**
+ * 显示节点名称或类型名称
+ * */
+export const needShowNameOrTypeName = [
+    'processor_group_default',
+    'processor_performance_runner_default',
+    'processor_performance_scenario_default',
 ]
 
 /**
