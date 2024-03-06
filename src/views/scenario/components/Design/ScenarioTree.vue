@@ -132,7 +132,7 @@ import {useStore} from "vuex";
 import debounce from "lodash.debounce";
 import {confirmToDelete} from "@/utils/confirm";
 import {filterTree, filterByKeyword} from "@/utils/tree";
-import {ProcessorInterface, ProcessorInterfaceSrc} from "@/utils/enum";
+import {ProcessorInterface, ProcessorInterfaceSrc, UsedBy} from "@/utils/enum";
 import {
   DESIGN_TYPE_ICON_MAP,
   menuKeyMapToProcessorCategory,
@@ -158,9 +158,13 @@ import InterfaceImportFromCurl from "@/views/component/InterfaceImportFromCurl/i
 import InterfaceSelectionFromDefineCase from "@/views/component/InterfaceSelectionFromDefineCase/index.vue";
 import {showLineScenarioType, onlyShowDisableAndDeleteTypes, loopIteratorTypes} from "./config";
 import TooltipCell from "@/components/Table/tooltipCell.vue";
-import {notifyWarn} from "@/utils/notify";
+import {notifySuccess, notifyWarn} from "@/utils/notify";
+import {loadCurl} from "@/views/component/debug/service";
+import {StateType as DebugStateType} from "@/views/component/debug/store";
+import useCopy from "@/composables/useClipboard";
 
-const store = useStore<{ Scenario: ScenarioStateType; }>();
+const { copy } = useCopy();
+const store = useStore<{ Scenario: ScenarioStateType; Debug: DebugStateType; }>();
 const treeData = computed<any>(() => store.state.Scenario.treeData);
 const treeDataNeedRender = computed<any>(() => {
   const children = cloneDeep(treeData.value?.[0]?.children);
@@ -182,6 +186,7 @@ const showAddTip = computed(() => {
   return !children?.length;
 })
 
+const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 const treeDataMap = computed<any>(() => store.state.Scenario.treeDataMap)
 const detailResult = computed<Scenario>(() => store.state.Scenario.detailResult)
 const scenarioProcessorIdForDebug = computed<number>(() => store.state.Scenario.scenarioProcessorIdForDebug)
@@ -357,6 +362,8 @@ const menuClick = (menuKey: string, targetId: number) => {
  * 选中的菜单key，对应的处理器类型
  * */
 function selectMenu(menuInfo, treeNode) {
+  console.log('selectMenu in tree')
+
   targetModelId = treeNode?.id;
   const key = menuInfo.key;
   let mode = 'child';
@@ -379,6 +386,10 @@ function selectMenu(menuInfo, treeNode) {
   }
   if (key === 'copy') {
     copyNode()
+    return
+  }
+  if (key === 'copyCurl') {
+    copyCurl()
     return
   }
   // 如果是 逻辑 else，则需要添加到父节点，即 if 节点下
@@ -640,6 +651,20 @@ const copyNode = () => {
     setExpandedKeys('scenario', treeData.value[0].scenarioId, expandedKeys.value);
     store.commit("Global/setSpinning", false)
   })
+}
+
+const copyCurl = async () => {
+  const node = treeDataMap.value[targetModelId];
+  const resp = await loadCurl({
+    debugInterfaceId: node.entityId,
+    caseId: node.id,
+    usedBy: UsedBy.ScenarioDebug,
+    environmentId: environmentId.value,
+  })
+  if (resp.code == 0) {
+    copy(resp.data)
+    notifySuccess('已复制cURL命令到剪贴板。');
+  }
 }
 
 const disableNodeOrNot = () => {
