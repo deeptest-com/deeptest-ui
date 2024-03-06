@@ -152,6 +152,18 @@ export enum ProcessorPerformanceScenario {
     PerformanceScenarioDefault = "processor_performance_scenario_default",
 }
 
+export enum PerformanceGenerateType {
+    Constant = "constant",
+    Ramp = "ramp",
+}
+export enum PerformanceGoalType {
+    Duration = "duration",
+    Loop = "loop",
+    ResponseTime = "responseTime",
+    Qps = "qps",
+    FailRate = "failRate",
+}
+
 export enum RequestBodyType {
     'application/json'= 'application/json',
     'application/xml' = 'application/xml',

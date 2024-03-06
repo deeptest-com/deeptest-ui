@@ -195,7 +195,6 @@ const execBegin = async () => {
     "influxdbOrg": "deeptest",
     "influxdbToken": "CjK5KHeIopceCfRznN7RZxlffNrnCOBJ6Ugi9PCFb-mRu4ZQJ01tqpE4oeWmw5VlaDk-y3JMkKSx8k8Klwh04g==",
 
-    // "mode": "parallel",
     // "goalAvgQps": 100,
     // "goalAvgResponseTime": 100,
     // "goalFailed": "300",
@@ -207,7 +206,10 @@ const execBegin = async () => {
         "grpcAddress": "127.0.0.1:9528",
         "webAddress": "127.0.0.1:8086",
         "weight": 100,
-        // "scenarios": [1],
+      },
+      {
+        "id": 2,
+        "name": "192.168.0.56",
       }
     ],
 
@@ -219,9 +221,12 @@ const execBegin = async () => {
         "generateType": "constant",
         "stages": [
           {
+            "target": 10,
             "duration": 60,
-            // "loop": 3,
-            "target": 100
+          },
+          {
+            "target": 0,
+            "duration": 3600,
           }
         ],
 
@@ -262,6 +267,10 @@ const execBegin = async () => {
             "type": "processor_interface_default"
           }
         ],
+      },
+      {
+        "id": 2,
+        "runners": [1,2],
       }
     ]
   });
