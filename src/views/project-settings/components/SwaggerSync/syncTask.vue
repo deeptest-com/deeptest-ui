@@ -318,7 +318,7 @@ const spinning = ref(false);
 const loading = ref(false);
 
 const modelRef = reactive<any>({
-  "cron": "* * * * *",
+  "cron": "23 * * * *",
   "lecangReq": {
     "addServicePrefix": true,
     "engineering": null,

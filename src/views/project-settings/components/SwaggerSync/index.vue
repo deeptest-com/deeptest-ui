@@ -148,7 +148,7 @@ const columns: any = [{
   width: 250,
   key: 'updatedAt',
   customRender: ({ record }) => {
-    return <span>{  record.execTime ? momentUtc(record.execTime) : '' }</span>
+    return <span>{  record.execTime ? momentUtc(record.execTime) : '-' }</span>
   }
 },{
   title: '创建人',
