@@ -116,7 +116,7 @@ const goalTypes = ref([
   {label: '执行轮次', value: PerformanceGoalType.Loop},
   {label: '响应时间', value: PerformanceGoalType.ResponseTime},
   {label: 'QPS每秒应答数', value: PerformanceGoalType.Qps},
-  {label: '错误率', value: PerformanceGoalType.FailRate}])
+  {label: '失败率', value: PerformanceGoalType.FailRate}])
 
 const submit = debounce(async () => {
   validate()
