@@ -39,7 +39,7 @@ const queryParams = reactive({
   executeStartTime: '',
   executeEndTime: '',
   keywords: '',
-  page: 1,
+  page: pagination.value.current || 1,
   pageSize: pagination.value.pageSize || 20,
 });
 
@@ -55,9 +55,9 @@ const handleFilter = (params: any) => {
 
 const getList = async (params?: any): Promise<void> => {
   loading.value = true;
-
   await store.dispatch('Report/list', {
-    ...queryParams,
+    page: pagination.value.current,
+    pageSize: pagination.value.pageSize,
     ...formState,
     ...params
   });

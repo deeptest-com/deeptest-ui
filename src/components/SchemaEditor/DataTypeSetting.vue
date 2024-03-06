@@ -151,14 +151,14 @@
       {{ typesLabel }}
     </a-button>
   </a-popover>
-  <!-- <a-tooltip>
+  <a-tooltip>
     <template #title>
       <span>{{`编辑组件 ${props?.value?.ref}`}}</span>
     </template>
     <span class="viewComponent" style="margin-left:4px" @click="goViewComponent">
       <LinkOutlined v-if="props?.value?.ref"/>
     </span>
-  </a-tooltip> -->
+  </a-tooltip>
 </template>
 <script lang="ts" setup>
 import {ref, defineProps, defineEmits, watch, computed} from 'vue';
@@ -402,7 +402,10 @@ const findNodeByRefId = (entityId: number, schemaNodes: any[]) => {
     if (schemaNodes[i].entityId === entityId) {
       return schemaNodes[i];
     } else if (Array.isArray(schemaNodes[i].children) && schemaNodes[i].children.length > 0){
-      return findNodeByRefId(entityId, schemaNodes[i].children);
+      const res = findNodeByRefId(entityId, schemaNodes[i].children);
+      if (res) {
+        return res;
+      }
     }
   }
 };

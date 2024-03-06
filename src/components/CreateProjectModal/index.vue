@@ -114,9 +114,9 @@
             </div>
           </a-form-item>
         </template>
-        <a-form-item label="示例数据">
+        <!-- <a-form-item label="示例数据">
           <a-switch v-model:checked="formStateRef.includeExample"/>
-        </a-form-item>
+        </a-form-item> -->
 
         <a-form-item label="项目简介">
           <a-textarea v-model:value="formStateRef.desc"/>
@@ -151,11 +151,12 @@ const props = defineProps<{
 }>();
 const emits = defineEmits(["update:visible", "handleOk", "handleSuccess"]);
 const store = useStore<{ User: UserStateType; Project: ProjectStateType }>();
-const { isInLeyanWujieContainer, parentOrigin } = useWujie();
+const { isInLeyanWujieContainer, parentOrigin, SaasProductStatus } = useWujie();
 const isLy = isLeyan();
 const userListOptions = computed<SelectTypes["options"]>(
     () => (store.state.Project.userList || []).filter(e => isInLeyanWujieContainer ? e.username !== 'admin' : e.username !== '')
 );
+const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
 const lyProducts = ref([]);
 const lySpaces = ref([]);
 const wrapperCol = {span: 14};
@@ -192,23 +193,23 @@ const filterSpaceOption = (input: string, option: any) => {
   }
 }
 
-const rulesRef = reactive({
-  name: [
-    {required: true, message: "请输入名称", trigger: "blur"},
-    {max: 20, message: "项目名称应小于20位", trigger: "blur"},
-  ],
-  shortName: [
-    { required: true, message: '首字母大写,英文和数字请正确输入' },
-    { max: 10, message: '不超过10位，请正确输入' },
-    {
-      pattern: /^[A-Z]{1}[A-Za-z0-9]*$/,
-      message: '首字母大写,英文和数字请正确输入',
-    },
-  ],
-  adminId: [{required: true, message: "请选择管理员"}],
-  products: [{required: true, message: "请选择所属产品"}],
-  // desc: [{max: 180, message: "项目简介应小于180位", trigger: "blur"}],
-});
+const rulesRef = computed(() => ({
+    name: [
+      {required: true, message: "请输入名称", trigger: "blur"},
+      {max: 20, message: "项目名称应小于20位", trigger: "blur"},
+    ],
+    shortName: [
+      { required: true, message: '首字母大写,英文和数字请正确输入' },
+      { max: 10, message: '不超过10位，请正确输入' },
+      {
+        pattern: /^[A-Z]{1}[A-Za-z0-9]*$/,
+        message: '首字母大写,英文和数字请正确输入',
+      },
+    ],
+    adminId: [{required: true, message: "请选择管理员"}],
+    products: [{required: !isSaas ? true : SaasProductStatus === 1, message: "请选择所属产品"}],
+    // desc: [{max: 180, message: "项目简介应小于180位", trigger: "blur"}],
+  }));
 
 const selectLogoKey = ref("default_logo1");
 const {validate, validateInfos, resetFields} = useForm(

@@ -9,10 +9,8 @@
             onChange: (page) => {
                 handleGetList({ page });
             },
-            onShowSizeChange: (page, size) => {
-                pagination.page = page
-                pagination.pageSize = size
-                handleGetList(pagination);
+            onShowSizeChange: (_, size) => {
+                handleGetList({ pageSize: size, page: 1 });
             },
             showTotal: (total) => {
                 return `共 ${total} 条数据`;
@@ -79,14 +77,14 @@ const { isCreator, hasPermission } = usePermission();
 const { isInLeyanWujieContainer } = useWujie();
 const store = useStore<{ Report: StateType, ProjectGlobal: ProjectStateType }>();
 // 分页数据
-let pagination = computed<PaginationConfig>(() => store.state.Report.listResult.pagination);
+const pagination = computed<PaginationConfig>(() => store.state.Report.listResult.pagination);
 // 表格选中项
 const selectedRowKeys = ref<Key[]>([]);
 const y = computed(() => {
     if (isInLeyanWujieContainer) {
         return window.parent.window.innerHeight - 240;
     }
-    return null;
+    return window.innerHeight - 280;
 });
 
 type Key = ColumnProps['key'];

@@ -115,6 +115,9 @@ import {notifyError, notifySuccess, notifyWarn} from "@/utils/notify";
 import {loadCurl} from "@/views/component/debug/service";
 import {StateType as DebugStateType} from "@/views/component/debug/store";
 import {UsedBy} from "@/utils/enum";
+import useCopy from "@/composables/useClipboard";
+
+const { copy } = useCopy();
 
 const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType,  Debug: DebugStateType,
   ProjectGlobal: ProjectStateType, ServeGlobal: ServeStateType }>();
@@ -242,11 +245,6 @@ async function deleteNode(node) {
 }
 async function copyCurl(node) {
   console.log('copyCurl', node)
-  const clipboard = navigator.clipboard;
-  if (!clipboard) {
-    notifyWarn('您的浏览器不支持复制内容到剪贴板。');
-    return
-  }
 
   const resp = await loadCurl({
     diagnoseId: node.id,
@@ -254,7 +252,7 @@ async function copyCurl(node) {
     usedBy: UsedBy.DiagnoseDebug,
   })
   if (resp.code == 0) {
-    navigator.clipboard.writeText(resp.data)
+    copy(resp.data)
     notifySuccess('已复制cURL命令到剪贴板。');
   }
 }

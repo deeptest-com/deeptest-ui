@@ -202,6 +202,7 @@ export default defineComponent({
     const handleCreateSuccess = async () => {
       createProjectModalVisible.value = false;
       await store.dispatch("ProjectGlobal/fetchProject");
+      await store.dispatch("Home/queryProject", {});
       bus.$emit(settings.sendMsgToLeyan, {
         type: 'fetchProjectSuccess',
         data: {
