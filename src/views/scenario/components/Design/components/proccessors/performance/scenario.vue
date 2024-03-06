@@ -3,7 +3,7 @@
     <ProcessorHeader />
 
     <a-card :bordered="false">
-      <a-form :label-col="{ style: { width: '120px' } }" :wrapper-col="{ span: 16 }">
+      <a-form :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
 
         <a-form-item label="加压方式" name="generateType" v-bind="validateInfos.generateType">
           <a-select v-model:value="modelRef.generateType" class="dp-per100"
@@ -22,7 +22,7 @@
         </a-form-item>
 
         <a-form-item v-if="modelRef.generateType === PerformanceGenerateType.Ramp"
-                     class="stages">
+                     :labelCol="{span: 0}" :wrapperCol="{span: 23}" class="stages">
           <div class="dp-param-grid">
             <div class="head">
               <a-row type="flex">
