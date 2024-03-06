@@ -164,15 +164,14 @@
                   <span
                       class="title">Cron表达式是一种用于指定任务在某个时间点或周期性执行的字符串表达式。表达式包含6个参数，每个参数代表不同的时间单位和取值范围</span><br>
                   <pre style="background-color: black; margin-bottom: 0px;">
-      *    *    *    *    *    *
-      ┬    ┬    ┬    ┬    ┬    ┬
-      │    │    │    │    │    │
-      │    │    │    │    │    └ day of week (0 - 7) (0 or 7 is Sun)
-      │    │    │    │    └───── month (1 - 12)
-      │    │    │    └────────── day of month (1 - 31)
-      │    │    └─────────────── hour (0 - 23)
-      │    └──────────────────── minute (0 - 59)
-      └───────────────────────── second (0 - 59, OPTIONAL)
+      *    *    *    *    *
+      ┬    ┬    ┬    ┬    ┬
+      │    │    │    │    │    
+      │    │    │    │    └ day of week (0 - 7) (0 or 7 is Sun)
+      │    │    │    └───── month (1 - 12)
+      │    │    └────────── day of month (1 - 31)
+      │    └─────────────── hour (0 - 23)
+      └──────────────────── minute (0 - 59)
                 </pre>
 
                 </template>
