@@ -1,10 +1,11 @@
 import { Tree } from "ant-design-vue-v3";
 import { PlusOutlined } from "@ant-design/icons-vue";
-import { PropType, defineComponent, ref, computed } from "vue";
+import { PropType, defineComponent, ref, computed, onMounted } from "vue";
 import cloneDeep from "lodash/cloneDeep";
 import { DropdownActionMenu } from "../DropDownMenu";
 import "./index.less";
 import {filterByKeyword, findPath} from "@/utils/tree";
+import { getMethodColor } from "@/utils/dom";
 
 const CategoryTreeProps = {
   categoryType: { // 目录树类型
@@ -23,9 +24,9 @@ const CategoryTreeProps = {
     type: Boolean,
     default: false,
   },
-  showIcon: { // 是否可拖拽节点
+  showIcon: { // 是否显示节点icon
     type: Boolean,
-    default: () => []
+    default: false,
   },
   autoExpandParent: {
     type: Boolean,
@@ -62,12 +63,19 @@ const CategoryTreeProps = {
   rootContextMenuList: {
     type: Array as PropType<any[]>,
     default: () => []
+  },
+  prefixCls: {
+    type: String,
+    default: '',
   }
 }
 
 const renderTitle = (nodeProps, searchValue) => {
   const node = nodeProps.dataRef;
   const title = node.title || node.name || '';
+  if (node.entityType === 'processor_interface_default') {
+    return renderInterfaceTitle(nodeProps, searchValue);
+  }
   return (
     title.includes(searchValue) ? (
       <span class="tree-title-text" title={title}>
@@ -80,6 +88,45 @@ const renderTitle = (nodeProps, searchValue) => {
     )
   );
 };
+
+const renderInterfaceTitle = (nodeProps, searchValue) => {
+  const node = nodeProps.dataRef;
+  const title = node.title || node.name || '';
+  const methodMap = {
+    POST: 'POST',
+    TRACE: 'TRA',
+    OPTIONS: 'OPT',
+    GET: 'GET',
+    PATCH: 'PAT',
+    DELETE: 'DEL',
+    HEAD: 'HEAD',
+  }
+  return (
+    <span class="tree-title-text interface-title-text">
+      <a-tooltip title={node.method.length > 1 ? node.method.join(' ') : null}>
+        <span class="interface-method-text" style={{ color: getMethodColor(node.method[0]) }}>
+          <span class="interface-method">
+            {methodMap[node.method[0]]}
+            {node.method.length > 1 && <span class="interface-method-badge">{node.method.slice(1).length}+</span>}
+          </span>
+        </span>
+      </a-tooltip>
+      <>
+        {
+          title.includes(searchValue) ? (
+            <span class="interface-title-text" title={title}>
+              { title.substr(0, title.indexOf(searchValue)) }
+              <span style="color: #f50">{ searchValue }</span>
+              { title.substr(title.indexOf(searchValue) + searchValue.length) }
+            </span>
+          ) : (
+            <span class="interface-title-text" title={title}>{ title }</span>
+          )
+        }
+      </>
+    </span>
+  )
+}
 
 const renderMore = (nodeProps, props) => {
   return (
@@ -111,6 +158,8 @@ const CategoryTree = defineComponent({
     const checkedKeys = ref([]);
     const selectedKeys = ref<any>([]);
     const autoExpandParent = ref(false);
+    const virtualHeight = ref(400);
+    const categoryTreeContainer = ref();
     const data = computed(() => {
       return [...filterByKeyword(setTreeDataKey(removeSlotsAttribute(props.treeData || [])), searchValue.value, 'name')];
     });
@@ -134,6 +183,10 @@ const CategoryTree = defineComponent({
       selectedKeys.value = [];
     }
 
+    const clearSearchValue = () => {
+      searchValue.value = '';
+    }
+
     const vSlots = {
       title: (nodeProps) => {
         return (
@@ -148,7 +201,7 @@ const CategoryTree = defineComponent({
     };
 
     const selectedNode = (keys, evt) => {
-      if (evt.node.dataRef.entityId === 0 || evt.node.dataRef.type === 'dir') {
+      if ((evt.node.dataRef.entityId === 0 || evt.node.dataRef.type === 'dir') && !props.isDirNodeClicked) {
         return;
       }
       selectedKeys.value = keys;
@@ -191,18 +244,21 @@ const CategoryTree = defineComponent({
     };
 
     const getVirtualHeight = () => {
-      const el = document.querySelector('.category-tree-container');
+      const el = document.querySelector(`.${props.prefixCls}`);
       if (el) {
         const { height }: any = el?.getBoundingClientRect();
-        return height - 52;
+        virtualHeight.value = height - 52;
       }
-      return 400;
     };
 
-    expose({ initTree, setSelectedKeys, scrollToSelectedNode });
+    onMounted(() => {
+      getVirtualHeight();
+    })
+    
+    expose({ initTree, setSelectedKeys, scrollToSelectedNode, getVirtualHeight, clearSearchValue });
     return () => {
       return (
-        <div class="category-tree-container">
+        <div class={["category-tree-container", props.prefixCls]}>
           <div class="tag-filter-form">
             <a-input
               class="search-input"
@@ -231,7 +287,7 @@ const CategoryTree = defineComponent({
                 selectedKeys={selectedKeys.value}
                 autoExpandParent={autoExpandParent.value}
                 treeData={data.value}
-                height={getVirtualHeight()}
+                height={virtualHeight.value}
                 showIcon={props.showIcon}
                 onSelect={(keys, evt) => selectedNode(keys, evt)}
                 onDrop={(...args) => props.onTreeNodeDrop(args[0])}

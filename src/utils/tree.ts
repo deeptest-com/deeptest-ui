@@ -1,4 +1,5 @@
 import {isInArray} from "@/utils/array";
+import cloneDeep from "lodash/cloneDeep";
 
 export function getSelectedTreeNode(checkedKeys, treeDataMapValue): any[] {
     const childrenMap = {} // nodes that is other's child
@@ -152,4 +153,17 @@ export function findPath(nodeId: number, nodes:any[]) :number[] {
     return []
    
 } 
+
+export function uniquArrray(data) {
+    const obj = {};
+    const _data = cloneDeep(data);
+    _data.forEach((e, index) => {
+      if (!obj[e.id]) {
+        obj[e.id] = e;
+      } else {
+        _data.splice(index, 1)
+      }
+    })
+    return _data;
+}
 

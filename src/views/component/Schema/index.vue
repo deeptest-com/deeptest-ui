@@ -14,6 +14,7 @@
       </div>
       <Tree 
       v-else
+        prefix-cls="schema-tree-container"
         ref="schemaTree"
         category-type="schema" 
         :checked="false" 
@@ -385,6 +386,10 @@ onMounted(() => {
       expand.value = true;
     }, 1000);
   }
+
+  window.addEventListener('resize', () => {
+    schemaTree.value?.getVirtualHeight();
+  })
 })
 
 defineExpose({

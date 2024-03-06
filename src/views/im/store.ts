@@ -135,7 +135,7 @@ export interface StateType {
     //接口定义选择code
     globalSelectCode:string;
 
-// 接口用例
+    // 接口用例
     caseQueryParams: any;
     caseList: QueryResult;
     caseDetail: any;
@@ -164,6 +164,10 @@ export interface StateType {
     diffModalVisible:any;
     //diff弹框信息
     thirdFunctionList: any;
+
+    // 右侧tab内容
+    activeTab: any,
+    activeTabs: any[],
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -235,6 +239,10 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setIsMockChange:Mutation<StateType>;
         setDiffModalVisible:Mutation<StateType>;
         setListFunctionsByClass: Mutation<StateType>;
+
+        // 右侧tab设置
+        setActiveTab: Mutation<StateType>;
+        setActiveTabs: Mutation<StateType>;
 
     };
     actions: {
@@ -424,6 +432,9 @@ const initState: StateType = {
     isMockChange: false,
     diffModalVisible: {},
     thirdFunctionList: [],
+
+    activeTab: null,
+    activeTabs: [],
 };
 
 const StoreModel: ModuleType = {
@@ -663,6 +674,14 @@ const StoreModel: ModuleType = {
 
         setListFunctionsByClass(state, payload) {
             state.thirdFunctionList = payload;
+        },
+
+        setActiveTab(state, payload) {
+            state.activeTab = payload;
+        },
+
+        setActiveTabs(state, payload) {
+            state.activeTabs = payload;
         }
     },
     actions: {
