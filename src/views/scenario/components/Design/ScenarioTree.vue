@@ -139,6 +139,10 @@ import {
   DesignScenarioFor,
   ProcessorInterface,
   ProcessorInterfaceSrc,
+  ProcessorPerformanceRunner,
+  ProcessorPerformanceRunners,
+  ProcessorPerformanceScenario,
+  ProcessorPerformanceScenarios,
   UsedBy
 } from "@/utils/enum";
 import {
@@ -267,7 +271,9 @@ const selectNode = (keys, e) => {
   const selectedData = treeDataMap.value[selectedKeys.value[0]]
   console.log('selectedData', selectedData)
 
-  if (selectedData && isRoot(selectedData.entityCategory)) {
+  if (selectedData && (isRoot(selectedData.entityCategory) ||
+        selectedData.entityType === ProcessorPerformanceRunners.PerformanceRunnersDefault ||
+          selectedData.entityType === ProcessorPerformanceScenarios.PerformanceScenariosDefault)) {
     store.dispatch('Scenario/getNode', null)
     return
   }

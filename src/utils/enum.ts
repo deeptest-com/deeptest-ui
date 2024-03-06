@@ -139,6 +139,19 @@ export enum ProcessorCustomCode {
     CustomCodeDefault = "processor_custom_code",
 }
 
+export enum ProcessorPerformanceRunners {
+    PerformanceRunnersDefault = "processor_performance_runners_default",
+}
+export enum ProcessorPerformanceScenarios {
+    PerformanceScenariosDefault = "processor_performance_scenarios_default",
+}
+export enum ProcessorPerformanceRunner {
+    PerformanceRunnerDefault = "processor_performance_runner_default",
+}
+export enum ProcessorPerformanceScenario {
+    PerformanceScenarioDefault = "processor_performance_scenario_default",
+}
+
 export enum RequestBodyType {
     'application/json'= 'application/json',
     'application/xml' = 'application/xml',
