@@ -16,10 +16,16 @@
 <script setup lang="ts">
 import {computed, defineEmits, defineProps, inject} from "vue";
 import cloneDeep from "lodash/cloneDeep";
-import {DESIGN_MENU_CONFIG} from "../../config";
+import {DESIGN_MENU_CONFIG, DESIGN_MENU_FOR_PERFORMANCE} from "../../config";
 import SubMenu from "./SubMenu.vue";
 import MenuItem from "./MenuItem.vue";
 import {designForKey, DesignScenarioFor} from "@/utils/enum";
+import {getIndexOfLastDivider, isUnderScenarioNode} from "@/views/scenario/service";
+import {useStore} from "vuex";
+import {StateType as PerformanceStateType, StateType as ScenarioStateType} from "@/views/scenario/store";
+
+const store = useStore<{ Scenario: ScenarioStateType; Performance: PerformanceStateType }>();
+const treeDataMap = computed<any>(() => store.state.Scenario.treeDataMap)
 
 const props = defineProps(['treeNode']);
 const emit = defineEmits(['selectMenu']);
@@ -40,7 +46,14 @@ const menus = computed(() => {
     return [];
   }
 
-  const src = cloneDeep(DESIGN_MENU_CONFIG) as any
+  const src = cloneDeep(DESIGN_MENU_CONFIG) as any[]
+
+  // add menu items for performance if needed
+  const a = DESIGN_MENU_FOR_PERFORMANCE + designFor
+  if (designFor === DesignScenarioFor.PerformanceTest && isUnderScenarioNode(props?.treeNode, treeDataMap.value)) {
+    const index = getIndexOfLastDivider(src)
+    src.splice(index, 0, ...DESIGN_MENU_FOR_PERFORMANCE);
+  }
 
   // 处理菜单的 disabled状态
   // 不再递归，因为最多三层，直接处理了

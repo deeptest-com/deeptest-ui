@@ -2,12 +2,22 @@ import request from '@/utils/request';
 import {QueryParams} from "./data";
 
 import {
-    ProcessorCookie, ProcessorData,
+    ProcessorCookie,
+    ProcessorData,
     ProcessorExtractor,
     ProcessorLogic,
-    ProcessorLoop, ProcessorGroup, ProcessorTimer, ProcessorPrint,
+    ProcessorLoop,
+    ProcessorGroup,
+    ProcessorTimer,
+    ProcessorPrint,
     ProcessorCategory,
-    ProcessorVariable, ProcessorAssertion, RequestBodyType, UsedBy, ProcessorAction, ProcessorInterface
+    ProcessorVariable,
+    ProcessorAssertion,
+    RequestBodyType,
+    UsedBy,
+    ProcessorAction,
+    ProcessorInterface,
+    ProcessorPerformanceScenario, ProcessorPerformanceRendezvous
 } from "@/utils/enum";
 import {Interface} from "@/views/component/debug/data";
 import {isInArray} from "@/utils/array";
@@ -375,4 +385,35 @@ export async function copyProcessor(params:any): Promise<any> {
         method: 'post',
         data:params,
     });
+}
+
+export function isUnderScenarioNode(node, treeDataMap) {
+    console.log('isUnderScenarioNode', node)
+
+    if (!node || node.entityType === ProcessorPerformanceRendezvous.PerformanceRendezvousDefault) {
+        return false
+    }
+
+    if (node.entityType === ProcessorPerformanceScenario.PerformanceScenarioDefault) {
+        return true
+    }
+
+    if (node.parentId) {
+        return isUnderScenarioNode(treeDataMap[node.parentId], treeDataMap)
+    }
+
+    return false
+}
+
+export function getIndexOfLastDivider(arr) {
+    let index = arr.length - 1
+
+    for (let i = arr.length - 1; i--; i >= 0) {
+        if (arr[i].key === 'divider') {
+            index = i
+            break
+        }
+    }
+
+    return index
 }

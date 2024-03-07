@@ -74,6 +74,11 @@ export enum ProcessorCategory {
     ProcessorAssertion = "processor_assertion",
     ProcessorCustomCode = "processor_custom_code",
 
+    PerformanceRunners = "processor_performance_runners",
+    PerformanceScenarios = "processor_performance_scenarios",
+    PerformanceRunner = "processor_performance_runner",
+    PerformanceScenario = "processor_performance_scenario",
+    PerformanceRendezvous = "processor_performance_rendezvous",
 }
 export enum ProcessorInterface {
     Interface = "processor_interface_default",

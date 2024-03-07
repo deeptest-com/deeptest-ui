@@ -52,7 +52,7 @@ const modelRef: any = computed<boolean>(() => store.state.Scenario.nodeData)
 
 const rulesRef = reactive({
   ip: [
-    {required: true, message: '请输入远程执行节点的IP地址', trigger: 'blur'},
+    {required: true, message: '请输入远程执行代理的IP地址', trigger: 'blur'},
   ],
   webPort: [
     {required: true, type: 'integer', message: '请输入Web服务端口，默认8086。', trigger: 'blur'},

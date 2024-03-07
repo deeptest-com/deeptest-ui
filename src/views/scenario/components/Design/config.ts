@@ -2,6 +2,13 @@
  * 场景编排配置相关
  * */
 
+import {
+    ProcessorCategory,
+    ProcessorPerformanceRendezvous,
+    ProcessorPerformanceRunner, ProcessorPerformanceRunners,
+    ProcessorPerformanceScenario, ProcessorPerformanceScenarios
+} from "@/utils/enum";
+
 /**
  * 循环相关的迭代器
  * */
@@ -10,8 +17,9 @@ export const loopIteratorTypes = ['processor_loop_time', 'processor_loop_in', 'p
  * 仅显示禁用和删除的操作的类型，即叶子节点
  * */
 export const onlyShowDisableAndDeleteTypes = [
-    'processor_performance_runners_default',
-    'processor_performance_scenarios_default',
+    ProcessorPerformanceRunners.PerformanceRunnersDefault,
+    ProcessorPerformanceScenarios.PerformanceScenariosDefault,
+    ProcessorPerformanceRendezvous.PerformanceRendezvousDefault,
 
     'processor_time_default',
     // cookie 相关
@@ -38,10 +46,25 @@ export const onlyShowDisableAndDeleteTypes = [
 /**
  * 场景编排菜单配置
  * */
+
+export const DESIGN_MENU_FOR_PERFORMANCE = [
+    //  分割线
+    {
+        key: 'divider',
+        title: '分割线',
+        hideInNodeTypes: [],
+    },
+    //  集合点
+    {
+        key: ProcessorPerformanceRendezvous.PerformanceRendezvousDefault,
+        title: '集合点',
+        hideInNodeTypes: [],
+    },
+]
 export const DESIGN_MENU_CONFIG = [
     {
         key: 'processor_performance_runner_default',
-        title: '添加执行节点',
+        title: '添加执行代理',
         showInNodeTypes: ['processor_performance_runners_default'],
         children: [],
     },
@@ -314,10 +337,11 @@ export const menuKeyMapToProcessorCategory = {
     "add-child-interface-custom": "processor_interface",
     "add-child-interface-curl": "processor_interface",
 
-    'processor_performance_runners_default': "processor_performance_runners",
-    'processor_performance_scenarios_default': "processor_performance_scenarios",
-    'processor_performance_runner_default': "processor_performance_runner",
-    'processor_performance_scenario_default': "processor_performance_scenario",
+    [ProcessorPerformanceRunners.PerformanceRunnersDefault]: ProcessorCategory.PerformanceRunners,
+    [ProcessorPerformanceScenarios.PerformanceScenariosDefault]: ProcessorCategory.PerformanceScenarios,
+    [ProcessorPerformanceRunner.PerformanceRunnerDefault]: ProcessorCategory.PerformanceRunner,
+    [ProcessorPerformanceScenario.PerformanceScenarioDefault]: ProcessorCategory.PerformanceScenario,
+    [ProcessorPerformanceRendezvous.PerformanceRendezvousDefault]: ProcessorCategory.PerformanceRendezvous,
 
     'processor_group_default': 'processor_group',
     'processor_cookie_get': 'processor_cookie',
@@ -419,8 +443,9 @@ export const scenarioTypeMapToText = {
     'custom': '自定义请求',
     'curl': 'cURL导入',
 
-    'processor_performance_runner_default': '新节点',
-    'processor_performance_scenario_default': '新场景',
+    [ProcessorPerformanceRunner.PerformanceRunnerDefault]: '新代理',
+    [ProcessorPerformanceScenario.PerformanceScenarioDefault]: '新场景',
+    [ProcessorPerformanceRendezvous.PerformanceRendezvousDefault]: '集合点',
 
     'processor_group_default': '分组',
     'processor_time_default': '等待时间',
@@ -471,18 +496,20 @@ export const needHandleShowName = [
     'processor_logic_else',
     'processor_interface_default',
 
-    'processor_performance_runners_default',
-    'processor_performance_scenarios_default',
-    'processor_performance_runner_default',
-    'processor_performance_scenario_default',
+    ProcessorPerformanceRunners.PerformanceRunnersDefault,
+    ProcessorPerformanceScenarios.PerformanceScenariosDefault,
+    ProcessorPerformanceRunner.PerformanceRunnerDefault,
+    ProcessorPerformanceScenario.PerformanceScenarioDefault,
+    ProcessorPerformanceRendezvous.PerformanceRendezvousDefault,
 ]
 /**
  * 显示节点名称或类型名称
  * */
 export const needShowNameOrTypeName = [
     'processor_group_default',
-    'processor_performance_runner_default',
-    'processor_performance_scenario_default',
+    ProcessorPerformanceRunner.PerformanceRunnerDefault,
+    ProcessorPerformanceScenario.PerformanceScenarioDefault,
+    ProcessorPerformanceRendezvous.PerformanceRendezvousDefault,
 ]
 
 /**

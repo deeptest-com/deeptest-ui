@@ -6,7 +6,7 @@
       <a-form :label-col="{ style: { width: '120px' } }" :wrapper-col="{ span: 16 }">
 
         <a-form-item label="集合数量" v-bind="validateInfos.target">
-          <a-input-number v-model:value="modelRef.target" :min="10" :max="100"
+          <a-input-number v-model:value="modelRef.target" :min="2"
                           @blur="validate('target', { trigger: 'blur' }).catch(() => {})" />
         </a-form-item>
 
