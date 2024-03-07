@@ -3,7 +3,18 @@
     <ProcessorHeader />
 
     <a-card :bordered="false">
-      <a-form :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
+      <a-tabs v-model:activeKey="activeKey">
+        <a-tab-pane key="info" tab="基本信息">
+
+        </a-tab-pane>
+
+        <a-tab-pane key="runners" tab="执行代理">
+
+        </a-tab-pane>
+      </a-tabs>
+
+      <a-form v-if="activeKey === 'info'"
+              :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
 
         <a-form-item label="加压方式" name="generateType" v-bind="validateInfos.generateType">
           <a-select v-model:value="modelRef.generateType" class="dp-per100"
@@ -85,37 +96,63 @@
         <a-form-item v-if="modelRef.goal === PerformanceGoalType.Duration"
                      label="执行时长" name="duration" v-bind="validateInfos.duration">
           <a-input-number v-model:value="modelRef.duration" :min="1" class="dp-per100"
-                        @blur="validate('duration', { trigger: 'blur' }).catch(() => {})" />
+                          @blur="validate('duration', { trigger: 'blur' }).catch(() => {})" />
         </a-form-item>
 
         <a-form-item v-if="modelRef.goal === PerformanceGoalType.Loop"
                      label="执行轮次" name="loop" v-bind="validateInfos.loop">
           <a-input-number v-model:value="modelRef.loop" :min="1" class="dp-per100"
-                        @blur="validate('loop', { trigger: 'blur' }).catch(() => {})" />
+                          @blur="validate('loop', { trigger: 'blur' }).catch(() => {})" />
         </a-form-item>
 
         <a-form-item v-if="modelRef.goal === PerformanceGoalType.ResponseTime"
                      label="响应时间阀值" name="responseTime" v-bind="validateInfos.responseTime">
           <a-input-number v-model:value="modelRef.responseTime" :min="0" class="dp-per100"
-                        @blur="validate('responseTime', { trigger: 'blur' }).catch(() => {})" />
+                          @blur="validate('responseTime', { trigger: 'blur' }).catch(() => {})" />
         </a-form-item>
 
         <a-form-item v-if="modelRef.goal === PerformanceGoalType.Qps"
                      label="QPS阀值" name="qps" v-bind="validateInfos.qps">
           <a-input-number v-model:value="modelRef.qps" :min="1" class="dp-per100"
-                        @blur="validate('qps', { trigger: 'blur' }).catch(() => {})" />
+                          @blur="validate('qps', { trigger: 'blur' }).catch(() => {})" />
         </a-form-item>
 
         <a-form-item v-if="modelRef.goal === PerformanceGoalType.FailRate"
                      label="失败率阀值" name="failRate" v-bind="validateInfos.failRate">
           <a-input-number v-model:value="modelRef.failRate" :min="0.01" class="dp-per100"
-                        @blur="validate('failRate', { trigger: 'blur' }).catch(() => {})" />
+                          @blur="validate('failRate', { trigger: 'blur' }).catch(() => {})" />
         </a-form-item>
 
         <a-form-item class="processor-btn" :wrapper-col="{ span: 16, offset: 4 }">
           <a-button type="primary" @click.prevent="submit">保存</a-button>
         </a-form-item>
       </a-form>
+
+      <div v-if="activeKey === 'runners' && runners.length > 0" class="dp-param-grid">
+        <div class="head">
+          <a-row type="flex">
+            <a-col flex="100px" class="title">
+              <a-checkbox v-model:checked="checkAll"
+                          @change="onCheckAllChanged" />
+            </a-col>
+            <a-col flex="1" class="title">代理名称</a-col>
+          </a-row>
+        </div>
+
+        <div class="params">
+          <a-row v-for="(item, idx) in runners" :key="idx" type="flex" class="param">
+            <a-col flex="100px" class="text">
+              <a-checkbox :checked="modelRef.runnerIds?.includes(item.id)"
+                          @change="e => onCheckChanged(item, e)"/>
+            </a-col>
+
+            <a-col flex="1" class="text">
+              {{item.name ? item.name : '新代理'}}
+            </a-col>
+          </a-row>
+        </div>
+      </div>
+
     </a-card>
   </div>
 </template>
@@ -123,20 +160,25 @@
 <script setup lang="ts">
 import {computed, onMounted, reactive, ref, watch} from "vue";
 import {useStore} from "vuex";
-import {StateType as ScenarioStateType} from "../../../../../store";
+import {StateType as PerformanceStateType, StateType as ScenarioStateType} from "../../../../../store";
 import {Form, message} from "ant-design-vue";
 import ProcessorHeader from '../../common/ProcessorHeader.vue';
 import debounce from "lodash.debounce";
 import {notifyError, notifySuccess} from "@/utils/notify";
-import {CheckpointType, PerformanceGenerateType, PerformanceGoalType} from "@/utils/enum";
+import {CheckpointType, DesignScenarioFor, PerformanceGenerateType, PerformanceGoalType} from "@/utils/enum";
 import {requestHeaderOptions} from "@/config/constant";
 import {CheckCircleOutlined, CloseCircleOutlined, DeleteOutlined, PlusOutlined} from "@ant-design/icons-vue";
 import Tips from "@/components/Tips/index.vue";
 import {Header} from "@/views/component/debug/data";
+import {Scenario} from "@/views/scenario/data";
 const useForm = Form.useForm;
 
-const store = useStore<{ Scenario: ScenarioStateType; }>()
+const store = useStore<{ Scenario: ScenarioStateType; Performance: PerformanceStateType; }>()
 const modelRef: any = computed<boolean>(() => store.state.Scenario.nodeData)
+const runners: any = computed<any[]>(() => store.state.Scenario.performanceRunners)
+const detailResult = computed<Scenario>(() => store.state.Performance.detailResult)
+
+const activeKey = ref('info')
 
 const targetRequired = [{ required: true, message: '请输入虚拟用户数', trigger: 'blur' }]
 const durationRequired = [{ required: true, type: 'integer', message: '请输入执行时长', trigger: 'blur' }]
@@ -174,6 +216,37 @@ const goalTypes = ref([
   {label: 'QPS每秒应答数', value: PerformanceGoalType.Qps},
   {label: '失败率', value: PerformanceGoalType.FailRate}])
 
+const checkAll = ref(false)
+
+const onCheckAllChanged = (e: any) => {
+  if (e.target.checked) {
+    modelRef.value.runnerIds = runners.value.map((item) => {
+      return item.id
+    })
+  } else {
+    modelRef.value.runnerIds = []
+  }
+}
+const onCheckChanged = (item, e) => {
+  console.log('onCheckChanged', item, e)
+
+  if (e.target.checked && modelRef.value.runnerIds.indexOf(item.id) < 0) {
+    modelRef.value.runnerIds.push(item.id)
+  } else {
+    modelRef.value.runnerIds.splice(modelRef.value.runnerIds.indexOf(item.id), 1)
+  }
+}
+
+watch(() => modelRef.value.id, val => {
+  console.log('watch modelRef id for listRunnerForPerformanceScenario')
+  store.dispatch('Scenario/listRunnerForPerformanceScenario', detailResult.value.scenarioId);
+}, {immediate: true})
+
+watch(() => modelRef.value.runnerIds, val => {
+  console.log('watch modelRef runnerIds')
+  checkAll.value = val?.length === runners.value.length;
+}, {immediate: true, deep: true})
+
 const submit = debounce(async () => {
   console.log('submit')
   validate()
@@ -186,7 +259,7 @@ const submit = debounce(async () => {
         });
         modelRef.value.stages = stages
 
-        const res = await store.dispatch('Scenario/saveProcessor', modelRef.value);
+        const res = await store.dispatch('Scenario/saveProcessor', modelRef.value)
         if (res === true) {
           notifySuccess('保存成功');
         } else {
@@ -232,15 +305,37 @@ onMounted(() => {
 
 </script>
 
+<style lang="less">
+.processor_performance_scenario-main {
+  height: 100%;
+  .ant-card {
+    height: calc(100% - 40px);
+
+    .ant-card-body {
+      height: 100%;
+
+      .dp-param-grid {
+        height: calc(100% - 60px);
+
+        .params {
+          height: calc(100% - 36px);
+        }
+      }
+    }
+  }
+}
+</style>
+
 <style lang="less" scoped>
 .processor_performance_scenario-main {
   .stages {
     padding: 0 16px;
-    .dp-param-grid {
-      .ant-col.text {
-        padding: 0 10px;
-        line-height: 32px;
-      }
+  }
+
+  .dp-param-grid {
+    .ant-col.text {
+      padding: 0 10px;
+      line-height: 32px;
     }
   }
 }

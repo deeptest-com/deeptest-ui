@@ -31,6 +31,8 @@ const apiPathExec = `${apiPath}/exec`;
 const apiInvocation = `processors/invocations`;
 const apiPathInterface = `processors/interfaces`
 
+const apiPathPerformanceTestPlans = 'performanceTestPlans';
+
 export async function query(params?: QueryParams): Promise<any> {
     return request({
         url: `/${apiPath}`,
@@ -260,6 +262,15 @@ export async function updateStatus(payload: any): Promise<any> {
         url: `/scenarios/${payload.id}/updateStatus?status=${payload.status}`,
         method: 'PUT',
         // data: payload.data
+    });
+}
+
+export async function listRunnerForPerformanceScenario(performanceScenarioId: any): Promise<any> {
+    const params = {performanceScenarioId}
+    return request({
+        url: `/${apiPathPerformanceTestPlans}/listRunner`,
+        method: 'GET',
+        params,
     });
 }
 

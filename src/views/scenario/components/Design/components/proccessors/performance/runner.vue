@@ -6,22 +6,22 @@
       <a-form :label-col="{ style: { width: '120px' } }" :wrapper-col="{ span: 16 }">
 
         <a-form-item label="IP地址" name="ip" v-bind="validateInfos.ip">
-          <a-input v-model:value="modelRef.ip"
+          <a-input v-model:value="modelRef.ip" class="dp-per100"
                    @blur="validate('ip', { trigger: 'blur' }).catch(() => {})" />
         </a-form-item>
 
         <a-form-item label="Web服务端口" v-bind="validateInfos.webPort">
-          <a-input-number v-model:value="modelRef.webPort"
+          <a-input-number v-model:value="modelRef.webPort" class="dp-per100"
                           @blur="validate('webPort', { trigger: 'blur' }).catch(() => {})" />
         </a-form-item>
 
         <a-form-item label="gRPC服务端口" v-bind="validateInfos.grpcPort">
-          <a-input-number v-model:value="modelRef.grpcPort"
+          <a-input-number v-model:value="modelRef.grpcPort" class="dp-per100"
                           @blur="validate('grpcPort', { trigger: 'blur' }).catch(() => {})" />
         </a-form-item>
 
         <a-form-item label="施压权重" v-bind="validateInfos.weight">
-          <a-input-number v-model:value="modelRef.weight" :min="10" :max="100"
+          <a-input-number v-model:value="modelRef.weight" :min="10" :max="100" class="dp-per100"
                           @blur="validate('weight', { trigger: 'blur' }).catch(() => {})" />
         </a-form-item>
 

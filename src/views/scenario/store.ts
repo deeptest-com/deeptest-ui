@@ -14,14 +14,26 @@ import {
     removeNode,
     disableNodeOrNot,
     moveNode,
-    addInterfacesFromDefine, addInterfacesFromDiagnose, addProcessor,
-    saveProcessor, loadExecResult,
+    addInterfacesFromDefine,
+    addInterfacesFromDiagnose,
+    addProcessor,
+    saveProcessor,
+    loadExecResult,
     getScenariosReports,
     getScenariosReportsDetail,
     addPlans,
     getPlans,
-    removePlans, updatePriority, updateStatus, genReport, saveDebugData, syncDebugData, saveProcessorInfo,importCurl,addInterfacesFromCase,
-    copyProcessor
+    removePlans,
+    updatePriority,
+    updateStatus,
+    genReport,
+    saveDebugData,
+    syncDebugData,
+    saveProcessorInfo,
+    importCurl,
+    addInterfacesFromCase,
+    copyProcessor,
+    listRunnerForPerformanceScenario
 } from './service';
 
 import {
@@ -76,6 +88,8 @@ export interface StateType {
 
     // nodeCount: number,
     scenarioCount: number,
+
+    performanceRunners: any[];
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -121,6 +135,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         // increaseNodeCount: Mutation<StateType>;
         increaseScenarioCount: Mutation<StateType>;
+
+        setRunnersForPerformanceScenario: Mutation<StateType>;
     };
     actions: {
         setScenarioProcessorIdForDebug: Action<StateType, StateType>;
@@ -177,6 +193,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
         importCurl: Action<StateType, StateType>;
         addInterfacesFromCase: Action<StateType, StateType>;
         copyProcessor: Action<StateType, StateType>;
+
+        listRunnerForPerformanceScenario: Action<StateType, StateType>;
     }
 }
 
@@ -202,6 +220,7 @@ const initState: StateType = {
     treeData: [],
     treeDataMap: {},
     nodeData: {},
+    performanceRunners: [],
 
     treeDataCategory: [],
     treeDataMapCategory: {},
@@ -339,6 +358,10 @@ const StoreModel: ModuleType = {
         // },
         increaseScenarioCount(state) {
             state.scenarioCount += 1;
+        },
+
+        setRunnersForPerformanceScenario(state, payload) {
+            state.performanceRunners = payload;
         },
     },
     actions: {
@@ -829,7 +852,15 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
-    }
+
+        async listRunnerForPerformanceScenario({commit, dispatch, state}, performanceScenarioId: number) {
+            const res = await listRunnerForPerformanceScenario(performanceScenarioId);
+            if (res.code === 0) {
+                commit('setRunnersForPerformanceScenario', res.data ? res.data : []);
+            }
+            return true;
+        }
+    },
 };
 
 export default StoreModel;
