@@ -151,6 +151,9 @@ export enum ProcessorPerformanceRunner {
 export enum ProcessorPerformanceScenario {
     PerformanceScenarioDefault = "processor_performance_scenario_default",
 }
+export enum ProcessorPerformanceRendezvous {
+    PerformanceRendezvousDefault = "processor_performance_rendezvous_default",
+}
 
 export enum PerformanceGenerateType {
     Constant = "constant",

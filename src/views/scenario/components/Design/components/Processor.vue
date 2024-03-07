@@ -2,39 +2,39 @@
   <div class="scenario-processor-edit-main dp-processors-container">
     <!--    <ProcessorThreadDefault v-if="selectedNode.processorType === 'processor_thread_default'" />-->
 
-    <ProcessorInterfaceDefault v-if="selectedNode.processorType === 'processor_interface_default'" />
-    <ProcessorGroupDefault v-else-if="selectedNode.processorType === 'processor_group_default'" />
-    <ProcessorTimerDefault  v-else-if="selectedNode.processorType === 'processor_time_default'" />
-    <ProcessorPrintDefault  v-else-if="selectedNode.processorType === 'processor_print_default'" />
+    <ProcessorInterfaceDefault v-if="selectedNode.processorType === ProcessorInterface.Interface" />
+    <ProcessorGroupDefault v-else-if="selectedNode.processorType === ProcessorGroup.Group" />
+    <ProcessorTimerDefault  v-else-if="selectedNode.processorType === ProcessorTimer.Time" />
+    <ProcessorPrintDefault  v-else-if="selectedNode.processorType === ProcessorPrint.Print" />
 
-    <ProcessorLogicIf   v-else-if="selectedNode.processorType === 'processor_logic_if'" />
-    <ProcessorLogicElse v-else-if="selectedNode.processorType === 'processor_logic_else'" />
+    <ProcessorLogicIf   v-else-if="selectedNode.processorType === ProcessorLogic.If" />
+    <ProcessorLogicElse v-else-if="selectedNode.processorType === ProcessorLogic.Else" />
 
-    <ProcessorLoopTime  v-else-if="selectedNode.processorType === 'processor_loop_time'" />
+    <ProcessorLoopTime  v-else-if="selectedNode.processorType === ProcessorLoop.Time" />
+    <ProcessorLoopUntil v-else-if="selectedNode.processorType === ProcessorLoop.Until" />
+    <ProcessorLoopIn    v-else-if="selectedNode.processorType === ProcessorLoop.In" />
+    <ProcessorLoopRange v-else-if="selectedNode.processorType === ProcessorLoop.Range" />
 
-    <ProcessorLoopUntil v-else-if="selectedNode.processorType === 'processor_loop_until'" />
-    <ProcessorLoopIn    v-else-if="selectedNode.processorType === 'processor_loop_in'" />
-    <ProcessorLoopRange v-else-if="selectedNode.processorType === 'processor_loop_range'" />
+    <ProcessorVariableSet   v-else-if="selectedNode.processorType === ProcessorVariable.Set" />
+    <ProcessorVariableClear v-else-if="selectedNode.processorType === ProcessorVariable.Clear" />
 
-    <ProcessorVariableSet   v-else-if="selectedNode.processorType === 'processor_variable_set'" />
-    <ProcessorVariableClear v-else-if="selectedNode.processorType === 'processor_variable_clear'" />
+    <ProcessorAssertionDefault      v-else-if="selectedNode.processorType === ProcessorAssertion.Assertion" />
 
-    <ProcessorAssertionDefault      v-else-if="selectedNode.processorCategory === 'processor_assertion'" />
-
-    <ProcessorExtractorBoundary  v-else-if="selectedNode.processorType === 'processor_extractor_boundary'" />
-    <ProcessorExtractorJsonQuery v-else-if="selectedNode.processorType === 'processor_extractor_jsonquery'" />
-    <ProcessorExtractorHtmlQuery v-else-if="selectedNode.processorType === 'processor_extractor_htmlquery'" />
-    <ProcessorExtractorXmlQuery  v-else-if="selectedNode.processorType === 'processor_extractor_xmlquery'" />
+    <ProcessorExtractorBoundary  v-else-if="selectedNode.processorType === ProcessorExtractor.Boundary" />
+    <ProcessorExtractorJsonQuery v-else-if="selectedNode.processorType === ProcessorExtractor.JsonQuery" />
+    <ProcessorExtractorHtmlQuery v-else-if="selectedNode.processorType === ProcessorExtractor.HtmlQuery" />
+    <ProcessorExtractorXmlQuery  v-else-if="selectedNode.processorType === ProcessorExtractor.XmlQuery" />
 
     <ProcessorCookieGet   v-else-if="selectedNode.processorType === 'processor_cookie_get'" />
-    <ProcessorCookieSet   v-else-if="selectedNode.processorType === 'processor_cookie_set'" />
-    <ProcessorCookieClear v-else-if="selectedNode.processorType === 'processor_cookie_clear'" />
+    <ProcessorCookieSet   v-else-if="selectedNode.processorType === ProcessorCookie.Set" />
+    <ProcessorCookieClear v-else-if="selectedNode.processorType === ProcessorCookie.Clear" />
 
-    <ProcessorDataDefault    v-else-if="selectedNode.processorType === 'processor_data_default'" />
-    <ProcessorCustomCode v-else-if="selectedNode.processorType === 'processor_custom_code'" />
+    <ProcessorDataDefault    v-else-if="selectedNode.processorType === ProcessorData.Data" />
+    <ProcessorCustomCodeDefault v-else-if="selectedNode.processorType === ProcessorCustomCode.CustomCodeDefault" />
 
-    <ProcessorRunner v-else-if="selectedNode.processorType === 'processor_performance_runner_default'" />
-    <ProcessorScenario v-else-if="selectedNode.processorType === 'processor_performance_scenario_default'" />
+    <ProcessorRunner v-else-if="selectedNode.processorType === ProcessorPerformanceRunner.PerformanceRunnerDefault" />
+    <ProcessorScenario v-else-if="selectedNode.processorType === ProcessorPerformanceScenario.PerformanceScenarioDefault" />
+    <ProcessorRendezvous v-else-if="selectedNode.processorType === ProcessorPerformanceRendezvous.PerformanceRendezvousDefault" />
 
     <span v-else>
       <a-empty style="margin-top: 100px;" :description="'请先在左侧目录上选择编排场景'"/>
@@ -50,6 +50,11 @@ import {useRouter} from "vue-router";
 import {useStore} from "vuex";
 
 import {StateType as ScenarioStateType} from "../../../store";
+
+import {ProcessorInterface, ProcessorGroup, ProcessorTimer, ProcessorPrint,
+  ProcessorLogic, ProcessorLoop, ProcessorVariable, ProcessorAssertion, ProcessorExtractor,
+  ProcessorCookie, ProcessorData, ProcessorCustomCode,
+  ProcessorPerformanceRunner, ProcessorPerformanceScenario,ProcessorPerformanceRendezvous} from "@/utils/enum";
 
 import ProcessorGroupDefault from "./proccessors/group/default.vue";
 import ProcessorInterfaceDefault from "./proccessors/interface/default.vue"
@@ -79,10 +84,11 @@ import ProcessorCookieSet  from "./proccessors/cookie/set.vue"
 import ProcessorCookieClear from "./proccessors/cookie/clear.vue"
 
 import ProcessorDataDefault   from "./proccessors/data/default.vue"
-import ProcessorCustomCode from "./proccessors/custom_code/default.vue"
+import ProcessorCustomCodeDefault from "./proccessors/custom_code/default.vue"
 
 import ProcessorRunner   from "./proccessors/performance/runner.vue"
 import ProcessorScenario from "./proccessors/performance/scenario.vue"
+import ProcessorRendezvous from "./proccessors/performance/rendezvous.vue"
 
 const router = useRouter();
 const store = useStore<{ Scenario: ScenarioStateType; }>();
