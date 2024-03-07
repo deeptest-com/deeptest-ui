@@ -176,7 +176,7 @@ const useForm = Form.useForm;
 const store = useStore<{ Scenario: ScenarioStateType; Performance: PerformanceStateType; }>()
 const modelRef: any = computed<boolean>(() => store.state.Scenario.nodeData)
 const runners: any = computed<any[]>(() => store.state.Scenario.performanceRunners)
-const detailResult = computed<Scenario>(() => store.state.Performance.detailResult)
+const detailResult = computed<any>(() => store.state.Performance.detailResult)
 
 const activeKey = ref('info')
 
