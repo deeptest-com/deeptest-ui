@@ -1,25 +1,27 @@
 <template>
-  <a-card :bordered="false">
-    <template #extra>
-      <a-button type="primary" @click="createOrUpdate">新建</a-button>
-    </template>
-    <BasicTable
-      :sortable="false"
-      :checkable="false"
-      :data-source="list"
-      :columns="columns"
-      :row-key="record => record.id"
-      :pagination="{
-        ...pagination,
-        onChange: (page) => {
-          listCronProject({ current: page });
-        },
-        onShowSizeChange: (_page, size) => {
-          listCronProject({ pageSize: size });
-        },
-      }"
-    />
-  </a-card>
+  <div class="swagger-sync-container">
+    <a-card :bordered="false">
+      <template #extra>
+        <a-button type="primary" @click="createOrUpdate">新建</a-button>
+      </template>
+      <BasicTable
+        :sortable="false"
+        :checkable="false"
+        :data-source="list"
+        :columns="columns"
+        :row-key="record => record.id"
+        :pagination="{
+          ...pagination,
+          onChange: (page) => {
+            listCronProject({ current: page });
+          },
+          onShowSizeChange: (_page, size) => {
+            listCronProject({ pageSize: size });
+          },
+        }"
+      />
+    </a-card>
+  </div>
   <SyncTaskModal v-if="syncTaskVisible" :visible="syncTaskVisible" @cancel="closeSyncTask" :task-id="currTaskId" @ok="addSyncTaskSuccess" />
 </template>
 
@@ -139,6 +141,7 @@ const columns: any = [{
   }
 },{
   title: '导入至分类',
+  width: 150,
   key: 'categoryName',
   customRender: ({ record }) => {
     return <span color="#1677ff">{ record.categoryName }</span>
@@ -148,7 +151,7 @@ const columns: any = [{
   width: 250,
   key: 'updatedAt',
   customRender: ({ record }) => {
-    return <span>{  record.execTime ? momentUtc(record.execTime) : '' }</span>
+    return <span>{  record.execTime ? momentUtc(record.execTime) : '-' }</span>
   }
 },{
   title: '创建人',
@@ -200,6 +203,10 @@ onMounted(() => {
 </script>
 
 <style lang="less" scoped>
+.swagger-sync-container {
+  overflow-y: scroll;
+  height: calc(100% - 46px);
+}
 .content {
   margin-top: 24px;
   margin-left: 24px;
