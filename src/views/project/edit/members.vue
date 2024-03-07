@@ -36,9 +36,7 @@
             },
           }"
         >
-          <template #username="{ text }">
-            {{ text }}
-          </template>
+      
 
           <template #email="{ text }">
             {{ text }}
@@ -84,15 +82,14 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, reactive, ref, watch} from "vue";
-import {PaginationConfig, Project, Member} from "../data.d";
+import {computed, onMounted, ref, watch} from "vue";
 import {useStore} from "vuex";
 
 import {StateType} from "../store";
 import debounce from "lodash.debounce";
-import {useRouter} from "vue-router";
-import {Modal, notification} from "ant-design-vue";
-import {NotificationKeyCommon} from "@/utils/const";
+
+import {Modal} from "ant-design-vue";
+
 import {
   queryMembers,
   removeMember,
@@ -102,12 +99,11 @@ import {StateType as UserStateType} from "@/store/user";
 import EditPage from "../edit/invite.vue";
 import {SelectTypes} from "ant-design-vue/lib/select";
 import {inviteUser} from "@/views/user/info/service";
-import {message} from 'ant-design-vue';
 import {notifyError, notifySuccess} from "@/utils/notify";
 
-const router = useRouter();
+
 const store = useStore<{ Project: StateType; User: UserStateType, ProjectGlobal }>();
-const currentUser = computed<any>(() => store.state.User.currentUser);
+
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 
 
@@ -121,13 +117,6 @@ let queryParams: any = ref<any>({
 
 const members = ref([]);
 
-const data = reactive<Member>({
-  userId: "",
-  email: "",
-  roleName: "",
-  username: "",
-});
-
 
 const columns = [
   {
@@ -137,8 +126,7 @@ const columns = [
   },
   {
     title: "用户名",
-    dataIndex: "username",
-    slots: {customRender: "username"},
+    dataIndex: "name",
   },
   {
     title: "角色",
