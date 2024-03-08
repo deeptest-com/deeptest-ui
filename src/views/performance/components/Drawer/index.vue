@@ -42,10 +42,6 @@
       </template>
     </DrawerLayout>
 
-    <EnvSelector :env-select-drawer-visible="selectEnvVisible"
-                 :execEnvId="execEnvId"
-                 @onOk="selectExecEnv"
-                 @onCancel="cancelSelectExecEnv" />
     <ExecModal :visible="execModalVisible"
                :onClose="onExecModalClosed" />
 
@@ -70,7 +66,6 @@ import {StateType} from "../../store";
 import BasicInfo from '../Detail/BasicInfo.vue';
 import Design from "@/views/scenario/components/Design/index.vue"
 import {designForKey, DesignScenarioFor} from "@/utils/enum";
-import EnvSelector from "@/views/component/EnvSelector/index.vue";
 import ExecModal from "../Exec/modal.vue";
 
 const store = useStore<{ Performance: StateType }>()
@@ -110,30 +105,18 @@ async function changeTab(value) {
   stickyKey.value++;
 }
 
+// 执行有关
 const execModalVisible = ref(false);
-const selectEnvVisible = ref(false);
-const execEnvId = ref(null);
-
 const onExecModalClosed = () => {
   execModalVisible.value = false
 }
-
-async function selectExecEnv() {
-  selectEnvVisible.value = false;
+async function exec() {
+  console.log('exec')
   execModalVisible.value = true;
-}
-async function cancelSelectExecEnv(record: any) {
-  selectEnvVisible.value = false;
-  execEnvId.value = null;
 }
 
 function onCloseDrawer() {
   emit('close');
-}
-
-async function exec() {
-  console.log('exec')
-  selectEnvVisible.value = true;
 }
 
 watch(() => {

@@ -3,7 +3,7 @@
     <div class="toolbar">
       {{t(progressStatus)}} &nbsp;
       <a-button v-if="progressStatus !== WsMsgCategory.InProgress" type="primary"
-                @click="execBegin">
+                @click="selectExecEnv">
         开始执行
       </a-button> &nbsp;
 
@@ -137,6 +137,13 @@
              :stopLog="stopLog" />
       </div>
     </div>
+
+    <EnvSelector v-if="selectEnvVisible"
+                 :env-select-drawer-visible="selectEnvVisible"
+                 :execEnvId="execEnvId"
+                 @onOk="finishSelectExecEnv"
+                 @onCancel="cancelSelectExecEnv" />
+
   </div>
 </template>
 
@@ -151,28 +158,29 @@ import {
 } from 'echarts/components';
 import VChart, { THEME_KEY } from 'vue-echarts';
 
-import {ref, onMounted, onUnmounted} from 'vue';
+import {ref, onMounted, onUnmounted, computed} from 'vue';
 import {getUuid} from "@/utils/string";
 import {WsMsgCategory} from "@/utils/enum";
 import {tableReqResponseTimeColumns} from "./config"
 import useCaseExecution from "./exec";
 import {useI18n} from "vue-i18n";
 import Log from "./log.vue";
+import {useStore} from "vuex";
+import {StateType} from "@/views/performance/store";
+import {PerformanceTestPlan} from "@/views/performance/data";
+import {StateType as UserStateType} from "@/store/user";
+import {StateType as ProjectStateType} from "@/store/project";
+import {setServeUrl} from "@/utils/url";
+import {getToken} from "@/utils/localToken";
+import {StateType as ProjectSettingStateType} from "@/views/project-settings/store";
+import EnvSelector from "@/views/component/EnvSelector/index.vue";
 
 require("echarts/lib/component/grid");
-const { t } = useI18n();
-
-use([
-  CanvasRenderer,
-  LineChart,
-  TitleComponent,
-  TooltipComponent,
-  LegendComponent,
-]);
-
+use([CanvasRenderer, LineChart, TitleComponent, TooltipComponent, LegendComponent,]);
 // provide(THEME_KEY, 'dark'); // for echart style
 const activeKey = ref('metrics')
 
+const { t } = useI18n();
 const { execJoin, execStart, execStop, startLog, stopLog,
         progressStatus,
         chartDataVuCount, chartDataAvgQps, chartDataFailNumb, chartDataAvgDurationAll,
@@ -181,99 +189,130 @@ const { execJoin, execStart, execStop, startLog, stopLog,
 
 const execUuid = ref('');
 
+const store = useStore<{ Performance: StateType; User: UserStateType; ProjectSetting: ProjectSettingStateType; ProjectGlobal: ProjectStateType  }>()
+const detailResult: any = computed<PerformanceTestPlan>(() => store.state.Performance.detailResult)
+const currUser = computed(() => store.state.User.currentUser);
+const currEnvId = computed(() => store.state.ProjectSetting.selectEnvId);
+
+const selectEnvVisible = ref(false);
+const execEnvId = ref(null);
+
+async function selectExecEnv() {
+  selectEnvVisible.value = true;
+}
+async function finishSelectExecEnv() {
+  execBegin()
+}
+async function cancelSelectExecEnv(record: any) {
+  selectEnvVisible.value = false;
+  execEnvId.value = null;
+}
+
 const execBegin = async () => {
   console.log('execBegin')
 
-  execUuid.value = getUuid()
-  execStart({
-    "uuid": execUuid.value,
-    "planId": 1,
-    "title": "my test",
+  execUuid.value = currUser.value.id + '@' + getUuid()
 
-    "serverAddress": "192.168.0.105:8086",
-    "influxdbAddress": "http://192.168.0.105:8087",
-    "influxdbOrg": "deeptest",
-    "influxdbToken": "CjK5KHeIopceCfRznN7RZxlffNrnCOBJ6Ugi9PCFb-mRu4ZQJ01tqpE4oeWmw5VlaDk-y3JMkKSx8k8Klwh04g==",
+  const data = {
+    userId: currUser.value.id,
+    execUuid: execUuid.value,
+    serverUrl: setServeUrl(process.env.VUE_APP_API_SERVER),
+    token: await getToken(),
+    planId: detailResult.value.id,
+    environmentId: currEnvId.value,
+  }
+  console.log('****** send ws data of exec performance testing ', data);
 
-    // "goalAvgQps": 100,
-    // "goalAvgResponseTime": 100,
-    // "goalFailed": "300",
-
-    "runners": [
-      {
-        "id": 1,
-        "name": "127.0.0.1",
-        "grpcAddress": "127.0.0.1:9528",
-        "webAddress": "127.0.0.1:8086",
-        "weight": 100,
-      },
-      {
-        "id": 2,
-        "name": "192.168.0.56",
-      }
-    ],
-
-    "scenarios": [
-      {
-        "id": 1,
-        "name": "my scenario 1",
-
-        "generateType": "constant",
-        "stages": [
-          {
-            "target": 10,
-            "duration": 60,
-          },
-          {
-            "target": 0,
-            "duration": 3600,
-          }
-        ],
-
-        "processors": [
-          {
-            "id": 1,
-            "name": "interface1",
-            "type": "processor_interface_default"
-          },
-          {
-            "type": "rendezvous",
-            "name": "rendezvousA",
-            "rendezvousTarget": 5
-          },
-          {
-            "id": 2,
-            "name": "interface2",
-            "type": "processor_interface_default"
-          },
-          {
-            "id": 3,
-            "name": "interface3",
-            "type": "processor_interface_default"
-          },
-          {
-            "id": 4,
-            "name": "interface4",
-            "type": "processor_interface_default"
-          },
-          {
-            "id": 5,
-            "name": "interface5",
-            "type": "processor_interface_default"
-          },
-          {
-            "id": 6,
-            "name": "interface6",
-            "type": "processor_interface_default"
-          }
-        ],
-      },
-      {
-        "id": 2,
-        "runners": [1,2],
-      }
-    ]
-  });
+  // execUuid.value = getUuid()
+  // execStart({
+  //   "uuid": execUuid.value,
+  //   "planId": 1,
+  //   "title": "my test",
+  //
+  //   "serverAddress": "192.168.0.105:8086",
+  //   "influxdbAddress": "http://192.168.0.105:8087",
+  //   "influxdbOrg": "deeptest",
+  //   "influxdbToken": "CjK5KHeIopceCfRznN7RZxlffNrnCOBJ6Ugi9PCFb-mRu4ZQJ01tqpE4oeWmw5VlaDk-y3JMkKSx8k8Klwh04g==",
+  //
+  //   // "goalAvgQps": 100,
+  //   // "goalAvgResponseTime": 100,
+  //   // "goalFailed": "300",
+  //
+  //   "runners": [
+  //     {
+  //       "id": 1,
+  //       "name": "127.0.0.1",
+  //       "grpcAddress": "127.0.0.1:9528",
+  //       "webAddress": "127.0.0.1:8086",
+  //       "weight": 100,
+  //     },
+  //     {
+  //       "id": 2,
+  //       "name": "192.168.0.56",
+  //     }
+  //   ],
+  //
+  //   "scenarios": [
+  //     {
+  //       "id": 1,
+  //       "name": "my scenario 1",
+  //
+  //       "generateType": "constant",
+  //       "stages": [
+  //         {
+  //           "target": 10,
+  //           "duration": 60,
+  //         },
+  //         {
+  //           "target": 0,
+  //           "duration": 3600,
+  //         }
+  //       ],
+  //
+  //       "processors": [
+  //         {
+  //           "id": 1,
+  //           "name": "interface1",
+  //           "type": "processor_interface_default"
+  //         },
+  //         {
+  //           "type": "rendezvous",
+  //           "name": "rendezvousA",
+  //           "rendezvousTarget": 5
+  //         },
+  //         {
+  //           "id": 2,
+  //           "name": "interface2",
+  //           "type": "processor_interface_default"
+  //         },
+  //         {
+  //           "id": 3,
+  //           "name": "interface3",
+  //           "type": "processor_interface_default"
+  //         },
+  //         {
+  //           "id": 4,
+  //           "name": "interface4",
+  //           "type": "processor_interface_default"
+  //         },
+  //         {
+  //           "id": 5,
+  //           "name": "interface5",
+  //           "type": "processor_interface_default"
+  //         },
+  //         {
+  //           "id": 6,
+  //           "name": "interface6",
+  //           "type": "processor_interface_default"
+  //         }
+  //       ],
+  //     },
+  //     {
+  //       "id": 2,
+  //       "runners": [1,2],
+  //     }
+  //   ]
+  // });
 }
 
 const execCancel = () => {

@@ -111,6 +111,9 @@
         @close="drawerVisible = false;"/>
   </div>
 
+  <ExecModal :visible="execModalVisible"
+             :onClose="onExecModalClosed" />
+
 </template>
 
 <script setup lang="ts">
@@ -139,6 +142,8 @@ import {StateType} from "../../store";
 import {StateType as ScenarioStateType} from "@/views/scenario/store";
 import Create from "../Create/index.vue";
 import DrawerDetail from "../Drawer/index.vue";
+import ExecModal from "@/views/performance/components/Exec/modal.vue";
+import EnvSelector from "@/views/component/EnvSelector/index.vue";
 
 const { hasPermission, isCreator } = usePermission();
 const { share } = useSharePage();
@@ -159,7 +164,7 @@ const currModelId = ref(0)
 
 const dropdownMenuList = [
   {
-    label: '执行',
+    label: '执行测试',
     action: (record) => execPerformanceTestPlan(record),
     auth: '',
   },
@@ -262,12 +267,11 @@ const remove = (id: number) => {
 
 // 抽屉是否打开
 const drawerVisible = ref<boolean>(false);
-// 执行抽屉打开
-const execVisible = ref<boolean>(false);
-const selectEnvVisible = ref<boolean>(false);
-const selectedExecPerformanceTestPlan: any = ref(null);
+
 // 抽屉里的tab key
 const drawerTabKey: any = ref<string>('1');
+
+
 
 async function editPerformanceTestPlan(record: any, tab: string) {
   drawerVisible.value = true;
@@ -279,11 +283,18 @@ async function editPerformanceTestPlan(record: any, tab: string) {
   await store.dispatch('Performance/getPlan', record.id);
 }
 
+// 执行有关
+const execModalVisible = ref(false);
+
+const onExecModalClosed = () => {
+  execModalVisible.value = false
+}
+
 async function execPerformanceTestPlan(record: any) {
-  store.commit('Performance/setNode', {});
-  selectEnvVisible.value = true;
-  selectedExecPerformanceTestPlan.value = record;
-  await store.dispatch('PerformanceTestPlan/getPerformanceTestPlan', record.id);
+  execModalVisible.value = true;
+
+  await store.dispatch('Scenario/getNode', null) // clear right page
+  await store.dispatch('Performance/getPlan', record.id);
 }
 
 async function handleChangeStatus(value: any, record: any,) {
