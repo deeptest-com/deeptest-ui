@@ -636,3 +636,20 @@ input:-webkit-autofill { -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !impor
   display: inline-block;
   padding: 0 6px 0 0;
 }
+
+.dp-full-modal {
+  .ant-modal {
+    max-width: 100%;
+    top: 0;
+    padding-bottom: 0;
+    margin: 0;
+  }
+  .ant-modal-content {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh);
+  }
+  .ant-modal-body {
+    flex: 1;
+  }
+}

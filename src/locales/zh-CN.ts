@@ -194,6 +194,8 @@ export default {
 
     'http_1000': '无法连接到服务',
 
+    'pt_connecting': '尝试连接进行中的测试。。。',
+
     'biz_401': '请重新登录',
     'biz_403': '权限不足',
     'biz_undefined': '未知错误',

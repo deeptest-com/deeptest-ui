@@ -1,14 +1,14 @@
 <template>
-  <div class="performance-test-index">
-    <ContentPane>
-      <template #left>
-        <Tree/>
-      </template>
-      <template #right>
-        <List/>
-      </template>
-    </ContentPane>
-  </div>
+  <ContentPane class="performance-test-index"
+               :showExpand="true"
+               :containerStyle="{ padding:0, margin:0}">
+    <template #left>
+      <Tree/>
+    </template>
+    <template #right>
+      <List/>
+    </template>
+  </ContentPane>
 </template>
 
 <script setup lang="ts">

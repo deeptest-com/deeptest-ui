@@ -4,155 +4,153 @@
 
     <a-card :bordered="false">
       <a-tabs v-model:activeKey="activeKey">
-        <a-tab-pane key="info" tab="基本信息">
-
-        </a-tab-pane>
-
-        <a-tab-pane key="runners" tab="执行代理">
-
-        </a-tab-pane>
+        <a-tab-pane key="info" tab="基本信息" />
+        <a-tab-pane key="runners" tab="执行代理" />
       </a-tabs>
 
-      <a-form v-if="activeKey === 'info'"
-              :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
+      <a-form :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
 
-        <a-form-item label="加压方式" name="generateType" v-bind="validateInfos.generateType">
-          <a-select v-model:value="modelRef.generateType" class="dp-per100"
-                    @blur="validate('generateType', { trigger: 'change' }).catch(() => {})">
-            <a-select-option v-for="(item, idx) in generateTypes" :key="idx" :value="item.value">
-              {{item.label}}
-            </a-select-option>
-          </a-select>
-        </a-form-item>
+        <div v-if="activeKey === 'info'">
+          <a-form-item label="加压方式" name="generateType" v-bind="validateInfos.generateType">
+            <a-select v-model:value="modelRef.generateType" class="dp-per100"
+                      @blur="validate('generateType', { trigger: 'change' }).catch(() => {})">
+              <a-select-option v-for="(item, idx) in generateTypes" :key="idx" :value="item.value">
+                {{item.label}}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
 
-        <a-form-item v-if="modelRef.generateType === PerformanceGenerateType.Constant"
-                     v-bind="validateInfos.target"
-                     label="虚拟用户数">
-          <a-input-number v-model:value="modelRef.target" :min="1" class="dp-per100"
-                          @blur="validate('target', { trigger: 'blur' }).catch(() => {})" />
-        </a-form-item>
+          <a-form-item v-if="modelRef.generateType === PerformanceGenerateType.Constant"
+                       v-bind="validateInfos.target"
+                       label="虚拟用户数">
+            <a-input-number v-model:value="modelRef.target" :min="1" class="dp-per100"
+                            @blur="validate('target', { trigger: 'blur' }).catch(() => {})" />
+          </a-form-item>
 
-        <a-form-item v-if="modelRef.generateType === PerformanceGenerateType.Ramp"
-                     :labelCol="{span: 0}" :wrapperCol="{span: 23}" class="stages">
-          <div class="dp-param-grid">
-            <div class="head">
-              <a-row type="flex">
-                <a-col flex="100px" class="title">阶段</a-col>
-                <a-col flex="1" class="title">时长(秒)</a-col>
-                <a-col flex="1" class="title">虚拟用户数</a-col>
+          <a-form-item v-if="modelRef.generateType === PerformanceGenerateType.Ramp"
+                       :labelCol="{span: 0}" :wrapperCol="{span: 23}" class="stages">
+            <div class="dp-param-grid">
+              <div class="head">
+                <a-row type="flex">
+                  <a-col flex="100px" class="title">阶段</a-col>
+                  <a-col flex="1" class="title">时长(秒)</a-col>
+                  <a-col flex="1" class="title">虚拟用户数</a-col>
 
-                <a-col flex="80px" class="dp-right">
-                  <Tips section="performance-stage" title="维护虚拟用户加载阶段" />
+                  <a-col flex="80px" class="dp-right">
+                    <Tips section="performance-stage" title="维护虚拟用户加载阶段" />
 
-                  <a-tooltip @click="addStage" overlayClassName="dp-tip-small">
-                    <template #title>新增</template>
-                    <PlusOutlined class="dp-icon-btn dp-trans-80"/>
-                  </a-tooltip>
-                </a-col>
-              </a-row>
+                    <a-tooltip @click="addStage" overlayClassName="dp-tip-small">
+                      <template #title>新增</template>
+                      <PlusOutlined class="dp-icon-btn dp-trans-80"/>
+                    </a-tooltip>
+                  </a-col>
+                </a-row>
+              </div>
+
+              <div class="params">
+                <a-row v-for="(item, idx) in modelRef.stages" :key="idx" type="flex" class="param">
+                  <a-col flex="100px" class="text">
+                    {{ idx + 1 }}
+                  </a-col>
+
+                  <a-col flex="1">
+                    <a-input v-model:value="item.duration"
+                             class="dp-bg-input-transparent" />
+                  </a-col>
+
+                  <a-col flex="1">
+                    <a-input v-model:value="item.target"
+                             class="dp-bg-input-transparent" />
+                  </a-col>
+
+                  <a-col flex="80px" class="dp-right dp-icon-btn-container">
+                    <a-tooltip @click="removeStage(idx)" overlayClassName="dp-tip-small">
+                      <template #title>移除</template>
+                      <DeleteOutlined class="dp-icon-btn dp-trans-80"/>
+                    </a-tooltip>
+
+                    <a-tooltip @click="insertStage(idx)" overlayClassName="dp-tip-small">
+                      <template #title>插入</template>
+                      <PlusOutlined class="dp-icon-btn dp-trans-80"/>
+                    </a-tooltip>
+                  </a-col>
+                </a-row>
+              </div>
             </div>
+          </a-form-item>
 
-            <div class="params">
-              <a-row v-for="(item, idx) in modelRef.stages" :key="idx" type="flex" class="param">
-                <a-col flex="100px" class="text">
-                  {{ idx + 1 }}
-                </a-col>
+          <a-form-item label="完成目标" name="goal" v-bind="validateInfos.goal">
+            <a-select v-model:value="modelRef.goal" class="dp-per100"
+                      @blur="validate('goal', { trigger: 'change' }).catch(() => {})">
+              <a-select-option v-for="(item, idx) in goalTypes" :key="idx" :value="item.value">
+                {{item.label}}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
 
-                <a-col flex="1">
-                  <a-input v-model:value="item.duration"
-                           class="dp-bg-input-transparent" />
-                </a-col>
+          <a-form-item v-if="modelRef.goal === PerformanceGoalType.Duration"
+                       label="执行时长" name="duration" v-bind="validateInfos.duration">
+            <a-input-number v-model:value="modelRef.duration" :min="1" class="dp-per100"
+                            @blur="validate('duration', { trigger: 'blur' }).catch(() => {})" />
+          </a-form-item>
 
-                <a-col flex="1">
-                  <a-input v-model:value="item.target"
-                           class="dp-bg-input-transparent" />
-                </a-col>
+          <a-form-item v-if="modelRef.goal === PerformanceGoalType.Loop"
+                       label="执行轮次" name="loop" v-bind="validateInfos.loop">
+            <a-input-number v-model:value="modelRef.loop" :min="1" class="dp-per100"
+                            @blur="validate('loop', { trigger: 'blur' }).catch(() => {})" />
+          </a-form-item>
 
-                <a-col flex="80px" class="dp-right dp-icon-btn-container">
-                  <a-tooltip @click="removeStage(idx)" overlayClassName="dp-tip-small">
-                    <template #title>移除</template>
-                    <DeleteOutlined class="dp-icon-btn dp-trans-80"/>
-                  </a-tooltip>
+          <a-form-item v-if="modelRef.goal === PerformanceGoalType.ResponseTime"
+                       label="响应时间阀值" name="responseTime" v-bind="validateInfos.responseTime">
+            <a-input-number v-model:value="modelRef.responseTime" :min="0" class="dp-per100"
+                            @blur="validate('responseTime', { trigger: 'blur' }).catch(() => {})" />
+          </a-form-item>
 
-                  <a-tooltip @click="insertStage(idx)" overlayClassName="dp-tip-small">
-                    <template #title>插入</template>
-                    <PlusOutlined class="dp-icon-btn dp-trans-80"/>
-                  </a-tooltip>
-                </a-col>
-              </a-row>
-            </div>
+          <a-form-item v-if="modelRef.goal === PerformanceGoalType.Qps"
+                       label="QPS阀值" name="qps" v-bind="validateInfos.qps">
+            <a-input-number v-model:value="modelRef.qps" :min="1" class="dp-per100"
+                            @blur="validate('qps', { trigger: 'blur' }).catch(() => {})" />
+          </a-form-item>
+
+          <a-form-item v-if="modelRef.goal === PerformanceGoalType.FailRate"
+                       label="失败率阀值" name="failRate" v-bind="validateInfos.failRate">
+            <a-input-number v-model:value="modelRef.failRate" :min="0.01" class="dp-per100"
+                            @blur="validate('failRate', { trigger: 'blur' }).catch(() => {})" />
+          </a-form-item>
+        </div>
+
+        <div v-if="activeKey === 'runners' && runners.length > 0" class="dp-param-grid">
+          <div class="head">
+            <a-row type="flex">
+              <a-col flex="100px" class="title">
+                <a-checkbox v-model:checked="checkAll"
+                            @change="onCheckAllChanged" />
+              </a-col>
+              <a-col flex="1" class="title">代理名称</a-col>
+            </a-row>
           </div>
-        </a-form-item>
 
-        <a-form-item label="完成目标" name="goal" v-bind="validateInfos.goal">
-          <a-select v-model:value="modelRef.goal" class="dp-per100"
-                    @blur="validate('goal', { trigger: 'change' }).catch(() => {})">
-            <a-select-option v-for="(item, idx) in goalTypes" :key="idx" :value="item.value">
-              {{item.label}}
-            </a-select-option>
-          </a-select>
-        </a-form-item>
+          <div class="params">
+            <a-row v-for="(item, idx) in runners" :key="idx" type="flex" class="param">
+              <a-col flex="100px" class="text">
+                <a-checkbox :checked="modelRef.runnerIds?.includes(item.id)"
+                            @change="e => onCheckChanged(item, e)"/>
+              </a-col>
 
-        <a-form-item v-if="modelRef.goal === PerformanceGoalType.Duration"
-                     label="执行时长" name="duration" v-bind="validateInfos.duration">
-          <a-input-number v-model:value="modelRef.duration" :min="1" class="dp-per100"
-                          @blur="validate('duration', { trigger: 'blur' }).catch(() => {})" />
-        </a-form-item>
+              <a-col flex="1" class="text">
+                {{item.name ? item.name : '新代理'}}
+              </a-col>
+            </a-row>
+          </div>
 
-        <a-form-item v-if="modelRef.goal === PerformanceGoalType.Loop"
-                     label="执行轮次" name="loop" v-bind="validateInfos.loop">
-          <a-input-number v-model:value="modelRef.loop" :min="1" class="dp-per100"
-                          @blur="validate('loop', { trigger: 'blur' }).catch(() => {})" />
-        </a-form-item>
-
-        <a-form-item v-if="modelRef.goal === PerformanceGoalType.ResponseTime"
-                     label="响应时间阀值" name="responseTime" v-bind="validateInfos.responseTime">
-          <a-input-number v-model:value="modelRef.responseTime" :min="0" class="dp-per100"
-                          @blur="validate('responseTime', { trigger: 'blur' }).catch(() => {})" />
-        </a-form-item>
-
-        <a-form-item v-if="modelRef.goal === PerformanceGoalType.Qps"
-                     label="QPS阀值" name="qps" v-bind="validateInfos.qps">
-          <a-input-number v-model:value="modelRef.qps" :min="1" class="dp-per100"
-                          @blur="validate('qps', { trigger: 'blur' }).catch(() => {})" />
-        </a-form-item>
-
-        <a-form-item v-if="modelRef.goal === PerformanceGoalType.FailRate"
-                     label="失败率阀值" name="failRate" v-bind="validateInfos.failRate">
-          <a-input-number v-model:value="modelRef.failRate" :min="0.01" class="dp-per100"
-                          @blur="validate('failRate', { trigger: 'blur' }).catch(() => {})" />
-        </a-form-item>
+          <br />
+        </div>
 
         <a-form-item class="processor-btn" :wrapper-col="{ span: 16, offset: 4 }">
           <a-button type="primary" @click.prevent="submit">保存</a-button>
         </a-form-item>
+
       </a-form>
-
-      <div v-if="activeKey === 'runners' && runners.length > 0" class="dp-param-grid">
-        <div class="head">
-          <a-row type="flex">
-            <a-col flex="100px" class="title">
-              <a-checkbox v-model:checked="checkAll"
-                          @change="onCheckAllChanged" />
-            </a-col>
-            <a-col flex="1" class="title">代理名称</a-col>
-          </a-row>
-        </div>
-
-        <div class="params">
-          <a-row v-for="(item, idx) in runners" :key="idx" type="flex" class="param">
-            <a-col flex="100px" class="text">
-              <a-checkbox :checked="modelRef.runnerIds?.includes(item.id)"
-                          @change="e => onCheckChanged(item, e)"/>
-            </a-col>
-
-            <a-col flex="1" class="text">
-              {{item.name ? item.name : '新代理'}}
-            </a-col>
-          </a-row>
-        </div>
-      </div>
-
     </a-card>
   </div>
 </template>
@@ -314,11 +312,13 @@ onMounted(() => {
     .ant-card-body {
       height: 100%;
 
-      .dp-param-grid {
-        height: calc(100% - 60px);
-
-        .params {
-          height: calc(100% - 36px);
+      .ant-form {
+        height: calc(100% - 80px);
+        .dp-param-grid {
+          height: 100%;
+          .params {
+            height: calc(100% - 36px);
+          }
         }
       }
     }

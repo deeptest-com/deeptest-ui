@@ -42,8 +42,14 @@
       </template>
     </DrawerLayout>
 
+    <EnvSelector :env-select-drawer-visible="selectEnvVisible"
+                 :execEnvId="execEnvId"
+                 @onOk="selectExecEnv"
+                 @onCancel="cancelSelectExecEnv" />
+    <ExecModal :visible="execModalVisible"
+               :onClose="onExecModalClosed" />
+
     <!--
-    <ScenarioExec :exec-drawer-visible="execDrawerVisible" @on-close="execDrawerVisible = false" />
     <ExecListDetail :exec-list-detail-visible="execListDetailVisible" @on-close="execListDetailVisible = false" />
     -->
   </div>
@@ -64,6 +70,8 @@ import {StateType} from "../../store";
 import BasicInfo from '../Detail/BasicInfo.vue';
 import Design from "@/views/scenario/components/Design/index.vue"
 import {designForKey, DesignScenarioFor} from "@/utils/enum";
+import EnvSelector from "@/views/component/EnvSelector/index.vue";
+import ExecModal from "../Exec/modal.vue";
 
 const store = useStore<{ Performance: StateType }>()
 const detailResult: any = computed<PerformanceTestPlan>(() => store.state.Performance.detailResult)
@@ -102,12 +110,21 @@ async function changeTab(value) {
   stickyKey.value++;
 }
 
-const execDrawerVisible = ref(false);
+const execModalVisible = ref(false);
 const selectEnvVisible = ref(false);
+const execEnvId = ref(null);
+
+const onExecModalClosed = () => {
+  execModalVisible.value = false
+}
 
 async function selectExecEnv() {
   selectEnvVisible.value = false;
-  execDrawerVisible.value = true;
+  execModalVisible.value = true;
+}
+async function cancelSelectExecEnv(record: any) {
+  selectEnvVisible.value = false;
+  execEnvId.value = null;
 }
 
 function onCloseDrawer() {
@@ -115,8 +132,8 @@ function onCloseDrawer() {
 }
 
 async function exec() {
+  console.log('exec')
   selectEnvVisible.value = true;
-  await store.dispatch('Performance/getPlan', detailResult?.value?.id);
 }
 
 watch(() => {

@@ -1,14 +1,14 @@
 <template>
   <div class="performance-test-exec">
     <div class="toolbar">
-      {{t(progressStatus)}}
-      <a-button @click="execBegin"
-                :disabled="progressStatus === WsMsgCategory.InProgress" type="primary">
+      {{t(progressStatus)}} &nbsp;
+      <a-button v-if="progressStatus !== WsMsgCategory.InProgress" type="primary"
+                @click="execBegin">
         开始执行
       </a-button> &nbsp;
 
-      <a-button @click="execCancel"
-                :disabled="progressStatus !== WsMsgCategory.InProgress">
+      <a-button v-else
+                @click="execCancel">
         停止执行
       </a-button>
     </div>
@@ -152,10 +152,10 @@ import {
 import VChart, { THEME_KEY } from 'vue-echarts';
 
 import {ref, onMounted, onUnmounted} from 'vue';
-import useCaseExecution from "./exec";
 import {getUuid} from "@/utils/string";
 import {WsMsgCategory} from "@/utils/enum";
 import {tableReqResponseTimeColumns} from "./config"
+import useCaseExecution from "./exec";
 import {useI18n} from "vue-i18n";
 import Log from "./log.vue";
 
@@ -170,7 +170,7 @@ use([
   LegendComponent,
 ]);
 
-// provide(THEME_KEY, 'dark');
+// provide(THEME_KEY, 'dark'); // for echart style
 const activeKey = ref('metrics')
 
 const { execJoin, execStart, execStop, startLog, stopLog,

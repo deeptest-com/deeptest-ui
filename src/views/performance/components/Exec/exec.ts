@@ -1,15 +1,17 @@
 import { ref, Ref, computed } from 'vue';
 import { useStore } from 'vuex';
 import {getWebSocketApi} from "@/services/websocket";
+import cloneDeep from "lodash/cloneDeep";
+import {WsMsgCategory} from "@/utils/enum";
+import {scrollTo} from "@/utils/dom";
+
 import {
     genAllResponseTimeChart, genCpuMetricsChart,
     genDiskMetricsChart, genMemoryMetricsChart,
     genNetworkMetricsChart, genFailedNumbChart, genVuCountChart,
 } from "@/views/performance/service";
-import {sampleAvgDuration} from "@/views/performance/config";
-import cloneDeep from "lodash/cloneDeep";
-import {WsMsgCategory} from "@/utils/enum";
-import {scrollTo} from "@/utils/dom";
+
+import {sampleAvgDuration} from "./config";
 import {PerformanceTestWsClient} from "./websocket";
 
 interface Execution {
