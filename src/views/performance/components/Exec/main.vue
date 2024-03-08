@@ -1,7 +1,7 @@
 <template>
   <div class="performance-test-exec">
     <div class="toolbar">
-      {{t(progressStatus)}} &nbsp;
+      {{ t(progressStatus) }} &nbsp;
       <a-button v-if="progressStatus !== WsMsgCategory.InProgress" type="primary"
                 @click="selectExecEnv">
         开始执行
@@ -15,11 +15,11 @@
 
     <div class="tab-bar">
       <a-tabs v-model:activeKey="activeKey">
-        <a-tab-pane key="metrics" tab="性能指标" />
+        <a-tab-pane key="metrics" tab="性能指标"/>
 
-        <a-tab-pane key="machine" tab="压力机监控" />
+        <a-tab-pane key="machine" tab="压力机监控"/>
 
-        <a-tab-pane key="logs" tab="详细日志" />
+        <a-tab-pane key="logs" tab="详细日志"/>
       </a-tabs>
     </div>
 
@@ -28,22 +28,22 @@
         <div class="charts-container">
           <div class="chart-box chart-box1">
             <v-chart class="chart" style="width: 100%; height: 300px;"
-                     :option="chartDataVuCount" autoresize />
+                     :option="chartDataVuCount" autoresize/>
           </div>
 
           <div class="chart-box chart-box1">
             <v-chart class="chart" style="width: 100%; height: 300px;"
-                     :option="chartDataAvgDurationAll" autoresize />
+                     :option="chartDataAvgDurationAll" autoresize/>
           </div>
 
           <div class="chart-box chart-box1">
             <v-chart class="chart" style="width: 100%; height: 300px;"
-                     :option="chartDataAvgQps" autoresize />
+                     :option="chartDataAvgQps" autoresize/>
           </div>
 
           <div class="chart-box chart-box1">
             <v-chart class="chart" style="width: 100%; height: 300px;"
-                     :option="chartDataFailNumb" autoresize />
+                     :option="chartDataFailNumb" autoresize/>
           </div>
         </div>
 
@@ -67,31 +67,38 @@
                 {{ summaryData.mean }}
               </div>
             </a-col>
-            <a-col :flex="4"><div class="title">
-              最小
-            </div>
+            <a-col :flex="4">
+              <div class="title">
+                最小
+              </div>
               <div class="content">
                 {{ summaryData.min }}
               </div>
             </a-col>
-            <a-col :flex="4"><div class="title">
-              最大
-            </div>
+            <a-col :flex="4">
+              <div class="title">
+                最大
+              </div>
               <div class="content">
                 {{ summaryData.max }}
-              </div></a-col>
-            <a-col :flex="4"><div class="title">
-              中位数
-            </div>
+              </div>
+            </a-col>
+            <a-col :flex="4">
+              <div class="title">
+                中位数
+              </div>
               <div class="content">
                 {{ summaryData.median }}
-              </div></a-col>
-            <a-col :flex="4"><div class="title">
-              95%
-            </div>
+              </div>
+            </a-col>
+            <a-col :flex="4">
+              <div class="title">
+                95%
+              </div>
               <div class="content">
                 {{ summaryData.quantile95 }}
-              </div></a-col>
+              </div>
+            </a-col>
           </a-row>
         </div>
 
@@ -108,21 +115,21 @@
         <div class="charts-container">
           <div class="chart-box chart-box1">
             <v-chart class="chart" style="width: 100%; height: 300px;"
-                     :option="chartDataCpu" autoresize />
+                     :option="chartDataCpu" autoresize/>
           </div>
           <div class="chart-box chart-box1">
             <v-chart class="chart" style="width: 100%; height: 300px;"
-                     :option="chartDataMemory" autoresize />
+                     :option="chartDataMemory" autoresize/>
           </div>
           <div class="chart-box chart-box1">
             <v-chart class="chart" style="width: 100%; height: 300px;"
-                     :option="chartDataDisk" autoresize />
+                     :option="chartDataDisk" autoresize/>
           </div>
         </div>
         <div class="charts-container">
           <div class="chart-box chart-box2">
             <v-chart class="chart" style="width: 100%; height: 300px;"
-                     :option="chartDataNetwork" autoresize />
+                     :option="chartDataNetwork" autoresize/>
           </div>
           <div class="chart-box chart-box1">
           </div>
@@ -134,7 +141,7 @@
              :request="request"
              :logs="execLogs"
              :startLog="startLog"
-             :stopLog="stopLog" />
+             :stopLog="stopLog"/>
       </div>
     </div>
 
@@ -142,23 +149,19 @@
                  :env-select-drawer-visible="selectEnvVisible"
                  :execEnvId="execEnvId"
                  @onOk="finishSelectExecEnv"
-                 @onCancel="cancelSelectExecEnv" />
+                 @onCancel="cancelSelectExecEnv"/>
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { use} from 'echarts/core';
-import { CanvasRenderer } from 'echarts/renderers';
-import { LineChart } from 'echarts/charts';
-import {
-  TitleComponent,
-  TooltipComponent,
-  LegendComponent,
-} from 'echarts/components';
-import VChart, { THEME_KEY } from 'vue-echarts';
+import {use} from 'echarts/core';
+import {CanvasRenderer} from 'echarts/renderers';
+import {LineChart} from 'echarts/charts';
+import {LegendComponent, TitleComponent, TooltipComponent,} from 'echarts/components';
+import VChart from 'vue-echarts';
 
-import {ref, onMounted, onUnmounted, computed} from 'vue';
+import {computed, onMounted, onUnmounted, ref} from 'vue';
 import {getUuid} from "@/utils/string";
 import {WsMsgCategory} from "@/utils/enum";
 import {tableReqResponseTimeColumns} from "./config"
@@ -180,16 +183,23 @@ use([CanvasRenderer, LineChart, TitleComponent, TooltipComponent, LegendComponen
 // provide(THEME_KEY, 'dark'); // for echart style
 const activeKey = ref('metrics')
 
-const { t } = useI18n();
-const { execJoin, execStart, execStop, startLog, stopLog,
-        progressStatus,
-        chartDataVuCount, chartDataAvgQps, chartDataFailNumb, chartDataAvgDurationAll,
-        chartDataCpu, chartDataMemory, chartDataDisk, chartDataNetwork,
-        tableReqResponseTime, summaryData, execLogs, request } = useCaseExecution()
+const {t} = useI18n();
+const {
+  execJoin, execStart, execStop, startLog, stopLog,
+  progressStatus,
+  chartDataVuCount, chartDataAvgQps, chartDataFailNumb, chartDataAvgDurationAll,
+  chartDataCpu, chartDataMemory, chartDataDisk, chartDataNetwork,
+  tableReqResponseTime, summaryData, execLogs, request
+} = useCaseExecution()
 
 const execUuid = ref('');
 
-const store = useStore<{ Performance: StateType; User: UserStateType; ProjectSetting: ProjectSettingStateType; ProjectGlobal: ProjectStateType  }>()
+const store = useStore<{
+  Performance: StateType;
+  User: UserStateType;
+  ProjectSetting: ProjectSettingStateType;
+  ProjectGlobal: ProjectStateType
+}>()
 const detailResult: any = computed<PerformanceTestPlan>(() => store.state.Performance.detailResult)
 const currUser = computed(() => store.state.User.currentUser);
 const currEnvId = computed(() => store.state.ProjectSetting.selectEnvId);
@@ -200,9 +210,11 @@ const execEnvId = ref(null);
 async function selectExecEnv() {
   selectEnvVisible.value = true;
 }
+
 async function finishSelectExecEnv() {
   execBegin()
 }
+
 async function cancelSelectExecEnv(record: any) {
   selectEnvVisible.value = false;
   execEnvId.value = null;
@@ -343,9 +355,11 @@ onUnmounted(() => {
     height: 32px;
     text-align: right;
   }
+
   .tab-bar {
     height: 61px;
   }
+
   .tab-content {
     flex: 1;
     height: 0;
@@ -354,10 +368,12 @@ onUnmounted(() => {
       height: 100%;
       overflow-y: auto;
     }
+
     .machine {
       height: 100%;
       overflow-y: auto;
     }
+
     .logs {
       height: 100%;
     }
@@ -368,6 +384,7 @@ onUnmounted(() => {
 
     .chart-box {
       margin-bottom: 26px;
+
       .chart {
         width: 100%;
       }
@@ -376,6 +393,7 @@ onUnmounted(() => {
     .chart-box1 {
       flex: 1;
     }
+
     .chart-box2 {
       flex: 2;
     }
@@ -393,6 +411,7 @@ onUnmounted(() => {
         .title {
 
         }
+
         .content {
           padding-bottom: 8px;
           height: calc(100% - 12px);
@@ -406,6 +425,7 @@ onUnmounted(() => {
       }
     }
   }
+
   .request-table {
     padding: 3px;
   }
