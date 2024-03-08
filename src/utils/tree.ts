@@ -167,3 +167,15 @@ export function uniquArrray(data) {
     return _data;
 }
 
+export const getAllTabsId = (data) => {
+    let result: any[] = [];
+    data.forEach(el => {
+        if (el.id !== 0) {
+            result.push(el.id);
+        } else if (el.id === 0 && el.children) {
+            result = result.concat(getAllTabsId(el.children));
+        }
+    });
+    return result;
+  }
+

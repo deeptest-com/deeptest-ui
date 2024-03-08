@@ -2,6 +2,7 @@
   <a-modal
       width="640px"
       :visible="visible"
+      :confirmLoading="loading"
       @ok="ok"
       @cancel="cancel"
       title="新建接口">
@@ -68,8 +69,9 @@ import {useStore} from "vuex";
 import {NewEndpointFormState} from "@/views/Endpoint/data";
 import SelectServe from './SelectServe/index.vue';
 
-const store = useStore<{ Endpoint }>();
+const store = useStore<{ Endpoint, ProjectGlobal }>();
 const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
+const currProject = computed(() => store.state.ProjectGlobal.currProject);
 
 const treeData: any = computed(() => {
   const data = treeDataCategory.value;
@@ -89,13 +91,27 @@ const props = defineProps({
 const emit = defineEmits(['ok', 'cancel']);
 
 const formRef = ref();
-
+const loading = ref(false);
 function ok() {
   formRef.value
       .validate()
-      .then(() => {
-        emit('ok', formState);
-        formRef.value.resetFields();
+      .then(async () => {
+        loading.value = true;
+        try {
+          await store.dispatch('Endpoint/createApi', {
+            "title": formState.title,
+            "projectId": currProject.value.id,
+            "serveId": formState.serveId,
+            "description": formState.description || null,
+            "categoryId": formState.categoryId || null,
+            "curl": formState.curl || null,
+          });
+          loading.value = false;
+          emit('ok');
+        } catch(error) {
+          loading.value = false;
+          return Promise.reject(error);
+        }
       })
       .catch((error: ValidateErrorEntity<NewEndpointFormState>) => {
         console.log('error', error);
@@ -128,6 +144,8 @@ watch(() => {
     Object.assign(formState, {
       categoryId: props.selectedCategoryId || -1
     });
+  } else {
+    formRef.value?.resetFields();
   }
 }, {
   immediate: true

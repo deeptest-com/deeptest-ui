@@ -17,6 +17,7 @@
           :width="140"
           :placeholder="'请选择创建人'"
           :options="userList"
+          @focus="handleUserFocus"
           :value="formState?.createUser || []"
           @change="(e) => handleFilterChange('createUser',e)"/>
       </a-form-item>
@@ -117,6 +118,10 @@ function handleFocus() {
   store.dispatch('ServeGlobal/fetchServe');
 }
 
+function handleUserFocus() {
+  store.dispatch('Project/getUserList');
+}
+
 function filterOptions(value: string, option: any) {
   return option.label.includes(value);
 }
@@ -145,10 +150,16 @@ watch(() => {
   formState.value = {...newVal}
 }, {
   immediate: true,
-})
+});
 
-onMounted(async () => {
-  await store.dispatch('Project/getUserList');
+onMounted(() => {
+  if (userList.value.length === 0) {
+    store.dispatch('Project/getUserList');
+  }
+
+  if (serves.value.length === 0) {
+    store.dispatch('ServeGlobal/fetchServe');
+  }
 })
 
 </script>

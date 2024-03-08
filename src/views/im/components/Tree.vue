@@ -1,5 +1,8 @@
 <template>
   <div class="im-tree-container">
+    <div :class="{'im-tree-loading': true, 'loading': spinning}">
+      <a-spin :spinning="spinning"/>
+    </div>
     <CategoryTree
       prefixCls="im-category-tree-container"
       ref="imCategoryTree"
@@ -21,27 +24,53 @@
           <FolderOpenOutlined v-else/>
         </span>
       </template>
-      <template #nodeIcon>
-        <span class="tree-icon">
-          <IconSvg type="model" class="dp-icon-large"/>
-        </span>
-      </template>
     </CategoryTree>
   </div>
+  <!-- 创建接口弹窗 -->
+  <CreateEndpointModal 
+    :visible="createEndpointModalVisible" 
+    :selectedCategoryId="selectedCategoryId"
+    @ok="handleCreateApiSuccess"
+    @cancel="createEndpointModalVisible = false" />
+  <!-- 创建分类弹窗 -->
+  <CreateCategoryModal 
+    :visible="createCategoryModalVisible"
+    :nodeInfo="currentNode || {}"
+    :mode="categoryModalMode"
+    @cancel="handleCategoryCancel"
+    @ok="handleCreateCategory" />
+  <!-- 导入接口弹窗 -->
+  <ImportEndpointModal 
+    :visible="importEndpointModalVisible"
+    :selectedCategoryId="selectedCategoryId"
+    @cancel="importEndpointModalVisible = false"
+    @ok="handleImportEndpoint" />
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watch, computed } from 'vue';
+import { onMounted, ref, watch, computed, createVNode } from 'vue';
 import { useStore } from 'vuex';
-import { FolderOutlined, FolderOpenOutlined } from '@ant-design/icons-vue';
+import { FolderOutlined, FolderOpenOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue';
 import CategoryTree from '@/components/CategoryTree';
-import IconSvg from "@/components/IconSvg";
 import {StateType as EndpointStateType} from "@/views/im/store";
+import CreateEndpointModal from "@/views/endpoint/components/CreateEndpointModal.vue";
+import CreateCategoryModal from '@/components/CreateCategoryModal/index.vue';
+import ImportEndpointModal from "@/views/endpoint/components/ImportEndpointModal.vue";
 import { filterByKeyword, uniquArrray } from '@/utils/tree';
+import eventBus from '@/utils/eventBus';
+import settings from "@/config/settings";
 import { testTreeData } from '../testData';
+import { notifyError, notifySuccess } from '@/utils/notify';
+import { confirmToDo, confirmToDelete } from '@/utils/confirm';
+import { getCache } from "@/utils/localCache";
+import useSharePage from '@/hooks/share';
+import usePermission from '@/composables/usePermission';
+import { Modal } from 'ant-design-vue';
 
 const store = useStore<{ Endpoint: EndpointStateType }>();
 const imCategoryTree = ref();
+const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
 const activeTabs = computed(() => store.state.Endpoint.activeTabs);
+const activeTab = computed(() => store.state.Endpoint.activeTab);
 const treeData: any = computed(() => {
   const data = testTreeData;
   if(!data?.[0]?.id){
@@ -77,62 +106,247 @@ const treeData: any = computed(() => {
 });
 
 /**
+ * 新建接口相关
+ */
+const createEndpointModalVisible = ref(false);
+const selectedCategoryId = ref(null);
+
+const handleCreateApiSuccess = () => {
+  createEndpointModalVisible.value = false;
+  if (activeTab.value?.id === selectedCategoryId.value) {
+    // 如果是给当前选中的分类下 添加了接口，则刷新右侧的列表
+    eventBus.emit(settings.eventEndpointAction, { type: 'getEndpointsList', categoryId: selectedCategoryId.value });
+  }
+  store.dispatch('Endpoint/loadCategory');
+};
+
+/**
+ * 新建分类
+ */ 
+const createCategoryModalVisible = ref(false);
+const currentNode = ref({});
+const categoryModalMode = ref('new');
+
+const handleCategoryCancel = () => {
+  createCategoryModalVisible.value = false;
+};
+
+const handleCreateCategory = async (data) => {
+  const formData = Object.assign(currentNode.value, data);
+  const paramsData = categoryModalMode.value === 'edit' ? {
+    id: formData.id,
+    name: formData.name,
+    desc: formData.desc,
+  } : {
+    name: formData.name,
+    desc: formData.desc,
+    targetId: formData.id,
+    type: 'endpoint',
+    mode: 'child',
+    projectId: currProject.value.id,
+  };
+  const dispatchAction = categoryModalMode.value === 'edit' ? 'Endpoint/saveCategory' : 'Endpoint/createCategoryNode';
+  const tip = categoryModalMode.value === 'edit' ? '修改分类' : '新建分类';
+  const res = await store.dispatch(dispatchAction, paramsData);
+  if (res?.code === 0) {
+    createCategoryModalVisible.value = false;
+    notifySuccess(`${tip}成功`);
+  } else {
+    notifyError(`${tip}失败，请重试~`);
+  }
+};
+
+const createNewCategory = (node?: any) => {
+  categoryModalMode.value = 'new';
+  currentNode.value = node || {};
+  createCategoryModalVisible.value = true;
+};
+
+const editCategory = (node: any) => {
+  categoryModalMode.value = 'edit';
+  currentNode.value = node;
+  createCategoryModalVisible.value = true;
+};
+
+const delCategory = (node: any) => {
+  confirmToDelete(
+    '将级联删除分类下的所有子分类、接口定义、调试信息等','删除后无法恢复，请确认是否删除？',
+    async () => {
+      spinning.value = true;
+      const res = await store.dispatch('Endpoint/removeCategoryNode', {
+        id:node.id,
+        type:'endpoint',
+        projectId: await getCache(settings.currProjectId)
+      });
+      if (res) {
+        // 是否选中父类
+        // const isRoot = node.parentId === (treeDataCategory?.value || [])?.[0]?.id;
+        // if (isRoot) {
+        //   imCategoryTree.value?.initTree();
+        // } else {
+        //   imCategoryTree.value?.setSelectedKeys(node.parentId);
+        // }
+        // 删除的是当前选中的分类tab
+        if (activeTab.value?.id === node.id) {
+          store.dispatch('Endpoint/removeActiveTab', node.id);
+        }
+        notifySuccess('删除成功');
+      } else {
+        notifyError('删除失败');
+      }
+      spinning.value = false;
+    }
+  )
+};
+
+/**
+ * 导入接口
+ */
+const importEndpointModalVisible = ref(false);
+
+const handleImportEndpoint = (data) => {
+  store.dispatch('Endpoint/loadCategory');
+  if (activeTab.value?.id === selectedCategoryId.value) {
+    // 如果是给当前选中的分类下 添加了接口，则刷新右侧的列表
+    setTimeout(() => {
+      eventBus.emit(settings.eventEndpointAction, { type: 'getEndpointsList', categoryId: selectedCategoryId.value });
+    }, 1500);
+  }
+  setTimeout(() => {
+    loadCategory();
+    eventBus.emit(settings.eventEndpointAction, { type: 'getSchemaTreeList' });
+  }, 2000);
+};
+
+/**
+ * 克隆分类
+ */
+const spinning = ref(false);
+
+const cloneCategory = (node) => {
+  confirmToDo(
+    `确认复制目录【`+node.name+`】？`, '该目录下的子目录和接口定义将被复制', 
+    async () => {
+      spinning.value = true;
+      const res = await store.dispatch('Endpoint/cloneCategoryNode',node.id)
+      if (res) {
+        notifySuccess('复制成功，稍后刷新页面查询复制结果');
+      }else {
+        notifyError('复制失败');
+      }
+      spinning.value = false;
+    }
+  );
+};
+
+const cloneEndpoint = async (nodeProps) => {
+  console.log('clone: ', nodeProps);
+  spinning.value = true;
+  await store.dispatch('Endpoint/copy', nodeProps);
+  notifySuccess('复制接口成功');
+  loadCategory();
+  spinning.value = false;
+};
+
+/**
  * menu list
  */
 
 const rootContextMenuList = [
   {
     label: '新建接口',
-    action: () => {}
+    action: () => {
+      selectedCategoryId.value = null;
+      createEndpointModalVisible.value = true;
+    }
   },
   {
     label: '新建分类',
-    action: () => {}
+    action: () => createNewCategory(treeDataCategory.value?.[0])
   },
   {
     label: '导入接口',
-    action: () => {}
+    action: () => {
+      importEndpointModalVisible.value = true;
+    }
   }
 ];
 
+/**
+ * 接口的相关操作
+ */
+const { share } = useSharePage();
+
+const delEndpoint = (record) => {
+  Modal.confirm({
+    title: () => '确定删除该接口吗？',
+    icon: createVNode(ExclamationCircleOutlined),
+    okText: () => '确定',
+    okType: 'danger',
+    cancelText: () => '取消',
+    onOk: async () => {
+      spinning.value = true
+      const res = await store.dispatch('Endpoint/del', record);
+      spinning.value = false
+      if (res) {
+        notifySuccess('删除成功');
+      } else {
+        notifyError('删除失败');
+      }
+    },
+  });
+}
+
+const { hasPermission, isCreator } = usePermission();
 const nodeMenuList = [
-{
+  {
     label: '新建接口',
-    action: () => {},
+    action: (nodeProps) => {
+      selectedCategoryId.value = nodeProps.dataRef.id;
+      createEndpointModalVisible.value = true;
+    },
     ifShow: (nodeProps) => nodeProps.entityId === 0,
   },
   {
     label: '新建子分类',
-    action: () => {},
+    action: (nodeProps) => createNewCategory(nodeProps),
     ifShow: (nodeProps) => nodeProps.entityId === 0,
   },
   {
     label: '克隆',
-    action: () => {},
+    action: (nodeProps) => {
+      nodeProps.entityId === 0 ? cloneCategory(nodeProps) : cloneEndpoint(nodeProps);
+    },
   },
   {
     label: '编辑分类',
-    action: () => {},
+    action: (nodeProps) => editCategory(nodeProps),
     ifShow: (nodeProps) => nodeProps.entityId === 0,
   },
   {
     label: '删除分类',
-    action: () => {},
+    action: (nodeProps) => delCategory(nodeProps),
     ifShow: (nodeProps) => nodeProps.entityId === 0,
   },
   {
     label: '分享链接',
-    action: () => {},
+    action: (nodeProps) => share(nodeProps, 'IM'),
     ifShow: (nodeProps) => nodeProps.entityId !== 0,
   },
   {
+    auth: 'p-api-endpoint-del',
     label: '删除',
-    action: () => {},
-    ifShow: (nodeProps) => nodeProps.entityId !== 0,
+    show: (record) => {
+      return (hasPermission('p-api-endpoint-del') || isCreator(record.createUser)) && record.entityId !== 0;
+    },
+    action: (record: any) => delEndpoint(record)
   },
   {
     label: '过期',
-    action: () => {},
+    action: async (record) => {
+      await store.dispatch('Endpoint/disabled', record);
+      loadCategory();
+    },
     ifShow: (nodeProps) => nodeProps.entityId !== 0,
   },
 ];
@@ -142,9 +356,8 @@ const showMoreIcon = (node) => {
 }
 
 const onTreeNodeClick = (node, evt) => {
-  console.log('click node', node, evt);
   const currNode = evt?.node?.dataRef;
-  const activeNode = { type: currNode.entityId === 0 ? 'im-dir' : 'im', ...currNode };
+  const activeNode = { type: (currNode.entityId === 0 || currNode.id === -1) ? 'im-dir' : 'im', ...currNode };
   store.commit('Endpoint/setActiveTab', activeNode);
   store.commit('Endpoint/setActiveTabs', uniquArrray([...activeTabs.value, activeNode]));
 }
@@ -173,6 +386,7 @@ watch(() => {
   return currProject.value;
 }, (newVal, oldVal) => {
   if (newVal?.id && oldVal?.id) { // 初始化 旧值为undefined 不需要重复调用loadCategories
+    // todo: 重置tree 选中为当前项目的全部数据 节点
     imCategoryTree.value.initTree();
     imCategoryTree.value.clearSearchValue();
     store.commit('Endpoint/setTreeDataCategory', {}); // 切换项目，重置category list
@@ -180,6 +394,16 @@ watch(() => {
   }
 }, {
   immediate: true,
+});
+
+watch(() => {
+  return activeTab.value;
+}, (val) => {
+  if (val?.id && val?.type !== 'schema') {
+    imCategoryTree.value.setSelectedKeys(val.id);
+  } else if (!val.id) {
+    imCategoryTree.value.initTree();
+  }
 })
 
 </script>
@@ -187,5 +411,15 @@ watch(() => {
 <style scoped lang="less">
 .im-tree-container {
   height: 100%;
+
+  .im-tree-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &.loading {
+      padding-top: 20px;
+    }
+  }
 }
 </style>

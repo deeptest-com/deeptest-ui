@@ -4,11 +4,16 @@
       <ContentPane>
         <template #left>
           <Tree />
-          <SchemaTree  ref="schema" @select="showSchema"/>
+          <SchemaTree ref="schemaTree" @select="showSchema"/>
         </template>
         <template #right>
-          <div v-if="activeTabs.length > 0">
-            <a-tabs :activeKey="activeTab.key" hide-add type="editable-card" >
+          <div v-if="activeTabs.length > 0" class="endpoint-right-content">
+            <a-tabs 
+              class="im-tabs-full-height"
+              :activeKey="activeTab.key" 
+              hide-add type="editable-card" 
+              @change="changeTab" 
+              @edit="onEdit">
               <a-tab-pane v-for="item in activeTabs" :key="item.key">
                 <template #tab>
                   <a-dropdown :trigger="['contextmenu']" :visible="visible[item.id]">
@@ -20,14 +25,10 @@
                     </template>
                   </a-dropdown>
                 </template>
-                <div v-if="item.type === 'im'">
-                  <Detail :id="item.entityId" />
-                </div>
-                <div v-else-if="item.type === 'im-dir' || item.id === -1" style="overflow-x: scroll">
-                  <List :category-id="item.id"/>
-                </div>
-                <div v-else>
-                  <Schema :entity-id="item.id" />
+                <div :class="['endpoint-tab-content', item.type]">
+                  <Detail v-if="item.type === 'im'" :endpoint-id="item.entityId"/>
+                  <List v-else-if="item.type === 'im-dir' || item.id === -1" :category-id="item.id"/>
+                  <SchemaEditorContent v-else />
                 </div>
               </a-tab-pane>
               <template #tabBarExtraContent>
@@ -48,16 +49,20 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue';
+import { watch, ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { EllipsisOutlined } from "@ant-design/icons-vue";
 import { vOnClickOutside } from '@vueuse/components';
 import ContentPane from '@/views/component/ContentPane/index.vue';
-import { Tree, Schema, Detail, List } from './components';
+import { Tree, Detail, List } from './components';
 import { SchemaTree } from '../component/Schema';
+import { SchemaEditorContent } from '@/views/component/Schema/components';
 import {StateType as EndpointStateType} from "@/views/im/store";
+import eventBus from '@/utils/eventBus';
+import settings from '@/config/settings';
 
-const store = useStore<{ Endpoint: EndpointStateType }>();
+const store = useStore<{ Endpoint: EndpointStateType, ProjectGlobal }>();
+const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const isImporting = ref(false);
 const activeTab = computed(() => {
   return store.state.Endpoint.activeTab;
@@ -72,21 +77,43 @@ const activeTabs = computed(() => {
 
 const dropdownMenu = [
   {
-    key: "1",
+    key: "close_cur",
     label: "关闭当前标签页",
   },
   {
-    key: "2",
+    key: "close_other",
     label: "关闭其他标签页",
   },
   {
-    key: "3",
+    key: "close_all",
     label: "关闭所有标签页",
   }
 ];
 
-const handleMenuClick = (evt, record) => {
-  console.log(evt, record);
+const handleMenuClick = (evt, record?: any) => {
+  switch(evt.key) {
+    case 'close_cur':
+      if (!record || record?.id === activeTab.value.id) {
+        store.dispatch('Endpoint/removeActiveTab', activeTab.value.id);
+      } else {
+        store.commit('Endpoint/setActiveTabs', activeTabs.value.filter(e => e.id !== record.id));
+      }
+      break;
+    case 'close_other':
+      if (!record || record?.id === activeTab.value.id) {
+        store.commit('Endpoint/setActiveTabs', [activeTab.value]);
+      } else {
+        store.commit('Endpoint/setActiveTab', record);
+        store.commit('Endpoint/setActiveTabs', [record]);
+      }
+      break;
+    case 'close_all':
+      store.commit('Endpoint/setActiveTab', null);
+      store.commit('Endpoint/setActiveTabs', []);
+      break;
+    default:
+      break;  
+  }
 };
 
 const showSchema = e => {
@@ -105,7 +132,37 @@ const openDropdown = item => {
     visible.value[e.id] = false;
   })
   visible.value[item.id] = true;
-}
+};
+
+const changeTab = key => {
+  const curr = activeTabs.value.find(e => e.id === key);
+  store.commit('Endpoint/setActiveTab', curr);
+  if (curr.type === 'schema') {
+    store.dispatch('Schema/querySchema', { id: curr.entityId });
+  }
+};
+
+const onEdit = (e, type?: string) => {
+  store.dispatch('Endpoint/removeActiveTab', e);
+};
+
+watch(() => {
+  return currProject.value;
+}, (val) => {
+  if (val.id) {
+    // todo: 重置tab为 当前项目的  全部数据 tab
+  }
+});
+
+
+const schemaTree = ref();
+onMounted(() => {
+  eventBus.on(settings.eventEndpointAction, (data: any) => {
+    if (data.type === 'getSchemaTreeList') {
+      schemaTree.value?.loadCategory();
+    }
+  })
+})
 </script>
 
 <style scoped lang="less">
@@ -122,6 +179,37 @@ const openDropdown = item => {
 
   :deep(.pane.right) {
     overflow: hidden;
+  }
+
+  .endpoint-right-content {
+    height: 100%;
+  }
+
+  :deep(.ant-tabs.im-tabs-full-height) {
+    height: 100%;
+
+    .ant-tabs-content {
+      height: calc(100% - 56px);
+
+      .ant-tabs-tabpane {
+        height: 100%;
+
+        &.ant-tabs-tabpane-inactive {
+          height: 0;
+        }
+      }
+    }
+  }
+
+  .endpoint-tab-content {
+    height: 100%;
+    &.im-dir {
+      overflow-x: scroll;
+    }
+
+    &.schema {
+      overflow-y: scroll;
+    }
   }
 }
 </style>

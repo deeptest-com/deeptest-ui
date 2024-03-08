@@ -81,9 +81,10 @@ const schemeVisibleKey = ref(1);
 const yamlCode = ref('');
 const loading = ref(false);
 
-const store = useStore<{ ProjectSetting: ProjectSettingStateType, Schema,ProjectGlobal }>();
+const store = useStore<{ ProjectSetting: ProjectSettingStateType, Schema,ProjectGlobal, Endpoint }>();
 const schemaDetail = computed(() => store.state.Schema.schemaDetail);
 const activeSchemaTab = computed(() => store.state.Schema.activeSchema);
+const activeTab = computed(() => store.state.Endpoint.activeTab);
 const schemas = computed(() => store.state.Schema.schemas);
 const projectId = computed<any>(() => store.state.ProjectGlobal.currProject.id);
 
@@ -178,11 +179,10 @@ const onDelete = () => {
     loading.value = true;
     try {
       await store.dispatch('Schema/deleteSchema', schemaDetail.value);
-      store.dispatch('Schema/removeActiveSchema', schemaDetail.value.id);
+      store.dispatch('Schema/removeActiveTab', activeTab.value.id);
     } catch(error) {
       message.error('删除失败');
     }
-    console.log('确认删除');
   })
 }
 

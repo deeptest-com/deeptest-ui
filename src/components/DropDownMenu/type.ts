@@ -19,7 +19,7 @@ export type MenuItem = {
   auth?: string;
   children?: MenuItem[];
   disabled?: boolean;
-  key?: string;
+  key?: string | number;
   action: (...args: any[]) => void,
   tip?: string;
 } 

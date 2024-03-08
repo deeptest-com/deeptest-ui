@@ -92,6 +92,7 @@ import {
     getSchemaList, getSchemaDetail
 } from "@/views/project-settings/service";
 import { changeServe } from '../project-settings/service';
+import { getAllTabsId } from "@/utils/tree";
 import {ConditionSrc} from "@/utils/enum";
 
 export interface StateType {
@@ -342,7 +343,11 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         updateServe: Action<StateType, StateType>;
 
-        cloneCategoryNode:Action<StateType, StateType>
+        cloneCategoryNode:Action<StateType, StateType>;
+
+        // tab相关
+        removeTabs: Action<StateType, StateType>;
+        removeActiveTab: Action<StateType, StateType>;
 
     }
 }
@@ -1845,7 +1850,7 @@ const StoreModel: ModuleType = {
                     return true;
                 }
                 return false;
-            } catch(error) {
+            } catch(error: any) {
                 error.msg && message.error(error.msg);
                 return false;
             }
@@ -1857,7 +1862,7 @@ const StoreModel: ModuleType = {
                     return true;
                 }
                 return false;
-            }catch(error) {
+            }catch(error: any) {
                 error.msg && message.error(error.msg);
                 return false;
             }
@@ -1869,7 +1874,30 @@ const StoreModel: ModuleType = {
                 return true;
             }
             return false
-        }
+        },
+        // tab相关
+        async removeTabs({ commit,dispatch, state }, { data }) {
+            const removeTabIds = getAllTabsId(data); // 该目录下所有的schema
+            const newTabs = state.activeTabs.filter(e => !removeTabIds.includes(e.id)); // 找出不属于指定删除目录下的schema tabs
+            commit('setActiveTabs', newTabs);
+            if (newTabs[0]) {
+                commit('setActiveTab', { ...newTabs[0] });
+            } else {
+                commit('setActiveTab', null)
+            }
+        },
+        async removeActiveTab({ commit, state, dispatch }, targetKey) {
+            const olderTabs = cloneDeep(state.activeTabs);
+            const currActiveTab = cloneDeep(state.activeTab);
+            const findIndex = olderTabs.findIndex(e => e.id === targetKey);
+            const tabs = state.activeTabs.filter(e => e.id !== targetKey);
+            commit('setActiveTabs', tabs);
+            if (currActiveTab.id !== targetKey) {
+                return;
+            }
+            const newSchema = olderTabs[findIndex - 1] ? olderTabs[findIndex - 1] : olderTabs[findIndex + 1] ? olderTabs[findIndex + 1] : {};
+            commit('setActiveTab', newSchema);
+        },
     },
 };
 

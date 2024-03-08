@@ -60,11 +60,9 @@
 
           <template #colStatus="{record}">
             <div class="customStatusColRender">
-              <EditAndShowSelect
-                :label="endpointStatus.get(record?.status || 0 )"
-                :value="record?.status"
-                :options="endpointStatusOpts"
-                @update="(val) => { handleChangeStatus(val,record);}"/>
+              <DropdownActionMenu :dropdown-list="statusDropdownMenu" :record="record" :selectedKey="record.status">
+                <span style="cursor: pointer;">{{ endpointStatus.get(record?.status || 0 ) }}</span>
+              </DropdownActionMenu>  
             </div>
           </template>
 
@@ -124,9 +122,15 @@
       </template>
     </EmptyCom>
   </div>
+  <!-- 创建接口弹窗 -->
+  <CreateEndpointModal 
+    :visible="createEndpointModalVisible" 
+    :selectedCategoryId="selectedCategoryId"
+    @ok="handleCreateApiSuccess"
+    @cancel="createEndpointModalVisible = false" />
 </template>
 <script setup lang="ts">
-import { defineProps, onMounted, computed, ref } from 'vue';
+import { defineProps, onMounted, computed, ref, watch, createVNode } from 'vue';
 import { useStore } from 'vuex';
 import debounce from "lodash.debounce";
 import {Endpoint, PaginationConfig} from "@/views/im/data";
@@ -136,6 +140,7 @@ import EmptyCom from '@/components/TableEmpty/index.vue';
 import PermissionButton from "@/components/PermissionButton/index.vue";
 import TooltipCell from '@/components/Table/tooltipCell.vue';
 import {DropdownActionMenu} from '@/components/DropDownMenu/index';
+import CreateEndpointModal from "@/views/endpoint/components/CreateEndpointModal.vue";
 import TableFilter from './TableFilter.vue';
 import Tags from './Tags.vue';
 
@@ -143,16 +148,23 @@ import {getMethodColor} from '@/utils/interface';
 import usePermission from '@/composables/usePermission';
 import useSharePage from '@/hooks/share';
 import {endpointStatusOpts, endpointStatus} from '@/config/constant';
+import eventBus from '@/utils/eventBus';
+import settings from "@/config/settings";
+import { notifyError, notifySuccess } from '@/utils/notify';
+import { Modal } from 'ant-design-vue';
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
 
 const props = defineProps<{
   categoryId: number;
 }>();
+
 const { hasPermission, isCreator } = usePermission();
 const { share } = useSharePage();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug, ServeGlobal, Project, Schema }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
 const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
+const activeTab = computed(() => store.state.Endpoint.activeTab);
 
 const list = computed<Endpoint[]>(() => store.state.Endpoint.listResult.list);
 let pagination = computed<PaginationConfig>(() => store.state.Endpoint.listResult.pagination);
@@ -237,20 +249,39 @@ const onSelectChange = e => {
   },
 ];
 
-const clone = record => {
-  console.log(record);
+const clone = async record => {
+  isFetching.value = true
+  const res = await store.dispatch('Endpoint/copy', record);
+  isFetching.value = false
+  notifySuccess('复制成功');
 };
 
 const del = record => {
-  console.log(record);
+  Modal.confirm({
+    title: () => '确定删除该接口吗？',
+    icon: createVNode(ExclamationCircleOutlined),
+    okText: () => '确定',
+    okType: 'danger',
+    cancelText: () => '取消',
+    onOk: async () => {
+      isFetching.value = true;
+      const res = await store.dispatch('Endpoint/del', record);
+      isFetching.value = false
+      if (res) {
+        notifySuccess('删除成功');
+      } else {
+        notifyError('删除失败');
+      }
+    },
+  });
 };
 
 const disabled = record => {
-  console.log(record);
+  store.dispatch('Endpoint/disabled', record);
 };
 
-const copyCurl = record => {
-  console.log(copyCurl);
+const copyCurl = (record, method) => {
+  console.log(record, method);
 };
 
 const getMenuItems = (record) => {
@@ -318,6 +349,12 @@ const getMenuItems = (record) => {
   return items
 };
 
+const statusDropdownMenu = endpointStatusOpts.map(e => ({
+  ...e,
+  key: e.value,
+  action: record => updateEndpointStatus(record, e.value),
+}))
+
 const selectedRow = ref<any>({});
 const selectedRowIds = computed(() => {
   const ids: any[] = [];
@@ -337,11 +374,8 @@ async function updateServe(value: any, record: any,) {
   loadList();
 }
 
-// 打开抽屉
 async function editEndpoint(record) {
-  await store.dispatch('Endpoint/getEndpointDetail', {id: record.id});
-  // 打开抽屉详情时，拉取mock表达式列表
-  await store.dispatch('Endpoint/getMockExpressions');
+  // 打开新tab页
 }
 
 const username = (user: string) => {
@@ -349,30 +383,79 @@ const username = (user: string) => {
   return result?.label || '-'
 };
 
+const updateTags = (tags: any[], id: number) => {
+  store.dispatch('Endpoint/updateEndpointTag', {
+    id: id, tagNames: tags
+  });
+};
 
-const loadList = debounce(async (page, size, opts?: any) => {
+const updateEndpointStatus = (record: any, value: number) => {
+  store.dispatch('Endpoint/updateStatus', {
+    id: record.id,
+    status: value
+  });
+};
+
+const updateTitle = (value: string, record: any) => {
+  store.dispatch('Endpoint/updateEndpointName',
+    {id: record.id, name: value}
+  );
+}
+
+const loadList = debounce(async (page?: number, size?: number, opts?: any) => {
   isFetching.value = true;
   await store.dispatch('Endpoint/loadList', {
     "projectId": currProject.value.id,
     "page": page || pagination.value.current,
     "pageSize": size || pagination.value.pageSize,
     ...opts,
-    categoryId: props.categoryId || null,
+    categoryId: activeTab.value.id || null,
   });
   isFetching.value = false;
 }, 300);
 
-const handleTableFilter = (e) => {
-  console.log(e);
+const handleTableFilter = async (state) => {
+  if (!state.needRequest) {
+    store.commit('Endpoint/setFilterState', state);
+  }
+  if (state.needRequest) {
+    await loadList(1, pagination.value.pageSize, state);
+  }
 };
+
+/**
+ * 新建接口相关
+ */
+const createEndpointModalVisible = ref(false);
+const selectedCategoryId = ref(null);
 
 const handleCreateEndPoint = () => {
-  console.log('创建接口定义');
+  selectedCategoryId.value = activeTab.value.id;
+  createEndpointModalVisible.value = true;
 };
 
-onMounted(() => {
-  console.log('查看列表', props.categoryId);
+const handleCreateApiSuccess = () => {
+  createEndpointModalVisible.value = false;
   loadList();
+  store.dispatch('Endpoint/loadCategory');
+};
+
+watch(() => {
+  return activeTab.value;
+}, (val) => {
+  if (val?.id && val?.type === 'im-dir' && val?.id === props.categoryId) {
+    loadList();
+  }
+}, {
+  immediate: true,
+});
+
+onMounted(() => {
+  eventBus.on(settings.eventEndpointAction, (data: any) => {
+    if (data.type === 'getEndpointsList' && data.categoryId === props.categoryId) {
+      loadList();
+    }
+  });
 })
 </script>
 <style scoped lang="less">
@@ -383,6 +466,7 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 16px;
+  padding-top: 0;
   box-sizing: border-box;
   overflow: hidden;
 
@@ -403,5 +487,23 @@ onMounted(() => {
 
 :deep(.top-action .ant-row.ant-form-item) {
   margin: 0;
+}
+
+.customPathColRender {
+  display: flex;
+
+  .path-col {
+    display: flex;
+    flex: 1;
+    width: 0;
+
+    :deep(.ant-tag) {
+      width: max-content;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+  }
 }
 </style>
