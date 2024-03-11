@@ -1,5 +1,4 @@
 import { ref, Ref, computed } from 'vue';
-import { useStore } from 'vuex';
 import {getWebSocketApi} from "@/services/websocket";
 import cloneDeep from "lodash/cloneDeep";
 import {WsMsgCategory} from "@/utils/enum";
@@ -40,10 +39,6 @@ interface Execution {
 }
 
 function useExecution(): Execution {
-    const store = useStore();
-    const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
-    const currUser = computed(() => store.state.User.currentUser);
-
     const progressStatus = ref('pt_connecting');
     const currRoom = ref('');
 
@@ -167,25 +162,18 @@ function useExecution(): Execution {
     }
 
     const execStart = async data => {
-        const url = await getWebSocketApi()
-        console.log('execStart', url)
-
-        currRoom.value = 'user' + currUser.value.id + '_' + data.uuid
+        console.log('execStart')
 
         resetChartData(chartDataVuCount,
-            chartDataAvgMapQps, chartDataAvgQps,
-            chartDataFailNumb,
+            chartDataAvgMapQps, chartDataAvgQps, chartDataFailNumb,
             chartDataAvgMapAll, chartDataAvgDurationAll,
             tableReqResponseTime, summaryData, execLogs, request,
             chartDataCpu, chartDataMemory, chartDataDisk, chartDataNetwork,
             chartDataCpuMap, chartDataMemoryMap, chartDataDiskMap, chartDataNetworkMap)
 
-        data = Object.assign({
-            room: currRoom.value,
-            userId: currUser.value.id,
-            projectId: currProject.value.id
-        }, data)
         request.value = data
+        currRoom.value = data.room
+        const url = await getWebSocketApi()
 
         PerformanceTestWsClient.sentPerformanceConductorInstruction(url, currRoom.value, JSON.stringify({
             act: 'startPerformanceTest',

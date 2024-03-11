@@ -32,6 +32,7 @@
     <ProcessorDataDefault    v-else-if="selectedNode.processorType === ProcessorData.Data" />
     <ProcessorCustomCodeDefault v-else-if="selectedNode.processorType === ProcessorCustomCode.CustomCodeDefault" />
 
+    <ProcessorGoal v-else-if="selectedNode.processorType === ProcessorPerformanceGoal.PerformanceGoalDefault" />
     <ProcessorRunner v-else-if="selectedNode.processorType === ProcessorPerformanceRunner.PerformanceRunnerDefault" />
     <ProcessorScenario v-else-if="selectedNode.processorType === ProcessorPerformanceScenario.PerformanceScenarioDefault" />
     <ProcessorRendezvous v-else-if="selectedNode.processorType === ProcessorPerformanceRendezvous.PerformanceRendezvousDefault" />
@@ -51,10 +52,12 @@ import {useStore} from "vuex";
 
 import {StateType as ScenarioStateType} from "../../../store";
 
-import {ProcessorInterface, ProcessorGroup, ProcessorTimer, ProcessorPrint,
+import {
+  ProcessorInterface, ProcessorGroup, ProcessorTimer, ProcessorPrint,
   ProcessorLogic, ProcessorLoop, ProcessorVariable, ProcessorAssertion, ProcessorExtractor,
   ProcessorCookie, ProcessorData, ProcessorCustomCode,
-  ProcessorPerformanceRunner, ProcessorPerformanceScenario,ProcessorPerformanceRendezvous} from "@/utils/enum";
+  ProcessorPerformanceRunner, ProcessorPerformanceScenario, ProcessorPerformanceRendezvous, ProcessorPerformanceGoal
+} from "@/utils/enum";
 
 import ProcessorGroupDefault from "./proccessors/group/default.vue";
 import ProcessorInterfaceDefault from "./proccessors/interface/default.vue"
@@ -86,6 +89,7 @@ import ProcessorCookieClear from "./proccessors/cookie/clear.vue"
 import ProcessorDataDefault   from "./proccessors/data/default.vue"
 import ProcessorCustomCodeDefault from "./proccessors/custom_code/default.vue"
 
+import ProcessorGoal   from "./proccessors/performance/goal.vue"
 import ProcessorRunner   from "./proccessors/performance/runner.vue"
 import ProcessorScenario from "./proccessors/performance/scenario.vue"
 import ProcessorRendezvous from "./proccessors/performance/rendezvous.vue"

@@ -3,7 +3,7 @@
  * */
 
 import {
-    ProcessorCategory,
+    ProcessorCategory, ProcessorPerformanceGoal,
     ProcessorPerformanceRendezvous,
     ProcessorPerformanceRunner, ProcessorPerformanceRunners,
     ProcessorPerformanceScenario, ProcessorPerformanceScenarios
@@ -17,6 +17,7 @@ export const loopIteratorTypes = ['processor_loop_time', 'processor_loop_in', 'p
  * 仅显示禁用和删除的操作的类型，即叶子节点
  * */
 export const onlyShowDisableAndDeleteTypes = [
+    ProcessorPerformanceGoal.PerformanceGoalDefault,
     ProcessorPerformanceRunners.PerformanceRunnersDefault,
     ProcessorPerformanceScenarios.PerformanceScenariosDefault,
     ProcessorPerformanceRendezvous.PerformanceRendezvousDefault,
@@ -496,6 +497,7 @@ export const needHandleShowName = [
     'processor_logic_else',
     'processor_interface_default',
 
+    ProcessorPerformanceGoal.PerformanceGoalDefault,
     ProcessorPerformanceRunners.PerformanceRunnersDefault,
     ProcessorPerformanceScenarios.PerformanceScenariosDefault,
     ProcessorPerformanceRunner.PerformanceRunnerDefault,

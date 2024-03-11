@@ -74,6 +74,7 @@ export enum ProcessorCategory {
     ProcessorAssertion = "processor_assertion",
     ProcessorCustomCode = "processor_custom_code",
 
+    PerformanceGoal = "processor_performance_goal",
     PerformanceRunners = "processor_performance_runners",
     PerformanceScenarios = "processor_performance_scenarios",
     PerformanceRunner = "processor_performance_runner",
@@ -142,6 +143,10 @@ export enum ProcessorData {
 
 export enum ProcessorCustomCode {
     CustomCodeDefault = "processor_custom_code",
+}
+
+export enum ProcessorPerformanceGoal {
+   PerformanceGoalDefault = "processor_performance_goal_default",
 }
 
 export enum ProcessorPerformanceRunners {

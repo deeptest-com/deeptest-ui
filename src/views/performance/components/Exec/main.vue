@@ -192,7 +192,7 @@ const {
   tableReqResponseTime, summaryData, execLogs, request
 } = useCaseExecution()
 
-const execUuid = ref('');
+const room = ref('');
 
 const store = useStore<{
   Performance: StateType;
@@ -202,6 +202,7 @@ const store = useStore<{
 }>()
 const detailResult: any = computed<PerformanceTestPlan>(() => store.state.Performance.detailResult)
 const currUser = computed(() => store.state.User.currentUser);
+const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currEnvId = computed(() => store.state.ProjectSetting.selectEnvId);
 
 const selectEnvVisible = ref(false);
@@ -223,17 +224,21 @@ async function cancelSelectExecEnv(record: any) {
 const execBegin = async () => {
   console.log('execBegin')
 
-  execUuid.value = currUser.value.id + '@' + getUuid()
+  room.value = 'user' + currUser.value.id + '_' + getUuid()
 
   const data = {
     userId: currUser.value.id,
-    execUuid: execUuid.value,
+    projectId: currProject.value.id,
     serverUrl: setServeUrl(process.env.VUE_APP_API_SERVER),
     token: await getToken(),
+
+    room: room.value,
     planId: detailResult.value.id,
     environmentId: currEnvId.value,
   }
   console.log('****** send ws data of exec performance testing ', data);
+
+  execStart(data)
 
   // execUuid.value = getUuid()
   // execStart({
