@@ -156,6 +156,9 @@ const isLy = isLeyan();
 const userListOptions = computed<SelectTypes["options"]>(
     () => (store.state.Project.userList || []).filter(e => isInLeyanWujieContainer ? e.username !== 'admin' : e.username !== '')
 );
+const currUser = computed(() => {
+  return store.state.User.currentUser;
+});
 const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
 const lyProducts = ref([]);
 const lySpaces = ref([]);
@@ -286,11 +289,14 @@ const handleToProducts = () => {
 }
 
 watch(() => props.visible,
-  (val) => {
+  async (val) => {
   if (val) {
-    store.dispatch("Project/getUserList");
+    await store.dispatch("Project/getUserList");
     if (!props?.formState?.id) {
       resetFields();
+      Object.assign(formStateRef, {
+        adminId: currUser?.value?.id,
+      })
     }
 
   }
