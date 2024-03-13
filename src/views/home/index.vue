@@ -125,7 +125,7 @@ onMounted(async () => {
     activeKey.value = 0
   }
   await store.dispatch("User/fetchCurrent");
-  await store.dispatch('Global/getPermissionMenuList');
+  await store.dispatch('Global/getPermissionMenuList', { needSysAuth: true });
   await getHearderData();
   await getList(1);
   

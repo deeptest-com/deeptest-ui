@@ -5,6 +5,7 @@ import bus from "@/utils/eventBus";
 import {getToken} from "@/utils/localToken";
 import settings from "@/config/settings";
 import {getAgentUrl} from "@/utils/agentEnv";
+import { useWujie } from '@/composables/useWujie';
 
 export const WsDefaultNamespace = 'default'
 export const WsDefaultRoom = 'default_room'
@@ -56,7 +57,7 @@ export class WebSocket {
     return WebSocket
   }
 
-  static async sentMsg(roomName: string, msg: string) {
+  static async sentMsg(roomName: string, msg: any) {
     if (!WebSocket.conn || WebSocket.conn.conn.isClosed()) {
       await WebSocket.init(true)
     }
@@ -64,8 +65,11 @@ export class WebSocket {
     if (!WebSocket.conn.room(roomName)) {
       await WebSocket.conn.joinRoom(roomName)
     }
-
-    WebSocket.conn.room(roomName).emit('OnChat', msg)
+    const { tenantId } =useWujie();
+    WebSocket.conn.room(roomName).emit('OnChat', JSON.stringify({
+      ...msg,
+      tenantId
+    }))
   }
 }
 

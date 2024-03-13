@@ -392,6 +392,15 @@ watch(() => {
   }
 }
 
+.tab-pane {
+  :deep(.doc-container) {
+    height: 100%;
+
+    .pane.right {
+      overflow: hidden;
+    }
+  }
+}
 </style>
 
 <style lang="less" >

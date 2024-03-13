@@ -243,7 +243,7 @@ const filterSchemas = [
     component: 'LSelect',
     componentProps: {
       placeholder: '请选择状态',
-      options: [],
+      options: planStatusOptions,
       onChange: (v) => {
         console.log('当前选择的状态', v);
       }
