@@ -205,6 +205,8 @@ watch(() => {
   if (val) {
     listCronProject({ current: 1 });
   } 
+}, {
+  immediate: true,
 })
 
 </script>
