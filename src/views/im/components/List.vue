@@ -40,15 +40,15 @@
           :data-source="list">
           <template #colTitle="{record}">
             <div class="customTitleColRender">
-              <!-- <div class="notice-icon">
+              <div class="notice-icon">
                 <a-tooltip v-if="record.changedStatus > ChangedStatus.NoChanged" :overlayClassName="'diff-custom-tooltip'">
                   <template #title>
-                  <span>{{record.changedStatus == ChangedStatus.Changed?'待处理':'已处理'}}，{{record.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a @click="showDiff(record.id)">查看详情</a></span>
+                    <span>{{record.changedStatus == ChangedStatus.Changed?'待处理':'已处理'}}，{{record.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a @click="showDiff(record.id)">查看详情</a></span>
                   </template>
                   <WarningFilled v-if="record.changedStatus == ChangedStatus.Changed"  @click="showDiff(record.id)" :style="{color: '#fb8b06'}" />
                   <InfoCircleOutlined  v-if="record.changedStatus == ChangedStatus.IgnoreChanged"  @click="showDiff(record.id)" :style="{color: '#c6c6c6'}" />
                 </a-tooltip>
-              </div> -->
+              </div>
               <EditAndShowField
                 :custom-class="'custom-endpoint show-on-hover'"
                 :value="record.title"
@@ -133,6 +133,10 @@
 import { defineProps, onMounted, computed, ref, watch, createVNode } from 'vue';
 import { useStore } from 'vuex';
 import debounce from "lodash.debounce";
+import { Modal } from 'ant-design-vue';
+import { ExclamationCircleOutlined, WarningFilled, InfoCircleOutlined } from '@ant-design/icons-vue';
+import cloneDeep from "lodash/cloneDeep";
+
 import {Endpoint, PaginationConfig} from "@/views/im/data";
 import EditAndShowField from '@/components/EditAndShow/index.vue';
 import EditAndShowSelect from '@/components/EditAndShowSelect/index.vue';
@@ -150,9 +154,9 @@ import useSharePage from '@/hooks/share';
 import {endpointStatusOpts, endpointStatus} from '@/config/constant';
 import eventBus from '@/utils/eventBus';
 import settings from "@/config/settings";
+import {ChangedStatus,SourceType, UsedBy} from "@/utils/enum";
 import { notifyError, notifySuccess } from '@/utils/notify';
-import { Modal } from 'ant-design-vue';
-import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
+import { loopTree } from '@/utils/tree';
 
 const props = defineProps<{
   categoryId: number;
@@ -165,11 +169,13 @@ const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
 const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 const activeTab = computed(() => store.state.Endpoint.activeTab);
+const activeTabs = computed(() => store.state.Endpoint.activeTabs);
 
 const list = computed<Endpoint[]>(() => store.state.Endpoint.listResult.list);
 let pagination = computed<PaginationConfig>(() => store.state.Endpoint.listResult.pagination);
 const tagList: any = computed(() => store.state.Endpoint.tagList);
 const userList = computed<any>(() => store.state.Project.userList);
+const treeData = computed(() => store.state.Endpoint.treeDataCategory);
 
 const selectedRowKeys = ref([]);
 const isFetching = ref(false);
@@ -205,7 +211,7 @@ const onSelectChange = e => {
     title: '标签',
     dataIndex: 'tags',
     slots: {customRender: 'colTags'},
-    width: 200,
+    width: 224,
   },
   {
     title: '所属服务',
@@ -374,8 +380,44 @@ async function updateServe(value: any, record: any,) {
   loadList();
 }
 
+const findNodeByRefId = (entityId: number, treeNodes: any[]) => {
+  for (let i = 0; i < treeNodes.length; i ++ ) {
+    if (treeNodes[i].entityId === entityId) {
+      return treeNodes[i];
+    } else if (Array.isArray(treeNodes[i].children) && treeNodes[i].children.length > 0){
+      const res = findNodeByRefId(entityId, treeNodes[i].children);
+      if (res) {
+        return res;
+      }
+    }
+  }
+};
+
 async function editEndpoint(record) {
   // 打开新tab页
+  let endpointNode = findNodeByRefId(record.id, treeData.value);
+  const findTab = activeTabs.value.find(e => (e?.entityData?.id || e.entityId) === record.id);
+  if (!endpointNode) {
+    const result = await store.dispatch('Endpoint/loadDynamicCategories', {
+      type: 'endpoint',
+      categoryId: record.categoryId,
+      nodeType: 'node',
+    });
+    const leafNodes = (result || []).map(e => ({
+      ...e,
+      type: 'im',
+      key: e?.entityData?.id,
+    }));
+    store.commit('Endpoint/setTreeDataCategory', loopTree(treeData.value, record.categoryId, item => {
+      const childrenData = cloneDeep(item.children || []);
+      item.children = [...childrenData, ...leafNodes];
+    }, 'id'))
+    endpointNode = leafNodes.find(e => (e.entityId || e.entityData?.id) === record.id);
+  }
+  if (!findTab) {
+    store.commit('Endpoint/setActiveTabs', [...activeTabs.value, { ...endpointNode }]);
+  }
+  store.commit('Endpoint/setActiveTab', endpointNode);
 }
 
 const username = (user: string) => {
@@ -439,6 +481,15 @@ const handleCreateApiSuccess = () => {
   loadList();
   store.dispatch('Endpoint/loadCategory');
 };
+
+function showDiff(id: number) {
+  store.commit('Endpoint/setDiffModalVisible', {
+    endpointId: id,
+    visible: true,
+    projectId: currProject.value.id,
+    callPlace: 'list'
+  });
+}
 
 watch(() => {
   return activeTab.value;
@@ -505,5 +556,10 @@ onMounted(() => {
       cursor: pointer;
     }
   }
+}
+</style>
+<style>
+.diff-custom-tooltip {
+  max-width: 320px;
 }
 </style>

@@ -177,5 +177,36 @@ export const getAllTabsId = (data) => {
         }
     });
     return result;
-  }
+}
 
+/**
+ * 树结构
+ * @param {Array} data 树的结构
+ * @param {String} key 当前节点id
+ * @param {String} callback 回调函数
+ * @param {String} defaultKey 默认节点
+ * @returns Array
+ */
+export const loopTree = (data, currKey, callback, defaultKey) => { // 循环树节点
+    data.forEach((item, index, arr) => {
+        if (item[defaultKey] === currKey) {
+            return callback(item, index, arr);
+        }
+        if (item.children) {
+            return loopTree(item.children, currKey, callback, defaultKey);
+        }
+    })
+    return [...data]
+}
+
+export const removeLeafNode = (data) => {
+    const arrayData = cloneDeep(data);
+    arrayData.forEach(e => {
+        e.children = (e.children || []).filter(e => e.entityId === 0);
+        if (e.children) {
+            e.children = removeLeafNode(e.children);
+        }
+    });
+
+    return [...arrayData];
+}

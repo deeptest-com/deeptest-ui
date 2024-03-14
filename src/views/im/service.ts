@@ -616,3 +616,15 @@ export async function getThirdPartyFunctions(data: any) {
         data
     })
 }
+
+/**
+ * 动态拉取分类列表
+ */
+export async function getDynamicCateogries(params: { type: string, currProjectId?: number, categoryId?: number | undefined | null }) {
+    console.error('getDynamicCateogries')
+    return request({
+        url: '/categories/loadChildren',
+        method: 'GET',
+        params,
+    })
+}

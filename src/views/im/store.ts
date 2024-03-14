@@ -68,7 +68,8 @@ import {
     getEndpointDiff,
     saveEndpointDiff,
     listFunctionsByThirdPartyClass,
-    importThirdPartyFunctions
+    importThirdPartyFunctions,
+    getDynamicCateogries
 } from './service';
 
 import {
@@ -349,6 +350,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
         removeTabs: Action<StateType, StateType>;
         removeActiveTab: Action<StateType, StateType>;
 
+        // 动态获取分类目录
+        loadDynamicCategories: Action<StateType, StateType>;
     }
 }
 
@@ -462,7 +465,7 @@ const StoreModel: ModuleType = {
             state.execResult = data;
         },
         setTreeDataCategory(state, data) {
-            state.treeDataCategory = [data];
+            state.treeDataCategory = Array.isArray(data) ? data : [data];
         },
         setTreeDataMapCategory(state, payload) {
             state.treeDataMapCategory = payload
@@ -500,6 +503,7 @@ const StoreModel: ModuleType = {
             }
         },
         setEndpointDetail(state, payload) {
+            console.error(payload);
             state.endpointDetail = payload;
         },
         initEndpointDetail(state, payload) {
@@ -686,6 +690,7 @@ const StoreModel: ModuleType = {
         },
 
         setActiveTabs(state, payload) {
+            console.error(payload);
             state.activeTabs = payload;
         }
     },
@@ -754,11 +759,11 @@ const StoreModel: ModuleType = {
         },
 
         // category tree
-        async loadCategory({commit}) {
-            const response = await loadCategory('endpoint');
+        async loadCategory({commit}, nodeType?: string) {
+            const response = await loadCategory('endpoint', nodeType);
             if (response.code != 0) return;
             const {data} = response;
-            commit('setTreeDataCategory', data || {});
+            commit('setTreeDataCategory', data || []);
             const mp = {}
             getNodeMap(data, mp)
             commit('setTreeDataMapCategory', mp);
@@ -783,7 +788,6 @@ const StoreModel: ModuleType = {
         async createCategoryNode({commit, dispatch, state}, payload: any) {
             try {
                 const res = await createCategory(payload);
-                await dispatch('loadCategory');
                 return res;
             } catch (error) {
                 return false;
@@ -801,7 +805,6 @@ const StoreModel: ModuleType = {
         async removeCategoryNode({commit, dispatch, state}, payload: any) {
             try {
                 await removeCategory(payload.id, payload.type);
-                await dispatch('loadCategory');
                 return true;
             } catch (error) {
                 return false;
@@ -825,8 +828,6 @@ const StoreModel: ModuleType = {
         async saveCategory({commit, dispatch, state}, payload: any) {
             const res = await updateCategory(payload);
             if (res.code === 0) {
-                // commit('setCategory', res.data);
-                await dispatch('loadCategory');
                 return res;
             } else {
                 return false
@@ -1870,7 +1871,6 @@ const StoreModel: ModuleType = {
         async cloneCategoryNode({dispatch,state}, targetId: number){
             const response: any = await copyCategory(targetId);
             if (response.code === 0) {
-                await dispatch('loadCategory');
                 return true;
             }
             return false
@@ -1898,6 +1898,18 @@ const StoreModel: ModuleType = {
             const newSchema = olderTabs[findIndex - 1] ? olderTabs[findIndex - 1] : olderTabs[findIndex + 1] ? olderTabs[findIndex + 1] : {};
             commit('setActiveTab', newSchema);
         },
+
+        async loadDynamicCategories({ commit }, payload: { type: string, categoryId?: number }) {
+            console.error('loadDynamicCategories', payload);
+            const result: any = await getDynamicCateogries(payload);
+            if (result.code === 0) {
+                if (result.data[0].parentId === 0) {
+                    commit('setTreeDataCategory', result.data[0]);
+                }
+                return result.data;
+            }
+            return null;
+        }
     },
 };
 

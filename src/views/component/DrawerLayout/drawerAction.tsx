@@ -3,6 +3,8 @@ import {
   FullscreenExitOutlined,
   FullscreenOutlined,
   SelectOutlined,
+  StarFilled,
+  StarOutlined,
 } from '@ant-design/icons-vue';
 import IconSvg from "@/components/IconSvg";
 
@@ -42,6 +44,11 @@ export const DrawerAction = defineComponent({
       type: String,
       default: '',
       required: false,
+    },
+    showStar: {
+      type: Boolean,
+      default: false,
+      required: false,
     }
   },
   components: {
@@ -52,6 +59,8 @@ export const DrawerAction = defineComponent({
     const shareLink = inject('shareLink', (_url: string) => {});
     const setFullScreen = inject('setFullScreen', (_value: boolean) => {});
     const isFullScreen: any = inject('isFullScreen', false);
+    const isFavorite: any = inject('isFavorite', false);
+    const favoriteItem = inject('favoriteItem', () => {});
 
     const handleClick = e => {
       e.preventDefault();
@@ -68,13 +77,15 @@ export const DrawerAction = defineComponent({
         case 'fullScreen':
           setFullScreen(true);
           break;
+        case 'toFavorite':
+          favoriteItem();  
+          break;
         default:
           break;
       }
     }
 
     const menuClick = (e) => {
-      console.log(e.key)
       if (e.key === 'copyShare') {
         shareLink(props.shareLink)
       } else if (e.key === 'copyCurl') {
@@ -112,6 +123,13 @@ export const DrawerAction = defineComponent({
 
       return (
         <div class="drawer-action" onClick={e => handleClick(e)}>
+          {props.showStar && (
+            <div class="drawer-action-item" data-action="toFavorite">
+              <a-tooltip placement="bottom" title={isFavorite.value ? '取消收藏' : '收藏'}>
+                {isFavorite.value ? <StarFilled style={{ color: '#1677ff' }}  /> : <StarOutlined /> }
+              </a-tooltip>
+            </div>
+          )}
           {props.showDetail &&  (
             <div class="drawer-action-item" data-action="detail">
               <a-tooltip placement="bottom" title="详情">

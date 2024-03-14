@@ -146,7 +146,7 @@ const saveSchema = async () => {
 }
 
 const handleCancel = () => {
-  store.commit('Schema/setActiveSchema', {
+  store.commit('Endpoint/setActiveTab', {
     ...activeSchemaTab.value,
     autoFocus: false,
   })
@@ -154,7 +154,7 @@ const handleCancel = () => {
 
 const handleUpdated = async (type: string, value: string) => {
   try {
-    store.commit('Schema/setActiveSchema', {
+    store.commit('Endpoint/setActiveTab', {
       ...activeSchemaTab.value,
       autoFocus: false,
     })
@@ -179,7 +179,7 @@ const onDelete = () => {
     loading.value = true;
     try {
       await store.dispatch('Schema/deleteSchema', schemaDetail.value);
-      store.dispatch('Schema/removeActiveTab', activeTab.value.id);
+      store.dispatch('Endpoint/removeActiveTab', activeTab.value.id);
     } catch(error) {
       message.error('删除失败');
     }

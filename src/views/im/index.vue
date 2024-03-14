@@ -17,7 +17,17 @@
               <a-tab-pane v-for="item in activeTabs" :key="item.key">
                 <template #tab>
                   <a-dropdown :trigger="['contextmenu']" :visible="visible[item.id]">
-                    <div v-on-click-outside="canelVisible" @contextmenu="openDropdown(item)">{{ item.name }}</div>
+                    <div v-on-click-outside="canelVisible" @contextmenu="openDropdown(item)">
+                      <span v-if="item.type === 'im'" class="endpoint-im-tab">
+                        <span 
+                          class="endpoint-method" 
+                          :style="{ 'color': getMethodColor(item.activeMethod) }">
+                          {{ item.activeMethod }}&nbsp;
+                        </span>
+                        {{ item?.entityData?.name || item.name }}
+                      </span>
+                      <span v-else>{{ item.name }}</span>
+                    </div>
                     <template #overlay>
                       <a-menu @click="e => handleMenuClick(e, item)">
                         <a-menu-item v-for="item in dropdownMenu" :key="item.key">{{ item.label }}</a-menu-item>
@@ -26,7 +36,7 @@
                   </a-dropdown>
                 </template>
                 <div :class="['endpoint-tab-content', item.type]">
-                  <Detail v-if="item.type === 'im'" :endpoint-id="item.entityId"/>
+                  <Detail v-if="item.type === 'im'" :endpoint-id="item.entityData?.id"/>
                   <List v-else-if="item.type === 'im-dir' || item.id === -1" :category-id="item.id"/>
                   <SchemaEditorContent v-else />
                 </div>
@@ -42,6 +52,9 @@
                 </a-dropdown>
               </template>
             </a-tabs>
+          </div>
+          <div v-else class="endpoint-empty-content">
+            <a-empty  description="请先在左侧目录上选择需要调试的接口"/>
           </div>
         </template>
       </ContentPane>
@@ -60,7 +73,11 @@ import { SchemaEditorContent } from '@/views/component/Schema/components';
 import {StateType as EndpointStateType} from "@/views/im/store";
 import eventBus from '@/utils/eventBus';
 import settings from '@/config/settings';
+import { getMethodColor } from '@/utils/dom';
+import { useRoute, useRouter } from 'vue-router';
 
+const route = useRoute();
+const router = useRouter();
 const store = useStore<{ Endpoint: EndpointStateType, ProjectGlobal }>();
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const isImporting = ref(false);
@@ -74,6 +91,8 @@ const activeTabs = computed(() => {
   })
   return tabs;
 });
+
+const endpointDetail = computed(() => store.state.Endpoint.endpointDetail);
 
 const dropdownMenu = [
   {
@@ -135,7 +154,7 @@ const openDropdown = item => {
 };
 
 const changeTab = key => {
-  const curr = activeTabs.value.find(e => e.id === key);
+  const curr = activeTabs.value.find(e => (e.id || e.entityId || e?.entityData?.id) === key);
   store.commit('Endpoint/setActiveTab', curr);
   if (curr.type === 'schema') {
     store.dispatch('Schema/querySchema', { id: curr.entityId });
@@ -146,13 +165,45 @@ const onEdit = (e, type?: string) => {
   store.dispatch('Endpoint/removeActiveTab', e);
 };
 
-watch(() => {
-  return currProject.value;
-}, (val) => {
-  if (val.id) {
-    // todo: 重置tab为 当前项目的  全部数据 tab
+/**
+ * 查看接口定义的详情
+ */
+const onRouterParams = async () => {
+  const { imSerialNumber = '' }: any = route.params || {};
+  if (imSerialNumber) {
+    await store.dispatch('Endpoint/getEndpointDetail', {
+      id: imSerialNumber.split('-')[2],
+    })
+    const method = (endpointDetail.value.interfaces || []).map(e => e.method);
+    const endpointNode = {
+      entityData: {
+        name: endpointDetail.value.title,
+        id: endpointDetail.value.id,
+        method,
+      },
+      entityId: endpointDetail.value.id,
+      key: endpointDetail.value.id,
+      type: 'im',
+      activeMethod: method[0] || ''
+    }
+    store.commit('Endpoint/setActiveTab', endpointNode);
+    store.commit('Endpoint/setActiveTabs', [...activeTabs.value, endpointNode]);
   }
-});
+};
+
+/**
+ * 查看组件详情
+ */
+const setActiveSchema = () => {
+  const { query }: any = router.currentRoute.value;
+  if (query.ref) {
+    const ref = JSON.parse(query.ref);
+    let activeSchema = { ...ref, key: ref.entityId, type: 'schema' };
+    store.commit('Schema/setActiveTab', activeSchema);
+    store.commit('Schema/setActiveTabs', [...activeTabs.value, activeSchema]);
+    store.dispatch('Schema/querySchema', { id: ref?.entityId });
+  }
+}
 
 
 const schemaTree = ref();
@@ -162,6 +213,9 @@ onMounted(() => {
       schemaTree.value?.loadCategory();
     }
   })
+
+  onRouterParams();
+  setActiveSchema();
 })
 </script>
 
@@ -183,6 +237,10 @@ onMounted(() => {
 
   .endpoint-right-content {
     height: 100%;
+  }
+
+  .endpoint-empty-content {
+    margin-top: 32px;
   }
 
   :deep(.ant-tabs.im-tabs-full-height) {

@@ -376,7 +376,9 @@ function ok() {
       if (res) {
         notifyWarn('异步导入中，稍后请刷新列表查看导入结果');
         reset();
-        emit('ok');
+        emit('ok', {
+          parentId: modelRef.categoryId,
+        });
       }
     })
     .catch((error: ValidateErrorEntity) => {

@@ -1,6 +1,7 @@
 import { Tree } from "ant-design-vue-v3";
-import { PlusOutlined } from "@ant-design/icons-vue";
-import { PropType, defineComponent, ref, computed, onMounted } from "vue";
+import { PlusOutlined, DownOutlined } from "@ant-design/icons-vue";
+import { PropType, defineComponent, ref, computed, onMounted, unref } from "vue";
+import { useStore } from "vuex";
 import cloneDeep from "lodash/cloneDeep";
 import { DropdownActionMenu } from "../DropDownMenu";
 import "./index.less";
@@ -67,13 +68,21 @@ const CategoryTreeProps = {
   prefixCls: {
     type: String,
     default: '',
+  },
+  loadApi: {
+    type: Function,
+    default: (..._args: any[]) => {}
+  },
+  needLoadData: {
+    type: Boolean,
+    default: false,
   }
 }
 
 const renderTitle = (nodeProps, searchValue) => {
   const node = nodeProps.dataRef;
   const title = node.title || node.name || '';
-  if (node.entityType === 'processor_interface_default') {
+  if (node.entityData) {
     return renderInterfaceTitle(nodeProps, searchValue);
   }
   return (
@@ -91,7 +100,8 @@ const renderTitle = (nodeProps, searchValue) => {
 
 const renderInterfaceTitle = (nodeProps, searchValue) => {
   const node = nodeProps.dataRef;
-  const title = node.title || node.name || '';
+  const title = node.entityData.name || node.title || node.name || '';
+  const method = node.entityData.method || node.method || [];
   const methodMap = {
     POST: 'POST',
     TRACE: 'TRA',
@@ -100,14 +110,15 @@ const renderInterfaceTitle = (nodeProps, searchValue) => {
     PATCH: 'PAT',
     DELETE: 'DEL',
     HEAD: 'HEAD',
+    PUT: 'PUT',
   }
   return (
     <span class="tree-title-text interface-title-text">
-      <a-tooltip title={node.method.length > 1 ? node.method.join(' ') : null}>
-        <span class="interface-method-text" style={{ color: getMethodColor(node.method[0]) }}>
+      <a-tooltip title={method.length > 1 ? method.join(' ') : null}>
+        <span class="interface-method-text" style={{ color: getMethodColor(method[0]) }}>
           <span class="interface-method">
-            {methodMap[node.method[0]]}
-            {node.method.length > 1 && <span class="interface-method-badge">{node.method.slice(1).length}+</span>}
+            {methodMap[method[0]]}
+            {method.length > 1 && <span class="interface-method-badge">+{method.slice(1).length}</span>}
           </span>
         </span>
       </a-tooltip>
@@ -153,12 +164,14 @@ const CategoryTree = defineComponent({
   name: 'CategoryTree',
   props: CategoryTreeProps,
   setup(props, { expose, slots }) {
+    const store = useStore<{ Endpoint }>();
     const searchValue = ref('');
     const expandedKeys = ref<number[]>([]);
     const checkedKeys = ref([]);
     const selectedKeys = ref<any>([]);
     const autoExpandParent = ref(false);
     const virtualHeight = ref(400);
+    const treeLoadedKeys = ref([]);
     const categoryTreeContainer = ref();
     const data = computed(() => {
       return [...filterByKeyword(setTreeDataKey(removeSlotsAttribute(props.treeData || [])), searchValue.value, 'name')];
@@ -197,7 +210,7 @@ const CategoryTree = defineComponent({
             {renderMore(nodeProps, props)}
           </div>
         )
-      }
+      },
     };
 
     const selectedNode = (keys, evt) => {
@@ -210,6 +223,10 @@ const CategoryTree = defineComponent({
     };
 
     const expand = (keys) => {
+      if (unref(expandedKeys).length > keys.length) {
+        // 已加载key数目大于展开key数目，
+        treeLoadedKeys.value = treeLoadedKeys.value.filter(i => keys.includes(i));
+      }
       expandedKeys.value = keys;
       autoExpandParent.value = false;
     };
@@ -239,7 +256,7 @@ const CategoryTree = defineComponent({
     const scrollToSelectedNode = () => {
       const treeInstance: any = TreeNode.value;
       if (treeInstance && selectedKeys.value.length > 0) {
-        treeInstance.scrollTo({ key:  expandedKeys.value.length > 0 ? expandedKeys.value[0] : selectedKeys.value[0], align: 'top' })
+        treeInstance.scrollTo({ key:  selectedKeys.value[0], align: 'top' })
       } 
     };
 
@@ -251,11 +268,60 @@ const CategoryTree = defineComponent({
       }
     };
 
+    /**
+      * 树结构
+      * @param {Array} data 树的结构
+      * @param {String} key 当前节点id
+      * @param {String} callback 回调函数
+      * @param {String} defaultKey 默认节点
+      * @returns Array
+      */
+
+    const loopTree = (data, currKey, callback, defaultKey) => { // 循环树节点
+      data.forEach((item, index, arr) => {
+        if (item[defaultKey] === currKey) {
+          return callback(item, index, arr);
+        }
+        if (item.children) {
+          return loopTree(item.children, currKey, callback, defaultKey);
+        }
+      })
+      return [...data]
+    }
+
+
+    const onTreeLoad = (treeNode, loadedKeys) => {
+      treeLoadedKeys.value = loadedKeys;
+      return new Promise<void>(resolve => {
+        if (treeNode.dataRef.isLeaf || !props.needLoadData) {
+          resolve();
+          return;
+        }
+        props.loadApi({
+          categoryId: treeNode.dataRef.id,
+          type: props.categoryType,
+          nodeType: 'node',
+        }).then(res => {
+          if (res.code === 0) {
+            treeNode.dataRef.children = [...treeNode.dataRef.children, ...(res.data || [])];
+            const tree = loopTree([...props.treeData], treeNode.dataRef.id, item => {
+              item.children = treeNode.dataRef.children || []
+            } ,'id');
+            store.commit('Endpoint/setTreeDataCategory', tree);
+          }
+          resolve();
+        }).catch(err => {
+          console.log(err);
+          resolve();
+        })
+      });
+    }
+
     onMounted(() => {
       getVirtualHeight();
     })
     
-    expose({ initTree, setSelectedKeys, scrollToSelectedNode, getVirtualHeight, clearSearchValue });
+    expose({ initTree, setSelectedKeys, scrollToSelectedNode, getVirtualHeight, clearSearchValue, onTreeLoad });
     return () => {
       return (
         <div class={["category-tree-container", props.prefixCls]}>
@@ -291,6 +357,7 @@ const CategoryTree = defineComponent({
                 showIcon={props.showIcon}
                 onSelect={(keys, evt) => selectedNode(keys, evt)}
                 onDrop={(...args) => props.onTreeNodeDrop(args[0])}
+                loadData={(loadedKeys, evt) => onTreeLoad(evt, loadedKeys)}
                 onExpand={(keys) => expand(keys)}
                 virtual={true}
                 v-slots={vSlots}

@@ -38,18 +38,18 @@ const onEdit = (targetKey: string | MouseEvent, action: string) => {
   if (action !== 'remove') {
     return;
   }
-  store.dispatch('Schema/removeActiveSchema', targetKey);
+  store.dispatch('Endpoint/removeActiveTab', targetKey);
 };
 
 const changeTab = async (evt) => {
-  await store.commit('Schema/setActiveSchema', {
+  await store.commit('Endpoint/setActiveTab', {
     ...activeSchema.value,
     autoFocus: false,
   });
   const curr = tabs.value.find(e => e.key === evt);
   store.dispatch('Schema/querySchema', { id: curr.entityId });
-  store.commit('Schema/setSchemas', tabs.value.map(e => ({ ...e, autoFocus: false })));
-  store.commit('Schema/setActiveSchema', curr);
+  store.commit('Endpoint/setActiveTabs', tabs.value.map(e => ({ ...e, autoFocus: false })));
+  store.commit('Endpoint/setActiveTab', curr);
 }
 
 </script>

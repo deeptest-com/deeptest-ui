@@ -1,5 +1,5 @@
 <template>
-  <DetailLayout :show-basic-info="true" :show-tab-header="true" :sticky-key="stickyKey">
+  <DetailLayout :prefix-cls="isFullScreen ? 'detail-view-full' : ''" :show-basic-info="true" :show-tab-header="true" :sticky-key="stickyKey">
     <template #header>
       <DetailHeader
         :serial-number="imDetail?.serialNumber || ''"
@@ -7,8 +7,9 @@
         @update-title="updateTitle"
         :show-action="true"
         :showCopyCurl="true"
+        :show-star="true"
         :copy-curl="copyCurl"
-        :show-full-screen="false"
+        :show-full-screen="true"
         :share-link="detailLink"
       />
     </template>
@@ -104,6 +105,7 @@ const selectedMethodDetail = computed<any>(() => store.state.Endpoint.selectedMe
 const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 const selectedMethod =  computed<any>(() => store.state.Endpoint.selectedMethod);
 const activeTab =  computed<any>(() => store.state.Endpoint.activeTab);
+const activeTabs =  computed<any>(() => store.state.Endpoint.activeTabs);
 
 const initEndpointDetail = async () => {
   await store.commit("Global/setSpinning", true);
@@ -117,7 +119,6 @@ const initEndpointDetail = async () => {
      */
     store.dispatch('Project/getUserList');
     store.dispatch('ServeGlobal/fetchServe');
-    await store.dispatch('Endpoint/loadCategory');
     await store.commit("Global/setSpinning", false);
     await store.commit("Detail/setShow", true);
   } catch(e) {
@@ -129,40 +130,12 @@ const initEndpointDetail = async () => {
 watch(() => {
   return activeTab.value;
 }, val => {
-  if (val?.id && val?.type === 'im' && props.endpointId === val?.entityId) {
+  if (val?.type === 'im' && props.endpointId === val?.entityData?.id) {
     initEndpointDetail();
   }
 }, {
   immediate: true,
 });
-
-/**
- * 页面渲染时
- */
-// onMounted(async () => {
-//   await store.commit("Global/setSpinning", true);
-//   await store.commit("Detail/setShow", false);
-//   const { imSerialNumber = '' }: { imSerialNumber?: string } = router.currentRoute.value.params;
-//   const tempArr = imSerialNumber.split('-');
-//   const id = tempArr[tempArr.length - 1];
-//   try {
-//     await store.dispatch('Schema/loadCategory');
-//     await store.dispatch('Endpoint/getEndpointDetail', { id });
-//     // 打开抽屉详情时，拉取mock表达式列表
-//     await store.dispatch('Endpoint/getMockExpressions');
-//     /**
-//      * 单独刷新详情页 需要初始化 用户列表和 serve列表
-//      */
-//     await store.dispatch('Project/getUserList');
-//     store.dispatch('ServeGlobal/fetchServe');
-//     await store.dispatch('Endpoint/loadCategory');
-//     await store.commit("Global/setSpinning", false);
-//     await store.commit("Detail/setShow", true);
-//   } catch(e) {
-//     await store.commit("Global/setSpinning", false);
-//     await store.commit("Detail/setShow", true);
-//   }
-// });
 
 /**
  * 基本信息部分
@@ -180,6 +153,19 @@ async function updateTitle(title) {
       {id: imDetail.value.id, name: title}
   );
   await store.dispatch('Endpoint/getEndpointDetail', {id: imDetail.value.id});
+  store.commit('Endpoint/setActiveTab', {
+    ...activeTab.value,
+    entityData: {
+      ...activeTab.value.entityData,
+      name: title
+    },
+  });
+  store.commit('Endpoint/setActiveTabs', activeTabs.value?.map(e => {
+    if ((e.entityId || e?.entityData?.id) === endpointDetail?.value?.id) {
+      e.entityData.name = title;
+    }
+    return e;
+  }))
   resetDefineChange();
 }
 
@@ -485,11 +471,43 @@ const shareLink = (url: string) => {
 }
 provide('shareLink', shareLink);
 
+
+/**
+ * 全屏
+ */
+const isFullScreen = ref(false);
+const setFullScreen = (value) => {
+  isFullScreen.value = value;
+  const el: any = document.querySelector('#indexlayout-right-top');
+  if (value) {
+    el.style.zIndex = 0;
+  } else {
+    el.style.zIndex = 9;
+  }
+  setTimeout(() => {
+    bus.emit(settings.paneResizeTop);
+  }, 300);
+};
+provide('setFullScreen', setFullScreen);
+provide('isFullScreen', computed(() => isFullScreen.value));
+
+/**
+ * 收藏
+ */
+const isFavorite = ref(false);
+provide('isFavorite', computed(() => isFavorite.value));
+const favoriteItem = () => {
+  console.log('favorite', endpointDetail?.value?.id);
+};
+
 // 离开页面时，重置数据
 onUnmounted(() => {
-  clearDefineChange();
-  clearMockChange();
-  clearDebugChange();
+  console.error(props, activeTab.value);
+  if (props.endpointId === activeTab.value?.entityData?.id) {
+    clearDefineChange();
+    clearMockChange();
+    clearDebugChange();
+  }
 })
 
 /*************************************************

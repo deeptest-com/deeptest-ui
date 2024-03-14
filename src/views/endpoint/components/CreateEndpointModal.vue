@@ -68,14 +68,14 @@ import {
 import {useStore} from "vuex";
 import {NewEndpointFormState} from "@/views/Endpoint/data";
 import SelectServe from './SelectServe/index.vue';
+import { removeLeafNode } from '@/utils/tree';
 
 const store = useStore<{ Endpoint, ProjectGlobal }>();
 const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 
 const treeData: any = computed(() => {
-  const data = treeDataCategory.value;
-  return  data?.[0]?.children || [];
+  return removeLeafNode(treeDataCategory.value);
 });
 
 const props = defineProps({
@@ -98,7 +98,7 @@ function ok() {
       .then(async () => {
         loading.value = true;
         try {
-          await store.dispatch('Endpoint/createApi', {
+          const res: any = await store.dispatch('Endpoint/createApi', {
             "title": formState.title,
             "projectId": currProject.value.id,
             "serveId": formState.serveId,
@@ -107,7 +107,17 @@ function ok() {
             "curl": formState.curl || null,
           });
           loading.value = false;
-          emit('ok');
+          emit('ok', {
+            id: res?.id,
+            entityId: res?.entityId,
+            entityData: {
+              id: res?.entityId,
+              method: ['GET'],
+              name: formState.title,
+            },
+            key: res?.entityId,
+            parentId: formState.categoryId,
+          });
         } catch(error) {
           loading.value = false;
           return Promise.reject(error);

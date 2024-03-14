@@ -81,6 +81,7 @@ const setTitle = (data: any[]) => {
     if (e.children) {
       e.children = setTitle(e.children);
     }
+    e.isLeaf = !e.children;
     return cloneDeep(e);
   })
 };
@@ -213,14 +214,14 @@ const delCategory = (nodeProps) => {
 
 const copy = async(nodeProps) => {
   try {
-    await store.commit('Schema/setActiveTab', {
+    await store.commit('Endpoint/setActiveTab', {
       ...activeTab.value,
       autoFocus: false,
     });
     const data = await store.dispatch('Schema/copySchema', nodeProps.dataRef?.id);
     const newSchema = { id: data.id, key: data.id, entityId: data.entityId, name: data.name, autoFocus: true, type: 'schema' };
     // 新建组件以后，设置当前选中tab以及tab列表
-    store.commit('Schema/setActiveTab', newSchema);
+    store.commit('Endpoint/setActiveTab', newSchema);
     activeTabs.value.push(newSchema)
     store.dispatch('Schema/querySchema', { id: data.entityId });
     emits('select');
