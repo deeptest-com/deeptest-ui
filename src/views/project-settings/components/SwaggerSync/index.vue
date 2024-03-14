@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="tsx">
-import {ref, onMounted, computed} from 'vue';
+import {ref, onMounted, computed, watch} from 'vue';
 import { useStore } from 'vuex';
 import {ImportOutlined, CopyOutlined, DeleteOutlined} from '@ant-design/icons-vue';
 import BasicTable from '@/components/Table/index.vue';
@@ -37,9 +37,12 @@ import { notifyError, notifySuccess } from '@/utils/notify';
 import { confirmToDelete } from '@/utils/confirm';
 import TooltipCell from '@/components/Table/tooltipCell.vue';
 
-const store = useStore<{ ProjectSetting }>();
+const store = useStore<{ ProjectSetting, ProjectGlobal }>();
 const list = computed(() => {
   return store.state.ProjectSetting.cronProjectListResult.list;
+})
+const currProject = computed(() => {
+  return store.state.ProjectGlobal.currProject;
 })
 
 const pagination = computed(() => {
@@ -196,8 +199,12 @@ const closeSyncTask = () => {
 
 const syncTaskVisible = ref(false);
 
-onMounted(() => {
-  listCronProject({ current: 1 });
+watch(() => {
+  return currProject.value?.id;
+}, val => {
+  if (val) {
+    listCronProject({ current: 1 });
+  } 
 })
 
 </script>
