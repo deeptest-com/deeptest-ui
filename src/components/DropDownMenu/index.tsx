@@ -67,13 +67,12 @@ const RenderMenuItem = ({ item, record }: { item: MenuItem, record: Recordable }
 
 const ActionList = (opts: { list: MenuItem[], record: Recordable}) => {
   const { list, record } = opts;
-  const handleClick = () => {
-    console.log('点击事件', record);
-  };
   return (
     <div class="action-list">
-      {list.map((action: MenuItem) => (
-        <div onClick={() => handleClick()}>{action.label}</div>
+      {list.map((actionItem: MenuItem) => (
+        <div class="action-item" onClick={() => actionItem.action(record)}>
+          { actionItem.customRender ? <a-tooltip title={actionItem.label} placement="top">{actionItem.customRender}</a-tooltip> : actionItem.label }
+        </div>
       ))}
     </div>
   )
@@ -159,12 +158,12 @@ export const DropdownActionMenu = defineComponent({
     return () => {
       return (
         <div class="drop-down-action-wrap">
-          {/* {actionList.value.length > 0 && (
+          {actionList.value.length > 0 && (
             <ActionList list={actionList.value} record={record.value} />
           )}
-          {actionList.value.length > 0 && (
+          {actionList.value.length > 0 && newDropDownList.value.length > 0 && (
             <a-divider type="vertical" />
-          )} */}
+          )}
           {dropdownList.value.length > 0 && newDropDownList.value.length > 0 && (
             <DropdownList
               list={newDropDownList.value}

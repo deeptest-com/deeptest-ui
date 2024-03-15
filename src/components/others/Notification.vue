@@ -23,7 +23,7 @@ export default defineComponent({
       if ([10600, 10700, 403, 10900].includes(result.resultCode)) {
         return;
       }
-      const text = result.resultCode === 10800 ? result.resultMsg : t('biz_'+result.resultCode);
+      const text = result.resultCode === 10800 ? result.resultMsg : (result.resultMsg || t('biz_'+result.resultCode));
       const msg = result.httpCode === 200 ? text : t('http_'+result.httpCode)
       const desc = result.resultMsg ? result.resultMsg : ''
 
