@@ -886,8 +886,7 @@ const StoreModel: ModuleType = {
                 ...params
             });
             if (res.code === 0) {
-                return true;
-                // await dispatch('loadList', {projectId: params.projectId});
+                return res.data;
             } else {
                 return false
             }
@@ -895,7 +894,7 @@ const StoreModel: ModuleType = {
         async disabled({commit, dispatch, state}, payload: any) {
             const res = await expireEndpoint(payload.id);
             if (res.code === 0) {
-                await dispatch('loadList', {projectId: payload.projectId});
+                return true;
             } else {
                 return false
             }
@@ -903,9 +902,10 @@ const StoreModel: ModuleType = {
         async del({commit, dispatch, state}, payload: any) {
             const res = await deleteEndpoint(payload.id);
             if (res.code === 0) {
-                await dispatch('loadList', {projectId: payload.projectId});
-                // 删除接口后，需要重新拉取分类树
-                await dispatch('loadCategory');
+                if (payload.projectId) {
+                    dispatch('loadList', {projectId: payload.projectId});
+                }
+                
                 return true
             } else {
                 return false
@@ -914,7 +914,7 @@ const StoreModel: ModuleType = {
         async copy({commit, dispatch, state}, payload: any) {
             const res = await copyEndpoint(payload.id);
             if (res.code === 0) {
-                await dispatch('loadList', {projectId: payload.projectId});
+                return true;
             } else {
                 return false
             }
@@ -988,6 +988,7 @@ const StoreModel: ModuleType = {
             if (res.code === 0) {
                 commit('setName', payload);
                 await dispatch('loadList', {projectId: rootState.ProjectGlobal.currProject.id});
+                return true;
             } else {
                 return false
             }
@@ -1871,7 +1872,7 @@ const StoreModel: ModuleType = {
         async cloneCategoryNode({dispatch,state}, targetId: number){
             const response: any = await copyCategory(targetId);
             if (response.code === 0) {
-                return true;
+                return response.data;
             }
             return false
         },
@@ -1903,9 +1904,6 @@ const StoreModel: ModuleType = {
             console.error('loadDynamicCategories', payload);
             const result: any = await getDynamicCateogries(payload);
             if (result.code === 0) {
-                if (result.data[0].parentId === 0) {
-                    commit('setTreeDataCategory', result.data[0]);
-                }
                 return result.data;
             }
             return null;

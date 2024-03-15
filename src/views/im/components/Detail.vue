@@ -91,15 +91,18 @@ import {UsedBy} from "@/utils/enum";
 import {doCopyCurl} from "@/services/curl";
 import useClipboard from "@/composables/useClipboard";
 import {useWujie} from "@/composables/useWujie";
+import { loopTree } from '@/utils/tree';
+import useEndpoint from '../hooks/useEndpoint';
 
 const props = defineProps<{
   endpointId: number;
 }>();
-
+const { updateEndpointNodes } = useEndpoint();
 const router = useRouter();
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal: ServeStateType, Global ,Debug}>();
 const imDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const globalActiveTab = computed(()=>store.state.Endpoint.globalActiveTab);
+const treeData = computed(()=>store.state.Endpoint.treeDataCategory);
 
 const selectedMethodDetail = computed<any>(() => store.state.Endpoint.selectedMethodDetail);
 const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
@@ -129,8 +132,8 @@ const initEndpointDetail = async () => {
 
 watch(() => {
   return activeTab.value;
-}, val => {
-  if (val?.type === 'im' && props.endpointId === val?.entityData?.id) {
+}, (val, oldVal) => {
+  if (val?.type === 'im' && props.endpointId === val?.entityData?.id && val?.entityData?.id !== oldVal?.entityData?.id) {
     initEndpointDetail();
   }
 }, {
@@ -152,7 +155,6 @@ async function updateTitle(title) {
   await store.dispatch('Endpoint/updateEndpointName',
       {id: imDetail.value.id, name: title}
   );
-  await store.dispatch('Endpoint/getEndpointDetail', {id: imDetail.value.id});
   store.commit('Endpoint/setActiveTab', {
     ...activeTab.value,
     entityData: {
@@ -166,6 +168,8 @@ async function updateTitle(title) {
     }
     return e;
   }))
+  updateEndpointNodes(imDetail.value.categoryId);
+  await store.dispatch('Endpoint/getEndpointDetail', {id: imDetail.value.id});
   resetDefineChange();
 }
 
@@ -185,7 +189,6 @@ async function changeCategory(value) {
     "endpointIds": [imDetail.value.id]
   });
   await store.dispatch('Endpoint/getEndpointDetail', {id: imDetail.value.id});
-  await store.dispatch('Endpoint/loadCategory');
 }
 
 async function changeServe(value:number) {

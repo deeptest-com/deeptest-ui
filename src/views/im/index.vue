@@ -75,10 +75,13 @@ import eventBus from '@/utils/eventBus';
 import settings from '@/config/settings';
 import { getMethodColor } from '@/utils/dom';
 import { useRoute, useRouter } from 'vue-router';
+import useEndpoint from './hooks/useEndpoint';
 
 const route = useRoute();
 const router = useRouter();
 const store = useStore<{ Endpoint: EndpointStateType, ProjectGlobal }>();
+const { openEndpointTab } = useEndpoint();
+
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const isImporting = ref(false);
 const activeTab = computed(() => {
@@ -154,7 +157,7 @@ const openDropdown = item => {
 };
 
 const changeTab = key => {
-  const curr = activeTabs.value.find(e => (e.id || e.entityId || e?.entityData?.id) === key);
+  const curr = activeTabs.value.find(e => (e.id === key || e.entityId === key || e?.entityData?.id === key));
   store.commit('Endpoint/setActiveTab', curr);
   if (curr.type === 'schema') {
     store.dispatch('Schema/querySchema', { id: curr.entityId });
@@ -174,20 +177,8 @@ const onRouterParams = async () => {
     await store.dispatch('Endpoint/getEndpointDetail', {
       id: imSerialNumber.split('-')[2],
     })
-    const method = (endpointDetail.value.interfaces || []).map(e => e.method);
-    const endpointNode = {
-      entityData: {
-        name: endpointDetail.value.title,
-        id: endpointDetail.value.id,
-        method,
-      },
-      entityId: endpointDetail.value.id,
-      key: endpointDetail.value.id,
-      type: 'im',
-      activeMethod: method[0] || ''
-    }
-    store.commit('Endpoint/setActiveTab', endpointNode);
-    store.commit('Endpoint/setActiveTabs', [...activeTabs.value, endpointNode]);
+    
+    openEndpointTab(endpointDetail.value);
   }
 };
 

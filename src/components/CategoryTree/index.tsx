@@ -290,8 +290,7 @@ const CategoryTree = defineComponent({
     }
 
 
-    const onTreeLoad = (treeNode, loadedKeys) => {
-      treeLoadedKeys.value = loadedKeys;
+    const onTreeLoad = (treeNode) => {
       return new Promise<void>(resolve => {
         if (treeNode.dataRef.isLeaf || !props.needLoadData) {
           resolve();
@@ -315,6 +314,10 @@ const CategoryTree = defineComponent({
           resolve();
         })
       });
+    }
+
+    const onload = loadedKeys => {
+      treeLoadedKeys.value = loadedKeys;
     }
 
     onMounted(() => {
@@ -357,7 +360,8 @@ const CategoryTree = defineComponent({
                 showIcon={props.showIcon}
                 onSelect={(keys, evt) => selectedNode(keys, evt)}
                 onDrop={(...args) => props.onTreeNodeDrop(args[0])}
-                loadData={(loadedKeys, evt) => onTreeLoad(evt, loadedKeys)}
+                onLoad={loadedKeys => onload(loadedKeys)}
+                loadData={(evt) => onTreeLoad(evt)}
                 onExpand={(keys) => expand(keys)}
                 virtual={true}
                 v-slots={vSlots}

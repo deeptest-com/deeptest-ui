@@ -35,7 +35,7 @@
               return `共 ${total} 条数据`;
             },
           }"
-          :scroll="{ x: '1240px' || true }"
+          :scroll="{ x: '1080px' || true, y }"
           :columns="columns"
           :data-source="list">
           <template #colTitle="{record}">
@@ -157,13 +157,17 @@ import settings from "@/config/settings";
 import {ChangedStatus,SourceType, UsedBy} from "@/utils/enum";
 import { notifyError, notifySuccess } from '@/utils/notify';
 import { loopTree } from '@/utils/tree';
+import useEndpoint from '../hooks/useEndpoint';
+import { useWujie } from '@/composables/useWujie';
 
 const props = defineProps<{
   categoryId: number;
 }>();
 
+const { isInLeyanWujieContainer } = useWujie();
 const { hasPermission, isCreator } = usePermission();
 const { share } = useSharePage();
+const { openEndpointTab, updateEndpointNodes } = useEndpoint();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug, ServeGlobal, Project, Schema }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
@@ -177,6 +181,14 @@ const tagList: any = computed(() => store.state.Endpoint.tagList);
 const userList = computed<any>(() => store.state.Project.userList);
 const treeData = computed(() => store.state.Endpoint.treeDataCategory);
 
+const computedY = () => {
+  if (isInLeyanWujieContainer) {
+      return window.parent.window.innerHeight - 320;
+  }
+  return window.innerHeight - 320;
+};
+
+const y = ref(computedY());
 const selectedRowKeys = ref([]);
 const isFetching = ref(false);
 const loading = ref(false);
@@ -257,7 +269,9 @@ const onSelectChange = e => {
 
 const clone = async record => {
   isFetching.value = true
-  const res = await store.dispatch('Endpoint/copy', record);
+  await store.dispatch('Endpoint/copy', record);
+  updateEndpointNodes(record.categoryId);
+  loadList();
   isFetching.value = false
   notifySuccess('复制成功');
 };
@@ -272,6 +286,7 @@ const del = record => {
     onOk: async () => {
       isFetching.value = true;
       const res = await store.dispatch('Endpoint/del', record);
+      updateEndpointNodes(props.categoryId);
       isFetching.value = false
       if (res) {
         notifySuccess('删除成功');
@@ -282,8 +297,9 @@ const del = record => {
   });
 };
 
-const disabled = record => {
-  store.dispatch('Endpoint/disabled', record);
+const disabled = async record => {
+  const result = await store.dispatch('Endpoint/disabled', record);
+  result && loadList();
 };
 
 const copyCurl = (record, method) => {
@@ -380,44 +396,8 @@ async function updateServe(value: any, record: any,) {
   loadList();
 }
 
-const findNodeByRefId = (entityId: number, treeNodes: any[]) => {
-  for (let i = 0; i < treeNodes.length; i ++ ) {
-    if (treeNodes[i].entityId === entityId) {
-      return treeNodes[i];
-    } else if (Array.isArray(treeNodes[i].children) && treeNodes[i].children.length > 0){
-      const res = findNodeByRefId(entityId, treeNodes[i].children);
-      if (res) {
-        return res;
-      }
-    }
-  }
-};
-
 async function editEndpoint(record) {
-  // 打开新tab页
-  let endpointNode = findNodeByRefId(record.id, treeData.value);
-  const findTab = activeTabs.value.find(e => (e?.entityData?.id || e.entityId) === record.id);
-  if (!endpointNode) {
-    const result = await store.dispatch('Endpoint/loadDynamicCategories', {
-      type: 'endpoint',
-      categoryId: record.categoryId,
-      nodeType: 'node',
-    });
-    const leafNodes = (result || []).map(e => ({
-      ...e,
-      type: 'im',
-      key: e?.entityData?.id,
-    }));
-    store.commit('Endpoint/setTreeDataCategory', loopTree(treeData.value, record.categoryId, item => {
-      const childrenData = cloneDeep(item.children || []);
-      item.children = [...childrenData, ...leafNodes];
-    }, 'id'))
-    endpointNode = leafNodes.find(e => (e.entityId || e.entityData?.id) === record.id);
-  }
-  if (!findTab) {
-    store.commit('Endpoint/setActiveTabs', [...activeTabs.value, { ...endpointNode }]);
-  }
-  store.commit('Endpoint/setActiveTab', endpointNode);
+  openEndpointTab(record);
 }
 
 const username = (user: string) => {
@@ -438,10 +418,20 @@ const updateEndpointStatus = (record: any, value: number) => {
   });
 };
 
-const updateTitle = (value: string, record: any) => {
-  store.dispatch('Endpoint/updateEndpointName',
+const updateTitle = async (value: string, record: any) => {
+  const result = await store.dispatch('Endpoint/updateEndpointName',
     {id: record.id, name: value}
   );
+  if (result) {
+    store.commit('Endpoint/setTreeDataCategory', loopTree(treeData.value, props.categoryId, item => {
+      item.children = item.children(e => {
+        if (e.entityId === record.id) {
+          e.entityData.name = value;
+        }
+        return e;
+      });
+    }, 'id'));
+  }
 }
 
 const loadList = debounce(async (page?: number, size?: number, opts?: any) => {
@@ -479,7 +469,7 @@ const handleCreateEndPoint = () => {
 const handleCreateApiSuccess = () => {
   createEndpointModalVisible.value = false;
   loadList();
-  store.dispatch('Endpoint/loadCategory');
+  updateEndpointNodes(props.categoryId);
 };
 
 function showDiff(id: number) {
@@ -502,6 +492,9 @@ watch(() => {
 });
 
 onMounted(() => {
+  window.addEventListener('resize', () => {
+    y.value = computedY();
+  })
   eventBus.on(settings.eventEndpointAction, (data: any) => {
     if (data.type === 'getEndpointsList' && data.categoryId === props.categoryId) {
       loadList();

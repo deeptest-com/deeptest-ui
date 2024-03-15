@@ -68,7 +68,9 @@ import useSharePage from '@/hooks/share';
 import usePermission from '@/composables/usePermission';
 import { Modal } from 'ant-design-vue';
 import { getDynamicCateogries } from '../service';
+import useEndpoint from '../hooks/useEndpoint';
 
+const { updateEndpointNodes } = useEndpoint();
 const store = useStore<{ Endpoint: EndpointStateType }>();
 const imCategoryTree = ref();
 const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
@@ -107,9 +109,9 @@ const selectedCategoryId = ref(null);
 
 const handleCreateApiSuccess = (endpointData) => {
   createEndpointModalVisible.value = false;
-  if (activeTab.value?.id === selectedCategoryId.value) {
+  if (activeTab.value?.id === selectedCategoryId.value || activeTab.value?.id === treeData.value[0].id) {
     // 如果是给当前选中的分类下 添加了接口，则刷新右侧的列表
-    eventBus.emit(settings.eventEndpointAction, { type: 'getEndpointsList', categoryId: selectedCategoryId.value });
+    eventBus.emit(settings.eventEndpointAction, { type: 'getEndpointsList', categoryId: activeTab.value.id });
   }
   // 更新标签页， 更新左侧树
   store.commit('Endpoint/setActiveTab', endpointData);
@@ -139,7 +141,8 @@ const handleCategoryCancel = () => {
 
 const handleCreateCategory = async (data) => {
   const formData = Object.assign(currentNode.value, data);
-  const paramsData = categoryModalMode.value === 'edit' ? {
+  const isEdit = categoryModalMode.value === 'edit';
+  const paramsData = isEdit ? {
     id: formData.id,
     name: formData.name,
     desc: formData.desc,
@@ -151,14 +154,43 @@ const handleCreateCategory = async (data) => {
     mode: 'child',
     projectId: currProject.value.id,
   };
-  const dispatchAction = categoryModalMode.value === 'edit' ? 'Endpoint/saveCategory' : 'Endpoint/createCategoryNode';
-  const tip = categoryModalMode.value === 'edit' ? '修改分类' : '新建分类';
+  const dispatchAction = isEdit ? 'Endpoint/saveCategory' : 'Endpoint/createCategoryNode';
+  const tip = isEdit ? '修改分类' : '新建分类';
   const res = await store.dispatch(dispatchAction, paramsData);
   if (res?.code === 0) {
     createCategoryModalVisible.value = false;
     notifySuccess(`${tip}成功`);
+    const newCategoryNode = !isEdit ? {
+      id: res.data.id,
+      name: res.data.name,
+      entityId: 0,
+      key: res.data.id,
+      children: [],
+      count: 0,
+      parentId: res.data.parentId,
+      type: 'im-dir'
+    } : {};
     // 更新左侧树， 是否需要打开分类的tab
-    loadCategory(categoryModalMode.value === 'edit' ? currentNode.value.parentId : formData.id, true);
+    store.commit('Endpoint/setTreeDataCategory', loopTree(treeDataCategory.value, isEdit ? currentNode.value.parentId : formData.id, item => {
+      if (isEdit) {
+        item.children = item.children.map(e => {
+          if (e.id === currentNode.value.id) {
+            e.name = formData.name;
+          }
+          return e;
+        });
+      } else {
+        item.children.push({
+          id: res.data.id,
+          name: res.data.name,
+          entityId: 0,
+          key: res.data.id,
+          children: [],
+          count: 0,
+          parentId: res.data.parentId,
+        })
+      }
+    }, 'id'))
     if (categoryModalMode.value === 'edit') {
       if (currentNode.value.id === activeTab.value.id) {
         // 修改的是当前分类的名字
@@ -173,6 +205,9 @@ const handleCreateCategory = async (data) => {
         }
         return e;
       }));
+    } else {
+      store.commit('Endpoint/setActiveTab', newCategoryNode);
+      store.commit('Endpoint/setActiveTab', [...activeTabs.value, newCategoryNode]);
     }
     
   } else {
@@ -210,7 +245,9 @@ const delCategory = (node: any) => {
         // } else {
         //   imCategoryTree.value?.setSelectedKeys(node.parentId);
         // }
-        loadCategory(node.parentId, true);
+        store.commit('Endpoint/setTreeDataCategory', loopTree(treeData.value, node.parentId, item => {
+          item.children = item.children.filter(e => e.id !== node.id);
+        }, 'id'));
         // 删除的是当前选中的分类tab
         if (activeTab.value?.id === node.id) {
           store.dispatch('Endpoint/removeActiveTab', node.id);
@@ -230,15 +267,14 @@ const delCategory = (node: any) => {
 const importEndpointModalVisible = ref(false);
 
 const handleImportEndpoint = (data) => {
-  loadCategory(data?.parentId, true);
-  if (activeTab.value?.id === selectedCategoryId.value) {
+  if (activeTab.value?.id === selectedCategoryId.value || activeTab.value?.id === treeData.value[0].id) {
     // 如果是给当前选中的分类下 添加了接口，则刷新右侧的列表
     setTimeout(() => {
-      eventBus.emit(settings.eventEndpointAction, { type: 'getEndpointsList', categoryId: selectedCategoryId.value });
+      eventBus.emit(settings.eventEndpointAction, { type: 'getEndpointsList', categoryId: activeTab.value?.id });
     }, 1500);
   }
   setTimeout(() => {
-    loadCategory(data?.parentId, true);
+    updateEndpointNodes(data?.parentId);
     eventBus.emit(settings.eventEndpointAction, { type: 'getSchemaTreeList' });
   }, 2000);
 };
@@ -253,10 +289,22 @@ const cloneCategory = (node) => {
     `确认复制目录【`+node.name+`】？`, '该目录下的子目录和接口定义将被复制', 
     async () => {
       spinning.value = true;
-      const res = await store.dispatch('Endpoint/cloneCategoryNode',node.id)
+      const res = await store.dispatch('Endpoint/cloneCategoryNode', node.id)
       if (res) {
         notifySuccess('复制成功，稍后刷新页面查询复制结果');
-        loadCategory(node.parentId, true);
+        store.commit('Endpoint/setTreeDataCategory', loopTree(treeDataCategory.value, node.parentId, item => {
+          const children = item.children || [];
+          children.push({
+            id: res.id,
+            name: res.name,
+            entityId: 0,
+            children: null,
+            type: 'im-dir',
+            parentId: res.parentId,
+            count: node.count,
+          });
+          item.children = [...children];
+        }, 'id'));
       }else {
         notifyError('复制失败');
       }
@@ -266,12 +314,26 @@ const cloneCategory = (node) => {
 };
 
 const cloneEndpoint = async (nodeProps) => {
-  console.log('clone: ', nodeProps);
-  spinning.value = true;
-  await store.dispatch('Endpoint/copy', nodeProps);
-  notifySuccess('复制接口成功');
-  loadCategory(nodeProps.parentId);
-  spinning.value = false;
+  confirmToDo(
+    `确认复制接口【`+nodeProps.name+`】？`, '', 
+    async () => {
+      spinning.value = true;
+      const res = await store.dispatch('Endpoint/cloneCategoryNode', nodeProps.id)
+      if (res) {
+        notifySuccess('复制成功，稍后刷新页面查询复制结果');
+        if (activeTab.value?.id === nodeProps.parentId || activeTab.value?.id === treeData.value[0].id) {
+          // 如果是给当前选中的分类下 添加了接口，则刷新右侧的列表
+          setTimeout(() => {
+            eventBus.emit(settings.eventEndpointAction, { type: 'getEndpointsList', categoryId: activeTab.value.id });
+          }, 500);
+        }
+        updateEndpointNodes(nodeProps.parentId);
+      }else {
+        notifyError('复制失败');
+      }
+      spinning.value = false;
+    }
+  );
 };
 
 /**
@@ -304,6 +366,7 @@ const rootContextMenuList = [
 const { share } = useSharePage();
 
 const delEndpoint = (record) => {
+  
   Modal.confirm({
     title: () => '确定删除该接口吗？',
     icon: createVNode(ExclamationCircleOutlined),
@@ -311,9 +374,24 @@ const delEndpoint = (record) => {
     okType: 'danger',
     cancelText: () => '取消',
     onOk: async () => {
-      spinning.value = true
-      const res = await store.dispatch('Endpoint/del', record);
-      loadCategory(record.parentId, true);
+      spinning.value = true;
+      const res = await store.dispatch('Endpoint/removeCategoryNode', {
+        id: record.id,
+        type:'endpoint',
+        projectId: await getCache(settings.currProjectId)
+      });
+      updateEndpointNodes(record.parentId);
+      if (activeTab.value?.id === record.parentId || activeTab.value?.id === treeData.value[0].id) {
+        // 如果是给当前选中的分类下 添加了接口，则刷新右侧的列表
+        setTimeout(() => {
+          eventBus.emit(settings.eventEndpointAction, { type: 'getEndpointsList', categoryId: selectedCategoryId.value });
+        }, 500);
+      }
+      // 移除已有的接口标签页
+      const findTab = activeTabs.value.find(e => e.entityId === record.entityId);
+      if (findTab) {
+        store.dispatch('Endpoint/removeActiveTab', record.id);
+      }
       spinning.value = false
       if (res) {
         notifySuccess('删除成功');
@@ -396,28 +474,14 @@ const onTreeNodeDrop = (...args) => {
   console.log('drop', args);
 }
 
-const loadCategory = async (parentCategoryId?: number, isRefreshDir?: boolean) => {
-  const result = await store.dispatch('Endpoint/loadDynamicCategories', {
-    type: 'endpoint',
-    categoryId: parentCategoryId,
-    node: 'dir'
-  })
-  if (result && isRefreshDir) {
-    // 需要刷新指定目录的子目录
-    const newData = loopTree(treeDataCategory.value, parentCategoryId, item => {
-      item.children = result;
-    }, 'id');
-    store.commit('Endpoint/setTreeDataCategory', newData);
-  }
-}
-
 const loadCategoryOnlyDir = async () => {
   await store.dispatch('Endpoint/loadCategory', 'dir');
 }
 
 const initActiveTab = () => {
   spinning.value = true;
-  imCategoryTree.value.setSelectedKeys(treeDataCategory?.value?.[0]?.id)
+  imCategoryTree.value.setSelectedKeys(treeDataCategory?.value?.[0]?.id);
+  imCategoryTree.value.onTreeLoad({ dataRef: treeDataCategory?.value?.[0] });
   const activeNode = {
     ...treeDataCategory.value?.[0],
     type: 'im-dir'

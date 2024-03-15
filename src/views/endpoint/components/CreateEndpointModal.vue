@@ -108,15 +108,17 @@ function ok() {
           });
           loading.value = false;
           emit('ok', {
-            id: res?.id,
-            entityId: res?.entityId,
+            id: res?.nodeId,
+            entityId: res?.endpointId,
             entityData: {
-              id: res?.entityId,
-              method: ['GET'],
+              id: res?.endpointId,
+              method: [],
               name: formState.title,
             },
-            key: res?.entityId,
+            key: res?.nodeId,
             parentId: formState.categoryId,
+            activeMethod: 'GET',
+            type: 'im',
           });
         } catch(error) {
           loading.value = false;
