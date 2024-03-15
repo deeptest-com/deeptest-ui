@@ -407,7 +407,13 @@ const rulesRef = computed(() => ({
         message: '请输入Swagger Url',
       }
     ]
-  }
+  },
+  "cron": [
+    {
+      required: true,
+      message: '请输入cron表达式',
+    }
+  ]
 }));
 
 const formRef = ref();
