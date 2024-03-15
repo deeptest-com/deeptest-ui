@@ -1,6 +1,6 @@
 import { Tree } from "ant-design-vue-v3";
 import { PlusOutlined, DownOutlined } from "@ant-design/icons-vue";
-import { PropType, defineComponent, ref, computed, onMounted, unref } from "vue";
+import { PropType, defineComponent, ref, computed, onMounted, unref, watch } from "vue";
 import { useStore } from "vuex";
 import cloneDeep from "lodash/cloneDeep";
 import { DropdownActionMenu } from "../DropDownMenu";
@@ -76,6 +76,10 @@ const CategoryTreeProps = {
   needLoadData: {
     type: Boolean,
     default: false,
+  },
+  needFavoriteNode: {
+    type: Boolean,
+    default: false,
   }
 }
 
@@ -114,14 +118,16 @@ const renderInterfaceTitle = (nodeProps, searchValue) => {
   }
   return (
     <span class="tree-title-text interface-title-text">
-      <a-tooltip title={method.length > 1 ? method.join(' ') : null}>
-        <span class="interface-method-text" style={{ color: getMethodColor(method[0]) }}>
-          <span class="interface-method">
-            {methodMap[method[0]]}
-            {method.length > 1 && <span class="interface-method-badge">+{method.slice(1).length}</span>}
+      {method.length > 0 && (
+        <a-tooltip title={method.length > 1 ? method.join(' ') : null}>
+          <span class="interface-method-text" style={{ color: getMethodColor(method[0]) }}>
+            <span class="interface-method">
+              {methodMap[method[0]]}
+              {method.length > 1 && <span class="interface-method-badge">+{method.slice(1).length}</span>}
+            </span>
           </span>
-        </span>
-      </a-tooltip>
+        </a-tooltip>
+      )}
       <>
         {
           title.includes(searchValue) ? (
@@ -141,7 +147,7 @@ const renderInterfaceTitle = (nodeProps, searchValue) => {
 
 const renderMore = (nodeProps, props) => {
   return (
-    props.showMoreIcon(nodeProps) && (
+    props.showMoreIcon(nodeProps) && nodeProps.dataRef.id !== -1000 && nodeProps.dataRef.parentId !== -1000 && (
       <span class="more-icon">
         <DropdownActionMenu dropdownList={props.contextMenuList} record={nodeProps}/>
       </span>
@@ -172,9 +178,25 @@ const CategoryTree = defineComponent({
     const autoExpandParent = ref(false);
     const virtualHeight = ref(400);
     const treeLoadedKeys = ref([]);
-    const categoryTreeContainer = ref();
+    const favoriteList = computed(() => {
+      return store.state.Endpoint.favoriteList;
+    });
     const data = computed(() => {
-      return [...filterByKeyword(setTreeDataKey(removeSlotsAttribute(props.treeData || [])), searchValue.value, 'name')];
+      let treeNodes = props.treeData || [];
+      if (props.needFavoriteNode) {
+        treeNodes = [{
+          name: `个人收藏(${favoriteList.value.length})`,
+          children: favoriteList.value || [],
+          id: -1000,
+          type: 'im-dir',
+          key: -1000,
+          entityId: 0,
+          parentId: 0,
+          isLeaf: false,
+        }, ...treeNodes];
+      }
+      
+      return [...filterByKeyword(setTreeDataKey(removeSlotsAttribute(treeNodes)), searchValue.value, 'name')];
     });
 
     const removeSlotsAttribute = (data: any[]) => {
@@ -240,7 +262,9 @@ const CategoryTree = defineComponent({
     const setSelectedKeys = (key) => {
       selectedKeys.value = [key];
       expandedKeys.value = findPath(key,data.value)
-      scrollToSelectedNode();
+      setTimeout(() => {
+        scrollToSelectedNode();
+      }, 300);
     }
 
     const renderEmptyContent = () => {
@@ -296,13 +320,17 @@ const CategoryTree = defineComponent({
           resolve();
           return;
         }
+        if (treeNode.dataRef.id === -1000) {
+          resolve();
+          return;
+        }
         props.loadApi({
           categoryId: treeNode.dataRef.id,
           type: props.categoryType,
           nodeType: 'node',
         }).then(res => {
           if (res.code === 0) {
-            treeNode.dataRef.children = [...treeNode.dataRef.children, ...(res.data || [])];
+            treeNode.dataRef.children = [...treeNode.dataRef.children.filter(e => e.entityId === 0), ...(res.data || [])];
             const tree = loopTree([...props.treeData], treeNode.dataRef.id, item => {
               item.children = treeNode.dataRef.children || []
             } ,'id');
@@ -354,6 +382,7 @@ const CategoryTree = defineComponent({
                 expandedKeys={expandedKeys.value}
                 checkedKeys={checkedKeys.value}
                 selectedKeys={selectedKeys.value}
+                loadedKeys={treeLoadedKeys.value}
                 autoExpandParent={autoExpandParent.value}
                 treeData={data.value}
                 height={virtualHeight.value}

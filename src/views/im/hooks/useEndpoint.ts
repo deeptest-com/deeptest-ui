@@ -1,4 +1,4 @@
-import { loopTree } from "@/utils/tree";
+import { findPath, loopTree } from "@/utils/tree";
 import { computed } from "vue";
 import { useStore } from "vuex"
 import cloneDeep from "lodash/cloneDeep";
@@ -34,23 +34,14 @@ function useEndpoint() {
     let endpointNode = findNodeByRefId(record.id, treeData.value);
     const findTab = activeTabs.value.find(e => (e?.entityData?.id || e.entityId) === record.id);
     if (!endpointNode) {
-      const result = await store.dispatch('Endpoint/loadDynamicCategories', {
-        type: 'endpoint',
-        categoryId: record.categoryId,
-        nodeType: 'node',
-      });
-      const leafNodes = (result || []).map(e => ({
-        ...e,
-        type: 'im',
-        key: e.id,
-        activeMethod: e?.entityData?.method?.[0],
-      }));
+      const leafNodes = await updateEndpointNodes(record.categoryId);
       store.commit('Endpoint/setTreeDataCategory', loopTree(treeData.value, record.categoryId, item => {
-        const childrenData = cloneDeep(item.children || []);
-        item.children = [...childrenData, ...leafNodes];
+        item.children = [...item.children.filter(e => e.entityId === 0), ...leafNodes];
       }, 'id'))
       endpointNode = leafNodes.find(e => (e.entityId || e.entityData?.id) === record.id);
     }
+    endpointNode.activeMethod = endpointNode.entityData?.method?.[0] || 'GET';
+    endpointNode.type = 'im';
     if (!findTab) {
       store.commit('Endpoint/setActiveTabs', [...activeTabs.value, { ...endpointNode }]);
     }
@@ -72,11 +63,36 @@ function useEndpoint() {
     store.commit('Endpoint/setTreeDataCategory', loopTree(treeData.value, categoryId, item => {
       item.children = [...item.children.filter(e => e.entityId === 0), ...leafNodes];
     }, 'id'));
+    return leafNodes;
   };
+
+  const reLoadFavoriteList = () => {
+    store.dispatch('Endpoint/loadFavoriteList');
+  }
+
+  const updateTreeNodeCount = (nodeId, type: string, num = 1) => {
+    const parentPath = findPath(nodeId, treeData.value);
+
+    const data = cloneDeep(treeData.value);
+    const updateNodeCounts = (data) => {
+      data.forEach((item) => {
+        if (parentPath.includes(item.id)) {
+          item.count = type === 'increase' ? item.count + num : item.count - num;
+        }
+        if (Array.isArray(item.children)) {
+          updateNodeCounts(item.children);
+        }
+      })
+    }
+    updateNodeCounts(data);
+    store.commit('Endpoint/setTreeDataCategory', cloneDeep(data));
+  }
 
   return {
     openEndpointTab,
-    updateEndpointNodes
+    updateEndpointNodes,
+    reLoadFavoriteList,
+    updateTreeNodeCount
   }
 }
 

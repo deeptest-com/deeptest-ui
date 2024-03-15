@@ -167,7 +167,7 @@ const props = defineProps<{
 const { isInLeyanWujieContainer } = useWujie();
 const { hasPermission, isCreator } = usePermission();
 const { share } = useSharePage();
-const { openEndpointTab, updateEndpointNodes } = useEndpoint();
+const { openEndpointTab, updateEndpointNodes, updateTreeNodeCount } = useEndpoint();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug, ServeGlobal, Project, Schema }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
@@ -271,6 +271,7 @@ const clone = async record => {
   isFetching.value = true
   await store.dispatch('Endpoint/copy', record);
   updateEndpointNodes(record.categoryId);
+  updateTreeNodeCount(record.categoryId, 'decrease', 1);
   loadList();
   isFetching.value = false
   notifySuccess('复制成功');
@@ -287,6 +288,7 @@ const del = record => {
       isFetching.value = true;
       const res = await store.dispatch('Endpoint/del', record);
       updateEndpointNodes(props.categoryId);
+      updateTreeNodeCount(record.categoryId, 'decrease', 1);
       isFetching.value = false
       if (res) {
         notifySuccess('删除成功');
@@ -424,7 +426,7 @@ const updateTitle = async (value: string, record: any) => {
   );
   if (result) {
     store.commit('Endpoint/setTreeDataCategory', loopTree(treeData.value, props.categoryId, item => {
-      item.children = item.children(e => {
+      item.children = item.children.map(e => {
         if (e.entityId === record.id) {
           e.entityData.name = value;
         }
@@ -442,6 +444,7 @@ const loadList = debounce(async (page?: number, size?: number, opts?: any) => {
     "pageSize": size || pagination.value.pageSize,
     ...opts,
     categoryId: activeTab.value.id || null,
+    isFavorite: props.categoryId === -1000,
   });
   isFetching.value = false;
 }, 300);
@@ -466,10 +469,11 @@ const handleCreateEndPoint = () => {
   createEndpointModalVisible.value = true;
 };
 
-const handleCreateApiSuccess = () => {
+const handleCreateApiSuccess = (endpointData) => {
   createEndpointModalVisible.value = false;
   loadList();
   updateEndpointNodes(props.categoryId);
+  updateTreeNodeCount(endpointData.parentId, 'increase', 1);
 };
 
 function showDiff(id: number) {

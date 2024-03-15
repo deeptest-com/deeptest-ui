@@ -497,12 +497,16 @@ provide('isFullScreen', computed(() => isFullScreen.value));
 /**
  * 收藏
  */
-const isFavorite = ref(false);
-provide('isFavorite', computed(() => isFavorite.value));
-const favoriteItem = () => {
-  console.log('favorite', endpointDetail?.value?.id);
+provide('isFavorite', computed(() => imDetail.value.isFavorite));
+const favoriteItem = async() => {
+  await store.dispatch('Endpoint/favoriteEndpoint', {
+    id: endpointDetail?.value?.id,
+  })
+  store.dispatch('Endpoint/loadFavoriteList');
+  await store.dispatch('Endpoint/getEndpointDetail', {id: imDetail.value.id});
+  resetDefineChange();
 };
-
+provide('favoriteItem', favoriteItem);
 // 离开页面时，重置数据
 onUnmounted(() => {
   console.error(props, activeTab.value);

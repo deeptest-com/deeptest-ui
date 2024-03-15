@@ -69,7 +69,9 @@ import {
     saveEndpointDiff,
     listFunctionsByThirdPartyClass,
     importThirdPartyFunctions,
-    getDynamicCateogries
+    getDynamicCateogries,
+    getFavoriteList,
+    favoriteEndpoint
 } from './service';
 
 import {
@@ -170,6 +172,7 @@ export interface StateType {
     // 右侧tab内容
     activeTab: any,
     activeTabs: any[],
+    favoriteList: any[],
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -245,6 +248,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         // 右侧tab设置
         setActiveTab: Mutation<StateType>;
         setActiveTabs: Mutation<StateType>;
+        setFavoriteList: Mutation<StateType>;
 
     };
     actions: {
@@ -352,6 +356,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         // 动态获取分类目录
         loadDynamicCategories: Action<StateType, StateType>;
+        loadFavoriteList: Action<StateType, StateType>;
+        favoriteEndpoint: Action<StateType, StateType>;
     }
 }
 
@@ -443,6 +449,7 @@ const initState: StateType = {
 
     activeTab: null,
     activeTabs: [],
+    favoriteList: [],
 };
 
 const StoreModel: ModuleType = {
@@ -690,8 +697,10 @@ const StoreModel: ModuleType = {
         },
 
         setActiveTabs(state, payload) {
-            console.error(payload);
             state.activeTabs = payload;
+        },
+        setFavoriteList(state, payload) {
+            state.favoriteList = payload;
         }
     },
     actions: {
@@ -1907,6 +1916,33 @@ const StoreModel: ModuleType = {
                 return result.data;
             }
             return null;
+        },
+
+        async loadFavoriteList({ commit, rootState }: any) {
+            const result: any = await getFavoriteList({ projectId: rootState.ProjectGlobal.currProject.id });
+            if (result.code === 0) {
+                commit('setFavoriteList', (result.data || []).map((e, index) => {
+                    const item = {
+                        ...e,
+                        parentId: -1000,
+                        isLeaf: true,
+                        id: `${e.entityId}_${index}`,
+                        key: `${e.entityId}_${index}`
+                    };
+                    delete item.slots;
+                    return item;
+                }));
+                return result.data;
+            }
+            return null;
+        },
+
+        async favoriteEndpoint({ commit, rootState }: any, payload: any) {
+            const result: any = await favoriteEndpoint(payload);
+            if (result.code === 0) {
+                return true;
+            }
+            return false;
         }
     },
 };

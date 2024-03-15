@@ -19,6 +19,7 @@
       :on-tree-node-clicked="onTreeNodeClick"
       :load-api="getDynamicCateogries"
       :need-load-data="true"
+      :need-favorite-node="true"
       :on-tree-node-drop="onTreeNodeDrop">
       <template #folderIcon="{ nodeProps }">
         <span class="tree-icon">
@@ -70,14 +71,16 @@ import { Modal } from 'ant-design-vue';
 import { getDynamicCateogries } from '../service';
 import useEndpoint from '../hooks/useEndpoint';
 
-const { updateEndpointNodes } = useEndpoint();
+const { updateEndpointNodes, reLoadFavoriteList, updateTreeNodeCount } = useEndpoint();
 const store = useStore<{ Endpoint: EndpointStateType }>();
 const imCategoryTree = ref();
+const favoriteList = computed(() => store.state.Endpoint.favoriteList);
 const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
 const activeTabs = computed(() => store.state.Endpoint.activeTabs);
 const activeTab = computed(() => store.state.Endpoint.activeTab);
 const treeData: any = computed(() => {
   const data = treeDataCategory.value;
+  console.log(data);
   if(!data?.[0]?.id){
     return [];
   }
@@ -126,6 +129,7 @@ const handleCreateApiSuccess = (endpointData) => {
       'id'
     )
   );
+  updateTreeNodeCount(endpointData.parentId, 'increase');
 };
 
 /**
@@ -180,15 +184,8 @@ const handleCreateCategory = async (data) => {
           return e;
         });
       } else {
-        item.children.push({
-          id: res.data.id,
-          name: res.data.name,
-          entityId: 0,
-          key: res.data.id,
-          children: [],
-          count: 0,
-          parentId: res.data.parentId,
-        })
+        const findIndex = item.children.findIndex(e => e.entityId !== 0);
+        findIndex === -1 ? item.children.push(newCategoryNode) : item.children.splice(findIndex, 0, newCategoryNode)
       }
     }, 'id'))
     if (categoryModalMode.value === 'edit') {
@@ -199,7 +196,7 @@ const handleCreateCategory = async (data) => {
           name: formData.name,
         });
       }
-      store.commit('Endpoint/setActiveTab', activeTabs.value.map(e => {
+      store.commit('Endpoint/setActiveTabs', activeTabs.value.map(e => {
         if (e.id === currentNode.value.id) {
           e.name = formData.name;
         }
@@ -207,7 +204,7 @@ const handleCreateCategory = async (data) => {
       }));
     } else {
       store.commit('Endpoint/setActiveTab', newCategoryNode);
-      store.commit('Endpoint/setActiveTab', [...activeTabs.value, newCategoryNode]);
+      store.commit('Endpoint/setActiveTabs', [...activeTabs.value, newCategoryNode]);
     }
     
   } else {
@@ -238,20 +235,12 @@ const delCategory = (node: any) => {
         projectId: await getCache(settings.currProjectId)
       });
       if (res) {
-        // 是否选中父类
-        // const isRoot = node.parentId === (treeDataCategory?.value || [])?.[0]?.id;
-        // if (isRoot) {
-        //   imCategoryTree.value?.initTree();
-        // } else {
-        //   imCategoryTree.value?.setSelectedKeys(node.parentId);
-        // }
         store.commit('Endpoint/setTreeDataCategory', loopTree(treeData.value, node.parentId, item => {
           item.children = item.children.filter(e => e.id !== node.id);
         }, 'id'));
-        // 删除的是当前选中的分类tab
-        if (activeTab.value?.id === node.id) {
-          store.dispatch('Endpoint/removeActiveTab', node.id);
-        }
+        store.dispatch('Endpoint/removeActiveTab', node.id);
+        store.dispatch('Endpoint/removeTabs', { data: node.children || [] });
+        updateTreeNodeCount(node.parentId, 'decrease', node.count || 0);
         notifySuccess('删除成功');
       } else {
         notifyError('删除失败');
@@ -292,19 +281,22 @@ const cloneCategory = (node) => {
       const res = await store.dispatch('Endpoint/cloneCategoryNode', node.id)
       if (res) {
         notifySuccess('复制成功，稍后刷新页面查询复制结果');
+        const newCategoryNode = {
+          id: res.id,
+          name: res.name,
+          entityId: 0,
+          children: null,
+          type: 'im-dir',
+          parentId: res.parentId,
+          count: node.count,
+        };
         store.commit('Endpoint/setTreeDataCategory', loopTree(treeDataCategory.value, node.parentId, item => {
-          const children = item.children || [];
-          children.push({
-            id: res.id,
-            name: res.name,
-            entityId: 0,
-            children: null,
-            type: 'im-dir',
-            parentId: res.parentId,
-            count: node.count,
-          });
-          item.children = [...children];
+          const findIndex = item.children.findIndex(e => e.entityId !== 0);
+          findIndex === -1 ? item.children.push(newCategoryNode) : item.children.splice(findIndex, 0, newCategoryNode)
         }, 'id'));
+        store.commit('Endpoint/setActiveTab', newCategoryNode);
+        store.commit('Endpoint/setActiveTabs', [...activeTabs.value, newCategoryNode]);
+        updateTreeNodeCount(node.parentId, 'increase', node.count);
       }else {
         notifyError('复制失败');
       }
@@ -328,6 +320,7 @@ const cloneEndpoint = async (nodeProps) => {
           }, 500);
         }
         updateEndpointNodes(nodeProps.parentId);
+        updateTreeNodeCount(nodeProps.parentId, 'increase');
       }else {
         notifyError('复制失败');
       }
@@ -344,7 +337,7 @@ const rootContextMenuList = [
   {
     label: '新建接口',
     action: () => {
-      selectedCategoryId.value = null;
+      selectedCategoryId.value = treeDataCategory.value?.[0]?.id;
       createEndpointModalVisible.value = true;
     }
   },
@@ -384,15 +377,17 @@ const delEndpoint = (record) => {
       if (activeTab.value?.id === record.parentId || activeTab.value?.id === treeData.value[0].id) {
         // 如果是给当前选中的分类下 添加了接口，则刷新右侧的列表
         setTimeout(() => {
-          eventBus.emit(settings.eventEndpointAction, { type: 'getEndpointsList', categoryId: selectedCategoryId.value });
+          eventBus.emit(settings.eventEndpointAction, { type: 'getEndpointsList', categoryId: activeTab.value?.id });
         }, 500);
       }
+      updateTreeNodeCount(record.parentId, 'decrease');
       // 移除已有的接口标签页
       const findTab = activeTabs.value.find(e => e.entityId === record.entityId);
       if (findTab) {
         store.dispatch('Endpoint/removeActiveTab', record.id);
       }
       spinning.value = false
+      reLoadFavoriteList();
       if (res) {
         notifySuccess('删除成功');
       } else {
@@ -459,15 +454,23 @@ const showMoreIcon = (node) => {
   return node.id !== -1;
 }
 
-const onTreeNodeClick = (node, evt) => {
+const onTreeNodeClick = (_node, evt) => {
   const currNode = evt?.node?.dataRef;
-  const activeNode = { type: (currNode.entityId === 0 || currNode.id === -1) ? 'im-dir' : 'im', ...currNode };
+  let activeNode = { type: (currNode.entityId === 0 || currNode.id === -1) ? 'im-dir' : 'im', ...currNode };
+  if (currNode.parentId === -1000) {
+    const findTab = activeTabs.value.find(e => e.entityId === currNode.entityId);
+    if (findTab) {
+      activeNode = findTab;
+    }
+  }
   // 接口定义的tab title 显示为 当前 method + title ,其中method是动态变化
-  if (currNode?.entityData?.id) {
-    activeNode.activeMethod = currNode?.entityData?.method[0];
+  if (activeNode?.entityData?.id) {
+    activeNode.activeMethod = activeNode?.entityData?.method?.[0] || 'GET';
   }
   store.commit('Endpoint/setActiveTab', activeNode);
-  store.commit('Endpoint/setActiveTabs', uniquArrray([...activeTabs.value, activeNode]));
+  if (currNode.parentId !== -1000) {
+    store.commit('Endpoint/setActiveTabs', uniquArrray([...activeTabs.value, activeNode]));
+  }
 }
 
 const onTreeNodeDrop = (...args) => {
@@ -497,6 +500,7 @@ onMounted(async () => {
   window.addEventListener('resize', () => {
     imCategoryTree.value?.getVirtualHeight();
   })
+  reLoadFavoriteList();
   await loadCategoryOnlyDir();
   initActiveTab();
 })
@@ -513,6 +517,7 @@ watch(() => {
     imCategoryTree.value.initTree();
     imCategoryTree.value.clearSearchValue();
     store.commit('Endpoint/setTreeDataCategory', {}); // 切换项目，重置category list
+    reLoadFavoriteList();
     await loadCategoryOnlyDir();
     initActiveTab();
   }
@@ -534,7 +539,7 @@ watch(() => {
 
 <style scoped lang="less">
 .im-tree-container {
-  height: 100%;
+  height: calc(100% - 32px);
 
   .im-tree-loading {
     display: flex;

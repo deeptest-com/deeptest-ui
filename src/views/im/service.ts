@@ -628,3 +628,19 @@ export async function getDynamicCateogries(params: { type: string, currProjectId
         params,
     })
 }
+
+export async function favoriteEndpoint(data: { id: number }) {
+    return request({
+        url: '/endpoints/favorite',
+        method: 'post',
+        data,
+    })
+}
+
+export async function getFavoriteList(data: { projectId: number }) {
+    return request({
+        url: '/endpoints/favorite/list',
+        method: 'post',
+        data,
+    })
+}
