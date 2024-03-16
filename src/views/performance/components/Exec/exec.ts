@@ -96,7 +96,7 @@ function useExecution(): Execution {
 
             } else if (body.instructionType === MsgInstruction.Exception) {
                 execStop();
-                notifyError('执行异常终止，请查看日志排查错误。')
+                notifyError('执行异常终止，请查看日志排查错误。', body.msg)
             }
 
         } else if (body.category === MsgCategory.Result) {
