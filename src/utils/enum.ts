@@ -312,3 +312,18 @@ export enum SourceType {
     ThirdPartySync = 3
 }
 
+export enum MsgCategory {
+    Instruction  = "instruction",
+    Result       = "result",
+    Log          = "log",
+}
+
+export enum MsgInstruction {
+    JoinExist       = "joinExist",
+    Start           = "start",
+    End             = "end",
+    Terminal        = "terminal",
+    Running  = "alreadyRunning",
+    Exception       = "exception",
+}
+

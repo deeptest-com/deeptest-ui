@@ -1,7 +1,7 @@
 import { ref, Ref, computed } from 'vue';
 import {getWebSocketApi} from "@/services/websocket";
 import cloneDeep from "lodash/cloneDeep";
-import {WsMsgCategory} from "@/utils/enum";
+import {MsgCategory, MsgInstruction, WsMsgCategory} from "@/utils/enum";
 import {scrollTo} from "@/utils/dom";
 
 import {
@@ -12,6 +12,7 @@ import {
 
 import {sampleAvgDuration} from "./config";
 import {PerformanceTestWsClient} from "./websocket";
+import {notifyError} from "@/utils/notify";
 
 interface Execution {
     progressStatus: Ref<WsMsgCategory>;
@@ -70,10 +71,10 @@ function useExecution(): Execution {
 
         const data = body.data ? JSON.parse(JSON.stringify(body.data)) : {};
 
-        if (body.category === 'instruction') {
+        if (body.category === MsgCategory.Instruction) {
             console.log('****** exec instruction', body.instructionType)
 
-            if (body.instructionType == 'joinExist') { // join exist running room in server msg
+            if (body.instructionType == MsgInstruction.JoinExist) { // join exist running room in server msg
                 if (body.msg)  {
                     progressStatus.value = WsMsgCategory.InProgress
                     currRoom.value = body.msg
@@ -84,20 +85,21 @@ function useExecution(): Execution {
                     progressStatus.value = WsMsgCategory.NotStart
                 }
 
-            } else if (body.instructionType == 'start') {
+            } else if (body.instructionType == MsgInstruction.Start) {
                 progressStatus.value = WsMsgCategory.InProgress
 
                 request.value = data
                 console.log('joined test', request.value)
 
-            } else if (body.instructionType === 'end' || body.instructionType === 'terminal') {
+            } else if (body.instructionType === MsgInstruction.End || body.instructionType === MsgInstruction.Terminal) {
                 progressStatus.value = WsMsgCategory.End
 
-            } else if (body.instructionType === "exception") {
+            } else if (body.instructionType === MsgInstruction.Exception) {
                 execStop();
+                notifyError('执行异常终止，请查看日志排查错误。')
             }
 
-        } else if (body.category === 'result') {
+        } else if (body.category === MsgCategory.Result) {
             console.log('****** get exec result', data.log ? 'LOG_DATA' : 'RESULT_DATA')
 
             if (data.vuCount) {
