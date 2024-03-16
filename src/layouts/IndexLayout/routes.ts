@@ -302,6 +302,16 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         }
       },
       {
+        icon: 'performance',
+        title: 'index-layout.menu.project.setting.performance',
+        path: 'performance',
+        component: () => import('@/views/project-settings/components/Performance/index.vue'),
+        hidden: false,
+        meta: {
+          code: 'p-setting-api-performance'
+        }
+      },
+      {
         icon: 'script',
         title: 'index-layout.menu.project.setting.jslib',
         path: 'jslib',

@@ -5,6 +5,7 @@
       @ok="onClose"
       @cancel="onClose"
       width="100%"
+      :footer="null"
       wrapClassName="dp-full-modal">
 
     <ExecPage v-if="visible" />

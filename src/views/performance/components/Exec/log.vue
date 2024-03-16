@@ -22,7 +22,9 @@
 <script setup lang="ts">
 
 import {ref, onMounted, onUnmounted, computed, defineProps, watch} from 'vue';
+import { computedAsync } from '@vueuse/core'
 import {useI18n} from "vue-i18n";
+import {getWebSocketApi} from "@/services/websocket";
 
 const { t } = useI18n();
 
@@ -48,14 +50,20 @@ const props = defineProps({
 
 const currRunnerId = ref(0)
 
-const items = computed<any[]>(() => {
+const items = computedAsync<any[]>(async () => {
+  console.log('computedAsync items')
   if (!props.request || !props.request?.runners) {
     return []
   }
 
   const arr = props.request?.runners
   if (arr.length === 0 || arr[0].id !== 0) {
-    arr.unshift({id: 0, name: '控制器', webAddress: props.request?.serverAddress})
+    const u = new URL(await getWebSocketApi())
+    const address = u.host
+
+    alert(address)
+
+    arr.unshift({id: 0, name: '控制器', webAddress: address})
   }
 
   return arr
@@ -71,6 +79,9 @@ const toStopLog = (runner) => {
 
 watch(() => {return items}, () => {
   console.log('watch props.request', items)
+
+  if (!items.value) return
+
   if (items.value.length > 0) {
     const runner = items.value[0]
     if (runner) {
@@ -98,6 +109,8 @@ onMounted(() => {
 })
 onUnmounted(() => {
   console.log('onUnmounted')
+
+  if (!items.value) return
 
   const runner = items.value.find(item => item.id === currRunnerId.value)
   if (runner) {

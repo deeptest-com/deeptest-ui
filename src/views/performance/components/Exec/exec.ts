@@ -77,6 +77,8 @@ function useExecution(): Execution {
                 if (body.msg)  {
                     progressStatus.value = WsMsgCategory.InProgress
                     currRoom.value = body.msg
+                    request.value = body.data
+
                     execJoin(currRoom.value)
                 } else {
                     progressStatus.value = WsMsgCategory.NotStart
@@ -85,10 +87,8 @@ function useExecution(): Execution {
             } else if (body.instructionType == 'start') {
                 progressStatus.value = WsMsgCategory.InProgress
 
-                if (data.runners) {
-                    request.value = data
-                    console.log('joined test', request.value)
-                }
+                request.value = data
+                console.log('joined test', request.value)
 
             } else if (body.instructionType === 'end' || body.instructionType === 'terminal') {
                 progressStatus.value = WsMsgCategory.End

@@ -42,7 +42,7 @@ import {
     getDbConn,
     listDbConn,
     saveDbConn,
-    updateDbConnName
+    updateDbConnName, savePerformance, getPerformance
 } from './service';
 import {message, notification} from 'ant-design-vue';
 import {
@@ -80,6 +80,7 @@ export interface StateType {
     datapoolDetail: any;
     swaggerSyncDetail:any;
     mockSettings:any;
+    performanceSettings:any;
 
     selectServiceDetail: any;
     serveVersionsList: any;
@@ -113,6 +114,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setSwaggerSync: Mutation<StateType>,
         setMock: Mutation<StateType>,
+        setPerformance: Mutation<StateType>,
 
         setJslibs: Mutation<StateType>,
         setJslib: Mutation<StateType>,
@@ -180,6 +182,9 @@ export interface ModuleType extends StoreModuleType<StateType> {
         saveMock: Action<StateType, StateType>,
         getMock: Action<StateType, StateType>,
 
+        savePerformance: Action<StateType, StateType>,
+        getPerformance: Action<StateType, StateType>,
+
         listJslib: Action<StateType, StateType>,
         getJslib: Action<StateType, StateType>,
         saveJslib: Action<StateType, StateType>,
@@ -226,6 +231,7 @@ const initState: StateType = {
     selectEnvId: null,
     swaggerSyncDetail: {},
     mockSettings: {},
+    performanceSettings: {},
 
     jslibModels: [],
     jslibModel: {},
@@ -285,6 +291,9 @@ const StoreModel: ModuleType = {
         },
         setMock(state, payload){
             state.mockSettings = payload;
+        },
+        setPerformance(state, payload){
+            state.performanceSettings = payload;
         },
 
         setJslibs(state, payload) {
@@ -777,6 +786,26 @@ const StoreModel: ModuleType = {
                 commit('setMock', res.data)
             } else {
                 notifyError('获取Mock设置失败');
+            }
+        },
+
+        async savePerformance({ commit }, params: SwaggerSync){
+            const res = await savePerformance(params);
+            if (res.code === 0) {
+                commit('setPerformance', res.data)
+                notifySuccess('保存性能测试设置成功');
+                return true
+            } else {
+                notifyError('保存性能测试设置失败');
+                return false
+            }
+        },
+        async getPerformance({ commit }){
+            const res = await getPerformance();
+            if (res.code === 0) {
+                commit('setPerformance', res.data)
+            } else {
+                notifyError('获取性能测试设置失败');
             }
         },
 

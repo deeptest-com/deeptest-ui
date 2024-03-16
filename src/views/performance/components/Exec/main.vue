@@ -136,7 +136,7 @@
         </div>
       </div>
 
-      <div v-if="activeKey === 'logs'" class="logs">
+      <div v-if="activeKey === 'logs'" class="logs"> {{request}}
         <Log v-if="activeKey === 'logs'"
              :request="request"
              :logs="execLogs"
@@ -177,6 +177,7 @@ import {setServeUrl} from "@/utils/url";
 import {getToken} from "@/utils/localToken";
 import {StateType as ProjectSettingStateType} from "@/views/project-settings/store";
 import EnvSelector from "@/views/component/EnvSelector/index.vue";
+import {loadProjectEnvVars} from "@/utils/cache";
 
 require("echarts/lib/component/grid");
 use([CanvasRenderer, LineChart, TitleComponent, TooltipComponent, LegendComponent,]);
@@ -213,6 +214,7 @@ async function selectExecEnv() {
 }
 
 async function finishSelectExecEnv() {
+  selectEnvVisible.value = false;
   execBegin()
 }
 
@@ -235,6 +237,7 @@ const execBegin = async () => {
     room: room.value,
     planId: detailResult.value.id,
     environmentId: currEnvId.value,
+    localVarsCache: await loadProjectEnvVars(currProject.value.id),
   }
   console.log('****** send ws data of exec performance testing ', data);
 

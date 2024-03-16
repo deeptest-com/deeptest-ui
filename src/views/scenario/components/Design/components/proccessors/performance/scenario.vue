@@ -27,6 +27,13 @@
                             @blur="validate('target', { trigger: 'blur' }).catch(() => {})" />
           </a-form-item>
 
+<!--          <a-form-item v-if="modelRef.generateType === PerformanceGenerateType.Constant"
+                       v-bind="validateInfos.duration"
+                       label="持续时间(秒)">
+            <a-input-number v-model:value="modelRef.duration" :min="1" class="dp-per100"
+                            @blur="validate('duration', { trigger: 'blur' }).catch(() => {})" />
+          </a-form-item>-->
+
           <a-form-item v-if="modelRef.generateType === PerformanceGenerateType.Ramp"
                        :labelCol="{span: 0}" :wrapperCol="{span: 23}" class="stages">
             <div class="dp-param-grid">
@@ -230,6 +237,7 @@ onMounted(() => {
   console.log('onMounted')
   if (!modelRef.value.generateType) modelRef.value.generateType = 'constant'
   if (!modelRef.value.target) modelRef.value.target = 10
+  // if (!modelRef.value.duration) modelRef.value.duration = 60
   if (!modelRef.value.stages) modelRef.value.stages = [{duration: 3, target: 10}]
   if (!modelRef.value.runnerIds) modelRef.value.runnerIds = []
 })

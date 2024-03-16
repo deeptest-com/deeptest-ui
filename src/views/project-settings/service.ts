@@ -440,6 +440,20 @@ export async function getMock(): Promise<any> {
     });
 }
 
+export async function savePerformance(data): Promise<any> {
+    return request({
+        url: `/projectSettings/savePerformance`,
+        method: 'post',
+        data: data
+    });
+}
+export async function getPerformance(): Promise<any> {
+    return request({
+        url: `/projectSettings/getPerformance`,
+        method: 'get',
+    });
+}
+
 export async function getVarsByEnv(envId): Promise<any> {
     return request({
         url: `/environments/envVars/byEnv`,
