@@ -61,8 +61,6 @@ const items = computedAsync<any[]>(async () => {
     const u = new URL(await getWebSocketApi())
     const address = u.host
 
-    alert(address)
-
     arr.unshift({id: 0, name: '控制器', webAddress: address})
   }
 

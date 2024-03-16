@@ -136,7 +136,7 @@
         </div>
       </div>
 
-      <div v-if="activeKey === 'logs'" class="logs"> {{request}}
+      <div v-if="activeKey === 'logs'" class="logs">
         <Log v-if="activeKey === 'logs'"
              :request="request"
              :logs="execLogs"
