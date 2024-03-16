@@ -61,7 +61,7 @@
 
             <a-col :flex="4">
               <div class="title">
-                平均
+                平均（毫秒）
               </div>
               <div class="content">
                 {{ summaryData.mean }}
@@ -69,7 +69,7 @@
             </a-col>
             <a-col :flex="4">
               <div class="title">
-                最小
+                最小（毫秒）
               </div>
               <div class="content">
                 {{ summaryData.min }}
@@ -77,7 +77,7 @@
             </a-col>
             <a-col :flex="4">
               <div class="title">
-                最大
+                最大（毫秒）
               </div>
               <div class="content">
                 {{ summaryData.max }}
@@ -85,7 +85,7 @@
             </a-col>
             <a-col :flex="4">
               <div class="title">
-                中位数
+                中位数（毫秒）
               </div>
               <div class="content">
                 {{ summaryData.median }}
@@ -93,7 +93,7 @@
             </a-col>
             <a-col :flex="4">
               <div class="title">
-                95%
+                95%（毫秒）
               </div>
               <div class="content">
                 {{ summaryData.quantile95 }}
