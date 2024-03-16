@@ -28,6 +28,16 @@ const onClose = () => {
 
 </script>
 
+<style lang="less">
+.ant-modal {
+  .ant-modal-content {
+    .ant-modal-body {
+      min-height: 0;
+    }
+  }
+}
+</style>
+
 <style lang="less" scoped>
 
 </style>

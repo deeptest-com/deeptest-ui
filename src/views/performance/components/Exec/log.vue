@@ -118,7 +118,7 @@ onUnmounted(() => {
 
 </script>
 
-<style scoped lang="less">
+<style lang="less">
 .performance-log {
   height: 100%;
   display: flex;
@@ -130,6 +130,7 @@ onUnmounted(() => {
   #performance-log-list {
     flex: 1;
     height: 0;
+    min-height: 0;
     overflow-y: auto;
     padding: 6px;
   }
