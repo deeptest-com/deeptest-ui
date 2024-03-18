@@ -164,7 +164,7 @@ const props = defineProps<{
 const { isInLeyanWujieContainer } = useWujie();
 const { hasPermission, isCreator } = usePermission();
 const { share } = useSharePage();
-const { openEndpointTab, updateEndpointNodes, updateTreeNodeCount } = useEndpoint();
+const { openEndpointTab, updateEndpointNodes, updateTreeNodeCount, copyCurl } = useEndpoint();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug, ServeGlobal, Project, Schema }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
@@ -299,10 +299,6 @@ const del = record => {
 const disabled = async record => {
   const result = await store.dispatch('Endpoint/disabled', record);
   result && loadList();
-};
-
-const copyCurl = (record, method) => {
-  console.log(record, method);
 };
 
 const getMenuItems = (record) => {

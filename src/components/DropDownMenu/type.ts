@@ -18,6 +18,7 @@ export type MenuItem = {
   /** 权限编码 */
   auth?: string;
   children?: MenuItem[];
+  renderChildren?: (record: Recordable) => any[];
   disabled?: boolean;
   key?: string | number;
   action: (...args: any[]) => void,

@@ -3,6 +3,11 @@ import { computed } from "vue";
 import { useStore } from "vuex"
 import cloneDeep from "lodash/cloneDeep";
 import {StateType as EndpointStateType} from "@/views/endpoint/store";
+import {StateType as Debug} from "@/views/component/debug/store";
+import { loadCurl } from "@/views/component/debug/service";
+import { UsedBy } from "@/utils/enum";
+import { notifySuccess } from "@/utils/notify";
+import useClipBoard from "@/composables/useClipboard";
 
 
 const findNodeByRefId = (entityId: number, treeNodes: any[]) => {
@@ -19,11 +24,13 @@ const findNodeByRefId = (entityId: number, treeNodes: any[]) => {
 };
 
 function useEndpoint() {
-  const store = useStore<{ Endpoint: EndpointStateType }>();
+  const store = useStore<{ Endpoint: EndpointStateType, Debug: Debug }>();
   const treeData = computed(() => {
     return store.state.Endpoint.treeDataCategory;
   });
   const activeTabs = computed(() => store.state.Endpoint.activeTabs);
+  const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
+  const { copy } = useClipBoard();
 
   /**
    * 打开接口的tab
@@ -89,11 +96,25 @@ function useEndpoint() {
     store.commit('Endpoint/setTreeDataCategory', cloneDeep(data));
   }
 
+  const copyCurl = async (record, method) => {
+    const resp = await loadCurl({
+      endpointId: record.id,
+      interfaceMethod: method,
+      usedBy: UsedBy.InterfaceDebug,
+      environmentId: environmentId.value,
+    })
+    if (resp.code == 0) {
+      copy(resp.data)
+      notifySuccess('已复制cURL命令到剪贴板。');
+    }
+  }
+
   return {
     openEndpointTab,
     updateEndpointNodes,
     reLoadFavoriteList,
-    updateTreeNodeCount
+    updateTreeNodeCount,
+    copyCurl,
   }
 }
 

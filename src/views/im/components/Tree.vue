@@ -71,7 +71,7 @@ import { Modal } from 'ant-design-vue';
 import { getDynamicCateogries } from '@/views/endpoint/service';
 import useEndpoint from '../hooks/useEndpoint';
 
-const { updateEndpointNodes, reLoadFavoriteList, updateTreeNodeCount } = useEndpoint();
+const { updateEndpointNodes, reLoadFavoriteList, updateTreeNodeCount, copyCurl } = useEndpoint();
 const store = useStore<{ Endpoint: EndpointStateType }>();
 const imCategoryTree = ref();
 const favoriteList = computed(() => store.state.Endpoint.favoriteList);
@@ -397,7 +397,7 @@ const delEndpoint = (record) => {
       }
     },
   });
-}
+};
 
 const { hasPermission, isCreator } = usePermission();
 const nodeMenuList = [
@@ -435,6 +435,23 @@ const nodeMenuList = [
     label: '分享链接',
     action: (nodeProps) => share(nodeProps, 'IM'),
     ifShow: (nodeProps) => nodeProps.entityId !== 0,
+  },
+  {
+    key: 'copyCurl',
+    label: `复制为cURL`,
+    action: (record: any) => record.entityId !== 0 && (record.entityData?.method || []).length === 1 ? copyCurl(record, record.entityData?.method?.[0]) : null,
+    ifShow: nodeProps => (nodeProps.entityData?.method || []).length > 0,
+    renderChildren: (nodeProps) => {
+      if ((nodeProps.entityData?.method || []).length <=1) {
+        return null;
+      }
+      return nodeProps.entityData?.method.map(e => ({
+        key: 'copyCurlChild-' + e,
+        auth: '',
+        label: e,
+        action: (record: any) => copyCurl(record, e)
+      }));
+    } 
   },
   {
     auth: 'p-api-endpoint-del',
@@ -518,6 +535,9 @@ const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 watch(() => {
   return currProject.value;
 }, async (newVal, oldVal) => {
+  if (newVal.id) {
+    store.dispatch("ServeGlobal/fetchServe");
+  }
   if (newVal?.id && oldVal?.id && newVal?.id !== oldVal?.id) { // 初始化 旧值为undefined 不需要重复调用loadCategories
     // todo: 重置tree 选中为当前项目的全部数据 节点
     imCategoryTree.value.initTree();
