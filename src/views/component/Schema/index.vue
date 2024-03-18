@@ -202,7 +202,7 @@ const delCategory = (nodeProps) => {
         type: 'schema'
       });
       if (nodeProps.dataRef.children) {
-        store.dispatch('Schema/removeSchemaTabs', { data: nodeProps.dataRef.children })
+        store.dispatch('Endpoint/removeTabs', { data: nodeProps.dataRef.children })
       }
 
     } catch(error: any) {
@@ -274,7 +274,7 @@ const dropDownMenuList = [
           await store.dispatch('Schema/deleteSchema', {
             id: record.dataRef.entityId,
           });
-          await store.dispatch('Schema/removeActiveSchema', record.dataRef?.entityId);
+          await store.dispatch('Endpoint/removeActiveTab', record.dataRef?.id);
         } catch(_error) {
           message.error('删除失败');
         }

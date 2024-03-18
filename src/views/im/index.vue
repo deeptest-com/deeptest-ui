@@ -70,7 +70,7 @@ import ContentPane from '@/views/component/ContentPane/index.vue';
 import { Tree, Detail, List } from './components';
 import { SchemaTree } from '../component/Schema';
 import { SchemaEditorContent } from '@/views/component/Schema/components';
-import {StateType as EndpointStateType} from "@/views/im/store";
+import {StateType as EndpointStateType} from "@/views/endpoint/store";
 import eventBus from '@/utils/eventBus';
 import settings from '@/config/settings';
 import { getMethodColor } from '@/utils/dom';

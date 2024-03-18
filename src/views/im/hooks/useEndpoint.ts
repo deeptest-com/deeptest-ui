@@ -2,6 +2,7 @@ import { findPath, loopTree } from "@/utils/tree";
 import { computed } from "vue";
 import { useStore } from "vuex"
 import cloneDeep from "lodash/cloneDeep";
+import {StateType as EndpointStateType} from "@/views/endpoint/store";
 
 
 const findNodeByRefId = (entityId: number, treeNodes: any[]) => {
@@ -18,7 +19,7 @@ const findNodeByRefId = (entityId: number, treeNodes: any[]) => {
 };
 
 function useEndpoint() {
-  const store = useStore<{ Endpoint }>();
+  const store = useStore<{ Endpoint: EndpointStateType }>();
   const treeData = computed(() => {
     return store.state.Endpoint.treeDataCategory;
   });
