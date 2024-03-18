@@ -161,21 +161,21 @@ function useCaseExecution(): CaseExecution {
             environmentId: environmentId,
         }
         console.log('****** send exec cases ws data', data);
-        WebSocket.sentMsg(execUuid.value, JSON.stringify({
+        WebSocket.sentMsg(execUuid.value, {
             act: 'execCases',
             casesExecReq: data,
             localVarsCache: await loadProjectEnvVars(currProject.value.id),
-        }))
+        })
     }
     const execStop = () => {
         if (!execUuid.value) return
 
-        WebSocket.sentMsg(execUuid.value, JSON.stringify({
+        WebSocket.sentMsg(execUuid.value, {
             act: 'stop',
             execReq: {
                 execUuid: execUuid.value
             },
-        }));
+        });
     }
 
     return {

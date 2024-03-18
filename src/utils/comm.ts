@@ -1,5 +1,9 @@
 export const isLeyan = () => {
-    return process.env.VUE_APP_DEPLOY_ENV === 'ly'
+    return process.env.VUE_APP_DEPLOY_ENV.includes('ly');
+}
+
+export const isSaas = () => {
+    return process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
 }
 
 export const getArrSelectItems = (arr) => {

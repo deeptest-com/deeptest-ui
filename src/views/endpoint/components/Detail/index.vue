@@ -485,6 +485,10 @@ onUnmounted(() => {
 
     .doc-container {
       height: 100%;
+
+      .pane.right {
+        overflow: hidden;
+      }
     }
 
     .left {

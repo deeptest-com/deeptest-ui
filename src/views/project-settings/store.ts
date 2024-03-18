@@ -42,7 +42,16 @@ import {
     getDbConn,
     listDbConn,
     saveDbConn,
-    updateDbConnName
+    updateDbConnName,
+    getCronProjectList,
+    updateCronProjectStatus,
+    saveCronProject,
+    getCronProjecDetail,
+    copyCronProject,
+    delCronProject,
+    getCronAllEngineeringOptions,
+    getCronAllServesOptions,
+    getCronAllServesList,
 } from './service';
 import {message, notification} from 'ant-design-vue';
 import {
@@ -67,6 +76,7 @@ import {
 import {disabledStatus, disabledStatusTagColor, serveStatus, serveStatusTagColor} from '@/config/constant';
 import { momentUtc } from '@/utils/datetime';
 import {notifyError, notifySuccess} from "@/utils/notify";
+import { log } from 'handsontable/helpers';
 
 export interface StateType {
     envList: any;
@@ -91,6 +101,10 @@ export interface StateType {
 
     dbConnModels: any[];
     dbConnModel: any;
+
+    //定时同步任务相关
+    cronProjectListResult: any;
+    cronProject: any;
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -119,6 +133,10 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setDbConns: Mutation<StateType>,
         setDbConn: Mutation<StateType>,
+
+        // 定时同步相关
+        setCronProjectList: Mutation<StateType>,
+        setCronProject: Mutation<StateType>,
     };
     actions: {
         // 环境-全局变量-全局参数相关
@@ -193,6 +211,17 @@ export interface ModuleType extends StoreModuleType<StateType> {
         updateDbConnName: Action<StateType, StateType>,
         deleteDbConn: Action<StateType, StateType>,
         disableDbConn: Action<StateType, StateType>,
+
+        // 定时同步任务相关
+        getCronProjectList: Action<StateType, StateType>,
+        saveCronProject: Action<StateType, StateType>,
+        delCronProject: Action<StateType, StateType>,
+        copyCronProject: Action<StateType, StateType>,
+        updateCronProjectStatus: Action<StateType, StateType>,
+        getCronAllEngineeringOptions: Action<StateType, StateType>,
+        getCronAllServesList: Action<StateType, StateType>,
+        getCronAllServesOptions: Action<StateType, StateType>,
+        getCronProjecDetail: Action<StateType, StateType>,
     }
 }
 
@@ -232,6 +261,17 @@ const initState: StateType = {
 
     dbConnModels: [],
     dbConnModel: {},
+
+    cronProjectListResult: {
+        list: [],
+        pagination: {
+            total: 0,
+            current: 1,
+            pageSize: 10,
+            showSizeChanger: true,
+        },
+    },
+    cronProject: {},
 };
 
 const StoreModel: ModuleType = {
@@ -299,6 +339,12 @@ const StoreModel: ModuleType = {
         },
         setDbConn(state, payload) {
             state.dbConnModel = payload;
+        },
+        setCronProject(state, payload) {
+            state.cronProject = payload;
+        },
+        setCronProjectList(state, payload) {
+            state.cronProjectListResult = payload;
         },
     },
     actions: {
@@ -891,6 +937,122 @@ const StoreModel: ModuleType = {
                 dispatch('listDbConn')
             } else {
                 notifyError('删除自定义脚本库失败');
+            }
+        },
+
+        async getCronProjectList({ commit, state, dispatch }, payload) {
+            const res: any = await getCronProjectList(payload);
+            const { code, data } = res;
+            if (code === 0) {
+                if (data.result.length === 0 && payload.page > 1) {
+                    dispatch('getCronProjectList', { ...payload, page: payload.page - 1 });
+                    return;
+                }
+                commit('setCronProjectList', {
+                    list: data.result || [],
+                    pagination: {
+                        ...state.cronProjectListResult,
+                        current: data.page,
+                        pageSize: data.pageSize,
+                        total: data.total,
+                    }
+                });
+            }
+        },
+
+        async saveCronProject(_, payload) {
+            try {
+                const { code }: any = await saveCronProject(payload);
+                if (code === 0) {
+                    return Promise.resolve();
+                }
+                return Promise.reject();
+            } catch(error) {
+                return Promise.reject(error);
+            }
+        },
+
+        async copyCronProject(_, payload) {
+            try {
+                const { code }: any = await copyCronProject(payload);
+                if (code === 0) {
+                    return Promise.resolve();
+                }
+                return Promise.reject();
+            } catch(error) {
+                return Promise.reject(error);
+            }
+        },
+
+        async delCronProject(_, payload) {
+            try {
+                const { code }: any = await delCronProject(payload);
+                if (code === 0) {
+                    return Promise.resolve();
+                }
+                return Promise.reject();
+            } catch(error) {
+                return Promise.reject(error);
+            }
+        },
+
+        async getCronProjecDetail({ commit }, payload) {
+            try {
+                const { code, data }: any = await getCronProjecDetail(payload);
+                if (code === 0) {
+                    return Promise.resolve(data);
+                }
+                return Promise.reject();
+            } catch(error) {
+                return Promise.reject(error);
+            }
+        },
+
+        async updateCronProjectStatus(_, payload) {
+            try {
+                const { code, data }: any = await updateCronProjectStatus(payload);
+                if (code === 0) {
+                    return Promise.resolve();
+                }
+                return Promise.reject();
+            } catch(error) {
+                return Promise.reject(error);
+            }
+        },
+
+        async getCronAllEngineeringOptions(_, payload) {
+            try {
+                const { code, data }: any = await getCronAllEngineeringOptions(payload);
+                if (code === 0) {
+                    return Promise.resolve(data);
+                }
+                return Promise.reject();
+            } catch(error) {
+                return Promise.reject(error);
+            }
+        },
+
+        async getCronAllServesOptions(_, payload) {
+            try {
+                const { code, data }: any = await getCronAllServesOptions(payload);
+                if (code === 0) {
+                    return Promise.resolve(data);
+                }
+                return Promise.reject();
+            } catch(error) {
+                return Promise.reject(error);
+            }
+        },
+
+        async getCronAllServesList(_, payload) {
+            try {
+                const { code, data }: any = await getCronAllServesList(payload);
+                if (code === 0) {
+                    return Promise.resolve(data);
+                }
+                return Promise.reject();
+            } catch(error) {
+                return Promise.reject(error);
             }
         },
     }

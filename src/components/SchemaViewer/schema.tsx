@@ -133,7 +133,7 @@ export default defineComponent({
                             {label !== 'description' ?
                                 <a-typography-text type="secondary">{label}：</a-typography-text> : null}
                             {label !== 'description' ?
-                                <a-typography-text type="secondary">{value}</a-typography-text> : null}
+                                <a-typography-text type="secondary">{Array.isArray(value) ? value.join(', ') : value}</a-typography-text> : null}
                             {label === 'description' ? <a-typography-text>{value}</a-typography-text> : null}
 
                         </div>

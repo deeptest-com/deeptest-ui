@@ -209,6 +209,8 @@ function changeVersion(docId) {
 
     .left {
       margin-left: 12px;
+      height: 100%;
+      overflow-y: scroll;
     }
   }
 }

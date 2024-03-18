@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <% if (process.env.VUE_APP_DEPLOY_ENV !=='ly' ) { %>
+    <% if (process.env.VUE_APP_DEPLOY_ENV !=='ly' && process.env.VUE_APP_DEPLOY_ENV !=='ly-saas') { %>
         <title>
             <%= htmlWebpackPlugin.options.title %>
         </title>
@@ -26,9 +26,6 @@
             <%= process.env.VUE_APP_DEPLOY_ENV_TITLE %>
         </title>
     <% } %>
-    <script>
-        const env = '<%= process.env.VUE_APP_DEPLOY_ENV%>';
-    </script>
     <style>
         * {
             margin: 0px;
@@ -182,7 +179,7 @@
 
 <!--全局 loading 控制 -->
 <div id="ly-app-loading">
-    <% if (process.env.VUE_APP_DEPLOY_ENV ==='ly' ) { %>
+    <% if (process.env.VUE_APP_DEPLOY_ENV ==='ly' || process.env.VUE_APP_DEPLOY_ENV ==='ly-saas') { %>
     <img src="<%= process.env.VUE_APP_DEPLOY_ENV_LOADING_ICON %>" class="app-loading-logo" alt="Logo"/>
     <% } %>
     <div id="ly-app-loading-dots">
@@ -192,7 +189,8 @@
     <script>
         const titleEl = document.getElementById('ly-app-loading-title');
         const loadingEl = document.getElementById('ly-app-loading');
-        if (titleEl && "<%= process.env.VUE_APP_DEPLOY_ENV%>" === 'ly') {
+        const env = '<%= process.env.VUE_APP_DEPLOY_ENV%>';
+        if (titleEl && env.includes('ly')) {
             titleEl.innerHTML =!!window.require ? "<%= process.env.VUE_APP_DEPLOY_ENV_TITLE %>" : location.host;
             // 无界环境下，隐藏 loading
             if(window.__POWERED_BY_WUJIE__ && loadingEl){

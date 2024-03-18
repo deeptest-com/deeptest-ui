@@ -135,7 +135,7 @@ export function useGlobalEnv(formRef?: any): EnvReturnData {
         if (action === 'delete') {
             activeEnvDetail.value[type].splice(index, 1);
         } else {
-            activeEnvDetail.value[type][index][field] = e.target.value;
+            activeEnvDetail.value[type][index][field] = field === 'url' ? e.target.value.trim() : e.target.value;
         }
 
     }

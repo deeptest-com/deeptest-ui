@@ -65,7 +65,7 @@
             </a-tooltip>
 
             <a-tooltip title="克隆" placement="top">
-              <a-button type="link" @click="() => copy(record)">
+              <a-button type="link" @click="() => copyCase(record)">
                 <IconSvg type="clone" />
               </a-button>
             </a-tooltip>
@@ -125,9 +125,11 @@ import CaseEdit from "./edit.vue";
 import AutoGenCaseModal from "./alternative/autoGenCaseModal.vue";
 import TableExpandIconVue from "@/components/Table/TableExpandIcon.vue";
 import {loadCurl} from "@/views/component/debug/service";
+import useCopy from "@/composables/useClipboard";
 
 provide('usedBy', UsedBy.InterfaceDebug)
 const {t} = useI18n();
+const { copy } = useCopy();
 
 const store = useStore<{ Endpoint: Endpoint, Debug: Debug, Project: Project }>();
 const endpoint = computed<any>(() => store.state.Endpoint.endpointDetail);
@@ -201,8 +203,8 @@ const remove = (record) => {
     store.dispatch('Endpoint/removeCase', record);
   })
 }
-const copy  = (record) => {
-  console.log('copy', record)
+const copyCase  = (record) => {
+  console.log('copyCase', record)
   store.dispatch('Endpoint/copyCase', record.id).then((po) => {
     if (po.id > 0) {
       notifySuccess(`复制成功`);
@@ -215,11 +217,6 @@ const copy  = (record) => {
 
 async function copyCurl(record) {
   console.log('copyCurl', record)
-  const clipboard = navigator.clipboard;
-  if (!clipboard) {
-    notifyWarn('您的浏览器不支持复制内容到剪贴板。');
-    return
-  }
 
   const resp = await loadCurl({
     caseId: record.id,
@@ -227,7 +224,7 @@ async function copyCurl(record) {
     environmentId: environmentId.value,
   })
   if (resp.code == 0) {
-    navigator.clipboard.writeText(resp.data)
+    copy(resp.data)
     notifySuccess('已复制cURL命令到剪贴板。');
   }
 }
