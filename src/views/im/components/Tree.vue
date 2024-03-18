@@ -80,7 +80,6 @@ const activeTabs = computed(() => store.state.Endpoint.activeTabs);
 const activeTab = computed(() => store.state.Endpoint.activeTab);
 const treeData: any = computed(() => {
   const data = treeDataCategory.value;
-  console.log(data);
   if(!data?.[0]?.id){
     return [];
   }
@@ -91,7 +90,7 @@ const treeData: any = computed(() => {
     arr.forEach((item) => {
       delete item.slots;
       item.key = item.id;
-      item.title = item.entityId === 0 ? item.name+" ("+item.count+")" : item.name;
+      item.title = item.entityId === 0 ? `${item.parentId === 0 ? '所有API' :item.name}(${item.count})` : item.name;
       item.isLeaf = item.entityId !== 0;
       if (Array.isArray(item.children)) {
         fn(item.children)
