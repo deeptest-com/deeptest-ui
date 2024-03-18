@@ -90,6 +90,9 @@ const treeData: any = computed(() => {
     arr.forEach((item) => {
       delete item.slots;
       item.key = item.id;
+      if (item.parentId === 0) {
+        item.name = '所有API';
+      }
       item.title = item.entityId === 0 ? `${item.parentId === 0 ? '所有API' :item.name}(${item.count})` : item.name;
       item.isLeaf = item.entityId !== 0;
       if (Array.isArray(item.children)) {
@@ -416,16 +419,17 @@ const nodeMenuList = [
     action: (nodeProps) => {
       nodeProps.entityId === 0 ? cloneCategory(nodeProps) : cloneEndpoint(nodeProps);
     },
+    ifShow: nodeProps => nodeProps.parentId !== 0,
   },
   {
     label: '编辑分类',
     action: (nodeProps) => editCategory(nodeProps),
-    ifShow: (nodeProps) => nodeProps.entityId === 0,
+    ifShow: (nodeProps) => nodeProps.entityId === 0 && nodeProps.parentId !== 0,
   },
   {
     label: '删除分类',
     action: (nodeProps) => delCategory(nodeProps),
-    ifShow: (nodeProps) => nodeProps.entityId === 0,
+    ifShow: (nodeProps) => nodeProps.entityId === 0 && nodeProps.parentId !== 0,
   },
   {
     label: '分享链接',
