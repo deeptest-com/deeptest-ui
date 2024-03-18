@@ -310,6 +310,9 @@ const getMenuItems = (record) => {
     {
       auth: '',
       label: '克隆',
+      show: () => {
+        return props.categoryId !== -1000
+      },
       action: (record: any) => clone(record)
     },
     {
@@ -322,7 +325,7 @@ const getMenuItems = (record) => {
       auth: 'p-api-endpoint-del',
       label: '删除',
       show: (record) => {
-        return hasPermission('p-api-endpoint-del') || isCreator(record.createUser);
+        return props.categoryId !== -1000 && (hasPermission('p-api-endpoint-del') || isCreator(record.createUser));
       },
       action: (record: any) => del(record)
     },

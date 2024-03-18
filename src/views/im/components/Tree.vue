@@ -53,6 +53,7 @@
 import { onMounted, ref, watch, computed, createVNode } from 'vue';
 import { useStore } from 'vuex';
 import { FolderOutlined, FolderOpenOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue';
+import cloneDeep from "lodash/cloneDeep";
 import CategoryTree from '@/components/CategoryTree';
 import {StateType as EndpointStateType} from "@/views/enpoint/store";
 import CreateEndpointModal from "@/views/endpoint/components/CreateEndpointModal.vue";
@@ -456,18 +457,21 @@ const showMoreIcon = (node) => {
 const onTreeNodeClick = (_node, evt) => {
   const currNode = evt?.node?.dataRef;
   let activeNode = { type: (currNode.entityId === 0 || currNode.id === -1) ? 'im-dir' : 'im', ...currNode };
-  if (currNode.parentId === -1000) {
+  if (activeNode.entityData) {
+    activeNode.entityData.id = activeNode.entityId;
+    activeNode.activeMethod = activeNode?.entityData?.method?.[0] || 'GET';
     const findTab = activeTabs.value.find(e => e.entityId === currNode.entityId);
     if (findTab) {
-      activeNode = findTab;
+      const findIndex = activeTabs.value.findIndex(e => e.entityId === currNode.entityId);
+      const oldTabs = cloneDeep(activeTabs.value);
+      oldTabs.splice(findIndex, 1, activeNode);
+      store.commit('Endpoint/setActiveTabs', oldTabs);
+    } else {
+      store.commit('Endpoint/setActiveTabs', uniquArrray([...activeTabs.value, activeNode]));
     }
   }
-  // 接口定义的tab title 显示为 当前 method + title ,其中method是动态变化
-  if (activeNode?.entityData?.id) {
-    activeNode.activeMethod = activeNode?.entityData?.method?.[0] || 'GET';
-  }
   store.commit('Endpoint/setActiveTab', activeNode);
-  if (currNode.parentId !== -1000) {
+  if (!activeNode.entityData) {
     store.commit('Endpoint/setActiveTabs', uniquArrray([...activeTabs.value, activeNode]));
   }
 }

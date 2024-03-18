@@ -695,6 +695,7 @@ const StoreModel: ModuleType = {
         },
 
         setActiveTabs(state, payload) {
+            console.error(payload);
             state.activeTabs = payload;
         },
         setFavoriteList(state, payload) {

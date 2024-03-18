@@ -154,12 +154,12 @@ export function findPath(nodeId: number, nodes:any[]) :number[] {
    
 } 
 
-export function uniquArrray(data) {
+export function uniquArrray(data, key?: string) {
     const obj = {};
     const _data = cloneDeep(data);
     _data.forEach((e, index) => {
-      if (!obj[e.id]) {
-        obj[e.id] = e;
+      if (!obj[key || e.id]) {
+        obj[key || e.id] = e;
       } else {
         _data.splice(index, 1)
       }
