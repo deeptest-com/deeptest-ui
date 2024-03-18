@@ -185,7 +185,8 @@ const CategoryTree = defineComponent({
       let treeNodes = props.treeData || [];
       if (props.needFavoriteNode) {
         treeNodes = [{
-          name: `个人收藏(${favoriteList.value.length})`,
+          title: `个人收藏(${favoriteList.value.length})`,
+          name: '个人收藏',
           children: favoriteList.value || [],
           id: -1000,
           type: 'im-dir',

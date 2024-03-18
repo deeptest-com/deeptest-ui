@@ -19,10 +19,7 @@
         <a-table 
           :loading="isFetching"
           :rowKey="'id'"
-          :row-selection="{
-            selectedRowKeys: selectedRowKeys,
-            onChange: onSelectChange
-          }"
+          :row-selection="null"
           :pagination="{
             ...pagination,
             onChange: (page) => {
@@ -437,13 +434,14 @@ const updateTitle = async (value: string, record: any) => {
 }
 
 const loadList = debounce(async (page?: number, size?: number, opts?: any) => {
+  console.error(props.categoryId);
   isFetching.value = true;
   await store.dispatch('Endpoint/loadList', {
     "projectId": currProject.value.id,
     "page": page || pagination.value.current,
     "pageSize": size || pagination.value.pageSize,
     ...opts,
-    categoryId: activeTab.value.id || null,
+    categoryId: props.categoryId === -1000 ? null : (activeTab.value.id || null),
     isFavorite: props.categoryId === -1000,
   });
   isFetching.value = false;
@@ -465,7 +463,7 @@ const createEndpointModalVisible = ref(false);
 const selectedCategoryId = ref(null);
 
 const handleCreateEndPoint = () => {
-  selectedCategoryId.value = activeTab.value.id;
+  selectedCategoryId.value = props.categoryId === -1000 ? treeData.value?.[0]?.id :  activeTab.value.id;
   createEndpointModalVisible.value = true;
 };
 

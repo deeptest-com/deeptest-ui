@@ -510,7 +510,6 @@ const StoreModel: ModuleType = {
             }
         },
         setEndpointDetail(state, payload) {
-            console.error(payload);
             state.endpointDetail = payload;
         },
         initEndpointDetail(state, payload) {
