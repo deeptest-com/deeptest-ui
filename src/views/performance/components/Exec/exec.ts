@@ -97,6 +97,9 @@ function useExecution(): Execution {
             } else if (body.instructionType === MsgInstruction.Exception) {
                 execStop();
                 notifyError('执行异常终止，请查看日志排查错误。', body.msg)
+            } else if (body.instructionType === MsgInstruction.AlreadyRunning) {
+                execStop();
+                notifyError(body.msg, '请等待现有测试结束，或通过重启代理强行终止。')
             }
 
         } else if (body.category === MsgCategory.Result) {

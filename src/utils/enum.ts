@@ -323,7 +323,7 @@ export enum MsgInstruction {
     Start           = "start",
     End             = "end",
     Terminal        = "terminal",
-    Running  = "alreadyRunning",
+    AlreadyRunning = "alreadyRunning",
     Exception       = "exception",
 }
 
