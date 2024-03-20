@@ -227,7 +227,7 @@ async function save() {
   });
   await store.commit('Global/setSpinning', false);
   notifySuccess('保存成功');
-
+  updateEndpointNodes(imDetail.value.categoryId === -1 ? treeData.value?.[0]?.id : imDetail.value.categoryId);
   setTimeout(() => {
     store.commit('Endpoint/initEndpointDetail', cloneDeep(endpointDetail.value));
   }, 200);

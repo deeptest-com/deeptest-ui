@@ -81,7 +81,7 @@
       </template>
       <!-- PostMan -->
       <template v-else>
-        <a-form-item label="上传文件" v-if="!modelRef.openUrlImport" name="filePath">
+        <a-form-item label="上传文件" name="filePath">
           <a-spin tip="上传中..." :spinning="uploading">
             <a-upload
               :fileList="fileList"
@@ -178,11 +178,11 @@ import {UploadOutlined,QuestionCircleOutlined, WarningOutlined} from '@ant-desig
 import {notifyWarn} from "@/utils/notify";
 import SelectServe from './SelectServe/index.vue';
 import Empty from '@/components/TableEmpty/index.vue';
-import { filterByKeyword } from '@/utils/tree';
+import { filterByKeyword, removeLeafNode } from '@/utils/tree';
 
 const store = useStore<{ Endpoint }>();
 const treeDataCategory = computed<any>(() => {
-  return (store.state.Endpoint.treeDataCategory?.[0]?.children || []).filter(e => e.id !== -1)
+  return removeLeafNode((store.state.Endpoint.treeDataCategory || []).filter(e => e.id !== -1))
 });
 
 const props = defineProps({
@@ -372,7 +372,7 @@ function ok() {
 
       const res = await store.dispatch('Endpoint/importEndpointData', {
         ...params,
-        categoryId: modelRef.categoryId || -1,
+        categoryId: modelRef.categoryId || treeDataCategory.value?.[0]?.id,
         "sourceType": 2,
       });
       confirmLoading.value = false;
@@ -380,7 +380,7 @@ function ok() {
         notifyWarn('异步导入中，稍后请刷新列表查看导入结果');
         reset();
         emit('ok', {
-          parentId: modelRef.categoryId,
+          parentId: modelRef.categoryId || treeDataCategory.value?.[0]?.id,
         });
       }
     })

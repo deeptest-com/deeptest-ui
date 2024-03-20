@@ -258,7 +258,7 @@ const delCategory = (node: any) => {
 const importEndpointModalVisible = ref(false);
 
 const handleImportEndpoint = (data) => {
-  if (activeTab.value?.id === selectedCategoryId.value || activeTab.value?.id === treeData.value[0].id) {
+  if (activeTab.value?.id === treeData.value[0].id || activeTab.value?.id === data.parentId) {
     // 如果是给当前选中的分类下 添加了接口，则刷新右侧的列表
     setTimeout(() => {
       eventBus.emit(settings.eventEndpointAction, { type: 'getEndpointsList', categoryId: activeTab.value?.id });
@@ -466,7 +466,7 @@ const nodeMenuList = [
   {
     label: '过期',
     action: async (record) => {
-      await store.dispatch('Endpoint/disabled', record);
+      console.log(record);
     },
     ifShow: (nodeProps) => nodeProps.entityId !== 0,
   },

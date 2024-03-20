@@ -74,10 +74,19 @@ function useEndpoint() {
     return leafNodes;
   };
 
+  /**
+   * 加载 个人收藏目录节点
+   */
   const reLoadFavoriteList = () => {
     store.dispatch('Endpoint/loadFavoriteList');
   }
 
+  /**
+   * 删除/新增叶子节点以后更新父节点count
+   * @param nodeId 节点id
+   * @param type 删除/新增
+   * @param num 删除/新增数目
+   */
   const updateTreeNodeCount = (nodeId, type: string, num = 1) => {
     const parentPath = findPath(nodeId, treeData.value);
 
@@ -94,8 +103,13 @@ function useEndpoint() {
     }
     updateNodeCounts(data);
     store.commit('Endpoint/setTreeDataCategory', cloneDeep(data));
-  }
+  };
 
+  /**
+   * 根据method复制curl
+   * @param record 
+   * @param method 
+   */
   const copyCurl = async (record, method) => {
     const resp = await loadCurl({
       endpointId: record.id,
@@ -107,7 +121,11 @@ function useEndpoint() {
       copy(resp.data)
       notifySuccess('已复制cURL命令到剪贴板。');
     }
-  }
+  };
+
+  const disabledEndpoint = async(record) => {
+    await store.dispatch('Endpoint/disabled', record);
+  };
 
   return {
     openEndpointTab,
@@ -115,6 +133,7 @@ function useEndpoint() {
     reLoadFavoriteList,
     updateTreeNodeCount,
     copyCurl,
+    disabledEndpoint,
   }
 }
 
