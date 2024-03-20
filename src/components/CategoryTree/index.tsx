@@ -21,10 +21,6 @@ const CategoryTreeProps = {
     type: Array as PropType<any[]>,
     default: () => []
   },
-  draggable: { // 是否可拖拽节点
-    type: Boolean,
-    default: false,
-  },
   showIcon: { // 是否显示节点icon
     type: Boolean,
     default: false,
@@ -79,6 +75,10 @@ const CategoryTreeProps = {
   },
   needFavoriteNode: {
     type: Boolean,
+    default: false,
+  },
+  draggable: {
+    type: [Boolean, Function],
     default: false,
   }
 }
@@ -187,13 +187,17 @@ const CategoryTree = defineComponent({
         treeNodes = [{
           title: `个人收藏(${favoriteList.value.length})`,
           name: '个人收藏',
-          children: favoriteList.value || [],
+          children: (favoriteList.value || []).map(e => ({
+            ...e,
+            dragDisabled: true,
+          })),
           id: -1000,
           type: 'im-dir',
           key: -1000,
           entityId: 0,
           parentId: 0,
           isLeaf: false,
+          dragDisabled: true, // 不可拖拽
         }, ...treeNodes];
       }
       
@@ -226,7 +230,7 @@ const CategoryTree = defineComponent({
     const vSlots = {
       title: (nodeProps) => {
         return (
-          <div class="tree-title" draggable={props.nodeDraggable(nodeProps)}>
+          <div class="tree-title">
             {(nodeProps.dataRef.entityId === 0 || nodeProps.dataRef.type === 'dir') && slots.folderIcon && slots.folderIcon({ nodeProps })}
             {(nodeProps.dataRef.entityId !== 0 || (nodeProps.dataRef.type && nodeProps.dataRef.type !== 'dir')) && slots.nodeIcon && slots.nodeIcon()}
             {renderTitle(nodeProps, searchValue.value)}
@@ -349,11 +353,15 @@ const CategoryTree = defineComponent({
       treeLoadedKeys.value = loadedKeys;
     }
 
+    const getSelectedKeys = () => {
+      return selectedKeys.value;
+    }
+
     onMounted(() => {
       getVirtualHeight();
     })
     
-    expose({ initTree, setSelectedKeys, scrollToSelectedNode, getVirtualHeight, clearSearchValue, onTreeLoad });
+    expose({ initTree, setSelectedKeys, scrollToSelectedNode, getVirtualHeight, clearSearchValue, onTreeLoad, getSelectedKeys });
     return () => {
       return (
         <div class={["category-tree-container", props.prefixCls]}>
@@ -378,7 +386,7 @@ const CategoryTree = defineComponent({
             <div class="category-tree">
               <Tree
                 ref={TreeNode}
-                draggable={props.draggable}
+                draggable={props.draggable as any}
                 checkable={props.checked}
                 expandedKeys={expandedKeys.value}
                 checkedKeys={checkedKeys.value}

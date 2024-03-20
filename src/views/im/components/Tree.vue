@@ -13,7 +13,7 @@
       :checked="false"
       :context-menu-list="nodeMenuList"
       :root-context-menu-list="rootContextMenuList"
-      :draggable="true"
+      :draggable="checkDraggable"
       :show-more-icon="showMoreIcon"
       :is-dir-node-clicked="true"
       :on-tree-node-clicked="onTreeNodeClick"
@@ -74,7 +74,6 @@ import useEndpoint from '../hooks/useEndpoint';
 const { updateEndpointNodes, reLoadFavoriteList, updateTreeNodeCount, copyCurl } = useEndpoint();
 const store = useStore<{ Endpoint: EndpointStateType }>();
 const imCategoryTree = ref();
-const favoriteList = computed(() => store.state.Endpoint.favoriteList);
 const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
 const activeTabs = computed(() => store.state.Endpoint.activeTabs);
 const activeTab = computed(() => store.state.Endpoint.activeTab);
@@ -93,6 +92,7 @@ const treeData: any = computed(() => {
       if (item.parentId === 0) {
         item.name = '所有API';
       }
+      item.dragDisabled = item.parentId === 0 ? true : false;
       item.title = item.entityId === 0 ? `${item.parentId === 0 ? '所有API' :item.name}(${item.count})` : item.name;
       item.isLeaf = item.entityId !== 0;
       if (Array.isArray(item.children)) {
@@ -499,8 +499,63 @@ const onTreeNodeClick = (_node, evt) => {
   }
 }
 
-const onTreeNodeDrop = (...args) => {
+/**
+ * 拖拽
+ */
+const checkDraggable = (node): Boolean => {
+  return !node.dragDisabled;
+};
+
+const onTreeNodeDrop = async (...args) => {
   console.log('drop', args);
+  const { node, dragNode, dropPosition } = args[0];
+  const dropKey = node.eventKey;
+  const dragKey = dragNode.eventKey;
+  const pos = node.pos.split('-');
+  const dragPos = dropPosition - Number(pos[pos.length - 1]);
+  if (node.dataRef.entityData && dragPos === 0) {
+    notifyError('接口/目录不可拖入接口节点内');
+    return;
+  }
+  const res = await store.dispatch('Endpoint/moveCategoryNode', {
+    "currProjectId": currProject.value.id,
+    "dragKey": dragKey, // 移动谁
+    "dropKey": dropKey,  // 移动那儿
+    "dropPos": dragPos, // 0 表示移动到目标节点的子节点，-1 表示移动到目标节点的前面， 1表示移动到目标节点的后面
+    "type": 'endpoint',
+  });
+  if (res) {
+    notifySuccess('移动成功');
+    const currDragNode = {
+      ...dragNode.dataRef,
+      parentId: node.dataRef?.id,
+    };
+    store.commit('Endpoint/setTreeDataCategory', loopTree(treeDataCategory.value, dragNode.dataRef.parentId, item => {
+      item.children = (item.children || []).filter(e => e.id !== dragNode.dataRef?.id);
+    }, 'id'));
+    if (node.dataRef.parentId === treeData.value[0].id && dragPos !== 0) {
+      // 将内部节点拖拽到根目录下
+      store.commit('Endpoint/setTreeDataCategory', loopTree(treeDataCategory.value, node.dataRef?.parentId, item => {
+        const find = item.children.findIndex(e => e.id === node.dataRef?.id);
+        item.children.splice(find + 1, 0, currDragNode);
+      }, 'id'));
+    } else {
+      // 拖拽到内部的其他节点上
+      store.commit('Endpoint/setTreeDataCategory', loopTree(treeDataCategory.value, node.dataRef.id, item => {
+        const findIndex = item.children.findIndex(e => e.entityId !== 0);
+          if (!node.dataRef?.entityData) {
+            item.children.splice(findIndex, 0, currDragNode);
+          } else {
+            item.children.push(currDragNode);
+          }
+      }, 'id'));
+    }
+    const currSelectedKey = imCategoryTree.value.getSelectedKeys();
+    imCategoryTree.value.setSelectedKeys(currSelectedKey[0]);
+    notifySuccess('移动成功');
+  } else {
+    notifyError('移动失败');
+  }
 }
 
 const loadCategoryOnlyDir = async () => {

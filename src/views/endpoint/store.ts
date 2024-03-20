@@ -820,7 +820,6 @@ const StoreModel: ModuleType = {
         async moveCategoryNode({commit, dispatch, state}, payload: any) {
             try {
                 await moveCategory(payload);
-                await dispatch('loadCategory');
                 return true;
             } catch (error) {
                 return false;

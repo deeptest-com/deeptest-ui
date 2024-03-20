@@ -361,6 +361,7 @@ async function onDrop(info: DropEvent) {
       expandedKeys.value = [...new Set([...expandedKeys.value, dropKey])];
     }
     notifySuccess('移动成功');
+    await store.dispatch('Endpoint/loadCategory');
   } else {
     notifyError('移动失败');
   }
