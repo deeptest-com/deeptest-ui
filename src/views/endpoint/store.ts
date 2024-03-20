@@ -1907,7 +1907,6 @@ const StoreModel: ModuleType = {
         },
 
         async loadDynamicCategories({ commit }, payload: { type: string, categoryId?: number }) {
-            console.error('loadDynamicCategories', payload);
             const result: any = await getDynamicCateogries(payload);
             if (result.code === 0) {
                 return result.data;

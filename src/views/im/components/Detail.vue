@@ -509,7 +509,6 @@ const favoriteItem = async() => {
 provide('favoriteItem', favoriteItem);
 // 离开页面时，重置数据
 onUnmounted(() => {
-  console.error(props, activeTab.value);
   if (props.endpointId === activeTab.value?.entityData?.id) {
     clearDefineChange();
     clearMockChange();

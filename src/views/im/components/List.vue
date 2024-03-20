@@ -433,7 +433,6 @@ const updateTitle = async (value: string, record: any) => {
 }
 
 const loadList = debounce(async (page?: number, size?: number, opts?: any) => {
-  console.error(props.categoryId);
   isFetching.value = true;
   await store.dispatch('Endpoint/loadList', {
     "projectId": currProject.value.id,

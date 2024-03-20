@@ -189,9 +189,11 @@ const setActiveSchema = () => {
   const { query }: any = router.currentRoute.value;
   if (query.ref) {
     const ref = JSON.parse(query.ref);
-    let activeSchema = { ...ref, key: ref.entityId, type: 'schema' };
-    store.commit('Schema/setActiveTab', activeSchema);
-    store.commit('Schema/setActiveTabs', [...activeTabs.value, activeSchema]);
+    let activeSchema = { ...ref, key: ref.id, type: 'schema' };
+    store.commit('Endpoint/setActiveTab', activeSchema);
+    if (!activeTabs.value.find(e => e.id === ref.id)) {
+      store.commit('Endpoint/setActiveTabs', [...activeTabs.value, activeSchema]);
+    }
     store.dispatch('Schema/querySchema', { id: ref?.entityId });
   }
 }
@@ -206,7 +208,17 @@ onMounted(() => {
   })
 
   onRouterParams();
-  setActiveSchema();
+})
+
+watch(() => {
+  return currProject.value;
+}, async (val, oldVal) => {
+  if (val?.id) {
+    await store.dispatch('Schema/loadCategory');
+    setActiveSchema();
+  }
+}, {
+  immediate: true,
 })
 </script>
 

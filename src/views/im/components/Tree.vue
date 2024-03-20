@@ -291,6 +291,8 @@ const cloneCategory = (node) => {
           type: 'im-dir',
           parentId: res.parentId,
           count: node.count,
+          key: res.id,
+          isLeaf: false,
         };
         store.commit('Endpoint/setTreeDataCategory', loopTree(treeDataCategory.value, node.parentId, item => {
           const findIndex = item.children.findIndex(e => e.entityId !== 0);
