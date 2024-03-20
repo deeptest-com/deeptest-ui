@@ -530,6 +530,12 @@ const onTreeNodeDrop = async (...args) => {
       ...dragNode.dataRef,
       parentId: node.dataRef?.id,
     };
+    if (activeTab.value?.id === dragNode.dataRef?.parentId) {
+      // 如果是给当前选中的分类下 添加了接口，则刷新右侧的列表
+      setTimeout(() => {
+        eventBus.emit(settings.eventEndpointAction, { type: 'getEndpointsList', categoryId: activeTab.value?.id });
+      }, 500);
+    }
     store.commit('Endpoint/setTreeDataCategory', loopTree(treeDataCategory.value, dragNode.dataRef.parentId, item => {
       item.children = (item.children || []).filter(e => e.id !== dragNode.dataRef?.id);
     }, 'id'));
