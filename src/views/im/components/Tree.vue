@@ -435,7 +435,7 @@ const nodeMenuList = [
   },
   {
     label: '分享链接',
-    action: (nodeProps) => share(nodeProps, 'IM'),
+    action: (nodeProps) => share(nodeProps.dataRef?.entityData, 'IM'),
     ifShow: (nodeProps) => nodeProps.entityId !== 0,
   },
   {

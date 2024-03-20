@@ -351,8 +351,10 @@ watch(() => {
   return activeTab.value;
 }, val => {
   if (val?.id && val?.type === 'schema') {
+    expand.value = true;
     schemaTree.value?.setSelectedKeys(val.id);
   } else {
+    expand.value = false;
     schemaTree.value?.initTree();
   }
 }, {

@@ -97,7 +97,7 @@ import useEndpoint from '../hooks/useEndpoint';
 const props = defineProps<{
   endpointId: number;
 }>();
-const { updateEndpointNodes } = useEndpoint();
+const { updateEndpointNodes, reLoadFavoriteList } = useEndpoint();
 const router = useRouter();
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal: ServeStateType, Global ,Debug}>();
 const imDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
@@ -169,6 +169,9 @@ async function updateTitle(title) {
     return e;
   }))
   updateEndpointNodes(imDetail.value.categoryId);
+  if (imDetail.value.isFavorite) {
+    reLoadFavoriteList();
+  }
   await store.dispatch('Endpoint/getEndpointDetail', {id: imDetail.value.id});
   resetDefineChange();
 }

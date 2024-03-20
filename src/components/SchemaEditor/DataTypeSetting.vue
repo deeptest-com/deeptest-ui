@@ -434,9 +434,10 @@ function goViewComponent() {
     notifyError('引用的数据组件不存在/已删除');
     return;
   }
+  const activeTab = { ...schemaNode, key: schemaNode.id, type: 'schema' };
   // 当前是处于 查看 组件tab中，去查看与该组件关联的组件信息， 无需跳转，新增tab即可
-  store.commit('Endpoint/setActiveTab', { ...schemaNode, key: schemaNode.id, type: 'schema' });
-  store.commit('Endpoint/setActiveTabs', uniquArrray([...store.state.Endpoint.activeTabs, schemaNode]));
+  store.commit('Endpoint/setActiveTab', activeTab);
+  store.commit('Endpoint/setActiveTabs', uniquArrray([...store.state.Endpoint.activeTabs, activeTab]));
   store.dispatch('Schema/querySchema', { id: refId });
   // if (activeSchema.value.id) {
   //   // 当前是处于 查看 组件tab中，去查看与该组件关联的组件信息， 无需跳转，新增tab即可
