@@ -464,13 +464,13 @@ const nodeMenuList = [
     },
     action: (record: any) => delEndpoint(record)
   },
-  {
-    label: '过期',
-    action: async (record) => {
-      console.log(record);
-    },
-    ifShow: (nodeProps) => nodeProps.entityId !== 0,
-  },
+  // {
+  //   label: '过期',
+  //   action: async (record) => {
+  //     console.log(record);
+  //   },
+  //   ifShow: (nodeProps) => nodeProps.entityId !== 0,
+  // },
 ];
 
 const showMoreIcon = (node) => {
