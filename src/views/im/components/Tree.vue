@@ -533,7 +533,7 @@ const onTreeNodeDrop = async (...args) => {
     store.commit('Endpoint/setTreeDataCategory', loopTree(treeDataCategory.value, dragNode.dataRef.parentId, item => {
       item.children = (item.children || []).filter(e => e.id !== dragNode.dataRef?.id);
     }, 'id'));
-    if (node.dataRef.parentId === treeData.value[0].id && dragPos !== 0) {
+    if (dragPos !== 0) {
       // 将内部节点拖拽到根目录下
       store.commit('Endpoint/setTreeDataCategory', loopTree(treeDataCategory.value, node.dataRef?.parentId, item => {
         const find = item.children.findIndex(e => e.id === node.dataRef?.id);
