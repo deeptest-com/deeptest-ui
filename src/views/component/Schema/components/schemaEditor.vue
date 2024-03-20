@@ -7,7 +7,7 @@
           <EditAndShowField
             :custom-class="'text-bolder'"
             @cancel="handleCancel"
-            :auto-focus="activeSchemaTab.autoFocus" 
+            :auto-focus="activeTab.autoFocus" 
             :value="schemaDetail?.name || ''" 
             placeholder="请输入内容" 
             @update="v => handleUpdated('name', v)" />
@@ -83,9 +83,8 @@ const loading = ref(false);
 
 const store = useStore<{ ProjectSetting: ProjectSettingStateType, Schema,ProjectGlobal, Endpoint }>();
 const schemaDetail = computed(() => store.state.Schema.schemaDetail);
-const activeSchemaTab = computed(() => store.state.Schema.activeSchema);
 const activeTab = computed(() => store.state.Endpoint.activeTab);
-const schemas = computed(() => store.state.Schema.schemas);
+const activeTabs = computed(() => store.state.Endpoint.activeTabs);
 const projectId = computed<any>(() => store.state.ProjectGlobal.currProject.id);
 
 const handleSwitchMode = async (e) => {
@@ -147,7 +146,7 @@ const saveSchema = async () => {
 
 const handleCancel = () => {
   store.commit('Endpoint/setActiveTab', {
-    ...activeSchemaTab.value,
+    ...activeTab.value,
     autoFocus: false,
   })
 }
@@ -155,7 +154,7 @@ const handleCancel = () => {
 const handleUpdated = async (type: string, value: string) => {
   try {
     store.commit('Endpoint/setActiveTab', {
-      ...activeSchemaTab.value,
+      ...activeTab.value,
       autoFocus: false,
     })
     await store.dispatch('Schema/saveSchema', {
@@ -164,7 +163,7 @@ const handleUpdated = async (type: string, value: string) => {
       "description": type === 'description' ? value : schemaDetail.value.description,
     })
     if (type === 'name') {
-      Object.assign(schemas.value.find(e => e.entityId === schemaDetail.value.id), {
+      Object.assign(activeTabs.value.find(e => e.entityId === schemaDetail.value.id), {
         name: value
       })
     }
