@@ -258,6 +258,7 @@ const delCategory = (node: any) => {
 const importEndpointModalVisible = ref(false);
 
 const handleImportEndpoint = (data) => {
+  importEndpointModalVisible.value = false;
   if (activeTab.value?.id === treeData.value[0].id || activeTab.value?.id === data.parentId) {
     // 如果是给当前选中的分类下 添加了接口，则刷新右侧的列表
     setTimeout(() => {
