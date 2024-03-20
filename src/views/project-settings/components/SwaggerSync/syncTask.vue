@@ -358,7 +358,7 @@ const rulesRef = computed(() => ({
   ],
   "categoryId": [
     {
-      required: false,
+      required: true,
       message: '请选择所属分类目录',
     }
   ],

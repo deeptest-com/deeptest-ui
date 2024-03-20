@@ -278,7 +278,7 @@ const rulesRef = computed(() => ({
   ],
   "categoryId": [
     {
-      required: false,
+      required: true,
       message: '请选择所属分类目录',
     }
   ],
@@ -463,7 +463,6 @@ watch(() => {
 }, (newVal) => {
   if(newVal) {
     confirmLoading.value = false;
-    modelRef.categoryId = (!props.selectedCategoryId || props.selectedCategoryId === -1) ? null : props.selectedCategoryId;
   }
 }, {
   immediate: true
@@ -486,6 +485,7 @@ watch(() => {
   return treeDataCategory.value;
 }, (val) => {
   treeData.value = val;
+  modelRef.categoryId = val[0].id;
 })
 
 </script>
