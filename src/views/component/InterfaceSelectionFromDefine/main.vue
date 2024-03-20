@@ -31,7 +31,6 @@ import {defineProps, ref} from "vue";
 
 import Tree from "./tree.vue"
 import List from "./list.vue"
-import debounce from "lodash.debounce";
 
 const props = defineProps({
   onFinish: {
@@ -50,16 +49,13 @@ const interfaceIds = ref([])
 const loading = ref(false);
 
 const changeServe = (ids: number[]) => {
-  console.log('changeServe', ids)
   serveIds.value = ids;
 }
 const changeCategory = (id: number) => {
-  console.log('changeCategory', id)
   categoryId.value = id;
 }
 
 const onSelectInterfaces = async (ids: never[]) => {
-  console.log('onSelectInterfaces', ids)
   interfaceIds.value = ids
 }
 
@@ -71,7 +67,6 @@ const onSubmit =  async () => {
 
 
 const onCancel = () => {
-  console.log('onCancel')
   props.onCancel()
 }
 

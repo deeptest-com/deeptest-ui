@@ -176,7 +176,7 @@ onMounted(async () => {
 });
 
 async function loadCategories() {
-  await store.dispatch('Endpoint/loadCategory');
+  await store.dispatch('Endpoint/loadCategory', 'dir');
  // expandAll();
   // await nextTick();
 }
@@ -361,7 +361,7 @@ async function onDrop(info: DropEvent) {
       expandedKeys.value = [...new Set([...expandedKeys.value, dropKey])];
     }
     notifySuccess('移动成功');
-    await store.dispatch('Endpoint/loadCategory');
+    await store.dispatch('Endpoint/loadCategory', 'dir');
   } else {
     notifyError('移动失败');
   }
