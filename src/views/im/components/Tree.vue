@@ -548,7 +548,6 @@ const checkDraggable = (node): Boolean => {
 };
 
 const onTreeNodeDrop = async (...args) => {
-  console.log('drop', args);
   const { node, dragNode, dropPosition } = args[0];
   const dropKey = node.eventKey;
   const dragKey = dragNode.eventKey;
@@ -558,6 +557,7 @@ const onTreeNodeDrop = async (...args) => {
     notifyError('接口/目录不可拖入接口节点内');
     return;
   }
+  spinning.value = true;
   const res = await store.dispatch('Endpoint/moveCategoryNode', {
     "currProjectId": currProject.value.id,
     "dragKey": dragKey, // 移动谁
@@ -602,11 +602,13 @@ const onTreeNodeDrop = async (...args) => {
       updateTreeNodeMap({ nodeId: targetId, data: newNode, type: 'update' });
     }
     updateTreeNodesCount()
-    const currSelectedKey = imCategoryTree.value.getSelectedKeys();
-    imCategoryTree.value.setSelectedKeys(currSelectedKey[0]);
+    // const currSelectedKey = imCategoryTree.value.getSelectedKeys();
+    // imCategoryTree.value.setSelectedKeys(currSelectedKey[0]);
     notifySuccess('移动成功');
+    spinning.value = false;
   } else {
     notifyError('移动失败');
+    spinning.value = false;
   }
 }
 

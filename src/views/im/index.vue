@@ -42,8 +42,8 @@
                 </div>
               </a-tab-pane>
               <template #tabBarExtraContent>
-                <a-dropdown>
-                  <span style="margin-right: 20px"><EllipsisOutlined /></span>
+                <a-dropdown placement="bottomLeft">
+                  <span style="margin-right: 20px;cursor: pointer;"><EllipsisOutlined /></span>
                   <template #overlay>
                     <a-menu @click="e => handleMenuClick(e)">
                       <a-menu-item v-for="item in dropdownMenu" :key="item.key">{{ item.label }}</a-menu-item>
