@@ -1,9 +1,17 @@
 <template>
-  <div class="processor_performance_runner-main  dp-processors-container">
-    <ProcessorHeader />
+  <div class="performance_runner-edit-main">
+    <a-modal title="新建执行代理"
+             :visible="visible"
+             @cancel="cancel"
+             class="runner-edit"
+             :footer="null"
+             width="800px">
 
-    <a-card :bordered="false">
-      <a-form :label-col="{ style: { width: '120px' } }" :wrapper-col="{ span: 16 }">
+      <a-form :label-col="{ style: { width: '160px' } }" :wrapper-col="{ span: 16 }">
+        <a-form-item label="名称" name="ip" v-bind="validateInfos.name">
+          <a-input v-model:value="modelRef.name" class="dp-per100"
+                   @blur="validate('name', { trigger: 'blur' }).catch(() => {})" />
+        </a-form-item>
 
         <a-form-item label="IP地址" name="ip" v-bind="validateInfos.ip">
           <a-input v-model:value="modelRef.ip" class="dp-per100"
@@ -30,27 +38,55 @@
         </a-form-item>
 
         <a-form-item class="processor-btn" :wrapper-col="{ span: 16, offset: 4 }">
-          <a-button type="primary" @click.prevent="submit">保存</a-button>
+          <a-button type="primary" @click="submit">保存</a-button>
         </a-form-item>
       </a-form>
-    </a-card>
+
+    </a-modal>
+
   </div>
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, reactive, ref, watch} from "vue";
+import {computed, defineProps, onMounted, PropType, reactive, ref, watch} from "vue";
 import {useStore} from "vuex";
 import {StateType as ScenarioStateType} from "../../../../../store";
 import {Form, message} from "ant-design-vue";
-import ProcessorHeader from '../../common/ProcessorHeader.vue';
 import debounce from "lodash.debounce";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import cloneDeep from "lodash/cloneDeep";
+
 const useForm = Form.useForm;
 
-const store = useStore<{ Scenario: ScenarioStateType; }>()
-const modelRef: any = computed<boolean>(() => store.state.Scenario.nodeData)
+const props = defineProps({
+  model: {
+    type: Object,
+    required: true
+  },
+  visible: {
+    type: Boolean,
+    required: true
+  },
+  onFinish: {
+    type: Function as PropType<() => void>,
+    required: true
+  }
+})
 
-const rulesRef = reactive({
+const store = useStore<{ Scenario: ScenarioStateType; }>()
+const nodeData: any = computed<any>(() => store.state.Scenario.nodeData)
+const modelRef = ref({
+  name: '',
+  ip: '',
+  webPort: 8086,
+  grpcPort: 9528,
+  weight: 100,
+} as any)
+
+const rulesRef = ref({
+  name: [
+    {required: true, message: '请输入远程执行代理的名称', trigger: 'blur'},
+  ],
   ip: [
     {required: true, message: '请输入远程执行代理的IP地址', trigger: 'blur'},
   ],
@@ -65,33 +101,52 @@ const rulesRef = reactive({
   ],
 })
 
-const {resetFields, validate, validateInfos} = useForm(modelRef, rulesRef);
+const {validate, validateInfos} = useForm(modelRef, rulesRef);
 
-const submit = debounce(async () => {
-  validate()
-      .then(async () => {
-        const res = await store.dispatch('Scenario/saveProcessor', modelRef.value);
-        if (res === true) {
-          notifySuccess('保存成功');
-        } else {
-          notifyError('保存失败');
-        }
-      })
-      .catch(error => {
-        console.log('error', error);
-      });
-}, 300);
+watch(() => props.model, val => {
+  console.log('watch model')
 
-const reset = () => {
-  resetFields();
+  modelRef.value.name = props.model.name ? props.model.name : ''
+  modelRef.value.ip = props.model.ip ? props.model.ip : ''
+  modelRef.value.webPort = props.model.webPort ? props.model.webPort : 8086
+  modelRef.value.grpcPort = props.model.grpcPort ? props.model.grpcPort : 9528
+  modelRef.value.weight = props.model.weight ? props.model.weight : 100
+
+}, {immediate: true, deep: true})
+
+const submit = debounce(() => {
+    const data = {scenarioId: nodeData.value.scenarioId, ...modelRef.value}
+    console.log('submit', data)
+
+    validate().then(async () => {
+      const res = await store.dispatch('Scenario/saveRunner', data);
+      if (res === true) {
+        notifySuccess('保存成功');
+      } else {
+        notifyError('保存失败');
+      }
+
+      props.onFinish()
+    }).catch((error) => {
+      console.log('error', error);
+    });
+}, 100)
+
+const cancel = () => {
+  console.log('cancel')
+  props.onFinish()
 };
 
 onMounted(() => {
   console.log('onMounted')
-  if (!modelRef.value.ip) modelRef.value.ip = ''
-  if (!modelRef.value.webPort) modelRef.value.webPort = 8086
-  if (!modelRef.value.grpcPort) modelRef.value.grpcPort = 9528
-  if (!modelRef.value.weight) modelRef.value.weight = 100
 })
 
 </script>
+
+<style lang="less" scoped>
+.performance_runner-edit-main {
+  .runner-edit {
+    padding: 16px;
+  }
+}
+</style>

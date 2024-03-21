@@ -32,8 +32,8 @@
     <ProcessorDataDefault    v-else-if="selectedNode.processorType === ProcessorData.Data" />
     <ProcessorCustomCodeDefault v-else-if="selectedNode.processorType === ProcessorCustomCode.CustomCodeDefault" />
 
+    <ProcessorRunners v-else-if="selectedNode.processorType === ProcessorPerformanceRunners.PerformanceRunnersDefault" />
     <ProcessorGoal v-else-if="selectedNode.processorType === ProcessorPerformanceGoal.PerformanceGoalDefault" />
-    <ProcessorRunner v-else-if="selectedNode.processorType === ProcessorPerformanceRunner.PerformanceRunnerDefault" />
     <ProcessorScenario v-else-if="selectedNode.processorType === ProcessorPerformanceScenario.PerformanceScenarioDefault" />
     <ProcessorRendezvous v-else-if="selectedNode.processorType === ProcessorPerformanceRendezvous.PerformanceRendezvousDefault" />
 
@@ -53,10 +53,23 @@ import {useStore} from "vuex";
 import {StateType as ScenarioStateType} from "../../../store";
 
 import {
-  ProcessorInterface, ProcessorGroup, ProcessorTimer, ProcessorPrint,
-  ProcessorLogic, ProcessorLoop, ProcessorVariable, ProcessorAssertion, ProcessorExtractor,
-  ProcessorCookie, ProcessorData, ProcessorCustomCode,
-  ProcessorPerformanceRunner, ProcessorPerformanceScenario, ProcessorPerformanceRendezvous, ProcessorPerformanceGoal
+  ProcessorInterface,
+  ProcessorGroup,
+  ProcessorTimer,
+  ProcessorPrint,
+  ProcessorLogic,
+  ProcessorLoop,
+  ProcessorVariable,
+  ProcessorAssertion,
+  ProcessorExtractor,
+  ProcessorCookie,
+  ProcessorData,
+  ProcessorCustomCode,
+  ProcessorPerformanceRunner,
+  ProcessorPerformanceScenario,
+  ProcessorPerformanceRendezvous,
+  ProcessorPerformanceGoal,
+  ProcessorPerformanceRunners
 } from "@/utils/enum";
 
 import ProcessorGroupDefault from "./proccessors/group/default.vue";
@@ -89,8 +102,8 @@ import ProcessorCookieClear from "./proccessors/cookie/clear.vue"
 import ProcessorDataDefault   from "./proccessors/data/default.vue"
 import ProcessorCustomCodeDefault from "./proccessors/custom_code/default.vue"
 
+import ProcessorRunners   from "./proccessors/performance/runners.vue"
 import ProcessorGoal   from "./proccessors/performance/goal.vue"
-import ProcessorRunner   from "./proccessors/performance/runner.vue"
 import ProcessorScenario from "./proccessors/performance/scenario.vue"
 import ProcessorRendezvous from "./proccessors/performance/rendezvous.vue"
 

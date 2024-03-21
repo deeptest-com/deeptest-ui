@@ -64,12 +64,6 @@ export const DESIGN_MENU_FOR_PERFORMANCE = [
 ]
 export const DESIGN_MENU_CONFIG = [
     {
-        key: 'processor_performance_runner_default',
-        title: '添加执行代理',
-        showInNodeTypes: ['processor_performance_runners_default'],
-        children: [],
-    },
-    {
         key: 'processor_performance_scenario_default',
         title: '添加性能场景',
         showInNodeTypes: ['processor_performance_scenarios_default'],

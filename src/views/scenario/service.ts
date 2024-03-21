@@ -32,6 +32,7 @@ const apiInvocation = `processors/invocations`;
 const apiPathInterface = `processors/interfaces`
 
 const apiPathPerformanceTestPlans = 'performanceTestPlans';
+const apiPathPerformanceTestRunners = 'performanceTestRunners';
 
 export async function query(params?: QueryParams): Promise<any> {
     return request({
@@ -265,12 +266,25 @@ export async function updateStatus(payload: any): Promise<any> {
     });
 }
 
-export async function listRunnerForPerformanceScenario(performanceScenarioId: any): Promise<any> {
-    const params = {performanceScenarioId}
+export async function listRunner(performanceScenarioId: any): Promise<any> {
+    const params = {scenarioId: performanceScenarioId}
     return request({
-        url: `/${apiPathPerformanceTestPlans}/listRunner`,
+        url: `/${apiPathPerformanceTestRunners}`,
         method: 'GET',
         params,
+    });
+}
+export async function saveRunner(data: any): Promise<any> {
+    return request({
+        url: `/${apiPathPerformanceTestRunners}`,
+        method: 'POST',
+        data: data,
+    });
+}
+export async function removeRunner(id: number): Promise<any> {
+    return request({
+        url: `/${apiPathNodes}/${id}`,
+        method: 'DELETE',
     });
 }
 

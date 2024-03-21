@@ -183,8 +183,8 @@ const onCheckChanged = (item, e) => {
 }
 
 watch(() => modelRef.value.id, val => {
-  console.log('watch modelRef id for listRunnerForPerformanceScenario')
-  store.dispatch('Scenario/listRunnerForPerformanceScenario', detailResult.value.scenarioId);
+  console.log('watch modelRef id for listRunner')
+  store.dispatch('Scenario/listRunner', detailResult.value.scenarioId);
 }, {immediate: true})
 
 watch(() => modelRef.value.runnerIds, val => {

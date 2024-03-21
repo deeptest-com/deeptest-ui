@@ -33,7 +33,10 @@ import {
     importCurl,
     addInterfacesFromCase,
     copyProcessor,
-    listRunnerForPerformanceScenario
+
+    listRunner,
+    saveRunner,
+    removeRunner,
 } from './service';
 
 import {
@@ -53,7 +56,7 @@ import {
     send_request_post,
     assert_common,
 } from "@/views/component/debug/config";
-import {DesignScenarioFor} from "@/utils/enum";
+import {DesignScenarioFor, ProcessorPerformanceRunners} from "@/utils/enum";
 
 export interface StateType {
     scenarioId: number;
@@ -136,7 +139,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         // increaseNodeCount: Mutation<StateType>;
         increaseScenarioCount: Mutation<StateType>;
 
-        setRunnersForPerformanceScenario: Mutation<StateType>;
+        setRunners: Mutation<StateType>;
     };
     actions: {
         setScenarioProcessorIdForDebug: Action<StateType, StateType>;
@@ -194,7 +197,9 @@ export interface ModuleType extends StoreModuleType<StateType> {
         addInterfacesFromCase: Action<StateType, StateType>;
         copyProcessor: Action<StateType, StateType>;
 
-        listRunnerForPerformanceScenario: Action<StateType, StateType>;
+        listRunner: Action<StateType, StateType>;
+        saveRunner: Action<StateType, StateType>;
+        removeRunner: Action<StateType, StateType>;
     }
 }
 
@@ -360,7 +365,7 @@ const StoreModel: ModuleType = {
             state.scenarioCount += 1;
         },
 
-        setRunnersForPerformanceScenario(state, payload) {
+        setRunners(state, payload) {
             state.performanceRunners = payload;
         },
     },
@@ -502,11 +507,16 @@ const StoreModel: ModuleType = {
                 if (!payload) {
                     commit('setNode', {});
                     return true;
+                } else if (payload.entityType === ProcessorPerformanceRunners.PerformanceRunnersDefault) {
+                    commit('setNode', {
+                        processorType: ProcessorPerformanceRunners.PerformanceRunnersDefault,
+                        ...payload,
+                    })
+                    return true
                 }
 
                 const response = await getNode(payload.id);
                 const {data} = response;
-
 
                 commit('setNode', data);
                 return true;
@@ -853,13 +863,31 @@ const StoreModel: ModuleType = {
             }
         },
 
-        async listRunnerForPerformanceScenario({commit, dispatch, state}, performanceScenarioId: number) {
-            const res = await listRunnerForPerformanceScenario(performanceScenarioId);
+        async listRunner({commit, dispatch, state}, scenarioId: number) {
+            const res = await listRunner(scenarioId);
             if (res.code === 0) {
-                commit('setRunnersForPerformanceScenario', res.data ? res.data : []);
+                commit('setRunners', res.data ? res.data : []);
             }
             return true;
-        }
+        },
+        async saveRunner({commit, dispatch, state}, payload: any) {
+            const jsn = await saveRunner(payload)
+            if (jsn.code === 0) {
+                dispatch('listRunner', payload.scenarioId)
+                return true;
+            } else {
+                return false
+            }
+        },
+        async removeRunner({commit, dispatch, state}, payload: any) {
+            const jsn = await removeRunner(payload);
+            if (jsn.code === 0) {
+                dispatch('listRunner', payload.scenarioId)
+                return true;
+            } else {
+                return false
+            }
+        },
     },
 };
 

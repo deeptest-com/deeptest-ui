@@ -272,7 +272,6 @@ const selectNode = (keys, e) => {
   console.log('selectedData', selectedData)
 
   if (selectedData && (isRoot(selectedData.entityCategory) ||
-        selectedData.entityType === ProcessorPerformanceRunners.PerformanceRunnersDefault ||
           selectedData.entityType === ProcessorPerformanceScenarios.PerformanceScenariosDefault)) {
     store.dispatch('Scenario/getNode', null)
     return
