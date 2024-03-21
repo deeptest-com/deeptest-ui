@@ -20,7 +20,8 @@
       :load-api="getDynamicCateogries"
       :need-load-data="true"
       :need-favorite-node="true"
-      :on-tree-node-drop="onTreeNodeDrop">
+      :on-tree-node-drop="onTreeNodeDrop"
+      :load-children="onLoadChildren">
       <template #folderIcon="{ nodeProps }">
         <span class="tree-icon">
           <FolderOutlined v-if="!nodeProps.expanded" />
@@ -50,7 +51,7 @@
     @ok="handleImportEndpoint" />
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watch, computed, createVNode } from 'vue';
+import { onMounted, ref, watch, computed, createVNode, unref } from 'vue';
 import { useStore } from 'vuex';
 import { FolderOutlined, FolderOpenOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue';
 import cloneDeep from "lodash/cloneDeep";
@@ -59,7 +60,7 @@ import {StateType as EndpointStateType} from "@/views/enpoint/store";
 import CreateEndpointModal from "@/views/endpoint/components/CreateEndpointModal.vue";
 import CreateCategoryModal from '@/components/CreateCategoryModal/index.vue';
 import ImportEndpointModal from "@/views/endpoint/components/ImportEndpointModal.vue";
-import { filterByKeyword, loopTree, uniquArrray } from '@/utils/tree';
+import { filterByKeyword, loopTree, transTreeNodesToMap, uniquArrray } from '@/utils/tree';
 import eventBus from '@/utils/eventBus';
 import settings from "@/config/settings";
 import { notifyError, notifySuccess } from '@/utils/notify';
@@ -71,12 +72,23 @@ import { Modal } from 'ant-design-vue';
 import { getDynamicCateogries } from '@/views/endpoint/service';
 import useEndpoint from '../hooks/useEndpoint';
 
-const { updateEndpointNodes, reLoadFavoriteList, updateTreeNodeCount, copyCurl } = useEndpoint();
+const { 
+  updateEndpointNodes, 
+  reLoadFavoriteList, 
+  updateTreeNodeCount, 
+  copyCurl, 
+  updateTreeNodeMap,
+  updateTreeNodes,
+  updateTreeNodesCount,
+} = useEndpoint();
 const store = useStore<{ Endpoint: EndpointStateType }>();
 const imCategoryTree = ref();
 const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
+const treeDataMap = computed(() => store.state.Endpoint.treeDataMapCategory);
 const activeTabs = computed(() => store.state.Endpoint.activeTabs);
 const activeTab = computed(() => store.state.Endpoint.activeTab);
+
+// 初始化tree
 const treeData: any = computed(() => {
   const data = treeDataCategory.value;
   if(!data?.[0]?.id){
@@ -84,26 +96,28 @@ const treeData: any = computed(() => {
   }
   function fn(arr: any) {
     if (!Array.isArray(arr)) {
-      return;
+      return [];
     }
-    arr.forEach((item) => {
-      delete item.slots;
-      item.key = item.id;
-      if (item.parentId === 0) {
-        item.name = '所有API';
+    return arr.map((item) => {
+      const nodeByMap = treeDataMap.value[item.id];
+      const node = { ...item, ...(nodeByMap || {}) };
+      delete node.slots;
+      node.key = node.id;
+      if (node.parentId === 0) {
+        node.name = '所有API';
       }
-      item.dragDisabled = item.parentId === 0 ? true : false;
-      item.title = item.entityId === 0 ? `${item.parentId === 0 ? '所有API' :item.name}(${item.count})` : item.name;
-      item.isLeaf = item.entityId !== 0;
-      if (Array.isArray(item.children)) {
-        fn(item.children)
+      node.dragDisabled = node.parentId === 0 ? true : false;
+      node.title = node.entityId === 0 ? `${node.parentId === 0 ? '所有API' :node.name}(${node.count})` : node.name;
+      node.isLeaf = node.entityId !== 0;
+      if (Array.isArray(node.children)) {
+        node.children = fn(node.children);
       } else {
-        item.children = [];
+        node.children = [];
       }
+      return node;
     });
   }
-  fn(data);
-  return data;
+  return fn(data);
 });
 
 /**
@@ -121,17 +135,15 @@ const handleCreateApiSuccess = (endpointData) => {
   // 更新标签页， 更新左侧树
   store.commit('Endpoint/setActiveTab', endpointData);
   store.commit('Endpoint/setActiveTabs', [...activeTabs.value, endpointData]);
-  store.commit('Endpoint/setTreeDataCategory', 
-    loopTree(
-      treeDataCategory.value, 
-      endpointData.parentId, 
-      (item: any) => {
-        item.children.push(endpointData)
-      }, 
-      'id'
-    )
-  );
+  // 更新 tree map数据
+  const nodeByMap = cloneDeep(treeDataMap.value[endpointData.parentId]);
+  nodeByMap.children = nodeByMap.children || [];
+  nodeByMap.children.push(endpointData);
+  updateTreeNodeMap({ nodeId: endpointData.parentId, data: nodeByMap, type: 'update' });
   updateTreeNodeCount(endpointData.parentId, 'increase');
+  setTimeout(() => {
+    imCategoryTree.value.setSelectedKeys(endpointData.id);
+  }, 300);
 };
 
 /**
@@ -145,6 +157,7 @@ const handleCategoryCancel = () => {
   createCategoryModalVisible.value = false;
 };
 
+// 更新或 创建分类
 const handleCreateCategory = async (data) => {
   const formData = Object.assign(currentNode.value, data);
   const isEdit = categoryModalMode.value === 'edit';
@@ -177,19 +190,25 @@ const handleCreateCategory = async (data) => {
       type: 'im-dir'
     } : {};
     // 更新左侧树， 是否需要打开分类的tab
-    store.commit('Endpoint/setTreeDataCategory', loopTree(treeDataCategory.value, isEdit ? currentNode.value.parentId : formData.id, item => {
-      if (isEdit) {
-        item.children = item.children.map(e => {
-          if (e.id === currentNode.value.id) {
-            e.name = formData.name;
-          }
-          return e;
-        });
-      } else {
-        const findIndex = item.children.findIndex(e => e.entityId !== 0);
-        findIndex === -1 ? item.children.push(newCategoryNode) : item.children.splice(findIndex, 0, newCategoryNode)
-      }
-    }, 'id'))
+    if (isEdit) {
+      const newNode = treeDataMap.value[formData.id];
+      newNode.name = formData.name;
+      updateTreeNodeMap({ nodeId: formData.id, data: newNode, type: 'update' });
+    } else {
+      updateTreeNodes();
+      updateTreeNodeMap({ nodeId: res.data.id, data: newCategoryNode, type: 'add' });
+      const parentNode = treeDataMap.value[formData.id];
+      parentNode.children = parentNode.children || [];
+      const findIndex = parentNode.children.findIndex(e => e.entityId !== 0);
+      findIndex === -1 ? parentNode.children.push(newCategoryNode) : parentNode.children.splice(findIndex, 0, newCategoryNode);
+      updateTreeNodeMap({ nodeId: formData.id, data: parentNode, type: 'update' });
+
+      setTimeout(() => {
+        imCategoryTree.value.setSelectedKeys(res.data.id);
+      }, 300);
+    }
+
+    // 设置 动态标签页
     if (categoryModalMode.value === 'edit') {
       if (currentNode.value.id === activeTab.value.id) {
         // 修改的是当前分类的名字
@@ -226,6 +245,7 @@ const editCategory = (node: any) => {
   createCategoryModalVisible.value = true;
 };
 
+// 删除分类
 const delCategory = (node: any) => {
   confirmToDelete(
     '将级联删除分类下的所有子分类、接口定义、调试信息等','删除后无法恢复，请确认是否删除？',
@@ -237,13 +257,20 @@ const delCategory = (node: any) => {
         projectId: await getCache(settings.currProjectId)
       });
       if (res) {
-        store.commit('Endpoint/setTreeDataCategory', loopTree(treeData.value, node.parentId, item => {
-          item.children = item.children.filter(e => e.id !== node.id);
-        }, 'id'));
+        const parentNode = treeDataMap.value[node.dataRef.parentId];
+        parentNode.children = (parentNode.children || []).filter(e => e.id !== node.id);
+        updateTreeNodeMap([
+          { nodeId: node.id, data: {}, type: 'delete' },
+          { nodeId: node.parentId, data: parentNode, type: 'update' },
+        ]);
+        updateTreeNodeCount(node.parentId, 'decrease', node.count || 0);
         store.dispatch('Endpoint/removeActiveTab', node.id);
         store.dispatch('Endpoint/removeTabs', { data: node.children || [] });
-        updateTreeNodeCount(node.parentId, 'decrease', node.count || 0);
         notifySuccess('删除成功');
+
+        setTimeout(() => {
+          imCategoryTree.value.setSelectedKeys(imCategoryTree.value.getSelectedKeys())
+        }, 300);
       } else {
         notifyError('删除失败');
       }
@@ -295,13 +322,18 @@ const cloneCategory = (node) => {
           key: res.id,
           isLeaf: false,
         };
-        store.commit('Endpoint/setTreeDataCategory', loopTree(treeDataCategory.value, node.parentId, item => {
-          const findIndex = item.children.findIndex(e => e.entityId !== 0);
-          findIndex === -1 ? item.children.push(newCategoryNode) : item.children.splice(findIndex, 0, newCategoryNode)
-        }, 'id'));
+        const parentNode = treeDataMap.value[node.parentId];
+        parentNode.children = parentNode.children || [];
+        const findIndex = parentNode.children.findIndex(e => e.entityId !== 0);
+        findIndex === -1 ? parentNode.children.push(newCategoryNode) : parentNode.children.splice(findIndex, 0, newCategoryNode);
+        updateTreeNodeMap({ nodeId: node.parentId, data: parentNode, type: 'update' });
+        updateTreeNodeCount(node.parentId, 'increase', node.count);
         store.commit('Endpoint/setActiveTab', newCategoryNode);
         store.commit('Endpoint/setActiveTabs', [...activeTabs.value, newCategoryNode]);
-        updateTreeNodeCount(node.parentId, 'increase', node.count);
+
+        setTimeout(() => {
+          imCategoryTree.value.setSelectedKeys(newCategoryNode.id);
+        }, 300);
       }else {
         notifyError('复制失败');
       }
@@ -326,6 +358,10 @@ const cloneEndpoint = async (nodeProps) => {
         }
         updateEndpointNodes(nodeProps.parentId);
         updateTreeNodeCount(nodeProps.parentId, 'increase');
+
+        // setTimeout(() => {
+        //   imCategoryTree.value.setSelectedKeys(res.id);
+        // }, 500);
       }else {
         notifyError('复制失败');
       }
@@ -526,36 +562,41 @@ const onTreeNodeDrop = async (...args) => {
   });
   if (res) {
     notifySuccess('移动成功');
-    const currDragNode = {
-      ...dragNode.dataRef,
-      parentId: node.dataRef?.id,
-    };
+    const oldParentId = dragNode.dataRef.parentId; // 节点或目录所属的旧父节点
+    const targetId = node.dataRef.id; // 目标节点
+    const newParentId = node.dataRef?.parentId; // 目标节点父节点
+
+    // 更新动态标签页
     if (activeTab.value?.id === dragNode.dataRef?.parentId) {
       // 如果是给当前选中的分类下 添加了接口，则刷新右侧的列表
       setTimeout(() => {
         eventBus.emit(settings.eventEndpointAction, { type: 'getEndpointsList', categoryId: activeTab.value?.id });
       }, 500);
     }
-    store.commit('Endpoint/setTreeDataCategory', loopTree(treeDataCategory.value, dragNode.dataRef.parentId, item => {
-      item.children = (item.children || []).filter(e => e.id !== dragNode.dataRef?.id);
-    }, 'id'));
+
+    const currDragNode = {
+      ...dragNode.dataRef,
+      parentId: node.dataRef?.id,
+    };
+    const oldParentNode = treeDataMap.value[oldParentId];
+    oldParentNode.children = (oldParentNode.children || []).filter(e => e.id !== dragNode.dataRef?.id);
+    updateTreeNodeMap({ nodeId: dragNode.dataRef?.parentId, data: oldParentNode, type: 'update' });
+    const newParentNode = treeDataMap.value[newParentId];
+    newParentNode.children = newParentNode.children || [];
+    const newNode = treeDataMap.value[targetId];
+    newNode.children = newNode.children || [];
+    
     if (dragPos !== 0) {
       // 将内部节点拖拽到根目录下
-      store.commit('Endpoint/setTreeDataCategory', loopTree(treeDataCategory.value, node.dataRef?.parentId, item => {
-        const find = item.children.findIndex(e => e.id === node.dataRef?.id);
-        item.children.splice(find + 1, 0, currDragNode);
-      }, 'id'));
+      const find = newParentNode.children.findIndex(e => e.id === node.dataRef?.id);
+      newParentNode.children.splice(find + 1, 0, currDragNode);
+      updateTreeNodeMap({ nodeId: newParentId, data: newParentNode, type: 'update' });
     } else {
-      // 拖拽到内部的其他节点上
-      store.commit('Endpoint/setTreeDataCategory', loopTree(treeDataCategory.value, node.dataRef.id, item => {
-        const findIndex = item.children.findIndex(e => e.entityId !== 0);
-          if (!node.dataRef?.entityData) {
-            item.children.splice(findIndex, 0, currDragNode);
-          } else {
-            item.children.push(currDragNode);
-          }
-      }, 'id'));
+      const findIndex = newNode.children.findIndex(e => e.entityId !== 0);
+      (findIndex === -1 || dragNode.dataRef?.entityData) ? newNode.children.push(currDragNode) : newNode.children.splice(findIndex, 0, currDragNode);
+      updateTreeNodeMap({ nodeId: targetId, data: newNode, type: 'update' });
     }
+    updateTreeNodesCount()
     const currSelectedKey = imCategoryTree.value.getSelectedKeys();
     imCategoryTree.value.setSelectedKeys(currSelectedKey[0]);
     notifySuccess('移动成功');
@@ -564,8 +605,13 @@ const onTreeNodeDrop = async (...args) => {
   }
 }
 
+const onLoadChildren = (evt) => {
+  updateTreeNodeMap({ ...evt, type: 'update' });
+}
+
 const loadCategoryOnlyDir = async () => {
   await store.dispatch('Endpoint/loadCategory', 'dir');
+  store.commit('Endpoint/setTreeDataMapCategory', transTreeNodesToMap(treeDataCategory.value));
 }
 
 const initActiveTab = () => {
@@ -574,7 +620,8 @@ const initActiveTab = () => {
   imCategoryTree.value.onTreeLoad({ dataRef: treeDataCategory?.value?.[0] });
   const activeNode = {
     ...treeDataCategory.value?.[0],
-    type: 'im-dir'
+    type: 'im-dir',
+    key: treeDataCategory.value?.[0]?.id,
   };
   store.commit('Endpoint/setActiveTab', activeNode);
   store.commit('Endpoint/setActiveTabs', [activeNode]);

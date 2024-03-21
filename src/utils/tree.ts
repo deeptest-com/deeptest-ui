@@ -211,3 +211,22 @@ export const removeLeafNode = (data) => {
 
     return [...arrayData];
 }
+
+/**
+ * 将树结构转化为map结构
+ * @param treeData 
+ * @returns 
+ */
+export const transTreeNodesToMap = (treeData: any[]): any => {
+    const nodesMap: any = {};
+    treeData.forEach(node => {
+        if (!nodesMap[node.id]) {
+            nodesMap[node.id] = node;
+        }
+        if (Array.isArray(node.children)) {
+            const res = transTreeNodesToMap(node.children);
+            Object.assign(nodesMap, res);
+        }
+    })
+    return nodesMap;
+};

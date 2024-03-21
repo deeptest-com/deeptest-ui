@@ -771,9 +771,6 @@ const StoreModel: ModuleType = {
             if (response.code != 0) return;
             const {data} = response;
             commit('setTreeDataCategory', data || []);
-            const mp = {}
-            getNodeMap(data, mp)
-            commit('setTreeDataMapCategory', mp);
             return true;
         },
         async getCategoryNode({commit}, payload: any) {

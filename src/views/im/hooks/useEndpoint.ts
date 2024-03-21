@@ -8,7 +8,13 @@ import { loadCurl } from "@/views/component/debug/service";
 import { UsedBy } from "@/utils/enum";
 import { notifySuccess } from "@/utils/notify";
 import useClipBoard from "@/composables/useClipboard";
+import { loadCategory } from "@/services/category";
 
+interface TreeMapNode {
+  nodeId: number;
+  data?: any;
+  type: string; // update / add / delete
+}
 
 const findNodeByRefId = (entityId: number, treeNodes: any[]) => {
   for (let i = 0; i < treeNodes.length; i ++ ) {
@@ -28,6 +34,9 @@ function useEndpoint() {
   const treeData = computed(() => {
     return store.state.Endpoint.treeDataCategory;
   });
+  const treeDataMap = computed(() => {
+    return store.state.Endpoint.treeDataMapCategory;
+  });
   const activeTabs = computed(() => store.state.Endpoint.activeTabs);
   const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
   const { copy } = useClipBoard();
@@ -43,9 +52,9 @@ function useEndpoint() {
     const findTab = activeTabs.value.find(e => (e?.entityData?.id || e.entityId) === record.id);
     if (!endpointNode) {
       const leafNodes = await updateEndpointNodes(record.categoryId);
-      store.commit('Endpoint/setTreeDataCategory', loopTree(treeData.value, record.categoryId, item => {
-        item.children = [...item.children.filter(e => e.entityId === 0), ...leafNodes];
-      }, 'id'))
+      const parentNode = treeDataMap.value[record.categoryId];
+      parentNode.children = [...(parentNode.children || []).filter(e => e.entityId === 0), ...leafNodes];
+      updateTreeNodeMap({ nodeId: record.categoryId, data: parentNode, type: 'update' });
       endpointNode = leafNodes.find(e => (e.entityId || e.entityData?.id) === record.id);
     }
     endpointNode.activeMethod = endpointNode.entityData?.method?.[0] || 'GET';
@@ -68,9 +77,9 @@ function useEndpoint() {
       key: e.id,
       activeMethod: e?.entityData?.method?.[0],
     }));
-    store.commit('Endpoint/setTreeDataCategory', loopTree(treeData.value, categoryId, item => {
-      item.children = [...item.children.filter(e => e.entityId === 0), ...leafNodes];
-    }, 'id'));
+    const parentNode = treeDataMap.value[categoryId];
+    parentNode.children = [...(parentNode.children || []).filter(e => e.entityId === 0), ...leafNodes];
+    updateTreeNodeMap({ nodeId: categoryId, data: parentNode, type: 'update' });
     return leafNodes;
   };
 
@@ -88,21 +97,15 @@ function useEndpoint() {
    * @param num 删除/新增数目
    */
   const updateTreeNodeCount = (nodeId, type: string, num = 1) => {
-    const parentPath = findPath(nodeId, treeData.value);
-
-    const data = cloneDeep(treeData.value);
-    const updateNodeCounts = (data) => {
-      data.forEach((item) => {
-        if (parentPath.includes(item.id)) {
-          item.count = type === 'increase' ? item.count + num : item.count - num;
-        }
-        if (Array.isArray(item.children)) {
-          updateNodeCounts(item.children);
-        }
-      })
+    const lastTreeNodeMap = cloneDeep(treeDataMap.value || {});
+    const updateNodeCounts = (id: number) => {
+      lastTreeNodeMap[id].count = type === 'increase' ? lastTreeNodeMap[id].count + num : lastTreeNodeMap[id].count - num;
+      if (lastTreeNodeMap[id].parentId !== 0) {
+        updateNodeCounts(lastTreeNodeMap[id].parentId);
+      }
     }
-    updateNodeCounts(data);
-    store.commit('Endpoint/setTreeDataCategory', cloneDeep(data));
+    updateNodeCounts(nodeId);
+    store.commit('Endpoint/setTreeDataMapCategory', lastTreeNodeMap);
   };
 
   /**
@@ -127,6 +130,62 @@ function useEndpoint() {
     await store.dispatch('Endpoint/disabled', record);
   };
 
+  /**
+   * 更新tree
+   */
+  const updateTreeNodes = async() => {
+    let newTreeNodesData = [];
+    const res = await loadCategory('endpoint', 'dir');
+    if (res.code === 0) {
+      newTreeNodesData = Array.isArray(res.data) ? res.data : [res.data];
+      store.commit('Endpoint/setTreeDataCategory', newTreeNodesData);
+      return newTreeNodesData;
+    }
+    return false;
+  };
+
+  /**
+   * 更新tree map,支持单次更新或批量更新
+   * @param data 
+   */
+  const updateTreeNodeMap = async (data: TreeMapNode | TreeMapNode[]) => {
+    console.log('更新tree map', data);
+    const lastTreeNodeMap = cloneDeep(treeDataMap.value || {});
+    const updateLastTreeNodeMap = (node) => {
+      if (node.type === 'delete') {
+        delete lastTreeNodeMap[node.nodeId];
+      } else {
+        lastTreeNodeMap[node.nodeId] = node.data;
+      }
+    }
+    if (Array.isArray(data)) {
+      data.forEach(node => {
+        updateLastTreeNodeMap(node);
+      })
+    } else {
+      updateLastTreeNodeMap(data);
+    }
+    store.commit('Endpoint/setTreeDataMapCategory', lastTreeNodeMap);
+  };
+
+  const updateTreeNodesCount = async () => {
+    const res = await loadCategory('endpoint', 'dir');
+    const lastTreeNodeMap = cloneDeep(treeDataMap.value);
+    if (res.code === 0) {
+      const newTreeNodesData = Array.isArray(res.data) ? res.data : [res.data];
+      const updateCount = (data: any[]) => {
+        data.forEach(e => {
+          lastTreeNodeMap[e.id].count = e.count;
+          if (Array.isArray(e.children)) {
+            updateCount(e.children);
+          }
+        })
+      };
+      updateCount(newTreeNodesData);
+    }
+    store.commit('Endpoint/setTreeDataMapCategory', lastTreeNodeMap);
+  };
+
   return {
     openEndpointTab,
     updateEndpointNodes,
@@ -134,6 +193,9 @@ function useEndpoint() {
     updateTreeNodeCount,
     copyCurl,
     disabledEndpoint,
+    updateTreeNodeMap,
+    updateTreeNodes,
+    updateTreeNodesCount,
   }
 }
 

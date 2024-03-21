@@ -80,6 +80,11 @@ const CategoryTreeProps = {
   draggable: {
     type: [Boolean, Function],
     default: false,
+  },
+  loadChildren: {
+    type: Function,
+    default: (..._args: any[]) => {},
+    required: false,
   }
 }
 
@@ -335,11 +340,14 @@ const CategoryTree = defineComponent({
           nodeType: 'node',
         }).then(res => {
           if (res.code === 0) {
-            treeNode.dataRef.children = [...treeNode.dataRef.children.filter(e => e.entityId === 0), ...(res.data || [])];
-            const tree = loopTree([...props.treeData], treeNode.dataRef.id, item => {
-              item.children = treeNode.dataRef.children || []
-            } ,'id');
-            store.commit('Endpoint/setTreeDataCategory', tree);
+            treeNode.dataRef.children = [...treeNode.dataRef.children.filter(e => e.entityId === 0), ...(res.data || []).map(e => {
+              delete e.slots;
+              return e;
+            })];
+            props.loadChildren({
+              nodeId: treeNode.dataRef.id,
+              data: treeNode.dataRef,
+            });
           }
           resolve();
         }).catch(err => {

@@ -284,7 +284,7 @@ const del = record => {
     onOk: async () => {
       isFetching.value = true;
       const res = await store.dispatch('Endpoint/del', record);
-      updateEndpointNodes(props.categoryId);
+      updateEndpointNodes(record.categoryId);
       updateTreeNodeCount(record.categoryId, 'decrease', 1);
       isFetching.value = false
       if (res) {
