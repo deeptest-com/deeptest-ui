@@ -1,34 +1,33 @@
 <template>
   <div class="im-tree-container">
-    <div :class="{'im-tree-loading': true, 'loading': spinning}">
-      <a-spin :spinning="spinning"/>
-    </div>
-    <CategoryTree
-      prefixCls="im-category-tree-container"
-      ref="imCategoryTree"
-      category-type="endpoint"
-      :tree-data="treeData" 
-      :auto-expand-parent="false"
-      :show-folder-icon="true"
-      :checked="false"
-      :context-menu-list="nodeMenuList"
-      :root-context-menu-list="rootContextMenuList"
-      :draggable="checkDraggable"
-      :show-more-icon="showMoreIcon"
-      :is-dir-node-clicked="true"
-      :on-tree-node-clicked="onTreeNodeClick"
-      :load-api="getDynamicCateogries"
-      :need-load-data="true"
-      :need-favorite-node="true"
-      :on-tree-node-drop="onTreeNodeDrop"
-      :load-children="onLoadChildren">
-      <template #folderIcon="{ nodeProps }">
-        <span class="tree-icon">
-          <FolderOutlined v-if="!nodeProps.expanded" />
-          <FolderOpenOutlined v-else/>
-        </span>
-      </template>
-    </CategoryTree>
+    <a-spin :spinning="spinning">
+      <CategoryTree
+        prefixCls="im-category-tree-container"
+        ref="imCategoryTree"
+        category-type="endpoint"
+        :tree-data="treeData" 
+        :auto-expand-parent="false"
+        :show-folder-icon="true"
+        :checked="false"
+        :context-menu-list="nodeMenuList"
+        :root-context-menu-list="rootContextMenuList"
+        :draggable="checkDraggable"
+        :show-more-icon="showMoreIcon"
+        :is-dir-node-clicked="true"
+        :on-tree-node-clicked="onTreeNodeClick"
+        :load-api="getDynamicCateogries"
+        :need-load-data="true"
+        :need-favorite-node="true"
+        :on-tree-node-drop="onTreeNodeDrop"
+        :load-children="onLoadChildren">
+        <template #folderIcon="{ nodeProps }">
+          <span class="tree-icon">
+            <FolderOutlined v-if="!nodeProps.expanded" />
+            <FolderOpenOutlined v-else/>
+          </span>
+        </template>
+      </CategoryTree>
+    </a-spin>
   </div>
   <!-- 创建接口弹窗 -->
   <CreateEndpointModal 
