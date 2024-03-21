@@ -236,8 +236,9 @@ const CategoryTree = defineComponent({
       title: (nodeProps) => {
         return (
           <div class="tree-title">
-            {(nodeProps.dataRef.entityId === 0 || nodeProps.dataRef.type === 'dir') && slots.folderIcon && slots.folderIcon({ nodeProps })}
+            {(nodeProps.dataRef.entityId === 0 || nodeProps.dataRef.type === 'dir') && nodeProps.dataRef.id !== -1000 && slots.folderIcon && slots.folderIcon({ nodeProps })}
             {(nodeProps.dataRef.entityId !== 0 || (nodeProps.dataRef.type && nodeProps.dataRef.type !== 'dir')) && slots.nodeIcon && slots.nodeIcon()}
+            {nodeProps.dataRef.id === -1000 && slots.favorIcon && slots.favorIcon({ nodeProps })}
             {renderTitle(nodeProps, searchValue.value)}
             {renderMore(nodeProps, props)}
           </div>

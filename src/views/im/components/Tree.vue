@@ -26,6 +26,12 @@
             <FolderOpenOutlined v-else/>
           </span>
         </template>
+        <template #favorIcon="{ nodeProps }">
+          <span class="tree-icon">
+            <StarOutlined v-if="!nodeProps.expanded" />
+            <StarTwoTone v-else/>
+          </span>
+        </template>
       </CategoryTree>
     </a-spin>
   </div>
@@ -52,7 +58,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch, computed, createVNode, unref } from 'vue';
 import { useStore } from 'vuex';
-import { FolderOutlined, FolderOpenOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue';
+import { FolderOutlined, FolderOpenOutlined, ExclamationCircleOutlined, StarOutlined, StarTwoTone } from '@ant-design/icons-vue';
 import cloneDeep from "lodash/cloneDeep";
 import CategoryTree from '@/components/CategoryTree';
 import {StateType as EndpointStateType} from "@/views/enpoint/store";
