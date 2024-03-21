@@ -1,7 +1,9 @@
 import request from "@/utils/request";
 import {QueryParams} from "./data";
+import axios, {AxiosInstance, AxiosResponse} from "axios";
 
 const apiPath = 'performanceTestPlans';
+const apiPathState = 'performanceState';
 
 // plan list
 export async function query(params?: QueryParams): Promise<any> {
@@ -205,4 +207,24 @@ export const genNetworkMetricsChart = (timestamp, metrics, chartData, indexMap) 
             indexMap[serialsName] = chartData.series.length - 1
         }
     })
+}
+
+// agent web api - performance
+function createAgentRequest(agentWebAddress: string) :AxiosInstance  {
+    const baseURL = `http://${agentWebAddress}/api/v1/`
+
+    const request = axios.create({
+        baseURL
+    });
+
+    return request
+}
+export async function getPerformanceState(agentWebAddress: string): Promise<any> {
+    const request = createAgentRequest(agentWebAddress);
+
+    const path = '/performanceState'
+
+    return request({url: path})
+        .then((response: AxiosResponse) => response.data)
+        .catch(err => { console.log('request to agent error', err) });
 }
