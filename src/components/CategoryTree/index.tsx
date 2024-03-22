@@ -352,7 +352,6 @@ const CategoryTree = defineComponent({
           }
           resolve();
         }).catch(err => {
-          console.log(err);
           resolve();
         })
       });

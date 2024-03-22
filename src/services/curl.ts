@@ -5,7 +5,6 @@ import {UsedBy} from "@/utils/enum";
 import useCopy from "@/composables/useClipboard";
 
 export const doCopyCurl = async (selectedMethodDetail, debugData, environmentId) => {
-    console.log('copyCurl', selectedMethodDetail, debugData)
     const { copy }  = useCopy();
     let resp = {} as any
 

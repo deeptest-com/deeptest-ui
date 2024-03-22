@@ -105,7 +105,7 @@ export const DrawerAction = defineComponent({
 
       const copyCurlSlots = {
         default: () => {
-          return <a-tooltip placement={props.showFullScreen ? 'right' : 'top'} v-slots={copyCurlTooltipSlots} />
+          return <a-tooltip placement="left" v-slots={copyCurlTooltipSlots} />
         },
         overlay: () => {
           return (
@@ -125,14 +125,14 @@ export const DrawerAction = defineComponent({
         <div class="drawer-action" onClick={e => handleClick(e)}>
           {props.showStar && (
             <div class="drawer-action-item" data-action="toFavorite">
-              <a-tooltip placement="bottom" title={isFavorite.value ? '取消收藏' : '收藏'}>
+              <a-tooltip placement="left" title={isFavorite.value ? '取消收藏' : '收藏'}>
                 {isFavorite.value ? <StarFilled style={{ color: '#1677ff' }}  /> : <StarOutlined /> }
               </a-tooltip>
             </div>
           )}
           {props.showDetail &&  (
             <div class="drawer-action-item" data-action="detail">
-              <a-tooltip placement="bottom" title="详情">
+              <a-tooltip placement="left" title="详情">
                 <SelectOutlined />
               </a-tooltip>
             </div>
@@ -144,7 +144,7 @@ export const DrawerAction = defineComponent({
           )}
           {props.showFullScreen &&  (
             <div class="drawer-action-item" data-action={isFullScreen.value ? 'exitFullScreen' : 'fullScreen'}>
-              <a-tooltip placement="bottom" title={isFullScreen.value ? '退出全屏' : '全屏'}>
+              <a-tooltip placement="left" title={isFullScreen.value ? '退出全屏' : '全屏'}>
                 {isFullScreen.value ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
               </a-tooltip>
             </div>

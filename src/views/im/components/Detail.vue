@@ -86,12 +86,9 @@ import Swal from "sweetalert2";
 import settings from "@/config/settings";
 import bus from "@/utils/eventBus";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
-import {loadCurl} from "@/views/component/debug/service";
-import {UsedBy} from "@/utils/enum";
 import {doCopyCurl} from "@/services/curl";
 import useClipboard from "@/composables/useClipboard";
 import {useWujie} from "@/composables/useWujie";
-import { loopTree } from '@/utils/tree';
 import useEndpoint from '../hooks/useEndpoint';
 
 const props = defineProps<{
@@ -417,7 +414,6 @@ onBeforeRouteLeave(async (to, from,next) => {
     }
     // isDismissed: false 取消,即什么也不做
     else if (result.isDismissed) {
-      console.log('保留');
       return false;
     }
   }
@@ -456,7 +452,6 @@ onBeforeRouteLeave(async (to, from,next) => {
 })
 
 const copyCurl = async () => {
-  console.log('copyCurl', selectedMethodDetail.value, debugData.value)
   doCopyCurl(selectedMethodDetail.value, debugData.value, environmentId.value)
 }
 
@@ -483,6 +478,18 @@ provide('shareLink', shareLink);
  */
 const isFullScreen = ref(false);
 const setFullScreen = (value) => {
+  if (isInLeyanWujieContainer) {
+    if (value) {
+      // modal 显示
+      window?.$wujie?.bus.$emit(settings.sendMsgToLeyan, {
+        type: 'openModalOrDrawerEl'
+      })
+    } else {
+      window?.$wujie?.bus.$emit(settings.sendMsgToLeyan, {
+        type: 'closeModalOrDrawerEl'
+      })
+    }
+  }
   isFullScreen.value = value;
   const el: any = document.querySelector('#indexlayout-right-top');
   if (value) {
