@@ -115,11 +115,12 @@ watch(() => props.model, val => {
 }, {immediate: true, deep: true})
 
 const submit = debounce(() => {
-    const data = {scenarioId: nodeData.value.scenarioId, ...modelRef.value}
-    console.log('submit', data)
+    console.log('submit')
 
     validate().then(async () => {
-      const res = await store.dispatch('Scenario/saveRunner', data);
+      const res = await store.dispatch('Scenario/saveRunner',
+          {scenarioId: nodeData.value.scenarioId, ...modelRef.value});
+
       if (res === true) {
         notifySuccess('保存成功');
       } else {
