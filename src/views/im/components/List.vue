@@ -40,10 +40,10 @@
               <div class="notice-icon">
                 <a-tooltip v-if="record.changedStatus > ChangedStatus.NoChanged" :overlayClassName="'diff-custom-tooltip'">
                   <template #title>
-                    <span>{{record.changedStatus == ChangedStatus.Changed?'待处理':'已处理'}}，{{record.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a @click="showDiff(record.id)">查看详情</a></span>
+                    <span>{{record.changedStatus == ChangedStatus.Changed?'待处理':'已处理'}}，{{record.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a @click="showDiff(record)">查看详情</a></span>
                   </template>
-                  <WarningFilled v-if="record.changedStatus == ChangedStatus.Changed"  @click="showDiff(record.id)" :style="{color: '#fb8b06'}" />
-                  <InfoCircleOutlined  v-if="record.changedStatus == ChangedStatus.IgnoreChanged"  @click="showDiff(record.id)" :style="{color: '#c6c6c6'}" />
+                  <WarningFilled v-if="record.changedStatus == ChangedStatus.Changed"  @click="showDiff(record)" :style="{color: '#fb8b06'}" />
+                  <InfoCircleOutlined  v-if="record.changedStatus == ChangedStatus.IgnoreChanged"  @click="showDiff(record)" :style="{color: '#c6c6c6'}" />
                 </a-tooltip>
               </div>
               <EditAndShowField
@@ -125,6 +125,7 @@
     :selectedCategoryId="selectedCategoryId"
     @ok="handleCreateApiSuccess"
     @cancel="createEndpointModalVisible = false" />
+  <Diff @callback="editEndpoint"/>  
 </template>
 <script setup lang="ts">
 import { defineProps, onMounted, computed, ref, watch, createVNode } from 'vue';
@@ -132,7 +133,6 @@ import { useStore } from 'vuex';
 import debounce from "lodash.debounce";
 import { Modal } from 'ant-design-vue';
 import { ExclamationCircleOutlined, WarningFilled, InfoCircleOutlined } from '@ant-design/icons-vue';
-import cloneDeep from "lodash/cloneDeep";
 
 import {Endpoint, PaginationConfig} from "@/views/im/data";
 import EditAndShowField from '@/components/EditAndShow/index.vue';
@@ -142,6 +142,7 @@ import PermissionButton from "@/components/PermissionButton/index.vue";
 import TooltipCell from '@/components/Table/tooltipCell.vue';
 import {DropdownActionMenu} from '@/components/DropDownMenu/index';
 import CreateEndpointModal from "@/views/endpoint/components/CreateEndpointModal.vue";
+import Diff from "@/views/endpoint/components/Drawer/Define/Diff/index.vue";
 import TableFilter from './TableFilter.vue';
 import Tags from './Tags.vue';
 
@@ -472,9 +473,10 @@ const handleCreateApiSuccess = (endpointData) => {
   updateTreeNodeCount(endpointData.parentId, 'increase', 1);
 };
 
-function showDiff(id: number) {
+function showDiff(record) {
   store.commit('Endpoint/setDiffModalVisible', {
-    endpointId: id,
+    endpointId: record.id,
+    record,
     visible: true,
     projectId: currProject.value.id,
     callPlace: 'list'
@@ -532,6 +534,15 @@ onMounted(() => {
 :deep(.top-action .ant-row.ant-form-item) {
   margin: 0;
 }
+
+.customTitleColRender {
+  display: flex;
+
+  .notice-icon {
+    margin-right: 6px;
+  }
+}
+
 
 .customPathColRender {
   display: flex;
