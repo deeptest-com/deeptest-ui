@@ -42,14 +42,15 @@
                 </div>
               </a-tab-pane>
               <template #tabBarExtraContent>
-                <a-dropdown placement="bottomLeft">
-                  <span style="margin-right: 20px;cursor: pointer;"><EllipsisOutlined /></span>
-                  <template #overlay>
-                    <a-menu @click="e => handleMenuClick(e)">
-                      <a-menu-item v-for="item in dropdownMenu" :key="item.key">{{ item.label }}</a-menu-item>
-                    </a-menu>
-                  </template>
-                </a-dropdown>
+                <div 
+                  :class="['extra-menu', dropdownVisible ? 'visible' : '']" 
+                  @mouseenter="dropdownVisible = true" 
+                  @mouseleave="dropdownVisible = false">
+                  <span style="cursor: pointer;margin-right: 20px;"><EllipsisOutlined /></span>
+                  <a-menu @click="e => handleMenuClick(e)">
+                    <a-menu-item v-for="(item) in dropdownMenu" :key="item.key">{{ item.label }}</a-menu-item>
+                  </a-menu>
+                </div>
               </template>
             </a-tabs>
           </div>
@@ -96,7 +97,7 @@ const activeTabs = computed(() => {
 });
 
 const endpointDetail = computed(() => store.state.Endpoint.endpointDetail);
-
+const dropdownVisible = ref(false);
 const dropdownMenu = [
   {
     key: "close_cur",
@@ -113,6 +114,7 @@ const dropdownMenu = [
 ];
 
 const handleMenuClick = (evt, record?: any) => {
+  dropdownVisible.value = false;
   switch(evt.key) {
     case 'close_cur':
       if (!record || record?.id === activeTab.value.id) {
@@ -260,6 +262,10 @@ watch(() => {
         }
       }
     }
+
+    .ant-tabs-extra-content {
+      
+    }
   }
 
   .endpoint-tab-content {
@@ -270,6 +276,47 @@ watch(() => {
 
     &.schema {
       overflow-y: scroll;
+    }
+  }
+
+  .extra-menu {
+    position: relative;
+
+    &.visible {
+      :deep(.ant-menu) {
+        height: max-content;
+        transition: all .3s ease-in-out;
+        opacity: 1;
+      }
+    }
+
+    :deep(.ant-menu) {
+      position: absolute;
+      width: 122px;
+      right: 16px;
+      top: 32px;
+      background-color: white;
+      height: 0;
+      box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      transition: all .3s ease-in-out;
+      opacity: 0;
+      z-index: 9999;
+      .ant-menu-item {
+        padding: 0;
+        margin: 0;
+        line-height: 32px;
+        height: 32px !important;
+        text-align: center;
+
+        &:first-child {
+          margin-top: 4px;
+        }
+
+        &:last-child {
+          margin-bottom: 4px;
+        }
+      }
     }
   }
 }
