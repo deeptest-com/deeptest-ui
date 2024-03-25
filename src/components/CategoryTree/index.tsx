@@ -152,7 +152,7 @@ const renderInterfaceTitle = (nodeProps, searchValue) => {
 
 const renderMore = (nodeProps, props) => {
   return (
-    props.showMoreIcon(nodeProps) && nodeProps.dataRef.id !== -1000 && nodeProps.dataRef.parentId !== -1000 && (
+    props.showMoreIcon(nodeProps) && nodeProps.dataRef.id !== -1000 && (
       <span class="more-icon">
         <DropdownActionMenu dropdownList={props.contextMenuList} record={nodeProps}/>
       </span>
@@ -365,11 +365,24 @@ const CategoryTree = defineComponent({
       return selectedKeys.value;
     }
 
+    const getExpandKeys = () => {
+      return expandedKeys.value;
+    }
+
     onMounted(() => {
       getVirtualHeight();
     })
     
-    expose({ initTree, setSelectedKeys, scrollToSelectedNode, getVirtualHeight, clearSearchValue, onTreeLoad, getSelectedKeys });
+    expose({ 
+      initTree, 
+      setSelectedKeys, 
+      scrollToSelectedNode, 
+      getVirtualHeight, 
+      clearSearchValue, 
+      onTreeLoad, 
+      getSelectedKeys, 
+      getExpandKeys 
+    });
     return () => {
       return (
         <div class={["category-tree-container", props.prefixCls]}>

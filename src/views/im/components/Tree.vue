@@ -65,7 +65,7 @@ import {StateType as EndpointStateType} from "@/views/enpoint/store";
 import CreateEndpointModal from "@/views/endpoint/components/CreateEndpointModal.vue";
 import CreateCategoryModal from '@/components/CreateCategoryModal/index.vue';
 import ImportEndpointModal from "@/views/endpoint/components/ImportEndpointModal.vue";
-import { filterByKeyword, loopTree, transTreeNodesToMap, uniquArrray } from '@/utils/tree';
+import { transTreeNodesToMap, uniquArrray } from '@/utils/tree';
 import eventBus from '@/utils/eventBus';
 import settings from "@/config/settings";
 import { notifyError, notifySuccess } from '@/utils/notify';
@@ -76,6 +76,7 @@ import usePermission from '@/composables/usePermission';
 import { Modal } from 'ant-design-vue';
 import { getDynamicCateogries } from '@/views/endpoint/service';
 import useEndpoint from '../hooks/useEndpoint';
+import { useRoute } from 'vue-router';
 
 const { 
   updateEndpointNodes, 
@@ -85,6 +86,7 @@ const {
   updateTreeNodeMap,
   updateTreeNodes,
   updateTreeNodesCount,
+  openEndpointTab,
 } = useEndpoint();
 const store = useStore<{ Endpoint: EndpointStateType }>();
 const imCategoryTree = ref();
@@ -92,6 +94,8 @@ const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCatego
 const treeDataMap = computed(() => store.state.Endpoint.treeDataMapCategory);
 const activeTabs = computed(() => store.state.Endpoint.activeTabs);
 const activeTab = computed(() => store.state.Endpoint.activeTab);
+const endpointDetail = computed(() => store.state.Endpoint.endpointDetail);
+const route = useRoute();
 
 // 初始化tree
 const treeData: any = computed(() => {
@@ -463,7 +467,7 @@ const nodeMenuList = [
     action: (nodeProps) => {
       nodeProps.entityId === 0 ? cloneCategory(nodeProps) : cloneEndpoint(nodeProps);
     },
-    ifShow: nodeProps => nodeProps.parentId !== 0,
+    ifShow: nodeProps => nodeProps.parentId !== 0 && nodeProps.parentId !== -1000,
   },
   {
     label: '编辑分类',
@@ -501,7 +505,7 @@ const nodeMenuList = [
     auth: 'p-api-endpoint-del',
     label: '删除',
     show: (record) => {
-      return (hasPermission('p-api-endpoint-del') || isCreator(record.createUser)) && record.entityId !== 0;
+      return (hasPermission('p-api-endpoint-del') || isCreator(record.createUser)) && record.entityId !== 0 && record.parentId !== -1000;
     },
     action: (record: any) => delEndpoint(record)
   },
@@ -644,6 +648,27 @@ const initActiveTab = () => {
   }, 500);
 }
 
+const onRouteParams = async () => {
+  const { imSerialNumber = '' }: any = route.params || {};
+  if (imSerialNumber) {
+    await store.dispatch('Endpoint/getEndpointDetail', {
+      id: imSerialNumber.split('-')[2],
+    })
+    
+    await openEndpointTab(endpointDetail.value);
+    spinning.value = true;
+    const expandKeys = imCategoryTree.value.getExpandKeys();
+    if (expandKeys.length > 0) {
+      expandKeys.slice(1, expandKeys.length - 1).forEach(e => {
+        updateEndpointNodes(e);
+      })
+    }
+    setTimeout(() => {
+      spinning.value = false;
+    }, 300);
+  }
+}
+
 onMounted(async () => {
   window.addEventListener('resize', () => {
     imCategoryTree.value?.getVirtualHeight();
@@ -651,6 +676,7 @@ onMounted(async () => {
   reLoadFavoriteList();
   await loadCategoryOnlyDir();
   initActiveTab();
+  onRouteParams();
 })
 
 /**
