@@ -82,21 +82,30 @@ watch(() => nodeData.value.scenarioId, val => {
     store.dispatch('Scenario/listRunner', nodeData.value.scenarioId)
 }, {immediate: true})
 
-watchDebounced(
-    runners,
-    () => {
-      runners.value.forEach(async (runner) => {
-        if (runner.webAddress) {
-          const jsn = await getPerformanceState(new URL(runner.webAddress).host)
-          if (!jsn || !jsn.data) {
-            runner.state = 'disconnected'
-            return
-          }
-          runner.state = jsn.data.isBusy ? 'busy' : 'idle'
-        }
-      })
-    },
-    { debounce: 500, maxWait: 1000 },
+watchDebounced(runners, () => {
+  if (runners.value.length === 0) return
+
+  runners.value.forEach(async (runner) => {
+    if (runner.webAddress) {
+      const jsn = await getPerformanceState(new URL(runner.webAddress).host)
+      if (!jsn || !jsn.data) {
+        runner.state = 'disconnected'
+        return
+      }
+      runner.state = jsn.data.isBusy ? 'busy' : 'idle'
+    }
+  })
+
+  let hasConductor = false
+  runners.value.forEach((runner) => {
+    if (runner.isConductor) hasConductor = true
+  })
+  if (!hasConductor) {
+    runners.value[0].isConductor = true
+    updateRunnerIsConductor(true, runners.value[0].id)
+  }
+
+  }, { debounce: 500, maxWait: 1000 },
 )
 
 function getStateClass (state) {
