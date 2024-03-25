@@ -205,6 +205,7 @@ watch(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
+  padding: 0 16px;
 
   .schema-editor-content {
     flex: 1;
