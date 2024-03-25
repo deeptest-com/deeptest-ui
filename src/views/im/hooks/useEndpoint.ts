@@ -120,7 +120,7 @@ function useEndpoint() {
    */
   const copyCurl = async (record, method) => {
     const resp = await loadCurl({
-      endpointId: record.id,
+      endpointId: record.entityId,
       interfaceMethod: method,
       usedBy: UsedBy.InterfaceDebug,
       environmentId: environmentId.value,
