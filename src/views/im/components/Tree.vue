@@ -608,8 +608,7 @@ const onTreeNodeDrop = async (...args) => {
       newParentNode.children.splice(find + 1, 0, currDragNode);
       updateTreeNodeMap({ nodeId: newParentId, data: newParentNode, type: 'update' });
     } else {
-      const findIndex = newNode.children.findIndex(e => e.entityId !== 0);
-      (findIndex === -1 || dragNode.dataRef?.entityData) ? newNode.children.push(currDragNode) : newNode.children.splice(findIndex, 0, currDragNode);
+      newNode.children.unshift(currDragNode);
       updateTreeNodeMap({ nodeId: targetId, data: newNode, type: 'update' });
     }
     updateTreeNodesCount()
