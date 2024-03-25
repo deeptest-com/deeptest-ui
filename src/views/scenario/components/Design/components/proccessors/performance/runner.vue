@@ -1,46 +1,36 @@
 <template>
-  <div class="performance_runner-edit-main">
-    <a-modal title="新建执行代理"
+  <div class="performance_runner-select-main">
+    <a-modal title="选择执行代理"
              :visible="visible"
              @cancel="cancel"
-             class="runner-edit"
-             :footer="null"
-             width="800px">
+             @ok="finish"
+             class="runner-select dp-modal-full-height"
+             width="600px"
+             height="400px">
 
-      <a-form :label-col="{ style: { width: '160px' } }" :wrapper-col="{ span: 16 }">
-        <a-form-item label="名称" name="ip" v-bind="validateInfos.name">
-          <a-input v-model:value="modelRef.name" class="dp-per100"
-                   @blur="validate('name', { trigger: 'blur' }).catch(() => {})" />
-        </a-form-item>
+      <div class="dp-param-grid">
+        <div class="head">
+          <a-row type="flex">
+            <a-col flex="100px" class="title">
+              <a-checkbox v-model:checked="checkAll"
+                          @change="onCheckAllChanged" />
+            </a-col>
+            <a-col flex="1" class="title">代理名称</a-col>
+          </a-row>
+        </div>
+        <div class="params">
+          <a-row v-for="(item, idx) in agents" :key="idx" type="flex" class="param">
+            <a-col flex="100px" class="text">
+              <a-checkbox :checked="selectedIds?.includes(item.id)"
+                          @change="e => onCheckChanged(item, e)"/>
+            </a-col>
 
-        <a-form-item label="IP地址" name="ip" v-bind="validateInfos.ip">
-          <a-input v-model:value="modelRef.ip" class="dp-per100"
-                   @blur="validate('ip', { trigger: 'blur' }).catch(() => {})" />
-        </a-form-item>
-
-        <a-form-item label="Web服务端口" v-bind="validateInfos.webPort">
-          <a-input-number v-model:value="modelRef.webPort" class="dp-per100"
-                          @blur="validate('webPort', { trigger: 'blur' }).catch(() => {})" />
-        </a-form-item>
-
-        <a-form-item label="gRPC服务端口" v-bind="validateInfos.grpcPort">
-          <a-input-number v-model:value="modelRef.grpcPort" class="dp-per100"
-                          @blur="validate('grpcPort', { trigger: 'blur' }).catch(() => {})" />
-        </a-form-item>
-
-        <a-form-item label="施压权重" v-bind="validateInfos.weight">
-          <a-input-number v-model:value="modelRef.weight" :min="10" :max="100" class="dp-per100"
-                          @blur="validate('weight', { trigger: 'blur' }).catch(() => {})" />
-        </a-form-item>
-
-        <a-form-item label="备注">
-          <a-textarea v-model:value="modelRef.comments" :rows="3"/>
-        </a-form-item>
-
-        <a-form-item class="processor-btn" :wrapper-col="{ span: 16, offset: 4 }">
-          <a-button type="primary" @click="submit">保存</a-button>
-        </a-form-item>
-      </a-form>
+            <a-col flex="1" class="text">
+              {{item.name ? item.name : '新代理'}}
+            </a-col>
+          </a-row>
+        </div>
+      </div>
 
     </a-modal>
 
@@ -48,94 +38,82 @@
 </template>
 
 <script setup lang="ts">
-import {computed, defineProps, onMounted, PropType, reactive, ref, watch} from "vue";
+import {computed, defineProps, onMounted, PropType, ref, watch} from "vue";
 import {useStore} from "vuex";
-import {StateType as ScenarioStateType} from "../../../../../store";
-import {Form, message} from "ant-design-vue";
-import debounce from "lodash.debounce";
-import {notifyError, notifySuccess} from "@/utils/notify";
-import cloneDeep from "lodash/cloneDeep";
+import {StateType as SysSettingStateType} from "@/views/sys-settings/store";
+import {StateType as ScenarioStateType} from "@/views/scenario/store";
 
-const useForm = Form.useForm;
+const store = useStore<{ Scenario: ScenarioStateType; SysSetting: SysSettingStateType; }>()
+const runners: any = computed<any[]>(() => store.state.Scenario.performanceRunners)
+const agents = computed<any>(() => store.state.SysSetting.agentModels)
 
 const props = defineProps({
-  model: {
-    type: Object,
-    required: true
-  },
   visible: {
     type: Boolean,
     required: true
   },
+  onCancel: {
+    type: Function,
+    required: true
+  },
   onFinish: {
-    type: Function as PropType<() => void>,
+    type: Function,
     required: true
   }
 })
 
-const store = useStore<{ Scenario: ScenarioStateType; }>()
-const nodeData: any = computed<any>(() => store.state.Scenario.nodeData)
-const modelRef = ref({
-  name: '',
-  ip: '',
-  webPort: 8086,
-  grpcPort: 9528,
-  weight: 100,
-} as any)
+function listAgent() {
+  console.log('listAgent')
+  store.dispatch('SysSetting/listAgent', {})
+}
+listAgent()
 
-const rulesRef = ref({
-  name: [
-    {required: true, message: '请输入远程执行代理的名称', trigger: 'blur'},
-  ],
-  ip: [
-    {required: true, message: '请输入远程执行代理的IP地址', trigger: 'blur'},
-  ],
-  webPort: [
-    {required: true, type: 'integer', message: '请输入Web服务端口，默认8086。', trigger: 'blur'},
-  ],
-  grpcPort: [
-    {required: true, type: 'integer', message: '请输入Web服务端口，默认9528。', trigger: 'blur'},
-  ],
-  weight: [
-    {required: true, type: 'integer', message: '请输入权重数字，系统会按其占合计的百分比来分配施压比率。', trigger: 'blur'},
-  ],
-})
+const selectedIds = ref([] as number[])
 
-const {validate, validateInfos} = useForm(modelRef, rulesRef);
+const checkAll = ref(false)
 
-watch(() => props.model, val => {
-  console.log('watch model')
+const onCheckAllChanged = (e: any) => {
+  if (e.target.checked) {
+    selectedIds.value = agents.value.map((item) => {
+      return item.id
+    })
+  } else {
+    selectedIds.value = []
+  }
+}
+const onCheckChanged = (item, e) => {
+  console.log('onCheckChanged', item, e)
 
-  modelRef.value.name = props.model.name ? props.model.name : ''
-  modelRef.value.ip = props.model.ip ? props.model.ip : ''
-  modelRef.value.webPort = props.model.webPort ? props.model.webPort : 8086
-  modelRef.value.grpcPort = props.model.grpcPort ? props.model.grpcPort : 9528
-  modelRef.value.weight = props.model.weight ? props.model.weight : 100
+  if (e.target.checked && selectedIds.value.indexOf(item.id) < 0) {
+    selectedIds.value.push(item.id)
+  } else {
+    selectedIds.value.splice(selectedIds.value.indexOf(item.id), 1)
+  }
+}
 
+watch(runners, val => {
+  console.log('watch runners', val)
+  val.forEach(item => {
+    selectedIds.value.push(item.id)
+  })
 }, {immediate: true, deep: true})
 
-const submit = debounce(() => {
-    console.log('submit')
+watch(selectedIds, val => {
+  console.log('watch selectedIds', val)
+  checkAll.value = val?.length > 0 && val?.length === agents.value.length;
+}, {immediate: true, deep: true})
 
-    validate().then(async () => {
-      const res = await store.dispatch('Scenario/saveRunner',
-          {scenarioId: nodeData.value.scenarioId, ...modelRef.value});
-
-      if (res === true) {
-        notifySuccess('保存成功');
-      } else {
-        notifyError('保存失败');
-      }
-
-      props.onFinish()
-    }).catch((error) => {
-      console.log('error', error);
-    });
-}, 100)
+const submit = () => {
+  console.log('submit')
+}
 
 const cancel = () => {
   console.log('cancel')
-  props.onFinish()
+  props.onCancel()
+};
+const finish = () => {
+  console.log('finish')
+  props.onFinish(selectedIds.value)
 };
 
 onMounted(() => {
@@ -145,9 +123,24 @@ onMounted(() => {
 </script>
 
 <style lang="less" scoped>
-.performance_runner-edit-main {
-  .runner-edit {
-    padding: 16px;
+.performance_runner-select-main {
+
+}
+</style>
+
+<style lang="less">
+.runner-select .dp-param-grid {
+  height: 100%;
+  .params {
+    height: calc(100% - 36px);
+
+    .param {
+      .ant-col.text {
+        padding: 0 10px;
+        line-height: 32px;
+      }
+    }
   }
 }
+
 </style>

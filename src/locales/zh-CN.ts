@@ -182,7 +182,11 @@ export default {
     'fail': '失败',
     'skip': '跳过',
     'block': '阻塞',
-    'unknown': '位置',
+    'unknown': '未知',
+
+    'idle': '空闲',
+    'busy': '繁忙',
+    'disconnected': '断开',
 
     'tips_print': '输出内容可引用形如${name}的变量。',
     'tips_expression': '字符串请用英文单引号括起，如\'foo\'。表达式可引用形如${name}的变量，使用加号${number}可获取数字值。',

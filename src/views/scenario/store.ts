@@ -35,7 +35,7 @@ import {
     copyProcessor,
 
     listRunner,
-    saveRunner,
+    selectRunner,
     removeRunner,
 } from './service';
 
@@ -198,7 +198,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         copyProcessor: Action<StateType, StateType>;
 
         listRunner: Action<StateType, StateType>;
-        saveRunner: Action<StateType, StateType>;
+        selectRunner: Action<StateType, StateType>;
         removeRunner: Action<StateType, StateType>;
     }
 }
@@ -870,8 +870,8 @@ const StoreModel: ModuleType = {
             }
             return true;
         },
-        async saveRunner({commit, dispatch, state}, payload: any) {
-            const jsn = await saveRunner(payload)
+        async selectRunner({commit, dispatch, state}, payload: any) {
+            const jsn = await selectRunner(payload.ids)
             if (jsn.code === 0) {
                 dispatch('listRunner', payload.scenarioId)
                 return true;

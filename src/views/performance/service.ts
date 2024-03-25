@@ -222,7 +222,7 @@ function createAgentRequest(agentWebAddress: string) :AxiosInstance  {
 export async function getPerformanceState(agentWebAddress: string): Promise<any> {
     const request = createAgentRequest(agentWebAddress);
 
-    const path = '/performanceState'
+    const path = '/performance/getState'
 
     return request({url: path})
         .then((response: AxiosResponse) => response.data)

@@ -274,7 +274,7 @@ export async function listRunner(performanceScenarioId: any): Promise<any> {
         params,
     });
 }
-export async function saveRunner(data: any): Promise<any> {
+export async function selectRunner(data: any): Promise<any> {
     return request({
         url: `/${apiPathPerformanceTestRunners}`,
         method: 'POST',

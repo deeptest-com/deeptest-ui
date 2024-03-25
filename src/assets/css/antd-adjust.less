@@ -67,6 +67,25 @@
     }
 }
 
+
+.ant-modal.dp-modal-full-height {
+    .ant-modal-content {
+        height: 100%;
+
+        .ant-modal-body {
+            height: calc(100% - 55px);
+
+            .dp-param-grid {
+                height: 100%;
+
+                .params {
+                    height: calc(100% - 36px);
+                }
+            }
+        }
+    }
+}
+
 .ant-drawer-close {
     height: 48px;
     line-height: 48px;
@@ -230,11 +249,11 @@
         overflow: hidden;
         white-space: nowrap;
         text-align: left;
-        
+
         label::after {
             color: transparent;
         }
-    
+
         label:not(.ant-form-item-required)::before {
             display: inline-block;
             margin-right: 4px;

@@ -58,7 +58,6 @@ import {ConditionType, ResultStatus} from "@/utils/enum";
 import { CheckCircleOutlined, CloseCircleOutlined} from '@ant-design/icons-vue';
 import IconSvg from "@/components/IconSvg";
 import Empty from "@/components/others/empty.vue";
-import {getResultClass} from "@/utils/dom";
 import {toJsonObj} from "@/utils/string";
 import {genScriptLogs} from "@/utils/console";
 
