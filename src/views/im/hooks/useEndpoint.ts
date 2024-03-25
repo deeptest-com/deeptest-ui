@@ -69,16 +69,21 @@ function useEndpoint() {
     const result = await store.dispatch('Endpoint/loadDynamicCategories', {
       type: 'endpoint',
       categoryId: categoryId,
-      nodeType: 'node',
+      nodeType: '',
     });
-    const leafNodes = (result || []).map(e => ({
-      ...e,
-      type: 'im',
-      key: e.id,
-      activeMethod: e?.entityData?.method?.[0],
-    }));
+    const leafNodes = (result || []).map(e => {
+      const node = {
+        ...e,
+        type: e.entityData ? 'im' : 'im-dir',
+        key: e.id,
+      };
+      if (node.entityData) {
+        node.activeMethod = e?.entityData?.method?.[0];
+      }
+      return node;
+    });
     const parentNode = treeDataMap.value[categoryId];
-    parentNode.children = [...(parentNode.children || []).filter(e => e.entityId === 0), ...leafNodes];
+    parentNode.children = [...leafNodes];
     updateTreeNodeMap({ nodeId: categoryId, data: parentNode, type: 'update' });
     return leafNodes;
   };

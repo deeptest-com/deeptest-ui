@@ -557,7 +557,7 @@ const onTreeNodeDrop = async (...args) => {
     notifyError('接口/目录不可拖入接口节点内');
     return;
   }
-  if (node.dataRef.parentId === 0) {
+  if (node.dataRef.parentId === 0 && dragPos !== 0) {
     notifyError('接口/目录不可拖到根目录外');
     return;
   }
@@ -587,6 +587,9 @@ const onTreeNodeDrop = async (...args) => {
       ...dragNode.dataRef,
       parentId: dragPos === 0 ? targetId : newParentId,
     };
+    if (!currDragNode.entityData) {
+      updateTreeNodeMap({ nodeId: currDragNode.id, data: currDragNode, type: 'update' });
+    }
     const oldParentNode = treeDataMap.value[oldParentId];
     oldParentNode.children = (oldParentNode.children || []).filter(e => e.id !== dragNode.dataRef?.id);
     updateTreeNodeMap({ nodeId: dragNode.dataRef?.parentId, data: oldParentNode, type: 'update' });

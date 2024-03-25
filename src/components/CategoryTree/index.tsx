@@ -338,13 +338,13 @@ const CategoryTree = defineComponent({
         props.loadApi({
           categoryId: treeNode.dataRef.id,
           type: props.categoryType,
-          nodeType: 'node',
+          nodeType: '',
         }).then(res => {
           if (res.code === 0) {
-            treeNode.dataRef.children = [...treeNode.dataRef.children.filter(e => e.entityId === 0), ...(res.data || []).map(e => {
+            treeNode.dataRef.children = (res.data || []).map(e => {
               delete e.slots;
               return e;
-            })];
+            });
             props.loadChildren({
               nodeId: treeNode.dataRef.id,
               data: treeNode.dataRef,
