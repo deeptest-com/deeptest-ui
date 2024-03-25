@@ -557,6 +557,10 @@ const onTreeNodeDrop = async (...args) => {
     notifyError('接口/目录不可拖入接口节点内');
     return;
   }
+  if (node.dataRef.parentId === 0) {
+    notifyError('接口/目录不可拖到根目录外');
+    return;
+  }
   spinning.value = true;
   const res = await store.dispatch('Endpoint/moveCategoryNode', {
     "currProjectId": currProject.value.id,
@@ -581,15 +585,15 @@ const onTreeNodeDrop = async (...args) => {
 
     const currDragNode = {
       ...dragNode.dataRef,
-      parentId: node.dataRef?.id,
+      parentId: dragPos === 0 ? targetId : newParentId,
     };
     const oldParentNode = treeDataMap.value[oldParentId];
     oldParentNode.children = (oldParentNode.children || []).filter(e => e.id !== dragNode.dataRef?.id);
     updateTreeNodeMap({ nodeId: dragNode.dataRef?.parentId, data: oldParentNode, type: 'update' });
-    const newParentNode = treeDataMap.value[newParentId];
-    newParentNode.children = newParentNode.children || [];
-    const newNode = treeDataMap.value[targetId];
-    newNode.children = newNode.children || [];
+    const newParentNode = treeDataMap.value[newParentId] || {};
+    newParentNode.children = newParentNode?.children || [];
+    const newNode = treeDataMap.value[targetId] || {};
+    newNode.children = newNode?.children || [];
     
     if (dragPos !== 0) {
       // 将内部节点拖拽到根目录下
