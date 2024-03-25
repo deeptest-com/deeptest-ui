@@ -18,6 +18,8 @@
                 <template #tab>
                   <a-dropdown :trigger="['contextmenu']" :visible="visible[item.id]">
                     <div v-on-click-outside="canelVisible" @contextmenu="openDropdown(item)">
+                      <FolderOpenOutlined v-if="item.type === 'im-dir'" />
+                      <IconSvg v-if="item.type === 'schema'" type="model" class="dp-icon-large"/>
                       <span v-if="item.type === 'im'" class="endpoint-im-tab">
                         <span 
                           class="endpoint-method" 
@@ -65,9 +67,10 @@
 <script setup lang="ts">
 import { watch, ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
-import { EllipsisOutlined } from "@ant-design/icons-vue";
+import { EllipsisOutlined, FolderOpenOutlined } from "@ant-design/icons-vue";
 import { vOnClickOutside } from '@vueuse/components';
 import ContentPane from '@/views/component/ContentPane/index.vue';
+import IconSvg from '@/components/IconSvg';
 import { Tree, Detail, List } from './components';
 import { SchemaTree } from '../component/Schema';
 import { SchemaEditorContent } from '@/views/component/Schema/components';
@@ -75,13 +78,10 @@ import {StateType as EndpointStateType} from "@/views/endpoint/store";
 import eventBus from '@/utils/eventBus';
 import settings from '@/config/settings';
 import { getMethodColor } from '@/utils/dom';
-import { useRoute, useRouter } from 'vue-router';
-import useEndpoint from './hooks/useEndpoint';
+import { useRouter } from 'vue-router';
 
-const route = useRoute();
 const router = useRouter();
 const store = useStore<{ Endpoint: EndpointStateType, ProjectGlobal }>();
-const { openEndpointTab } = useEndpoint();
 
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const isImporting = ref(false);
@@ -96,7 +96,6 @@ const activeTabs = computed(() => {
   return tabs;
 });
 
-const endpointDetail = computed(() => store.state.Endpoint.endpointDetail);
 const dropdownVisible = ref(false);
 const dropdownMenu = [
   {
@@ -171,20 +170,6 @@ const onEdit = (e, type?: string) => {
 };
 
 /**
- * 查看接口定义的详情
- */
-const onRouterParams = async () => {
-  const { imSerialNumber = '' }: any = route.params || {};
-  if (imSerialNumber) {
-    await store.dispatch('Endpoint/getEndpointDetail', {
-      id: imSerialNumber.split('-')[2],
-    })
-    
-    openEndpointTab(endpointDetail.value);
-  }
-};
-
-/**
  * 查看组件详情
  */
 const setActiveSchema = () => {
@@ -208,8 +193,6 @@ onMounted(() => {
       schemaTree.value?.loadCategory();
     }
   })
-
-  onRouterParams();
 })
 
 watch(() => {
