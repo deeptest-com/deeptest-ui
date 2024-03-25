@@ -871,7 +871,7 @@ const StoreModel: ModuleType = {
             return true;
         },
         async selectRunner({commit, dispatch, state}, payload: any) {
-            const jsn = await selectRunner(payload.ids)
+            const jsn = await selectRunner(payload)
             if (jsn.code === 0) {
                 dispatch('listRunner', payload.scenarioId)
                 return true;
@@ -880,7 +880,7 @@ const StoreModel: ModuleType = {
             }
         },
         async removeRunner({commit, dispatch, state}, payload: any) {
-            const jsn = await removeRunner(payload);
+            const jsn = await removeRunner(payload.id);
             if (jsn.code === 0) {
                 dispatch('listRunner', payload.scenarioId)
                 return true;

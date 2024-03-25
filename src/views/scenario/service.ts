@@ -283,7 +283,7 @@ export async function selectRunner(data: any): Promise<any> {
 }
 export async function removeRunner(id: number): Promise<any> {
     return request({
-        url: `/${apiPathNodes}/${id}`,
+        url: `/${apiPathPerformanceTestRunners}/${id}`,
         method: 'DELETE',
     });
 }

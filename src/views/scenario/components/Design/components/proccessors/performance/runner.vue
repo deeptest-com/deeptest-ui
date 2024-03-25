@@ -4,7 +4,7 @@
              :visible="visible"
              @cancel="cancel"
              @ok="finish"
-             class="runner-select dp-modal-full-height"
+             class="runner-select dp-modal-full-height dp-modal-full-height-with-footer"
              width="600px"
              height="400px">
 

@@ -188,7 +188,7 @@ watch(() => modelRef.value.id, val => {
 }, {immediate: true})
 
 watch(() => modelRef.value.runnerIds, val => {
-  console.log('watch modelRef runnerIds')
+  console.log('watch modelRef runnerIds', modelRef.value.runnerIds)
   checkAll.value = val?.length > 0 && val?.length === runners.value.length;
 }, {immediate: true, deep: true})
 

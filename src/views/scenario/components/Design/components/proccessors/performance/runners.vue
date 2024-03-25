@@ -60,6 +60,7 @@ import RunnerModal from "./runner.vue";
 import usePermission from "@/composables/usePermission";
 import PermissionButton from "@/components/PermissionButton/index.vue";
 import {getPerformanceState} from "@/views/performance/service";
+import {confirmToDelete} from "@/utils/confirm";
 const { t } = useI18n();
 const { hasPermission, isCreator } = usePermission();
 
@@ -75,12 +76,13 @@ watch(() => nodeData.value.scenarioId, val => {
 watch(() => runners, val => {
   console.log('watch runners')
   runners.value.forEach((runner) => {
-   getPerformanceState(new URL(runner.webAddress).host).then((state) => {
-     console.log(state.data.isBusy)
-     runner.state = state.data.isBusy ? 'busy' : 'idle'
-   }).catch((err) => {
-     console.log(err)
-     runner.state = 'disconnected'
+   getPerformanceState(new URL(runner.webAddress).host).then((jsn) => {
+     // console.log(jsn.data)
+     if (!jsn || !jsn.data) {
+       runner.state = 'disconnected'
+       return
+     }
+     runner.state = jsn.data.isBusy ? 'busy' : 'idle'
    })
   })
 }, {immediate: true, deep: true})
@@ -105,7 +107,10 @@ const selectFinish = (ids) => {
 }
 const remove = (record) => {
   console.log('remove', record)
-  store.dispatch('Scenario/removeRunner', record.id)
+
+  confirmToDelete(`确定移除名为"${record.name}"的代理？`, '', () => {
+    store.dispatch('Scenario/removeRunner', {id: record.id, scenarioId: nodeData.value.scenarioId})
+  })
 }
 
 onMounted(() => {

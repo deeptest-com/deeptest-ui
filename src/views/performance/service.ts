@@ -226,5 +226,5 @@ export async function getPerformanceState(agentWebAddress: string): Promise<any>
 
     return request({url: path})
         .then((response: AxiosResponse) => response.data)
-        .catch(err => { console.log('request to agent error', err) });
+        .catch(err => {console.log('')});
 }
