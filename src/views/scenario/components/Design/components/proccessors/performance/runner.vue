@@ -13,7 +13,7 @@
           <a-row type="flex">
             <a-col flex="100px" class="title">
               <a-checkbox v-model:checked="checkAll"
-                          @change="onCheckAllChanged" />
+                          @change="onCheckAllChanged" /> 全选
             </a-col>
             <a-col flex="1" class="title">代理名称</a-col>
           </a-row>
@@ -94,7 +94,7 @@ const onCheckChanged = (item, e) => {
 watch(runners, val => {
   console.log('watch runners', val)
   val.forEach(item => {
-    selectedIds.value.push(item.id)
+    selectedIds.value.push(item.agentId)
   })
 }, {immediate: true, deep: true})
 

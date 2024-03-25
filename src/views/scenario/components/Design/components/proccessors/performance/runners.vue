@@ -13,8 +13,9 @@
         :data-source="runners"
         class="dp-table">
 
-      <template #index="{ index }">
-        {{index+1}}
+      <template #isConductor="{ record }">
+        <a-checkbox v-model:checked="record.isConductor"
+                    @change="e => onIsConductorChanged(e, record)" />
       </template>
 
       <template #name="{ record }">
@@ -25,6 +26,11 @@
         <span :class="[getStateClass(record.state)]">
           {{ record.state ? t(record.state) : '' }}
         </span>
+      </template>
+
+      <template #weight="{ record }">
+        <a-input-number v-model:value="record.weight" :min="1" class="dp-per100"
+                        @blur="e => onWeightChanged(e, record)" />
       </template>
 
       <template #updatedAt="{ record, column }">
@@ -48,6 +54,7 @@
 
 <script setup lang="ts">
 import {computed, onMounted, ref, watch} from "vue";
+import { watchDebounced } from '@vueuse/core'
 import { useI18n } from "vue-i18n";
 import {useStore} from "vuex";
 import {StateType as ScenarioStateType} from "../../../../../store";
@@ -59,8 +66,9 @@ import RunnerModal from "./runner.vue";
 
 import usePermission from "@/composables/usePermission";
 import PermissionButton from "@/components/PermissionButton/index.vue";
-import {getPerformanceState} from "@/views/performance/service";
+import {getPerformanceState, updateRunnerIsConductor, updateRunnerWeight} from "@/views/performance/service";
 import {confirmToDelete} from "@/utils/confirm";
+import debounce from "lodash.debounce";
 const { t } = useI18n();
 const { hasPermission, isCreator } = usePermission();
 
@@ -70,22 +78,26 @@ const runners: any = computed<any[]>(() => store.state.Scenario.performanceRunne
 
 watch(() => nodeData.value.scenarioId, val => {
   console.log('watch runnersRef scenarioId in runner list page')
-  store.dispatch('Scenario/listRunner', nodeData.value.scenarioId)
+  if (nodeData.value.scenarioId)
+    store.dispatch('Scenario/listRunner', nodeData.value.scenarioId)
 }, {immediate: true})
 
-watch(() => runners, val => {
-  console.log('watch runners')
-  runners.value.forEach((runner) => {
-   getPerformanceState(new URL(runner.webAddress).host).then((jsn) => {
-     // console.log(jsn.data)
-     if (!jsn || !jsn.data) {
-       runner.state = 'disconnected'
-       return
-     }
-     runner.state = jsn.data.isBusy ? 'busy' : 'idle'
-   })
-  })
-}, {immediate: true, deep: true})
+watchDebounced(
+    runners,
+    () => {
+      runners.value.forEach(async (runner) => {
+        if (runner.webAddress) {
+          const jsn = await getPerformanceState(new URL(runner.webAddress).host)
+          if (!jsn || !jsn.data) {
+            runner.state = 'disconnected'
+            return
+          }
+          runner.state = jsn.data.isBusy ? 'busy' : 'idle'
+        }
+      })
+    },
+    { debounce: 500, maxWait: 1000 },
+)
 
 function getStateClass (state) {
   return state === 'idle' ? 'pass': state === 'busy' ? 'busy' : 'fail'
@@ -113,39 +125,69 @@ const remove = (record) => {
   })
 }
 
+const onIsConductorChanged = (e, record) => {
+  console.log('onIsConductorChanged', e.target.checked, record.id)
+  record.isConductor = true
+
+  runners.value.forEach(runner => {
+    if (runner.id !== record.id)
+      runner.isConductor = false
+  })
+
+  if (record.isConductor)
+    updateRunnerIsConductor(record.isConductor, record.id)
+}
+const onWeightChanged = debounce((e, record) => {
+  console.log('onWeightChanged', e.target.value, record.id)
+  updateRunnerWeight(+e.target.value, record.id)
+}, 500)
+
+
 onMounted(() => {
   console.log('onMounted')
 })
 
 const columns = [
   {
+    title: '是否为主控',
+    dataIndex: 'isConductor',
+    slots: {customRender: 'isConductor'},
+    width: 60,
+  },
+  {
     title: '编号',
     dataIndex: 'serialNumber',
-    width: 126,
+    width: 60,
   },
   {
     title: '名称',
     dataIndex: 'name',
     slots: {customRender: 'name'},
-    width: 300,
+    width: 100,
   },
   {
     title: '状态',
     dataIndex: 'state',
     slots: {customRender: 'state'},
-    width: 160,
+    width: 50,
+  },
+  {
+    title: '权重',
+    dataIndex: 'weight',
+    slots: {customRender: 'weight'},
+    width: 60,
   },
   {
     title: '最新更新',
     dataIndex: 'updatedAt',
     slots: {customRender: 'updatedAt'},
     ellipsis: true,
-    width: 200,
+    width: 100,
   },
   {
     title: '操作',
     key: 'action',
-    width: 106,
+    width: 50,
     fixed: 'right',
     slots: {customRender: 'action'},
   },

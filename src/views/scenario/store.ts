@@ -503,6 +503,8 @@ const StoreModel: ModuleType = {
             return true;
         },
         async getNode({commit}, payload: any) {
+            console.log('getNode')
+
             try {
                 if (!payload) {
                     commit('setNode', {});

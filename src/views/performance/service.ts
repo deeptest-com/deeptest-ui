@@ -1,9 +1,11 @@
-import request from "@/utils/request";
+import request, {ResponseData} from "@/utils/request";
 import {QueryParams} from "./data";
 import axios, {AxiosInstance, AxiosResponse} from "axios";
+import {setToken} from "@/utils/localToken";
 
 const apiPath = 'performanceTestPlans';
-const apiPathState = 'performanceState';
+const apiPathPerformance = 'performance';
+const apiPathTestRunners = "performanceTestRunners"
 
 // plan list
 export async function query(params?: QueryParams): Promise<any> {
@@ -210,21 +212,33 @@ export const genNetworkMetricsChart = (timestamp, metrics, chartData, indexMap) 
 }
 
 // agent web api - performance
-function createAgentRequest(agentWebAddress: string) :AxiosInstance  {
-    const baseURL = `http://${agentWebAddress}/api/v1/`
-
-    const request = axios.create({
-        baseURL
-    });
-
-    return request
+const responseInterceptors = async (axiosResponse: AxiosResponse) => {
+    console.log('=== response ===', axiosResponse.config.url, axiosResponse)
+    return axiosResponse;
 }
-export async function getPerformanceState(agentWebAddress: string): Promise<any> {
-    const request = createAgentRequest(agentWebAddress);
+export async function getPerformanceState(agentWebAddress: string) {
+    const url = `http://${agentWebAddress}/api/v1/${apiPathPerformance}/getState`
 
-    const path = '/performance/getState'
-
-    return request({url: path})
-        .then((response: AxiosResponse) => response.data)
-        .catch(err => {console.log('')});
+    try {
+        const jsn = await axios.get(url)
+        return jsn
+    } catch (error) {
+        return {} as any
+    }
+}
+export async function updateRunnerIsConductor(value, id): Promise<any> {
+    const data = {value, id}
+    return request({
+        url: `/${apiPathTestRunners}/${id}/updateIsConductor`,
+        method: 'PUT',
+        data,
+    });
+}
+export async function updateRunnerWeight(value, id): Promise<any> {
+    const data = {value, id}
+    return request({
+        url: `/${apiPathTestRunners}/${id}/updateWeight`,
+        method: 'PUT',
+        data,
+    });
 }
