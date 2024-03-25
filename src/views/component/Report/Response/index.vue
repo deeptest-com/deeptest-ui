@@ -4,7 +4,7 @@
       :visible="responseDrawerVisible"
       :closable="true"
       :width="1000"
-      :bodyStyle="{ padding: '24px' }"
+      :bodyStyle="{ padding: '16px', height: 'calc(100vh - 56px)' }"
       style="z-index: 1003;"
       @close="onClose"
     >
@@ -106,6 +106,10 @@ watch(() => {return props.responseDrawerVisible;}, (newVal) => {
 
 <style scoped lang="less">
 .drawer-content {
-  height: calc(100% - 46px);
+  height: 100%;
+
+  :deep(.editor-wrapper) {
+    height: calc(100% - 24px);
+  }
 }
 </style>
