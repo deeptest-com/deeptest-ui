@@ -487,7 +487,7 @@ const nodeMenuList = [
   {
     key: 'copyCurl',
     label: `复制为cURL`,
-    action: (record: any) => record.entityId !== 0 && (record.entityData?.method || []).length === 1 ? copyCurl(record, record.entityData?.method?.[0]) : null,
+    action: (record: any) => record.entityId !== 0 && (record.entityData?.method || []).length === 1 ? copyCurl(record.entityData?.id, record.entityData?.method?.[0]) : null,
     ifShow: nodeProps => (nodeProps.entityData?.method || []).length > 0,
     renderChildren: (nodeProps) => {
       if ((nodeProps.entityData?.method || []).length <=1) {
@@ -497,7 +497,7 @@ const nodeMenuList = [
         key: 'copyCurlChild-' + e,
         auth: '',
         label: e,
-        action: (record: any) => copyCurl(record, e)
+        action: (record: any) => copyCurl(record.entityData?.id, e)
       }));
     } 
   },

@@ -1,4 +1,3 @@
-import { findPath, loopTree } from "@/utils/tree";
 import { computed } from "vue";
 import { useStore } from "vuex"
 import cloneDeep from "lodash/cloneDeep";
@@ -115,12 +114,12 @@ function useEndpoint() {
 
   /**
    * 根据method复制curl
-   * @param record 
+   * @param endpointId 
    * @param method 
    */
-  const copyCurl = async (record, method) => {
+  const copyCurl = async (endpointId, method) => {
     const resp = await loadCurl({
-      endpointId: record.entityId,
+      endpointId,
       interfaceMethod: method,
       usedBy: UsedBy.InterfaceDebug,
       environmentId: environmentId.value,

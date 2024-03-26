@@ -345,7 +345,7 @@ const getMenuItems = (record) => {
       key: 'copyCurl',
       auth: '',
       label: `复制为cURL`,
-      action: (record: any) => copyCurl(record, method)
+      action: (record: any) => copyCurl(record.id, method)
     }
   } else {
     copyCurlItem = {
@@ -360,7 +360,7 @@ const getMenuItems = (record) => {
         key: 'copyCurlChild-' + method,
         auth: '',
         label: method,
-        action: (record: any) => copyCurl(record, method)
+        action: (record: any) => copyCurl(record.id, method)
       })
     })
   }
