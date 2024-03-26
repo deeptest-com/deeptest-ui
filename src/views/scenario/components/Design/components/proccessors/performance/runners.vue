@@ -42,6 +42,11 @@
           <template #title>删除</template>
           <DeleteOutlined class="dp-icon-btn dp-trans-80"/>
         </a-tooltip>
+
+        <a-tooltip @click="terminate(record)" overlayClassName="dp-tip-small">
+          <template #title>强制终止现有执行</template>
+          <StopOutlined class="dp-icon-btn dp-trans-80"/>
+        </a-tooltip>
       </template>
     </a-table>
 
@@ -59,14 +64,19 @@ import { useI18n } from "vue-i18n";
 import {useStore} from "vuex";
 import {StateType as ScenarioStateType} from "../../../../../store";
 
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons-vue";
+import { StopOutlined, DeleteOutlined } from "@ant-design/icons-vue";
 import {momentUtc} from "@/utils/datetime";
 import TooltipCell from "@/components/Table/tooltipCell.vue";
 import RunnerModal from "./runner.vue";
 
 import usePermission from "@/composables/usePermission";
 import PermissionButton from "@/components/PermissionButton/index.vue";
-import {getPerformanceState, updateRunnerIsConductor, updateRunnerWeight} from "@/views/performance/service";
+import {
+  getPerformanceState,
+  terminateExec,
+  updateRunnerIsConductor,
+  updateRunnerWeight
+} from "@/views/performance/service";
 import {confirmToDelete} from "@/utils/confirm";
 import debounce from "lodash.debounce";
 const { t } = useI18n();
@@ -89,7 +99,7 @@ watchDebounced(runners, () => {
     if (runner.webAddress) {
       const jsn = await getPerformanceState(new URL(runner.webAddress).host)
       if (!jsn || !jsn.data) {
-        runner.state = 'disconnected'
+        runner.state = 'offline'
         return
       }
       runner.state = jsn.data.isBusy ? 'busy' : 'idle'
@@ -132,6 +142,12 @@ const remove = (record) => {
   confirmToDelete(`确定移除名为"${record.name}"的代理？`, '', () => {
     store.dispatch('Scenario/removeRunner', {id: record.id, scenarioId: nodeData.value.scenarioId})
   })
+}
+
+const terminate = async (record) => {
+  console.log('terminate', record)
+  await terminateExec(new URL(record.webAddress).host)
+  store.dispatch('Scenario/listRunner', nodeData.value.scenarioId)
 }
 
 const onIsConductorChanged = (e, record) => {

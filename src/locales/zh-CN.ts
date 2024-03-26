@@ -186,7 +186,7 @@ export default {
 
     'idle': '空闲',
     'busy': '繁忙',
-    'disconnected': '断开',
+    'offline': '离线',
 
     'tips_print': '输出内容可引用形如${name}的变量。',
     'tips_expression': '字符串请用英文单引号括起，如\'foo\'。表达式可引用形如${name}的变量，使用加号${number}可获取数字值。',

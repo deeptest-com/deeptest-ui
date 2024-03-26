@@ -212,10 +212,6 @@ export const genNetworkMetricsChart = (timestamp, metrics, chartData, indexMap) 
 }
 
 // agent web api - performance
-const responseInterceptors = async (axiosResponse: AxiosResponse) => {
-    console.log('=== response ===', axiosResponse.config.url, axiosResponse)
-    return axiosResponse;
-}
 export async function getPerformanceState(agentWebAddress: string) {
     const url = `http://${agentWebAddress}/api/v1/${apiPathPerformance}/getState`
 
@@ -224,6 +220,14 @@ export async function getPerformanceState(agentWebAddress: string) {
         return jsn
     } catch (error) {
         return {} as any
+    }
+}
+export function terminateExec(agentWebAddress) {
+    const url = `http://${agentWebAddress}/api/v1/${apiPathPerformance}/forceStop`
+    try {
+        axios.get(url)
+    } catch (error) {
+        console.log('')
     }
 }
 export async function updateRunnerIsConductor(value, id): Promise<any> {
