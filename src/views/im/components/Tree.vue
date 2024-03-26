@@ -448,7 +448,7 @@ const delEndpoint = (record) => {
 };
 
 const { hasPermission, isCreator } = usePermission();
-const nodeMenuList = [
+const nodeMenuList = (currNode) => [
   {
     label: '新建接口',
     action: (nodeProps) => {
@@ -487,19 +487,14 @@ const nodeMenuList = [
   {
     key: 'copyCurl',
     label: `复制为cURL`,
-    action: (record: any) => record.entityId !== 0 && (record.entityData?.method || []).length === 1 ? copyCurl(record.entityData?.id, record.entityData?.method?.[0]) : null,
-    ifShow: nodeProps => (nodeProps.entityData?.method || []).length > 0,
-    renderChildren: (nodeProps) => {
-      if ((nodeProps.entityData?.method || []).length <=1) {
-        return null;
-      }
-      return nodeProps.entityData?.method.map(e => ({
-        key: 'copyCurlChild-' + e,
-        auth: '',
-        label: e,
-        action: (record: any) => copyCurl(record.entityData?.id, e)
-      }));
-    } 
+    action: (record: any) => (currNode.dataRef.entityData?.method || []).length === 1 ? copyCurl(record.dataRef.entityData?.id, record.entityData?.method?.[0]) : null,
+    ifShow: nodeProps => (nodeProps.dataRef.entityData?.method || []).length > 0,
+    children: (currNode?.dataRef?.entityData?.method || []).length <= 1 ? null : currNode.dataRef.entityData?.method.map(e => ({
+      key: 'copyCurlChild-' + e,
+      auth: '',
+      label: e,
+      action: (record: any) => copyCurl(record.entityData?.id, e)
+    }))
   },
   {
     auth: 'p-api-endpoint-del',
@@ -509,13 +504,6 @@ const nodeMenuList = [
     },
     action: (record: any) => delEndpoint(record)
   },
-  // {
-  //   label: '过期',
-  //   action: async (record) => {
-  //     console.log(record);
-  //   },
-  //   ifShow: (nodeProps) => nodeProps.entityId !== 0,
-  // },
 ];
 
 const showMoreIcon = (node) => {

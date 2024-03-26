@@ -161,12 +161,7 @@ export const DropdownActionMenu = defineComponent({
       return hasPermission(e.auth || '') && ifShow(e, props);
     };
 
-    const newDropDownList = computed(() => dropdownList.value.filter(e => filterAction(e, props)).map(e => {
-      if (e.renderChildren) {
-        e.children = e.renderChildren(e);
-      }
-      return e;
-    }));
+    const newDropDownList = computed(() => dropdownList.value.filter(e => filterAction(e, props)));
 
     return () => {
       return (

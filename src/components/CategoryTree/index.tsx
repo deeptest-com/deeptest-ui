@@ -18,7 +18,7 @@ const CategoryTreeProps = {
     default: () => []
   },
   contextMenuList: { // 三点菜单
-    type: Array as PropType<any[]>,
+    type: [Array, Function],
     default: () => []
   },
   showIcon: { // 是否显示节点icon
@@ -154,7 +154,7 @@ const renderMore = (nodeProps, props) => {
   return (
     props.showMoreIcon(nodeProps) && nodeProps.dataRef.id !== -1000 && (
       <span class="more-icon">
-        <DropdownActionMenu dropdownList={props.contextMenuList} record={nodeProps}/>
+        <DropdownActionMenu dropdownList={typeof props.contextMenuList === 'function' ? props.contextMenuList(nodeProps) : props.contextMenuList} record={nodeProps}/>
       </span>
     )
   )
@@ -407,7 +407,7 @@ const CategoryTree = defineComponent({
             <div class="category-tree">
               <Tree
                 ref={TreeNode}
-                draggable={props.draggable as any}
+                draggable={props.draggable as boolean}
                 checkable={props.checked}
                 expandedKeys={expandedKeys.value}
                 checkedKeys={checkedKeys.value}
