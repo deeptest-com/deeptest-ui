@@ -51,9 +51,6 @@ function useEndpoint() {
     const findTab = activeTabs.value.find(e => (e?.entityData?.id || e.entityId) === record.id);
     if (!endpointNode) {
       const leafNodes = await updateEndpointNodes(record.categoryId);
-      const parentNode = treeDataMap.value[record.categoryId];
-      parentNode.children = [...(parentNode.children || []).filter(e => e.entityId === 0), ...leafNodes];
-      updateTreeNodeMap({ nodeId: record.categoryId, data: parentNode, type: 'update' });
       endpointNode = leafNodes.find(e => (e.entityId || e.entityData?.id) === record.id);
     }
     endpointNode.activeMethod = endpointNode.entityData?.method?.[0] || 'GET';
