@@ -25,7 +25,7 @@
           />
         </a-form-item>
         <a-form-item label="英文缩写" v-bind="validateInfos.shortName">
-                    <a-input 
+                    <a-input
             v-model:value="formStateRef.shortName"
             placeholder="大写英文字母开头,仅限字母和数字,<=10位"
             @blur="validate('shortName', { trigger: 'blur' }).catch(() => {})" />
@@ -192,7 +192,7 @@ const filterSpaceOption = (input: string, option: any) => {
   }
 }
 
-const rulesRef = reactive({
+const rulesRef = ref({
   name: [
     {required: true, message: "请输入名称", trigger: "blur"},
     {max: 20, message: "项目名称应小于20位", trigger: "blur"},
@@ -206,7 +206,7 @@ const rulesRef = reactive({
     },
   ],
   adminId: [{required: true, message: "请选择管理员"}],
-  products: [{required: true, message: "请选择所属产品"}],
+  products: isLy ? [{required: true, message: "请选择所属产品"}] : [],
   // desc: [{max: 180, message: "项目简介应小于180位", trigger: "blur"}],
 });
 
@@ -221,7 +221,7 @@ const submitForm = async () => {
       .then(() => {
         console.error(formStateRef);
         store.dispatch("Project/saveProject", {
-          ...formStateRef, 
+          ...formStateRef,
           products: (formStateRef.products || []).map(e => e.value),
           spaces: (formStateRef.spaces || []).map(e => e.value),
         }).then(() => {
@@ -260,7 +260,7 @@ const getProjectDetail = async(id: number) => {
   } catch(error) {
     console.log(error);
   }
-};  
+};
 
 const handleToProducts = () => {
   if (isInLeyanWujieContainer) {
