@@ -138,7 +138,6 @@ const card = ref<any>({});
 
 // 监听项目数据变化
 watch(() => {return props.params;}, async (newVal: any) => {
-      console.log("watch staticstic newVal", newVal);
       card.value = newVal.cardData;
     }, {immediate: true});
 

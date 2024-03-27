@@ -141,7 +141,7 @@
           :visible="createApiModalVisible"
           :selectedCategoryId="selectedCategoryId"
           @cancel="createApiModalVisible = false;"
-          @ok="handleCreateApi"/>
+          @ok="handleCreateApiSuccess"/>
       <ImportEndpointModal
           :visible="showImportModal"
           :selectedCategoryId="selectedCategoryId"
@@ -569,15 +569,7 @@ async function del(record: any) {
   });
 }
 
-async function handleCreateApi(data) {
-  await store.dispatch('Endpoint/createApi', {
-    "title": data.title,
-    "projectId": currProject.value.id,
-    "serveId": data.serveId,
-    "description": data.description || null,
-    "categoryId": data.categoryId || null,
-    "curl": data.curl || null,
-  });
+async function handleCreateApiSuccess() {
   await refreshList('reset');
   createApiModalVisible.value = false;
 }

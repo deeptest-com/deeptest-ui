@@ -108,6 +108,7 @@ function canClose(e) {
     max-height: 64px;
     overflow-y: scroll;
     max-width: 320px;
+    scrollbar-width: none;
     background-color: #fff;
     .ant-tag{
       margin-bottom: 3px;
