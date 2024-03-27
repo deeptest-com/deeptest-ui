@@ -1,6 +1,6 @@
 <template>
   <div class="config-main">
-    <a-tabs v-model:activeKey="activeKey" :animated="false" class="dp-tabs-full-height">
+    <a-tabs v-model:activeKey="activeKey" class="dp-tabs-full-height">
 
       <a-tab-pane key="query-param" :tab="getTabTitle('queryParams')">
         <GlobalParameters :in="'query'" />
@@ -19,8 +19,10 @@
       </a-tab-pane>
 
       <a-tab-pane key="header" :tab="getTabTitle('headers')">
-        <GlobalParameters :in="'header'" />
-        <RequestHeaders v-if="activeKey === 'header'" />
+        <div style="height: 100%;overflow-y: scroll">
+          <GlobalParameters style="overflow: unset;max-height: max-content;" :in="'header'" />
+          <RequestHeaders style="overflow: unset;max-height: max-content;" v-if="activeKey === 'header'" />
+        </div>
       </a-tab-pane>
 
       <a-tab-pane key="cookie" :tab="getTabTitle('cookies')">
@@ -259,7 +261,6 @@ onUnmounted( () => {
 
     .ant-tabs-top-content {
       height: calc(100% - 45px);
-      overflow-y: auto;
     }
   }
 }

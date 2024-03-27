@@ -9,12 +9,12 @@
         <template #right>
           <div v-if="activeTabs.length > 0" class="endpoint-right-content">
             <Tabs 
-              class="im-tabs-full-height"
+              class="endpoint-tabs-full-height"
               :activeKey="activeTab.key" 
               type="editable-card" 
               @change="changeTab" 
               @edit="onEdit">
-              <TabPane v-for="item in activeTabs" :key="item.key">
+              <TabPane class="endpoint-tabs" v-for="item in activeTabs" :key="item.key">
                 <template #tab>
                   <a-dropdown :trigger="['contextmenu']" :visible="visible[item.id]" placement="bottomRight">
                     <div v-on-click-outside="canelVisible" @contextmenu="openDropdown(item)">
@@ -214,15 +214,6 @@ watch(() => {
   height: 100%;
   overflow: hidden;
 
-  :deep(.ant-tabs-tab) {
-    display: flex;
-    align-items: center;
-    div {
-      display: flex;
-      align-items: center;
-    }
-  }
-
   :deep(.ant-tabs-nav-wrap) {
     overflow: visible;
     scrollbar-width: none;
@@ -250,24 +241,28 @@ watch(() => {
     margin-top: 32px;
   }
 
-  :deep(.ant-tabs.im-tabs-full-height) {
+  :deep(.ant-tabs.endpoint-tabs-full-height) {
     height: 100%;
 
-    .ant-tabs-content {
-      height: 100%;
+    .ant-tabs-tabpane {
 
-      .ant-tabs-tabpane {
-        height: 100%;
-
-        &.ant-tabs-tabpane-inactive {
-          height: 0;
-        }
+      &.ant-tabs-tabpane-inactive {
+        height: 0;
       }
     }
+  }
 
-    .ant-tabs-extra-content {
-      
-    }
+  :deep(
+    .ant-tabs.endpoint-tabs-full-height > .ant-tabs-content-holder > .ant-tabs-content,
+    .ant-tabs.endpoint-tabs-full-height > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane
+  ) {
+    height: 100%;
+  }
+  
+
+  :deep(.ant-tabs.endpoint-tabs-full-height > .ant-tabs-nav > .ant-tabs-nav-wrap > .ant-tabs-nav-list > .ant-tabs-tab) {
+    display: flex;
+    align-items: center;
   }
 
   .endpoint-tab-content {

@@ -2,7 +2,7 @@
   <div class="diagnose-interface-design-main">
       <div id="diagnose-interface-debug-panel">
         <Tabs
-          class="dp-tabs-full-height"
+          class="diagnose-tabs-full-height"
           type="editable-card"
           :closable="true"
           v-if="interfaceTabs?.length"
@@ -226,18 +226,37 @@ const getTitle = (title) => {
   #diagnose-interface-debug-panel {
     height: 100%;
 
+    :deep(.pane.top) {
+      overflow: hidden;
+    }
+
     .interface-tabs-content {
       width: 100%;
       height: 100%;
     }
 
-    :deep(.ant-tabs-tab) {
+    :deep(.ant-tabs.diagnose-tabs-full-height) {
+      height: 100%;
+
+      .ant-tabs-tabpane {
+
+        &.ant-tabs-tabpane-inactive {
+          height: 0;
+        }
+      }
+    }
+
+    :deep(
+      .ant-tabs.diagnose-tabs-full-height > .ant-tabs-content-holder > .ant-tabs-content,
+      .ant-tabs.diagnose-tabs-full-height > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane
+    ) {
+      height: 100%;
+    }
+    
+
+    :deep(.ant-tabs.diagnose-tabs-full-height > .ant-tabs-nav > .ant-tabs-nav-wrap > .ant-tabs-nav-list > .ant-tabs-tab) {
       display: flex;
       align-items: center;
-      div {
-        display: flex;
-        align-items: center;
-      }
     }
 
     :deep(.ant-tabs-nav-wrap) {
@@ -270,7 +289,7 @@ const getTitle = (title) => {
         position: absolute;
         width: 122px;
         right: 16px;
-        top: 32px;
+        top: 12px;
         background-color: white;
         height: 0;
         box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
