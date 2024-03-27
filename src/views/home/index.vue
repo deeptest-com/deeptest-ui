@@ -128,7 +128,7 @@ onMounted(async () => {
   await store.dispatch('Global/getPermissionMenuList');
   await getHearderData();
   await getList(1);
-  
+
 });
 
 const getHearderData = async (): Promise<void> => {

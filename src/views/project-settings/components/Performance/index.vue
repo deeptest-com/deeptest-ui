@@ -1,11 +1,6 @@
 <template>
   <div class="project-settings-performance-main">
     <a-form :label-col="labelCol" :wrapper-col="wrapperCol" labelAlign="left">
-      <a-form-item label="主控端GRPC地址" v-bind="validateInfos.conductorGrpcAddress" required>
-        <a-input v-model:value="modelRef.conductorGrpcAddress"
-                 @blur="validate('conductorGrpcAddress', { trigger: 'blur' }).catch(() => {})"/>
-      </a-form-item>
-
       <a-form-item label="Influxdb地址" v-bind="validateInfos.influxdbAddress" required>
         <a-input v-model:value="modelRef.influxdbAddress"
                  @blur="validate('influxdbAddress', { trigger: 'blur' }).catch(() => {})"/>
@@ -39,9 +34,6 @@ const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const modelRef = computed<any>(() => store.state.ProjectSetting.performanceSettings);
 
 const rules = ref({
-  conductorGrpcAddress: [
-    {required: true, message: '请输入主控端GRPC地址', trigger: 'blur'},
-  ],
   influxdbAddress: [
     {required: true, message: '请输入Influxdb时序数据库地址', trigger: 'blur'},
   ],
@@ -60,7 +52,6 @@ onMounted(async () => {
   await store.dispatch('ProjectSetting/getPerformance');
   dataLoaded.value = true
 
-  if (!modelRef.value.conductorGrpcAddress) modelRef.value.conductorGrpcAddress = ''
   if (!modelRef.value.influxdbAddress) modelRef.value.influxdbAddress = ''
   if (!modelRef.value.influxdbOrg) modelRef.value.influxdbOrg = ''
   if (!modelRef.value.influxdbToken) modelRef.value.influxdbToken = ''
