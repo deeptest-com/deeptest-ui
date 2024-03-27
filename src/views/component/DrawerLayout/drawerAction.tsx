@@ -3,8 +3,6 @@ import {
   FullscreenExitOutlined,
   FullscreenOutlined,
   SelectOutlined,
-  StarFilled,
-  StarOutlined,
 } from '@ant-design/icons-vue';
 import IconSvg from "@/components/IconSvg";
 
@@ -44,11 +42,6 @@ export const DrawerAction = defineComponent({
       type: String,
       default: '',
       required: false,
-    },
-    showStar: {
-      type: Boolean,
-      default: false,
-      required: false,
     }
   },
   components: {
@@ -59,8 +52,6 @@ export const DrawerAction = defineComponent({
     const shareLink = inject('shareLink', (_url: string) => {});
     const setFullScreen = inject('setFullScreen', (_value: boolean) => {});
     const isFullScreen: any = inject('isFullScreen', false);
-    const isFavorite: any = inject('isFavorite', false);
-    const favoriteItem = inject('favoriteItem', () => {});
 
     const handleClick = e => {
       e.preventDefault();
@@ -77,15 +68,13 @@ export const DrawerAction = defineComponent({
         case 'fullScreen':
           setFullScreen(true);
           break;
-        case 'toFavorite':
-          favoriteItem();  
-          break;
         default:
           break;
       }
     }
 
     const menuClick = (e) => {
+      console.log(e.key)
       if (e.key === 'copyShare') {
         shareLink(props.shareLink)
       } else if (e.key === 'copyCurl') {
@@ -105,7 +94,7 @@ export const DrawerAction = defineComponent({
 
       const copyCurlSlots = {
         default: () => {
-          return <a-tooltip placement="left" v-slots={copyCurlTooltipSlots} />
+          return <a-tooltip placement={props.showFullScreen ? 'right' : 'top'} v-slots={copyCurlTooltipSlots} />
         },
         overlay: () => {
           return (
@@ -123,16 +112,9 @@ export const DrawerAction = defineComponent({
 
       return (
         <div class="drawer-action" onClick={e => handleClick(e)}>
-          {props.showStar && (
-            <div class="drawer-action-item" data-action="toFavorite">
-              <a-tooltip placement="left" title={isFavorite.value ? '取消收藏' : '收藏'}>
-                {isFavorite.value ? <StarFilled style={{ color: '#1677ff' }}  /> : <StarOutlined /> }
-              </a-tooltip>
-            </div>
-          )}
           {props.showDetail &&  (
             <div class="drawer-action-item" data-action="detail">
-              <a-tooltip placement="left" title="详情">
+              <a-tooltip placement="bottom" title="详情">
                 <SelectOutlined />
               </a-tooltip>
             </div>
@@ -144,7 +126,7 @@ export const DrawerAction = defineComponent({
           )}
           {props.showFullScreen &&  (
             <div class="drawer-action-item" data-action={isFullScreen.value ? 'exitFullScreen' : 'fullScreen'}>
-              <a-tooltip placement="left" title={isFullScreen.value ? '退出全屏' : '全屏'}>
+              <a-tooltip placement="bottom" title={isFullScreen.value ? '退出全屏' : '全屏'}>
                 {isFullScreen.value ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
               </a-tooltip>
             </div>

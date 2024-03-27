@@ -1,16 +1,16 @@
 <template>
   <a-modal
-    width="600px"
-    :visible="visible"
-    @ok="ok"
-    @cancel="cancel"
-    :title="mode === 'new' ? '新建分类' : '修改分类'">
+      width="600px"
+      :visible="visible"
+      @ok="ok"
+      @cancel="cancel"
+      :title="mode === 'new' ? '新建分类' : '修改分类'">
     <a-form
-      ref="tagFormRef"
-      class="custom-center-form"
-      :rules="rules"
-      :model="formState"
-      :wrapper-col="{ span: 14 }">
+        ref="tagFormRef"
+        class="custom-center-form"
+        :rules="rules"
+        :model="formState"
+        :wrapper-col="{ span: 14 }">
       <a-form-item label="分类名称" name="name">
         <a-input placeholder="请输入分类名称" v-model:value="formState.name"/>
       </a-form-item>
@@ -51,6 +51,7 @@ function ok() {
         emit('ok', {
           ...formState.value
         });
+        tagFormRef.value.resetFields();
       })
       .catch((error) => {
         console.log('error', error);

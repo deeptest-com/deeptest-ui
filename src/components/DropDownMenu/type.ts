@@ -18,9 +18,8 @@ export type MenuItem = {
   /** 权限编码 */
   auth?: string;
   children?: MenuItem[];
-  renderChildren?: (record: Recordable) => any[];
   disabled?: boolean;
-  key?: string | number;
+  key?: string;
   action: (...args: any[]) => void,
   tip?: string;
   customRender?: JSX.Element;

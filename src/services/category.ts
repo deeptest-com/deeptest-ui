@@ -1,8 +1,8 @@
 import request from '@/utils/request';
 const apiPath = 'categories';
 
-export async function loadCategory(type: string, nodeType?: string): Promise<any> {
-    const params = {type, nodeType: nodeType || ''};
+export async function loadCategory(type): Promise<any> {
+    const params = {type}
     return request({
         url: `/${apiPath}/load`,
         method: 'get',

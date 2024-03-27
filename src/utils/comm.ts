@@ -59,18 +59,3 @@ export const transformTextareaToHtml = (v) => {
 export const transformHtmlToTextare = (v) => {
     return v.replace(/<br>/g, '\n').replace(/(&nbsp;)/g, ' ')
 }
-
-export const tabsContextMenu = [
-    {
-      key: "close_cur",
-      label: "关闭当前标签页",
-    },
-    {
-      key: "close_other",
-      label: "关闭其他标签页",
-    },
-    {
-      key: "close_all",
-      label: "关闭所有标签页",
-    }
-];

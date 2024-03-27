@@ -74,12 +74,12 @@ const saveDiff = async (title: string, isChanged: boolean) => {
         const selectedMethodDetail = store.state.Endpoint.endpointDetail.interfaces.find(arrItem => arrItem.method == store.state.Endpoint.selectedMethodDetail.method)
         store.commit('Endpoint/setSelectedMethodDetail', selectedMethodDetail);
       }else {
-        callback();
+        callback(id);
       }
     })
   } else {
     await store.dispatch('Endpoint/saveEndPointDiff', { ...diffModalVisible.value, isChanged: isChanged });
-    callback();
+    callback(id);
   }
 }
 
@@ -89,8 +89,8 @@ const cancel = async() => {
 
 
 const emits = defineEmits(['callback'])
-function callback(){
-     emits('callback', diffModalVisible.value.record)
+function callback(id:number){
+     emits('callback',{id:id})
 }
 
 

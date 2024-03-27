@@ -127,6 +127,7 @@ const modelRef = ref<any>({
 })
 
 const onVarChanged = (e) => {
+  console.log('onVarChanged', e)
 
   const value = e.target.value.trim()
 

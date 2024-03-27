@@ -14,7 +14,6 @@
       </div>
       <Tree 
       v-else
-        prefix-cls="schema-tree-container"
         ref="schemaTree"
         category-type="schema" 
         :checked="false" 
@@ -65,10 +64,9 @@ import Tree from '@/components/CategoryTree/index';
 import { CreateModal } from './components';
 import { StateType as SchemaStateType } from './store';
 import { confirmToDelete } from '@/utils/confirm';
-import { uniquArrray } from '@/utils/tree';
 
 const emits = defineEmits(['select']);
-const store = useStore<{ Schema: SchemaStateType, ProjectGlobal, Endpoint }>();
+const store = useStore<{ Schema: SchemaStateType, ProjectGlobal }>();
 const treeData = computed<any>(() => {
   return setTitle(store.state.Schema.schemaTreeData?.children || []);
 });
@@ -81,7 +79,6 @@ const setTitle = (data: any[]) => {
     if (e.children) {
       e.children = setTitle(e.children);
     }
-    e.isLeaf = !e.children;
     return cloneDeep(e);
   })
 };
@@ -95,8 +92,6 @@ const treeDataCategory = computed(() => {
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const activeSchema = computed(() => store.state.Schema.activeSchema);
 const schemas = computed(() => store.state.Schema.schemas);
-const activeTabs = computed(() => store.state.Endpoint.activeTabs);
-const activeTab = computed(() => store.state.Endpoint.activeTab);
 
 const expand = ref(false);
 const parentNode = ref();
@@ -109,14 +104,27 @@ const visible = ref(false);
 const modalType = ref('create');
 const router = useRouter();
 
+const uniquArrray = (data) => {
+  const obj = {};
+  const _data = cloneDeep(data);
+  _data.forEach((e, index) => {
+    if (!obj[e.entityId]) {
+      obj[e.entityId] = e;
+    } else {
+      _data.splice(index, 1)
+    }
+  })
+  return _data;
+}
+
 const handleClick = (keys, evt) => {
   console.log('clickNode', evt);
   if (evt.node.dataRef?.entityId === 0) {
     return;
   }
-  let activeSchema = { ...evt.node.dataRef, key: evt.node?.dataRef?.id, type: 'schema' }
-  store.commit('Endpoint/setActiveTab', activeSchema);
-  store.commit('Endpoint/setActiveTabs', uniquArrray([...activeTabs.value, activeSchema]));
+  let activeSchema = { ...evt.node.dataRef, key: evt.node?.dataRef?.entityId }
+  store.commit('Schema/setActiveSchema', activeSchema);
+  store.commit('Schema/setSchemas', uniquArrray([...store.state.Schema.schemas, activeSchema]));
   store.dispatch('Schema/querySchema', { id: evt.node.dataRef?.entityId });
   emits('select');
 };
@@ -175,10 +183,10 @@ const createCategoryOrSchema = async (nodeProps, createType) => {
       name: 'NewComponent',
       isEntity: true,
     });
-    const newSchema = { id: data.id, key: data.id, entityId: data.entityId, name: 'NewComponent', autoFocus: true, type: 'schema' };
+    const newSchema = { id: data.id, key: data.entityId, entityId: data.entityId, name: 'NewComponent', autoFocus: true };
     // 新建组件以后，设置当前选中tab以及tab列表
-    store.commit('Endpoint/setActiveTab', newSchema);
-    activeTabs.value.push(newSchema)
+    store.commit('Schema/setActiveSchema', newSchema);
+    schemas.value.push(newSchema)
     store.dispatch('Schema/querySchema', { id: data.entityId });
     emits('select');
   } catch(error) {
@@ -202,7 +210,7 @@ const delCategory = (nodeProps) => {
         type: 'schema'
       });
       if (nodeProps.dataRef.children) {
-        store.dispatch('Endpoint/removeTabs', { data: nodeProps.dataRef.children })
+        store.dispatch('Schema/removeSchemaTabs', { data: nodeProps.dataRef.children })
       }
 
     } catch(error: any) {
@@ -214,15 +222,15 @@ const delCategory = (nodeProps) => {
 
 const copy = async(nodeProps) => {
   try {
-    await store.commit('Endpoint/setActiveTab', {
-      ...activeTab.value,
+    await store.commit('Schema/setActiveSchema', {
+      ...activeSchema.value,
       autoFocus: false,
     });
     const data = await store.dispatch('Schema/copySchema', nodeProps.dataRef?.id);
-    const newSchema = { id: data.id, key: data.id, entityId: data.entityId, name: data.name, autoFocus: true, type: 'schema' };
+    const newSchema = { id: data.id, key: data.entityId, entityId: data.entityId, name: data.name, autoFocus: true };
     // 新建组件以后，设置当前选中tab以及tab列表
-    store.commit('Endpoint/setActiveTab', newSchema);
-    activeTabs.value.push(newSchema)
+    store.commit('Schema/setActiveSchema', newSchema);
+    schemas.value.push(newSchema)
     store.dispatch('Schema/querySchema', { id: data.entityId });
     emits('select');
     message.success('克隆成功');
@@ -274,7 +282,7 @@ const dropDownMenuList = [
           await store.dispatch('Schema/deleteSchema', {
             id: record.dataRef.entityId,
           });
-          await store.dispatch('Endpoint/removeActiveTab', record.dataRef?.id);
+          await store.dispatch('Schema/removeActiveSchema', record.dataRef?.entityId);
         } catch(_error) {
           message.error('删除失败');
         }
@@ -348,13 +356,11 @@ watch(() => {
 })
 
 watch(() => {
-  return activeTab.value;
+  return activeSchema.value;
 }, val => {
-  if (val?.id && val?.type === 'schema') {
-    expand.value = true;
+  if (val.id) {
     schemaTree.value?.setSelectedKeys(val.id);
   } else {
-    expand.value = false;
     schemaTree.value?.initTree();
   }
 }, {
@@ -379,10 +385,6 @@ onMounted(() => {
       expand.value = true;
     }, 1000);
   }
-
-  window.addEventListener('resize', () => {
-    schemaTree.value?.getVirtualHeight();
-  })
 })
 
 defineExpose({

@@ -2,7 +2,6 @@
   <a-modal
       width="640px"
       :visible="visible"
-      :confirmLoading="loading"
       @ok="ok"
       @cancel="cancel"
       title="新建接口">
@@ -68,14 +67,13 @@ import {
 import {useStore} from "vuex";
 import {NewEndpointFormState} from "@/views/Endpoint/data";
 import SelectServe from './SelectServe/index.vue';
-import { removeLeafNode } from '@/utils/tree';
 
-const store = useStore<{ Endpoint, ProjectGlobal }>();
+const store = useStore<{ Endpoint }>();
 const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
-const currProject = computed(() => store.state.ProjectGlobal.currProject);
 
 const treeData: any = computed(() => {
-  return removeLeafNode(treeDataCategory.value);
+  const data = treeDataCategory.value;
+  return  data?.[0]?.children || [];
 });
 
 const props = defineProps({
@@ -91,39 +89,13 @@ const props = defineProps({
 const emit = defineEmits(['ok', 'cancel']);
 
 const formRef = ref();
-const loading = ref(false);
+
 function ok() {
   formRef.value
       .validate()
-      .then(async () => {
-        loading.value = true;
-        try {
-          const res: any = await store.dispatch('Endpoint/createApi', {
-            "title": formState.title,
-            "projectId": currProject.value.id,
-            "serveId": formState.serveId,
-            "description": formState.description || null,
-            "categoryId": formState.categoryId || null,
-            "curl": formState.curl || null,
-          });
-          loading.value = false;
-          emit('ok', {
-            id: res?.nodeId,
-            entityId: res?.endpointId,
-            entityData: {
-              id: res?.endpointId,
-              method: [],
-              name: formState.title,
-            },
-            key: res?.nodeId,
-            parentId: formState.categoryId,
-            activeMethod: 'GET',
-            type: 'im',
-          });
-        } catch(error) {
-          loading.value = false;
-          return Promise.reject(error);
-        }
+      .then(() => {
+        emit('ok', formState);
+        formRef.value.resetFields();
       })
       .catch((error: ValidateErrorEntity<NewEndpointFormState>) => {
         console.log('error', error);
@@ -156,8 +128,6 @@ watch(() => {
     Object.assign(formState, {
       categoryId: props.selectedCategoryId || -1
     });
-  } else {
-    formRef.value?.resetFields();
   }
 }, {
   immediate: true
@@ -179,7 +149,7 @@ const rules = {
     {required: true, message: '请输入接口名称', trigger: 'blur'},
     {min: 1, max: 50, message: '最少 1 个字符，最长 100 个字符', trigger: 'blur'},
   ],
-  categoryId: [{required: true, message: '请选择接口所属分类'}],
+  categoryId: [{required: false}],
   description: [{required: false}],
   curl: [
     {required: false,  message: '',validator:validateCurl, trigger: 'change',pattern:/curl\s+.*\s+.*/},

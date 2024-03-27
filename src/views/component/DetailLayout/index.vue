@@ -1,6 +1,6 @@
 <template>
   <a-spin tip="loading....." :spinning="spinning">
-    <div :class="['detail-wrapper', prefixCls]">
+    <div class="detail-wrapper">
       <template v-if="show">
         <div class="detail-header">
           <slot name="header" />
@@ -43,11 +43,6 @@ const props = defineProps({
     default: true,
     required: false,
   },
-  prefixCls: {
-    type: String,
-    default: '',
-    required: false,
-  }
 });
 
 const store = useStore<{ Detail: DetailStateType, Global }>();
@@ -98,15 +93,6 @@ provide('containerScrollTop', computed(() => containerScrollTop.value));
   width: 100%;
   height: 100%;
   background-color: #fff;
-
-  &.detail-view-full {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 9999999;
-  }
 
   :deep(.ant-divider-horizontal) {
     margin: 0;
@@ -161,23 +147,6 @@ provide('containerScrollTop', computed(() => containerScrollTop.value));
 
     :deep(.tab-pane) {
       height: 100%;
-    }
-  }
-
-  :deep(.drawer-action) {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-
-    .drawer-action-item {
-      margin-left: 18px;
-      .anticon {
-        color: rgb(153, 153, 153);
-
-        &:hover {
-          color: #1677ff;
-        }
-      }
     }
   }
 }
