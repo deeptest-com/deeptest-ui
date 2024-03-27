@@ -1,15 +1,16 @@
 <template>
   <div class="diagnose-interface-design-main">
       <div id="diagnose-interface-debug-panel">
-        <Tabs
+        <a-tabs
           class="dp-tabs-full-height"
           type="editable-card"
+          :hideAdd="true"
           :closable="true"
           v-if="interfaceTabs?.length"
           :activeKey="interfaceId"
           @edit="onTabEdit"
           @change="changeTab">
-          <TabPane
+          <a-tab-pane
             v-for="tab in interfaceTabs"
             :title="tab.title"
             :key="tab.id"
@@ -34,19 +35,19 @@
                 </template>
               </div>
             </a-spin>
-          </TabPane>
-          <template #addIcon>
+          </a-tab-pane>
+          <template #tabBarExtraContent>
             <div 
               :class="['extra-menu', dropdownVisible ? 'visible' : '']" 
               @mouseenter="dropdownVisible = true" 
               @mouseleave="dropdownVisible = false">
-              <span style="cursor: pointer;"><EllipsisOutlined /></span>
+              <span style="cursor: pointer;margin-right: 20px;"><EllipsisOutlined /></span>
               <a-menu @click="e => onContextMenuClick(e)">
                 <a-menu-item v-for="(item) in tabsContextMenu" :key="item.key">{{ item.label }}</a-menu-item>
               </a-menu>
             </div>
           </template>
-        </Tabs>
+        </a-tabs>
         <div  v-else style="margin-top: 36px;">
           <a-empty  :description="'请先在左侧目录上选择需要调试的接口'"/>
         </div>
@@ -62,7 +63,6 @@
 import {computed, provide, ref, watch} from 'vue';
 import {useStore} from "vuex";
 import debounce from "lodash.debounce";
-import { Tabs, TabPane } from 'ant-design-vue-v3';
 import { EllipsisOutlined } from '@ant-design/icons-vue';
 import { vOnClickOutside } from '@vueuse/components';
 
@@ -232,27 +232,10 @@ const getTitle = (title) => {
     }
 
     :deep(.ant-tabs-tab) {
-      display: flex;
-      align-items: center;
       div {
         display: flex;
         align-items: center;
       }
-    }
-
-    :deep(.ant-tabs-nav-wrap) {
-      overflow: visible;
-      scrollbar-width: none;
-      z-index: 999;
-      width: 100%;
-
-      &.ant-tabs-nav-wrap-ping-right, &.ant-tabs-nav-wrap-ping-left {
-        overflow: hidden;
-      }
-    }
-
-    :deep(.ant-tabs-nav-more) {
-      display: none;
     }
 
     .extra-menu {
