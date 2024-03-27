@@ -434,17 +434,22 @@ function goViewComponent() {
     notifyError('引用的数据组件不存在/已删除');
     return;
   }
-  if (activeSchema.value.id) {
-    // 当前是处于 查看 组件tab中，去查看与该组件关联的组件信息， 无需跳转，新增tab即可
-    store.commit('Schema/setActiveSchema', { ...schemaNode, key: refId });
-    store.commit('Schema/setSchemas', uniquArrray([...store.state.Schema.schemas, schemaNode]));
-    store.dispatch('Schema/querySchema', { id: refId });
-  } else {
-    // 当前是 查看接口定义详情抽屉或单独详情页. 需单独打开一个页面展示
-    const { entityId, id, name }: any = schemaNode || {};
-    const prefixUrl = isInLeyanWujieContainer ? `${parentOrigin}/lyapi` : window.location.origin;
-    window.open(`${prefixUrl}/${router.currentRoute.value.params.projectNameAbbr}/IM?ref=${JSON.stringify(schemaNode ? { entityId, id, name } : {})}`, '_blank');
-  }
+  const activeTab = { ...schemaNode, key: schemaNode.id, type: 'schema' };
+  // 当前是处于 查看 组件tab中，去查看与该组件关联的组件信息， 无需跳转，新增tab即可
+  store.commit('Endpoint/setActiveTab', activeTab);
+  store.commit('Endpoint/setActiveTabs', uniquArrray([...store.state.Endpoint.activeTabs, activeTab]));
+  store.dispatch('Schema/querySchema', { id: refId });
+  // if (activeSchema.value.id) {
+  //   // 当前是处于 查看 组件tab中，去查看与该组件关联的组件信息， 无需跳转，新增tab即可
+  //   store.commit('Schema/setActiveSchema', { ...schemaNode, key: refId });
+  //   store.commit('Schema/setSchemas', uniquArrray([...store.state.Schema.schemas, schemaNode]));
+  //   store.dispatch('Schema/querySchema', { id: refId });
+  // } else {
+  //   // 当前是 查看接口定义详情抽屉或单独详情页. 需单独打开一个页面展示
+  //   const { entityId, id, name }: any = schemaNode || {};
+  //   const prefixUrl = isInLeyanWujieContainer ? `${parentOrigin}/lyapi` : window.location.origin;
+  //   window.open(`${prefixUrl}/${router.currentRoute.value.params.projectNameAbbr}/IM?ref=${JSON.stringify(schemaNode ? { entityId, id, name } : {})}`, '_blank');
+  // }
   
 }
 
@@ -565,4 +570,3 @@ watch(() => {
   }
 }
 </style>
-

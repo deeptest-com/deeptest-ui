@@ -9,7 +9,7 @@
 
     <a-col :span="22">
       <!-- 请求方法定义 -->
-      <a-radio-group v-model:value="selectedMethod" button-style="outline">
+      <a-radio-group v-model:value="selectedMethod" button-style="outline" @change="handleMethodChanged">
         <a-radio-button
             v-for="method in requestMethodOpts"
             :class="{'has-defined': hasDefinedMethod(method.value),'request-method-btn':true}"
@@ -18,7 +18,8 @@
                       background: method.value !== selectedMethod ? '#f5f5f5' : '#fff',
                      'border-color': '#d9d9d9'}"
             :size="'small'"
-            :key="method.value" :value="method.value">
+            :key="method.value" :value="method.value"
+            >
           {{ method.label }}
         </a-radio-button>
       </a-radio-group>
@@ -98,12 +99,14 @@ const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpoi
 const interfaceDetail = computed<any>(() => store.state.Endpoint.selectedMethodDetail);
 const interfaceMethodToObjMap = computed<any>(() => store.state.Endpoint.interfaceMethodToObjMap);
 const currentUser: any = computed<Endpoint>(() => store.state.User.currentUser);
-
+const activeTab: any = computed<any>(() => store.state.Endpoint?.activeTab);
 
 const selectedMethod = ref('')
 
 onUnmounted(async () => {
-  await store.dispatch('Endpoint/removeUnSavedMethods')
+  if (activeTab?.value?.entityData?.id === endpointDetail.value.id) {
+    await store.dispatch('Endpoint/removeUnSavedMethods')
+  }
 })
 
 // 是否折叠,默认展开
@@ -119,6 +122,16 @@ function hasDefinedMethod(method: string) {
 function handleResDescriptionChange(evt: any) {
   selectedMethodDetail.value.description = evt.target.value;
   store.commit('Endpoint/setSelectedMethodDetail', selectedMethodDetail.value);
+}
+
+const handleMethodChanged = (evt) => {
+  const tabs = store.state.Endpoint.activeTabs;
+  store.commit('Endpoint/setActiveTabs', tabs.map(e => {
+    if (e.entityId === endpointDetail?.value?.id) {
+      e.activeMethod = evt.target.value;
+    }
+    return e;
+  }));
 }
 
 // 当前选中的请求方法详情

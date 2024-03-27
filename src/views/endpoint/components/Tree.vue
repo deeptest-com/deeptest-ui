@@ -62,16 +62,13 @@
 <script setup lang="ts">
 import {
   computed, ref, onMounted,
-  watch, defineEmits, defineProps, createVNode, nextTick, defineExpose
+  watch, defineEmits, defineExpose
 } from 'vue';
 import {useStore} from "vuex";
 import {
   PlusOutlined,
   CaretDownOutlined,
-  MoreOutlined,
-  ExclamationCircleOutlined
 } from '@ant-design/icons-vue';
-import {Modal} from 'ant-design-vue';
 import {DropEvent} from 'ant-design-vue/es/tree/Tree';
 import cloneDeep from "lodash/cloneDeep";
 
@@ -82,7 +79,6 @@ import {setSelectedKey} from "@/utils/cache";
 import {filterByKeyword, filterTree} from "@/utils/tree";
 import {getCache} from "@/utils/localCache";
 import settings from "@/config/settings";
-import { getUrlKey } from '@/utils/url';
 import {notifyError, notifySuccess, notifyWarn} from "@/utils/notify";
 import { DropdownActionMenu } from '@/components/DropDownMenu';
 import {confirmToDo,confirmToDelete} from "@/utils/confirm";
@@ -99,7 +95,6 @@ const spinning = ref(false)
 
 let selectedKeys = ref<number[]>([]);
 const emit = defineEmits(['select']);
-const treeItemRef = ref({});
 const treeData: any = computed(() => {
   const data = treeDataCategory.value;
   if(!data?.[0]?.id){
@@ -181,7 +176,7 @@ onMounted(async () => {
 });
 
 async function loadCategories() {
-  await store.dispatch('Endpoint/loadCategory');
+  await store.dispatch('Endpoint/loadCategory', 'dir');
  // expandAll();
   // await nextTick();
 }
@@ -366,6 +361,7 @@ async function onDrop(info: DropEvent) {
       expandedKeys.value = [...new Set([...expandedKeys.value, dropKey])];
     }
     notifySuccess('移动成功');
+    await store.dispatch('Endpoint/loadCategory', 'dir');
   } else {
     notifyError('移动失败');
   }

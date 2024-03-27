@@ -111,12 +111,15 @@ const selectServe = () => {
 const treeDataCategory = ref([] as any[])
 let treeDataMapCategory = {}
 const loadCategoryByServe = async () => {
-  console.log('loadCategory', serveIds.value)
-
-  const response = await loadCategory('endpoint');
+  const response = await loadCategory('endpoint', 'dir');
   if (response.code === 0) {
-    treeDataCategory.value = response.data.children
-
+    treeDataCategory.value = (Array.isArray(response.data) ? response.data : [response.data]).map(e => {
+      if (e.parentId === 0) {
+        e.name = '所有API'
+      }
+      return e;
+    });
+    expandedKeys.value = [treeDataCategory.value[0].id];
     treeDataMapCategory = {}
     getNodeMap(treeDataCategory.value, treeDataMapCategory)
   }

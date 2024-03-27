@@ -68,7 +68,10 @@ import {
     getEndpointDiff,
     saveEndpointDiff,
     listFunctionsByThirdPartyClass,
-    importThirdPartyFunctions
+    importThirdPartyFunctions,
+    getDynamicCateogries,
+    getFavoriteList,
+    favoriteEndpoint
 } from './service';
 
 import {
@@ -93,6 +96,7 @@ import {
 } from "@/views/project-settings/service";
 import { changeServe } from '../project-settings/service';
 import {ConditionSrc} from "@/utils/enum";
+import { getAllTabsId } from "@/utils/tree";
 
 export interface StateType {
     endpointId: number;
@@ -164,6 +168,10 @@ export interface StateType {
     diffModalVisible:any;
     //diff弹框信息
     thirdFunctionList: any;
+    // 右侧tab内容
+    activeTab: any,
+    activeTabs: any[],
+    favoriteList: any[],
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -235,6 +243,11 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setIsMockChange:Mutation<StateType>;
         setDiffModalVisible:Mutation<StateType>;
         setListFunctionsByClass: Mutation<StateType>;
+
+        // 右侧tab设置
+        setActiveTab: Mutation<StateType>;
+        setActiveTabs: Mutation<StateType>;
+        setFavoriteList: Mutation<StateType>;
 
     };
     actions: {
@@ -334,7 +347,16 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         updateServe: Action<StateType, StateType>;
 
-        cloneCategoryNode:Action<StateType, StateType>
+        cloneCategoryNode:Action<StateType, StateType>;
+
+        // tab相关
+        removeTabs: Action<StateType, StateType>;
+        removeActiveTab: Action<StateType, StateType>;
+
+        // 动态获取分类目录
+        loadDynamicCategories: Action<StateType, StateType>;
+        loadFavoriteList: Action<StateType, StateType>;
+        favoriteEndpoint: Action<StateType, StateType>;
 
     }
 }
@@ -424,6 +446,9 @@ const initState: StateType = {
     isMockChange: false,
     diffModalVisible: {},
     thirdFunctionList: [],
+    activeTab: null,
+    activeTabs: [],
+    favoriteList: [],
 };
 
 const StoreModel: ModuleType = {
@@ -446,7 +471,7 @@ const StoreModel: ModuleType = {
             state.execResult = data;
         },
         setTreeDataCategory(state, data) {
-            state.treeDataCategory = [data];
+            state.treeDataCategory = Array.isArray(data) ? data : [data];
         },
         setTreeDataMapCategory(state, payload) {
             state.treeDataMapCategory = payload
@@ -663,6 +688,17 @@ const StoreModel: ModuleType = {
 
         setListFunctionsByClass(state, payload) {
             state.thirdFunctionList = payload;
+        },
+
+        setActiveTab(state, payload) {
+            state.activeTab = payload;
+        },
+
+        setActiveTabs(state, payload) {
+            state.activeTabs = payload;
+        },
+        setFavoriteList(state, payload) {
+            state.favoriteList = payload;
         }
     },
     actions: {
@@ -730,14 +766,11 @@ const StoreModel: ModuleType = {
         },
 
         // category tree
-        async loadCategory({commit}) {
-            const response = await loadCategory('endpoint');
+        async loadCategory({commit}, nodeType?: string) {
+            const response = await loadCategory('endpoint', nodeType);
             if (response.code != 0) return;
             const {data} = response;
-            commit('setTreeDataCategory', data || {});
-            const mp = {}
-            getNodeMap(data, mp)
-            commit('setTreeDataMapCategory', mp);
+            commit('setTreeDataCategory', data || []);
             return true;
         },
         async getCategoryNode({commit}, payload: any) {
@@ -759,7 +792,6 @@ const StoreModel: ModuleType = {
         async createCategoryNode({commit, dispatch, state}, payload: any) {
             try {
                 const res = await createCategory(payload);
-                await dispatch('loadCategory');
                 return res;
             } catch (error) {
                 return false;
@@ -777,7 +809,6 @@ const StoreModel: ModuleType = {
         async removeCategoryNode({commit, dispatch, state}, payload: any) {
             try {
                 await removeCategory(payload.id, payload.type);
-                await dispatch('loadCategory');
                 return true;
             } catch (error) {
                 return false;
@@ -786,7 +817,6 @@ const StoreModel: ModuleType = {
         async moveCategoryNode({commit, dispatch, state}, payload: any) {
             try {
                 await moveCategory(payload);
-                await dispatch('loadCategory');
                 return true;
             } catch (error) {
                 return false;
@@ -801,8 +831,6 @@ const StoreModel: ModuleType = {
         async saveCategory({commit, dispatch, state}, payload: any) {
             const res = await updateCategory(payload);
             if (res.code === 0) {
-                // commit('setCategory', res.data);
-                await dispatch('loadCategory');
                 return res;
             } else {
                 return false
@@ -861,8 +889,7 @@ const StoreModel: ModuleType = {
                 ...params
             });
             if (res.code === 0) {
-                return true;
-                // await dispatch('loadList', {projectId: params.projectId});
+                return res.data;
             } else {
                 return false
             }
@@ -870,7 +897,7 @@ const StoreModel: ModuleType = {
         async disabled({commit, dispatch, state}, payload: any) {
             const res = await expireEndpoint(payload.id);
             if (res.code === 0) {
-                await dispatch('loadList', {projectId: payload.projectId});
+                return true;
             } else {
                 return false
             }
@@ -878,9 +905,9 @@ const StoreModel: ModuleType = {
         async del({commit, dispatch, state}, payload: any) {
             const res = await deleteEndpoint(payload.id);
             if (res.code === 0) {
-                await dispatch('loadList', {projectId: payload.projectId});
-                // 删除接口后，需要重新拉取分类树
-                await dispatch('loadCategory');
+                if (payload.projectId) {
+                    dispatch('loadList', {projectId: payload.projectId});
+                }
                 return true
             } else {
                 return false
@@ -889,7 +916,7 @@ const StoreModel: ModuleType = {
         async copy({commit, dispatch, state}, payload: any) {
             const res = await copyEndpoint(payload.id);
             if (res.code === 0) {
-                await dispatch('loadList', {projectId: payload.projectId});
+                return true;
             } else {
                 return false
             }
@@ -1846,10 +1873,67 @@ const StoreModel: ModuleType = {
         async cloneCategoryNode({dispatch,state}, targetId: number){
             const response: any = await copyCategory(targetId);
             if (response.code === 0) {
-                await dispatch('loadCategory');
-                return true;
+                return response.data;
             }
             return false
+        },
+        // tab相关
+        async removeTabs({ commit,dispatch, state }, { data }) {
+            const removeTabIds = getAllTabsId(data); // 该目录下所有的schema
+            const newTabs = state.activeTabs.filter(e => !removeTabIds.includes(e.id)); // 找出不属于指定删除目录下的schema tabs
+            commit('setActiveTabs', newTabs);
+            if (newTabs[0]) {
+                commit('setActiveTab', { ...newTabs[0] });
+            } else {
+                commit('setActiveTab', null)
+            }
+        },
+        async removeActiveTab({ commit, state, dispatch }, targetKey) {
+            const olderTabs = cloneDeep(state.activeTabs);
+            const currActiveTab = cloneDeep(state.activeTab);
+            const findIndex = olderTabs.findIndex(e => e.id === targetKey);
+            const tabs = state.activeTabs.filter(e => e.id !== targetKey);
+            commit('setActiveTabs', tabs);
+            if (currActiveTab.id !== targetKey) {
+                return;
+            }
+            const newSchema = olderTabs[findIndex - 1] ? olderTabs[findIndex - 1] : olderTabs[findIndex + 1] ? olderTabs[findIndex + 1] : {};
+            commit('setActiveTab', newSchema);
+        },
+
+        async loadDynamicCategories({ commit }, payload: { type: string, categoryId?: number }) {
+            const result: any = await getDynamicCateogries(payload);
+            if (result.code === 0) {
+                return result.data;
+            }
+            return null;
+        },
+
+        async loadFavoriteList({ commit, rootState }: any) {
+            const result: any = await getFavoriteList({ projectId: rootState.ProjectGlobal.currProject.id });
+            if (result.code === 0) {
+                commit('setFavoriteList', (result.data || []).map((e, index) => {
+                    const item = {
+                        ...e,
+                        parentId: -1000,
+                        isLeaf: true,
+                        id: `${e.entityId}_${index}`,
+                        key: `${e.entityId}_${index}`
+                    };
+                    delete item.slots;
+                    return item;
+                }));
+                return result.data;
+            }
+            return null;
+        },
+
+        async favoriteEndpoint({ commit, rootState }: any, payload: any) {
+            const result: any = await favoriteEndpoint(payload);
+            if (result.code === 0) {
+                return true;
+            }
+            return false;
         }
     },
 };
