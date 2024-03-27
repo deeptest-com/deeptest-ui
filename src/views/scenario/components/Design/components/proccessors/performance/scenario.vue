@@ -180,6 +180,8 @@ const onCheckChanged = (item, e) => {
   } else {
     modelRef.value.runnerIds.splice(modelRef.value.runnerIds.indexOf(item.id), 1)
   }
+
+  modelRef.value.runnerIdsRaw = ""
 }
 
 watch(() => modelRef.value.id, val => {
