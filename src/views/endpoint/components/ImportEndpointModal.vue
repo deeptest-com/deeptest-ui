@@ -81,7 +81,7 @@
       </template>
       <!-- PostMan -->
       <template v-else>
-        <a-form-item label="上传文件" name="filePath">
+        <a-form-item label="上传文件" v-if="!modelRef.openUrlImport" name="filePath">
           <a-spin tip="上传中..." :spinning="uploading">
             <a-upload
               :fileList="fileList"
@@ -178,11 +178,11 @@ import {UploadOutlined,QuestionCircleOutlined, WarningOutlined} from '@ant-desig
 import {notifyWarn} from "@/utils/notify";
 import SelectServe from './SelectServe/index.vue';
 import Empty from '@/components/TableEmpty/index.vue';
-import { filterByKeyword, removeLeafNode } from '@/utils/tree';
+import { filterByKeyword } from '@/utils/tree';
 
 const store = useStore<{ Endpoint }>();
 const treeDataCategory = computed<any>(() => {
-  return removeLeafNode((store.state.Endpoint.treeDataCategory || []).filter(e => e.id !== -1))
+  return (store.state.Endpoint.treeDataCategory?.[0]?.children || []).filter(e => e.id !== -1)
 });
 
 const props = defineProps({
@@ -278,7 +278,7 @@ const rulesRef = computed(() => ({
   ],
   "categoryId": [
     {
-      required: true,
+      required: false,
       message: '请选择所属分类目录',
     }
   ],
@@ -372,16 +372,14 @@ function ok() {
 
       const res = await store.dispatch('Endpoint/importEndpointData', {
         ...params,
-        categoryId: modelRef.categoryId || treeDataCategory.value?.[0]?.id,
+        categoryId: modelRef.categoryId || -1,
         "sourceType": 2,
       });
       confirmLoading.value = false;
       if (res) {
         notifyWarn('异步导入中，稍后请刷新列表查看导入结果');
         reset();
-        emit('ok', {
-          parentId: modelRef.categoryId || treeDataCategory.value?.[0]?.id,
-        });
+        emit('ok');
       }
     })
     .catch((error: ValidateErrorEntity) => {
@@ -463,6 +461,7 @@ watch(() => {
 }, (newVal) => {
   if(newVal) {
     confirmLoading.value = false;
+    modelRef.categoryId = (!props.selectedCategoryId || props.selectedCategoryId === -1) ? null : props.selectedCategoryId;
   }
 }, {
   immediate: true
@@ -485,7 +484,6 @@ watch(() => {
   return treeDataCategory.value;
 }, (val) => {
   treeData.value = val;
-  modelRef.categoryId = val[0].id;
 })
 
 </script>

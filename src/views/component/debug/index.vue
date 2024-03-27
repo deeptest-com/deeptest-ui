@@ -164,7 +164,7 @@ onMounted(() => {
 })
 onUnmounted(() => {
   console.log('onUnmounted in debug-index')
-  // store.dispatch('Debug/resetDataAndInvocations');
+  store.dispatch('Debug/resetDataAndInvocations');
 })
 // onBeforeRouteLeave((to, from) => {
 //   store.commit('clearInvokedMap')

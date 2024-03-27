@@ -21,11 +21,7 @@ const DropdownMenuProps = {
   record: {
     type: Object,
     default: {},
-  }, // 当前操作项
-  selectedKey: {
-    type: [Number, String],
-    default: ''
-  }
+  } // 当前操作项
 };
 
 const RenderMenuItem = ({ item, record }: { item: MenuItem, record: Recordable }) => {
@@ -52,7 +48,7 @@ const RenderMenuItem = ({ item, record }: { item: MenuItem, record: Recordable }
 
   if (!hasMoreThanOneChildren.value) {
     return (
-        <a-menu-item key={item.key} class={{ 'lyapi-drop-menu-item': true, 'has-no-permission': item.disabled }} onClick={e => handleClick(e)}>
+        <a-menu-item class={{ 'lyapi-drop-menu-item': true, 'has-no-permission': item.disabled }} onClick={e => handleClick(e)}>
           <span>{renderContent()}</span>
         </a-menu-item>
     )
@@ -92,11 +88,7 @@ const DropdownList = defineComponent({
     record: {
       type: Object,
       default: () => {},
-    },
-    selectedkey: {
-      type: [Number, String],
-      default: ''
-    },
+    }
   },
   setup(props, { slots }) {
 
@@ -106,7 +98,7 @@ const DropdownList = defineComponent({
       },
       overlay: () => {
         return (
-          <a-menu selectedKeys={[props.selectedkey]}>
+          <a-menu>
             {
               props.list.map((e: any, index) => (
                 RenderMenuItem({ item: e, record: props.record })
@@ -176,7 +168,6 @@ export const DropdownActionMenu = defineComponent({
             <DropdownList
               list={newDropDownList.value}
               record={record.value}
-              selectedkey={props.selectedKey}
               v-slots={slots} />
           )}
         </div>

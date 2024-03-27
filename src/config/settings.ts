@@ -107,11 +107,6 @@ export interface SettingsType {
     lyElectronUserInfo: string;
     SwalLeaveSetting: any;
     eventPreConditionSave: string;
-
-    /**
-     * 接口定义页面
-     */
-    eventEndpointAction: string;
 }
 
 const settings: SettingsType = {
@@ -199,8 +194,6 @@ const settings: SettingsType = {
         },
     },
     eventPreConditionSave:'eventPreConditionSave',
-
-    eventEndpointAction: 'eventEndpointAction',
 
 };
 

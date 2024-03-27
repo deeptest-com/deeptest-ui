@@ -20,7 +20,6 @@
     :showCopyCurl="showCopyCurl"
     :copy-curl="copyCurl"
     :show-detail="showDetail"
-    :show-star="showStar"
     :detail-link="detailLink" />
 
 </template>
@@ -95,11 +94,6 @@ import { DrawerAction } from "@/views/component/DrawerLayout/drawerAction";
     default: false,
     required: false,
   },
-  showStar: {
-    type: Boolean,
-    default: false,
-    required: false,
-  }
 });
 
 

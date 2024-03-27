@@ -23,6 +23,7 @@ export default defineComponent({
     });
     // 监听项目数据变化
     watch(() => {return props.params;}, async (newVal: any) => {
+          console.log("watch pie newVal", newVal);
           pieData.value = newVal.pieData;
           // if (pieData.value?.total!=0) {
           init();

@@ -217,18 +217,13 @@ import cloneDeep from "lodash/cloneDeep";
 import {QuestionCircleOutlined, WarningOutlined} from '@ant-design/icons-vue';
 import Empty from '@/components/TableEmpty/index.vue';
 import SelectServe from '@/views/endpoint/components/SelectServe/index.vue';
-import { filterByKeyword, removeLeafNode } from '@/utils/tree';
+import { filterByKeyword } from '@/utils/tree';
 import { message } from 'ant-design-vue';
 import { isSaas } from '@/utils/comm';
 
 const store = useStore<{ Endpoint }>();
 const treeDataCategory = computed<any>(() => {
-  return removeLeafNode((store.state.Endpoint.treeDataCategory || []).filter(e => e.id !== -1)).map(e => {
-    if (e.parentId === 0) {
-      e.name = '所有API';
-    }
-    return e;
-  });
+  return (store.state.Endpoint.treeDataCategory?.[0]?.children || []).filter(e => e.id !== -1)
 });
 
 const props = defineProps({
@@ -363,7 +358,7 @@ const rulesRef = computed(() => ({
   ],
   "categoryId": [
     {
-      required: true,
+      required: false,
       message: '请选择所属分类目录',
     }
   ],
@@ -692,7 +687,7 @@ watch(() => {
 })
 
 onMounted(() => {
-  store.dispatch('Endpoint/loadCategory', 'dir');
+  store.dispatch('Endpoint/loadCategory');
 })
 </script>
 

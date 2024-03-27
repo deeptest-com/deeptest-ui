@@ -47,7 +47,7 @@ onMounted(() => {
 })
 onUnmounted(() => {
   console.log('onUnmounted debug-interface')
-  // store.dispatch('Debug/resetDataAndInvocations');
+  store.dispatch('Debug/resetDataAndInvocations');
 })
 
 </script>

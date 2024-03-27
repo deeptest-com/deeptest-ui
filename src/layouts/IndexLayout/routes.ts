@@ -30,7 +30,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         icon: 'define',
         title: 'endpoint-management',
         path: '',
-        component: () => import('@/views/im/index.vue'),
+        component: () => import('@/views/endpoint/index.vue'),
         hidden: false,
         meta: {
           code: 'p-api'
@@ -40,7 +40,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         icon: 'define',
         title: 'endpoint-management',
         path: ':imSerialNumber',
-        component: () => import('@/views/im/index.vue'),
+        component: () => import('@/views/endpoint/components/Detail/index.vue'),
         hidden: false,
         meta: {
           code: 'p-api',

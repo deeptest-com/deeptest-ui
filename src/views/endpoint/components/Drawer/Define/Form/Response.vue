@@ -170,7 +170,7 @@ const selectedCodes: any = computed(() => {
     codes = cloneDeep(defaultResponseCodes);
   }
   
-  selectedMethodDetail?.value?.responseBodies?.forEach((item) => {
+  selectedMethodDetail?.value?.responseBodies.forEach((item) => {
     if (codes.indexOf(item.code) == -1 ){
       codes.push(item.code);
     }

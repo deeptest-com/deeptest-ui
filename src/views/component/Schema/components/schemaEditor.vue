@@ -7,7 +7,7 @@
           <EditAndShowField
             :custom-class="'text-bolder'"
             @cancel="handleCancel"
-            :auto-focus="activeTab.autoFocus" 
+            :auto-focus="activeSchemaTab.autoFocus" 
             :value="schemaDetail?.name || ''" 
             placeholder="请输入内容" 
             @update="v => handleUpdated('name', v)" />
@@ -81,10 +81,10 @@ const schemeVisibleKey = ref(1);
 const yamlCode = ref('');
 const loading = ref(false);
 
-const store = useStore<{ ProjectSetting: ProjectSettingStateType, Schema,ProjectGlobal, Endpoint }>();
+const store = useStore<{ ProjectSetting: ProjectSettingStateType, Schema,ProjectGlobal }>();
 const schemaDetail = computed(() => store.state.Schema.schemaDetail);
-const activeTab = computed(() => store.state.Endpoint.activeTab);
-const activeTabs = computed(() => store.state.Endpoint.activeTabs);
+const activeSchemaTab = computed(() => store.state.Schema.activeSchema);
+const schemas = computed(() => store.state.Schema.schemas);
 const projectId = computed<any>(() => store.state.ProjectGlobal.currProject.id);
 
 const handleSwitchMode = async (e) => {
@@ -145,16 +145,16 @@ const saveSchema = async () => {
 }
 
 const handleCancel = () => {
-  store.commit('Endpoint/setActiveTab', {
-    ...activeTab.value,
+  store.commit('Schema/setActiveSchema', {
+    ...activeSchemaTab.value,
     autoFocus: false,
   })
 }
 
 const handleUpdated = async (type: string, value: string) => {
   try {
-    store.commit('Endpoint/setActiveTab', {
-      ...activeTab.value,
+    store.commit('Schema/setActiveSchema', {
+      ...activeSchemaTab.value,
       autoFocus: false,
     })
     await store.dispatch('Schema/saveSchema', {
@@ -163,7 +163,7 @@ const handleUpdated = async (type: string, value: string) => {
       "description": type === 'description' ? value : schemaDetail.value.description,
     })
     if (type === 'name') {
-      Object.assign(activeTabs.value.find(e => e.entityId === schemaDetail.value.id), {
+      Object.assign(schemas.value.find(e => e.entityId === schemaDetail.value.id), {
         name: value
       })
     }
@@ -178,10 +178,11 @@ const onDelete = () => {
     loading.value = true;
     try {
       await store.dispatch('Schema/deleteSchema', schemaDetail.value);
-      store.dispatch('Endpoint/removeActiveTab', activeTab.value.id);
+      store.dispatch('Schema/removeActiveSchema', schemaDetail.value.id);
     } catch(error) {
       message.error('删除失败');
     }
+    console.log('确认删除');
   })
 }
 
@@ -205,7 +206,6 @@ watch(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 0 16px;
 
   .schema-editor-content {
     flex: 1;

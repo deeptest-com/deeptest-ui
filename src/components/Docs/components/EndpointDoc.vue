@@ -255,10 +255,12 @@ const contentStr = ref('')
 function genCode(content:string) {
   contentStr.value = content
   genCodeVisible.value = true;
+  console.log("genCode",genCodeVisible.value)
 }
 
 function close (){
   genCodeVisible.value = false;
+  console.log("close",genCodeVisible.value)
 }
 
 </script>

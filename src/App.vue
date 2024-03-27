@@ -114,7 +114,7 @@ export default defineComponent({
 
     const listenSubApp = () => {
       bus?.$on('sendMsgToLeyanAPI', async (msg: any) => {
-        // console.log('832msg', msg)
+        console.log('832msg', msg)
 
         if (msg?.type === 'changeRouter') {
           // 切换项目了，需要重置数据
