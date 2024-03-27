@@ -67,9 +67,12 @@
         <div class="dp-input-tip">{{t('tips_expression_bool', {name: '{name}', number: '{+number}'})}}</div>
       </a-form-item>
 
-      <a-form-item v-if="model.type !== 'judgement'" label="数值" v-bind="validateInfos.value" required>
+      <a-form-item v-if="model.type !== 'judgement'" label="取值" v-bind="validateInfos.value" required>
         <a-input v-model:value="model.value"
                  @blur="validate('value', { trigger: 'blur' }).catch(() => {})" />
+        <div class="dp-input-tip">
+          可引用形如${name}的变量表达式，使用加号${+number}可获取其数字值，字符串常量请用英文单引号括起。
+        </div>
       </a-form-item>
 
     </a-form>
@@ -165,7 +168,7 @@ const extractorTypeRequired = [{ required: true, message: '请选择提取器类
 const extractorExpressionRequired = [{ required: true, message: '请输入提取器表达式', trigger: 'change' }]
 const expressionRequired = [{ required: true, message: '请输入表达式', trigger: 'blur' }]
 const operatorRequired = [{ required: true, message: '请选择操作', trigger: 'change' }]
-const valueRequired = [{ required: true, message: '请输入数值', trigger: 'blur' }]
+const valueRequired = [{ required: true, message: '请输入取值', trigger: 'blur' }]
 
 const rulesRef = computed(() => {
   const ret = {
