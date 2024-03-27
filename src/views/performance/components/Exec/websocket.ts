@@ -114,7 +114,7 @@ export class PerformanceTestWsClient {
     }
 
     static async sentPerformanceConductorInstruction(url, room, msg, resultCb) {
-        console.log('sentPerformanceConductorInstruction')
+        console.log('sentPerformanceConductorInstruction', url, room, msg)
 
         if (resultCb) {
             PerformanceTestWsClient.resultCallback = resultCb
