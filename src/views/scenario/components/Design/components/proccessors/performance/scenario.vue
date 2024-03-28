@@ -198,6 +198,8 @@ const submit = debounce(async () => {
   console.log('submit')
   validate()
       .then(async () => {
+        modelRef.value.runnerIdsRaw = modelRef.value.runnerIds.join(',')
+
         const stages = [] as any[]
        modelRef.value.stages.forEach((item) => {
           if (item.duration && item.target) {

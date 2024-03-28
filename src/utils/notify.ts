@@ -16,6 +16,7 @@ export function notifyError(title, desc = '', key = NotificationKeyCommon){
         key: key,
         message: title,
         description: desc,
+        duration: 3000,
     });
 }
 
