@@ -71,7 +71,7 @@
         <a-input v-model:value="model.value"
                  @blur="validate('value', { trigger: 'blur' }).catch(() => {})" />
         <div class="dp-input-tip">
-          可引用形如${name}的变量表达式，使用加号${+number}可获取其数字值，字符串常量请用英文单引号括起。
+          可引用形如${name}的变量表达式，使用加号${+number}可获取其数字值；如果表达式中涉及字符串常量运算，字符串常量请用英文单引号括起。
         </div>
       </a-form-item>
 
