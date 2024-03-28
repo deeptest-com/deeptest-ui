@@ -15,6 +15,7 @@ export const isElectronEnv = win?.versions?.electron;
  * */
 export async function getAgentUrl() {
     console.log('getAgentUrl')
+
     const currAgent = await getCache(Cache_Key_Agent)
 
     let agentUrl = currAgent ? currAgent.url : process.env.VUE_APP_API_AGENT;
