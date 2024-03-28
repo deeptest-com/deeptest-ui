@@ -29,8 +29,9 @@
       </template>
 
       <template #weight="{ record }">
-        <a-input-number v-model:value="record.weight" :min="1" class="dp-per100"
+        <a-input-number v-model:value="record.weight" :min="1"
                         @blur="e => onWeightChanged(e, record)" />
+        %
       </template>
 
       <template #updatedAt="{ record, column }">
@@ -200,7 +201,7 @@ const columns = [
     title: '权重',
     dataIndex: 'weight',
     slots: {customRender: 'weight'},
-    width: 60,
+    width: 80,
   },
   {
     title: '最新更新',
@@ -223,5 +224,9 @@ const columns = [
 <style lang="less" scoped>
 .processor_performance_runners-main {
   padding: 26px;
+
+  .ant-input-number {
+    width: 70px;
+  }
 }
 </style>
