@@ -4,6 +4,7 @@
       <div class="indexlayout-top-menu">
         <DetailBreadCrumb  v-if="isDetailPage"/>
         <RightTopProject v-if="!isDetailPage"/>
+        <RightTopLecang />
         <!--
         <RightTopServer v-if="showServerSelector && !isDetailPage" />
         -->
@@ -27,6 +28,7 @@ import RightTopSettings from './RightTopSettings.vue';
 import RightTopWebsocket from './RightTopWebsocket.vue';
 import RightTopUpdate from './RightTopUpdate.vue';
 import DetailBreadCrumb from "./DetailBreadCrumb.vue";
+import RightTopLecang from "./RightTopLecang.vue";
 import useTopMenuWidth from "../composables/useTopMenuWidth";
 
 export default defineComponent({
@@ -38,6 +40,7 @@ export default defineComponent({
     RightTopUpdate,
     //RightTopServer,
     DetailBreadCrumb,
+    RightTopLecang,
   },
   props: {
     collapsed: {

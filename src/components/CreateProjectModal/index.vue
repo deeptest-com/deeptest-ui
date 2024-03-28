@@ -61,7 +61,7 @@
             </a-select-option>
           </a-select>
         </a-form-item>
-        <template v-if="isLy">
+        <template v-if="isLy && !isLecang">
           <!-- ly wujie环境 或 客户端下 展示所属产品  -->
           <a-form-item v-bind="validateInfos.products">
             <template #label>
@@ -114,10 +114,32 @@
             </div>
           </a-form-item>
         </template>
-        <!-- <a-form-item label="示例数据">
-          <a-switch v-model:checked="formStateRef.includeExample"/>
-        </a-form-item> -->
-
+        <template v-if="isLy && !isLecang">
+          <a-form-item v-bind="validateInfos.products">
+            <template #label>
+              <div class="create-project-label">
+                所属工程
+                <a-tooltip placement="top" title="所属工程数据来自乐仓工程管理，请联系管理员创建">
+                  <QuestionCircleOutlined />
+                </a-tooltip>
+              </div>
+            </template>
+            <div class="project-edit-pd">
+              <a-tree-select
+                v-model:value="formStateRef.products"
+                show-search
+                placeholder="请选择所属工程"
+                optionFilterProp="label"
+                tree-checkable
+                mode="multiple"
+                :maxTagCount="10"
+                :tree-data="lyProducts"
+                labelInValue
+                :replaceFields="{ title: 'name',value:'id'}"
+              />
+            </div>
+          </a-form-item>
+        </template>
         <a-form-item label="项目简介">
           <a-textarea v-model:value="formStateRef.desc"/>
         </a-form-item>
@@ -143,6 +165,7 @@ import {notifyError, notifySuccess} from "@/utils/notify";
 import {useWujie} from "@/composables/useWujie";
 import { isElectronEnv } from "@/utils/agentEnv";
 import { isLeyan } from "@/utils/comm";
+import { useRoute } from "vue-router";
 
 const useForm = Form.useForm;
 const props = defineProps<{
@@ -151,7 +174,8 @@ const props = defineProps<{
 }>();
 const emits = defineEmits(["update:visible", "handleOk", "handleSuccess"]);
 const store = useStore<{ User: UserStateType; Project: ProjectStateType }>();
-const { isInLeyanWujieContainer, parentOrigin, SaasProductStatus } = useWujie();
+const route = useRoute();
+const { isInLeyanWujieContainer, parentOrigin, SaasProductStatus, isInLecangWujieContainer } = useWujie();
 const isLy = isLeyan();
 const userListOptions = computed<SelectTypes["options"]>(
     () => (store.state.Project.userList || []).filter(e => isInLeyanWujieContainer ? e.username !== 'admin' : e.username !== '')
@@ -160,6 +184,7 @@ const currUser = computed(() => {
   return store.state.User.currentUser;
 });
 const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
+const isLecang = route.query.from === 'lecang' || isInLecangWujieContainer;
 const lyProducts = ref([]);
 const lySpaces = ref([]);
 const wrapperCol = {span: 14};
