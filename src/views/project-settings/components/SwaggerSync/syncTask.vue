@@ -435,6 +435,7 @@ const handleDriverTypeChanged = (v) => {
 /**
  * ::::: 智能体厂相关 ::::
  */
+const lastLecangUrl = ref('');
 const fetching = ref(false);
 
 const handleEngineerFocus = async () => {
@@ -443,6 +444,12 @@ const handleEngineerFocus = async () => {
       'lecangReq.url',
     ])
     .then(async () => {
+      if (lastLecangUrl.value !== modelRef.lecangReq.url) {
+        cronEngineeringOptions.value = [];
+        modelRef.lecangReq.engineering = [];
+        modelRef.lecangReq.serviceCodes = [];
+        lastLecangUrl.value = modelRef.lecangReq.url;
+      }
       fetching.value = true;
       try {
         const result = await store.dispatch('ProjectSetting/getCronAllEngineeringOptions', {
@@ -469,6 +476,7 @@ const handleEngineerFocus = async () => {
 
 const handleEngineerChanged = async () => {
   modelRef.lecangReq.serviceCodes = [];
+  cronServesOptions.value = [];
 }
 
 const handleServiceFocus = async () => {
