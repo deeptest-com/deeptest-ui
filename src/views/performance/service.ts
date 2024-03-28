@@ -210,6 +210,13 @@ export const genNetworkMetricsChart = (timestamp, metrics, chartData, indexMap) 
         }
     })
 }
+export async function getConductor(planId) {
+    const params = {planId}
+    return request({
+        url: `/${apiPath}/getConductor`,
+        params,
+    });
+}
 
 // agent web api - performance
 export async function getPerformanceState(agentWebAddress: string) {

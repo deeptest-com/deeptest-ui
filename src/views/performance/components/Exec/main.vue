@@ -178,6 +178,8 @@ import {getToken} from "@/utils/localToken";
 import {StateType as ProjectSettingStateType} from "@/views/project-settings/store";
 import EnvSelector from "@/views/component/EnvSelector/index.vue";
 import {loadProjectEnvVars} from "@/utils/cache";
+import {getConductor} from "@/views/performance/service";
+import {getWebSocketApi, getWebSocketUrl} from "@/services/websocket";
 
 require("echarts/lib/component/grid");
 use([CanvasRenderer, LineChart, TitleComponent, TooltipComponent, LegendComponent,]);
@@ -228,12 +230,13 @@ const execBegin = async () => {
 
   room.value = 'user' + currUser.value.id + '_' + getUuid()
 
+  const conductor = await getConductor(detailResult.value.id) as any
+
   const data = {
     userId: currUser.value.id,
     projectId: currProject.value.id,
     serverUrl: setServeUrl(process.env.VUE_APP_API_SERVER),
     token: await getToken(),
-
     room: room.value,
     planId: detailResult.value.id,
     environmentId: currEnvId.value,
@@ -241,7 +244,7 @@ const execBegin = async () => {
   }
   console.log('****** send ws data of exec performance testing ', data);
 
-  execStart(data)
+  execStart(data, getWebSocketUrl(conductor.data.webAddress))
 
   // execUuid.value = getUuid()
   // execStart({
@@ -343,8 +346,10 @@ const execCancel = () => {
 onMounted(() => {
   console.log('onMounted')
 
-  setTimeout(() => {
-    execJoin('')
+  setTimeout(async () => {
+    const conductor = await getConductor(detailResult.value.id) as any
+    console.log('conductor', conductor.data);
+    execJoin('', getWebSocketUrl(conductor.data.webAddress))
   }, 1000)
 })
 onUnmounted(() => {

@@ -7,7 +7,7 @@ import {scrollTo} from "@/utils/dom";
 import {
     genAllResponseTimeChart, genCpuMetricsChart,
     genDiskMetricsChart, genMemoryMetricsChart,
-    genNetworkMetricsChart, genFailedNumbChart, genVuCountChart,
+    genNetworkMetricsChart, genFailedNumbChart, genVuCountChart, getConductor,
 } from "@/views/performance/service";
 
 import {sampleAvgDuration} from "./config";
@@ -37,6 +37,7 @@ interface Execution {
 
     execLogs: Ref<any[]>,
     request: Ref<any>,
+    conductorUrl: Ref<string>,
 }
 
 function useExecution(): Execution {
@@ -59,6 +60,7 @@ function useExecution(): Execution {
 
         execLogs,
         request,
+        conductorUrl,
     } = initChartData()
 
     const resultCallback = (room, body) => {
@@ -156,8 +158,8 @@ function useExecution(): Execution {
         }
     }
 
-    const execJoin = async (room) => {
-        const url = await getWebSocketApi()
+    const execJoin = async (room, u?) => {
+        const url = u ? u : conductorUrl.value
         console.log('execJoin', url)
 
         PerformanceTestWsClient.sentPerformanceConductorInstruction(url, currRoom.value, JSON.stringify({
@@ -166,7 +168,7 @@ function useExecution(): Execution {
         }), resultCallback)
     }
 
-    const execStart = async data => {
+    const execStart = async (data, u) => {
         console.log('execStart')
 
         resetChartData(chartDataVuCount,
@@ -178,20 +180,20 @@ function useExecution(): Execution {
 
         request.value = data
         currRoom.value = data.room
-        const url = await getWebSocketApi()
 
-        PerformanceTestWsClient.sentPerformanceConductorInstruction(url, currRoom.value, JSON.stringify({
+        conductorUrl.value = u
+
+        PerformanceTestWsClient.sentPerformanceConductorInstruction(conductorUrl.value, currRoom.value, JSON.stringify({
             act: 'startPerformanceTest',
             performanceTestExecReq: data,
         }), resultCallback)
     }
     const execStop = async () => {
-        const url = await getWebSocketApi()
-        console.log('execStop', url)
+        console.log('execStop', conductorUrl.value)
 
         if (!currRoom.value) return
 
-        PerformanceTestWsClient.sentPerformanceConductorInstruction(url, currRoom.value, JSON.stringify({
+        PerformanceTestWsClient.sentPerformanceConductorInstruction(conductorUrl.value, currRoom.value, JSON.stringify({
             act: 'stopPerformanceTest',
             performanceTestExecReq: {room: currRoom.value},
         }), null)
@@ -241,7 +243,7 @@ function useExecution(): Execution {
         chartDataNetwork,
 
         tableReqResponseTime, summaryData,
-        execLogs, request,
+        execLogs, request, conductorUrl,
     } as Execution
 }
 
@@ -280,6 +282,7 @@ function initChartData() {
     const summaryData: Ref<any> = ref({})
     const execLogs: Ref<any[]> = ref([] )
     const request: Ref<any> = ref({})
+    const conductorUrl: Ref<string> = ref('')
 
     return {
         chartDataVuCount,
@@ -291,7 +294,7 @@ function initChartData() {
         chartDataDiskMap, chartDataDisk,
         chartDataNetworkMap, chartDataNetwork,
         tableReqResponseTime, summaryData,
-        execLogs, request,
+        execLogs, request, conductorUrl,
     }
 }
 

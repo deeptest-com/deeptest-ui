@@ -71,7 +71,11 @@ export class WebSocket {
 
 export async function getWebSocketApi() {
   const apiHost = await getAgentUrl();
-  const url = apiHost.replace('http', 'ws') + '/ws'
+
+  return getWebSocketUrl(apiHost)
+}
+export function getWebSocketUrl(webUrl) {
+  const url = webUrl.replace('http', 'ws') + '/ws'
   console.log(`websocket url = ${url}`)
 
   return url
