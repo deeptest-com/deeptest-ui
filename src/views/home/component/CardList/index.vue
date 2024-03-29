@@ -192,7 +192,10 @@ async function goProject(item: any, e) {
         clearInterval(interval);
       }
       otherWindow.postMessage({
-        user,
+        user: {
+          ...user,
+          lzosOrigin: window.parent.window.location.origin,
+        },
         token
       }, childOrigin?.endsWith('/') ? childOrigin.substring(0, childOrigin.length - 1) : childOrigin);
       i++;
