@@ -38,6 +38,7 @@ import {WebSocket} from "@/services/websocket";
 import {getCache, setCache} from "@/utils/localCache";
 import store from "@/config/store";
 import { config, observer } from "./utils/observer";
+import getWindowMessage from "./utils/message";
 fixMonacoEditor();
 export default defineComponent({
   name: 'App',
@@ -70,6 +71,7 @@ export default defineComponent({
       spaces: [],
       syncMembers: false,
     });
+    const show = ref(false);
 
     watch(() => {
       return currentUser.value
@@ -161,7 +163,7 @@ export default defineComponent({
       })
     }
 
-    onMounted(() => {
+    onMounted(async () => {
       setHtmlLang(locale.value); 
       //  监听父应用传递过来的消息
       if(isWujieEnv){
@@ -234,7 +236,8 @@ export default defineComponent({
       antdLocales,
       createProjectModalVisible,
       handleCreateSuccess,
-      formState
+      formState,
+      show
     }
   }
 })

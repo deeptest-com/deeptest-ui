@@ -166,6 +166,7 @@ import {useWujie} from "@/composables/useWujie";
 import { isElectronEnv } from "@/utils/agentEnv";
 import { isLeyan } from "@/utils/comm";
 import { useRoute } from "vue-router";
+import { getLzosInfo } from "@/utils/lzos";
 
 const useForm = Form.useForm;
 const props = defineProps<{
@@ -184,7 +185,11 @@ const currUser = computed(() => {
   return store.state.User.currentUser;
 });
 const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
-const isLecang = route.query.from === 'lecang' || isInLecangWujieContainer;
+
+const isLecang = async () => {
+  const lzosInfo = await getLzosInfo();
+  return lzosInfo || isInLecangWujieContainer
+};
 const lyProducts = ref([]);
 const lySpaces = ref([]);
 const wrapperCol = {span: 14};
