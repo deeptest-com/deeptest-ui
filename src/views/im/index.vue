@@ -8,15 +8,15 @@
         </template>
         <template #right>
           <div v-if="activeTabs.length > 0" class="endpoint-right-content">
-            <a-tabs 
-              class="im-tabs-full-height"
+            <Tabs 
+              class="endpoint-tabs-full-height"
               :activeKey="activeTab.key" 
-              hide-add type="editable-card" 
+              type="editable-card" 
               @change="changeTab" 
               @edit="onEdit">
-              <a-tab-pane v-for="item in activeTabs" :key="item.key">
+              <TabPane class="endpoint-tabs" v-for="item in activeTabs" :key="item.key">
                 <template #tab>
-                  <a-dropdown :trigger="['contextmenu']" :visible="visible[item.id]">
+                  <a-dropdown :trigger="['contextmenu']" :visible="visible[item.id]" placement="bottomRight">
                     <div v-on-click-outside="canelVisible" @contextmenu="openDropdown(item)">
                       <FolderOpenOutlined v-if="item.type === 'im-dir'" />
                       <IconSvg v-if="item.type === 'schema'" type="model" class="dp-icon-large"/>
@@ -42,19 +42,19 @@
                   <List v-else-if="item.type === 'im-dir' || item.id === -1" :category-id="item.id"/>
                   <SchemaEditorContent v-else />
                 </div>
-              </a-tab-pane>
-              <template #tabBarExtraContent>
+              </TabPane>
+              <template #addIcon>
                 <div 
                   :class="['extra-menu', dropdownVisible ? 'visible' : '']" 
                   @mouseenter="dropdownVisible = true" 
                   @mouseleave="dropdownVisible = false">
-                  <span style="cursor: pointer;margin-right: 20px;"><EllipsisOutlined /></span>
-                  <a-menu @click="e => handleMenuClick(e)">
+                  <span style="cursor: pointer;"><EllipsisOutlined /></span>
+                  <a-menu @click="e => handleMenuClick(e)" :selectedKeys="null">
                     <a-menu-item v-for="(item) in dropdownMenu" :key="item.key">{{ item.label }}</a-menu-item>
                   </a-menu>
                 </div>
               </template>
-            </a-tabs>
+            </Tabs>
           </div>
           <div v-else class="endpoint-empty-content">
             <a-empty  description="请先在左侧目录上选择需要调试的接口"/>
@@ -68,6 +68,7 @@
 import { watch, ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { EllipsisOutlined, FolderOpenOutlined } from "@ant-design/icons-vue";
+import { Tabs, TabPane } from 'ant-design-vue-v3';
 import { vOnClickOutside } from '@vueuse/components';
 import ContentPane from '@/views/component/ContentPane/index.vue';
 import IconSvg from '@/components/IconSvg';
@@ -166,6 +167,7 @@ const changeTab = key => {
 };
 
 const onEdit = (e, type?: string) => {
+  if (type === 'add') return;
   store.dispatch('Endpoint/removeActiveTab', e);
 };
 
@@ -212,11 +214,19 @@ watch(() => {
   height: 100%;
   overflow: hidden;
 
-  :deep(.ant-tabs-tab) {
-    div {
-      display: flex;
-      align-items: center;
+  :deep(.ant-tabs-nav-wrap) {
+    overflow: visible;
+    scrollbar-width: none;
+    z-index: 999;
+    width: 100%;
+
+    &.ant-tabs-nav-wrap-ping-right, &.ant-tabs-nav-wrap-ping-left {
+      overflow: hidden;
     }
+  }
+
+  :deep(.ant-tabs-nav-more) {
+    display: none;
   }
 
   :deep(.pane.right) {
@@ -231,24 +241,28 @@ watch(() => {
     margin-top: 32px;
   }
 
-  :deep(.ant-tabs.im-tabs-full-height) {
+  :deep(.ant-tabs.endpoint-tabs-full-height) {
     height: 100%;
 
-    .ant-tabs-content {
-      height: calc(100% - 56px);
+    .ant-tabs-tabpane {
 
-      .ant-tabs-tabpane {
-        height: 100%;
-
-        &.ant-tabs-tabpane-inactive {
-          height: 0;
-        }
+      &.ant-tabs-tabpane-inactive {
+        height: 0;
       }
     }
+  }
 
-    .ant-tabs-extra-content {
-      
-    }
+  :deep(
+    .ant-tabs.endpoint-tabs-full-height > .ant-tabs-content-holder > .ant-tabs-content,
+    .ant-tabs.endpoint-tabs-full-height > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane
+  ) {
+    height: 100%;
+  }
+  
+
+  :deep(.ant-tabs.endpoint-tabs-full-height > .ant-tabs-nav > .ant-tabs-nav-wrap > .ant-tabs-nav-list > .ant-tabs-tab) {
+    display: flex;
+    align-items: center;
   }
 
   .endpoint-tab-content {
@@ -277,7 +291,7 @@ watch(() => {
       position: absolute;
       width: 122px;
       right: 16px;
-      top: 32px;
+      top: 12px;
       background-color: white;
       height: 0;
       box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);

@@ -1,16 +1,15 @@
 <template>
   <div class="diagnose-interface-design-main">
       <div id="diagnose-interface-debug-panel">
-        <a-tabs
-          class="dp-tabs-full-height"
+        <Tabs
+          class="diagnose-tabs-full-height"
           type="editable-card"
-          :hideAdd="true"
           :closable="true"
           v-if="interfaceTabs?.length"
           :activeKey="interfaceId"
           @edit="onTabEdit"
           @change="changeTab">
-          <a-tab-pane
+          <TabPane
             v-for="tab in interfaceTabs"
             :title="tab.title"
             :key="tab.id"
@@ -35,19 +34,19 @@
                 </template>
               </div>
             </a-spin>
-          </a-tab-pane>
-          <template #tabBarExtraContent>
+          </TabPane>
+          <template #addIcon>
             <div 
               :class="['extra-menu', dropdownVisible ? 'visible' : '']" 
               @mouseenter="dropdownVisible = true" 
               @mouseleave="dropdownVisible = false">
-              <span style="cursor: pointer;margin-right: 20px;"><EllipsisOutlined /></span>
-              <a-menu @click="e => onContextMenuClick(e)">
+              <span style="cursor: pointer;"><EllipsisOutlined /></span>
+              <a-menu @click="e => onContextMenuClick(e)" :selectedKeys="null">
                 <a-menu-item v-for="(item) in tabsContextMenu" :key="item.key">{{ item.label }}</a-menu-item>
               </a-menu>
             </div>
           </template>
-        </a-tabs>
+        </Tabs>
         <div  v-else style="margin-top: 36px;">
           <a-empty  :description="'请先在左侧目录上选择需要调试的接口'"/>
         </div>
@@ -63,6 +62,7 @@
 import {computed, provide, ref, watch} from 'vue';
 import {useStore} from "vuex";
 import debounce from "lodash.debounce";
+import { Tabs, TabPane } from 'ant-design-vue-v3';
 import { EllipsisOutlined } from '@ant-design/icons-vue';
 import { vOnClickOutside } from '@vueuse/components';
 
@@ -226,16 +226,52 @@ const getTitle = (title) => {
   #diagnose-interface-debug-panel {
     height: 100%;
 
+    :deep(.pane.top) {
+      overflow: hidden;
+    }
+
     .interface-tabs-content {
       width: 100%;
       height: 100%;
     }
 
-    :deep(.ant-tabs-tab) {
-      div {
-        display: flex;
-        align-items: center;
+    :deep(.ant-tabs.diagnose-tabs-full-height) {
+      height: 100%;
+
+      .ant-tabs-tabpane {
+
+        &.ant-tabs-tabpane-inactive {
+          height: 0;
+        }
       }
+    }
+
+    :deep(
+      .ant-tabs.diagnose-tabs-full-height > .ant-tabs-content-holder > .ant-tabs-content,
+      .ant-tabs.diagnose-tabs-full-height > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane
+    ) {
+      height: 100%;
+    }
+    
+
+    :deep(.ant-tabs.diagnose-tabs-full-height > .ant-tabs-nav > .ant-tabs-nav-wrap > .ant-tabs-nav-list > .ant-tabs-tab) {
+      display: flex;
+      align-items: center;
+    }
+
+    :deep(.ant-tabs-nav-wrap) {
+      overflow: visible;
+      scrollbar-width: none;
+      z-index: 999;
+      width: 100%;
+
+      &.ant-tabs-nav-wrap-ping-right, &.ant-tabs-nav-wrap-ping-left {
+        overflow: hidden;
+      }
+    }
+
+    :deep(.ant-tabs-nav-more) {
+      display: none;
     }
 
     .extra-menu {
@@ -253,7 +289,7 @@ const getTitle = (title) => {
         position: absolute;
         width: 122px;
         right: 16px;
-        top: 32px;
+        top: 12px;
         background-color: white;
         height: 0;
         box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);

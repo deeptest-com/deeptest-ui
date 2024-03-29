@@ -694,7 +694,7 @@ watch(() => {
 }, (val) => {
   if (val?.id && val?.type !== 'schema') {
     imCategoryTree.value.setSelectedKeys(val.id);
-  } else if (!val.id && !val.type) {
+  } else if (!val?.id && !val?.type) {
     imCategoryTree.value.initTree();
   }
 })

@@ -55,6 +55,9 @@ function useEndpoint() {
     }
     endpointNode.activeMethod = endpointNode.entityData?.method?.[0] || 'GET';
     endpointNode.type = 'im';
+    if (!endpointNode.key) {
+      endpointNode.key = endpointNode.id;
+    }
     if (!findTab) {
       store.commit('Endpoint/setActiveTabs', [...activeTabs.value, { ...endpointNode }]);
     }
