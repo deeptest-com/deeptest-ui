@@ -49,7 +49,7 @@
                   @mouseenter="dropdownVisible = true" 
                   @mouseleave="dropdownVisible = false">
                   <span style="cursor: pointer;"><EllipsisOutlined /></span>
-                  <a-menu @click="e => handleMenuClick(e)">
+                  <a-menu @click="e => handleMenuClick(e)" :selectedKeys="null">
                     <a-menu-item v-for="(item) in dropdownMenu" :key="item.key">{{ item.label }}</a-menu-item>
                   </a-menu>
                 </div>
