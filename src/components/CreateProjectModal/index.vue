@@ -63,7 +63,7 @@
             </a-select-option>
           </a-select>
         </a-form-item>
-        <template v-if="isLy && !isLecang">
+        <template v-if="isLy">
           <!-- ly wujie环境 或 客户端下 展示所属产品  -->
           <a-form-item name="products">
             <template #label>
@@ -115,8 +115,6 @@
               <a-checkbox v-model:checked="formStateRef.syncMembers">同步空间成员</a-checkbox>
             </div>
           </a-form-item>
-        </template>
-        <template v-if="isLy && isLecang">
           <a-form-item name="engineering">
             <template #label>
               <div class="create-project-label">
@@ -242,8 +240,8 @@ const rulesRef = computed(() => ({
       },
     ],
     adminId: [{required: true, message: "请选择管理员"}],
-    products: [{required: !isSaas ? true : SaasProductStatus === 1, message: "请选择所属产品", trigger: "blur"} ],
-    engineering: [{required: true, message: "请输入所属工程"},],
+    products: [{required: isLecang.value ? false : !isSaas ? true : SaasProductStatus === 1, message: "请选择所属产品", trigger: "blur"} ],
+    engineering: [{required: isLecang.value, message: "请输入所属工程"},],
     // desc: [{max: 180, message: "项目简介应小于180位", trigger: "blur"}],
 }));
 
