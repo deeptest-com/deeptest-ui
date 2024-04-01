@@ -508,7 +508,7 @@ const handleServiceFocus = async () => {
 };
 
 const filterOption = (input: string, option: any) => {
-  if (option.value.includes(input)) {
+  if (option.name.includes(input)) {
     return true
   }
 };
