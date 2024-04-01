@@ -89,9 +89,11 @@ import {notifyError, notifySuccess} from "@/utils/notify";
 import usePermission from "@/composables/usePermission";
 import { setCache } from "@/utils/localCache";
 import settings from "@/config/settings";
+import { useWujie } from "@/composables/useWujie";
 
 // 获取当前登录用户信息
 const router = useRouter();
+const { isInLecangWujieContainer } = useWujie();
 const { hasProjectAuth } = usePermission();
 const store = useStore<{ Home: StateType, User: UserStateType }>();
 const currentUser = computed<CurrentUser>(() => store.state.User.currentUser);
@@ -127,9 +129,26 @@ onMounted(async () => {
   await store.dispatch("User/fetchCurrent");
   await store.dispatch('Global/getPermissionMenuList', { needSysAuth: true });
   await getHearderData();
+  if (isInLecangWujieContainer) {
+    getLzosContextInfo();
+    return;
+  }
   await getList(1);
   
 });
+
+const bus: any = window?.$wujie?.bus;
+const getLzosContextInfo = () => {
+  if (bus) {
+    const engineer = bus?.props?.setting?.activeContextForm;
+    console.log('首次加载，当前工程信息：', engineer);
+  }
+  getList(1);
+
+  bus?.$on('contextBus', data => {
+    console.log('监听乐仓工程切换信息', data);
+  })
+};
 
 const getHearderData = async (): Promise<void> => {
   await store.dispatch("Home/queryCard", {projectId: 0});

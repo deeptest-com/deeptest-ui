@@ -126,7 +126,7 @@
                 </a-tooltip>
               </div>
             </template>
-            <div class="project-edit-pd">
+            <div>
               <a-select
                 v-model:value="formStateRef.engineering"
                 show-search
