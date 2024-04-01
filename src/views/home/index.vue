@@ -122,6 +122,7 @@ let formState = ref({
   syncMembers: false,
 });
 
+const bus: any = window?.$wujie?.bus;
 onMounted(async () => {
   if (router.currentRoute.value?.query?.type == 'all') {
     activeKey.value = 0
@@ -129,26 +130,12 @@ onMounted(async () => {
   await store.dispatch("User/fetchCurrent");
   await store.dispatch('Global/getPermissionMenuList', { needSysAuth: true });
   await getHearderData();
-  if (isInLecangWujieContainer) {
-    getLzosContextInfo();
-    return;
-  }
   await getList(1);
-  
-});
-
-const bus: any = window?.$wujie?.bus;
-const getLzosContextInfo = () => {
-  if (bus) {
-    const engineer = bus?.props?.setting?.activeContextForm;
-    console.log('首次加载，当前工程信息：', engineer);
-  }
-  getList(1);
-
   bus?.$on('contextBus', data => {
     console.log('监听乐仓工程切换信息', data);
+    getList(1);
   })
-};
+});
 
 const getHearderData = async (): Promise<void> => {
   await store.dispatch("Home/queryCard", {projectId: 0});
@@ -157,7 +144,9 @@ const getHearderData = async (): Promise<void> => {
 
 // 获取全部项目数据
 const getList = async (current: number): Promise<void> => {
-  await store.dispatch("Home/queryProject", {});
+  const engineering = JSON.parse(localStorage.getItem('lzos:activeContextForm') || '{}') || {};
+  console.log('localStorage: 获取', engineering);
+  await store.dispatch("Home/queryProject", engineering.container ? { engineering: engineering.container } : {});
   isLoadingList.value = false;
 };
 
