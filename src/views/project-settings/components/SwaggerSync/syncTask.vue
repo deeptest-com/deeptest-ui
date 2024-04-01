@@ -28,7 +28,7 @@
           <!-- 智能体厂 -->
           <template v-if="modelRef.source === 'lecang'">
             <a-form-item label="环境URL" :name="['lecangReq', 'url']">
-              <a-input :disabled="lzosInfo.lzosOrigin" v-model:value="modelRef.lecangReq.url" placeholder="请输入智能体厂环境URL地址，如 https://lzos.rysaas.cn"/>
+              <a-input v-model:value="modelRef.lecangReq.url" placeholder="请输入智能体厂环境URL地址，如 https://lzos.rysaas.cn"/>
             </a-form-item>
             <a-form-item label="所属工程" :name="['lecangReq', 'engineering']">
               <template v-slot:label>

@@ -23,7 +23,7 @@
       <!-- 智能体厂 -->
       <template v-if="modelRef.driverType === 'lzos'">
         <a-form-item label="环境URL" name="filePath">
-          <a-input :disabled="lzosInfo?.lzosOrigin" v-model:value="modelRef.filePath" placeholder="请输入智能体厂环境URL地址，如 https://lzos.rysaas.cn"/>
+          <a-input v-model:value="modelRef.filePath" placeholder="请输入智能体厂环境URL地址，如 https://lzos.rysaas.cn"/>
         </a-form-item>
         <a-form-item label="智能体名" name="classCode">
           <a-input v-model:value="modelRef.classCode" placeholder="请输入智能体模型类" @change="handleClassCodeChanged"/>
