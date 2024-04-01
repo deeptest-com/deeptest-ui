@@ -36,9 +36,7 @@ import {getProjectLogo} from "@/components/CreateProjectModal";
 import fixMonacoEditor from "@/utils/fixMonacoEditor";
 import {WebSocket} from "@/services/websocket";
 import {getCache, setCache} from "@/utils/localCache";
-import store from "@/config/store";
 import { config, observer } from "./utils/observer";
-import getWindowMessage from "./utils/message";
 fixMonacoEditor();
 export default defineComponent({
   name: 'App',

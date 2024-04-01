@@ -7,7 +7,7 @@ const getWindowMessage = (cb?: any) => {
     window.addEventListener('message', async event => {
       if (event.data.token) {
         await setToken(event.data.token);
-        await setLzosInfo(event.data.user || {});
+        await setLzosInfo(event.data.user || null);
         isEmitMessage = true;
         cb && cb(event.data);
         resolve('success');

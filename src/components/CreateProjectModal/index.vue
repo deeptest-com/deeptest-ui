@@ -13,24 +13,26 @@
     <div class="project-edit-main">
       <a-form
         class="custom-center-form"
+        ref="createProjectForm"
         :model="formStateRef"
+        :rules="rulesRef"
         :wrapper-col="wrapperCol"
         :label-col="{ style: { width: isLy ? '130px' : '82px' } }"
       >
-        <a-form-item label="项目名称" v-bind="validateInfos.name">
+        <a-form-item label="项目名称" name="name">
                     <a-input
               v-model:value="formStateRef.name"
               placeholder="请输入项目名称"
               @blur="validate('name', { trigger: 'blur' }).catch(() => {})"
           />
         </a-form-item>
-        <a-form-item label="英文缩写" v-bind="validateInfos.shortName">
+        <a-form-item label="英文缩写" name="shortName">
                     <a-input 
             v-model:value="formStateRef.shortName"
             placeholder="大写英文字母开头,仅限字母和数字,<=10位"
             @blur="validate('shortName', { trigger: 'blur' }).catch(() => {})" />
         </a-form-item>
-        <a-form-item label="logo" v-bind="validateInfos.logo">
+        <a-form-item label="logo" name="logo">
                     <div class="logo-picker">
             <div :class="{
                 'logo-picker-item': true,
@@ -44,7 +46,7 @@
             </div>
           </div>
         </a-form-item>
-        <a-form-item label="管理员" v-bind="validateInfos.adminId">
+        <a-form-item label="管理员" name="adminId">
           <a-select
               v-model:value="formStateRef.adminId"
               show-search
@@ -63,7 +65,7 @@
         </a-form-item>
         <template v-if="isLy && !isLecang">
           <!-- ly wujie环境 或 客户端下 展示所属产品  -->
-          <a-form-item v-bind="validateInfos.products">
+          <a-form-item name="products">
             <template #label>
               <div class="create-project-label">
                 所属产品
@@ -114,8 +116,8 @@
             </div>
           </a-form-item>
         </template>
-        <template v-if="isLy && !isLecang">
-          <a-form-item v-bind="validateInfos.products">
+        <template v-if="isLy && isLecang">
+          <a-form-item name="engineering">
             <template #label>
               <div class="create-project-label">
                 所属工程
@@ -125,18 +127,20 @@
               </div>
             </template>
             <div class="project-edit-pd">
-              <a-tree-select
-                v-model:value="formStateRef.products"
+              <a-select
+                v-model:value="formStateRef.engineering"
                 show-search
                 placeholder="请选择所属工程"
-                optionFilterProp="label"
-                tree-checkable
                 mode="multiple"
                 :maxTagCount="10"
-                :tree-data="lyProducts"
+                :options="engineerings"
                 labelInValue
-                :replaceFields="{ title: 'name',value:'id'}"
-              />
+                @focus="handleEngineeringFocus"
+              >
+              <template v-if="engineeringFetching" #notFoundContent>
+                <a-spin size="small" />
+              </template>
+              </a-select>
             </div>
           </a-form-item>
         </template>
@@ -154,7 +158,7 @@
 
 <script lang="ts" setup>
 import {computed, defineEmits, defineProps, reactive, ref, watch, h, onMounted} from "vue";
-import {Form, message, notification} from "ant-design-vue";
+import {Form} from "ant-design-vue";
 import { PlusOutlined, QuestionCircleOutlined } from "@ant-design/icons-vue";
 import {StateType as UserStateType} from "@/store/user";
 import {StateType as ProjectStateType} from "@/views/project/store";
@@ -163,10 +167,8 @@ import {useStore} from "vuex";
 import {getProjectLogo, projectLogoList} from "./index";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import {useWujie} from "@/composables/useWujie";
-import { isElectronEnv } from "@/utils/agentEnv";
 import { isLeyan } from "@/utils/comm";
-import { useRoute } from "vue-router";
-import { getLzosInfo } from "@/utils/lzos";
+import { getLzosInfo, setLzosInfo } from "@/utils/lzos";
 
 const useForm = Form.useForm;
 const props = defineProps<{
@@ -175,7 +177,6 @@ const props = defineProps<{
 }>();
 const emits = defineEmits(["update:visible", "handleOk", "handleSuccess"]);
 const store = useStore<{ User: UserStateType; Project: ProjectStateType }>();
-const route = useRoute();
 const { isInLeyanWujieContainer, parentOrigin, SaasProductStatus, isInLecangWujieContainer } = useWujie();
 const isLy = isLeyan();
 const userListOptions = computed<SelectTypes["options"]>(
@@ -185,11 +186,11 @@ const currUser = computed(() => {
   return store.state.User.currentUser;
 });
 const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
-
-const isLecang = async () => {
-  const lzosInfo = await getLzosInfo();
-  return lzosInfo || isInLecangWujieContainer
-};
+const lzosInfo = ref(null);
+const createProjectForm = ref();
+const isLecang = computed(() => {
+  return lzosInfo.value || isInLecangWujieContainer;
+});
 const lyProducts = ref([]);
 const lySpaces = ref([]);
 const wrapperCol = {span: 14};
@@ -207,6 +208,7 @@ const wujieExtraInfo = {
   spaces: null,
   products: null,
   syncMembers: false,
+  engineering: null,
 }
 
 const formStateRef = reactive(props.formState || ( isLy ? { ...projectInfo, wujieExtraInfo } : projectInfo ));
@@ -240,9 +242,10 @@ const rulesRef = computed(() => ({
       },
     ],
     adminId: [{required: true, message: "请选择管理员"}],
-    products: [{required: !isSaas ? true : SaasProductStatus === 1, message: "请选择所属产品"}],
+    products: [{required: !isSaas ? true : SaasProductStatus === 1, message: "请选择所属产品", trigger: "blur"} ],
+    engineering: [{required: true, message: "请输入所属工程"},],
     // desc: [{max: 180, message: "项目简介应小于180位", trigger: "blur"}],
-  }));
+}));
 
 const selectLogoKey = ref("default_logo1");
 const {validate, validateInfos, resetFields} = useForm(
@@ -251,12 +254,13 @@ const {validate, validateInfos, resetFields} = useForm(
 );
 const submitForm = async () => {
   loading.value = true;
-  validate()
+  createProjectForm.value?.validate()
       .then(() => {
         store.dispatch("Project/saveProject", {
           ...formStateRef, 
           products: (formStateRef.products || []).map(e => e.value),
           spaces: (formStateRef.spaces || []).map(e => e.value),
+          engineering: (formStateRef.engineering || []).map(e => e.value),
         }).then(() => {
           loading.value = false;
           notifySuccess("保存成功");
@@ -290,6 +294,7 @@ const getProjectDetail = async(id: number) => {
     const result = await store.dispatch('Global/getIntegrationDetail', { projectId: id });
     formStateRef.products = (result.products || []).map(e => ({ ...e, label: e.name, value: e.id }));
     formStateRef.spaces = (result.spaces || []).map(e => ({ ...e, label: e.name, value: e.nameEngAbbr }));
+    formStateRef.engineering = (result.engineeringItem || []).map(e => ({ label: e.name, value: e.code }));
   } catch(error) {
     console.log(error);
   }
@@ -317,6 +322,21 @@ const handleToProducts = () => {
   }
 }
 
+/**
+ * lzos 相关
+ */
+const engineerings = ref([]);
+const engineeringFetching = ref(false);
+const handleEngineeringFocus = async() => {
+  engineeringFetching.value = true;
+  const result = await store.dispatch('Global/getLyEngineering');
+  engineerings.value = (result || []).map(e => ({
+    value: e.code,
+    label: e.name,
+  }))
+  engineeringFetching.value = false;
+}
+
 watch(() => props.visible,
   async (val) => {
   if (val) {
@@ -337,6 +357,7 @@ watch(() => {
   if (val?.id && isLy) {
     formStateRef.products = [];
     formStateRef.spaces = [];
+    formStateRef.engineering = [];
     formStateRef.syncMembers = false;
     // wujie环境下，获取所属产品/所属研发空间
     getProjectDetail(val.id);
@@ -346,7 +367,10 @@ watch(() => {
 })
 
 onMounted(async () => {
-  if (isLy) {
+  const lzUserInfo = await getLzosInfo();
+  lzosInfo.value = lzUserInfo;
+  const islecangEnv = lzUserInfo || isInLecangWujieContainer;
+  if (isLy && !islecangEnv) {
     try {
       const products = await store.dispatch('Global/getLyProducts');
       const spaces = await store.dispatch('Global/getLySpaces');

@@ -23,7 +23,7 @@
       <!-- 智能体厂 -->
       <template v-if="modelRef.driverType === 'lzos'">
         <a-form-item label="环境URL" name="filePath">
-          <a-input v-model:value="modelRef.filePath" placeholder="请输入智能体厂环境URL地址，如 https://lzos.rysaas.cn"/>
+          <a-input :disabled="lzosInfo?.lzosOrigin" v-model:value="modelRef.filePath" placeholder="请输入智能体厂环境URL地址，如 https://lzos.rysaas.cn"/>
         </a-form-item>
         <a-form-item label="智能体名" name="classCode">
           <a-input v-model:value="modelRef.classCode" placeholder="请输入智能体模型类" @change="handleClassCodeChanged"/>
@@ -171,6 +171,7 @@ import {
   defineEmits,
   reactive,
   computed, watch,
+  onMounted
 } from 'vue';
 import {useStore} from "vuex";
 import cloneDeep from "lodash/cloneDeep";
@@ -179,11 +180,13 @@ import {notifyWarn} from "@/utils/notify";
 import SelectServe from './SelectServe/index.vue';
 import Empty from '@/components/TableEmpty/index.vue';
 import { filterByKeyword, removeLeafNode } from '@/utils/tree';
+import { getLzosInfo } from '@/utils/lzos';
 
 const store = useStore<{ Endpoint }>();
 const treeDataCategory = computed<any>(() => {
   return removeLeafNode((store.state.Endpoint.treeDataCategory || []).filter(e => e.id !== -1))
 });
+const lzosInfo = ref<any>(null);
 
 const props = defineProps({
   visible: {
@@ -319,7 +322,7 @@ const spinning = ref<boolean>(false);
 
 const handleDriverTypeChanged = (v) => {
   modelRef.dataSyncType = v === 'lzos' ? 1 : 2;
-  modelRef.filePath = '';
+  modelRef.filePath = v === 'lzos' ? (lzosInfo.value?.lzosOrigin || '') : '';
 }
 
 /**
@@ -487,6 +490,11 @@ watch(() => {
   treeData.value = val;
   modelRef.categoryId = val[0].id;
 })
+
+onMounted(async() => {
+  const result = await getLzosInfo();
+  lzosInfo.value = result;
+});
 
 </script>
 

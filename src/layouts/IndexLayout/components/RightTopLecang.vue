@@ -1,34 +1,35 @@
 <template>
-  <div class="lecang-engineer" v-if="isLecangEnv && engineers.length > 0">乐仓工程：
+  <div class="lecang-engineer" v-if="isLecang && engineers.length > 0">乐仓工程：
     <span>{{ engineers.join('，') }}</span>
   </div>  
 </template>
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useWujie } from '@/composables/useWujie';
+import { getLzosInfo } from '@/utils/lzos';
+import { computed, ref, watch, onMounted } from 'vue';
 import { useStore } from 'vuex';
 
-const route = useRoute();
-const isLecangEnv = route.query.from === 'lecang';
+const { isInLecangWujieContainer } = useWujie();
+const lzosInfo = ref(null);
+const isLecang = computed(() => lzosInfo.value || isInLecangWujieContainer)
 const store = useStore<{ ProjectGlobal }>();
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 
 const engineers = ref<any[]>([]);
 
-const getEngineers = () => {
-  return [{
-    name: '工程1',
-  }, {
-    name: '工程2'
-  }]
-};
+onMounted(async() => {
+  const info = await getLzosInfo();
+  lzosInfo.value = info;
+})
 
 watch(() => {
   return currProject.value;
-}, val => {
+}, async val => {
   if (val.id) {
-    const result = getEngineers();
-    engineers.value = result;
+    const result = await store.dispatch('Global/getLyUserEngineering', {
+      projectId: val.id,
+    });
+    engineers.value = (result || []).map(e => e.name);
   }
 }, {
   immediate: true,
@@ -38,5 +39,7 @@ watch(() => {
 .lecang-engineer {
   display: flex;
   align-items: center;
+  margin-left: 20px;
+  color: rgba(0, 0, 0, 0.85);
 }
 </style>

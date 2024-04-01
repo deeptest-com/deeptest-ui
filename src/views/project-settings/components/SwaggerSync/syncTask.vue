@@ -28,7 +28,7 @@
           <!-- 智能体厂 -->
           <template v-if="modelRef.source === 'lecang'">
             <a-form-item label="环境URL" :name="['lecangReq', 'url']">
-              <a-input v-model:value="modelRef.lecangReq.url" placeholder="请输入智能体厂环境URL地址，如 https://lzos.rysaas.cn"/>
+              <a-input :disabled="lzosInfo.lzosOrigin" v-model:value="modelRef.lecangReq.url" placeholder="请输入智能体厂环境URL地址，如 https://lzos.rysaas.cn"/>
             </a-form-item>
             <a-form-item label="所属工程" :name="['lecangReq', 'engineering']">
               <template v-slot:label>
@@ -210,7 +210,7 @@ import {
   defineEmits,
   reactive,
   computed, watch,
-  onMounted
+  onMounted,
 } from 'vue';
 import {useStore} from "vuex";
 import cloneDeep from "lodash/cloneDeep";
@@ -220,6 +220,7 @@ import SelectServe from '@/views/endpoint/components/SelectServe/index.vue';
 import { filterByKeyword, removeLeafNode } from '@/utils/tree';
 import { message } from 'ant-design-vue';
 import { isSaas } from '@/utils/comm';
+import { getLzosInfo } from '@/utils/lzos';
 
 const store = useStore<{ Endpoint }>();
 const treeDataCategory = computed<any>(() => {
@@ -345,7 +346,7 @@ const modelRef = reactive<any>({
 const searchValue = ref('');
 
 const confirmLoading = ref(false);
-
+const lzosInfo = ref<any>(null);
 const cronServesOptions = ref([]);
 const cronEngineeringOptions = ref([]);
 const rulesRef = computed(() => ({
@@ -426,6 +427,7 @@ const formRef = ref();
 const handleDriverTypeChanged = (v) => {
   modelRef.syncType = v === 'lecang' ? 1 : 2;
   if (v === 'lecang') {
+    modelRef.lecangReq.url = lzosInfo.value?.lzosOrigin || '';
     if (!modelRef.lecangReq.serviceCodes) {
       modelRef.lecangReq.serviceCodes = [];
     }
@@ -699,8 +701,10 @@ watch(() => {
   immediate: true,
 })
 
-onMounted(() => {
+onMounted(async() => {
   store.dispatch('Endpoint/loadCategory', 'dir');
+  const result = await getLzosInfo();
+  lzosInfo.value = result || null;
 })
 </script>
 

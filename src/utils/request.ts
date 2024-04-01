@@ -11,6 +11,7 @@ import {getToken, setToken} from '@/utils/localToken';
 import {getCache} from '@/utils/localCache';
 import {getCachedServerUrl} from "@/utils/serverEnv";
 import {useWujie} from "@/composables/useWujie";
+import { getLzosInfo } from './lzos';
 const {xToken,tenantId,isWujieEnv,user} = useWujie()
 
 export interface ResponseData {
@@ -98,6 +99,11 @@ const requestInterceptors = async (config: AxiosRequestConfig & { cType?: boolea
     const jwtToken = await getToken();
     if (jwtToken) {
         config.headers[settings.ajaxHeadersTokenKey] = 'Bearer ' + jwtToken;
+    }
+    // lzos userinfo
+    const lzosInfo = await getLzosInfo();
+    if (lzosInfo) {
+        config.headers['Token'] = lzosInfo.token;
     }
     // 加随机数清除缓存
     config.params = {...config.params, ts: Date.now()};
