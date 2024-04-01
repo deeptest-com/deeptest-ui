@@ -113,7 +113,7 @@
               <a-checkbox v-model:checked="formStateRef.syncMembers">同步空间成员</a-checkbox>
             </div>
           </a-form-item>
-          <a-form-item name="engineering">
+          <a-form-item v-if="!isSaas" name="engineering">
             <template #label>
               <div class="create-project-label">
                 所属工程
