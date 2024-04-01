@@ -20,20 +20,19 @@
         :label-col="{ style: { width: isLy ? '130px' : '82px' } }"
       >
         <a-form-item label="项目名称" name="name">
-                    <a-input
-              v-model:value="formStateRef.name"
-              placeholder="请输入项目名称"
-              @blur="validate('name', { trigger: 'blur' }).catch(() => {})"
+          <a-input
+            v-model:value="formStateRef.name"
+            placeholder="请输入项目名称"
           />
         </a-form-item>
         <a-form-item label="英文缩写" name="shortName">
-                    <a-input 
+          <a-input 
             v-model:value="formStateRef.shortName"
             placeholder="大写英文字母开头,仅限字母和数字,<=10位"
-            @blur="validate('shortName', { trigger: 'blur' }).catch(() => {})" />
+          />
         </a-form-item>
         <a-form-item label="logo" name="logo">
-                    <div class="logo-picker">
+          <div class="logo-picker">
             <div :class="{
                 'logo-picker-item': true,
                 'logo-picker-item-active': selectLogoKey === item.imgName,
@@ -51,7 +50,6 @@
               v-model:value="formStateRef.adminId"
               show-search
               placeholder="请选择管理员"
-              @blur="validate('adminId', { trigger: 'blur' }).catch(() => {})"
               optionFilterProp="label"
               :filter-option="filterOption"
           >
@@ -65,7 +63,7 @@
         </a-form-item>
         <template v-if="isLy">
           <!-- ly wujie环境 或 客户端下 展示所属产品  -->
-          <a-form-item name="products">
+          <a-form-item :name="isInLecangWujieContainer ? null : 'products'">
             <template #label>
               <div class="create-project-label">
                 所属产品
@@ -156,7 +154,6 @@
 
 <script lang="ts" setup>
 import {computed, defineEmits, defineProps, reactive, ref, watch, h, onMounted} from "vue";
-import {Form} from "ant-design-vue";
 import { PlusOutlined, QuestionCircleOutlined } from "@ant-design/icons-vue";
 import {StateType as UserStateType} from "@/store/user";
 import {StateType as ProjectStateType} from "@/views/project/store";
@@ -168,7 +165,6 @@ import {useWujie} from "@/composables/useWujie";
 import { isLeyan } from "@/utils/comm";
 import { getLzosInfo, setLzosInfo } from "@/utils/lzos";
 
-const useForm = Form.useForm;
 const props = defineProps<{
   visible: Boolean;
   formState?: any;
@@ -240,16 +236,11 @@ const rulesRef = computed(() => ({
       },
     ],
     adminId: [{required: true, message: "请选择管理员"}],
-    products: [{required: isLecang.value ? false : !isSaas ? true : SaasProductStatus === 1, message: "请选择所属产品", trigger: "blur"} ],
+    products: [{required: isLecang.value ? false : !isSaas ? true : SaasProductStatus === 1, message: "请选择所属产品"} ],
     engineering: [{required: isLecang.value, message: "请输入所属工程"},],
-    // desc: [{max: 180, message: "项目简介应小于180位", trigger: "blur"}],
 }));
 
 const selectLogoKey = ref("default_logo1");
-const {validate, validateInfos, resetFields} = useForm(
-    formStateRef,
-    rulesRef
-);
 const submitForm = async () => {
   loading.value = true;
   createProjectForm.value?.validate()
@@ -340,7 +331,7 @@ watch(() => props.visible,
   if (val) {
     await store.dispatch("Project/getUserList");
     if (!props?.formState?.id) {
-      resetFields();
+      createProjectForm.value?.resetFields();
       Object.assign(formStateRef, {
         adminId: currUser?.value?.id,
       })
@@ -367,8 +358,7 @@ watch(() => {
 onMounted(async () => {
   const lzUserInfo = await getLzosInfo();
   lzosInfo.value = lzUserInfo;
-  const islecangEnv = lzUserInfo || isInLecangWujieContainer;
-  if (isLy && !islecangEnv) {
+  if (isLy) {
     try {
       const products = await store.dispatch('Global/getLyProducts');
       const spaces = await store.dispatch('Global/getLySpaces');
