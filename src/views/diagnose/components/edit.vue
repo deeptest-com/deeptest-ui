@@ -4,7 +4,7 @@
       :visible="!!nodeInfo"
       @ok="ok"
       @cancel="cancel"
-      :title="(!nodeInfo.id ? '新建' : '修改') + (formState.type === 'interface' ? '接口' : '目录')">
+      :title="(!nodeInfo.id ? '新建' : '修改') + (formState.type === 'interface' ? '快捷请求' : '目录')">
     <a-form
         ref="tagFormRef"
         :rules="rules"
@@ -12,7 +12,7 @@
         class="custom-center-form"
         :wrapper-col="{ span: 14 }">
 
-      <a-form-item :label="(formState.type === 'interface' ? '接口' : '目录') + '名称'" name="name">
+      <a-form-item :label="(formState.type === 'interface' ? '请求' : '目录') + '名称'" name="name">
         <a-input placeholder="请输入名称" v-model:value="formState.title"/>
       </a-form-item>
 

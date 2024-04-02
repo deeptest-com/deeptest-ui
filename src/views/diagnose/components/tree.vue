@@ -368,7 +368,7 @@ const DropdownMenuList = [
     action: (nodeProps) => create(nodeProps.dataRef?.id, 'dir'),
   },
   {
-    label: '新建接口',
+    label: '新建请求',
     ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
     action: (nodeProps) => create(nodeProps.dataRef?.id, 'interface'),
   },
@@ -379,14 +379,14 @@ const DropdownMenuList = [
   },
   {
     label: (nodeProps) => {
-      return `编辑${nodeProps.dataRef.type === 'interface' ? '接口' : '目录'}`;
+      return `编辑${nodeProps.dataRef.type === 'interface' ? '请求' : '目录'}`;
     },
     ifShow: (nodeProps) => nodeProps.dataRef.id !== -1,
     action: (nodeProps) => edit(nodeProps),
   },
   {
     label: (nodeProps) => {
-      return `删除${nodeProps.dataRef.type === 'interface' ? '接口' : '目录'}`;
+      return `删除${nodeProps.dataRef.type === 'interface' ? '请求' : '目录'}`;
     },
     auth: 'p-api-debug-del',
     ifShow: (nodeProps) => nodeProps.dataRef.id !== -1,
