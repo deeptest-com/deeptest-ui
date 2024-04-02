@@ -1,5 +1,6 @@
 <template>
   <div :class="{'schema-container': true, 'expanded': expand}" ref="schemaNode" :style="prefixStyle">
+    <div v-if="expand" class="schema-resizer" @mousedown.stop="onMouseDown"></div>
     <div class="schema-inlet" @click="expand = !expand">
       <span class="schema-icon"> <IconSvg type="model" style="font-size: 18px;"/>
       </span>
@@ -66,6 +67,7 @@ import { CreateModal } from './components';
 import { StateType as SchemaStateType } from './store';
 import { confirmToDelete } from '@/utils/confirm';
 import { uniquArrray } from '@/utils/tree';
+import { useWujie } from '@/composables/useWujie';
 
 const emits = defineEmits(['select']);
 const store = useStore<{ Schema: SchemaStateType, ProjectGlobal, Endpoint }>();
@@ -333,6 +335,43 @@ const loadCategory = async () => {
   loading.value = false;
 }
 
+/**
+ * resize
+ */
+const onMouseDown = (evt) => {
+  const { pageY: initialPageY } = evt;
+  const endpointContainer: any = document.getElementsByClassName('endpoint-content')?.[0];
+  const initialEndpointHeight = endpointContainer.clientHeight;
+  const minResizeHeight = initialEndpointHeight * 0.4;
+  const schemaContainer: any = document.getElementsByClassName('schema-container')?.[0];
+  const schemHeight = schemaContainer.clientHeight;
+
+  const resize = (resizePageY) => {
+    const resizeHeight = initialPageY - resizePageY;
+    const newHeight = schemHeight + resizeHeight;
+    schemaContainer.style.height = `${newHeight > initialEndpointHeight ? initialEndpointHeight : newHeight < minResizeHeight ? minResizeHeight : newHeight}px`;
+    schemaTree.value?.getVirtualHeight();
+  };
+
+  const handleMouseMove = (mouseMoveEvent: any) => {
+    resize(mouseMoveEvent.pageY || 0);
+  }
+
+  const handleMouseUp = (mouseUpEvent: any) => {
+    resize(mouseUpEvent.pageY || 0);
+
+    removeEventListener('mousemove', handleMouseMove);
+    removeEventListener('mouseup', handleMouseUp);
+
+  }
+
+  addEventListener('mousemove', handleMouseMove);
+  addEventListener('mouseup', handleMouseUp)
+}
+
+/**
+ * 监听
+ */
 watch(() => {
   return expand.value;
 }, async val => {
@@ -401,9 +440,21 @@ defineExpose({
   height: 66.6666%;
   background: #fff;
   overflow: hidden;
-  transition: all .2s ease-in-out;
+  // transition: all .2s ease-in-out;
   box-shadow: 0 2px 8px #00000026;
   transform: translateY(100%);
+
+  .schema-resizer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    cursor: s-resize;
+    background-color: transparent;
+    z-index: 999;
+  }
+
   .schema-inlet {
     height: 32px;
     line-height: 32px;
@@ -448,6 +499,7 @@ defineExpose({
 
   &.expanded {
     transform: translateY(0);
+    transition: unset;
     bottom: 0;
   }
 }
