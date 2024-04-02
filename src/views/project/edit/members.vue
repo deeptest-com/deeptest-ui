@@ -46,7 +46,7 @@
             <div class="customTitleColRender">
               <a-select
                   :value="record.roleId"
-                  style="width: 100px"
+                  style="width: 200px"
                   :size="'small'"
                   placeholder="请选中角色"
                   @change="
@@ -127,21 +127,24 @@ const columns = [
   {
     title: "用户名",
     dataIndex: "name",
+    width: 150,
   },
   {
     title: "角色",
     dataIndex: "role",
     slots: {customRender: "role"},
+    width: 200,
   },
   {
     title: "邮箱",
     dataIndex: "email",
     slots: {customRender: "email"},
+    width: 200,
   },
   {
     title: "操作",
     key: "action",
-    width: 260,
+    width: 80,
     slots: {customRender: "action"},
   },
 ];
