@@ -108,25 +108,26 @@
           </template>
           <span class="form-header-title">导入设置</span>
           <a-form-item label="导入至分类" name="categoryId">
-            <Empty :loading="loading">
-              <template #content>
-                <a-tree-select
-                  @change="selectedCategory"
-                  :value="modelRef.categoryId"
-                  v-model:searchValue="searchValue"
-                  show-search
-                  :multiple="false"
-                  :treeData="treeData"
-                  :treeDefaultExpandAll="true"
-                  :filterTreeNode="false"
-                  :replaceFields="{ title: 'name',value:'id'}"
-                  :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-                  placeholder="请选择分类目录"
-                  @search="handleTreeSelectSearch"
-                  allow-clear/>
+            <a-tree-select
+              @change="selectedCategory"
+              :value="modelRef.categoryId"
+              v-model:searchValue="searchValue"
+              show-search
+              :multiple="false"
+              :treeData="treeData"
+              :treeDefaultExpandAll="true"
+              :filterTreeNode="false"
+              :replaceFields="{ title: 'name',value:'id'}"
+              :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+              placeholder="请选择分类目录"
+              @search="handleTreeSelectSearch"
+              allow-clear>
+              <template #notFoundContent>
+                <div class="not-found-content">
+                  <a-spin />
+                </div>
               </template>
-            </Empty>
-
+            </a-tree-select>
           </a-form-item>
           <a-form-item label="所属服务" name="serveId">
             <SelectServe v-if="visible" @change="change" />
