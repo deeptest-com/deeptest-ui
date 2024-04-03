@@ -16,7 +16,6 @@ const store = useStore<{ ProjectGlobal }>();
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 
 const engineers = ref<any[]>([]);
-
 onMounted(async() => {
   const info = await getLzosInfo();
   lzosInfo.value = info;

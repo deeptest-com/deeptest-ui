@@ -102,6 +102,7 @@ export default defineComponent({
     }
 
     const bus = window?.$wujie?.bus;
+    const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
 
     const router = useRouter();
 
@@ -215,8 +216,20 @@ export default defineComponent({
 
     watch(() => {
       return currProject.value.id;
-    }, (val, oldv) => {
+    }, async (val, oldv) => {
       if (val) {
+        if (!isSaas) {
+          const result = await store.dispatch('Global/getLyUserEngineering', {
+            projectId: val,
+          });
+          bus?.$emit(settings.sendMsgToLeyan, {
+            type: 'fetchUserEngineering',
+            data: {
+              engineerings: result
+            }
+          })
+        }
+       
         setTimeout(() => {
           bus?.$emit(settings.sendMsgToLeyan, {
             type: 'fetchProjectSuccess',
@@ -228,6 +241,8 @@ export default defineComponent({
           })
         }, (600));
       }
+    }, {
+      immediate: true,
     })
 
     return {
