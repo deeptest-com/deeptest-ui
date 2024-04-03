@@ -1,5 +1,5 @@
 <template>
-  <div class="lecang-engineer" v-if="isLecang && engineers.length > 0">乐仓工程：
+  <div class="lecang-engineer" v-if="engineers.length > 0">乐仓工程：
     <span>{{ engineers.join('，') }}</span>
   </div>  
 </template>
