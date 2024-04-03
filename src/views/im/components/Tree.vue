@@ -622,7 +622,7 @@ const loadCategoryOnlyDir = async () => {
 const initActiveTab = () => {
   spinning.value = true;
   imCategoryTree.value.setSelectedKeys(treeDataCategory?.value?.[0]?.id);
-  imCategoryTree.value.onTreeLoad({ dataRef: treeDataCategory?.value?.[0] });
+  imCategoryTree.value.onTreeLoad({ dataRef: cloneDeep(treeDataCategory?.value?.[0]) });
   const activeNode = {
     ...treeDataCategory.value?.[0],
     type: 'im-dir',
@@ -664,6 +664,18 @@ onMounted(async () => {
   await loadCategoryOnlyDir();
   initActiveTab();
   onRouteParams();
+
+  eventBus.on(settings.eventEndpointAction, data => {
+    if (data.type === 'updateTreeSelectedKeys') {
+      imCategoryTree.value?.setSelectedKeys(data.nodeId);
+      const expandKeys = imCategoryTree.value.getExpandKeys();
+      if (expandKeys.length > 0) {
+        expandKeys.slice(1, expandKeys.length - 1).forEach(e => {
+          updateEndpointNodes(e);
+        })
+      }
+    }
+  })
 })
 
 /**

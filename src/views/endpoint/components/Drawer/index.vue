@@ -283,8 +283,7 @@ async function changeCategory(value) {
     "endpointIds": [endpointDetail.value.id]
   });
   await store.dispatch('Endpoint/getEndpointDetail', {id: endpointDetail.value.id});
-
-  await store.dispatch('Endpoint/loadCategory');
+  await store.dispatch('Endpoint/loadCategory', 'dir');
 }
 
 async function changeServe(value:number) {

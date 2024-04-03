@@ -94,7 +94,7 @@ import useEndpoint from '../hooks/useEndpoint';
 const props = defineProps<{
   endpointId: number;
 }>();
-const { updateEndpointNodes, reLoadFavoriteList } = useEndpoint();
+const { updateEndpointNodes, reLoadFavoriteList, updateTreeNodes, updateTreeNodesCount } = useEndpoint();
 const router = useRouter();
 const store = useStore<{ Endpoint, ProjectGlobal, ServeGlobal: ServeStateType, Global ,Debug}>();
 const imDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
@@ -183,12 +183,24 @@ async function changeDescription(description) {
 }
 
 async function changeCategory(value) {
+  const oldCategoryId = imDetail.value.categoryId;
   await store.dispatch('Endpoint/batchUpdateField', {
     "fieldName": 'categoryId',
     value,
     "endpointIds": [imDetail.value.id]
   });
+  updateTreeNodesCount()
+  if (oldCategoryId !== -1) {
+    await updateEndpointNodes(oldCategoryId); // 更新旧的分类目录节点
+  }
   await store.dispatch('Endpoint/getEndpointDetail', {id: imDetail.value.id});
+  resetDefineChange();
+  await updateEndpointNodes(imDetail.value.categoryId); // 更新新的分类目录节点
+  store.commit('Endpoint/setActiveTab', {
+    ...activeTab.value,
+    parentId: value,
+  });
+  bus.emit(settings.eventEndpointAction, { type: 'updateTreeSelectedKeys', nodeId: activeTab.value.id, });
 }
 
 async function changeServe(value:number) {

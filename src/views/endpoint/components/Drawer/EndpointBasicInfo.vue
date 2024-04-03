@@ -22,7 +22,7 @@
       <EditAndShowTreeSelect
           :label="categoryLabel"
           :value="endpointDetail?.categoryId"
-          :treeData="treeData"
+          :treeData="treeDataCategory"
           :show-search="true"
           @update="handleChangeCategory"/>
     </a-descriptions-item>
@@ -66,13 +66,9 @@ import { removeLeafNode } from '@/utils/tree';
 const store = useStore<{ Endpoint, Project,ServeGlobal }>();
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
-
 const tagList: any = computed(()=>store.state.Endpoint.tagList);
-//  const tagList = ref(["aabdd","sddsd"])
 const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
-const treeData: any = computed(() => {
-  return removeLeafNode(treeDataCategory.value);
-});
+
 const categoryLabel = computed(() => {
   if (!endpointDetail.value?.categoryId) {
     return '未分类'
