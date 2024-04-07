@@ -118,7 +118,7 @@ onMounted(async () => {
      */
     await store.dispatch('Project/getUserList');
     store.dispatch('ServeGlobal/fetchServe');
-    await store.dispatch('Endpoint/loadCategory');
+    await store.dispatch('Endpoint/loadCategory', 'dir');
     await store.commit("Global/setSpinning", false);
     await store.commit("Detail/setShow", true);
   } catch(e) {
@@ -162,7 +162,7 @@ async function changeCategory(value) {
     "endpointIds": [imDetail.value.id]
   });
   await store.dispatch('Endpoint/getEndpointDetail', {id: imDetail.value.id});
-  await store.dispatch('Endpoint/loadCategory');
+  await store.dispatch('Endpoint/loadCategory', 'dir');
 }
 
 async function changeServe(value:number) {

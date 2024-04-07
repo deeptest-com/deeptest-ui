@@ -828,7 +828,7 @@ const StoreModel: ModuleType = {
         async saveTreeMapItemPropCategory({commit}, payload: any) {
             commit('setTreeDataMapItemPropCategory', payload);
         },
-        async saveCategory({commit, dispatch, state}, payload: any) {
+        async saveCategory(_, payload: any) {
             const res = await updateCategory(payload);
             if (res.code === 0) {
                 return res;
@@ -836,10 +836,10 @@ const StoreModel: ModuleType = {
                 return false
             }
         },
-        async updateCategoryName({commit, dispatch, state}, payload: any) {
+        async updateCategoryName({dispatch}, payload: any) {
             const res = await updateCategoryName(payload.id, payload.name)
             if (res.code === 0) {
-                await dispatch('loadCategory');
+                await dispatch('loadCategory', 'dir');
                 return res;
             } else {
                 return false
@@ -1596,8 +1596,7 @@ const StoreModel: ModuleType = {
         async batchUpdateField({commit, dispatch}, payload: any) {
             const res = await batchUpdateField(payload);
             if (res.code === 0) {
-               // await dispatch('loadList', {projectId: payload.projectId});
-                await dispatch('loadCategory');
+                await dispatch('loadCategory', 'dir');
             } else {
                 return null
             }
