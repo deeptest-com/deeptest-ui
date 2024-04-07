@@ -30,6 +30,11 @@ export default defineComponent({
       default: "",
       required: false,
       type: String,
+    },
+    placement: {
+      default: 'top',
+      required: false,
+      type: String,
     }
   },
   emits: ['edit'],
@@ -74,7 +79,7 @@ export default defineComponent({
   render() {
     return (
       <div style={{ width: this.width ? `${this.width}px` : 'max-content', maxWidth: (this.maxWidth || this.width) ?`${this.maxWidth || this.width}px` : '100%' ,cursor: this.showTooltip ? 'pointer' : 'unset' }}>
-        <a-tooltip placement="top" arrowPointAtCenter={true} title={this.showTooltip ? this.tip || this.text : null}>
+        <a-tooltip placement={this.placement || 'top'} arrowPointAtCenter={true} title={this.showTooltip ? this.tip || this.text : null}>
           <div class={['out', this.customClass]} onClick={() => this.handleClick()}>
             <span ref="textRef" class="text">
               {this.text}

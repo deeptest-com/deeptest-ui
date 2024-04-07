@@ -102,12 +102,7 @@
                 {{ method }}
               </a-tag>
               <span class="path-col" v-if="text">
-                <a-tooltip placement="topLeft">
-                  <template #title>
-                    <span>{{ text }}</span>
-                  </template>
-                  <a-tag>{{ text }}</a-tag>
-                </a-tooltip>
+                <a-tag><TooltipCell :text="text" /></a-tag>
               </span>
               <span class="path-col" v-else> --- </span>
             </div>

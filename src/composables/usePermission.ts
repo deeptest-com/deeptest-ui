@@ -40,7 +40,7 @@ export default function usePermission() {
    * @returns boolean
    */
   const isCreator = (flag: string | number) => {
-    return (currUser.value.username || '') === flag || (currUser.value.id || '') === flag;
+    return !flag ? true : ((currUser.value.username || '') === flag || (currUser.value.id || '') === flag);
   };
 
   const setPermission = (value: string) => {
