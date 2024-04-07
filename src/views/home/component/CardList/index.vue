@@ -88,6 +88,7 @@ import {DropdownActionMenu} from "@/components/DropDownMenu/index";
 import usePermission from "@/composables/usePermission";
 import { useWujie } from "@/composables/useWujie";
 import settings from "@/config/settings";
+import { getToken } from "@/utils/localToken";
 
 // 组件接收参数
 const props = defineProps({
@@ -106,7 +107,7 @@ const props = defineProps({
 const router = useRouter();
 const store = useStore<{ Home: StateType }>();
 const { hasProjectAuth, isCreator } = usePermission();
-const { isInLeyanWujieContainer,isInLecangWujieContainer } = useWujie();
+const { isInLeyanWujieContainer,isInLecangWujieContainer, user } = useWujie();
 const ListItem = List.Item;
 const list = computed<any>(() => store.state.Home.queryResult.list);
 const projects = computed<any>(() => store.state.ProjectGlobal.projects);
@@ -181,7 +182,24 @@ async function goProject(item: any, e) {
 
  //乐仓重新打开信息页面
  if (isInLecangWujieContainer) {
-    window.open(`/${item.projectShortName}/workspace`, '_blank');
+    const childOrigin = window.$wujie?.shadowRoot?.baseURI;
+    const otherWindow: any =  window.open(`${childOrigin}${childOrigin?.endsWith('/') ? '' : '/'}${item.projectShortName}/workspace`, '_blank');
+    const token = await getToken();
+    let i = 0;
+    let interval: any = null;
+    interval = setInterval(() => {
+      if (i > 4) {
+        clearInterval(interval);
+      }
+      otherWindow.postMessage({
+        user: {
+          ...user,
+          lzosOrigin: window.parent.window.location.origin,
+        },
+        token
+      }, childOrigin?.endsWith('/') ? childOrigin.substring(0, childOrigin.length - 1) : childOrigin);
+      i++;
+    }, 300);
     return 
   }
 

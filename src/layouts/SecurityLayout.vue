@@ -12,6 +12,7 @@ import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { StateType as UserStateType, CurrentUser } from "@/store/user";
 import {showGlobalLoading,hideGlobalLoading} from "@/utils/handleLoad";
+import { removeLzosInfo } from "@/utils/lzos";
 
 interface SecurityLayoutSetupData {
     isLogin: ComputedRef<boolean>;
@@ -40,6 +41,7 @@ export default defineComponent({
             await store.dispatch('User/fetchCurrent');
             loading.value = false;
             if(!isLogin.value && router.currentRoute.value.path !== '/user/login') {
+                removeLzosInfo();
                 router.replace({
                     path: '/user/login',
                     query: {

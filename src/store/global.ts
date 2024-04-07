@@ -7,7 +7,7 @@ import router from '@/router';
 import {getConfigByKey, getServerConfig} from "@/services/config";
 import {getClientVersion} from "@/services/static";
 import {listAgent} from "@/views/sys-settings/service";
-import { getUserIntegrationDetail, getUserMenuList, getUserProducts, getUserSpaces } from '@/services/project';
+import { getEngineering, getUserEngineering, getUserIntegrationDetail, getUserMenuList, getUserProducts, getUserSpaces } from '@/services/project';
 import {Cache_Key_Agent} from "@/utils/const";
 import {getCache, setCache} from "@/utils/localCache";
 import { getUserRolesAuth } from '@/services/role';
@@ -70,6 +70,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
     getLyProducts: Action<StateType, StateType>;
     getLySpaces: Action<StateType, StateType>;
     getIntegrationDetail: Action<StateType, StateType>;
+    getLyEngineering: Action<StateType, StateType>;
+    getLyUserEngineering: Action<StateType, StateType>;
   };
 }
 
@@ -262,6 +264,22 @@ const StoreModel: ModuleType = {
       } catch(error: any) {
         return Promise.reject(error?.message || error);
       } 
+    },
+
+    async getLyEngineering() {
+      const { code, data }: any = await getEngineering();
+      if (code === 0) {
+        return data;
+      }
+      return false;
+    },
+
+    async getLyUserEngineering(_, params) {
+      const { code, data }: any = await getUserEngineering(params);
+      if (code === 0) {
+        return data;
+      }
+      return false;
     }
   }
 }
