@@ -4,7 +4,11 @@
     <div class="schema-inlet" @click="expand = !expand">
       <span class="schema-icon"> <IconSvg type="model" style="font-size: 18px;"/>
       </span>
-      <span class="schema-title">数据组件({{ count }})</span>
+      <span class="schema-title">数据组件({{ count }})
+        <a-tooltip title="将接口请求体和响应体中相同/重复的数据结构定义为“数据组件”，可以在多个API接口定义中进行复用。" placement="top">
+          <QuestionCircleOutlined />
+        </a-tooltip>
+      </span>
       <span class="schema-expand-icon">
         <IconSvg :type="expand ? 'expand' : 'collapse'" style="font-size: 20px;" />
       </span>
@@ -55,7 +59,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, defineEmits, defineExpose } from 'vue';
-import { SettingOutlined, ArrowDownOutlined, ArrowUpOutlined, FolderOutlined, FolderOpenOutlined } from '@ant-design/icons-vue';
+import { SettingOutlined, ArrowDownOutlined, ArrowUpOutlined, FolderOutlined, FolderOpenOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
