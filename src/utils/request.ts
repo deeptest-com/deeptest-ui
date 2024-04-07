@@ -3,6 +3,7 @@
  * @author LiQingSong
  */
 import axios, {AxiosPromise, AxiosRequestConfig, AxiosResponse} from 'axios';
+import store from '@/config/store';
 import router from '@/router';
 import i18n from "@/config/i18n";
 import bus from "@/utils/eventBus";
@@ -35,7 +36,6 @@ export const getUrls = () => {
     const staticUrl = process.env.VUE_APP_API_STATIC;
     return {serverUrl, agentUrl,staticUrl}
 }
-
 const {serverUrl, agentUrl, staticUrl} = getUrls()
 const request = axios.create({
     baseURL: serverUrl,
@@ -101,8 +101,9 @@ const requestInterceptors = async (config: AxiosRequestConfig & { cType?: boolea
     }
     // 加随机数清除缓存
     config.params = {...config.params, ts: Date.now()};
+    const state: any = store.state;
     if (!config.params.currProjectId) {
-        const projectId = await getCache(settings.currProjectId);
+        const projectId: any = state.ProjectGlobal?.currProject?.id;
         const { pathname = '' } = window.location;
         config.params = {...config.params, currProjectId: pathname === '/' ? 0 : projectId, lang: i18n.global.locale.value};
     }

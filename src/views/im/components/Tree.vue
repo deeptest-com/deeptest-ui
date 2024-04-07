@@ -530,6 +530,9 @@ const onTreeNodeClick = (_node, evt) => {
   if (!activeNode.entityData) {
     store.commit('Endpoint/setActiveTabs', uniquArrray([...activeTabs.value, activeNode]));
   }
+  if (currNode.entityId === 0) {
+    imCategoryTree.value.onTreeLoad({ dataRef: currNode });
+  }
 }
 
 /**
