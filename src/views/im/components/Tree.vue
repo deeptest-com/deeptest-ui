@@ -665,7 +665,7 @@ onMounted(async () => {
   initActiveTab();
   onRouteParams();
 
-  eventBus.on(settings.eventEndpointAction, data => {
+  eventBus.on(settings.eventEndpointAction, (data: any) => {
     if (data.type === 'updateTreeSelectedKeys') {
       imCategoryTree.value?.setSelectedKeys(data.nodeId);
       const expandKeys = imCategoryTree.value.getExpandKeys();
