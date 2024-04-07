@@ -1,5 +1,5 @@
 <template>
-  <div class="lecang-engineer" v-if="engineers.length > 0">乐仓工程：
+  <div class="lecang-engineer" v-if="engineers.length > 0 && !isSaas">乐仓工程：
     <span>{{ engineers.join('，') }}</span>
   </div>  
 </template>
@@ -14,6 +14,7 @@ const lzosInfo = ref(null);
 const isLecang = computed(() => lzosInfo.value || isInLecangWujieContainer)
 const store = useStore<{ ProjectGlobal }>();
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
+const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
 
 const engineers = ref<any[]>([]);
 onMounted(async() => {
