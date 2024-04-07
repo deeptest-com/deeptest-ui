@@ -607,3 +607,11 @@ export async function getCronAllEngineeringOptions(payload: { url: string, engin
         params: payload,
     })
 }
+
+export async function runCronProject(payload) {
+    return request({
+        url: `/${apiPathCron}/run`,
+        method: 'GET',
+        params: payload,
+    })
+}

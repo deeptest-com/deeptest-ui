@@ -52,6 +52,7 @@ import {
     getCronAllEngineeringOptions,
     getCronAllServesOptions,
     getCronAllServesList,
+    runCronProject,
 } from './service';
 import {message, notification} from 'ant-design-vue';
 import {
@@ -222,6 +223,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         getCronAllServesList: Action<StateType, StateType>,
         getCronAllServesOptions: Action<StateType, StateType>,
         getCronProjecDetail: Action<StateType, StateType>,
+        runCronProject: Action<StateType, StateType>,
     }
 }
 
@@ -1055,6 +1057,18 @@ const StoreModel: ModuleType = {
                 return Promise.reject(error);
             }
         },
+
+        async runCronProject(_, payload) {
+            try {
+                const { code }: any = await runCronProject(payload);
+                if (code === 0) {
+                    return true;
+                }
+                return false;
+            } catch(error) {
+                return Promise.reject(error);
+            }
+        }
     }
 };
 

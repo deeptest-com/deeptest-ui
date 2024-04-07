@@ -195,7 +195,7 @@
         </a-form>
       </div>
       <div class="sync-task-footer">
-        <!-- <a-button type="default" @click="autoImport">立即导入</a-button> -->
+        <a-button type="default" @click="ok(true)">立即导入</a-button>
         <a-button type="default" @click="cancel">取消</a-button>
         <a-button type="primary" @click="ok">确定</a-button>
       </div>
@@ -221,6 +221,7 @@ import SelectServe from '@/views/endpoint/components/SelectServe/index.vue';
 import { filterByKeyword, removeLeafNode } from '@/utils/tree';
 import { message } from 'ant-design-vue';
 import { isSaas } from '@/utils/comm';
+import { notifySuccess } from '@/utils/notify';
 
 const store = useStore<{ Endpoint }>();
 const treeDataCategory = computed<any>(() => {
@@ -504,7 +505,7 @@ const filterOption = (input: string, option: any) => {
   }
 };
 
-function ok() {
+function ok(isAutoRun?: boolean) {
   if (uploading.value) {
     return;
   }
@@ -549,15 +550,25 @@ function ok() {
         ...paramsData,
         ...extraData,
       });
+      if (isAutoRun) {
+        paramsData.runAtOnce = true;
+      }
       try {
         await store.dispatch('ProjectSetting/saveCronProject', {
         ...paramsData,
         ...extraData,
         });
-        confirmLoading.value = false;
+        setTimeout(() => {
+          if (isAutoRun) {
+            notifySuccess('导入成功');
+          }
+          confirmLoading.value = false;
+        }, 300);
         emit('ok');
       } catch(err) {
-        confirmLoading.value = false;
+        setTimeout(() => {
+          confirmLoading.value = false;
+        }, 300);
         return Promise.reject(err);
       }
     })

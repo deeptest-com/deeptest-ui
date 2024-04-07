@@ -66,14 +66,25 @@ const driverTypeOpts = [
   },
 ];
 
-const autoImport = (record) => {
+const autoImport = async (record) => {
   if (record.loading) {
     return;
   }
   record.loading = true;
-  setTimeout(() => {
+  try {
+    const result = await store.dispatch('ProjectSetting/runCronProject', {
+      id: record.id
+    });
+    setTimeout(() => {
+      if (result) {
+        notifySuccess('导入成功');
+      }
+      record.loading = false;
+    }, 1000);
+  } catch(error) {
+    console.log(error);
     record.loading = false;
-  }, 1000);
+  }
 }
 
 const copy = async (record) => {
@@ -118,8 +129,9 @@ const actionList = [
   {
     label: '立即导入',
     customRender(record) {
-      return record.loading ? <LoadingOutlined /> : <ImportOutlined />
+      return (record.loading || record.runAtOnce) ? <LoadingOutlined /> : <ImportOutlined />
     },
+    loadingText: '执行中...',
     action: autoImport
   },
   {

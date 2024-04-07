@@ -24,4 +24,5 @@ export type MenuItem = {
   action: (...args: any[]) => void,
   tip?: string;
   customRender?: JSX.Element | ((record: Recordable) => JSX.Element);
+  loadingText?: string;
 }

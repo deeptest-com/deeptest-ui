@@ -82,7 +82,7 @@ const ActionList = (opts: { list: MenuItem[], record: Recordable}) => {
       {list.map((actionItem: MenuItem) => (
         <div class="action-item" onClick={() => actionItem.action(record)}>
           { actionItem.customRender ? 
-            <a-tooltip title={record.loading ? null : actionItem.label} placement="top">
+            <a-tooltip title={record.loading ? (actionItem.loadingText || null) : actionItem.label} placement="top">
               {customRenderLabel(actionItem)}
             </a-tooltip> 
             : 
