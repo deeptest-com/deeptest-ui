@@ -4,7 +4,7 @@
       :visible="!!nodeInfo"
       @ok="ok"
       @cancel="cancel"
-      :title="(!nodeInfo.id ? '新建' : '修改') + (formState.type === 'interface' ? '快捷请求' : '目录')">
+      :title="(!nodeInfo.id ? '新建' : '编辑') + (formState.type === 'interface' ? '请求' : '目录')">
     <a-form
         ref="tagFormRef"
         :rules="rules"
