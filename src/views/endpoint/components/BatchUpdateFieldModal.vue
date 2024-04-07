@@ -29,7 +29,7 @@
                        v-model:value="formState.value"
             show-search
             :multiple="false"
-            :treeData="treeData"
+            :treeData="treeDataCategory"
             :treeDefaultExpandAll="true"
             :replaceFields="{ title: 'name',value:'id'}"
             :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
@@ -56,15 +56,13 @@ import {
 import {endpointStatusOpts} from '@/config/constant';
 import {useStore} from "vuex";
 import {NewEndpointFormState} from "@/views/Endpoint/data";
+import { removeLeafNode } from '@/utils/tree';
 
 const store = useStore<{ Endpoint,ServeGlobal }>();
-const treeDataCategory = computed<any>(() => store.state.Endpoint.treeDataCategory);
-  const serves = computed<any>(() => store.state.ServeGlobal.serves);
-
-const treeData: any = computed(() => {
-  const data = treeDataCategory.value;
-  return  data?.[0]?.children || [];
+const treeDataCategory = computed<any>(() => {
+  return removeLeafNode(store.state.Endpoint.treeDataCategory || []).filter(e => e.id !== -1);
 });
+const serves = computed<any>(() => store.state.ServeGlobal.serves);
 
 const FieldNameOpts = [
 
@@ -88,7 +86,7 @@ const props = defineProps({
     type: Boolean,
   },
   selectedCategoryId: {
-    required: true,
+    required: false,
   },
   selectedEndpointNum:{
     required: true,
@@ -111,7 +109,7 @@ function ok() {
       .validate()
       .then(() => {
         emit('ok', formState);
-        formRef.value.resetFields();
+        // formRef.value.resetFields();
       })
       .catch((error: ValidateErrorEntity) => {
         console.log('error', error);

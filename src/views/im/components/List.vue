@@ -138,13 +138,21 @@
     :endpointIds="selectedRowKeys"
     @cancel="publicDocsCancel"
     @ok="publicDocsCancel" />
+  <!-- 批量更新 -->
+  <BatchUpdateFieldModal
+    v-if="batchUpdateFieldVisible"
+    :visible="batchUpdateFieldVisible"
+    :selectedEndpointNum="selectedRowKeys.length"
+    @cancel="batchUpdateFieldVisible = false"
+    @ok="handleBatchUpdate"
+  />
 </template>
 <script setup lang="tsx">
 import { defineProps, onMounted, computed, ref, watch, createVNode, unref } from 'vue';
 import { useStore } from 'vuex';
 import debounce from "lodash.debounce";
 import { Modal } from 'ant-design-vue';
-import { ExclamationCircleOutlined, WarningFilled, InfoCircleOutlined, UploadOutlined } from '@ant-design/icons-vue';
+import { ExclamationCircleOutlined, WarningFilled, InfoCircleOutlined, UploadOutlined, EditOutlined } from '@ant-design/icons-vue';
 
 import {Endpoint, PaginationConfig} from "@/views/im/data";
 import EditAndShowField from '@/components/EditAndShow/index.vue';
@@ -158,7 +166,7 @@ import TableFilter from './TableFilter.vue';
 import Tags from './Tags.vue';
 import BatchAction from '@/components/BatchAction/index';
 import IconSvg from "@/components/IconSvg";
-import { PublicDocs, CreateEndpointModal } from '@/views/endpoint/components';
+import { PublicDocs, CreateEndpointModal, BatchUpdateFieldModal } from '@/views/endpoint/components';
 
 import {getMethodColor} from '@/utils/interface';
 import usePermission from '@/composables/usePermission';
@@ -179,13 +187,21 @@ const props = defineProps<{
 const { isInLeyanWujieContainer } = useWujie();
 const { hasPermission, isCreator } = usePermission();
 const { share } = useSharePage();
-const { openEndpointTab, updateEndpointNodes, updateTreeNodeCount, copyCurl } = useEndpoint();
+const { 
+  openEndpointTab, 
+  updateEndpointNodes, 
+  updateTreeNodeCount, 
+  copyCurl, 
+  updateTreeNodes, 
+  updateTreeNodesCount, 
+  updateTreeNodeMap } = useEndpoint();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug, ServeGlobal, Project, Schema }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
 const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 const activeTab = computed(() => store.state.Endpoint.activeTab);
 const activeTabs = computed(() => store.state.Endpoint.activeTabs);
+const treeDataMap = computed(() => store.state.Endpoint.treeDataMapCategory);
 
 const list = computed<Endpoint[]>(() => store.state.Endpoint.listResult.list);
 let pagination = computed<PaginationConfig>(() => store.state.Endpoint.listResult.pagination);
@@ -527,6 +543,54 @@ const publicDocsCancel = () => {
   publicDocsVisible.value = false;
 };
 
+/**
+ * 批量编辑
+ */
+const batchUpdateFieldVisible = ref(false);
+const handleBatchUpdate = async(data) => {
+  const result = await store.dispatch('Endpoint/batchUpdateField', {
+    "fieldName": data.value.fieldName,
+    "value": data.value.value,
+    "endpointIds": selectedRowKeys.value
+  });
+  result ? notifySuccess('批量修改成功') : notifyError('批量修改失败');
+  if (!result) return;
+  batchUpdateFieldVisible.value = false;
+  loadList();
+
+  // 如果更新的是所属分类，需要更新左侧目录树以及 修改的接口中包含已经打开的tab，要更新对应tab标签页的parentId,
+  /**
+   * 更新分类
+   * 1. 更新左侧目录树 (count)
+   * 2. 更新已经打开的接口tab中，如果修改的接口包含这个tab，则更新对应parentId
+   * 3. 更新已经打开的接口tab对应的分类下的 叶子节点
+   */
+  if (data.value.fieldName !== 'categoryId') return;
+  const oldCategoryIdList = activeTabs.value.filter(e => e.entityData && selectedRowKeys.value.includes(e.entityId)).map(e => e.parentId);
+  updateTreeNodesCount();
+  store.commit('Endpoint/setActiveTabs', activeTabs.value.map(e => {
+    if (e.entityData && selectedRowKeys.value.includes(e.entityId)) {
+      e.parentId = data.value.value;
+    }
+    return e;
+  }))
+  updateEndpointNodes(data.value.value);
+  updateEndpointNodes(activeTab.value.id);
+  if (oldCategoryIdList.length > 0) {
+    [...new Set(oldCategoryIdList)].forEach(e => {
+      updateTreeNodeMap({
+        nodeId: e,
+        data: {
+          ...treeDataMap.value[e],
+          children: (treeDataMap.value[e].children || []).filter(e => e.entityData && selectedRowKeys.value.includes(e.entityId)),
+        },
+        type: 'update',
+      })
+    })
+  }
+  
+};
+
 const batchActionList = [
   {
     label: '查看文档',
@@ -535,11 +599,18 @@ const batchActionList = [
   },
   {
     label: '发布文档',
-    icon: <UploadOutlined style="font-size: 20px" />,
+    icon: <UploadOutlined style="font-size: 18px" />,
     action: () => {
       publicDocsVisible.value = true;
     }
-  }
+  },
+  {
+    label: '批量修改',
+    icon: <EditOutlined style="font-size: 16px" />,
+    action: () => {
+      batchUpdateFieldVisible.value = true;
+    }
+  },
 ];
 
 const handleCancelBatch = () => {
