@@ -77,9 +77,10 @@ const autoImport = async (record) => {
     });
     setTimeout(() => {
       if (result) {
-        notifySuccess('导入成功');
+        notifySuccess('异步导入中，稍后请刷新列表查看');
       }
       record.loading = false;
+      listCronProject();
     }, 1000);
   } catch(error) {
     console.log(error);
@@ -131,7 +132,7 @@ const actionList = [
     customRender(record) {
       return (record.loading || record.runAtOnce) ? <LoadingOutlined /> : <ImportOutlined />
     },
-    loadingText: '执行中...',
+    loadingText: '异步导入中...',
     action: autoImport
   },
   {

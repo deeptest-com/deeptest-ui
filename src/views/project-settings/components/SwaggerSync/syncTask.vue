@@ -560,7 +560,7 @@ function ok(isAutoRun?: boolean) {
         });
         setTimeout(() => {
           if (isAutoRun) {
-            notifySuccess('导入成功');
+            notifySuccess('异步导入中，稍后请刷新列表查看');
           }
           confirmLoading.value = false;
         }, 300);
