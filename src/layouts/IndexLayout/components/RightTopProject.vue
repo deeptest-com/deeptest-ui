@@ -110,7 +110,7 @@ const myRecentProject = computed(() => {
 });
 
 function viewAllProject() {
-  router.push({path:'',query:{type:'all'}});
+  router.push({path:'/',query:{type:'all'}});
 }
 
 function newProject() {

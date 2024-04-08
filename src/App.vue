@@ -36,7 +36,6 @@ import {getProjectLogo} from "@/components/CreateProjectModal";
 import fixMonacoEditor from "@/utils/fixMonacoEditor";
 import {WebSocket} from "@/services/websocket";
 import {getCache, setCache} from "@/utils/localCache";
-import store from "@/config/store";
 import { config, observer } from "./utils/observer";
 fixMonacoEditor();
 export default defineComponent({
@@ -70,6 +69,7 @@ export default defineComponent({
       spaces: [],
       syncMembers: false,
     });
+    const show = ref(false);
 
     watch(() => {
       return currentUser.value
@@ -102,6 +102,7 @@ export default defineComponent({
     }
 
     const bus = window?.$wujie?.bus;
+    const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
 
     const router = useRouter();
 
@@ -161,7 +162,7 @@ export default defineComponent({
       })
     }
 
-    onMounted(() => {
+    onMounted(async () => {
       setHtmlLang(locale.value); 
       //  监听父应用传递过来的消息
       if(isWujieEnv){
@@ -215,8 +216,20 @@ export default defineComponent({
 
     watch(() => {
       return currProject.value.id;
-    }, (val, oldv) => {
+    }, async (val, oldv) => {
       if (val) {
+        if (!isSaas) {
+          const result = await store.dispatch('Global/getLyUserEngineering', {
+            projectId: val,
+          });
+          bus?.$emit(settings.sendMsgToLeyan, {
+            type: 'fetchUserEngineering',
+            data: {
+              engineerings: result
+            }
+          })
+        }
+       
         setTimeout(() => {
           bus?.$emit(settings.sendMsgToLeyan, {
             type: 'fetchProjectSuccess',
@@ -228,13 +241,16 @@ export default defineComponent({
           })
         }, (600));
       }
+    }, {
+      immediate: true,
     })
 
     return {
       antdLocales,
       createProjectModalVisible,
       handleCreateSuccess,
-      formState
+      formState,
+      show
     }
   }
 })

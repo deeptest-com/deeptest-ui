@@ -77,3 +77,18 @@ export async function getUserIntegrationDetail(params: { projectId: number }) {
         params,
     })
 }
+
+export async function getEngineering() {
+    return request({
+        url: `/${apiPath}/userEngineering`,
+        method: 'get',
+    })
+}
+
+export async function getUserEngineering(params: { projectId: number }) {
+    return request({
+        url: `/${apiPath}/projectEngineering`,
+        method: 'get',
+        params,
+    })
+}

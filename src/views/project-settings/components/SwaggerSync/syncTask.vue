@@ -211,7 +211,7 @@ import {
   defineEmits,
   reactive,
   computed, watch,
-  onMounted
+  onMounted,
 } from 'vue';
 import {useStore} from "vuex";
 import cloneDeep from "lodash/cloneDeep";
@@ -222,6 +222,7 @@ import { filterByKeyword, removeLeafNode } from '@/utils/tree';
 import { message } from 'ant-design-vue';
 import { isSaas } from '@/utils/comm';
 import { notifySuccess } from '@/utils/notify';
+import { getLzosInfo } from '@/utils/lzos';
 
 const store = useStore<{ Endpoint }>();
 const treeDataCategory = computed<any>(() => {
@@ -347,7 +348,7 @@ const modelRef = reactive<any>({
 const searchValue = ref('');
 
 const confirmLoading = ref(false);
-
+const lzosInfo = ref<any>(null);
 const cronServesOptions = ref([]);
 const cronEngineeringOptions = ref([]);
 const rulesRef = computed(() => ({
@@ -428,6 +429,7 @@ const formRef = ref();
 const handleDriverTypeChanged = (v) => {
   modelRef.syncType = v === 'lecang' ? 1 : 2;
   if (v === 'lecang') {
+    modelRef.lecangReq.url = lzosInfo.value?.lzosOrigin || '';
     if (!modelRef.lecangReq.serviceCodes) {
       modelRef.lecangReq.serviceCodes = [];
     }
@@ -437,6 +439,7 @@ const handleDriverTypeChanged = (v) => {
 /**
  * ::::: 智能体厂相关 ::::
  */
+const lastLecangUrl = ref('');
 const fetching = ref(false);
 
 const handleEngineerFocus = async () => {
@@ -445,6 +448,12 @@ const handleEngineerFocus = async () => {
       'lecangReq.url',
     ])
     .then(async () => {
+      if (lastLecangUrl.value !== modelRef.lecangReq.url) {
+        cronEngineeringOptions.value = [];
+        modelRef.lecangReq.engineering = [];
+        modelRef.lecangReq.serviceCodes = [];
+        lastLecangUrl.value = modelRef.lecangReq.url;
+      }
       fetching.value = true;
       try {
         const result = await store.dispatch('ProjectSetting/getCronAllEngineeringOptions', {
@@ -471,6 +480,7 @@ const handleEngineerFocus = async () => {
 
 const handleEngineerChanged = async () => {
   modelRef.lecangReq.serviceCodes = [];
+  cronServesOptions.value = [];
 }
 
 const handleServiceFocus = async () => {
@@ -500,7 +510,7 @@ const handleServiceFocus = async () => {
 };
 
 const filterOption = (input: string, option: any) => {
-  if (option.value.includes(input)) {
+  if (option.name.includes(input)) {
     return true
   }
 };
@@ -703,8 +713,10 @@ watch(() => {
   immediate: true,
 })
 
-onMounted(() => {
+onMounted(async() => {
   store.dispatch('Endpoint/loadCategory', 'dir');
+  const result = await getLzosInfo();
+  lzosInfo.value = result || null;
 })
 </script>
 

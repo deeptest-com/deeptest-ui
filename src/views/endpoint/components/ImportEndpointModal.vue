@@ -171,6 +171,7 @@ import {
   defineEmits,
   reactive,
   computed, watch,
+  onMounted
 } from 'vue';
 import {useStore} from "vuex";
 import cloneDeep from "lodash/cloneDeep";
@@ -179,11 +180,13 @@ import {notifyWarn} from "@/utils/notify";
 import SelectServe from './SelectServe/index.vue';
 import Empty from '@/components/TableEmpty/index.vue';
 import { filterByKeyword, removeLeafNode } from '@/utils/tree';
+import { getLzosInfo } from '@/utils/lzos';
 
 const store = useStore<{ Endpoint }>();
 const treeDataCategory = computed<any>(() => {
   return removeLeafNode((store.state.Endpoint.treeDataCategory || []).filter(e => e.id !== -1))
 });
+const lzosInfo = ref<any>(null);
 
 const props = defineProps({
   visible: {
@@ -319,7 +322,7 @@ const spinning = ref<boolean>(false);
 
 const handleDriverTypeChanged = (v) => {
   modelRef.dataSyncType = v === 'lzos' ? 1 : 2;
-  modelRef.filePath = '';
+  modelRef.filePath = v === 'lzos' ? (lzosInfo.value?.lzosOrigin || '') : '';
 }
 
 /**
@@ -487,6 +490,11 @@ watch(() => {
   treeData.value = val;
   modelRef.categoryId = val[0].id;
 })
+
+onMounted(async() => {
+  const result = await getLzosInfo();
+  lzosInfo.value = result;
+});
 
 </script>
 

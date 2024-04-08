@@ -89,9 +89,11 @@ import {notifyError, notifySuccess} from "@/utils/notify";
 import usePermission from "@/composables/usePermission";
 import { setCache } from "@/utils/localCache";
 import settings from "@/config/settings";
+import { useWujie } from "@/composables/useWujie";
 
 // 获取当前登录用户信息
 const router = useRouter();
+const { isInLecangWujieContainer } = useWujie();
 const { hasProjectAuth } = usePermission();
 const store = useStore<{ Home: StateType, User: UserStateType }>();
 const currentUser = computed<CurrentUser>(() => store.state.User.currentUser);
@@ -120,6 +122,7 @@ let formState = ref({
   syncMembers: false,
 });
 
+const bus: any = window?.$wujie?.bus;
 onMounted(async () => {
   if (router.currentRoute.value?.query?.type == 'all') {
     activeKey.value = 0
@@ -128,7 +131,10 @@ onMounted(async () => {
   await store.dispatch('Global/getPermissionMenuList', { needSysAuth: true });
   await getHearderData();
   await getList(1);
-  
+  bus?.$on('contextBus', data => {
+    console.log('监听乐仓工程切换信息', data);
+    getList(1);
+  })
 });
 
 const getHearderData = async (): Promise<void> => {
@@ -138,7 +144,9 @@ const getHearderData = async (): Promise<void> => {
 
 // 获取全部项目数据
 const getList = async (current: number): Promise<void> => {
-  await store.dispatch("Home/queryProject", {});
+  const engineering = JSON.parse(localStorage.getItem('lzos:activeContextForm') || '{}') || {};
+  console.log('localStorage: 获取', engineering);
+  await store.dispatch("Home/queryProject", engineering.container ? { engineering: engineering.container } : {});
   isLoadingList.value = false;
 };
 

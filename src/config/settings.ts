@@ -112,6 +112,11 @@ export interface SettingsType {
      * 接口定义页面
      */
     eventEndpointAction: string;
+
+    /**
+     * lzos
+     */
+    lzosUserInfo: string;
 }
 
 const settings: SettingsType = {
@@ -201,6 +206,7 @@ const settings: SettingsType = {
     eventPreConditionSave:'eventPreConditionSave',
 
     eventEndpointAction: 'eventEndpointAction',
+    lzosUserInfo: 'lzosUserInfo',
 
 };
 
