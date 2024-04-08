@@ -359,10 +359,12 @@ const onMouseDown = (evt) => {
 
   const handleMouseMove = (mouseMoveEvent: any) => {
     resize(mouseMoveEvent.pageY || 0);
+    document.body.classList.add('no-pointer-events');
   }
 
   const handleMouseUp = (mouseUpEvent: any) => {
     resize(mouseUpEvent.pageY || 0);
+    document.body.classList.remove('no-pointer-events');
 
     removeEventListener('mousemove', handleMouseMove);
     removeEventListener('mouseup', handleMouseUp);
@@ -454,9 +456,15 @@ defineExpose({
     left: 0;
     width: 100%;
     height: 3px;
-    cursor: s-resize;
+    cursor: row-resize;
     background-color: transparent;
+    pointer-events: auto;
     z-index: 999;
+
+    &:hover {
+      cursor: row-resize;
+      background-color: #1890ff;
+    }
   }
 
   .schema-inlet {
