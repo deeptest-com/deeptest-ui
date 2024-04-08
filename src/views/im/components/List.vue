@@ -412,7 +412,7 @@ async function editEndpoint(record) {
 
 const username = (user: string) => {
   let result = userList.value.find(arrItem => arrItem.value == user);
-  return result?.label || '-'
+  return user === 'admin' ? '管理员' : (result?.label || '-');
 };
 
 const updateTags = (tags: any[], id: number) => {
