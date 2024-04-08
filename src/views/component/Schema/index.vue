@@ -455,14 +455,29 @@ defineExpose({
     top: 0;
     left: 0;
     width: 100%;
-    height: 3px;
     cursor: row-resize;
     background-color: transparent;
     pointer-events: auto;
     z-index: 999;
+    height: 8px;
+    display: flex;
+    align-items: center;
+    cursor: row-resize;
+    
+    &:after {
+      height: 2px;
+      content: '';
+      width: 100%;
+      position: absolute;
+      background-color: #f0f0f0;
+      left: 0;
+      top: 0;
+    }
 
-    &:hover {
+    &:hover:after {
       cursor: row-resize;
+      height: 2px;
+      width: 100%;
       background-color: #1890ff;
     }
   }
