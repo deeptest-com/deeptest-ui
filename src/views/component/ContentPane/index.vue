@@ -99,7 +99,8 @@ const handlePaneResize = (...args) => {
 
       .expand-icon {
         position: absolute;
-        top: 6px;
+        top: 50%;
+        transform: translateY(-50%);
         left: -3px;
         cursor: pointer;
 
