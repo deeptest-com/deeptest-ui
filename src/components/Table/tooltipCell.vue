@@ -64,10 +64,6 @@ export default defineComponent({
 
     onMounted(() => {
       setTooltip();
-
-      window.addEventListener('resize', () => {
-        setTooltip();
-      })
     })
 
     watch(() => props.text, () => {
