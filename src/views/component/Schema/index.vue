@@ -346,7 +346,7 @@ const onMouseDown = (evt) => {
   const { pageY: initialPageY } = evt;
   const endpointContainer: any = document.getElementsByClassName('endpoint-content')?.[0];
   const initialEndpointHeight = endpointContainer.clientHeight;
-  const minResizeHeight = initialEndpointHeight * 0.4;
+  const minResizeHeight = initialEndpointHeight * 0.2;
   const schemaContainer: any = document.getElementsByClassName('schema-container')?.[0];
   const schemHeight = schemaContainer.clientHeight;
 
