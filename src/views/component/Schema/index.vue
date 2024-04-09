@@ -1,9 +1,14 @@
 <template>
   <div :class="{'schema-container': true, 'expanded': expand}" ref="schemaNode" :style="prefixStyle">
+    <div v-if="expand" class="schema-resizer" @mousedown.stop="onMouseDown"></div>
     <div class="schema-inlet" @click="expand = !expand">
       <span class="schema-icon"> <IconSvg type="model" style="font-size: 18px;"/>
       </span>
-      <span class="schema-title">数据组件({{ count }})</span>
+      <span class="schema-title">数据组件({{ count }})
+        <a-tooltip title="将接口请求体和响应体中相同/重复的数据结构定义为“数据组件”，可以在多个API接口定义中进行复用。" placement="top">
+          <QuestionCircleOutlined />
+        </a-tooltip>
+      </span>
       <span class="schema-expand-icon">
         <IconSvg :type="expand ? 'expand' : 'collapse'" style="font-size: 20px;" />
       </span>
@@ -54,7 +59,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, defineEmits, defineExpose } from 'vue';
-import { SettingOutlined, ArrowDownOutlined, ArrowUpOutlined, FolderOutlined, FolderOpenOutlined } from '@ant-design/icons-vue';
+import { SettingOutlined, ArrowDownOutlined, ArrowUpOutlined, FolderOutlined, FolderOpenOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
@@ -66,6 +71,7 @@ import { CreateModal } from './components';
 import { StateType as SchemaStateType } from './store';
 import { confirmToDelete } from '@/utils/confirm';
 import { uniquArrray } from '@/utils/tree';
+import { useWujie } from '@/composables/useWujie';
 
 const emits = defineEmits(['select']);
 const store = useStore<{ Schema: SchemaStateType, ProjectGlobal, Endpoint }>();
@@ -333,6 +339,45 @@ const loadCategory = async () => {
   loading.value = false;
 }
 
+/**
+ * resize
+ */
+const onMouseDown = (evt) => {
+  const { pageY: initialPageY } = evt;
+  const endpointContainer: any = document.getElementsByClassName('endpoint-content')?.[0];
+  const initialEndpointHeight = endpointContainer.clientHeight;
+  const minResizeHeight = initialEndpointHeight * 0.2;
+  const schemaContainer: any = document.getElementsByClassName('schema-container')?.[0];
+  const schemHeight = schemaContainer.clientHeight;
+
+  const resize = (resizePageY) => {
+    const resizeHeight = initialPageY - resizePageY;
+    const newHeight = schemHeight + resizeHeight;
+    schemaContainer.style.height = `${newHeight > initialEndpointHeight ? initialEndpointHeight : newHeight < minResizeHeight ? minResizeHeight : newHeight}px`;
+    schemaTree.value?.getVirtualHeight();
+  };
+
+  const handleMouseMove = (mouseMoveEvent: any) => {
+    resize(mouseMoveEvent.pageY || 0);
+    document.body.classList.add('no-pointer-events');
+  }
+
+  const handleMouseUp = (mouseUpEvent: any) => {
+    resize(mouseUpEvent.pageY || 0);
+    document.body.classList.remove('no-pointer-events');
+
+    removeEventListener('mousemove', handleMouseMove);
+    removeEventListener('mouseup', handleMouseUp);
+
+  }
+
+  addEventListener('mousemove', handleMouseMove);
+  addEventListener('mouseup', handleMouseUp)
+}
+
+/**
+ * 监听
+ */
 watch(() => {
   return expand.value;
 }, async val => {
@@ -401,9 +446,42 @@ defineExpose({
   height: 66.6666%;
   background: #fff;
   overflow: hidden;
-  transition: all .2s ease-in-out;
+  // transition: all .2s ease-in-out;
   box-shadow: 0 2px 8px #00000026;
   transform: translateY(100%);
+
+  .schema-resizer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    cursor: row-resize;
+    background-color: transparent;
+    pointer-events: auto;
+    z-index: 999;
+    height: 8px;
+    display: flex;
+    align-items: center;
+    cursor: row-resize;
+    
+    &:after {
+      height: 2px;
+      content: '';
+      width: 100%;
+      position: absolute;
+      background-color: #f0f0f0;
+      left: 0;
+      top: 0;
+    }
+
+    &:hover:after {
+      cursor: row-resize;
+      height: 2px;
+      width: 100%;
+      background-color: #1890ff;
+    }
+  }
+
   .schema-inlet {
     height: 32px;
     line-height: 32px;
@@ -448,6 +526,7 @@ defineExpose({
 
   &.expanded {
     transform: translateY(0);
+    transition: unset;
     bottom: 0;
   }
 }

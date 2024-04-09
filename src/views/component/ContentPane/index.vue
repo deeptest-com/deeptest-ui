@@ -12,7 +12,8 @@
         <div :class="['pane', 'right', !isFold && 'unfold']">
           <slot name="right"></slot>
           <div v-if="showExpand" class="expand-icon" @click="toggle">
-            <img :src="PutAway" />
+            <ExpandSvg class="expand-icon-svg" v-if="!isFold" />
+            <CollapseSvg class="expand-icon-svg" v-else />
           </div>
         </div>
       </multipane>
@@ -28,6 +29,7 @@ import {Multipane, MultipaneResizer} from '@/components/Resize/index';
 import PutAway from '@/assets/images/put-away.png';
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
+import { ExpandSvg, CollapseSvg } from './ExpandCollapseSvg.tsx';
 
 const {t} = useI18n();
 defineProps(['containerStyle', 'showExpand'])
@@ -74,6 +76,7 @@ const handlePaneResize = (...args) => {
       &.unfold {
         width: 0 !important;
         min-width: 0 !important;
+        overflow: hidden;
       }
 
     }
@@ -86,12 +89,7 @@ const handlePaneResize = (...args) => {
       padding-left: 1px;
 
       &.unfold {
-        overflow: scroll;
-
-        .expand-icon {
-          transform: rotate(180deg);
-          left: -14px;
-        }
+        overflow: unset;
       }
 
       &:has(.expand-icon:hover) {
@@ -101,15 +99,15 @@ const handlePaneResize = (...args) => {
 
       .expand-icon {
         position: absolute;
-        top: 6px;
-        left: -16px;
-        width: 30px;
-        height: 30px;
+        top: 50%;
+        transform: translateY(-50%);
+        left: -3px;
+        cursor: pointer;
 
-        img {
-          width: 100%;
-          height: 100%;
-          image-rendering: pixelated;
+        .expand-icon-svg {
+          fill: #f3f3f3;
+          transition: fill .3s ease;
+          box-shadow: 1px 1px 4px #ccc;
         }
       }
     }

@@ -563,7 +563,7 @@ const StoreModel: ModuleType = {
             state.selectedMethodDetail = payload;
             // 同步到接口详情
             const interfaces: any = [];
-            state.endpointDetail.interfaces.forEach((item) => {
+            state.endpointDetail.interfaces?.forEach((item) => {
                 if (item.method === payload.method) {
                     interfaces.push(payload);
                 } else {
@@ -577,11 +577,11 @@ const StoreModel: ModuleType = {
             const methodIndex = state.endpointDetail?.interfaces?.findIndex((item) => item.method === state.selectedMethodDetail.method);
             const codeIndex = state.selectedMethodDetail?.responseBodies?.findIndex((item) => item.code === payload?.code);
             // 修改
-            if (methodIndex !== -1 && codeIndex !== -1) {
+            if (methodIndex !== -1 && codeIndex !== -1 && state.endpointDetail && state.endpointDetail.interfaces) {
                 state.endpointDetail.interfaces[methodIndex]['responseBodies'][codeIndex] = {...payload};
             }
             // 新增
-            if (methodIndex !== -1 && codeIndex === -1 && payload?.code) {
+            if (methodIndex !== -1 && codeIndex === -1 && payload?.code && state.endpointDetail && state.endpointDetail.interfaces) {
                 state.endpointDetail.interfaces[methodIndex]['responseBodies'].push({...payload});
             }
         },
@@ -1597,6 +1597,7 @@ const StoreModel: ModuleType = {
             const res = await batchUpdateField(payload);
             if (res.code === 0) {
                 await dispatch('loadCategory', 'dir');
+                return true;
             } else {
                 return null
             }

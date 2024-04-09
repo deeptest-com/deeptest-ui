@@ -19,7 +19,7 @@
         <a-table 
           :loading="isFetching"
           :rowKey="'id'"
-          :row-selection="null"
+          :row-selection="rowSelection"
           :pagination="{
             ...pagination,
             onChange: (page) => {
@@ -102,12 +102,7 @@
                 {{ method }}
               </a-tag>
               <span class="path-col" v-if="text">
-                <a-tooltip placement="topLeft">
-                  <template #title>
-                    <span>{{ text }}</span>
-                  </template>
-                  <a-tag>{{ text }}</a-tag>
-                </a-tooltip>
+                <a-tag><TooltipCell :text="text" /></a-tag>
               </span>
               <span class="path-col" v-else> --- </span>
             </div>
@@ -120,19 +115,39 @@
     </EmptyCom>
   </div>
   <!-- 创建接口弹窗 -->
-  <CreateEndpointModal 
-    :visible="createEndpointModalVisible" 
+  <CreateEndpointModal
+    :visible="createEndpointModalVisible"
     :selectedCategoryId="selectedCategoryId"
     @ok="handleCreateApiSuccess"
     @cancel="createEndpointModalVisible = false" />
-  <Diff @callback="editEndpoint"/>  
+  <Diff @callback="editEndpoint"/>
+  <!-- 批量操作 -->
+  <BatchAction
+    v-if="showBatch"
+    :action-list="batchActionList"
+    :rows="selectedRows"
+    @cancel="handleCancelBatch" />
+  <!-- 发布文档 -->
+  <PublicDocs
+    :visible="publicDocsVisible"
+    :endpointIds="selectedRowKeys"
+    @cancel="publicDocsCancel"
+    @ok="publicDocsCancel" />
+  <!-- 批量更新 -->
+  <BatchUpdateFieldModal
+    v-if="batchUpdateFieldVisible"
+    :visible="batchUpdateFieldVisible"
+    :selectedEndpointNum="selectedRowKeys.length"
+    @cancel="batchUpdateFieldVisible = false"
+    @ok="handleBatchUpdate"
+  />
 </template>
-<script setup lang="ts">
-import { defineProps, onMounted, computed, ref, watch, createVNode } from 'vue';
+<script setup lang="tsx">
+import { defineProps, onMounted, computed, ref, watch, createVNode, unref } from 'vue';
 import { useStore } from 'vuex';
 import debounce from "lodash.debounce";
 import { Modal } from 'ant-design-vue';
-import { ExclamationCircleOutlined, WarningFilled, InfoCircleOutlined } from '@ant-design/icons-vue';
+import { ExclamationCircleOutlined, WarningFilled, InfoCircleOutlined, UploadOutlined, EditOutlined } from '@ant-design/icons-vue';
 
 import {Endpoint, PaginationConfig} from "@/views/im/data";
 import EditAndShowField from '@/components/EditAndShow/index.vue';
@@ -141,10 +156,12 @@ import EmptyCom from '@/components/TableEmpty/index.vue';
 import PermissionButton from "@/components/PermissionButton/index.vue";
 import TooltipCell from '@/components/Table/tooltipCell.vue';
 import {DropdownActionMenu} from '@/components/DropDownMenu/index';
-import CreateEndpointModal from "@/views/endpoint/components/CreateEndpointModal.vue";
 import Diff from "@/views/endpoint/components/Drawer/Define/Diff/index.vue";
 import TableFilter from './TableFilter.vue';
 import Tags from './Tags.vue';
+import BatchAction from '@/components/BatchAction/index';
+import IconSvg from "@/components/IconSvg";
+import { PublicDocs, CreateEndpointModal, BatchUpdateFieldModal } from '@/views/endpoint/components';
 
 import {getMethodColor} from '@/utils/interface';
 import usePermission from '@/composables/usePermission';
@@ -165,13 +182,21 @@ const props = defineProps<{
 const { isInLeyanWujieContainer } = useWujie();
 const { hasPermission, isCreator } = usePermission();
 const { share } = useSharePage();
-const { openEndpointTab, updateEndpointNodes, updateTreeNodeCount, copyCurl } = useEndpoint();
+const { 
+  openEndpointTab, 
+  updateEndpointNodes, 
+  updateTreeNodeCount, 
+  copyCurl, 
+  updateTreeNodes, 
+  updateTreeNodesCount, 
+  updateTreeNodeMap } = useEndpoint();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug, ServeGlobal, Project, Schema }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
 const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 const activeTab = computed(() => store.state.Endpoint.activeTab);
 const activeTabs = computed(() => store.state.Endpoint.activeTabs);
+const treeDataMap = computed(() => store.state.Endpoint.treeDataMapCategory);
 
 const list = computed<Endpoint[]>(() => store.state.Endpoint.listResult.list);
 let pagination = computed<PaginationConfig>(() => store.state.Endpoint.listResult.pagination);
@@ -187,13 +212,8 @@ const computedY = () => {
 };
 
 const y = ref(computedY());
-const selectedRowKeys = ref([]);
 const isFetching = ref(false);
 const loading = ref(false);
-
-const onSelectChange = e => {
-  console.log(e);
-}
 
 /**
  * 表格数据
@@ -376,15 +396,6 @@ const statusDropdownMenu = endpointStatusOpts.map(e => ({
   action: record => updateEndpointStatus(record, e.value),
 }))
 
-const selectedRow = ref<any>({});
-const selectedRowIds = computed(() => {
-  const ids: any[] = [];
-  Object.keys(selectedRow.value).forEach((key: string) => {
-    ids.push(...selectedRow.value[key]);
-  });
-  return ids;
-});
-
 async function updateServe(value: any, record: any,) {
   await store.dispatch('Endpoint/updateServe', {
     "fieldName": "serveId",
@@ -401,7 +412,7 @@ async function editEndpoint(record) {
 
 const username = (user: string) => {
   let result = userList.value.find(arrItem => arrItem.value == user);
-  return result?.label || '-'
+  return user === 'admin' ? '管理员' : (result?.label || '-');
 };
 
 const updateTags = (tags: any[], id: number) => {
@@ -473,6 +484,10 @@ const handleCreateApiSuccess = (endpointData) => {
   updateTreeNodeCount(endpointData.parentId, 'increase', 1);
 };
 
+/**
+ * diff相关
+ * @param record 
+ */
 function showDiff(record) {
   store.commit('Endpoint/setDiffModalVisible', {
     endpointId: record.id,
@@ -483,10 +498,130 @@ function showDiff(record) {
   });
 }
 
+/**
+ * 批量操作
+ */
+const showBatch = computed(() => {
+  return selectedRowKeys.value.length > 0;
+});
+const selectedRowKeys = ref([]);
+const selectedRows = ref([]);
+const onSelectChange = (keys, rows) => {
+  selectedRowKeys.value = keys;
+  selectedRows.value = rows;
+};
+
+const rowSelection = computed(() => {
+  return {
+    selectedRowKeys: unref(selectedRowKeys),
+    onChange: onSelectChange,
+    hideDefaultSelections: true,
+  }
+});
+
+const viewDocs = () => {
+  const {parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
+  if(isInLeyanWujieContainer){
+    window.open(`${parentOrigin}/lyapi/${projectName}/docsView?endpointIds=${selectedRowKeys.value.join(',')}`, '_blank')
+    return;
+  }
+  const viewURL = `docs/view?endpointIds=${selectedRowKeys.value.join(',')}`
+  window.open(`${window.location.origin}/${viewURL}`, '_blank');
+};
+
+/**
+ * 发布文档
+ */
+const publicDocsVisible = ref(false);
+
+const publicDocsCancel = () => {
+  publicDocsVisible.value = false;
+};
+
+/**
+ * 批量编辑
+ */
+const batchUpdateFieldVisible = ref(false);
+const handleBatchUpdate = async(data) => {
+  const result = await store.dispatch('Endpoint/batchUpdateField', {
+    "fieldName": data.value.fieldName,
+    "value": data.value.value,
+    "endpointIds": selectedRowKeys.value
+  });
+  result ? notifySuccess('批量修改成功') : notifyError('批量修改失败');
+  if (!result) return;
+  batchUpdateFieldVisible.value = false;
+  loadList();
+
+  // 如果更新的是所属分类，需要更新左侧目录树以及 修改的接口中包含已经打开的tab，要更新对应tab标签页的parentId,
+  /**
+   * 更新分类
+   * 1. 更新左侧目录树 (count)
+   * 2. 更新已经打开的接口tab中，如果修改的接口包含这个tab，则更新对应parentId
+   * 3. 更新已经打开的接口tab对应的分类下的 叶子节点
+   */
+  if (data.value.fieldName !== 'categoryId') return;
+  const oldCategoryIdList = activeTabs.value.filter(e => e.entityData && selectedRowKeys.value.includes(e.entityId)).map(e => e.parentId);
+  updateTreeNodesCount();
+  store.commit('Endpoint/setActiveTabs', activeTabs.value.map(e => {
+    if (e.entityData && selectedRowKeys.value.includes(e.entityId)) {
+      e.parentId = data.value.value;
+    }
+    return e;
+  }))
+  updateEndpointNodes(data.value.value);
+  updateEndpointNodes(activeTab.value.id);
+  if (oldCategoryIdList.length > 0) {
+    [...new Set(oldCategoryIdList)].forEach(e => {
+      updateTreeNodeMap({
+        nodeId: e,
+        data: {
+          ...treeDataMap.value[e],
+          children: (treeDataMap.value[e].children || []).filter(e => e.entityData && selectedRowKeys.value.includes(e.entityId)),
+        },
+        type: 'update',
+      })
+    })
+  }
+  
+};
+
+const batchActionList = [
+  {
+    label: '查看文档',
+    icon: <IconSvg type="view-docs" style="font-size: 20px"/>,
+    action: () => viewDocs()
+  },
+  {
+    label: '发布文档',
+    icon: <UploadOutlined style="font-size: 18px" />,
+    action: () => {
+      publicDocsVisible.value = true;
+    }
+  },
+  {
+    label: '批量修改',
+    icon: <EditOutlined style="font-size: 16px" />,
+    action: () => {
+      batchUpdateFieldVisible.value = true;
+    }
+  },
+];
+
+const handleCancelBatch = () => {
+  selectedRowKeys.value = [];
+  selectedRows.value = [];
+};
+
+/**
+ * 监听tab切换
+ */
 watch(() => {
   return activeTab.value;
 }, (val) => {
   if (val?.id && val?.type === 'im-dir' && val?.id === props.categoryId) {
+    selectedRows.value = [];
+    selectedRowKeys.value = [];
     loadList();
   }
 }, {

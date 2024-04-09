@@ -131,6 +131,7 @@
                 :maxTagCount="10"
                 :options="engineerings"
                 labelInValue
+                :filter-option="filterSpaceOption"
                 @focus="handleEngineeringFocus"
               >
               <template v-if="engineeringFetching" #notFoundContent>

@@ -28,7 +28,7 @@
 <script setup lang="tsx">
 import {ref, onMounted, computed, watch} from 'vue';
 import { useStore } from 'vuex';
-import {ImportOutlined, CopyOutlined, DeleteOutlined} from '@ant-design/icons-vue';
+import {ImportOutlined, CopyOutlined, DeleteOutlined, LoadingOutlined} from '@ant-design/icons-vue';
 import BasicTable from '@/components/Table/index.vue';
 import { DropdownActionMenu } from '@/components/DropDownMenu';
 import { momentUtc } from '@/utils/datetime';
@@ -66,8 +66,26 @@ const driverTypeOpts = [
   },
 ];
 
-const autoImport = (record) => {
-  console.log(record);
+const autoImport = async (record) => {
+  if (record.loading) {
+    return;
+  }
+  record.loading = true;
+  try {
+    const result = await store.dispatch('ProjectSetting/runCronProject', {
+      id: record.id
+    });
+    setTimeout(() => {
+      if (result) {
+        notifySuccess('异步导入中，稍后请刷新列表查看');
+      }
+      record.loading = false;
+      listCronProject();
+    }, 1000);
+  } catch(error) {
+    console.log(error);
+    record.loading = false;
+  }
 }
 
 const copy = async (record) => {
@@ -109,11 +127,14 @@ const createOrUpdate = (record?: any) => {
 }
 
 const actionList = [
-  // {
-  //   label: '立即导入',
-  //   customRender: <ImportOutlined />,
-  //   action: autoImport
-  // },
+  {
+    label: '立即导入',
+    customRender(record) {
+      return (record.loading || record.execStatus == "running") ? <LoadingOutlined /> : <ImportOutlined />
+    },
+    loadingText: '异步导入中...',
+    action: autoImport
+  },
   {
     label: '复制',
     customRender: <CopyOutlined />,

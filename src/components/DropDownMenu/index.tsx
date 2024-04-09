@@ -71,11 +71,22 @@ const RenderMenuItem = ({ item, record }: { item: MenuItem, record: Recordable }
 
 const ActionList = (opts: { list: MenuItem[], record: Recordable}) => {
   const { list, record } = opts;
+  const customRenderLabel = (item) => {
+    if (typeof item.customRender === 'function') {
+      return item.customRender(record);
+    }
+    return item.customRender;
+  };
   return (
     <div class="action-list">
       {list.map((actionItem: MenuItem) => (
         <div class="action-item" onClick={() => actionItem.action(record)}>
-          { actionItem.customRender ? <a-tooltip title={actionItem.label} placement="top">{actionItem.customRender}</a-tooltip> : actionItem.label }
+          { actionItem.customRender ? 
+            <a-tooltip title={record.loading ? (actionItem.loadingText || null) : actionItem.label} placement="top">
+              {customRenderLabel(actionItem)}
+            </a-tooltip> 
+            : 
+          actionItem.label }
         </div>
       ))}
     </div>

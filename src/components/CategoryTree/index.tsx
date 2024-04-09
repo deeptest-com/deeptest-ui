@@ -341,13 +341,14 @@ const CategoryTree = defineComponent({
           nodeType: '',
         }).then(res => {
           if (res.code === 0) {
-            treeNode.dataRef.children = (res.data || []).map(e => {
+            const dataRef = cloneDeep(treeNode.dataRef);
+            dataRef.children = (res.data || []).map(e => {
               delete e.slots;
               return e;
             });
             props.loadChildren({
               nodeId: treeNode.dataRef.id,
-              data: treeNode.dataRef,
+              data: dataRef,
             });
           }
           resolve();

@@ -108,25 +108,26 @@
           </template>
           <span class="form-header-title">导入设置</span>
           <a-form-item label="导入至分类" name="categoryId">
-            <Empty :loading="loading">
-              <template #content>
-                <a-tree-select
-                  @change="selectedCategory"
-                  :value="modelRef.categoryId"
-                  v-model:searchValue="searchValue"
-                  show-search
-                  :multiple="false"
-                  :treeData="treeData"
-                  :treeDefaultExpandAll="true"
-                  :filterTreeNode="false"
-                  :replaceFields="{ title: 'name',value:'id'}"
-                  :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-                  placeholder="请选择分类目录"
-                  @search="handleTreeSelectSearch"
-                  allow-clear/>
+            <a-tree-select
+              @change="selectedCategory"
+              :value="modelRef.categoryId"
+              v-model:searchValue="searchValue"
+              show-search
+              :multiple="false"
+              :treeData="treeData"
+              :treeDefaultExpandAll="true"
+              :filterTreeNode="false"
+              :replaceFields="{ title: 'name',value:'id'}"
+              :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+              placeholder="请选择分类目录"
+              @search="handleTreeSelectSearch"
+              allow-clear>
+              <template #notFoundContent>
+                <div class="not-found-content">
+                  <a-spin />
+                </div>
               </template>
-            </Empty>
-
+            </a-tree-select>
           </a-form-item>
           <a-form-item label="所属服务" name="serveId">
             <SelectServe v-if="visible" @change="change" />
@@ -194,7 +195,7 @@
         </a-form>
       </div>
       <div class="sync-task-footer">
-        <!-- <a-button type="default" @click="autoImport">立即导入</a-button> -->
+        <a-button type="default" @click="ok(true)">保存并导入</a-button>
         <a-button type="default" @click="cancel">取消</a-button>
         <a-button type="primary" @click="ok">确定</a-button>
       </div>
@@ -220,6 +221,7 @@ import SelectServe from '@/views/endpoint/components/SelectServe/index.vue';
 import { filterByKeyword, removeLeafNode } from '@/utils/tree';
 import { message } from 'ant-design-vue';
 import { isSaas } from '@/utils/comm';
+import { notifySuccess } from '@/utils/notify';
 import { getLzosInfo } from '@/utils/lzos';
 
 const store = useStore<{ Endpoint }>();
@@ -513,7 +515,7 @@ const filterOption = (input: string, option: any) => {
   }
 };
 
-function ok() {
+function ok(isAutoRun?: boolean) {
   if (uploading.value) {
     return;
   }
@@ -558,15 +560,25 @@ function ok() {
         ...paramsData,
         ...extraData,
       });
+      if (isAutoRun) {
+        paramsData.runAtOnce = true;
+      }
       try {
         await store.dispatch('ProjectSetting/saveCronProject', {
         ...paramsData,
         ...extraData,
         });
-        confirmLoading.value = false;
+        setTimeout(() => {
+          if (isAutoRun) {
+            notifySuccess('异步导入中，稍后请刷新列表查看');
+          }
+          confirmLoading.value = false;
+        }, 300);
         emit('ok');
       } catch(err) {
-        confirmLoading.value = false;
+        setTimeout(() => {
+          confirmLoading.value = false;
+        }, 300);
         return Promise.reject(err);
       }
     })
