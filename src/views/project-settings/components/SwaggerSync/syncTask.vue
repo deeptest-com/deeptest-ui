@@ -195,7 +195,7 @@
         </a-form>
       </div>
       <div class="sync-task-footer">
-        <a-button type="default" @click="ok(true)">立即导入</a-button>
+        <a-button type="default" @click="ok(true)">保存并导入</a-button>
         <a-button type="default" @click="cancel">取消</a-button>
         <a-button type="primary" @click="ok">确定</a-button>
       </div>
