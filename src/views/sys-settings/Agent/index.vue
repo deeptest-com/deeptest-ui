@@ -2,7 +2,13 @@
   <div class="sys-agent-list-main" :class="{'wujie-main':isWujieEnv}">
     <a-card :bordered="false">
       <template #title>
-        <a-button type="primary" @click="() => edit(0)">新建执行代理</a-button>
+        <a-button type="primary" @click="() => edit(0)">
+          新建执行代理
+          <a-tooltip title="请点击代理安装包下载安装后使用">
+            <InfoCircleOutlined />
+          </a-tooltip>
+        </a-button>
+        <span style="cursor: pointer;color: #1677ff;margin-left: 14px">代理安装包下载</span>
       </template>
       <template #extra>
         <a-input-search
@@ -79,7 +85,7 @@
 <script setup lang="ts">
 import {computed, createVNode, onMounted, reactive, ref, watch} from 'vue';
 import {useStore} from "vuex";
-import {ExclamationCircleOutlined, MoreOutlined} from '@ant-design/icons-vue';
+import {ExclamationCircleOutlined, MoreOutlined, InfoCircleOutlined } from '@ant-design/icons-vue';
 import {StateType as SysSettingStateType} from '../store';
 import {useI18n} from "vue-i18n";
 import {disabledStatus, disabledStatusTagColor} from "@/config/constant"
