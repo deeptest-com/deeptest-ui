@@ -8,11 +8,17 @@
     </div>
   </div>
   <div class="tab-header-btns">
-    <a-button class="plan-exec" type="primary" @click="handleEnvSelect">执行计划</a-button>
+    <ExecBtn>
+      <template #execBtn="{ isNotClickable }">
+        <a-button class="plan-exec" type="primary" :disabled="isNotClickable" @click="handleEnvSelect(isNotClickable)">执行计划</a-button>
+      </template>
+    </ExecBtn>
   </div>
 </template>
 <script setup lang="ts">
 import { ref, defineEmits, defineProps } from "vue";
+import { useStore } from "vuex";
+import ExecBtn from "@/components/ExecBtn/index.vue";
 
 const props = defineProps<{
   tabKey?: string;
@@ -38,8 +44,10 @@ const changeTab = (key) => {
   emits('changeTab', key);
 };
 
-const handleEnvSelect = () => {
-  console.log('执行计划');
+const handleEnvSelect = async (isNotClickable) => {
+  if (isNotClickable) {
+    return;
+  }
   emits('onSelectEnv');
 }
 </script>

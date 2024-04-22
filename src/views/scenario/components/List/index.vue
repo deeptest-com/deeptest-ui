@@ -214,6 +214,7 @@ const dropdownMenuList = [
   },
   {
     label: '执行',
+    checkExecClickAble: true,
     action: (record) => execScenario(record),
     auth: '',
   },

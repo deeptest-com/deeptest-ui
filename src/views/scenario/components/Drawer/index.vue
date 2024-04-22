@@ -26,7 +26,11 @@
           :active-key="activeKey"
           @change-tab="changeTab">
           <template #btn>
-            <a-button class="tab-header-btn" type="primary" @click="exec">执行场景</a-button>
+            <ExecBtn>
+              <template #execBtn="{ isNotClickable }">
+                <a-button class="tab-header-btn" type="primary" @click="exec(isNotClickable)" :disabled="isNotClickable">执行场景</a-button>
+              </template>
+            </ExecBtn>
           </template>
         </DetailTabHeader>
       </template>
@@ -73,6 +77,7 @@ import { DetailHeader, DetailTabHeader } from "@/views/component/DetailLayout";
 import {ProcessorInterfaceSrc} from "@/utils/enum";
 import { ScenarioTabList } from '../../config';
 import {useWujie} from "@/composables/useWujie";
+import ExecBtn from "@/components/ExecBtn";
 const store = useStore<{ Debug: Debug, Scenario: ScenarioStateType, ProjectGlobal, ServeGlobal, Report }>();
 const detailResult: any = computed<Scenario>(() => store.state.Scenario.detailResult);
 const debugData = computed<any>(() => store.state.Debug.debugData);
@@ -135,7 +140,10 @@ function onCloseDrawer() {
   emit('close');
 }
 
-async function exec() {
+async function exec(isNotClickable) {
+  if (isNotClickable) {
+    return;
+  }
   selectEnvVisible.value = true;
   await store.dispatch('Scenario/getScenario', detailResult?.value?.id);
   execEnvId.value = detailResult?.value?.currEnvId;
