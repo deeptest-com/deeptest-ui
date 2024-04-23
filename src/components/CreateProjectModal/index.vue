@@ -77,12 +77,14 @@
                 v-model:value="formStateRef.products"
                 show-search
                 placeholder="请选择所属产品"
-                optionFilterProp="label"
+                tree-node-filter-prop="title"
                 tree-checkable
                 mode="multiple"
                 :maxTagCount="10"
                 :tree-data="lyProducts"
                 labelInValue
+                :dropdownStyle="{ maxHeight: '200px', top: '34px' }"
+                :getPopupContainer="triggerNode => triggerNode.parentNode"
                 :replaceFields="{ title: 'name',value:'id'}"
               />
               <a-button @click="handleToProducts" type="primary" :icon="h(PlusOutlined)"></a-button>
@@ -165,6 +167,7 @@ import {notifyError, notifySuccess} from "@/utils/notify";
 import {useWujie} from "@/composables/useWujie";
 import { isLeyan } from "@/utils/comm";
 import { getLzosInfo, setLzosInfo } from "@/utils/lzos";
+import settings from "@/config/settings";
 
 const props = defineProps<{
   visible: Boolean;
@@ -289,9 +292,15 @@ const getProjectDetail = async(id: number) => {
     console.log(error);
   }
 };  
-
+const bus = window?.$wujie?.bus;
 const handleToProducts = () => {
   if (isInLeyanWujieContainer) {
+    if (!isSaas) {
+      bus?.$emit(settings.sendMsgToLeyan, {
+        type: 'openCreateProductModal'
+      })
+      return;
+    }
     window.open(`${parentOrigin}/pd/list`);
     return;
   }
@@ -357,6 +366,12 @@ watch(() => {
 })
 
 onMounted(async () => {
+  bus?.$on('sendMsgToLeyanAPI', async msg => {
+    if (msg.type === 'createProductSuccess') {
+      const newProducts = await store.dispatch('Global/getLyProducts');
+      lyProducts.value = (newProducts || []).map(e => ({ ...e, children: e.children || [], }));
+    }
+  })
   const lzUserInfo = await getLzosInfo();
   lzosInfo.value = lzUserInfo;
   if (isLy) {
