@@ -8,7 +8,7 @@
             <InfoCircleOutlined />
           </a-tooltip>
         </a-button>
-        <span style="cursor: pointer;color: #1677ff;margin-left: 14px">代理安装包下载</span>
+        <span style="cursor: pointer;color: #1677ff;margin-left: 14px" @click="downloadAgent">代理安装包下载</span>
       </template>
       <template #extra>
         <a-input-search
@@ -102,7 +102,7 @@ import {useWujie} from "@/composables/useWujie";
 
 const {t} = useI18n();
 
-const {isWujieEnv} = useWujie();
+const {isWujieEnv, parentOrigin} = useWujie();
 
 const store = useStore<{ SysSetting: SysSettingStateType }>();
 const models = computed<any>(() => store.state.SysSetting.agentModels);
@@ -152,6 +152,12 @@ async function onDisable(record: any) {
 
 function onClose() {
   drawerVisible.value = false;
+}
+
+const downloadAgent = () => {
+  const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
+  const url = `${isSaas ? parentOrigin : window.location.origin}${isSaas ? '/lya' : ''}/upload/agent.zip`;
+  window.open(url);
 }
 
 </script>
