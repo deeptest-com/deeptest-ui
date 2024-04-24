@@ -64,6 +64,7 @@ const onSelectInterfaces = async (ids: never[]) => {
 }
 
 const onSubmit =  async () => {
+  if (loading.value) return;
   loading.value=true
   await props.onFinish(interfaceIds.value )
   loading.value=false

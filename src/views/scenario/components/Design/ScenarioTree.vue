@@ -570,11 +570,11 @@ const addNode = (mode, processorCategory, processorType,
 const interfaceSelectionVisible = ref(false)
 const interfaceSelectionSrc = ref('')
 
-const endpointInterfaceIdsSelectionFinish = (interfaceIds) => {
+const endpointInterfaceIdsSelectionFinish = async (interfaceIds) => {
   const targetNode = treeDataMap.value[targetModelId]
   console.log('endpointInterfaceIdsSelectionFinish', interfaceIds, targetNode)
 
-  store.dispatch('Scenario/addInterfacesFromDefine', {
+  await store.dispatch('Scenario/addInterfacesFromDefine', {
     interfaceIds: interfaceIds,
     targetId: targetNode.id,
   }).then((newNode) => {
