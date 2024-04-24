@@ -41,6 +41,11 @@ const RenderMenuItem = ({ item, record }: { item: MenuItem, record: Recordable }
       _e.preventDefault();
       return;
     }
+    if (_e?.target?.children[0]?.disabled) {
+      _e.preventDefault();
+      _e.stopPropagation();
+      return;
+    }
     item.action?.(record);
   };
 
@@ -77,7 +82,6 @@ const renderExecBtn = (item) => {
   const onFreeSaasBtnclick = (e, isNotClickable) => {
     if (isNotClickable) {
       e.preventDefault();
-      e.stopPropagation();
       return;
     }
   }

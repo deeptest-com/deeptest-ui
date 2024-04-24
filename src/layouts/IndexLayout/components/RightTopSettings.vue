@@ -257,14 +257,16 @@ onMounted(async () => {
   await store.dispatch('Global/getClientVersion');
   await store.dispatch('Global/listAgent');
   await store.commit('Global/setCurrAgent', null);
-  bus?.$emit(settings.sendMsgToLeyan, {
-    type: 'initClientOrAgents',
-    data: {
-      clientDownloadUrlOpts: clientDownloadUrlOpts.value,
-      agents: agents.value,
-      currAgent: currentAgent.value,
-    }
-  });
+  setTimeout(() => {
+    bus?.$emit(settings.sendMsgToLeyan, {
+      type: 'initClientOrAgents',
+      data: {
+        clientDownloadUrlOpts: clientDownloadUrlOpts.value,
+        agents: agents.value,
+        currAgent: currentAgent.value,
+      }
+    });
+  }, 500);
 })
 
 const isAdmin = computed(() => {

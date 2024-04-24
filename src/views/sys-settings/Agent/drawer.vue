@@ -57,8 +57,11 @@ import {urlValidator} from "@/utils/validate";
 
 const useForm = Form.useForm;
 
-const store = useStore<{ SysSetting: SysSettingStateType }>();
+const store = useStore<{ SysSetting: SysSettingStateType, Global }>();
 const model = computed<any>(() => store.state.SysSetting.agentModel);
+const agents = computed<any[]>(() => store.state.Global.agents);
+const currentAgent = computed<any>(() => store.state.Global.currAgent);
+const bus = window?.$wujie?.bus;
 
 const props = defineProps({
   visible: {
@@ -100,11 +103,24 @@ watch(props, () => {
   }
 }, {deep: true, immediate: true})
 
+const setAgent = async () => {
+  await store.dispatch('Global/listAgent');
+  await store.commit('Global/setCurrAgent', null);
+  bus?.$emit(settings.sendMsgToLeyan, {
+    type: 'initClientOrAgents',
+    data: {
+      agents: agents.value,
+      currAgent: currentAgent.value,
+    }
+  });
+};
+
 const onSubmit = async () => {
   console.log('onSubmit', model.value)
 
   validate().then(async () => {
-    store.dispatch('SysSetting/saveAgent', model.value).then(() => {
+    store.dispatch('SysSetting/saveAgent', model.value).then(async () => {
+      await setAgent();
       props.onClose();
     })
   }).catch(err => {

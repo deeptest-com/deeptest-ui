@@ -142,8 +142,13 @@ const StoreModel: ModuleType = {
       } else {
         let currAgent = await getCache(Cache_Key_Agent)
 
-        if (!currAgent && state.agents.length > 0) {
-          currAgent = state.agents[0]
+        if (state.agents.length > 0) {
+          if (!currAgent) {
+            currAgent = state.agents[0]
+          } else { // 判断缓存的agent是否被删除了，如果没删除，则用新的数据覆盖，反之则 取新的agent列表的第一项
+            const find = state.agents.find(e => e.id === currAgent.id);
+            find ? currAgent = find : currAgent = state.agents[0];
+          }
         }
 
         state.currAgent = currAgent

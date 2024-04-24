@@ -75,7 +75,7 @@
       </EmptyComp>
 
       <!-- 编辑抽屉 -->
-      <EditDrawer :modelId="modelId"
+      <EditDrawer v-if="drawerVisible" :modelId="modelId"
               :visible="drawerVisible"
               :onClose="onClose" />
     </a-card>
@@ -99,13 +99,16 @@ import EmptyComp from '@/components/TableEmpty/index.vue';
 import EditDrawer from './drawer.vue';
 import debounce from "lodash.debounce";
 import {useWujie} from "@/composables/useWujie";
+import settings from '@/config/settings';
 
 const {t} = useI18n();
 
 const {isWujieEnv, parentOrigin} = useWujie();
 
-const store = useStore<{ SysSetting: SysSettingStateType }>();
+const store = useStore<{ SysSetting: SysSettingStateType, Global }>();
 const models = computed<any>(() => store.state.SysSetting.agentModels);
+const agents = computed<any[]>(() => store.state.Global.agents);
+const currentAgent = computed<any>(() => store.state.Global.currAgent);
 
 const drawerVisible = ref(false);
 const modelId = ref(0);
@@ -136,18 +139,22 @@ const edit = (id) => {
   drawerVisible.value = true;
 }
 
+const bus = window?.$wujie?.bus;
+
 async function remove(record: any) {
   Modal.confirm({
     title: '确认要删除该执行代理吗？',
     icon: createVNode(ExclamationCircleOutlined),
-    onOk() {
-      store.dispatch('SysSetting/deleteAgent', record.id);
+    async onOk() {
+      await store.dispatch('SysSetting/deleteAgent', record.id);
+      setAgent();
     }
   })
 }
 
 async function onDisable(record: any) {
-  store.dispatch('SysSetting/disableAgent', record.id);
+  await store.dispatch('SysSetting/disableAgent', record.id);
+  setAgent();
 }
 
 function onClose() {
@@ -158,6 +165,18 @@ const downloadAgent = () => {
   const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
   const url = `${isSaas ? parentOrigin : window.location.origin}${isSaas ? '/lya' : ''}/upload/agent.zip`;
   window.open(url);
+}
+
+const setAgent = async () => {
+  await store.dispatch('Global/listAgent');
+  await store.commit('Global/setCurrAgent', null);
+  bus?.$emit(settings.sendMsgToLeyan, {
+    type: 'initClientOrAgents',
+    data: {
+      agents: agents.value,
+      currAgent: currentAgent.value,
+    }
+  });
 }
 
 </script>
