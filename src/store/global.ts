@@ -186,6 +186,9 @@ const StoreModel: ModuleType = {
 
       if (result.code === 0) {
         commit('setAgents',result.data);
+        if ((result.data || []).length === 0) {
+          await setCache(Cache_Key_Agent, null)
+        }
       }
     },
 

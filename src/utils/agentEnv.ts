@@ -14,9 +14,9 @@ export const isElectronEnv = win?.versions?.electron;
  *
  * */
 export async function getAgentUrl() {
-    const currAgent = await getCache(Cache_Key_Agent)
+    const currAgent: any = await getCache(Cache_Key_Agent)
 
-    let agentUrl = currAgent ? currAgent.url : process.env.VUE_APP_API_AGENT;
+    let agentUrl = currAgent?.url;
 
     const localAgentPort = window.localStorage.getItem(Cache_Key_Agent_Local_Port) || '';
     if (isElectronEnv && localAgentPort?.length === 5 && agentUrl.includes('127.0.0.1')) {
