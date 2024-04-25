@@ -295,7 +295,7 @@ const getProjectDetail = async(id: number) => {
 const bus = window?.$wujie?.bus;
 const handleToProducts = () => {
   if (isInLeyanWujieContainer) {
-    if (!isSaas) {
+    if (isSaas) {
       bus?.$emit(settings.sendMsgToLeyan, {
         type: 'openCreateProductModal'
       })
