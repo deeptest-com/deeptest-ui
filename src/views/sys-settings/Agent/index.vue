@@ -4,8 +4,16 @@
       <template #title>
         <a-button type="primary" @click="() => edit(0)">
           新建执行代理
-          <a-tooltip title="请点击代理安装包下载安装后使用">
-            <InfoCircleOutlined />
+          <a-tooltip placement="right" overlayClassName="agent-toolt-tip">
+            <template #title>
+              所有接口请求通过执行代理转发。可下载安装包自行安装配置后使用。 <br />
+              步骤一、点击代理安装包下载，解压LeyanAPIAgent.zip包到运行代理的服务器目录下 <br />
+              步骤二、启动代理 <br />
+              * windows环境：在文件存放目录，双击 lyapiagent.exe 启动 <br />
+              * Mac环境：在文件存放目录，执行chmod -R 0777 lyapiagent赋予可执行权限，执行./lyapiagent 启动代理。Mac下执行时会被安全性拦截，在 系统设置-》隐私与安全性 下允许代理运行。 <br />
+              步骤三、配置代理。在代理设置页面，新建执行代理。代理地址为：http://安装IP地址:8086/api/v1。例如本地安装，代理地址为：http://127.0.0.1:8086/api/v1
+            </template>
+            <QuestionCircleOutlined />
           </a-tooltip>
         </a-button>
         <span class="sys-agent-download" @click="downloadAgent">代理安装包下载</span>
@@ -85,7 +93,7 @@
 <script setup lang="ts">
 import {computed, createVNode, onMounted, reactive, ref, watch} from 'vue';
 import {useStore} from "vuex";
-import {ExclamationCircleOutlined, MoreOutlined, InfoCircleOutlined } from '@ant-design/icons-vue';
+import {ExclamationCircleOutlined, MoreOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue';
 import {StateType as SysSettingStateType} from '../store';
 import {useI18n} from "vue-i18n";
 import {disabledStatus, disabledStatusTagColor} from "@/config/constant"
@@ -180,6 +188,15 @@ const setAgent = async () => {
 }
 
 </script>
+
+<style lang="less">
+.agent-toolt-tip {
+
+  .ant-tooltip-content {
+    width: 550px;
+  }
+}
+</style>
 
 <style scoped lang="less">
 .sys-agent-list-main {
