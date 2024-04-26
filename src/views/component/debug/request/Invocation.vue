@@ -43,11 +43,15 @@
       </div>
 
       <div class="send" v-if="showOperation">
-        <a-button type="primary" trigger="click"
-                  @click="confirmSend"
-                  :disabled="!isPathValid">
-          <span>发送</span>
-        </a-button>
+        <ExecBtn>
+          <template #execBtn="{ isNotClickable }">
+            <a-button type="primary" trigger="click"
+                      @click="confirmSend(isNotClickable)"
+                      :disabled="!isPathValid || isNotClickable">
+              <span>发送</span>
+            </a-button>
+          </template>
+        </ExecBtn>
       </div>
 
       <div class="save" v-if="showOperation">
@@ -127,6 +131,7 @@ import { setServeUrl } from "@/utils/url";
 import {StateType as ProjectStateType} from "@/store/project";
 import {loadProjectEnvVars} from "@/utils/cache";
 import useCopy from "@/composables/useClipboard";
+import ExecBtn from "@/components/ExecBtn";
 const {
   isDebugChange,
   debugChangePreScript,
@@ -186,7 +191,6 @@ const props = defineProps({
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 const {showContextMenu, contextMenuStyle, onContextMenuShow, onMenuClick} = useVariableReplace('endpointInterfaceUrl')
-
 const showBaseUrl = () => {
   return showBaseUrlOrNot(debugData.value)
 }
@@ -222,7 +226,7 @@ function changeServer(id) {
   store.dispatch('Debug/changeServer', { serverId: id,serveId:debugData.value.serveId, requestEnvVars: false })
 }
 
-const send = async (e) => {
+const send = async () => {
   const data = prepareDataForRequest(debugData.value)
   console.log('sendRequest', data);
 
@@ -248,17 +252,20 @@ const send = async (e) => {
   }
 }
 
-const confirmSend = async (e)=>{
+const confirmSend = async (isNotClickable)=>{
+  if (isNotClickable) {
+    return;
+  }
   if(debugChangePreScript.value || debugChangePostScript.value || debugChangeCheckpoint.value){
     store.commit("Global/setSpinning",true)
     bus.emit(settings.eventPostConditionSave, {
       callback:async () => {
-        await send(e)
+        await send()
         store.commit("Global/setSpinning",false)
       }
     });
   }else {
-    await send(e)
+    await send()
   }
 }
 

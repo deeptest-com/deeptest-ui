@@ -3,6 +3,7 @@ import "./index.less";
 import { MoreOutlined } from "@ant-design/icons-vue";
 import { MenuItem, Recordable } from "./type";
 import usePermission from "@/composables/usePermission";
+import ExecBtn from "@/components/ExecBtn/index.vue";
 
 
 /**
@@ -40,6 +41,11 @@ const RenderMenuItem = ({ item, record }: { item: MenuItem, record: Recordable }
       _e.preventDefault();
       return;
     }
+    if (_e?.target?.children[0]?.disabled) {
+      _e.preventDefault();
+      _e.stopPropagation();
+      return;
+    }
     item.action?.(record);
   };
 
@@ -47,13 +53,16 @@ const RenderMenuItem = ({ item, record }: { item: MenuItem, record: Recordable }
     if (typeof item.label === 'function') {
       return item.label(record);
     }
+    if (item.checkExecClickAble) {
+      return renderExecBtn(item);
+    }
     return item.label;
   };
 
   if (!hasMoreThanOneChildren.value) {
     return (
         <a-menu-item key={item.key} class={{ 'lyapi-drop-menu-item': true, 'has-no-permission': item.disabled }} onClick={e => handleClick(e)}>
-          <span>{renderContent()}</span>
+          <span class="drop-down-menu-text">{renderContent()}</span>
         </a-menu-item>
     )
   } else {
@@ -69,8 +78,32 @@ const RenderMenuItem = ({ item, record }: { item: MenuItem, record: Recordable }
   }
 }
 
+const renderExecBtn = (item) => {
+  const onFreeSaasBtnclick = (e, isNotClickable) => {
+    if (isNotClickable) {
+      e.preventDefault();
+      return;
+    }
+  }
+  return (
+    <ExecBtn placement="left">
+      {{
+        execBtn: ({ isNotClickable }) => {
+          return isNotClickable ? <a-button class="exec-btn" type='default' disabled={isNotClickable} onClick={(e) => onFreeSaasBtnclick(e, isNotClickable)}>{ item.label }</a-button> : <span>{item.label}</span>
+        }
+      }}  
+    </ExecBtn>
+  )
+};
+
 const ActionList = (opts: { list: MenuItem[], record: Recordable}) => {
   const { list, record } = opts;
+  const customRenderLoadingLabel = (item) => {
+    if (typeof item.customLoadingRender === 'function') {
+      return item.customLoadingRender(record);
+    }
+    return item.customLoadingRender;
+  };
   const customRenderLabel = (item) => {
     if (typeof item.customRender === 'function') {
       return item.customRender(record);
@@ -81,12 +114,12 @@ const ActionList = (opts: { list: MenuItem[], record: Recordable}) => {
     <div class="action-list">
       {list.map((actionItem: MenuItem) => (
         <div class="action-item" onClick={() => actionItem.action(record)}>
-          { actionItem.customRender ? 
+          {JSON.stringify(actionItem)}
+          { actionItem.checkExecClickAble ? renderExecBtn(actionItem) : actionItem.customLoadingRender ? 
             <a-tooltip title={record.loading ? (actionItem.loadingText || null) : actionItem.label} placement="top">
-              {customRenderLabel(actionItem)}
+              {customRenderLoadingLabel(actionItem)}
             </a-tooltip> 
-            : 
-          actionItem.label }
+            : actionItem.customRender ? customRenderLabel(actionItem) : actionItem.label}
         </div>
       ))}
     </div>

@@ -129,7 +129,7 @@ const createOrUpdate = (record?: any) => {
 const actionList = [
   {
     label: '立即导入',
-    customRender(record) {
+    customLoadingRender(record) {
       return (record.loading || record.execStatus == "running") ? <LoadingOutlined /> : <ImportOutlined />
     },
     loadingText: '异步导入中...',

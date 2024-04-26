@@ -16,22 +16,23 @@
         <a-form :model="model" :label-col="{ style: { width: '56px' } }" :wrapper-col="wrapperCol">
           <a-form-item label="名称" v-bind="validateInfos.name" required>
             <a-input v-model:value="model.name"
+                    :disabled="disabled"
                      @blur="validate('name', { trigger: 'blur' }).catch(() => {})"/>
           </a-form-item>
 
           <a-form-item label="地址" v-bind="validateInfos.url" required>
-            <a-input v-model:value="model.url"
+            <a-input v-model:value="model.url" :disabled="disabled"
                      @blur="validate('url', { trigger: 'blur' }).catch(() => {})"/>
           </a-form-item>
 
           <a-form-item label="描述" v-bind="validateInfos.desc">
-            <a-textarea v-model:value="model.desc"
+            <a-textarea v-model:value="model.desc" :disabled="disabled"
                         @blur="validate('desc', { trigger: 'blur' }).catch(() => {})"/>
           </a-form-item>
 
           <a-form-item :wrapper-col="{ span: wrapperCol.span, offset: labelCol.span }">
-            <a-button type="primary" @click="onSubmit" class="dp-btn-gap">保存</a-button> &nbsp;
-            <a-button @click="onCancel" class="dp-btn-gap">取消</a-button>
+            <a-button :disabled="disabled" type="primary" @click="onSubmit" class="dp-btn-gap">保存</a-button> &nbsp;
+            <a-button :disabled="disabled" @click="onCancel" class="dp-btn-gap">取消</a-button>
           </a-form-item>
         </a-form>
       </div>
@@ -56,9 +57,15 @@ import {pattern} from "@/utils/const";
 import {urlValidator} from "@/utils/validate";
 
 const useForm = Form.useForm;
-
-const store = useStore<{ SysSetting: SysSettingStateType }>();
+const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
+const disabled = computed(() => {
+  return isSaas && currentAgent.value?.id === 1;
+})
+const store = useStore<{ SysSetting: SysSettingStateType, Global }>();
 const model = computed<any>(() => store.state.SysSetting.agentModel);
+const agents = computed<any[]>(() => store.state.Global.agents);
+const currentAgent = computed<any>(() => store.state.Global.currAgent);
+const bus = window?.$wujie?.bus;
 
 const props = defineProps({
   visible: {
@@ -100,11 +107,24 @@ watch(props, () => {
   }
 }, {deep: true, immediate: true})
 
+const setAgent = async () => {
+  await store.dispatch('Global/listAgent');
+  await store.commit('Global/setCurrAgent', null);
+  bus?.$emit(settings.sendMsgToLeyan, {
+    type: 'initClientOrAgents',
+    data: {
+      agents: agents.value,
+      currAgent: currentAgent.value,
+    }
+  });
+};
+
 const onSubmit = async () => {
   console.log('onSubmit', model.value)
 
   validate().then(async () => {
-    store.dispatch('SysSetting/saveAgent', model.value).then(() => {
+    store.dispatch('SysSetting/saveAgent', model.value).then(async () => {
+      await setAgent();
       props.onClose();
     })
   }).catch(err => {
