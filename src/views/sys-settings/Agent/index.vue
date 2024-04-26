@@ -8,7 +8,7 @@
             <InfoCircleOutlined />
           </a-tooltip>
         </a-button>
-        <span style="cursor: pointer;color: #1677ff;margin-left: 14px" @click="downloadAgent">代理安装包下载</span>
+        <span class="sys-agent-download" @click="downloadAgent">代理安装包下载</span>
       </template>
       <template #extra>
         <a-input-search
@@ -201,5 +201,12 @@ const setAgent = async () => {
   .record-name {
     width: 120px;
   }
+}
+
+.sys-agent-download {
+  cursor: pointer;
+  color: #1677ff;
+  margin-left: 14px;
+  font-size: 14px;
 }
 </style>

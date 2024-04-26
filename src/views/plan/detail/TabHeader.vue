@@ -8,7 +8,7 @@
     </div>
   </div>
   <div class="tab-header-btns">
-    <ExecBtn>
+    <ExecBtn placement="left">
       <template #execBtn="{ isNotClickable }">
         <a-button class="plan-exec" type="primary" :disabled="isNotClickable" @click="handleEnvSelect(isNotClickable)">执行计划</a-button>
       </template>

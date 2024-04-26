@@ -26,7 +26,7 @@
           :active-key="activeKey"
           @change-tab="changeTab">
           <template #btn>
-            <ExecBtn>
+            <ExecBtn placement="left">
               <template #execBtn="{ isNotClickable }">
                 <a-button class="tab-header-btn" type="primary" @click="exec(isNotClickable)" :disabled="isNotClickable">执行场景</a-button>
               </template>

@@ -86,7 +86,7 @@ const renderExecBtn = (item) => {
     }
   }
   return (
-    <ExecBtn>
+    <ExecBtn placement="left">
       {{
         execBtn: ({ isNotClickable }) => {
           return isNotClickable ? <a-button class="exec-btn" type='default' disabled={isNotClickable} onClick={(e) => onFreeSaasBtnclick(e, isNotClickable)}>{ item.label }</a-button> : <span>{item.label}</span>
