@@ -163,7 +163,7 @@ function onClose() {
 
 const downloadAgent = () => {
   const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
-  const url = `${isSaas ? parentOrigin : window.location.origin}${isSaas ? '/lya' : ''}/upload/agent.zip`;
+  const url = `${isSaas ? parentOrigin : window.location.origin}${isSaas ? '/lya' : ''}/upload/LeyanAPIAgent.zip`;
   window.open(url);
 }
 
