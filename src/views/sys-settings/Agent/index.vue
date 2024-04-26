@@ -4,6 +4,8 @@
       <template #title>
         <a-button type="primary" @click="() => edit(0)">
           新建执行代理
+        </a-button>
+        <span class="sys-agent-download" @click="downloadAgent">代理安装包下载
           <a-tooltip placement="right" overlayClassName="agent-toolt-tip">
             <template #title>
               所有接口请求通过执行代理转发。可下载安装包自行安装配置后使用。 <br />
@@ -15,8 +17,7 @@
             </template>
             <QuestionCircleOutlined />
           </a-tooltip>
-        </a-button>
-        <span class="sys-agent-download" @click="downloadAgent">代理安装包下载</span>
+        </span>
       </template>
       <template #extra>
         <a-input-search
