@@ -63,7 +63,7 @@
                       </span>
                     </a-menu-item>
 
-                    <a-menu-item key="2">
+                    <a-menu-item key="2" v-if="(!isSaas || (isSaas && record.id !== 1))">
                       <span class="dp-link operation" @click="remove(record)">删除</span>
                     </a-menu-item>
                   </a-menu>
@@ -104,7 +104,7 @@ import settings from '@/config/settings';
 const {t} = useI18n();
 
 const {isWujieEnv, parentOrigin} = useWujie();
-
+const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
 const store = useStore<{ SysSetting: SysSettingStateType, Global }>();
 const models = computed<any>(() => store.state.SysSetting.agentModels);
 const agents = computed<any[]>(() => store.state.Global.agents);
