@@ -59,7 +59,7 @@ import {urlValidator} from "@/utils/validate";
 const useForm = Form.useForm;
 const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
 const disabled = computed(() => {
-  return isSaas && currentAgent.value?.id === 1;
+  return isSaas && model.value?.id === 1;
 })
 const store = useStore<{ SysSetting: SysSettingStateType, Global }>();
 const model = computed<any>(() => store.state.SysSetting.agentModel);

@@ -142,8 +142,9 @@ function updateName(value: string, record: any) {
   });
 }
 
-const edit = (id) => {
+const edit = async (id) => {
   console.log('edit')
+  await store.commit('SysSetting/setAgent', {});
   modelId.value = id;
   drawerVisible.value = true;
 }
