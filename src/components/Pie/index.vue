@@ -35,29 +35,29 @@ export default defineComponent({
       const myChart = echarts.init(main.value);
       let schoolData = [
         {
-          name: "轻微",
-          value: pieData.value?.minor || 0,
-          color: "#447DFD",
-        },
-        {
           name: "致命",
           value: pieData.value?.deadly || 0,
-          color: "#5344FD",
+          color: "#af0808",
         },
         {
           name: "阻塞",
           value: pieData.value?.blocker || 0,
-          color: "#26D1A1",
+          color: "#ff0000",
         },
         {
           name: "严重",
           value: pieData.value?.critical || 0,
-          color: "#FF6963",
+          color: "#ff5c00",
         },
         {
           name: "一般",
           value: pieData.value?.major || 0,
           color: "#FBC434",
+        },
+        {
+          name: "轻微",
+          value: pieData.value?.minor || 0,
+          color: "#26D1A1",
         },
         {
           name: '建议',
