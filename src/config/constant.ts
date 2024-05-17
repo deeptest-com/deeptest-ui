@@ -1396,7 +1396,7 @@ export const EndpointTabsList = [
     },
     {
       "key": "cases",
-      "label": "用例"
+      "label": "测试用例"
     },
     {
       "key": "mock",
