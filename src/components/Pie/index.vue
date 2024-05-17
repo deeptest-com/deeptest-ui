@@ -59,6 +59,11 @@ export default defineComponent({
           value: pieData.value?.major || 0,
           color: "#FBC434",
         },
+        {
+          name: '建议',
+          value: pieData.value?.suggest || 0,
+          color: '#4490f7'
+        }
       ];
       schoolData = schoolData.filter((item) => {
         if (item.value != 0) {
