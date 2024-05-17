@@ -31,6 +31,7 @@
                      v-model:value="item.value"
                      @change="onParamChange(idx)"
                      v-contextmenu="e => onContextMenuShow(idx, e)"
+                     v-func-selection
                      class="dp-bg-input-transparent" />
           </a-col>
           <a-col flex="80px" class="dp-right dp-icon-btn-container">
