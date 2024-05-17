@@ -28,8 +28,8 @@ import { useStore } from 'vuex';
 import { BugIcon } from './constant';
 import { useWujie } from '@/composables/useWujie';
 import settings from '@/config/settings';
-import { notification } from 'ant-design-vue-v3';
-import { Modal, Select, message } from 'ant-design-vue';
+import { notification, message } from 'ant-design-vue-v3';
+import { Modal, Select } from 'ant-design-vue';
 import { referBug } from '@/views/report/service';
 import { SmileOutlined } from '@ant-design/icons-vue';
 
@@ -88,27 +88,26 @@ const referBugCallback = async (info) => {
         bugId: info.workitemKey,
         bugType: info.workitemTypeCategory,
         reportId: props.record?.reportId,
+        severity: info.severity,
       })
       bugInfo.value.bugId = info.workitemKey;
       bugInfo.value.bugType = info.workitemTypeCategory;
       store.commit('Global/setSpinning', false);
-      // notification.open({
-      //   message: '提交bug成功',
-      //   placement: 'bottomRight',
-      //   description: () => {
-      //     return (
-      //       <div>{`已提交bug(${info.workitemKey})`},
-      //         <span 
-      //           style="cursor: pointer; color: #4096ff" 
-      //           onClick={() => {
-      //             window.open(info.detailUrl, '_blank')
-      //           }}>查看详情</span>
-      //       </div>
-      //     )
-      //   },
-      //   icon: () => h(SmileOutlined, { style: 'color: #108ee9' }),
-      // });
-      message.success('已提交bug');
+      message.success({
+        content: () => {
+          return (
+            <span>{`已提交bug(${info.workitemKey})`},
+              <span 
+                style="cursor: pointer; color: #4096ff" 
+                onClick={() => {
+                  window.open(info.detailUrl, '_blank')
+                }}>查看详情</span>
+            </span>
+          )
+        },
+        duration: 3,
+        prefixCls: 'refer-bug-message'
+      });
     } catch(err) {
       store.commit('Global/setSpinning', false);
     }

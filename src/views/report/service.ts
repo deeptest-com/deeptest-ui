@@ -29,7 +29,7 @@ export async function members(id: number): Promise<any> {
     })
 }
 
-export async function referBug(data: { reportId: number, bugId: string, bugType: number }) {
+export async function referBug(data: { reportId: number, bugId: string, bugType: number, severity: number, }) {
     return request({
         url: '/scenarios/reports/referBug',
         method: 'post',
