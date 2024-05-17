@@ -3,30 +3,59 @@
     <div class="scenario-name">{{ record.name }}</div>
     <template v-if="record.showMoreInfo !== false">
       <div class="scenario-priority">{{ record.priority}}</div>
-      <div :class="['scenario-status', logInfo.resultStatus]">{{ statusMap.get(status) }}
+      <div :class="['scenario-status', status]">{{ statusMap.get(status) }}
       </div>
       <div class="scenario-rate">
         <div class="scenario-rate-progress">
           <a-progress :percent="progressInfo.progressValue" :status="progressInfo.status" :show-info="false"/>
         </div>
         <div class="scenario-rate-info">通过率 {{ `${progressInfo.progressValue}%` }}</div>
+        <template v-if="showBugAction && isInLeyanWujieContainer">
+          <a-tooltip :title="getTitle">
+            <div :class="{'scenario-report-bug': true, 'disabled': userSpaces.length === 0 || execStatus !== 'end'}" @click="handleAubmitToBug">
+              <BugIcon />
+            </div>
+          </a-tooltip>
+        </template>
       </div>
+     
     </template>
   </div>
 </template>
-<script lang="ts" setup>
-import {defineProps, computed, watch} from 'vue';
+<script lang="tsx" setup>
+import {defineProps, computed, inject, h, ref} from 'vue';
+import { useStore } from 'vuex';
+import { BugIcon } from './constant';
+import { useWujie } from '@/composables/useWujie';
+import settings from '@/config/settings';
+import { notification, message } from 'ant-design-vue-v3';
+import { Modal, Select } from 'ant-design-vue';
+import { referBug } from '@/views/report/service';
+import { SmileOutlined } from '@ant-design/icons-vue';
 
+const store = useStore<{ Global }>();
 const props = defineProps(['record', 'showScenarioInfo', 'expandActive']);
 const statusMap = new Map([['pass', '通过'], ['fail', '失败'],['exception','失败'], ['in-progress', '进行中']]);
-
+const { isInLeyanWujieContainer } = useWujie();
+const showBugAction = inject('showBugAction', false);
+const detailLink = inject('detailLink') as any;
+const execStatus = inject('execStatus') as any;
 const logInfo = computed(() => {
   return props.record?.logs?.[0] || {};
 })
+const userSpaces = computed(() => {
+  return store.state.Global.lyUserSpaces;
+});
+const bus = window?.$wujie?.bus;
 
 const status = computed(() => {
   return props.record?.resultStatus || 'in-progress'
 })
+
+const bugInfo = ref({
+  bugId: props.record?.bugId || '',
+  bugType: 2,
+});
 
 const progressInfo = computed(() => {
   const { resultStatus = ''} = props.record || {};
@@ -35,6 +64,121 @@ const progressInfo = computed(() => {
     progressValue: resultStatus === 'fail' ? 50 : resultStatus === 'pass' ? 100 : 20,
   }
 })
+
+const getTitle = computed(() => {
+  if (execStatus.value !== 'end') {
+    return '执行未完成，不可提交';
+  }
+  if (userSpaces.value.length === 0) {
+    return '无法提交问题，请先到项目列表页编辑项目，关联承接的研发空间';
+  }
+  if (bugInfo.value.bugId) {
+    return '已提交bug，点击查看详情';
+  }
+  return '未提交bug，点击创建并关联';
+})
+
+const referBugCallback = async (info) => {
+  if (info.status !== 'success') {
+    store.commit('Global/setSpinning', false);
+  } else {
+    // 成功
+    try {
+      await referBug({
+        bugId: info.workitemKey,
+        bugType: info.workitemTypeCategory,
+        reportId: props.record?.reportId,
+        severity: info.severity,
+      })
+      bugInfo.value.bugId = info.workitemKey;
+      bugInfo.value.bugType = info.workitemTypeCategory;
+      store.commit('Global/setSpinning', false);
+      message.success({
+        content: () => {
+          return (
+            <span>{`已提交bug(${info.workitemKey})`},
+              <span 
+                style="cursor: pointer; color: #4096ff" 
+                onClick={() => {
+                  window.open(info.detailUrl, '_blank')
+                }}>查看详情</span>
+            </span>
+          )
+        },
+        duration: 3,
+        prefixCls: 'refer-bug-message'
+      });
+    } catch(err) {
+      store.commit('Global/setSpinning', false);
+    }
+  }
+}
+
+const submitToLy = (space: any) => {
+  store.commit('Global/setSpinning', true);
+  bus?.$emit(settings.sendMsgToLeyan, {
+    type: 'openCreateBugWorkitem',
+    data: {
+      reportInfo: {
+        link: detailLink.value,
+        space,
+        callback: referBugCallback,
+      },
+    }
+  })
+}
+
+const handleAubmitToBug = (evt) => {
+  evt.stopPropagation();
+
+  // 已关联了
+  if (bugInfo.value.bugId) {
+    bus?.$emit(settings.sendMsgToLeyan, {
+      type: 'openBugWorkitemLink',
+      data: {
+        workitem: {
+          workitemKey: bugInfo.value.bugId,
+          workitemTypeCategory: bugInfo.value.bugType,
+        }
+      }
+    })
+    return;
+  }
+  // 未关联
+  const spacesLength = userSpaces.value.length;
+  /** 判断当前空间关联多少ly研发空间 */
+  // 只关联一个
+  // 关联多个，显示选择研发空间的弹窗
+  // 未关联 禁用
+  if (spacesLength === 0 || execStatus.value !== 'end') return;
+  if (spacesLength === 1) {
+    // 直接打开创建弹窗
+    submitToLy(userSpaces.value[0].nameEngAbbr);
+    return;
+  }
+  const selectedSpaceKey = ref(userSpaces.value[0].nameEngAbbr);
+  // 打开选择空间弹窗
+  Modal.confirm({
+    class: 'submit-bug-modal',
+    title: '请选择研发空间',
+    content: () => {
+      return (
+        <div class="submit-bug-modal-content">
+          <span style="margin-right:2px;color: red">*</span> 研发空间 :
+          <Select 
+            value={selectedSpaceKey} 
+            options={userSpaces.value.map(e => ({ value: e.nameEngAbbr, label: e.name }))} 
+            onChange={(e) => selectedSpaceKey.value = e}/>
+        </div>
+      )
+    },
+    onOk() {
+      submitToLy(selectedSpaceKey.value);
+    }
+  })
+
+  
+}
 
 </script>
 
@@ -122,6 +266,24 @@ const progressInfo = computed(() => {
   margin-left: 40px;
   font-size: 12px;
   color: rgba(0, 0, 0, 0.45);
+}
+
+.scenario-report-bug {
+  margin-left: 16px;
+  width: 24px;
+  height: 24px;
+  background-color: #fc5944;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 4px;
+
+  &.disabled {
+    background-color: #cdcdcd;
+    cursor: not-allowed;
+  }
 }
 </style>
 

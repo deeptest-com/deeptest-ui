@@ -165,7 +165,7 @@ const StoreModel: ModuleType = {
                         "passAssertionNum": data.passAssertionNum, //通过检查点数
                         "failAssertionNum": data.failAssertionNum, //失败检查点数
                     },
-                    scenarioReports
+                    // scenarioReports
                 });
                 return true;
             } catch (error) {

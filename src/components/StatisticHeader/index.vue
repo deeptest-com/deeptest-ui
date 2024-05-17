@@ -14,7 +14,7 @@
               <div class="card-content">
                 <StatisticTooltip
                   v-if="type === 0"
-                  :title="'入住项目（个）'"
+                  title="项目数（个）"
                   :value="card?.projectTotal||0"
 
                 />
@@ -72,7 +72,7 @@
           </div>
         </a-card>
       </a-col>
-      <a-col class="pie" style="margin-left: 14px" flex="0 1 400px">
+      <a-col class="pie" style="margin-left: 14px" flex="0 1 450px">
         <a-card title="发现缺陷分布">
           <Pie :params="pieData"/>
         </a-card>
