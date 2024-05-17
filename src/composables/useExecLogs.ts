@@ -42,7 +42,7 @@ const reports = computed(() => {
             ...item, ...{
                 resultStatus: report?.resultStatus,
                 totalProcessorNum: report?.totalProcessorNum,
-                reportId: report.id,
+                reportId: report?.id,
             }
         };
     });
