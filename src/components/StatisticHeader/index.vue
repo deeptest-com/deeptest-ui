@@ -14,7 +14,7 @@
               <div class="card-content">
                 <a-statistic
                   v-if="type === 0"
-                  title="入住项目（个）"
+                  title="项目数（个）"
                   :value="card?.projectTotal||0"
 
                 />
