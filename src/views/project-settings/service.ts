@@ -185,8 +185,8 @@ export async function getSchemaList(data: SchemaListReqParams): Promise<any> {
 export async function getSchemaDetail(data: SchemaDetailReqParams): Promise<any> {
     return request({
         url: `/serves/schema/detail`,
-        method: 'post',
-        data: data
+        method: 'get',
+        params: data
     });
 }
 /**
@@ -440,10 +440,11 @@ export async function getMock(): Promise<any> {
     });
 }
 
-export async function getVarsByEnv(envId: number): Promise<any> {
+export async function getVarsByEnv(envId): Promise<any> {
     return request({
-        url: `/environments/envVars/byEnv?envId=${envId}`,
-        method: 'get'
+        url: `/environments/envVars/byEnv`,
+        method: 'get',
+        params: {envId}
     })
 }
 
@@ -535,3 +536,82 @@ export async function disableDbConn(id): Promise<any> {
     });
 }
 
+const apiPathCron = 'project/cron';
+// 定时同步任务相关
+export async function getCronProjectList(payload): Promise<any> {
+    return request({
+        url: `/${apiPathCron}`,
+        method: 'GET',
+        params: payload,
+    })
+}
+
+export async function getCronProjecDetail(payload): Promise<any> {
+    return request({
+        url: `/${apiPathCron}/${payload.id}`,
+        method: 'GET',
+    })
+}
+
+export async function copyCronProject(payload): Promise<any> {
+    return request({
+        url: `/${apiPathCron}/${payload.id}/clone`,
+        method: 'GET',
+    })
+}
+
+export async function delCronProject(payload): Promise<any> {
+    return request({
+        url: `/${apiPathCron}/${payload.id}`,
+        method: 'DELETE',
+    })
+}
+
+export async function saveCronProject(payload): Promise<any> {
+    return request({
+        url: `/${apiPathCron}`,
+        method: 'POST',
+        data: payload,
+    })
+}
+
+export async function updateCronProjectStatus(payload): Promise<any> {
+    return request({
+        url: `/${apiPathCron}/updateStatus`,
+        method: 'POST',
+        data: payload,
+    })
+}
+
+export async function getCronAllServesList(payload: { url: string }): Promise<any> {
+    return request({
+        url: `/${apiPathCron}/allServiceList`,
+        method: 'GET',
+        params: payload,
+    })
+}
+
+
+export async function getCronAllServesOptions(payload: { url: string, engineeringCode: string }): Promise<any> {
+    return request({
+        url: `/${apiPathCron}/serviceOptions`,
+        method: 'GET',
+        params: payload,
+    })
+}
+
+export async function getCronAllEngineeringOptions(payload: { url: string, engineeringCode: string }): Promise<any> {
+    return request({
+        url: `/${apiPathCron}/engineeringOptions`,
+        method: 'GET',
+        params: payload,
+    })
+}
+
+export async function runCronProject(payload) {
+    return request({
+        url: `/${apiPathCron}/run`,
+        method: 'GET',
+        params: payload,
+    })
+}

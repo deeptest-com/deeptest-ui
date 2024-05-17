@@ -14,14 +14,13 @@
       </span>
       </div>
     </template>
+
     <!-- 请求断言检查信息 -->
-    <template v-if="invokeDetail.checkpoint && invokeDetail.checkpoint.length">
+    <template v-if="checkpointsWithTheOnesInPostScripts && checkpointsWithTheOnesInPostScripts.length">
       <div class="endpoint-expand-content" style="font-weight: bold;">断言结果</div>
-      <div
-        class="endpoint-expand-content"
-        v-for="(item, index) in invokeDetail.checkpoint"
-        :key="index"
-      >
+      <div class="endpoint-expand-content"
+           v-for="(item, index) in checkpointsWithTheOnesInPostScripts"
+           :key="index">
         <span :style="{color: resultMap[item.resultStatus] }">
           <template v-if="item.resultStatus === 'fail'">
             <exclamation-circle-outlined /> &nbsp;
@@ -31,6 +30,9 @@
         </span>
       </div>
     </template>
+
+    <div v-else class="endpoint-expand-content" style="font-weight: bold;">无断言</div>
+
     <!-- 请求未通过其他异常信息 -->
     <template v-if="invokeDetail.result">
       <div class="endpoint-expand-content">{{ invokeDetail.result || '' }}</div>
@@ -43,6 +45,7 @@ import {
   ExclamationCircleOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons-vue";
+import {ConditionType} from "@/utils/enum";
 
 const props = defineProps({
   collapseKey: {
@@ -59,6 +62,19 @@ const invokeDetail = computed(() => {
     ? JSON.parse(props.endpointData.detail)
     : { };
 });
+
+const checkpointsWithTheOnesInPostScripts = computed(() => {
+  const ret = [] as any[]
+
+  props.endpointData.postConditions?.forEach(item => {
+    if (item.type === 'checkpoint') {
+      ret.push(item.raw)
+    }
+  })
+
+  props.endpointData?.interfaceCheckpointsResult?.length > 0 && ret.push(...props.endpointData.interfaceCheckpointsResult)
+  return ret
+})
 
 const resultMap = {
   fail: '#f5222d',

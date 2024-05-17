@@ -64,8 +64,10 @@ export function useGlobalEnv(formRef?: any): EnvReturnData {
     async function addEnvData() {
         try {
             const success = await formRef.value.validateFields();
-            console.log('addEnvData validate success---', success);
+            console.log('addEnvData validate success: ', success);
+
             const envVars = activeEnvDetail.value?.vars || [];
+
             const result = await store.dispatch('ProjectSetting/addEnvData', {
                 id: activeEnvDetail.value?.id,
                 projectId: currProject.value.id,
@@ -73,9 +75,11 @@ export function useGlobalEnv(formRef?: any): EnvReturnData {
                 "serveServers": activeEnvDetail.value?.serveServers || [],
                 "vars": envVars,
             })
+
             if (result) {
                 setShowEnvDetail(result, true);
             }
+
         } catch (err) {
             console.log('addEnvData validate validateFiled--', err);
         }
@@ -131,7 +135,7 @@ export function useGlobalEnv(formRef?: any): EnvReturnData {
         if (action === 'delete') {
             activeEnvDetail.value[type].splice(index, 1);
         } else {
-            activeEnvDetail.value[type][index][field] = e.target.value;
+            activeEnvDetail.value[type][index][field] = field === 'url' ? e.target.value.trim() : e.target.value;
         }
 
     }

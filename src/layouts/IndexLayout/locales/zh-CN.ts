@@ -45,5 +45,5 @@ export default {
   'index-layout.menu.project.setting.mock': 'Mock设置',
   'index-layout.menu.project.setting.jslib': '自定义脚本库',
   'index-layout.menu.project.setting.dbConn': '数据库连接',
-  'index-layout.menu.project.setting.swaggerSync': '自动同步',
+  'index-layout.menu.project.setting.swaggerSync': '定时同步',
 };

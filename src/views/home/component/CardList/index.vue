@@ -18,7 +18,7 @@
         <template #header></template>
         <template #renderItem="{ item }">
           <ListItem>
-            <Card class="card" @click="goProject(item)">
+            <Card class="card" @click="e => goProject(item, e)">
               <div class="card-title">
                 <div class="title">
                   <img :src="getProjectLogo(item?.logo)" alt=""/>
@@ -29,7 +29,7 @@
                     }}</span>
                 </div>
 
-                <div class="action">
+                <div :data-project-id="item.projectId" class="project-item-action" @click="e => e.preventDefault()">
                   <DropdownActionMenu :dropdown-list="dropDownList" :record="item">
                     <EllipsisOutlined key="ellipsis"/>
                   </DropdownActionMenu>
@@ -85,6 +85,10 @@ import {useStore} from "vuex";
 import {StateType} from "../../store";
 import {getProjectLogo} from "@/components/CreateProjectModal";
 import {DropdownActionMenu} from "@/components/DropDownMenu/index";
+import usePermission from "@/composables/usePermission";
+import { useWujie } from "@/composables/useWujie";
+import settings from "@/config/settings";
+import { getToken } from "@/utils/localToken";
 
 // 组件接收参数
 const props = defineProps({
@@ -102,8 +106,12 @@ const props = defineProps({
 });
 const router = useRouter();
 const store = useStore<{ Home: StateType }>();
+const { hasProjectAuth, isCreator } = usePermission();
+const { isInLeyanWujieContainer,isInLecangWujieContainer, user } = useWujie();
 const ListItem = List.Item;
 const list = computed<any>(() => store.state.Home.queryResult.list);
+const projects = computed<any>(() => store.state.ProjectGlobal.projects);
+const bus = window?.$wujie?.bus;
 
 const filterList = computed(() => {
   const items = props?.activeKey === 0 ? list?.value?.projectList || [] : list?.value?.userProjectList || [];
@@ -119,34 +127,29 @@ const filterList = computed(() => {
 const loading = ref(true);
 // 分页相关
 const current = ref(1);
+const projectAction = ref({});
 const total = computed(() => filterList.value.length);
 
-const dropDownList = [
-  {
-    label: '申请加入',
-    action: (record) => emit("join", record),
-    auth: '',
-    ifShow: (record) => record.accessible === 0,
-  },
-  {
-    label: '编辑',
-    action: (record) => emit("edit", record),
-    auth: '',
-    ifShow: (record) => record.accessible === 1,
-  },
-  {
-    label: '删除',
-    action: (record) => emit("delete", record),
-    auth: '',
-    ifShow: (record) => record.accessible === 1,
-  },
-  {
-    label: '退出项目',
-    action: (record) => emit("exit", record),
-    auth: '',
-    ifShow: (record) => record.accessible === 1,
-  }
-]
+const dropDownList = [{
+  label: '申请加入',
+  action: (record) => emit("join", record),
+  show: (record) => record.accessible === 0,
+},
+{
+  label: '编辑',
+  action: (record) => emit("edit", record),
+  show: (record) => hasProjectAuth('p-project-edit') || isCreator(record.adminId),
+},
+{
+  label: '删除',
+  action: (record) => emit("delete", record),
+  show: (record) => hasProjectAuth('p-project-del') || isCreator(record.adminId),
+},
+{
+  label: '退出项目',
+  action: (record) => emit("exit", record),
+  show: (record) => hasProjectAuth('p-project-exit') && record.accessible === 1,
+}];
 
 watch(() => props?.searchValue, (val) => {
   current.value = 1;
@@ -163,14 +166,54 @@ async function handleJoin(item) {
   emit("join", item);
 }
 
-async function goProject(item: any) {
+async function goProject(item: any, e) {
+  const el = [...document.querySelectorAll('.project-item-action')]?.find((e: any) => e?.dataset?.projectId === item.projectId + '');
+  if (el?.contains(e.target)) {
+    return;
+  }
   if (item?.accessible === 0) {
     handleJoin(item);
     return false;
   }
   await store.dispatch("ProjectGlobal/changeProject", item?.projectId);
+  await store.commit('Global/setPermissionMenuList', []);
   // 更新左侧菜单以及按钮权限
-  await store.dispatch("Global/getPermissionList", { projectId: item.projectId });
+  await store.dispatch("Global/getPermissionMenuList", { currProjectId: item.projectId });
+
+ //乐仓重新打开信息页面
+ if (isInLecangWujieContainer) {
+    const childOrigin = window.$wujie?.shadowRoot?.baseURI;
+    const otherWindow: any =  window.open(`${childOrigin}${childOrigin?.endsWith('/') ? '' : '/'}${item.projectShortName}/workspace`, '_blank');
+    const token = await getToken();
+    let i = 0;
+    let interval: any = null;
+    interval = setInterval(() => {
+      if (i > 4) {
+        clearInterval(interval);
+      }
+      otherWindow.postMessage({
+        user: {
+          ...user,
+          lzosOrigin: window.parent.window.location.origin,
+        },
+        token
+      }, childOrigin?.endsWith('/') ? childOrigin.substring(0, childOrigin.length - 1) : childOrigin);
+      i++;
+    }, 300);
+    return 
+  }
+
+  if (isInLeyanWujieContainer) {
+    bus?.$emit(settings.sendMsgToLeyan, {
+      type: 'changeParentRouter',
+      data: {
+        url: `${item.projectShortName}/workspace`
+      }
+    })
+    return;
+  }
+
+ 
   router.push(`/${item.projectShortName}/workspace`);
 }
 </script>

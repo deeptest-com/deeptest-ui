@@ -7,7 +7,7 @@
         </a-col>
 
         <a-col flex="100px" class="dp-right">
-          <Tips section="assert" title="针对响应的检查点断言" />
+          <Tips v-if="!isLeyan()" section="assert" title="针对响应的检查点断言" />
         </a-col>
       </a-row>
     </div>
@@ -97,7 +97,7 @@ import {
   DownOutlined,
   CloseCircleOutlined,
   FullscreenOutlined } from '@ant-design/icons-vue';
-import {ConditionType, UsedBy} from "@/utils/enum";
+import {ConditionSrc, ConditionType, UsedBy} from "@/utils/enum";
 import {EnvDataItem} from "@/views/project-settings/data";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
@@ -105,12 +105,13 @@ import {confirmToDelete} from "@/utils/confirm";
 import {StateType as Debug} from "@/views/component/debug/store";
 import IconSvg from "@/components/IconSvg";
 import useIMLeaveTip   from "@/composables/useIMLeaveTip";
-import Checkpoint from "./conditions-post/Checkpoint.vue";
+import Checkpoint from "./conditions/Checkpoint.vue";
 import FullScreenPopup from "./ConditionPopup.vue";
 import TooltipCell from "@/components/Table/tooltipCell.vue";
 import draggable from 'vuedraggable'
 import Tips from "@/components/Tips/index.vue";
 import {equalObjectByLodash} from "@/utils/object";
+import {isLeyan} from "@/utils/comm";
 
 const store = useStore<{  Debug: Debug }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
@@ -141,9 +142,10 @@ watch(debugData, async (newVal) => {
 
 const create = () => {
   console.log('create', ConditionType.checkpoint);
-  store.dispatch('Debug/createPostCondition', {
+  store.dispatch('Debug/createCondition', {
     entityType: ConditionType.checkpoint,
     ...debugInfo.value,
+    conditionSrc: ConditionSrc.PostCondition,
     isForBenchmarkCase: false,
   })
 }
@@ -154,7 +156,7 @@ const format = (item) => {
 }
 const disable = (item) => {
   console.log('disable', item)
-  store.dispatch('Debug/disablePostCondition', {
+  store.dispatch('Debug/disableCondition', {
     ...item,
     isForBenchmarkCase: false
   })
@@ -163,7 +165,7 @@ const remove = (item) => {
   console.log('remove', item)
 
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
-    store.dispatch('Debug/removePostCondition', {
+    store.dispatch('Debug/removeCondition', {
       ...item,
       isForBenchmarkCase: false
     })
@@ -173,7 +175,7 @@ function move(_e: any) {
   const envIdList = assertionConditions.value.map((e: EnvDataItem) => {
     return e.id;
   })
-  store.dispatch('Debug/movePostCondition', {
+  store.dispatch('Debug/moveCondition', {
     data: envIdList,
     isForBenchmarkCase: false,
     info: debugInfo.value,
@@ -221,8 +223,6 @@ watch(() => {
 onUnmounted(() => {
   store.commit('Debug/setActiveAssertion', {});
 })
-
-provide('isForBenchmarkCase', false);
 
 </script>
 

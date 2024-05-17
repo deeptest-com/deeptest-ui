@@ -21,7 +21,7 @@
 
     <template #footer>
       <a-button @click="onCancel">取消</a-button>
-      <a-button @click="onSubmit" type="primary">确定</a-button>
+      <a-button :loading="loading" @click="onSubmit" type="primary" >确定</a-button>
     </template>
   </a-modal>
 </template>
@@ -47,6 +47,7 @@ const props = defineProps({
 const serveIds = ref([] as number[])
 const categoryId = ref(0)
 const interfaceIds = ref([])
+const loading = ref(false);
 
 const changeServe = (ids: number[]) => {
   console.log('changeServe', ids)
@@ -62,7 +63,13 @@ const onSelectInterfaces = async (ids: never[]) => {
   interfaceIds.value = ids
 }
 
-const onSubmit = debounce( async () => props.onFinish(interfaceIds.value ),300)
+const onSubmit =  async () => {
+  if (loading.value) return;
+  loading.value=true
+  await props.onFinish(interfaceIds.value )
+  loading.value=false
+}
+
 
 const onCancel = () => {
   console.log('onCancel')

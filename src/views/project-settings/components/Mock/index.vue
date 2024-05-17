@@ -67,7 +67,7 @@ const onSubmit = () => {
   })
 }
 
-const labelCol = {span: 2}
+const labelCol = { style: { width: '120px' } }
 const wrapperCol = {span: 18}
 
 </script>

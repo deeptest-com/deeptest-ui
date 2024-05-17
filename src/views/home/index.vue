@@ -17,6 +17,7 @@
                 style="width: 200px; margin-right: 20px"
                 placeholder="请输入项目名称搜索"/>
             <a-button
+                v-if="hasProjectAuth('p-project-create')"
                 type="primary"
                 style="margin-right: 20px"
                 @click="handleOpenAdd">新建项目
@@ -50,6 +51,7 @@
 
       <!-- 创建项目弹窗 -->
       <CreateProjectModal
+          v-if="createProjectModalVisible"
           :visible="createProjectModalVisible"
           :formState="formState"
           @update:visible="createProjectModalVisible = false"
@@ -84,9 +86,15 @@ import {removeMember} from "@/views/project/service";
 import {NotificationKeyCommon} from "@/utils/const";
 import {CurrentUser, StateType as UserStateType} from "@/store/user";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import usePermission from "@/composables/usePermission";
+import { setCache } from "@/utils/localCache";
+import settings from "@/config/settings";
+import { useWujie } from "@/composables/useWujie";
 
 // 获取当前登录用户信息
 const router = useRouter();
+const { isInLecangWujieContainer } = useWujie();
+const { hasProjectAuth } = usePermission();
 const store = useStore<{ Home: StateType, User: UserStateType }>();
 const currentUser = computed<CurrentUser>(() => store.state.User.currentUser);
 const cardData = computed<any>(() => store.state.Home.cardData);
@@ -109,15 +117,24 @@ let formState = ref({
   adminId: "",
   includeExample: false,
   desc: "",
+  products: [],
+  spaces: [],
+  syncMembers: false,
 });
 
+const bus: any = window?.$wujie?.bus;
 onMounted(async () => {
   if (router.currentRoute.value?.query?.type == 'all') {
     activeKey.value = 0
   }
+  await store.dispatch("User/fetchCurrent");
+  await store.dispatch('Global/getPermissionMenuList', { needSysAuth: true });
   await getHearderData();
   await getList(1);
-  await store.dispatch("User/fetchCurrent");
+  bus?.$on('contextBus', data => {
+    console.log('监听乐仓工程切换信息', data);
+    getList(1);
+  })
 });
 
 const getHearderData = async (): Promise<void> => {
@@ -127,7 +144,9 @@ const getHearderData = async (): Promise<void> => {
 
 // 获取全部项目数据
 const getList = async (current: number): Promise<void> => {
-  await store.dispatch("Home/queryProject", {});
+  const engineering = JSON.parse(localStorage.getItem('lzos:activeContextForm') || '{}') || {};
+  console.log('localStorage: 获取', engineering);
+  await store.dispatch("Home/queryProject", engineering.container ? { engineering: engineering.container } : {});
   isLoadingList.value = false;
 };
 
@@ -150,16 +169,29 @@ function handleJoin(item) {
     content: "您还没有该项目的访问权限，是否申请更多角色权限？",
     okText: "申请权限",
     cancelText: "取消",
+    maskClosable: true,
     onOk: async () => {
       applyProPermissionsModalVisible.value = true;
       applyItem.value = item;
     },
+    onCancel() {}
   });
 }
 
 function handleOpenAdd() {
+  formState.value = {
+    id: 0,
+    logo: "",
+    name: "",
+    shortName: "",
+    adminId: "",
+    includeExample: false,
+    desc: "",
+    products: [],
+    spaces: [],
+    syncMembers: false,
+  };
   createProjectModalVisible.value = true;
-  formState.value.id = 0;
 }
 
 function handleOpenEdit(item) {
@@ -170,6 +202,7 @@ function handleOpenEdit(item) {
   formState.value.adminId = item.adminId;
   formState.value.includeExample = item.includeExample;
   formState.value.desc = item.projectDescr;
+  formState.value.syncMembers = item.syncMembers || false;
   createProjectModalVisible.value = true;
 }
 

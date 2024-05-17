@@ -85,7 +85,7 @@
           <p v-if="info.requestBody.description">{{ info.requestBody.description }}</p>
           <SchemaViewer
               :examples-str="info?.requestBody?.examples"
-              :components="info?.serveInfo?.component"
+              :components="info?.components"
               :contentType="info?.requestBody?.schemaItem?.type"
               :contentStr="info?.requestBody?.schemaItem?.content"/>
         </div>
@@ -132,7 +132,7 @@
           </h3>
           <p v-if="res.description">{{ res.description }}</p>
           <SchemaViewer :examples-str="res?.examples"
-                        :components="info?.serveInfo?.component"
+                        :components="info?.components"
                         :contentType="res?.schemaItem?.type"
                         :contentStr="res?.schemaItem?.content"/>
         </div>
@@ -144,7 +144,7 @@
   :visible="genCodeVisible"
   @close="close"
   :contentStr="contentStr"
-  :serveId="info?.serveId"
+  :projectId="info?.projectId"
   />
 </template>
 
@@ -156,7 +156,7 @@ import Security from "./Security.vue"
 import Securitys from "./Securitys.vue"
 import SchemaViewer from "@/components/SchemaViewer/index.vue";
 import {CopyOutlined} from '@ant-design/icons-vue';
-import {useClipboard, useFullscreen} from '@vueuse/core'
+import useClipboard from "@/composables/useClipboard";
 import {message, notification} from "ant-design-vue";
 import {notifySuccess} from "@/utils/notify";
 import IconSvg from "@/components/IconSvg";
@@ -165,7 +165,7 @@ const props = defineProps<{
   info: Object;
   onlyShowDocs?: boolean;
 }>();
-const {text, copy, copied, isSupported} = useClipboard({});
+const {text, copy} = useClipboard({legacy: true});
 const info: any = computed(() => {
   return props.info;
 })

@@ -34,23 +34,8 @@
                 </span>
               <span class="tree-title-text" v-else>{{ nodeProps.title }}</span>
               <span class="more-icon" v-if="nodeProps.id !== -1">
-                  <a-dropdown>
-                       <MoreOutlined/>
-                      <template #overlay>
-                        <a-menu>
-                          <a-menu-item key="0" @click="newCategory(nodeProps)">
-                             新建子分类
-                          </a-menu-item>
-                          <a-menu-item :disabled="nodeProps.id === -1" key="1" @click="deleteCategory(nodeProps)">
-                            删除分类
-                          </a-menu-item>
-                          <a-menu-item :disabled="nodeProps.id === -1" key="1" @click="editCategory(nodeProps)">
-                            编辑分类
-                          </a-menu-item>
-                        </a-menu>
-                      </template>
-                    </a-dropdown>
-                </span>
+                <DropdownActionMenu :dropdown-list="ContextMenuList" :record="nodeProps" />
+              </span>
             </div>
           </template>
         </a-tree>
@@ -60,14 +45,14 @@
         </div>
       </div>
     </div>
-    <!--  创建接口 Tag  -->
-    <CreateCategoryModal
-        :visible="createTagModalVisible"
-        :nodeInfo="currentNode"
-        :mode="tagModalMode"
-        @ok="handleTagModalOk"
-        @cancel="handleCancelTagModalCancel" />
   </div>
+  <!--  创建接口 Tag  -->
+  <CreateCategoryModal
+    :visible="createTagModalVisible"
+    :nodeInfo="currentNode"
+    :mode="tagModalMode"
+    @ok="handleTagModalOk"
+    @cancel="handleCancelTagModalCancel" />
 </template>
 <script setup lang="ts">
 import {
@@ -89,6 +74,7 @@ import {setSelectedKey} from "@/utils/cache";
 import {StateType as ScenarioStateType} from "@/views/scenario/store";
 import {filterTree, filterByKeyword} from "@/utils/tree";
 import {notifyError, notifySuccess, notifyWarn} from "@/utils/notify";
+import { DropdownActionMenu } from '@/components/DropDownMenu';
 
 const store = useStore<{ Scenario: ScenarioStateType, ProjectGlobal: ProjectStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -145,6 +131,25 @@ const treeData: any = computed(() => {
 });
 
 /**
+ * 分类下拉菜单
+ */
+const ContextMenuList = [
+  {
+    label: '新建子分类',
+    action: (_record: any) => newCategory(_record),
+  },
+  {
+    label: '删除分类',
+    auth: 'p-api-ts-del',
+    action: (_record: any) => deleteCategory(_record),
+  },
+  {
+    label: '编辑分类',
+    action: (_record: any) => editCategory(_record),
+  }
+]
+
+/**
  * 搜索结果为空时展示
  */
  const showKeywordsTip = computed(() => {
@@ -159,8 +164,8 @@ async function loadCategorys() {
 // 切换项目  重置搜索关键词/重置分类列表
 watch(() => {
   return currProject.value;
-}, async (newVal) => {
-  if (newVal?.id) {
+}, async (newVal, oldVal) => {
+  if (newVal?.id && newVal?.id !== oldVal?.id) {
     store.commit('Scenario/setTreeDataCategory', {});
     searchValue.value = '';
     await loadCategorys();
@@ -338,19 +343,20 @@ async function onDrop(info: DropEvent) {
     notifyError('移动失败');
   }
 }
-
-onMounted(async () => {
-  await loadCategorys();
-  // expandAll();
-})
-
 </script>
 
 <style scoped lang="less">
 .tree-container {
   //margin: 16px;
   background: #ffffff;
+  height: 100%;
+  padding-top: 8px;
 
+  .tree-content {
+    height: calc(100% - 50px);
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
 }
 
 .tag-filter-form {
@@ -358,7 +364,6 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
   height: 50px;
-  margin-top: 8px;
   .search-input {
     margin-left: 16px;
     margin-right: 8px;
@@ -369,54 +374,6 @@ onMounted(async () => {
     margin-right: 16px;
     cursor: pointer;
   }
-}
-
-.content {
-  display: flex;
-  width: 100%;
-
-  .left {
-    width: 300px;
-    border-right: 1px solid #f0f0f0;
-  }
-
-  .right {
-    flex: 1
-  }
-}
-
-.action-new {
-  margin-right: 8px;
-}
-
-.top-action {
-  height: 60px;
-  display: flex;
-  align-items: center;
-  margin-left: 16px;
-
-  .ant-btn {
-    margin-right: 16px;
-  }
-}
-
-.action-btns {
-  display: flex;
-}
-
-.customTitleColRender {
-  display: flex;
-
-  .edit {
-    margin-left: 8px;
-    cursor: pointer;
-  }
-}
-
-.form-item-con {
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .tree-title {

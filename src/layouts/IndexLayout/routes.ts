@@ -15,7 +15,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/workbench/index.vue'),
         hidden: false,
         meta: {
-          code: 'WORKSPACE'
+          code: 'p-api-workspace'
         }
       }
     ],
@@ -30,20 +30,20 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         icon: 'define',
         title: 'endpoint-management',
         path: '',
-        component: () => import('@/views/endpoint/index.vue'),
+        component: () => import('@/views/im/index.vue'),
         hidden: false,
         meta: {
-          code: 'IM'
+          code: 'p-api'
         }
       },
       {
         icon: 'define',
         title: 'endpoint-management',
         path: ':imSerialNumber',
-        component: () => import('@/views/endpoint/components/Detail/index.vue'),
+        component: () => import('@/views/im/index.vue'),
         hidden: false,
         meta: {
-          code: 'IM',
+          code: 'p-api',
           type: 'im-detail'
         }
       }
@@ -62,7 +62,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/docs/index.vue'),
         hidden: false,
         meta: {
-          code: 'DOCS'
+          code: 'p-api-docs'
         }
       },
     ],
@@ -80,7 +80,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/diagnose/index.vue'),
         hidden: false,
         meta: {
-          code: 'DEBUG'
+          code: 'p-api-debug'
         }
       },
     ],
@@ -98,7 +98,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/scenario/index.vue'),
         hidden: false,
         meta: {
-          code: 'TS'
+          code: 'p-api-ts'
         }
       },
       {
@@ -108,7 +108,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/scenario/components/Detail/index.vue'),
         hidden: false,
         meta: {
-          code: 'TS',
+          code: 'p-api-ts',
           type: 'ts-detail'
         }
       }
@@ -128,7 +128,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/plan/index.vue'),
         hidden: false,
         meta: {
-          code: 'TP'
+          code: 'p-api-tp'
         }
       },
       {
@@ -138,7 +138,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/plan/detail/index.vue'),
         hidden: false,
         meta: {
-          code: 'TP',
+          code: 'p-api-tp',
           type: 'plan-detail',
         }
       },
@@ -158,7 +158,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/report/index.vue'),
         hidden: false,
         meta: {
-          code: 'TR'
+          code: 'p-api-tr'
         }
       },
       {
@@ -168,7 +168,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/report/Detail/index.vue'),
         hidden: false,
         meta: {
-          code: 'TR',
+          code: 'p-api-tr',
           type: 'report-detail',
         }
       }
@@ -189,7 +189,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: BlankLayout,
         hidden: false,
         meta: {
-          code: 'PROJECT-SETTING'
+          code: 'p-setting-api'
         }
       },
       {
@@ -200,7 +200,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/project-settings/components/EnvSetting/index.vue'),
         hidden: false,
         meta: {
-          code: 'PROJECT-SETTING-ENVIRONMENT'
+          code: 'p-setting-api-env'
         },
         children: [
           {
@@ -237,7 +237,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/project-settings/components/DataPool/index.vue'),
         hidden: false,
         meta: {
-          code: 'PROJECT-SETTING-DATA-POOL'
+          code: 'p-setting-api-datapool'
         }
       },
       {
@@ -248,7 +248,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/project-settings/components/ServiceSetting/index.vue'),
         hidden: false,
         meta: {
-          code: 'PROJECT-SETTING-SERVICE-SETTING'
+          code: 'p-setting-api-service'
         }
       },
       {
@@ -258,7 +258,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/project/edit/members.vue'),
         hidden: false,
         meta: {
-          code: 'PROJECT-SETTING-MEMBERS'
+          code: 'p-setting-api-members'
         }
       },
       {
@@ -268,7 +268,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/project-settings/components/Mock/index.vue'),
         hidden: false,
         meta: {
-          code: 'PROJECT-SETTING-MOCK'
+          code: 'p-setting-api-mock'
         }
       },
       {
@@ -278,7 +278,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/project-settings/components/JsLib/index.vue'),
         hidden: false,
         meta: {
-          code: 'PROJECT-SETTING-JSLIB'
+          code: 'p-setting-api-jslib'
         }
       },
       {
@@ -288,7 +288,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/project-settings/components/DbConn/index.vue'),
         hidden: false,
         meta: {
-          code: 'PROJECT-SETTING-DBCONN'
+          code: 'p-setting-api-dbconn'
         }
       },
       {
@@ -298,7 +298,7 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         component: () => import('@/views/project-settings/components/SwaggerSync/index.vue'),
         hidden: false,
         meta: {
-          code: 'PROJECT-SETTING-SWAGGERSYNC'
+          code: 'p-setting-api-autosync'
         }
       },
     ],

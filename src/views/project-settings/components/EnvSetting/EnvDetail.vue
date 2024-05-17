@@ -13,7 +13,6 @@
             <div class="serveServers">
                 <div class="serveServers-header">服务访问地址</div>
                 <PermissionButton
-                    code="LINK-SERVICE"
                     :disabled="isMockEnv"
                     :tip="isMockEnv ? 'Mock环境为系统生成，不可编辑' : ''"
                     class="envDetail-btn"
@@ -23,6 +22,7 @@
                         <PlusOutlined />
                     </template>
                 </PermissionButton>
+
                 <a-table :style="isMockEnv ? { marginTop: '16px' } : undefined" v-if="activeEnvDetail.serveServers.length > 0" size="small" bordered :pagination="false"
                     :columns="serveServersColumns" :data-source="activeEnvDetail.serveServers" :rowKey="(_record, index) => index">
                     <template #customUrl="{ text, index }">
@@ -38,7 +38,6 @@
                     </template>
                     <template #customAction="{ index }">
                         <PermissionButton
-                            code="UNLINK-SERVICE"
                             type="text"
                             :disabled="isMockEnv"
                             size="small"
@@ -53,13 +52,15 @@
                 <div class="vars-header">环境变量</div>
                 <PermissionButton
                     class="envDetail-btn"
-                    code="ADD-ENVIRONMENT-VARIABLE"
+                    :disabled="isMockEnv ? true : false"
                     text="添加"
+                    :tip="isMockEnv ? 'Mock环境为系统生成，不可编辑' : ''"
                     @handle-access="addVar">
                     <template #before>
                         <PlusOutlined />
                     </template>
                 </PermissionButton>
+
                 <a-table v-if="activeEnvDetail.vars.length > 0" bordered size="small" :pagination="false"
                     :columns="globalVarsColumns" :data-source="activeEnvDetail.vars" :rowKey="(_record, index) => index">
                     <template #customName="{ text, index }">
@@ -70,22 +71,35 @@
                             }" :value="text" placeholder="请输入参数名" />
                         </a-form-item>
                     </template>
-                    <template #customLocalValue="{ text, index }">
+
+                    <template #customLocalTitle>
+                      私有值
+                      <Tips title="仅存放在用户本地，不会同步到服务器，也不会在项目成员之间共享，适合存放token、账号密码等个人敏感数据。注意：清除浏览器缓存时会把变量的私有值清除。"
+                            classes="dp-tip-wide" />
+                    </template>
+                    <template #customLocalValue="{ record, index }">
                         <a-form-item :name="['vars', index, 'localValue']"
                             :rules="rules.localValue">
-                            <a-input :value="text" @change="(e) => {
-                                handleEnvChange('vars', 'localValue', index, e);
-                            }" placeholder="请输入本地值" />
+                            <a-input v-model:value="localValueMap[record.name]"  placeholder="请输入私有值"
+                                     @change="(e) => {
+                                        handleEnvChange('vars', 'localValue', index, e);
+                                     }" />
                         </a-form-item>
+                    </template>
+
+                    <template #customRemoteTitle>
+                      共享值
+                      <Tips title="保存在远端服务器中，整个项目内成员之间共享数据值。" />
                     </template>
                     <template #customRemoteValue="{ text, index }">
                         <a-form-item :name="['vars', index, 'remoteValue']"
                             :rules="rules.remoteValue">
                             <a-input :value="text" @change="(e) => {
                                 handleEnvChange('vars', 'remoteValue', index, e);
-                            }" placeholder="请输入远程值" />
+                            }" placeholder="请输入共享值" />
                         </a-form-item>
                     </template>
+
                     <template #customDescription="{ text, index }">
                         <a-input :value="text" @change="(e) => {
                             handleEnvChange('vars', 'description', index, e);
@@ -93,7 +107,6 @@
                     </template>
                     <template #customAction="{ index }">
                         <PermissionButton
-                            code="DELETE-ENVIRONMENT-VARIABLE"
                             type="text"
                             size="small"
                             :danger="true"
@@ -103,36 +116,41 @@
                 </a-table>
             </div>
         </div>
-        <div class="envDetail-footer">
+
+        <div class="envDetail-footer" v-if="!isMockEnv">
             <PermissionButton
                 class="save-btn"
-                code="SAVE-ENVIRONMENT"
                 type="primary"
                 text="保存"
                 html-type="submit"
-                @handle-access="addEnvData" />
+                @handle-access="toAddEnvData" />
         </div>
     </a-form>
+
     <a-modal v-model:visible="addServiceModalVisible" title="关联服务" @ok="handleAddServiceOk">
         <a-form-item class="select-service" :labelCol="{ span: 6 }" :wrapperCol="{ span: 16 }" label="请选择服务">
-            <Select :value="selectedService" :options="serviceOptions" :showSearch="true" :filterOptions="filterOptions" placeholder="请选择服务" style="width: 200px" @change="handleSelect" />
+            <Select v-if="addServiceModalVisible" v-model:value="selectedService" :options="serviceOptions" :showSearch="true" :filterOptions="filterOptions" placeholder="请选择服务" style="width: 200px" @change="handleSelect" />
         </a-form-item>
 
     </a-modal>
 </template>
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import {ref, computed, watch} from 'vue';
 import { useStore } from "vuex";
 import { PlusOutlined } from '@ant-design/icons-vue';
 import ConBoxTitle from '@/components/ConBoxTitle/index.vue';
 import PermissionButton from "@/components/PermissionButton/index.vue";
+import Tips from "@/components/Tips/index.vue";
 import Select from '@/components/Select/index.vue';
 import { globalVarsColumns, serveServersColumns } from '../../config';
 import { useGlobalEnv } from '../../hooks/useGlobalEnv';
-import { StateType as ProjectSettingStateType } from "@/views/ProjectSetting/store";
+import { StateType as ProjectSettingStateType } from "@/views/project-settings/store";
 import {urlValidator} from "@/utils/validate";
+import {loadProjectEnvVars, setProjectEnvVar} from "@/utils/cache";
+import {StateType as ProjectStateType} from "@/store/project";
 
-const store = useStore<{ ProjectSetting: ProjectSettingStateType }>();
+const store = useStore<{ ProjectGlobal: ProjectStateType, ProjectSetting: ProjectSettingStateType }>();
+const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const serviceOptions = computed<any>(() => store.state.ProjectSetting.serviceOptions);
 const addServiceModalVisible = ref(false);
 const selectedService = ref<any[]>([]);
@@ -151,12 +169,13 @@ const rules = {
     name: [{ required: true, message: '环境名称不能为空' }],
     serveUrl: [{ required: true, validator: urlValidator }],
     var: [{ required: true, message: '参数名不可为空' }],
-    localValue: [{ required: true, message: '本地值不可为空' }],
-    remoteValue: [{ required: true, message: '远程值不可为空' }]
+    remoteValue: [{ required: true, message: '共享值不可为空' }],
+  // localValue: [{ required: true, message: '私有值不可为空' }]
 }
 
 // 添加服务弹窗操作
 async function addService() {
+    selectedService.value = [];
     addServiceModalVisible.value = true;
 }
 
@@ -183,6 +202,25 @@ function handleAddServiceOk() {
     addServiceModalVisible.value = false;
     selectedService.value = [];
 }
+
+const toAddEnvData = async () => {
+  for (const item of activeEnvDetail.value.vars) {
+    console.log('999', item)
+    await setProjectEnvVar(item.projectId, item.environmentId, item.name, localValueMap.value[item.name])
+  }
+
+  addEnvData()
+}
+
+const localValueMap = ref({0: {}})
+watch(() => { return activeEnvDetail.value.id }, async (val: any) => {
+  console.log('watch activeEnvDetail id', activeEnvDetail.value.id)
+
+  const cache = await loadProjectEnvVars(currProject.value.id)
+
+  localValueMap.value = cache[activeEnvDetail.value.id] ? cache[activeEnvDetail.value.id] : {}
+
+}, {immediate: true})
 
 </script>
 
@@ -219,9 +257,11 @@ function handleAddServiceOk() {
     }
 }
 
-.envDetail-btn {
-    margin-top: 16px;
-    margin-bottom: 16px;
+.serveServers {
+    :deep(.envDetail-btn) {
+        margin-top: 16px;
+        margin-bottom: 16px;
+    }
 }
 
 .envDetail-footer {
@@ -233,7 +273,7 @@ function handleAddServiceOk() {
     margin-top: 60px;
     box-shadow: 0px -1px 0px rgba(0, 0, 0, 0.06);
 
-    .save-btn {
+    :deep(.save-btn) {
         margin-right: 16px;
     }
 }

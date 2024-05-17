@@ -44,32 +44,8 @@
               <span class="tree-title-text" v-else>{{ nodeProps.dataRef.title }}</span>
 
               <span class="more-icon" v-if="nodeProps.dataRef.id > 0">
-                  <a-dropdown>
-                      <MoreOutlined/>
-                      <template #overlay>
-                        <a-menu>
-                          <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="0" @click="create(nodeProps.dataRef.id, 'dir')">
-                            新建目录
-                          </a-menu-item>
-                          <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="1" @click="create(nodeProps.dataRef.id, 'interface')">
-                            新建接口
-                          </a-menu-item>
-                          <a-menu-item v-if="nodeProps.dataRef.id !== -1" key="2" @click="edit(nodeProps)">
-                          {{'编辑' + (nodeProps.dataRef.type === 'interface' ? '接口' : '目录')}}
-                          </a-menu-item>
-                          <a-menu-item v-if="nodeProps.dataRef.id !== -1" key="3" @click="deleteNode(nodeProps.dataRef)">
-                            {{'删除' + (nodeProps.dataRef.type === 'interface' ? '接口' : '目录')}}
-                          </a-menu-item>
-                          <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="4" @click="importInterfaces(nodeProps.dataRef)">
-                            导入接口
-                          </a-menu-item>
-                          <a-menu-item v-if="nodeProps.dataRef.type === 'dir'" key="5" @click="importCurl(nodeProps.dataRef)">
-                            导入cURL
-                          </a-menu-item>
-                        </a-menu>
-                      </template>
-                    </a-dropdown>
-                </span>
+                <DropdownActionMenu :dropdown-list="DropdownMenuList" :record="nodeProps" />
+              </span>
             </div>
           </template>
         </a-tree>
@@ -133,14 +109,23 @@ import {filterByKeyword, filterTree} from "@/utils/tree";
 import {confirmToDelete} from "@/utils/confirm";
 import debounce from "lodash.debounce";
 import InterfaceSelectionFromDefine from "@/views/component/InterfaceSelectionFromDefine/main.vue";
+import { DropdownActionMenu } from '@/components/DropDownMenu';
 import CurlImportModal from "./curl.vue";
-import {notifyError, notifySuccess} from "@/utils/notify";
+import {notifyError, notifySuccess, notifyWarn} from "@/utils/notify";
+import {loadCurl} from "@/views/component/debug/service";
+import {StateType as DebugStateType} from "@/views/component/debug/store";
+import {UsedBy} from "@/utils/enum";
+import useCopy from "@/composables/useClipboard";
 
-const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType, ProjectGlobal: ProjectStateType, ServeGlobal: ServeStateType }>();
+const { copy } = useCopy();
+
+const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType,  Debug: DebugStateType,
+  ProjectGlobal: ProjectStateType, ServeGlobal: ServeStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const treeData = computed<any>(() => store.state.DiagnoseInterface.treeData);
 const treeDataMap = computed<any>(() => store.state.DiagnoseInterface.treeDataMap);
 const interfaceId = computed<any>(() => store.state.DiagnoseInterface.interfaceId);
+const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 
 const keywords = ref('');
 const replaceFields = {key: 'id'};
@@ -258,6 +243,19 @@ async function deleteNode(node) {
     store.dispatch('DiagnoseInterface/removeInterface', {id: node.id, type: node.type});
   })
 }
+async function copyCurl(node) {
+  console.log('copyCurl', node)
+
+  const resp = await loadCurl({
+    diagnoseId: node.id,
+    environmentId: environmentId.value,
+    usedBy: UsedBy.DiagnoseDebug,
+  })
+  if (resp.code == 0) {
+    copy(resp.data)
+    notifySuccess('已复制cURL命令到剪贴板。');
+  }
+}
 
 async function handleModalOk(model) {
   console.log('handleModalOk')
@@ -290,10 +288,10 @@ const importInterfaces = (target) => {
   importTarget.value = target
   interfaceSelectionVisible.value = true
 }
-const interfaceSelectionFinish = (interfaceIds) => {
+const interfaceSelectionFinish = async (interfaceIds) => {
   console.log('interfaceSelectionFinish', interfaceIds, importTarget.value)
 
-  store.dispatch('DiagnoseInterface/importInterfaces', {
+  await store.dispatch('DiagnoseInterface/importInterfaces', {
     interfaceIds: interfaceIds,
     targetId: importTarget.value.id,
   }).then((newNode) => {
@@ -363,6 +361,49 @@ async function onDrop(info: DropEvent) {
   }
 }
 
+const DropdownMenuList = [
+  {
+    label: '新建目录',
+    ifShow: (nodeProps) => nodeProps.dataRef.type === 'dir',
+    action: (nodeProps) => create(nodeProps.dataRef?.id, 'dir'),
+  },
+  {
+    label: '新建请求',
+    ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
+    action: (nodeProps) => create(nodeProps.dataRef?.id, 'interface'),
+  },
+  {
+    label: '复制为cURL',
+    ifShow: (nodeProps) => nodeProps.dataRef?.type === 'interface',
+    action: (nodeProps) => copyCurl(nodeProps.dataRef),
+  },
+  {
+    label: (nodeProps) => {
+      return `编辑${nodeProps.dataRef.type === 'interface' ? '请求' : '目录'}`;
+    },
+    ifShow: (nodeProps) => nodeProps.dataRef.id !== -1,
+    action: (nodeProps) => edit(nodeProps),
+  },
+  {
+    label: (nodeProps) => {
+      return `删除${nodeProps.dataRef.type === 'interface' ? '请求' : '目录'}`;
+    },
+    auth: 'p-api-debug-del',
+    ifShow: (nodeProps) => nodeProps.dataRef.id !== -1,
+    action: (nodeProps) => deleteNode(nodeProps.dataRef),
+  },
+  {
+    label: '导入接口',
+    ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
+    action: (nodeProps) => importInterfaces(nodeProps.dataRef),
+  },
+  {
+    label: '导入cURL',
+    ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
+    action: (nodeProps) => importCurl(nodeProps.dataRef),
+  },
+]
+
 onMounted(async () => {
   console.log('onMounted')
 })
@@ -409,7 +450,7 @@ watch(() => {
     }
   }
 
-  
+
   .nodata-tip {
     margin-left: 0 !important;
   }

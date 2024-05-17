@@ -55,7 +55,7 @@
         </div>
       </div>
 
-      <div class="env-var">
+      <div v-if="showBaseUrl()" class="env-var">
         <div class="body">
           <div class="envs">
             <div class="env header">
@@ -83,8 +83,10 @@
 
                 <div class="val">
                   <a-tooltip class="val" overlayClassName="dp-tip-small">
-                    <template #title>{{item.localValue}}</template>
-                    {{item.localValue}}
+                    {{ value = !!localVarsCache[environmentId] && localVarsCache[environmentId][item.name] ? localVarsCache[environmentId][item.name] : item.remoteValue }}
+                    <template #title>
+                      {{value}}
+                    </template>
                   </a-tooltip>
                 </div>
 
@@ -124,8 +126,10 @@
 
                 <div class="val">
                   <a-tooltip class="val" overlayClassName="dp-tip-small">
-                    <template #title>{{item.localValue}}</template>
-                    {{item.localValue}}
+                    {{ value = !!localVarsCache[0] && localVarsCache[0][item.name] ? localVarsCache[0][item.name] : item.remoteValue }}
+                    <template #title>
+                      {{value}}
+                    </template>
                   </a-tooltip>
                 </div>
               </div>
@@ -198,11 +202,14 @@ const {t} = useI18n();
 
 import {StateType as Debug} from "@/views/component/debug/store";
 import {StateType as ServeStateType} from "@/store/serve";
+import {loadProjectEnvVars} from "@/utils/cache";
+import {showBaseUrlOrNot} from "@/views/component/debug/service";
 const store = useStore<{  Debug: Debug, ServeGlobal: ServeStateType, ProjectGlobal: ProjectStateType }>();
 
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currServe = computed<any>(() => store.state.Debug.currServe);
+const environmentId = computed<any>(() => store.state.Debug.currServe.environmentId || null);
 
 const envVars = ref<any[]>([]);
 
@@ -226,14 +233,22 @@ const close = () => {
   if (props.onClose) props.onClose()
 }
 
-watch(() => {
-  return currServe.value;
-}, async val => {
-  const res = await store.dispatch('Debug/getEnvVarsByEnv');
-  envVars.value = res;
-}, {
-  immediate: true,
-})
+const localVarsCache = ref({})
+watch(() => { return [currServe.value, environmentId.value] }, async val => {
+  const res = await store.dispatch('Debug/getEnvVarsByEnv', environmentId.value)
+  envVars.value = res
+}, {immediate: true})
+
+watch(currProject.value, async val => {
+  localVarsCache.value = await loadProjectEnvVars(currProject.value.id)
+  console.log('localVarsCache 1', localVarsCache)
+
+}, {immediate: true, deep: true})
+
+const showBaseUrl = () => {
+  return showBaseUrlOrNot(debugData.value)
+}
+
 </script>
 
 <style lang="less">

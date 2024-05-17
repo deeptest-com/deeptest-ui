@@ -1,22 +1,30 @@
 <template>
   <div class="header-text">
     <span class="serialNumber" v-if="serialNumber">[{{ serialNumber }}]</span>
-    <EditAndShowField 
+
+    <EditAndShowField
       placeholder="修改标题"
       :custom-class="!canEdit ? 'readonly' : ''"
       :can-edit="canEdit"
       :value="name || ''"
-      @update="updateTitle"/>
-      <slot name='custom'></slot>
+      @update="updateTitle" />
+
+      <slot name='custom' />
   </div>
+
   <DrawerAction
     v-if="showAction"
-    :show-full-screen="true" 
+    :show-full-screen="showFullScreen"
     :show-share="showShare"
     :share-link="shareLink"
-    :show-detail="showDetail" 
-    :detail-link="detailLink"/>       
+    :showCopyCurl="showCopyCurl"
+    :copy-curl="copyCurl"
+    :show-detail="showDetail"
+    :show-star="showStar"
+    :detail-link="detailLink" />
+
 </template>
+
 <script setup lang="ts">
 import { defineProps, defineEmits, computed } from "vue";
 import EditAndShowField from '@/components/EditAndShow/index.vue';
@@ -63,6 +71,20 @@ import { DrawerAction } from "@/views/component/DrawerLayout/drawerAction";
     default: '',
     required: false,
   },
+   showFullScreen: {
+     type: Boolean,
+     default: true,
+     required: false,
+   },
+   showCopyCurl: {
+     type: Boolean,
+     default: false,
+     required: false,
+   },
+   copyCurl: {
+     type: Function,
+     required: false,
+   },
   endpointId: {
     type: Number,
     default: 0,
@@ -73,6 +95,11 @@ import { DrawerAction } from "@/views/component/DrawerLayout/drawerAction";
     default: false,
     required: false,
   },
+  showStar: {
+    type: Boolean,
+    default: false,
+    required: false,
+  }
 });
 
 

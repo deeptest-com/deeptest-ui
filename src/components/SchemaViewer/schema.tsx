@@ -28,8 +28,9 @@ export default defineComponent({
             if (tree.ref) {
                 // 如果没有引用组件内容，需要获取组件详情
                 if (!tree.content) {
-                    const result: any = (props.components || []).find((item: any) => item.ref === tree.ref);
+                    const result: any = (props.components || []).find((item: any) => item.id === tree.refId);
                     // 处理引用组件的信息
+                    //debugger
                     handleRefInfo(tree, result);
                     data.value = addExtraViewInfo(data.value);
                     tree.extraViewInfo.isExpand = true;
@@ -132,7 +133,7 @@ export default defineComponent({
                             {label !== 'description' ?
                                 <a-typography-text type="secondary">{label}：</a-typography-text> : null}
                             {label !== 'description' ?
-                                <a-typography-text type="secondary">{value}</a-typography-text> : null}
+                                <a-typography-text type="secondary">{Array.isArray(value) ? value.join(', ') : value}</a-typography-text> : null}
                             {label === 'description' ? <a-typography-text>{value}</a-typography-text> : null}
 
                         </div>

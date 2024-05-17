@@ -13,6 +13,7 @@ import {
     removeScenarios,
     clonePlan,
     listScenario,
+    moveScenario
 } from './service';
 
 import { get as getExecDetail } from '../report/service';
@@ -124,6 +125,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         getExecDetail: Action<StateType, StateType>;
         setExecResult: Action<StateType, StateType>;
         initExecResult: Action<StateType, StateType>;
+        moveScenario: Action<StateType, StateType>;
     }
 }
 
@@ -384,7 +386,7 @@ const StoreModel: ModuleType = {
         async updateCategoryNode({ commit }, payload: any) {
             try {
                 const { id, ...params } = payload;
-                await updateCategory(id, { ...params });
+                await updateCategory({ ...params });
                 return true;
             } catch (error) {
                 return false;
@@ -416,7 +418,7 @@ const StoreModel: ModuleType = {
             commit('setTreeDataMapItemPropCategory', payload);
         },
         async saveCategory({ commit, dispatch, state }, payload: any) {
-            const jsn = await updateCategory(payload.id, payload)
+            const jsn = await updateCategory(payload)
             if (jsn.code === 0) {
                 commit('setCategory', jsn.data);
                 await dispatch('loadCategory');
@@ -521,6 +523,13 @@ const StoreModel: ModuleType = {
 
         async initExecResult({ commit }) {
             commit('setExecResult', { basicInfoList: [], statisticData: {}, scenarioReports: [], progressValue: 10, progressStatus: 'in_progress' });
+        },
+        async moveScenario({ commit }, payload: any) {
+            const jsn = await moveScenario(payload);
+            if (jsn.code === 0) {
+                return true;
+            }
+            return false;
         }
     }
 };

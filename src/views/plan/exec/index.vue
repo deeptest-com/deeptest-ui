@@ -53,6 +53,9 @@ import {
   , statisticData, initData, progressStatus, progressValue, updatePlanRes, updateStatFromLog,
 } from '@/composables/useExecLogs';
 import {getUuid} from "@/utils/string";
+import { setServeUrl } from '@/utils/url';
+import {loadProjectEnvVars} from "@/utils/cache";
+import {StateType as ProjectStateType} from "@/store/project";
 
 const props = defineProps<{
   drawerVisible: boolean
@@ -67,7 +70,7 @@ const store = useStore<{
   Report: ReportStateType,
   ProjectSetting: ProjectSettingStateType,
   User: UserStateType
-  CurrentUser
+  CurrentUser, ProjectGlobal: ProjectStateType
 }>();
 
 const currPlan = computed<any>(() => store.state.Plan.detailResult);
@@ -75,6 +78,7 @@ const currEnvId = computed(() => store.state.ProjectSetting.selectEnvId);
 const envList = computed(() => store.state.ProjectSetting.envList);
 const currentUser = computed(() => store.state.User.currentUser);
 const currUser = computed(() => store.state.User.currentUser);
+const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 
 // 执行计划的基本信息
 const basicInfoList = computed(() => {
@@ -113,25 +117,26 @@ const execStart = async () => {
   const data = {
     userId: currUser.value.id,
     execUuid: execUuid.value,
-    serverUrl: process.env.VUE_APP_API_SERVER,
+    serverUrl: setServeUrl(process.env.VUE_APP_API_SERVER),
     token: token,
     planId: currPlan.value?.id,
     environmentId: currEnvId.value
   }
   console.log('****** send exec plan ws data', data);
-  WebSocket.sentMsg(execUuid.value, JSON.stringify({
+  WebSocket.sentMsg(execUuid.value, {
     act: 'execPlan',
-    planExecReq: data
-  }));
+    planExecReq: data,
+    localVarsCache: await loadProjectEnvVars(currProject.value.id),
+  });
 };
 const stopExec = () => {
-  WebSocket.sentMsg(execUuid.value, JSON.stringify({
+  WebSocket.sentMsg(execUuid.value, {
     act: 'stop',
     execReq: {
       execUuid: execUuid.value,
       planId: currPlan.value?.id,
     }
-  }))
+  })
 };
 
 const execCancel = () => {

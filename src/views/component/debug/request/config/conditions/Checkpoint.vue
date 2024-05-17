@@ -67,9 +67,12 @@
         <div class="dp-input-tip">{{t('tips_expression_bool', {name: '{name}', number: '{+number}'})}}</div>
       </a-form-item>
 
-      <a-form-item v-if="model.type !== 'judgement'" label="数值" v-bind="validateInfos.value" required>
+      <a-form-item v-if="model.type !== 'judgement'" label="取值" v-bind="validateInfos.value" required>
         <a-input v-model:value="model.value"
                  @blur="validate('value', { trigger: 'blur' }).catch(() => {})" />
+        <div class="dp-input-tip">
+          可引用形如${name}的变量表达式，使用加号${+number}可获取其数字值；如果表达式中涉及字符串常量运算，字符串常量请用英文单引号括起。
+        </div>
       </a-form-item>
 
     </a-form>
@@ -98,7 +101,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, CloseCircleOutlined, CheckC
 import {
   listExtractorVariable
 } from "@/views/component/debug/service";
-import {ComparisonOperator, CheckpointType, UsedBy, ExtractorType} from "@/utils/enum";
+import {ComparisonOperator, CheckpointType, UsedBy, ExtractorType, ConditionSrc} from "@/utils/enum";
 import {isInArray} from "@/utils/array";
 import {getDpResultClass} from "@/utils/dom"
 import {getCompareOptsForRespCode, getCompareOptsForString} from "@/utils/compare";
@@ -110,10 +113,13 @@ import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import useIMLeaveTip   from "@/composables/useIMLeaveTip";
-const useForm = Form.useForm;
-const usedBy = inject('usedBy') as UsedBy
-const isForBenchmarkCase = inject('isForBenchmarkCase');
 const {t} = useI18n();
+const useForm = Form.useForm;
+
+const usedBy = inject('usedBy') as UsedBy
+const conditionSrc = inject('conditionSrc') as ConditionSrc
+
+const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
 
 const store = useStore<{  Debug: any }>();
 
@@ -162,7 +168,7 @@ const extractorTypeRequired = [{ required: true, message: '请选择提取器类
 const extractorExpressionRequired = [{ required: true, message: '请输入提取器表达式', trigger: 'change' }]
 const expressionRequired = [{ required: true, message: '请输入表达式', trigger: 'blur' }]
 const operatorRequired = [{ required: true, message: '请选择操作', trigger: 'change' }]
-const valueRequired = [{ required: true, message: '请输入数值', trigger: 'blur' }]
+const valueRequired = [{ required: true, message: '请输入取值', trigger: 'blur' }]
 
 const rulesRef = computed(() => {
   const ret = {
@@ -195,6 +201,8 @@ const save = (item) => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
     model.value.projectId = debugData.value.projectId
+    model.value.conditionSrc = conditionSrc
+    model.value.isForBenchmarkCase = isForBenchmarkCase
 
     store.dispatch('Debug/saveCheckpoint', model.value).then((result) => {
       if (result) {

@@ -56,7 +56,7 @@
       <!-- Swagger -->
       <template v-else-if="modelRef.driverType === 'swagger'">
         <a-form-item label="导入方式" name="openUrlImport">
-          <a-radio-group 
+          <a-radio-group
             :options="openUrlImportOpts"
             v-model:value="modelRef.openUrlImport"/>
         </a-form-item>
@@ -81,7 +81,7 @@
       </template>
       <!-- PostMan -->
       <template v-else>
-        <a-form-item label="上传文件" v-if="!modelRef.openUrlImport" name="filePath">
+        <a-form-item label="上传文件" name="filePath">
           <a-spin tip="上传中..." :spinning="uploading">
             <a-upload
               :fileList="fileList"
@@ -117,7 +117,7 @@
               allow-clear/>
           </template>
         </Empty>
-        
+
       </a-form-item>
       <a-form-item label="所属服务" name="serveId">
         <SelectServe v-if="visible" @change="change"/>
@@ -147,6 +147,18 @@
         placeholder="请选择"/>
       <span v-if="modelRef.dataSyncType === 1" class="form-tip"><WarningOutlined /> 完全覆盖会导致通过平台上的接口定义更新被覆盖，请谨慎使用</span>
       </a-form-item>
+      <a-form-item label="接口路径规则" name="addServicePrefix" v-if="modelRef.driverType === 'lzos'">
+        <div class="add-service-prefix">
+          <a-checkbox v-model:checked="modelRef.addServicePrefix">智能体所属服务名作为路径第一级</a-checkbox><br>
+        </div>
+        <span v-if="modelRef.addServicePrefix">
+          接口路径导入为：/服务名/智能体名/消息名，例如：/acnsvr/Agent/CancelCollectItem
+        </span>
+        <span v-else>
+          接口路径导入为：/智能体名/消息名，例如：/Agent/CancelCollectItem
+        </span>
+      </a-form-item>
+
     </a-form>
   </a-modal>
 
@@ -159,6 +171,7 @@ import {
   defineEmits,
   reactive,
   computed, watch,
+  onMounted
 } from 'vue';
 import {useStore} from "vuex";
 import cloneDeep from "lodash/cloneDeep";
@@ -166,12 +179,14 @@ import {UploadOutlined,QuestionCircleOutlined, WarningOutlined} from '@ant-desig
 import {notifyWarn} from "@/utils/notify";
 import SelectServe from './SelectServe/index.vue';
 import Empty from '@/components/TableEmpty/index.vue';
-import { filterByKeyword } from '@/utils/tree';
+import { filterByKeyword, removeLeafNode } from '@/utils/tree';
+import { getLzosInfo } from '@/utils/lzos';
 
 const store = useStore<{ Endpoint }>();
 const treeDataCategory = computed<any>(() => {
-  return (store.state.Endpoint.treeDataCategory?.[0]?.children || []).filter(e => e.id !== -1)
+  return removeLeafNode((store.state.Endpoint.treeDataCategory || []).filter(e => e.id !== -1))
 });
+const lzosInfo = ref<any>(null);
 
 const props = defineProps({
   visible: {
@@ -189,16 +204,19 @@ const driverTypeOpts = [
   {
     label: 'Swagger(OpenAPI)',
     value: 'swagger',
+    show: true,
   },
   {
     label: 'Postman',
     value: 'postman',
+    show: true,
   },
   {
     label: '智能体厂',
     value: 'lzos',
+    show: process.env.VUE_APP_DEPLOY_ENV !== 'ly-saas',
   },
-];
+].filter(e => e.show);
 
 const dataSyncTypeOpts = [
   {
@@ -240,6 +258,7 @@ const modelRef = reactive<any>({
   // 智能体厂
   classCode: '',
   functionCodes: [],
+  addServicePrefix: true
 });
 
 const searchValue = ref('');
@@ -262,7 +281,7 @@ const rulesRef = computed(() => ({
   ],
   "categoryId": [
     {
-      required: false,
+      required: true,
       message: '请选择所属分类目录',
     }
   ],
@@ -303,7 +322,7 @@ const spinning = ref<boolean>(false);
 
 const handleDriverTypeChanged = (v) => {
   modelRef.dataSyncType = v === 'lzos' ? 1 : 2;
-  modelRef.filePath = '';
+  modelRef.filePath = v === 'lzos' ? (lzosInfo.value?.lzosOrigin || '') : '';
 }
 
 /**
@@ -351,20 +370,22 @@ function ok() {
     .validate()
     .then(async () => {
       confirmLoading.value = true;
-      const { filePath, openUrlImport, functionCodes, classCode, ...rest } = modelRef;
-      const params = modelRef.driverType === 'lzos' ? { filePath, classCode, functionCodes, ...rest } : { filePath, openUrlImport, ...rest };
+      const { filePath, openUrlImport, functionCodes, classCode,addServicePrefix, ...rest } = modelRef;
+      const params = modelRef.driverType === 'lzos' ? { filePath, classCode, functionCodes,addServicePrefix, ...rest } : { filePath, openUrlImport, ...rest };
 
       const res = await store.dispatch('Endpoint/importEndpointData', {
         ...params,
-        categoryId: modelRef.categoryId || -1,
+        categoryId: modelRef.categoryId || treeDataCategory.value?.[0]?.id,
         "sourceType": 2,
       });
       confirmLoading.value = false;
       if (res) {
         notifyWarn('异步导入中，稍后请刷新列表查看导入结果');
         reset();
-        emit('ok');
-      } 
+        emit('ok', {
+          parentId: modelRef.categoryId || treeDataCategory.value?.[0]?.id,
+        });
+      }
     })
     .catch((error: ValidateErrorEntity) => {
       console.log('error', error);
@@ -445,7 +466,6 @@ watch(() => {
 }, (newVal) => {
   if(newVal) {
     confirmLoading.value = false;
-    modelRef.categoryId = (!props.selectedCategoryId || props.selectedCategoryId === -1) ? null : props.selectedCategoryId;
   }
 }, {
   immediate: true
@@ -468,7 +488,13 @@ watch(() => {
   return treeDataCategory.value;
 }, (val) => {
   treeData.value = val;
+  modelRef.categoryId = val[0].id;
 })
+
+onMounted(async() => {
+  const result = await getLzosInfo();
+  lzosInfo.value = result;
+});
 
 </script>
 
@@ -508,5 +534,8 @@ watch(() => {
 .message-tooltip {
   min-width: 266px;
 }
-</style>
 
+.add-service-prefix {
+  line-height: 32px;
+}
+</style>

@@ -3,7 +3,7 @@ const bodyParser = require('body-parser')
 const mockServer = require('./src/utils/mock/server');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
 
-let { NODE_ENV, VUE_APP_PORT, VUE_APP_MOCK, APP_CONF } = process.env
+let { NODE_ENV, VUE_APP_PORT, VUE_APP_MOCK, APP_CONF, VUE_APP_DEPLOY_ENV } = process.env
 
 // loa app conf if needed
 if (NODE_ENV === 'production' && APP_CONF) {
@@ -12,15 +12,17 @@ if (NODE_ENV === 'production' && APP_CONF) {
     process.env.VUE_APP_API_SERVER = prodConf.VUE_APP_API_SERVER
     process.env.VUE_APP_API_AGENT = prodConf.VUE_APP_API_AGENT
 }
-console.log('API URL: ', process.env.VUE_APP_API_SERVER, process.env.VUE_APP_API_AGENT)
+console.log('API URL: ', process.env.VUE_APP_API_SERVER, process.env.VUE_APP_API_AGENT, process.env.VUE_APP_DEPLOY_ENV)
 
 module.exports = {
-    publicPath: '/',
+    publicPath: VUE_APP_DEPLOY_ENV === 'ly-saas' ? '/lya' : '/',
     outputDir: 'dist',
     productionSourceMap: false,
     devServer: {
         port: VUE_APP_PORT || 8000,
         disableHostCheck: true,
+        https:false,
+        headers: { "Access-Control-Allow-Origin": "*" },
         before: function(app, server) {
             if(NODE_ENV === 'development' && VUE_APP_MOCK === 'true') {
                 // parse app.body
@@ -42,11 +44,7 @@ module.exports = {
     },
     // 修改webpack的配置
     configureWebpack: {
-        // 不需要打包的插件
-        externals: {
-            // 'vue': 'Vue',
-            // 'vue-router': 'VueRouter',
-        }
+      
     },
     chainWebpack(config) {
         // 内置的 svg Rule 添加 exclude
@@ -82,7 +80,8 @@ module.exports = {
         config.plugin('monaco-editor').use(MonacoWebpackPlugin, [
             {
                 languages: [
-                    'javascript', 'typescript',
+                    'javascript',
+                    'typescript',
                     'html',
                     'xml',
                     'json',

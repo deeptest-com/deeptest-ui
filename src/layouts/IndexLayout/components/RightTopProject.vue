@@ -42,7 +42,7 @@
             </div>
           </a-menu-item>
           <a-menu-item key="footer" class="menu-item footer">
-            <a-button type="link" :size="'small'" @click="newProject">
+            <a-button v-if="hasProjectAuth('p-project-create')" type="link" :size="'small'" @click="newProject">
               <PlusOutlined/>
               新建项目
             </a-button>
@@ -79,6 +79,7 @@ import {
 } from '@ant-design/icons-vue';
 import CreateProjectModal from "@/components/CreateProjectModal/index.vue";
 import {getProjectLogo} from "@/components/CreateProjectModal";
+import usePermission from "@/composables/usePermission";
 
 const store = useStore<{
   User: UserStateType,
@@ -86,6 +87,7 @@ const store = useStore<{
 }>();
 
 const route = useRoute();
+const { hasProjectAuth } = usePermission();
 const createProjectModalVisible = ref(false);
 const message = computed<number>(() => store.state.User.message);
 const projects = computed<any>(() => store.state.ProjectGlobal.projects);
@@ -108,7 +110,7 @@ const myRecentProject = computed(() => {
 });
 
 function viewAllProject() {
-  router.push({path:'',query:{type:'all'}});
+  router.push({path:'/',query:{type:'all'}});
 }
 
 function newProject() {
@@ -127,11 +129,12 @@ const selectProject = async (item): Promise<void> => {
   const { path, params }: any = unref(router.currentRoute);
   router.replace(path.replace(params.projectNameAbbr, item.shortName));
   await store.dispatch('ProjectGlobal/changeProject', item.id);
+  await store.commit('Global/setPermissionMenuList', []);
   await store.dispatch('Environment/getEnvironment', {id: 0, projectId: item.id});
 
   // 更新左侧菜单以及按钮权限
   if (params.projectNameAbbr) {
-    await store.dispatch('Global/getPermissionList', { projectId: item.id });
+    await store.dispatch('Global/getPermissionMenuList', { currProject: item.id });
   }
 
 }

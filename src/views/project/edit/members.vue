@@ -36,9 +36,7 @@
             },
           }"
         >
-          <template #username="{ text }">
-            {{ text }}
-          </template>
+      
 
           <template #email="{ text }">
             {{ text }}
@@ -47,9 +45,8 @@
           <template #role="{ record }">
             <div class="customTitleColRender">
               <a-select
-                  :disabled="currentUser.projectRoles[currProject.id] !== 'admin' && currentUser.sysRoles.indexOf('admin') === -1"
                   :value="record.roleId"
-                  style="width: 100px"
+                  style="width: 200px"
                   :size="'small'"
                   placeholder="请选中角色"
                   @change="
@@ -73,7 +70,6 @@
             <a-button
                 type="link"
                 @click="() => remove(record.id)"
-                :disabled="currentUser.projectRoles[currProject.id] !== 'admin' && currentUser.sysRoles.indexOf('admin') === -1"
             >移除
             </a-button
             >
@@ -86,15 +82,14 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, reactive, ref, watch} from "vue";
-import {PaginationConfig, Project, Member} from "../data.d";
+import {computed, onMounted, ref, watch} from "vue";
 import {useStore} from "vuex";
 
 import {StateType} from "../store";
 import debounce from "lodash.debounce";
-import {useRouter} from "vue-router";
-import {Modal, notification} from "ant-design-vue";
-import {NotificationKeyCommon} from "@/utils/const";
+
+import {Modal} from "ant-design-vue";
+
 import {
   queryMembers,
   removeMember,
@@ -104,12 +99,11 @@ import {StateType as UserStateType} from "@/store/user";
 import EditPage from "../edit/invite.vue";
 import {SelectTypes} from "ant-design-vue/lib/select";
 import {inviteUser} from "@/views/user/info/service";
-import {message} from 'ant-design-vue';
 import {notifyError, notifySuccess} from "@/utils/notify";
 
-const router = useRouter();
+
 const store = useStore<{ Project: StateType; User: UserStateType, ProjectGlobal }>();
-const currentUser = computed<any>(() => store.state.User.currentUser);
+
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 
 
@@ -123,13 +117,6 @@ let queryParams: any = ref<any>({
 
 const members = ref([]);
 
-const data = reactive<Member>({
-  userId: "",
-  email: "",
-  roleName: "",
-  username: "",
-});
-
 
 const columns = [
   {
@@ -139,30 +126,31 @@ const columns = [
   },
   {
     title: "用户名",
-    dataIndex: "username",
-    slots: {customRender: "username"},
+    dataIndex: "name",
+    width: 150,
   },
   {
     title: "角色",
     dataIndex: "role",
     slots: {customRender: "role"},
+    width: 200,
   },
   {
     title: "邮箱",
     dataIndex: "email",
     slots: {customRender: "email"},
+    width: 200,
   },
   {
-    title: "操作1",
+    title: "操作",
     key: "action",
-    width: 260,
+    width: 80,
     slots: {customRender: "action"},
   },
 ];
 
 
 onMounted(() => {
-  console.log("onMounted");
   getMembers(1);
   getRoles()
   store.dispatch("User/fetchUserProjectRole");

@@ -31,6 +31,7 @@ export const setExpandedKeys = async (type, id, keys) => {
     await setCache(settings.expandedKeys, cachedData);
 }
 
+// Tree Selected Key
 export const getSelectedKey = async (type, projectId) => {
     console.log('getSelectedKey')
     const key = `${type}-${projectId}`
@@ -42,7 +43,6 @@ export const getSelectedKey = async (type, projectId) => {
 
     return cachedData[key]
 }
-
 export const setSelectedKey = async (type, projectId, selectedKey) => {
     console.log('setSelectedKey')
     const key = `${type}-${projectId}`
@@ -52,4 +52,44 @@ export const setSelectedKey = async (type, projectId, selectedKey) => {
 
     cachedData[key] = selectedKey
     await setCache(settings.selectedKey, cachedData);
+}
+
+// project environment variables
+export const setProjectEnvVar = async (projectId, envId, varName, varValue) => {
+    console.log('setProjectEnvVar')
+
+    let cachedData = await getCache(settings.projectEnvVarsKey);
+    if (!cachedData) cachedData = {}
+
+    let envs = cachedData[projectId]
+    if (!envs) {
+        envs = {}
+        cachedData[projectId] = envs
+    }
+
+    let vars = envs[envId]
+    if (!vars) {
+        vars = {}
+        envs[envId] = vars
+    }
+
+    vars[varName] = varValue
+
+    await setCache(settings.projectEnvVarsKey, cachedData);
+}
+export const loadProjectEnvVars = async (projectId) => {
+    console.log('loadProjectEnvVars')
+
+    let ret = {}
+
+    const cachedData = await getCache(settings.projectEnvVarsKey);
+    if (cachedData && cachedData[projectId]) {
+        ret = cachedData[projectId]
+    }
+
+    if (!ret[0]) {
+        ret[0] = {}
+    }
+
+    return ret
 }

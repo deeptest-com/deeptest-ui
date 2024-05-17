@@ -4,12 +4,13 @@ import { StoreModuleType } from "@/utils/store";
 import { TabNavItem } from '@/utils/routes';
 import settings from '@/config/settings';
 import router from '@/router';
-import { getPermissionMenuList } from '@/services/project';
 import {getConfigByKey, getServerConfig} from "@/services/config";
 import {getClientVersion} from "@/services/static";
 import {listAgent} from "@/views/sys-settings/service";
+import { getEngineering, getUserEngineering, getUserIntegrationDetail, getUserMenuList, getUserProducts, getUserSpaces } from '@/services/project';
 import {Cache_Key_Agent} from "@/utils/const";
 import {getCache, setCache} from "@/utils/localCache";
+import { getUserRolesAuth } from '@/services/role';
 
 export interface StateType {
   // 左侧展开收起
@@ -23,14 +24,20 @@ export interface StateType {
   // 头部tab导航列表
   headTabNavList: TabNavItem[];
 
-  permissionMenuMap: any;
-  permissionButtonMap: any;
   serverConfig: any;
   configInfo: any,
   agents: any[],
   currAgent: any,
   spinning:boolean;
   clientVersion: string;
+  permissionMenuList: string[];
+  userRolesAuth: string[];
+}
+
+interface ResponseState {
+  code: number;
+  data?: any;
+  msg?: string;
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -41,21 +48,30 @@ export interface ModuleType extends StoreModuleType<StateType> {
     setHeadFixed: Mutation<StateType>;
     setTabNavEnable: Mutation<StateType>;
     setHeadTabNavList: Mutation<StateType>;
-    setPermissionMenuAndBtn: Mutation<StateType>;
     setServerConfig: Mutation<StateType>;
     setConfigByKey: Mutation<StateType>;
     setClientVersion: Mutation<StateType>;
     setSpinning: Mutation<StateType>;
     setAgents: Mutation<StateType>;
     setCurrAgent: Mutation<StateType>;
+    setPermissionMenuList: Mutation<StateType>;
+    setRolesAuth: Mutation<StateType>;
   };
   actions: {
-    getPermissionList: Action<StateType, StateType>;
     getServerConfig: Action<StateType, StateType>;
     getConfigByKey: Action<StateType, StateType>;
     getClientVersion: Action<StateType, StateType>;
+    getPermissionMenuList: Action<StateType, StateType>;
 
     listAgent: Action<StateType, StateType>;
+    getUserRolesAuth: Action<StateType, StateType>;
+
+    // ly  wujie内相关的接口
+    getLyProducts: Action<StateType, StateType>;
+    getLySpaces: Action<StateType, StateType>;
+    getIntegrationDetail: Action<StateType, StateType>;
+    getLyEngineering: Action<StateType, StateType>;
+    getLyUserEngineering: Action<StateType, StateType>;
   };
 }
 
@@ -72,14 +88,14 @@ const initState: StateType = {
       menu: settings.homeRouteItem
     }
   ],
-  permissionMenuMap: null,
-  permissionButtonMap: null,
   serverConfig: {},
   configInfo: {},
   agents: [],
   currAgent: {},
   spinning:false,
   clientVersion: '0.0.1',
+  permissionMenuList: [],
+  userRolesAuth: [],
 };
 
 const StoreModel: ModuleType = {
@@ -104,11 +120,6 @@ const StoreModel: ModuleType = {
     setHeadTabNavList(state, payload) {
       state.headTabNavList = payload;
     },
-    setPermissionMenuAndBtn(state, payload) {
-      const { permissionButtonMap, permissionMenuMap } = payload;
-      state.permissionButtonMap = permissionButtonMap;
-      state.permissionMenuMap = permissionMenuMap
-    },
     setServerConfig(state, payload) {
       state.serverConfig = payload
     },
@@ -131,8 +142,13 @@ const StoreModel: ModuleType = {
       } else {
         let currAgent = await getCache(Cache_Key_Agent)
 
-        if (!currAgent && state.agents.length > 0) {
-          currAgent = state.agents[0]
+        if (state.agents.length > 0) {
+          if (!currAgent) {
+            currAgent = state.agents[0]
+          } else { // 判断缓存的agent是否被删除了，如果没删除，则用新的数据覆盖，反之则 取新的agent列表的第一项
+            const find = state.agents.find(e => e.id === currAgent.id);
+            find ? currAgent = find : currAgent = state.agents[0];
+          }
         }
 
         state.currAgent = currAgent
@@ -140,28 +156,14 @@ const StoreModel: ModuleType = {
 
       await setCache(Cache_Key_Agent, state.currAgent)
     },
+    setPermissionMenuList(state, payload) {
+      state.permissionMenuList = payload;
+    },
+    setRolesAuth(state, payload) {
+      state.userRolesAuth = payload;
+    }
   },
   actions: {
-    async getPermissionList({ commit }, payload: any) {
-      const menuData = {};
-      const buttonData = {};
-      try {
-        const result = await getPermissionMenuList(payload);
-        if (result.code === 0 && result.data.result) {
-          result.data.result.forEach(e => {
-            if (e.type === 'menu') {
-              menuData[e.code] = e;
-            } else if (e.type === 'button') {
-              buttonData[e.code] = e;
-            }
-          })
-        }
-        commit('setPermissionMenuAndBtn', { permissionButtonMap: buttonData, permissionMenuMap: menuData });
-        return { menuData, buttonData };
-      } catch(error) {
-        return { menuData, buttonData };
-      }
-    },
     async getServerConfig({ commit }) {
       const result = await getServerConfig();
 
@@ -188,7 +190,11 @@ const StoreModel: ModuleType = {
       const result = await listAgent('');
 
       if (result.code === 0) {
-        commit('setAgents',result.data);
+        const agents = (result.data || []).filter(e => !e.disabled);
+        commit('setAgents', agents);
+        if (agents.length === 0) {
+          await setCache(Cache_Key_Agent, null)
+        }
       }
     },
 
@@ -198,6 +204,91 @@ const StoreModel: ModuleType = {
       if (result?.version) {
         commit('setClientVersion',result.version);
       }
+    },
+
+    async getPermissionMenuList({ commit, rootState }: any, payload?: any) {
+      try {
+        const { code, data }: any = await getUserMenuList(payload);
+        if (code === 0) {
+          commit('setPermissionMenuList', data || []);
+          window?.$wujie?.bus.$emit(settings.sendMsgToLeyan, {
+            type: 'initLeyanAPIMenu',
+            data: {
+              menu: data || []
+            }
+          })
+          return true;
+        } else {
+          return false;
+        }
+      } catch(_err) {
+        return false;
+      }
+    },
+
+    async getUserRolesAuth({ commit }) {
+      try {
+        const result: any = await getUserRolesAuth();
+        if (result.code === 0) {
+          commit('setRolesAuth', result.data);
+          return result.data;
+        }
+        return result;
+      } catch(error) {
+        return error;
+      }
+    },
+
+    async getLyProducts() {
+      try {
+        const { code, data, msg }: any = await getUserProducts({ page: 1, pageSize: 9999 });
+        if (code === 0) {
+          return Promise.resolve(data);
+        }
+        return Promise.reject(msg);
+      } catch(error: any) {
+        return Promise.reject(error?.message || error);
+      }
+    },
+
+    async getLySpaces() {
+      try {
+        const { code, data, msg }: any = await getUserSpaces();
+        if (code === 0) {
+          return Promise.resolve(data);
+        }
+        return Promise.reject(msg);
+      } catch(error: any) {
+        return Promise.reject(error?.message || error);
+      }
+    },
+
+    async getIntegrationDetail(_, payload) {
+      try {
+        const { code, data, msg }: any = await getUserIntegrationDetail(payload);
+        if (code === 0) {
+          return Promise.resolve(data);
+        }
+        return Promise.reject(msg);
+      } catch(error: any) {
+        return Promise.reject(error?.message || error);
+      } 
+    },
+
+    async getLyEngineering() {
+      const { code, data }: any = await getEngineering();
+      if (code === 0) {
+        return data;
+      }
+      return false;
+    },
+
+    async getLyUserEngineering(_, params) {
+      const { code, data }: any = await getUserEngineering(params);
+      if (code === 0) {
+        return data;
+      }
+      return false;
     }
   }
 }

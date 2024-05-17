@@ -127,13 +127,14 @@ export interface SchemaListReqParams {
 
 
 export interface SchemaDetailReqParams {
-    serveId: number | string;
-    ref: string;
+    serveId?: number | string;
+    ref?: string;
+    id: number | string;
 }
 
 export interface BasicSchemaParams {
     name?: string; // 搜索关键字
-    serveId?: number | string;
+    projectId?: number | string;
     id?: string | number | undefined;
     data?: string;
 }

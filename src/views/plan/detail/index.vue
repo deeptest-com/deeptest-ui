@@ -60,7 +60,9 @@ onMounted(async() => {
     const tempArr = planSerialNumber.split('-');
     const planId = tempArr[tempArr.length - 1];
     await store.dispatch('Plan/getPlan', planId);
-    await store.dispatch('Plan/getRelationScenarios', planId);
+    const { id, adminId, categoryId, testStage, desc, status, createUserName, name } = unref(planDetail);
+    await store.dispatch('Plan/setCurrentPlan', { id, adminId, categoryId, testStage, desc, status, name, createUserName });
+    await store.dispatch('Plan/getRelationScenarios', { planId });
     store.commit('Global/setSpinning', false);
     store.commit('Detail/setShow', true);
   } catch(err) {

@@ -11,7 +11,8 @@ import debounce from "lodash.debounce";
 import {addExtractAction, addReplaceAction} from "@/components/Editor/service";
 import {getJslibs, getSnippet} from "@/views/component/debug/service";
 
-import {UsedBy, UsedWith} from "@/utils/enum";
+import fixMonacoEditor from "@/utils/fixMonacoEditor";
+import {UsedBy, ConditionSrc} from "@/utils/enum";
 
 export default defineComponent({
   name: "MonacoEditor",
@@ -40,6 +41,7 @@ export default defineComponent({
   setup(props){
     const { width, height } = toRefs(props)
 
+    fixMonacoEditor();
     const style = computed(()=>{
       const fixedWidth = width.value.toString().includes('%') ? width.value : `${width.value}px`
       const fixedHeight = height.value.toString().includes('%')? height.value : `${height.value}px`
@@ -104,13 +106,13 @@ export default defineComponent({
       })
 
       const usedBy = inject('usedBy', '')
-      const usedWith = inject('usedWith', '')
+      const conditionSrc = inject('conditionSrc', '')
 
       if (options.initTsModules) {
         const loadJsLibs = async () => {
           const typeFiles = []
 
-          if (usedWith === UsedWith.PostCondition) {
+          if (conditionSrc === ConditionSrc.PostCondition || conditionSrc === ConditionSrc.ScenarioCustomCode) {
             const chaiDeclareSnippet = 'chai.d'
             const chaiDeclareJson = await getSnippet(chaiDeclareSnippet)
             if (chaiDeclareJson.code === 0 && !!chaiDeclareJson.data?.script) {
@@ -118,8 +120,16 @@ export default defineComponent({
             }
           }
 
-          const declareSnippet = usedBy == UsedBy.MockData ?
-              'mock.d' : usedWith === UsedWith.PostCondition ? 'deeptest-post.d' : 'deeptest.d'
+          let declareSnippet = ''
+          if (usedBy == UsedBy.MockData) {
+            declareSnippet = 'mock.d'
+          } else if (conditionSrc === ConditionSrc.PostCondition) {
+            declareSnippet = 'deeptest-post.d'
+          } else if (conditionSrc === ConditionSrc.ScenarioCustomCode) {
+            declareSnippet = 'deeptest-scenario-custom-code.d'
+          } else {
+            declareSnippet = 'deeptest.d'
+          }
 
           const defaultDeclareJson = await getSnippet(declareSnippet)
           if (defaultDeclareJson.code === 0 && !!defaultDeclareJson.data?.script) {

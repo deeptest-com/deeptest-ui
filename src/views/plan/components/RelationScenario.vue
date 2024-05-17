@@ -15,7 +15,8 @@
             :show-scenario-operation="false"
             :selectedKeys="selectedScenarioIds"
             @refresh-list="getScenarioList"
-            @select-row-keys="handleSelectRowKeys" />
+            @select-row-keys="handleSelectRowKeys" 
+            />
     </a-modal>
 </template>
 <script setup lang="ts">
@@ -31,17 +32,22 @@ const props = defineProps<{
 const store = useStore<{ Plan: PlanStateType }>();
 const emits = defineEmits(['onCancel', 'onOk']);
 const scenarioLists = computed<any[]>(() => store.state.Plan.scenarios.list);
-const currPlan = computed<any>(() => store.state.Plan.detailResult);
+const currPlan = computed<any>(() => store.state.Plan.currPlan);
 let pagination = computed<any>(() => store.state.Plan.scenarios.pagination);
 let queryParams = reactive<any>({
   keywords: '', enabled: '1',
-  planId: currPlan.value.id,
+  planId: currPlan.value?.id,
   page: pagination.value.current, pageSize: pagination.value.pageSize
 });
 const selectedScenarioIds = ref<number[]>([]);
 const loading = ref<boolean>(false);
 
 const columns: any[] = reactive([
+    {
+        title: '编号',
+        dataIndex: 'serialNumber',
+        width: 150,
+    },
     {
         title: '用例名称',
         dataIndex: 'name',
@@ -91,6 +97,7 @@ async function getScenarioList(params) {
     })
     loading.value = false;
 }
+
 
 watch(() => {
     return props.associateModalVisible;

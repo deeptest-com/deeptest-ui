@@ -1,3 +1,4 @@
+import cloneDeep from "lodash/cloneDeep";
 /**
  * 数组合并并去重
  * @param arr1 数组1
@@ -35,4 +36,18 @@ export function isInArray(item, arr) {
     }
   }
   return false;
+}
+
+// json 数组去重
+export const uniquArray = (data) => {
+  const obj = {};
+  const _data = cloneDeep(data);
+  _data.forEach((e, index) => {
+    if (!obj[e.entityId]) {
+      obj[e.entityId] = e;
+    } else {
+      _data.splice(index, 1)
+    }
+  })
+  return _data;
 }

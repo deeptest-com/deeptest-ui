@@ -92,6 +92,9 @@ export default defineComponent({
             const userInfo = JSON.parse(userInfoStr || '{}');
             modelRef.username = userInfo?.username || '';
             modelRef.password = userInfo?.password || '';
+          } else if(window.location.host === 'demo.deeptest.com') { // 演示站点，自动填充用户名和密码
+            modelRef.username = 'admin';
+            modelRef.password = 'P2ssw0rd';
           }
         });
 
@@ -124,7 +127,7 @@ export default defineComponent({
                 const fieldsValue = await validate<LoginParamsType>();
                 const res: boolean = await store.dispatch('UserLogin/login', fieldsValue);
                 if (res === true) {
-                  notifySuccess(t('page.user.login.form.login-success'));
+                    notifySuccess(t('page.user.login.form.login-success'));
 
                     const { redirect, ...query } = currentRoute.value.query;
                     router.replace({

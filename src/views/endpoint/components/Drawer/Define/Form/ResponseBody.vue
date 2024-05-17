@@ -31,7 +31,7 @@
           @generateFromJSON="generateFromJSON"
           @changeContent="changeContent"
           @changeExamples="changeExamples"
-          :serveId="serveId"
+          :projectId="projectId"
           :contentStr="contentStr"
           :exampleStr="exampleStr"
           @generateExample="handleGenerateExample"
@@ -53,7 +53,7 @@ const selectedCodeDetail = computed<any>(() => store.state.Endpoint.selectedCode
 
 // 是否折叠,默认展开
 const collapse = ref(true);
-const props = defineProps(['serveId']);
+const props = defineProps(['projectId']);
 const emit = defineEmits([]);
 const activeResBodySchema: any = ref({
   content: null,
@@ -90,13 +90,13 @@ async function generateFromJSON(JSONStr?: string) {
 async function handleGenerateExample(examples: any) {
   const content = contentStr.value;
   const res = await store.dispatch('Endpoint/schema2example',
-      {data: content, serveId: props.serveId,}
+      {data: content, projectId: props.projectId,}
   );
   const example = {
     name: `Example ${examples.length + 1}`,
     content: JSON.stringify(res),
   };
-  if(!activeResBodySchema.value?.examples) {
+  if(!activeResBodySchema.value?.examples || !Array.isArray(activeResBodySchema.value?.examples)) {
     activeResBodySchema.value.examples = [];
   }
   activeResBodySchema.value.examples?.push(example)

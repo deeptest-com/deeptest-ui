@@ -28,12 +28,12 @@
             </a-col>
             <TooltipJumpUrl :jumpUrl="jumpUrl">
             <a-col flex="1" class="name">
-              {{item.name}}
+              {{ item.name }}
             </a-col>
             </TooltipJumpUrl>
             <TooltipJumpUrl :jumpUrl="jumpUrl">
             <a-col flex="1" class="value">
-              {{item.defaultValue}}
+              <TooltipCell :text="item.defaultValue" :placement="'bottom'"/>
             </a-col>
            </TooltipJumpUrl> 
           </a-row>
@@ -50,6 +50,7 @@
   import {StateType as Debug} from "@/views/component/debug/store";
   import {GlobalParamsMap} from '@/config/constant';
   import TooltipJumpUrl from '@/components/others/TooltipJumpUrl.vue';
+import TooltipCell from "@/components/Table/tooltipCell.vue";
 
  
   const store = useStore<{  Debug: Debug }>();

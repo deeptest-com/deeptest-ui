@@ -147,8 +147,9 @@ export async function saveEndpoint(data: any): Promise<any> {
  */
 export async function updateName(data: any): Promise<any> {
     return request({
-        url: `endpoint/updateName?id=${data.id}&name=${data.name}`,
+        url: `endpoint/updateName`,
         method: 'PUT',
+        data
     })
 }
 
@@ -554,7 +555,7 @@ export async function moveAlternativeCaseAssertion(data): Promise<any> {
 // 重置用例因子- 后置处理器包含断言
 export async function resetPostConditions(data: { debugInterfaceId: number, endpointInterfaceId: number, category: string }): Promise<any> {
     return request({
-        url: '/postConditions/resetForCase',
+        url: '/conditions/resetForCase',
         method: 'get',
         params: data,
     })
@@ -563,7 +564,7 @@ export async function resetPostConditions(data: { debugInterfaceId: number, endp
 // 重置用例因子-预处理
 export async function resetPreConditions(data: { debugInterfaceId: number, endpointInterfaceId: number }): Promise<any> {
     return request({
-        url: '/preConditions/resetForCase',
+        url: '/conditions/resetForCase',
         method: 'get',
         params: data,
     })
@@ -605,5 +606,40 @@ export async function importThirdPartyFunctions(data: any) {
         url: '/endpoint/importThirdPartyFunctions',
         method: 'POST',
         data
+    })
+}
+
+export async function getThirdPartyFunctions(data: any) {
+    return request({
+        url: '/endpoint/getThirdPartyFunctions',
+        method: 'POST',
+        data
+    })
+}
+
+/**
+ * 动态拉取分类列表
+ */
+export async function getDynamicCateogries(params: { type: string, currProjectId?: number, categoryId?: number | undefined | null }) {
+    return request({
+        url: '/categories/loadChildren',
+        method: 'GET',
+        params,
+    })
+}
+
+export async function favoriteEndpoint(data: { id: number }) {
+    return request({
+        url: '/endpoints/favorite',
+        method: 'post',
+        data,
+    })
+}
+
+export async function getFavoriteList(data: { projectId: number }) {
+    return request({
+        url: '/endpoints/favorite/list',
+        method: 'post',
+        data,
     })
 }

@@ -24,6 +24,7 @@ const props = defineProps(['treeNode']);
 const emit = defineEmits(['selectMenu']);
 
 function selectMenu(info) {
+  console.log('selectMenu')
   emit('selectMenu', info, props.treeNode)
 }
 

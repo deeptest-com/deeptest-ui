@@ -1,6 +1,6 @@
 <template>
   <div v-if="data?.name && serviceList?.length"
-       :class="{'content':isDocsPage,'full-content':isDocsFullPage,'drawer-content':isEndpointPage}">
+       :class="{'content':isDocsPage,'full-content':isDocsFullPage,'drawer-content':isEndpointPage, 'wujie-docs': isWujieEnv}">
     <DocsHeader v-if="showHeader"
                 :data="data"
                 :items="serviceList"
@@ -53,6 +53,7 @@ import LeftTreeView from "./components/LeftTreeView.vue";
 import EndpointDoc from "./components/EndpointDoc.vue";
 import DocsHeader from "./components/DocsHeader.vue";
 import ContentPane from '@/views/component/ContentPane/index.vue';
+import { useWujie } from '@/composables/useWujie';
 
 const store = useStore<{ Docs, ProjectGlobal }>();
 const props = defineProps(['showMenu', 'data', 'onlyShowDocs', 'showHeader']);
@@ -60,11 +61,12 @@ const emit = defineEmits(['changeVersion', 'switchToDefineTab']);
 const currDocId = computed<any>(() => store.state.Docs.currDocId);
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const router = useRouter();
+const { isWujieEnv } = useWujie();
 const isEndpointPage = window.location.href.includes('/IM');
 const isSharePage = window.location.href.includes('/docs/share');
 const isViewPage = window.location.href.includes('/docs/view');
 const isDocsPage = computed(() => {
-  return router.currentRoute.value.path === `/${currProject.value.shortName}/docs`;
+  return router.currentRoute.value.path.replaceAll(/\/lyapi/g, '') === `/${currProject.value.shortName}/docs`;
 }) ;
 
 const isDocsFullPage = isSharePage || isViewPage;
@@ -83,6 +85,7 @@ const serviceList = computed(() => {
           ...interfaceItem,
           endpointInfo: endpoint,
           serveInfo: item,
+          components:props?.data?.components,
           serveId: item.id,
         });
       })
@@ -165,12 +168,22 @@ function changeVersion(docId) {
 .content {
   height: calc(100vh - 100px);
 
+  &.wujie-docs {
+    height: calc(100vh - 48px);
+
+    .doc-container {
+      height: calc(100vh - 108px);
+    }
+  }
+
   .doc-container {
     display: flex;
     height: calc(100vh - 156px);
 
     .left {
       margin-left: 12px;
+      height: 100%;
+      overflow-y: scroll;
     }
 
     .only-docs {
@@ -183,10 +196,22 @@ function changeVersion(docId) {
 .full-content {
   min-height: 100vh !important;
 
+  &.wujie-docs {
+    .doc-container {
+      height: calc(100vh - 106px);
+    }
+  }
+
   .doc-container {
     display: flex;
     top: 0;
     height: calc(100vh - 56px);
+
+    .left {
+      margin-left: 12px;
+      height: 100%;
+      overflow-y: scroll;
+    }
   }
 }
 

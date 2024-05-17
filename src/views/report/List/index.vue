@@ -9,16 +9,14 @@
             onChange: (page) => {
                 handleGetList({ page });
             },
-            onShowSizeChange: (page, size) => {
-                pagination.page = page
-                pagination.pageSize = size
-                handleGetList(pagination);
+            onShowSizeChange: (_, size) => {
+                handleGetList({ pageSize: size, page: 1 });
             },
             showTotal: (total) => {
                 return `共 ${total} 条数据`;
             },
         }"
-        :scroll="{ x: 1240 }"
+        :scroll="{ x: 1240, y }"
         class="dp-table">
         <template #serialNumber="{ record }">
             <span>{{ record.serialNumber }}</span>
@@ -58,6 +56,8 @@ import ToolTipCell from '@/components/Table/tooltipCell.vue';
 import { DropdownActionMenu } from "@/components/DropDownMenu";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import useSharePage from "@/hooks/share";
+import usePermission from "@/composables/usePermission";
+import { useWujie } from "@/composables/useWujie";
 
 
 defineProps({
@@ -73,11 +73,19 @@ defineProps({
 })
 const emits = defineEmits(['queryDetail', 'getList']);
 const { share }  = useSharePage();
+const { isCreator, hasPermission } = usePermission();
+const { isInLeyanWujieContainer } = useWujie();
 const store = useStore<{ Report: StateType, ProjectGlobal: ProjectStateType }>();
 // 分页数据
-let pagination = computed<PaginationConfig>(() => store.state.Report.listResult.pagination);
+const pagination = computed<PaginationConfig>(() => store.state.Report.listResult.pagination);
 // 表格选中项
 const selectedRowKeys = ref<Key[]>([]);
+const y = computed(() => {
+    if (isInLeyanWujieContainer) {
+        return window.parent.window.innerHeight - 240;
+    }
+    return window.innerHeight - 280;
+});
 
 type Key = ColumnProps['key'];
 
@@ -145,7 +153,8 @@ const dropdownMenuList = [
     {
         label: '删除',
         action: (record) => handleDelete(record.id),
-        auth: '',
+        show: record => hasPermission('p-api-tr-del') || isCreator(record.createUserId),
+        auth: 'p-api-tr-del',
     },
 ];
 

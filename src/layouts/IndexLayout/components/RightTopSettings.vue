@@ -4,12 +4,13 @@
 
       <!--  客户端下载 -->
       <template v-if="!isElectronEnv">
-        <a-dropdown placement="bottomRight" v-if="isLyEnv">
+        <a-dropdown v-if="isLyEnv" placement="bottomRight">
           <a class="indexlayout-top-usermenu ant-dropdown-link" style="margin-right: 4px;margin-left: 4px;">
             <DesktopOutlined type="top-right-web" class="top-right-icon-desktop"/>
-            <span class="operation-name">{{ '客户端下载' }}</span>
+            <span class="operation-name">客户端下载</span>
             <DownOutlined class="user-icon"/>
           </a>
+
           <template #overlay>
             <a-menu @click="downloadClient">
               <a-menu-item v-for="client in clientDownloadUrlOpts" :key="client.value">
@@ -21,33 +22,44 @@
 
         <span v-else>
           <CloudDownloadOutlined class="user-icon" style="color: #c0c4cc;" />
-          <a href="https://deeptest.com/setup.html" target="_blank" style="color: #fff;">
+
+          <a href="https://deeptest.com/setup.html" target="_blank" style="color: #8A8A8A;">
             客户端下载
           </a>
         </span>
       </template>
 
       <!--  切换Agent -->
-      <a-dropdown placement="bottomRight" v-if="agents?.length" class="user-agent-manage">
+      <a-dropdown placement="bottomRight" class="user-agent-manage">
         <a class="indexlayout-top-usermenu ant-dropdown-link" style="margin-right: 6px;margin-left: 15px;">
           <IconSvg type="top-right-web" class="top-right-icon"/>
           <span class="agent-name">
-            {{ currentAgent.name }}
+            {{ currentAgent?.name || '暂无代理' }}
           </span>
           <DownOutlined class="user-icon"/>
         </a>
         <template #overlay>
           <a-menu @click="changeAgentEnv">
-            <a-menu-item :key="agent.id" v-for="agent in agents"  :style="agent.id === currentAgent.id ? {color:'#1890ff','background-color': '#e6f7ff'} : {}">
-              <a-tooltip placement="left" :title="agent.desc">
-                {{ agent.name }}
-              </a-tooltip>
-            </a-menu-item>
+            <template v-if="agents.length">
+              <a-menu-item :key="agent.id" v-for="agent in agents"  :style="agent.id === currentAgent.id ? {color:'#1890ff','background-color': '#e6f7ff'} : {}">
+                <a-tooltip placement="left" :title="agent.desc">
+                  {{ agent.name }}
+                </a-tooltip>
+              </a-menu-item>
+            </template>
+            <template v-else>
+              <a-menu-item key="nodata">
+                <a-tooltip placement="left" title="所有接口请求通过代理转发。请通过代理设置页面自行安装配置代理后使用">
+                  暂无代理
+                </a-tooltip>
+              </a-menu-item>
+            </template>
+            <a-menu-item key="setting"><SettingOutlined />代理设置</a-menu-item>
           </a-menu>
         </template>
       </a-dropdown>
 
-      <a-dropdown placement="bottomRight" v-if="isAdmin">
+      <a-dropdown placement="bottomRight" v-if="isAdmin && !isWujieEnv" >
         <a class="indexlayout-top-sysmenu ant-dropdown-link operation-name message" style="margin-right: 6px;margin-left: 8px;">
           <SettingOutlined class="top-right-icon-desktop"/>
         </a>
@@ -56,7 +68,7 @@
             <a-menu-item key="agentManage">
               代理管理
             </a-menu-item>
-            <a-menu-item key="userManage">
+            <a-menu-item key="userManage" v-if="hasProjectAuth('p-api-setting-usermanage')">
               用户管理
             </a-menu-item>
           </a-menu>
@@ -64,13 +76,13 @@
       </a-dropdown>
 
       <!-- ::::消息通知 -->
-      <a-tooltip placement="bottom" title="消息通知">
+      <a-tooltip placement="bottom" title="消息通知" v-if="!isWujieEnv && hasProjectAuth('p-api-notification')">
         <span class="operation-name message" @click="onMessageClick">
           <BellOutlined />
         </span>
       </a-tooltip>
 
-      <a-tooltip placement="bottom" @click="toggle">
+      <a-tooltip placement="bottom" @click="toggle" v-if="!isWujieEnv">
         <template #title>{{ isFullscreen ? '退出全屏' : '全屏' }}</template>
         <a-button type="text" class="share-btn">
           <FullscreenOutlined v-if="isFullscreen"
@@ -81,7 +93,7 @@
       </a-tooltip>
 
       <!-- ::::用户信息 -->
-      <a-dropdown placement="bottomRight">
+      <a-dropdown placement="bottomRight" v-if="!isWujieEnv">
         <a class="indexlayout-top-usermenu ant-dropdown-link" style="margin-right: 6px;margin-left: 8px;">
           <UserOutlined class="user-icon"/>
           <span class="operation-name">{{ currentUser.name }}</span>
@@ -126,7 +138,11 @@ import {useFullscreen} from '@vueuse/core';
 import {StateType as GlobalStateType} from "@/store/global";
 import {Cache_Key_Agent} from "@/utils/const";
 import {isLeyan} from "@/utils/comm";
-
+import {useWujie} from "@/composables/useWujie";
+import usePermission from "@/composables/usePermission";
+import settings from "@/config/settings";
+const {isWujieEnv} = useWujie();
+const { hasProjectAuth } = usePermission();
 const props = defineProps({
   theme: {
     required: false,
@@ -137,7 +153,8 @@ const props = defineProps({
 const {t} = useI18n();
 const router = useRouter();
 const store = useStore<{ User: UserStateType, Global: GlobalStateType }>();
-const {isFullscreen, enter, exit, toggle} = useFullscreen();
+const {isFullscreen, toggle} = useFullscreen();
+const bus = window?.$wujie?.bus;
 
 const agents = computed<any[]>(() => store.state.Global.agents);
 const currentUser = computed<CurrentUser>(() => store.state.User.currentUser);
@@ -152,6 +169,8 @@ const onMenuClick = (event: any) => {
   } else if (key === 'logout') {
     store.dispatch('User/logout').then((res) => {
       if (res === true) {
+        store.commit('ProjectGlobal/saveProjects', {});
+        store.commit('Global/setPermissionMenuList', []);
         router.replace({
           path: '/user/login',
           query: {
@@ -194,6 +213,13 @@ const onMessageClick = () => {
 
 function changeAgentEnv(event: any) {
   const {key} = event;
+  if (key === 'nodata') {
+    return;
+  }
+  if (key === 'setting') {
+    router.push({ path: '/sys-setting/agent' });
+    return;
+  }
   const currAgent = agents.value.find((item) => item.id === +key)
   store.commit('Global/setCurrAgent', currAgent)
 }
@@ -231,6 +257,16 @@ onMounted(async () => {
   await store.dispatch('Global/getClientVersion');
   await store.dispatch('Global/listAgent');
   await store.commit('Global/setCurrAgent', null);
+  setTimeout(() => {
+    bus?.$emit(settings.sendMsgToLeyan, {
+      type: 'initClientOrAgents',
+      data: {
+        clientDownloadUrlOpts: clientDownloadUrlOpts.value,
+        agents: agents.value,
+        currAgent: currentAgent.value,
+      }
+    });
+  }, 500);
 })
 
 const isAdmin = computed(() => {

@@ -15,7 +15,10 @@
         </a-select>
       </div>
       <div id="env-selector">
-        <EnvSelector :show="showBaseUrl()" :serveId="debugData.serveId" @change="changeServer" :disabled="usedBy === UsedBy.ScenarioDebug" />
+        <EnvSelector :show="showBaseUrl()"
+                     :serveId="debugData.serveId"
+                     @change="changeServer"
+                     :disabled="usedBy === UsedBy.ScenarioDebug" />
       </div>
       <div v-if="showBaseUrl()" class="base-url">
         <a-input placeholder="请输入地址"
@@ -26,8 +29,9 @@
       <div class="url"
            :class="[isPathValid  ? '' :  'dp-field-error' ]">
         <a-tooltip
-          :overlayClassName="getOverlayClassName()"
+          :overlayStyle="getOverlayStyle()"
           placement="bottom"
+
           :visible="!isPathValid"
           :title="'请输入合法的路径,以http(s)开头'">
           <a-input placeholder="请输入http(s)://开头的地址"
@@ -39,11 +43,15 @@
       </div>
 
       <div class="send" v-if="showOperation">
-        <a-button type="primary" trigger="click"
-                  @click="confirmSend"
-                  :disabled="!isPathValid">
-          <span>发送</span>
-        </a-button>
+        <ExecBtn>
+          <template #execBtn="{ isNotClickable }">
+            <a-button type="primary" trigger="click"
+                      @click="confirmSend(isNotClickable)"
+                      :disabled="!isPathValid || isNotClickable">
+              <span>发送</span>
+            </a-button>
+          </template>
+        </ExecBtn>
       </div>
 
       <div class="save" v-if="showOperation">
@@ -73,6 +81,14 @@
         </a-tooltip>
         </a-button>
       </div>
+
+      <div v-if="isShowCopyCurl" class="copy-as">
+        <a-tooltip>
+          <template #title>复制为cURL</template>
+          <icon-svg type="copy-as" class="dp-link-black"
+                    @click="copyCurl" />
+        </a-tooltip>
+      </div>
     </div>
 
     <ContextMenu
@@ -92,7 +108,7 @@ import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import IconSvg from "@/components/IconSvg";
 import {Methods, ProcessorInterfaceSrc, UsedBy} from "@/utils/enum";
-import {prepareDataForRequest} from "@/views/component/debug/service";
+import {prepareDataForRequest, loadCurl, showBaseUrlOrNot} from "@/views/component/debug/service";
 import {NotificationKeyCommon} from "@/utils/const"
 
 import {StateType as GlobalStateType} from "@/store/global";
@@ -108,18 +124,27 @@ import settings from "@/config/settings";
 import EnvSelector from "./config/EnvSelector.vue";
 import {handlePathLinkParams} from "@/utils/dom";
 import {syncSourceMapToText} from "@/views/scenario/components/Design/config"
-import {notifyWarn} from "@/utils/notify";
+import {notifySuccess, notifyWarn} from "@/utils/notify";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import {getUuid} from "@/utils/string";
+import { setServeUrl } from "@/utils/url";
+import {StateType as ProjectStateType} from "@/store/project";
+import {loadProjectEnvVars} from "@/utils/cache";
+import useCopy from "@/composables/useClipboard";
+import ExecBtn from "@/components/ExecBtn";
 const {
   isDebugChange,
   debugChangePreScript,
   debugChangePostScript,
   debugChangeCheckpoint} = useIMLeaveTip();
-const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, Global: GlobalStateType, ServeGlobal, User }>();
+const { copy } = useCopy();
+
+const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, ProjectGlobal: ProjectStateType, Global: GlobalStateType, ServeGlobal, User }>();
 const currUser = computed(() => store.state.User.currentUser);
+const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currServe = computed(() => store.state.Debug.currServe);
 const debugData = computed<any>(() => store.state.Debug.debugData);
+const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 
@@ -166,18 +191,9 @@ const props = defineProps({
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 const {showContextMenu, contextMenuStyle, onContextMenuShow, onMenuClick} = useVariableReplace('endpointInterfaceUrl')
-
 const showBaseUrl = () => {
-  const notShow = debugData.value.usedBy === UsedBy.DiagnoseDebug
-      || (debugData.value.usedBy === UsedBy.ScenarioDebug &&
-                (debugData.value.processorInterfaceSrc === ProcessorInterfaceSrc.Diagnose ||
-                  debugData.value.processorInterfaceSrc === ProcessorInterfaceSrc.Custom  ||
-                  debugData.value.processorInterfaceSrc === ProcessorInterfaceSrc.Curl
-                  ))
-
-  return !notShow
+  return showBaseUrlOrNot(debugData.value)
 }
-
 
 const isShowSync = computed(() => {
   const ret = usedBy === UsedBy.ScenarioDebug && (
@@ -187,28 +203,30 @@ const isShowSync = computed(() => {
   return ret
 })
 
-const getOverlayClassName = () => {
-  return `${usedBy === UsedBy.DiagnoseDebug ? 'dp-field-error-tooltip' : ''} dp-tip-small`
+const isShowCopyCurl = computed(() => {
+  const ret = usedBy === UsedBy.DiagnoseDebug ||
+      usedBy === UsedBy.ScenarioDebug ||
+      usedBy === UsedBy.InterfaceDebug ||
+      usedBy === UsedBy.CaseDebug
+
+  return ret
+})
+
+const getOverlayStyle = () => {
+  return usedBy === UsedBy.DiagnoseDebug ? { 'zIndex': 999 } : usedBy === UsedBy.ScenarioDebug ? { 'zIndex': '1001' } : {};
 }
 
 watch(debugData, (newVal) => {
   if (usedBy === UsedBy.InterfaceDebug || usedBy === UsedBy.CaseDebug) {
     debugData.value.url = debugData?.value.url || endpointDetail.value?.path || ''
   }
-    // debugData.value.baseUrl = currServe.value.url;
-  //debugData.value.serveId = currServe.value.serveId;
 }, {immediate: true, deep: true});
-
-const serverId = computed(() => {
-  return store.state.Debug.currServe.environmentId || 0
-});
 
 function changeServer(id) {
   store.dispatch('Debug/changeServer', { serverId: id,serveId:debugData.value.serveId, requestEnvVars: false })
 }
 
-
-const send = async (e) => {
+const send = async () => {
   const data = prepareDataForRequest(debugData.value)
   console.log('sendRequest', data);
 
@@ -218,12 +236,13 @@ const send = async (e) => {
     data.environmentId = environmentId.value
     const callData = {
       execUuid: currUser.value.id + '@' + getUuid(),
-      serverUrl: process.env.VUE_APP_API_SERVER,
+      serverUrl: setServeUrl(process.env.VUE_APP_API_SERVER),
       token: await getToken(),
       data: {
         ...data,
         baseUrl: currServe.value.url,
-      }
+      },
+      localVarsCache: await loadProjectEnvVars(currProject.value.id)
     }
     await store.dispatch('Debug/call', callData).finally(()=>{
       store.commit("Global/setSpinning",false)
@@ -233,17 +252,20 @@ const send = async (e) => {
   }
 }
 
-const confirmSend = async (e)=>{
+const confirmSend = async (isNotClickable)=>{
+  if (isNotClickable) {
+    return;
+  }
   if(debugChangePreScript.value || debugChangePostScript.value || debugChangeCheckpoint.value){
     store.commit("Global/setSpinning",true)
     bus.emit(settings.eventPostConditionSave, {
       callback:async () => {
-        await send(e)
+        await send()
         store.commit("Global/setSpinning",false)
       }
     });
   }else {
-    await send(e)
+    await send()
   }
 }
 
@@ -325,6 +347,23 @@ function validatePath() {
   return isMatch
 }
 
+async function copyCurl() {
+  console.log('copyCurl', debugInfo.value)
+
+  const resp = await loadCurl({
+    debugInterfaceId: debugInfo.value.debugInterfaceId,
+    endpointInterfaceId: debugInfo.value.endpointInterfaceId,
+    caseId: debugInfo.value.caseInterfaceId,
+    diagnoseId: debugInfo.value.diagnoseInterfaceId,
+    usedBy: debugInfo.value.usedBy,
+    environmentId: environmentId.value,
+  })
+  if (resp.code == 0) {
+    copy(resp.data)
+    notifySuccess('已复制cURL命令到剪贴板。');
+  }
+}
+
 onMounted(() => {
   // 离开前保存数据
   bus.on(settings.eventLeaveDebugSaveData, save);
@@ -385,6 +424,12 @@ onUnmounted(() => {
       width: 80px;
     }
 
+    .copy-as {
+      margin: 0 8px;
+      line-height: 32px;
+      font-size: 18px;
+      width: 20px;
+    }
   }
 }
 

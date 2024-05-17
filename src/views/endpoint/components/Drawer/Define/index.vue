@@ -24,8 +24,7 @@
           theme="vs"
           :options="{...MonacoOptions}"
           @change="handleYamlCodeChange"
-          :timestamp="timestamp"
-          />
+          :timestamp="timestamp" />
 
     </div>
   </div>

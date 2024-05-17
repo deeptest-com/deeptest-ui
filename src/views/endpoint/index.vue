@@ -1,196 +1,177 @@
 <template>
-  <a-spin tip="Loading..." :spinning="isImporting" style="z-index: 2000;">
-    <ContentPane>
-      <template #left>
-        <Tree @select="selectNode"/>
-      </template>
-      <template #right>
-        <div style="min-width: 1080px;overflow-x:scroll ">
-          <div class="top-action">
-            <div class="top-action-left">
-              <PermissionButton
+  <div class="endpoint-content">
+    <a-spin tip="Loading..." :spinning="isImporting" style="z-index: 2000;">
+      <ContentPane>
+        <template #left>
+          <Tree ref="endpointTree" @select="selectNode"/>
+          <SchemaTree ref="schema" @select="showSchema" />
+        </template>
+        <template #right>
+          <div v-if="!openSchemaTab" style="min-width: 1080px">
+            <div class="top-action">
+              <div class="top-action-left">
+                <PermissionButton
+                  v-if="hasPermission('')"
                   class="action-new"
                   text="新建接口"
-                  code="ENDPOINT-ADD"
                   type="primary"
                   :loading="loading"
-                  action="create"
                   @handle-access="handleCreateEndPoint"/>
-              <a-dropdown :trigger="['hover']" :placement="'bottomLeft'">
-                <a class="ant-dropdown-link" @click.prevent>
+                <DropdownActionMenu :dropdown-list="BulkMenuList">
                   <a-button>批量操作</a-button>
-                </a>
-                <template #overlay>
-                  <a-menu style="margin-top: 8px;">
-                    <a-menu-item key="0">
-                      <a-button type="link" :size="'small'" href="javascript:void (0)" @click="importApi">导入接口
-                      </a-button>
-                    </a-menu-item>
-                    <a-menu-item key="2">
-                      <a-button :disabled="!hasSelected" :size="'small'" type="link" @click="goDocs">查看文档</a-button>
-                    </a-menu-item>
-                    <a-menu-item key="3">
-                      <a-button :disabled="!hasSelected" :size="'small'" type="link"
-                                @click="showPublishDocsModal = true">发布文档
-                      </a-button>
-                    </a-menu-item>
-                    <a-menu-item key="4">
-                      <a-button :disabled="!hasSelected" type="link" :size="'small'" @click="batchUpdate">批量修改
-                      </a-button>
-                    </a-menu-item>
-                  </a-menu>
-                </template>
-              </a-dropdown>
+                </DropdownActionMenu>
+              </div>
+              <div class="top-search-filter">
+                <TableFilter @filter="handleTableFilter" ref="filter"/>
+              </div>
             </div>
-            <div class="top-search-filter">
-              <TableFilter @filter="handleTableFilter" ref="filter"/>
-            </div>
+            <EmptyCom>
+              <template #content>
+                <a-table :loading="fetching"
+                        :rowKey="'id'"
+                        :row-selection="{
+                        selectedRowKeys: selectedRowKeys,
+                        onChange: onSelectChange
+                }"
+                        :pagination="{
+                    ...pagination,
+                    onChange: (page) => {
+                      loadList(page,pagination.pageSize);
+                    },
+                    onShowSizeChange: (_page, size) => {
+                      loadList(1,size);
+                    },
+                    showTotal: (total) => {
+                      return `共 ${total} 条数据`;
+                    },
+                }"
+                        :scroll="{ x: '1240px' || true }"
+                        :columns="columns"
+                        :data-source="list">
+                  <template #colTitle="{record}">
+                    <div class="customTitleColRender">
+                      <div class="notice-icon">
+                        <a-tooltip v-if="record.changedStatus > ChangedStatus.NoChanged" :overlayClassName="'diff-custom-tooltip'">
+                          <template #title>
+                          <span>{{record.changedStatus == ChangedStatus.Changed?'待处理':'已处理'}}，{{record.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a @click="showDiff(record.id)">查看详情</a></span>
+                          </template>
+                          <WarningFilled v-if="record.changedStatus == ChangedStatus.Changed"  @click="showDiff(record.id)" :style="{color: '#fb8b06'}" />
+                          <InfoCircleOutlined  v-if="record.changedStatus == ChangedStatus.IgnoreChanged"  @click="showDiff(record.id)" :style="{color: '#c6c6c6'}" />
+                        </a-tooltip>
+                    </div>
+                      <EditAndShowField
+                          :custom-class="'custom-endpoint show-on-hover'"
+                          :value="record.title"
+                          placeholder="请输入接口名称"
+                          @update="(e: string) => updateTitle(e, record)"
+                          @edit="editEndpoint(record)"/>
+                    </div>
+                  </template>
+
+                  <template #colStatus="{record}">
+                    <div class="customStatusColRender">
+                      <EditAndShowSelect
+                          :label="endpointStatus.get(record?.status || 0 )"
+                          :value="record?.status"
+                          :options="endpointStatusOpts"
+                          @update="(val) => { handleChangeStatus(val,record);}"/>
+                    </div>
+                  </template>
+
+                  <template #colTags="{record}">
+                    <div class="customTagsColRender">
+                      <Tags
+                          :values="record?.tags"
+                          :options="tagList"
+                          @updateTags="(values:[])=>{
+                        updateTags(values,record.id)
+                      }"
+                      />
+                    </div>
+                  </template>
+                  <template #colServe="{record}">
+                    <div class="customServeColRender">
+                      <EditAndShowSelect
+                      :value="record?.serveId"
+                      :options="serves"
+                      @update="(val) => { updateServe(val,record) }"/>
+                    </div>
+                  </template>
+
+                  <template #colCreateUser="{record}">
+                    <div class="customTagsColRender">
+                      {{ username(record.createUser) }}
+                    </div>
+                  </template>
+                  <template #colUpdateUser="{record}">
+                    <div class="customTagsColRender">
+                      {{ username(record.updateUser) }}
+                    </div>
+                  </template>
+                  <template #updatedAt="{ record, column }">
+                    <TooltipCell :text="record.updatedAt" :width="column.width"/>
+                  </template>
+                  <template #colPath="{text, record}">
+                    <div class="customPathColRender">
+                      <a-tag :color="getMethodColor(method)" v-for="(method, index) in (record.methods)" :key="index">
+                        {{ method }}
+                      </a-tag>
+                      <span class="path-col" v-if="text">
+                        <a-tooltip placement="topLeft">
+                          <template #title>
+                            <span>{{ text }}</span>
+                          </template>
+                          <a-tag>{{ text }}</a-tag>
+                        </a-tooltip>
+                      </span>
+                      <span class="path-col" v-else> --- </span>
+                    </div>
+                  </template>
+                  <template #action="{record}">
+                    <DropdownActionMenu :dropdownList="getMenuItems(record)" :record="record"/>
+                  </template>
+                </a-table>
+              </template>
+            </EmptyCom>
           </div>
-          <EmptyCom>
-            <template #content>
-              <a-table :loading="fetching"
-                       :rowKey="'id'"
-                       :row-selection="{
-                      selectedRowKeys: selectedRowKeys,
-                      onChange: onSelectChange
-              }"
-                       :pagination="{
-                  ...pagination,
-                  onChange: (page) => {
-                    loadList(page,pagination.pageSize);
-                  },
-                  onShowSizeChange: (_page, size) => {
-                    loadList(1,size);
-                  },
-                  showTotal: (total) => {
-                    return `共 ${total} 条数据`;
-                  },
-              }"
-                       :scroll="{ x: '1240px' || true }"
-                       :columns="columns"
-                       :data-source="list">
-                <template #colTitle="{record}">
-                  <div class="customTitleColRender">
-                    <div class="notice-icon">
-                      <a-tooltip v-if="record.changedStatus > ChangedStatus.NoChanged" :overlayClassName="'diff-custom-tooltip'">       
-                        <template #title>
-                        <span>{{record.changedStatus == ChangedStatus.Changed?'待处理':'已处理'}}，{{record.sourceType == SourceType.SwaggerImport?'定义与导入不一致':'定义和同步不一致'}}，点此<a @click="showDiff(record.id)">查看详情</a></span>
-                        </template>
-                        <WarningFilled v-if="record.changedStatus == ChangedStatus.Changed"  @click="showDiff(record.id)" :style="{color: '#fb8b06'}" />
-                        <InfoCircleOutlined  v-if="record.changedStatus == ChangedStatus.IgnoreChanged"  @click="showDiff(record.id)" :style="{color: '#c6c6c6'}" />
-                      </a-tooltip>
-                  </div>
-                    <EditAndShowField
-                        :custom-class="'custom-endpoint show-on-hover'"
-                        :value="record.title"
-                        placeholder="请输入接口名称"
-                        @update="(e: string) => updateTitle(e, record)"
-                        @edit="editEndpoint(record)"/>
-                  </div>
-                </template>
-
-                <template #colStatus="{record}">
-                  <div class="customStatusColRender">
-                    <EditAndShowSelect
-                        :label="endpointStatus.get(record?.status || 0 )"
-                        :value="record?.status"
-                        :options="endpointStatusOpts"
-                        @update="(val) => { handleChangeStatus(val,record);}"/>
-                  </div>
-                </template>
-
-                <template #colTags="{record}">
-                  <div class="customTagsColRender">
-                    <Tags
-                        :values="record?.tags"
-                        :options="tagList"
-                        @updateTags="(values:[])=>{
-                      updateTags(values,record.id)
-                    }"
-                    />
-                  </div>
-                </template>
-                <template #colServe="{record}">
-                  <div class="customServeColRender">
-                    <EditAndShowSelect
-                    :value="record?.serveId"
-                    :options="serves"
-                    @update="(val) => { updateServe(val,record) }"/>
-                  </div>
-                </template>
-
-                <template #colCreateUser="{record}">
-                  <div class="customTagsColRender">
-                    {{ username(record.createUser) }}
-                  </div>
-                </template>
-                <template #colUpdateUser="{record}">
-                  <div class="customTagsColRender">
-                    {{ username(record.updateUser) }}
-                  </div>
-                </template>
-                <template #updatedAt="{ record, column }">
-                  <TooltipCell :text="record.updatedAt" :width="column.width"/>
-                </template>
-                <template #colPath="{text, record}">
-                  <div class="customPathColRender">
-                    <a-tag :color="getMethodColor(method)" v-for="(method, index) in (record.methods)" :key="index">
-                      {{ method }}
-                    </a-tag>
-                    <span class="path-col" v-if="text">
-                      <a-tooltip placement="topLeft">
-                        <template #title>
-                          <span>{{ text }}</span>
-                        </template>
-                        <a-tag>{{ text }}</a-tag>
-                      </a-tooltip>
-                    </span>
-                    <span class="path-col" v-else> --- </span>
-                  </div>
-                </template>
-                <template #action="{record}">
-                  <DropdownActionMenu :dropdownList="MenuList" :record="record"/>
-                </template>
-              </a-table>
-            </template>
-          </EmptyCom>
-        </div>
-      </template>
-    </ContentPane>
-    <CreateEndpointModal
-        :visible="createApiModalVisible"
-        :selectedCategoryId="selectedCategoryId"
-        @cancel="createApiModalVisible = false;"
-        @ok="handleCreateApi"/>
-    <ImportEndpointModal
-        :visible="showImportModal"
-        :selectedCategoryId="selectedCategoryId"
-        @cancal="showImportModal = false;"
-        @ok="handleImport"/>
-    <BatchUpdateFieldModal
-        :visible="showBatchUpdateModal"
-        :selectedCategoryId="selectedCategoryId"
-        :selectedEndpointNum="selectedEndpointNum"
-        @cancel="showBatchUpdateModal = false;"
-        @ok="handleBatchUpdate"/>
-    <PubDocs
-        :visible="showPublishDocsModal"
-        :endpointIds='selectedRowIds'
-        @cancal="showPublishDocsModal = false;"
-        @ok="publishDocs"/>
-    <Diff @callback="editEndpoint"/>
-    <!-- 编辑接口时，展开抽屉：外层再包一层 div, 保证每次打开弹框都重新渲染   -->
-    <div v-if="drawerVisible">
-      <Drawer
-          :destroyOnClose="true"
-          :visible="drawerVisible"
-          @refreshList="refreshList"
-          ref="drawerRef"
-          @close="() => {
-            closeDrawer();
-          }"/>
-    </div>
-  </a-spin>
+          <SchemaContent v-else/>
+        </template>
+      </ContentPane>
+      <CreateEndpointModal
+          :visible="createApiModalVisible"
+          :selectedCategoryId="selectedCategoryId"
+          @cancel="createApiModalVisible = false;"
+          @ok="handleCreateApiSuccess"/>
+      <ImportEndpointModal
+          :visible="showImportModal"
+          :selectedCategoryId="selectedCategoryId"
+          @cancal="showImportModal = false;"
+          @ok="handleImport"/>
+      <BatchUpdateFieldModal
+          :visible="showBatchUpdateModal"
+          :selectedCategoryId="selectedCategoryId"
+          :selectedEndpointNum="selectedEndpointNum"
+          @cancel="showBatchUpdateModal = false;"
+          @ok="handleBatchUpdate"/>
+      <PubDocs
+          :visible="showPublishDocsModal"
+          :endpointIds='selectedRowIds'
+          @cancal="showPublishDocsModal = false;"
+          @ok="publishDocs"/>
+      <Diff @callback="editEndpoint"/>
+      <!-- 编辑接口时，展开抽屉：外层再包一层 div, 保证每次打开弹框都重新渲染   -->
+      <div v-if="drawerVisible">
+        <Drawer
+            :destroyOnClose="true"
+            :visible="drawerVisible"
+            @refreshList="refreshList"
+            ref="drawerRef"
+            @close="() => {
+              closeDrawer();
+            }"/>
+      </div>
+    </a-spin>
+  </div>
 </template>
 <script setup lang="ts">
 import {
@@ -226,7 +207,7 @@ import TooltipCell from '@/components/Table/tooltipCell.vue';
 import {DropdownActionMenu} from '@/components/DropDownMenu/index';
 
 import {getMethodColor} from '@/utils/interface';
-import {notifyError, notifySuccess} from "@/utils/notify";
+import {notifyError, notifySuccess, notifyWarn} from "@/utils/notify";
 import {equalObjectByLodash} from "@/utils/object";
 import useSharePage from '@/hooks/share';
 import Swal from "sweetalert2";
@@ -234,13 +215,22 @@ import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
 import useIMLeaveTip from "@/composables/useIMLeaveTip";
 import Diff from "./components/Drawer/Define/Diff/index.vue";
-import {ChangedStatus,SourceType} from "@/utils/enum";
+import { SchemaTree, SchemaContent } from '../component/Schema';
+import {ChangedStatus,SourceType, UsedBy} from "@/utils/enum";
+import {loadCurl} from "@/views/component/debug/service";
+import {useWujie} from "@/composables/useWujie";
+import usePermission from '@/composables/usePermission';
+import { uniquArray } from "@/utils/array";
+import useCopy from "@/composables/useClipboard";
 
+const { copy } = useCopy();
 
+const { hasPermission, isCreator } = usePermission();
 const {share} = useSharePage();
-const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project }>();
+const store = useStore<{ Endpoint, ProjectGlobal, Debug: Debug, ServeGlobal: ServeStateType, Project, Schema }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const serves = computed<any>(() => store.state.ServeGlobal.serves);
+const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 
 const list = computed<Endpoint[]>(() => store.state.Endpoint.listResult.list);
 let pagination = computed<PaginationConfig>(() => store.state.Endpoint.listResult.pagination);
@@ -250,6 +240,8 @@ const router = useRouter();
 type Key = ColumnProps['key'];
 const tagList: any = computed(() => store.state.Endpoint.tagList);
 const userList = computed<any>(() => store.state.Project.userList);
+const endpointTree = ref();
+const activeSchema = computed(() => store.state.Schema.activeSchema);
 
 /**
  * 表格数据
@@ -320,33 +312,98 @@ const columns = [
     slots: {customRender: 'action'},
   },
 ];
-const MenuList = [
+
+// 批量操作下拉菜单
+const BulkMenuList = computed(() => [
   {
-    key: '1',
-    auth: 'ENDPOINT-COPY',
-    label: '克隆',
-    action: (record: any) => clone(record)
+    label: '导入接口',
+    action: (_record: any) => importApi()
   },
   {
-    key: '2',
-    auth: '',
-    label: '分享链接',
-    action: (record: any) => share(record, 'IM')
+    label: '查看文档',
+    disabled: !hasSelected.value,
+    action: (_record: any) => goDocs()
   },
 
   {
-    key: '3',
-    auth: 'ENDPOINT-DELETEE',
-    label: '删除',
-    action: (record: any) => del(record)
+    label: '发布文档',
+    disabled: !hasSelected.value,
+    action: (_record: any) => {
+      showPublishDocsModal.value = true
+    }
   },
   {
-    key: '4',
-    auth: 'ENDPOINT-OUTDATED',
-    label: '过期',
-    action: (record: any) => disabled(record)
+    label: '批量修改',
+    disabled: !hasSelected.value,
+    action: (_record: any) => batchUpdate()
   },
-]
+]);
+
+
+const getMenuItems = (record) => {
+  const items = [
+    {
+      auth: '',
+      label: '克隆',
+      action: (record: any) => clone(record)
+    },
+    {
+      auth: '',
+      label: '分享链接',
+      action: (record: any) => share(record, 'IM')
+    },
+
+    {
+      auth: 'p-api-endpoint-del',
+      label: '删除',
+      show: (record) => {
+        return hasPermission('p-api-endpoint-del') || isCreator(record.createUser);
+      },
+      action: (record: any) => del(record)
+    },
+    {
+      auth: '',
+      label: '过期',
+      action: (record: any) => disabled(record)
+    },
+  ]
+
+  let copyCurlItem = {} as any
+
+  if (!record.methods || record.methods.length === 0) {
+    return items
+  }
+
+  if (record.methods.length === 1) {
+    const method = record.methods[0]
+    copyCurlItem = {
+      key: 'copyCurl',
+      auth: '',
+      label: `复制为cURL`,
+      action: (record: any) => copyCurl(record, method)
+    }
+  } else {
+    copyCurlItem = {
+      key: 'copyCurl',
+      auth: '',
+      label: `复制为cURL`,
+      children: []
+    }
+
+    record.methods.forEach(method => {
+      copyCurlItem.children.push({
+        key: 'copyCurlChild-' + method,
+        auth: '',
+        label: method,
+        action: (record: any) => copyCurl(record, method)
+      })
+    })
+  }
+
+  items.splice(2, 0, copyCurlItem);
+
+  return items
+}
 
 const selectedRowKeys = ref<Key[]>([]);
 
@@ -375,10 +432,16 @@ const fetching = ref(false);
 
 /*查看选中的接口文档*/
 function goDocs() {
-  window.open(`${window.location.origin}/docs/view?endpointIds=${selectedRowIds.value.join(',')}`, '_blank');
+  const {isWujieEnv,parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
+  if(isInLeyanWujieContainer){
+    window.open(`${parentOrigin}/lyapi/${projectName}/docsView?endpointIds=${selectedRowIds.value.join(',')}`, '_blank')
+    return;
+  }
+  const viewURL = `docs/view?endpointIds=${selectedRowIds.value.join(',')}`
+  window.open(`${window.location.origin}/${viewURL}`, '_blank');
 }
 
-const showPublishDocsModal: any = ref(false)
+const showPublishDocsModal = ref(false)
 
 // 发布文档版本
 async function publishDocs() {
@@ -457,7 +520,25 @@ async function editEndpoint(record) {
  */
 
 async function clone(record: any) {
-  await store.dispatch('Endpoint/copy', record);
+  fetching.value = true
+  const res = await store.dispatch('Endpoint/copy', record);
+  fetching.value = false
+  notifySuccess('复制成功');
+}
+
+async function copyCurl(record: any, method: string) {
+  // console.log('copyCurl', record, method)
+
+  const resp = await loadCurl({
+    endpointId: record.id,
+    interfaceMethod: method,
+    usedBy: UsedBy.InterfaceDebug,
+    environmentId: environmentId.value,
+  })
+  if (resp.code == 0) {
+    copy(resp.data)
+    notifySuccess('已复制cURL命令到剪贴板。');
+  }
 }
 
 async function disabled(record: any) {
@@ -472,11 +553,13 @@ async function del(record: any) {
     okType: 'danger',
     cancelText: () => '取消',
     onOk: async () => {
+      fetching.value = true
       const res = await store.dispatch('Endpoint/del', record);
       // // 删除后重新拉取列表，根据当前页面和当前筛选条件
       // await loadList(pagination.value.current, pagination.value.pageSize, filterState.value);
       // // 重新拉取目录树
       // await store.dispatch('Endpoint/loadCategory');
+      fetching.value = false
       if (res) {
         notifySuccess('删除成功');
       } else {
@@ -486,15 +569,7 @@ async function del(record: any) {
   });
 }
 
-async function handleCreateApi(data) {
-  await store.dispatch('Endpoint/createApi', {
-    "title": data.title,
-    "projectId": currProject.value.id,
-    "serveId": data.serveId,
-    "description": data.description || null,
-    "categoryId": data.categoryId || null,
-    "curl": data.curl || null,
-  });
+async function handleCreateApiSuccess() {
   await refreshList('reset');
   createApiModalVisible.value = false;
 }
@@ -517,12 +592,18 @@ async function handleImport() {
   console.log('success');
   showImportModal.value = false;
   refreshList('reset');
+  schema.value.loadCategory()
 }
 
 // 当前筛选条件，包括分类、服务、状态
 const filterState: any = ref({});
 
 async function selectNode(id) {
+  if (openSchemaTab.value) { // 如果此时在查看schema组件，则隐藏schema展示的内容，展示接口列表
+    openSchemaTab.value = false;
+    schema.value?.initTree();
+    store.dispatch('Schema/initSchema');
+  }
   selectedCategoryId.value = id;
   selectedRowKeys.value = [];
   selectedRow.value = {};
@@ -556,6 +637,18 @@ async function handleTableFilter(state) {
   }
 }
 
+const setActiveSchema = () => {
+  const { query }: any = router.currentRoute.value;
+  if (query.ref) {
+    const ref = JSON.parse(query.ref);
+    let activeSchema = { ...ref, key: ref.entityId };
+    store.commit('Schema/setActiveSchema', activeSchema);
+    store.commit('Schema/setSchemas', uniquArray([...store.state.Schema.schemas, activeSchema]));
+    store.dispatch('Schema/querySchema', { id: ref?.entityId });
+    openSchemaTab.value = true;
+  }
+}
+
 const filter = ref()
 
 watch(() => currProject.value.id, async (newVal, oldVal) => {
@@ -571,7 +664,10 @@ watch(() => currProject.value.id, async (newVal, oldVal) => {
     await loadList(1, pagination.value.pageSize);
     await store.dispatch('Endpoint/getEndpointTagList');
     store.commit('Endpoint/clearFilterState');
-    filter.value.resetFields()
+    filter.value?.resetFields()
+    await store.dispatch('Schema/loadCategory');
+    await store.dispatch('Endpoint/getMockExpressions');
+    setActiveSchema();
   }
 }, {
   immediate: true
@@ -584,6 +680,7 @@ async function refreshList(resetPage?: string) {
 // 页面路由卸载时，清空搜索条件
 onUnmounted(async () => {
   store.commit('Endpoint/clearFilterState');
+  store.dispatch('Schema/initSchema');
 })
 
 function paneResizeStop(pane, resizer, size) {
@@ -796,8 +893,30 @@ function showDiff(id: number) {
   store.commit('Endpoint/setDiffModalVisible', {endpointId:id,visible:true,projectId:currProject.value.id,callPlace:'list'});
 }
 
+
+/*************************************************
+ * :::: schema数据组件相关
+ ************************************************/
+const openSchemaTab = ref(false);
+const schema = ref();
+
+const showSchema = () => {
+  openSchemaTab.value = true;
+}
+
+watch(() => {
+  return activeSchema.value;
+}, val => {
+  if (!val.id) {
+    openSchemaTab.value = false;
+  }
+})
 </script>
 <style scoped lang="less">
+.endpoint-content {
+  overflow: hidden;
+  height: 100%;
+}
 
 .tag-filter-form {
   display: flex;
@@ -838,6 +957,10 @@ function showDiff(id: number) {
     min-width: 220px;
     display: flex;
     align-items: center;
+  }
+
+  :deep(.action-new) {
+    margin-right: 8px;
   }
 }
 

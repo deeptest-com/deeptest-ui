@@ -209,12 +209,19 @@ export const DESIGN_MENU_CONFIG = [
         title: '分割线',
         hideInNodeTypes: ['processor_root_default',...onlyShowDisableAndDeleteTypes],
     },
-    //    复制
+    //    克隆
     {
         key: 'copy',
         title: '克隆',
         // icon: 'arrange-disabled',
         hideInNodeTypes: ['processor_root_default', 'processor_logic_else'],
+    },
+    //    复制cURL
+    {
+        key: 'copyCurl',
+        title: '复制为cURL',
+        // icon: 'arrange-disabled',
+        showInNodeTypes: ['processor_interface_default'],
     },
     //    禁用
     {

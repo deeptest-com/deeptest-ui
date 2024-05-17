@@ -46,6 +46,7 @@ export interface SettingsType {
     settings: string;
     expandedKeys: string;
     selectedKey: string;
+    projectEnvVarsKey: string;
     skippedVersion: string;
     ignoreUtil: string,
 
@@ -97,6 +98,8 @@ export interface SettingsType {
      * pane resize
      */
     paneResizeTop: string;
+    sendMsgToLeyan: string;
+    leyanProjectName: string;
 
     /**
      * ly api 客户端本地存储的用户信息
@@ -104,6 +107,16 @@ export interface SettingsType {
     lyElectronUserInfo: string;
     SwalLeaveSetting: any;
     eventPreConditionSave: string;
+
+    /**
+     * 接口定义页面
+     */
+    eventEndpointAction: string;
+
+    /**
+     * lzos
+     */
+    lzosUserInfo: string;
 }
 
 const settings: SettingsType = {
@@ -124,6 +137,7 @@ const settings: SettingsType = {
     settings: 'settings',
     expandedKeys: 'deeptest-expandedKeys',
     selectedKey: 'deeptest-selectedKey',
+    projectEnvVarsKey: 'deeptest-projectEnvVarsKey',
     skippedVersion: 'skippedVersion',
     ignoreUtil: 'ignoreUtil',
 
@@ -163,6 +177,11 @@ const settings: SettingsType = {
     eventGetPlanDetail: 'eventGetPlanDetail',
     eventGetPlansReports: 'eventGetPlansReports',
 
+    // 向乐研基座工程发送消息（无界）
+    sendMsgToLeyan: 'sendMsgToLeyan',
+    // 乐研内对应的工程名称
+    leyanProjectName: 'LeyanProjectName',
+
     // pane Resizer
     paneResizeTop: 'paneResizeTop',
 
@@ -185,6 +204,9 @@ const settings: SettingsType = {
         },
     },
     eventPreConditionSave:'eventPreConditionSave',
+
+    eventEndpointAction: 'eventEndpointAction',
+    lzosUserInfo: 'lzosUserInfo',
 
 };
 

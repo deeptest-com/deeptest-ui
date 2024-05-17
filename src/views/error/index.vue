@@ -21,17 +21,27 @@
 import { watch, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ApplyProPermissionsModal from "@/components/ApplyProPermissions/index.vue";
+import {hideGlobalLoading} from "@/utils/handleLoad";
+import { useWujie } from '@/composables/useWujie';
 
 const router = useRouter();
+const { isWujieEnv } = useWujie();
+const bus = window?.$wujie?.bus;
 
 /**
  * 1. 用户访问无权限页面
  * 2. 用户访问的详情记录不存在
  * 3. 用户访问的页面不存在
- * */ 
+ * */
 const backHome = {
   text: '回到首页',
   action: () => {
+    if (isWujieEnv) {
+      bus.$emit('childRouterChanged', {
+        url: '/lyapi'
+      })
+      return;
+    }
     router.replace({
       path: '/'
     })
@@ -42,7 +52,7 @@ const ErrorInfoMap = {
   10700: {
     title: '项目不存在',
     desc: '抱歉，访问的项目不存在',
-    actionList: [backHome]
+    actionList: !isWujieEnv ? [backHome] : []
   },
   10600: {
     title: '无权访问',
@@ -53,12 +63,12 @@ const ErrorInfoMap = {
         applyProPermissionsModalVisible.value = true;
       },
       type: 'default',
-    }, backHome]
+    }, !isWujieEnv ? backHome : null].filter((e: any) => ![null, undefined].includes(e))
   },
   403: {
     title: '无权访问',
     desc: '抱歉，您无权访问此页面',
-    actionList: [backHome]
+    actionList:  !isWujieEnv ? [backHome] : []
   }
 }
 
@@ -69,9 +79,11 @@ const projectInfo = ref<any>(null);
 
 const handleSuccess = () => {
   applyProPermissionsModalVisible.value = false;
-  setTimeout(() => {
-    router.replace('/');
-  }, 500);
+  if (!isWujieEnv) {
+    setTimeout(() => {
+      router.replace('/');
+    }, 500);
+  }
 }
 
 watch(() => {
@@ -90,13 +102,8 @@ watch(() => {
     projectInfo.value = { projectId, projectName };
   }
 
-  const appLoadingEl = document.getElementsByClassName('app-loading');
-  if (appLoadingEl[0]) {
-    appLoadingEl[0].classList.add('hide');
-    setTimeout(() => {
-      document.body.removeChild(appLoadingEl[0]);
-    }, 600)
-  } 
+  hideGlobalLoading();
+
 }, {
   immediate: true,
 });

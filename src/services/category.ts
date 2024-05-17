@@ -1,8 +1,8 @@
 import request from '@/utils/request';
 const apiPath = 'categories';
 
-export async function loadCategory(type): Promise<any> {
-    const params = {type}
+export async function loadCategory(type: string, nodeType?: string): Promise<any> {
+    const params = {type, nodeType: nodeType || ''};
     return request({
         url: `/${apiPath}/load`,
         method: 'get',
@@ -19,7 +19,7 @@ export async function createCategory(data): Promise<any> {
         data: data,
     });
 }
-export async function updateCategory(id: number, params: any): Promise<any> {
+export async function updateCategory(params: any): Promise<any> {
     return request({
         url: `/${apiPath}`,
         method: 'PUT',
@@ -49,4 +49,8 @@ export async function moveCategory(data: any): Promise<any> {
         method: 'post',
         data: data,
     });
+}
+
+export async function copyCategory(id: number): Promise<any> {
+    return request({url: `/${apiPath}/copy/${id}`});
 }

@@ -34,7 +34,7 @@
       <div class="tab-body-schema" v-if="activeTab=== 'schema'">
         <Schema
             :value="contentStr"
-            :serveId="Number(serveId)"
+            :projectId="Number(projectId)"
             @change="handleContentChange"
             :contentStyle="tabContentStyle"/>
       </div>
@@ -133,7 +133,7 @@
   :visible="genCodeVisible" 
   @close="close"
   :contentStr="contentStr"
-  :serveId="serveId"
+  :projectId="projectId"
   />
 </template>
 <script lang="ts" setup>
@@ -153,13 +153,14 @@ import IconSvg from "@/components/IconSvg";
 import GenerateCode from './GenerateCode.vue';
 
 
-const props = defineProps(['tabContentStyle', 'contentStr', 'serveId', 'exampleStr', 'schemeVisibleKey', 'value']);
+const props = defineProps(['tabContentStyle', 'contentStr', 'exampleStr', 'schemeVisibleKey', 'value','projectId']);
 const emit = defineEmits<{
   (e: 'generateFromJSON', jsonStr?: string): void,
   (e: 'generateExample', jsonStr?: string): void,
   (e: 'changeExamples', json?: object): void,
   (e: 'changeContent', json?: object): void,
 }>();
+
 
 const content: any = ref(null);
 const examples: any = ref([]);

@@ -15,7 +15,7 @@
       </div>
     </template>
     <div class="scenario-exec-info-main">
-      <ReportBasicInfo 
+      <ReportBasicInfo
         :showBtn="true"
         :btnText="'另存为报告'"
         :items="baseInfoList || []"
@@ -24,7 +24,7 @@
       <LogTreeView :treeData="scenarioList" :isSingleScenario="true"/>
     </div>
   </a-drawer>
-  
+
 </template>
 <script setup lang="ts">
 import {computed, defineProps, defineEmits} from 'vue';
@@ -49,7 +49,6 @@ const emits = defineEmits(['onClose']);
 const store = useStore<{ Scenario, ProjectGlobal, ServeGlobal, }>();
 const reportsDetail: any = computed<PaginationConfig>(() => store.state.Scenario.reportsDetail);
 
-
 const baseInfoList = computed(() => {
   if (!reportsDetail.value) return [];
   return [
@@ -71,6 +70,7 @@ const statInfo = computed(() => {
     interfaceSkip: data.interfaceSkip || 0,
   }
 })
+
 const statisticData = computed(() => {
   const data = JSON.parse(reportsDetail.value?.stat || '{}');
   const {
@@ -87,6 +87,7 @@ const statisticData = computed(() => {
   const passRate = getPercentStr(interfacePass, interfaceCount);
   const notPassRate = getPercentStr(interfaceFail, interfaceCount);
   const notTestNumRate = getPercentStr(interfaceSkip, interfaceCount);
+
   return [
     {
       label: '通过接口',
@@ -119,7 +120,6 @@ const statisticData = computed(() => {
       value: `${checkpointPass + checkpointFail} (${checkpointPass}/${checkpointFail})`,
     },
   ]
-
 })
 
 /**

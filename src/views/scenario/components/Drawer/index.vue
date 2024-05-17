@@ -4,14 +4,14 @@
                   class="scenario-interface-design">
       <!-- 头部信息  -->
       <template #header>
-        <DetailHeader 
+        <DetailHeader
           :serial-number="detailResult.serialNumber"
-          :show-action="true" 
-          :show-detail="true" 
+          :show-action="true"
+          :show-detail="true"
           :show-share="true"
           :share-link="detailLink"
-          :name="detailResult?.name || ''" 
-          @update-title="updateTitle" 
+          :name="detailResult?.name || ''"
+          @update-title="updateTitle"
           :detail-link="detailLink"  />
       </template>
 
@@ -20,13 +20,17 @@
         <BasicInfo />
       </template>
       <template #tabHeader>
-        <DetailTabHeader 
-          :tab-list="ScenarioTabList" 
+        <DetailTabHeader
+          :tab-list="ScenarioTabList"
           :showBtn="activeKey === '1' ? true : false"
           :active-key="activeKey"
           @change-tab="changeTab">
           <template #btn>
-            <a-button class="tab-header-btn" type="primary" @click="exec">执行场景</a-button>
+            <ExecBtn placement="left">
+              <template #execBtn="{ isNotClickable }">
+                <a-button class="tab-header-btn" type="primary" @click="exec(isNotClickable)" :disabled="isNotClickable">执行场景</a-button>
+              </template>
+            </ExecBtn>
           </template>
         </DetailTabHeader>
       </template>
@@ -72,7 +76,8 @@ import DrawerLayout from "@/views/component/DrawerLayout/index.vue";
 import { DetailHeader, DetailTabHeader } from "@/views/component/DetailLayout";
 import {ProcessorInterfaceSrc} from "@/utils/enum";
 import { ScenarioTabList } from '../../config';
-
+import {useWujie} from "@/composables/useWujie";
+import ExecBtn from "@/components/ExecBtn";
 const store = useStore<{ Debug: Debug, Scenario: ScenarioStateType, ProjectGlobal, ServeGlobal, Report }>();
 const detailResult: any = computed<Scenario>(() => store.state.Scenario.detailResult);
 const debugData = computed<any>(() => store.state.Debug.debugData);
@@ -92,9 +97,15 @@ const emit = defineEmits(['ok', 'close', 'refreshList', 'closeExecDrawer']);
 const router = useRouter();
 const activeKey = ref('1');
 const stickyKey = ref(0);
-
+const {projectName,parentOrigin,isWujieEnv,isInLeyanWujieContainer} = useWujie();
 const detailLink = computed(() => {
   const { params: { projectNameAbbr } } = router.currentRoute.value;
+
+  // 无界环境，使用父级域名跳转
+  if(isInLeyanWujieContainer){
+    return `${parentOrigin}/lyapi/${projectName}/TS/${detailResult.value?.serialNumber}`;
+  }
+
   return `${window.location.origin}/${projectNameAbbr}/TS/${detailResult.value.serialNumber}`;
 })
 
@@ -129,7 +140,10 @@ function onCloseDrawer() {
   emit('close');
 }
 
-async function exec() {
+async function exec(isNotClickable) {
+  if (isNotClickable) {
+    return;
+  }
   selectEnvVisible.value = true;
   await store.dispatch('Scenario/getScenario', detailResult?.value?.id);
   execEnvId.value = detailResult?.value?.currEnvId;

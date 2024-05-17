@@ -6,6 +6,8 @@ import {WebSocket} from "@/services/websocket";
 import {getToken} from "@/utils/localToken";
 import {getUuid} from "@/utils/string";
 import { ConditionType } from '@/utils/enum';
+import { setServeUrl } from '@/utils/url';
+import {loadProjectEnvVars} from "@/utils/cache";
 
 interface CaseExecution {
     progressStatus: Ref<any>;
@@ -115,7 +117,7 @@ function useCaseExecution(): CaseExecution {
                 item.respContent = JSON.stringify({ ...item.response, cookies: item.response.cookies || [] });
                 item.reqContent = JSON.stringify({ ...item.request.debugData, ...item.request });
                 item.detail = JSON.stringify({
-                    responseDefine: (item.response.consoleLogs || []).find(e => e.conditionEntityType === ""),
+                    // responseDefine: (item.response.consoleLogs || []).find(e => e.conditionEntityType === ""),
                     checkpoint: (item.response.consoleLogs || []).filter(e => e.conditionEntityType === ConditionType.checkpoint),
                 });
                 item.resultStatus = item.status;
@@ -149,7 +151,7 @@ function useCaseExecution(): CaseExecution {
         const data = {
             userId: currUser.value.id,
             execUuid: execUuid.value,
-            serverUrl: process.env.VUE_APP_API_SERVER,
+            serverUrl: setServeUrl(process.env.VUE_APP_API_SERVER),
             token: await getToken(),
             projectId: currProject.value.id,
             baseCaseId,
@@ -159,20 +161,21 @@ function useCaseExecution(): CaseExecution {
             environmentId: environmentId,
         }
         console.log('****** send exec cases ws data', data);
-        WebSocket.sentMsg(execUuid.value, JSON.stringify({
+        WebSocket.sentMsg(execUuid.value, {
             act: 'execCases',
-            casesExecReq: data
-        }))
+            casesExecReq: data,
+            localVarsCache: await loadProjectEnvVars(currProject.value.id),
+        })
     }
     const execStop = () => {
         if (!execUuid.value) return
 
-        WebSocket.sentMsg(execUuid.value, JSON.stringify({
+        WebSocket.sentMsg(execUuid.value, {
             act: 'stop',
             execReq: {
                 execUuid: execUuid.value
             },
-        }));
+        });
     }
 
     return {
