@@ -77,7 +77,7 @@ const getTitle = computed(() => {
   }
   if (userSpaces.value.length === 0) {
     return () => {
-      return <>无法提交问题，请先到<span onClick={() => handleEditProject()} style={{ cursor: 'pointer', color: '#1677ff' }}>API</span>项目列表页编辑项目，关联承接的研发空间</>
+      return <>无法提交问题，请先到<span onClick={() => handleEditProject()} style={{ cursor: 'pointer', color: '#1677ff' }}>API项目列表页</span>编辑项目，关联承接的研发空间</>
     }
   }
   if (bugInfo.value.bugId) {
