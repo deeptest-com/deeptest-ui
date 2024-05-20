@@ -28,12 +28,14 @@ import { useStore } from 'vuex';
 import { BugIcon } from './constant';
 import { useWujie } from '@/composables/useWujie';
 import settings from '@/config/settings';
-import { notification, message } from 'ant-design-vue-v3';
 import { Modal, Select } from 'ant-design-vue';
 import { referBug } from '@/views/report/service';
-import { SmileOutlined } from '@ant-design/icons-vue';
 
-const store = useStore<{ Global }>();
+const store = useStore<{ Global, ProjectGlobal }>();
+const currProject = computed(() => {
+  return store.state.ProjectGlobal.currProject;
+})
+const { parentOrigin } = useWujie();
 const props = defineProps(['record', 'showScenarioInfo', 'expandActive']);
 const statusMap = new Map([['pass', '通过'], ['fail', '失败'],['exception','失败'], ['in-progress', '进行中']]);
 const { isInLeyanWujieContainer } = useWujie();
@@ -65,12 +67,18 @@ const progressInfo = computed(() => {
   }
 })
 
+const handleEditProject = () => {
+  window.open(`${parentOrigin}/lyapi?code=${currProject.value?.shortName}`)
+};
+
 const getTitle = computed(() => {
   if (execStatus.value !== 'end') {
     return '执行未完成，不可提交';
   }
   if (userSpaces.value.length === 0) {
-    return '无法提交问题，请先到项目列表页编辑项目，关联承接的研发空间';
+    return () => {
+      return <>无法提交问题，请先到<span onClick={() => handleEditProject()} style={{ cursor: 'pointer', color: '#1677ff' }}>API</span>项目列表页编辑项目，关联承接的研发空间</>
+    }
   }
   if (bugInfo.value.bugId) {
     return '已提交bug，点击查看详情';
@@ -93,21 +101,6 @@ const referBugCallback = async (info) => {
       bugInfo.value.bugId = info.workitemKey;
       bugInfo.value.bugType = info.workitemTypeCategory;
       store.commit('Global/setSpinning', false);
-      message.success({
-        content: () => {
-          return (
-            <span>{`已提交bug(${info.workitemKey})`},
-              <span 
-                style="cursor: pointer; color: #4096ff" 
-                onClick={() => {
-                  window.open(info.detailUrl, '_blank')
-                }}>查看详情</span>
-            </span>
-          )
-        },
-        duration: 3,
-        prefixCls: 'refer-bug-message'
-      });
     } catch(err) {
       store.commit('Global/setSpinning', false);
     }

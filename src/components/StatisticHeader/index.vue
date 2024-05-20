@@ -127,8 +127,11 @@ watch(() => {return props.params;}, async (newVal: any) => {
     }
     :deep(.ant-card-body) {
       // height: 38vh !important;
-         height: calc(100% - 57px);
+      height: calc(100% - 57px);
       padding: 0 !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   }
 }
