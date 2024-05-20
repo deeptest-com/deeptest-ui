@@ -2,12 +2,12 @@
 <template>
   <a-modal
     v-model:visible="visible"
-    title="自动生成用例（Beta）- 选择基准用例"
+    title="自动生成测试用例（Beta）- 选择基准用例"
     :confirmLoading="loading"
     @ok="handleOk"
     @cancel="handleCancel">
     <p style="padding: 0 11px;">
-      生成用例功能需要基于一个正向基准用例，针对请求参数的各种边界异常场景生成负向用例。
+      自动生成测试用例功能需要基于一个正向基准用例，针对请求参数的各种边界异常场景生成负向用例。
     </p>
     <a-form class="custom-center-form">
       <a-form-item label="基准用例">
@@ -23,7 +23,7 @@
       </template>
       <template v-else>
         <a-form-item label="名称" v-bind="validateInfos.name">
-          <a-input v-model:value="generateData.name" style="width: 200px;" placeholder="请填写用例名称"/>
+          <a-input v-model:value="generateData.name" style="width: 200px;" placeholder="请填写测试用例名称"/>
         </a-form-item>
         <a-form-item label="请求方法" v-bind="validateInfos.interfaceId">
           <a-select v-model:value="generateData.interfaceId" :options="interfacesOptions" style="width: 200px;" placeholder="请选择请求方法"></a-select>
