@@ -33,13 +33,24 @@
             },
           }"
         >
+        <template #sort="{ record }">
+          <a-button type="primary" shape="circle" size="small" :ghost="record.sort>3">{{record.sort}}</a-button>
+            <span v-if="record.hb > 0" style="color:red;margin-left: 2px;">(<ArrowUpOutlined />{{ record.hb }})</span>
+            <span v-else-if="record.hb < 0" style="color:green;margin-left: 2px;">(<ArrowDownOutlined />{{ record.hb*-1 }})</span>
+         </template>
+          <template #sortTitle>
+            <Header :title="'排名'" :prompt="'按用户创建的场景数排名，场景数相同时按照最近更新时间先后排。和上周对比排名的上下浮动。'" />
+         </template>
+         <template #scenarioTitle>
+            <Header :title="'场景数'" :prompt="'该用户创建的测试场景总数'" />
+         </template>
+         <template #interfaceTitle>
+            <Header :title="'接口数'" :prompt="'该用户添加到场景中的接口请求总数，无论该场景是否由此用户创建。'" />
+         </template>
           <template #name="{ text, record }">
             <div class="project-name" @click="goProject(record.id)">
               {{ text }}
             </div>
-          </template>
-          <template #hb="{ text }">
-            <span>{{ text > 0 ? `+${text}` : text }}</span>
           </template>
         </a-table>
       </div>
@@ -62,6 +73,8 @@ import { StateType as UserStateType } from "@/store/user";
 import { StateType as ProjectStateType } from "@/store/project";
 import { MoreOutlined } from "@ant-design/icons-vue";
 import {notifyError, notifySuccess} from "@/utils/notify";
+import { ArrowUpOutlined,ArrowDownOutlined } from "@ant-design/icons-vue";
+import Header  from "./header.vue";
 const router = useRouter();
 const store = useStore<{
   ProjectGlobal: ProjectStateType;
@@ -71,7 +84,10 @@ const store = useStore<{
 const projects = computed<any>(() => store.state.ProjectGlobal.projects);
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currentUser = computed<any>(() => store.state.User.currentUser);
-const list = computed<any[]>(() => store.state.workbench.queryResult.list);
+const list = computed<any[]>(() =>  store.state.workbench.queryResult.list.map(item => {
+  //item.hb = Math.floor(Math.random() * 100) -50;
+  return item;
+}));
 const projectId = +router.currentRoute.value.params.id;
 const timeframe = ref<string>("month");
 let pagination = computed<PaginationConfig>(
@@ -80,28 +96,21 @@ let pagination = computed<PaginationConfig>(
 
 const columns = [
   {
-    title: "排名",
     dataIndex: "sort",
+    slots: { customRender: "sort",title: 'sortTitle' },
   },
   {
     title: "用户名",
     dataIndex: "userName",
     slots: { customRender: "name" },
   },
-
   {
-    title: "较上周",
-    dataIndex: "hb",
-    slots: { customRender: "hb" },
-  },
-
-  {
-    title: "用例数",
-    dataIndex: "testCaseTotal",
-  },
-  {
-    title: "场景数",
     dataIndex: "scenarioTotal",
+    slots: { title: 'scenarioTitle' },
+  },
+  {
+    dataIndex: "testCaseTotal",
+    slots: {  title: 'interfaceTitle' },
   },
   {
     title: "最近更新日期",
