@@ -12,7 +12,7 @@
         <div class="scenario-rate-info">通过率 {{ `${progressInfo.progressValue}%` }}</div>
         <template v-if="showBugAction && isInLeyanWujieContainer">
           <a-tooltip :title="getTitle">
-            <div :class="{'scenario-report-bug': true, 'disabled': userSpaces.length === 0 || execStatus !== 'end'}" @click="handleAubmitToBug">
+            <div :class="{'scenario-report-bug': true, 'disabled': !bugInfo.bugId && (userSpaces.length === 0 || execStatus !== 'end')}" @click="handleAubmitToBug">
               <BugIcon />
             </div>
           </a-tooltip>
@@ -75,14 +75,15 @@ const getTitle = computed(() => {
   if (execStatus.value !== 'end') {
     return '执行未完成，不可提交';
   }
+  if (bugInfo.value.bugId) {
+    return '已提交bug，点击查看详情';
+  }
   if (userSpaces.value.length === 0) {
     return () => {
       return <>无法提交问题，请先到<span onClick={() => handleEditProject()} style={{ cursor: 'pointer', color: '#1677ff' }}>API项目列表页</span>编辑项目，关联承接的研发空间</>
     }
   }
-  if (bugInfo.value.bugId) {
-    return '已提交bug，点击查看详情';
-  }
+  
   return '未提交bug，点击创建并关联';
 })
 
