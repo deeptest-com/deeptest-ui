@@ -7,7 +7,7 @@ import {
     save,
     remove,
     move,
-    clone, saveDiagnoseDebugData, importInterfaces, importCurl,
+    clone, saveDiagnoseDebugData, importInterfaces, importCurl, importRecordData,
 } from './service';
 import {serverList} from "@/views/project-settings/service";
 import {genNodeMap, getNodeMap} from "@/services/tree";
@@ -22,6 +22,8 @@ export interface StateType {
 
     treeData: any[] | null;
     treeDataMap: any,
+
+    recordConf: any,
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -40,6 +42,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setInterfaceTabs: Mutation<StateType>;
         updateTabName: Mutation<StateType>;
+
+        setRecordConf: Mutation<StateType>;
     };
     actions: {
         loadTree: Action<StateType, StateType>;
@@ -51,6 +55,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         importInterfaces: Action<StateType, StateType>;
         importCurl: Action<StateType, StateType>;
+        openRecordConf: Action<StateType, StateType>;
+        importRecordData: Action<StateType, StateType>;
 
         openInterfaceTab: Action<StateType, StateType>;
         removeInterfaceTab: Action<StateType, StateType>;
@@ -71,6 +77,8 @@ const initState: StateType = {
 
     treeData: [],
     treeDataMap: {},
+
+    recordConf: null,
 };
 
 const StoreModel: ModuleType = {
@@ -119,13 +127,17 @@ const StoreModel: ModuleType = {
                 }
             });
         },
+
+        setRecordConf(state, payload) {
+            state.recordConf = payload;
+        },
     },
     actions: {
         async loadTree({ commit, state, dispatch }, params: any) {
             try {
                 const response: ResponseData = await query(params);
                 if (response.code != 0) return;
-                
+
                 commit('setQueryParams', params);
                 commit('setTreeData', response.data || []);
 
@@ -221,6 +233,19 @@ const StoreModel: ModuleType = {
                 return resp.data;
             } catch (error) {
                 return false;
+            }
+        },
+
+        async openRecordConf({commit, dispatch, state}, payload: any) {
+            commit('setRecordConf', payload)
+        },
+        async importRecordData({commit, dispatch, state}, payload: any) {
+            const jsn = await importRecordData(payload)
+            if (jsn.code === 0) {
+                dispatch('loadTree', state.queryParams);
+                return true;
+            } else {
+                return false
             }
         },
 

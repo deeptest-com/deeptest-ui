@@ -345,3 +345,13 @@ export const findParentNodeByX = (
     }
     return findParentNodeByX(node.parentNode as Element, opts);
 };
+
+export const getNodePath = (node, retPaths, treeDataMap) => {
+    if (!retPaths) retPaths = []
+
+    retPaths.unshift(node.title)
+
+    if (node.parentId > 0 && treeDataMap[node.parentId] && treeDataMap[node.parentId].parentId > 0) {
+        getNodePath(treeDataMap[node.parentId], retPaths, treeDataMap)
+    }
+}

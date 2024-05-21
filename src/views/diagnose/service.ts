@@ -66,3 +66,11 @@ export async function importCurl(data): Promise<any> {
         data: data,
     });
 }
+
+export async function importRecordData(data): Promise<any> {
+    return request({
+        url: `/${apiPath}/importRecordData`,
+        method: 'POST',
+        data: data,
+    });
+}

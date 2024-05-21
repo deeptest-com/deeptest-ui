@@ -116,7 +116,10 @@ import {loadCurl} from "@/views/component/debug/service";
 import {StateType as DebugStateType} from "@/views/component/debug/store";
 import {UsedBy} from "@/utils/enum";
 import useCopy from "@/composables/useClipboard";
+import {getNodePath} from "@/utils/dom";
+import {isLeyan} from "@/utils/comm";
 
+const isLyEnv = isLeyan()
 const { copy } = useCopy();
 
 const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType,  Debug: DebugStateType,
@@ -335,6 +338,15 @@ const importCurlCancel = () => {
   curlImportVisible.value = false
 }
 
+const openRecordConf = (node) => {
+  console.log('openRecordConf', node)
+  let paths = []
+  getNodePath(node, paths, treeDataMap.value)
+
+  const data = {targetId: node.id, targetName: paths.join(' -> ')}
+  store.dispatch('DiagnoseInterface/openRecordConf', data)
+}
+
 async function onDrop(info: DropEvent) {
   if (info.node?.dataRef?.type === "interface") {
     message.error('仅可移动到目录下');
@@ -403,6 +415,14 @@ const DropdownMenuList = [
     action: (nodeProps) => importCurl(nodeProps.dataRef),
   },
 ]
+
+if (!isLyEnv) {
+  DropdownMenuList.push({
+    label: '录制请求',
+    ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
+    action: (nodeProps) => openRecordConf(nodeProps.dataRef),
+  })
+}
 
 onMounted(async () => {
   console.log('onMounted')
