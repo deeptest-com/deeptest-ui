@@ -1,19 +1,22 @@
 <template>
   <div class="diagnose-interface-design-main">
       <div id="diagnose-interface-debug-panel">
+
         <Tabs
           class="diagnose-tabs-full-height"
           type="editable-card"
           :closable="true"
-          v-if="interfaceTabs?.length"
-          :activeKey="interfaceId"
+          v-if="interfaceTabs?.length || recordConf"
+          :activeKey="recordConf ? -1 : interfaceId"
           @edit="onTabEdit"
           @change="changeTab">
+
           <TabPane
             v-for="tab in interfaceTabs"
             :title="tab.title"
             :key="tab.id"
             class="dp-relative">
+
             <template #tab>
               <a-dropdown :trigger="['contextmenu']" :visible="visible[tab.id]">
                 <div v-on-click-outside="cancelVisible" @contextmenu="openDropdown(tab)">
@@ -26,6 +29,7 @@
                 </template>
               </a-dropdown>
             </template>
+
             <a-spin :spinning="spinning">
               <div class="interface-tabs-content">
                 <template v-if="interfaceData?.type === 'interface'" >
@@ -42,7 +46,22 @@
                 </template>
               </div>
             </a-spin>
+
           </TabPane>
+
+          <TabPane class="dp-relative"
+                   v-if="recordConf"
+                   title="请求录制"
+                   :key="-1">
+            <template #tab>请求录制</template>
+
+            <a-spin :spinning="spinning">
+              <div class="interface-tabs-content">
+                <RequestRecord />
+              </div>
+            </a-spin>
+          </TabPane>
+
           <template #addIcon>
             <div
               :class="['extra-menu', dropdownVisible ? 'visible' : '']"
@@ -54,7 +73,9 @@
               </a-menu>
             </div>
           </template>
+
         </Tabs>
+
         <div  v-else style="margin-top: 36px;">
           <a-empty  :description="'请先在左侧目录上选择需要调试的接口'"/>
         </div>
@@ -77,6 +98,7 @@ import { vOnClickOutside } from '@vueuse/components';
 import DebugComp from '@/views/component/debug/index.vue';
 import WebsocketDebug from '../websocket/index.vue';
 import GrpcDebug from '../grpc/index.vue';
+import RequestRecord from "../components/record.vue";
 
 import {prepareDataForRequest} from "@/views/component/debug/service";
 import {StateType as Debug} from "@/views/component/debug/store";
@@ -96,6 +118,7 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 
 const interfaceId = computed<any>(() => store.state.DiagnoseInterface.interfaceId);
 const interfaceData = computed<any>(() => store.state.DiagnoseInterface.interfaceData);
+const recordConf = computed<any>(() => store.state.DiagnoseInterface.recordConf);
 const interfaceTabs = computed<any>(() => {
   const tabs = store.state.DiagnoseInterface.interfaceTabs;
   (tabs || []).forEach(e => {
@@ -103,6 +126,7 @@ const interfaceTabs = computed<any>(() => {
   })
   return tabs;
 });
+
 const activeTabKey = ref();
 const spinning = computed(()=> store.state.Global.spinning );
 
@@ -194,6 +218,14 @@ watch(() => { return currProject.value.id },(newVal) => {
   }
 },{immediate:true})
 
+watch((recordConf), async (newVal) => {
+  console.log('watch recordConf')
+  if (recordConf.value) {
+    activeTabKey.value = -1
+    return
+  }
+}, { immediate: true, deep: true })
+
 const saveDiagnoseInterface = async (e) => {
   store.commit("Global/setSpinning",true)
   console.log('saveDiagnoseInterface')
@@ -216,7 +248,10 @@ const saveDiagnoseInterface = async (e) => {
 const onTabEdit = (key, action) => {
   console.log('onTabEdit', key, action)
   if (action === 'remove') {
-    store.dispatch('DiagnoseInterface/removeInterfaceTab', +key);
+    if (+key === -1)
+      store.commit('DiagnoseInterface/setRecordConf', null);
+    else
+      store.dispatch('DiagnoseInterface/removeInterfaceTab', +key);
   }
 };
 
