@@ -6,8 +6,8 @@
           class="diagnose-tabs-full-height"
           type="editable-card"
           :closable="true"
-          v-if="interfaceTabs?.length || recordConf"
-          :activeKey="recordConf ? -1 : interfaceId"
+          v-if="interfaceTabs?.length"
+          :activeKey="interfaceId"
           @edit="onTabEdit"
           @change="changeTab">
 
@@ -44,22 +44,14 @@
                 <template v-else-if="interfaceData?.type === 'grpc_interface'" >
                   <GrpcDebug />
                 </template>
+
+                <template v-else-if="interfaceData?.type === 'record'" >
+                  <RequestRecord />
+                </template>
+
               </div>
             </a-spin>
 
-          </TabPane>
-
-          <TabPane class="dp-relative"
-                   v-if="recordConf"
-                   title="请求录制"
-                   :key="-1">
-            <template #tab>请求录制</template>
-
-            <a-spin :spinning="spinning">
-              <div class="interface-tabs-content">
-                <RequestRecord />
-              </div>
-            </a-spin>
           </TabPane>
 
           <template #addIcon>
@@ -118,7 +110,6 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 
 const interfaceId = computed<any>(() => store.state.DiagnoseInterface.interfaceId);
 const interfaceData = computed<any>(() => store.state.DiagnoseInterface.interfaceData);
-const recordConf = computed<any>(() => store.state.DiagnoseInterface.recordConf);
 const interfaceTabs = computed<any>(() => {
   const tabs = store.state.DiagnoseInterface.interfaceTabs;
   (tabs || []).forEach(e => {
@@ -191,6 +182,8 @@ function changeTab(key) {
 const usedBy = UsedBy.DiagnoseDebug
 const loadDebugData = debounce(async () => {
   console.log('loadDebugData')
+  if (interfaceData.value.id <= 9) return // is record tab
+
   store.commit("Global/setSpinning",true)
   await store.dispatch('Debug/loadDataAndInvocations', {
     diagnoseInterfaceId: interfaceData.value.id,
@@ -218,14 +211,6 @@ watch(() => { return currProject.value.id },(newVal) => {
   }
 },{immediate:true})
 
-watch((recordConf), async (newVal) => {
-  console.log('watch recordConf')
-  if (recordConf.value) {
-    activeTabKey.value = -1
-    return
-  }
-}, { immediate: true, deep: true })
-
 const saveDiagnoseInterface = async (e) => {
   store.commit("Global/setSpinning",true)
   console.log('saveDiagnoseInterface')
@@ -248,10 +233,7 @@ const saveDiagnoseInterface = async (e) => {
 const onTabEdit = (key, action) => {
   console.log('onTabEdit', key, action)
   if (action === 'remove') {
-    if (+key === -1)
-      store.commit('DiagnoseInterface/setRecordConf', null);
-    else
-      store.dispatch('DiagnoseInterface/removeInterfaceTab', +key);
+    store.dispatch('DiagnoseInterface/removeInterfaceTab', +key);
   }
 };
 

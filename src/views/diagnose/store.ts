@@ -28,8 +28,6 @@ export interface StateType {
 
     treeData: any[] | null;
     treeDataMap: any,
-
-    recordConf: any,
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -51,8 +49,6 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setInterfaceTabs: Mutation<StateType>;
         updateTabName: Mutation<StateType>;
-
-        setRecordConf: Mutation<StateType>;
     };
     actions: {
         loadTree: Action<StateType, StateType>;
@@ -69,7 +65,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         importInterfaces: Action<StateType, StateType>;
         importCurl: Action<StateType, StateType>;
-        openRecordConf: Action<StateType, StateType>;
+        openRecordTab: Action<StateType, StateType>;
         importRecordData: Action<StateType, StateType>;
 
         openInterfaceTab: Action<StateType, StateType>;
@@ -94,8 +90,6 @@ const initState: StateType = {
 
     treeData: [],
     treeDataMap: {},
-
-    recordConf: null,
 };
 
 const StoreModel: ModuleType = {
@@ -150,10 +144,6 @@ const StoreModel: ModuleType = {
                     item.title = payload.title
                 }
             });
-        },
-
-        setRecordConf(state, payload) {
-            state.recordConf = payload;
         },
     },
     actions: {
@@ -260,8 +250,18 @@ const StoreModel: ModuleType = {
             }
         },
 
-        async openRecordConf({commit, dispatch, state}, payload: any) {
-            commit('setRecordConf', payload)
+        async openRecordTab({commit, dispatch, state}, payload: any) {
+            const tabs = state.interfaceTabs
+            const found = tabs.find(function (item, index, arr) {
+                return item.id === payload.id
+            })
+            if (!found) {
+                tabs.push(payload)
+                commit('setInterfaceTabs', tabs);
+            }
+
+            commit('setInterfaceData', payload)
+            commit('setInterfaceId', payload.id);
         },
         async importRecordData({commit, dispatch, state}, payload: any) {
             const jsn = await importRecordData(payload)
@@ -346,7 +346,7 @@ const StoreModel: ModuleType = {
                 const tabs = state.interfaceTabs
 
                 const found = state.interfaceTabs.find(function (item, index, arr) {
-                    return item.id === state.interfaceData.id
+                    return item.id === state.interfaceData.id // state.interfaceData updated in getInterface action
                 })
 
                 if (!found) {

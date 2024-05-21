@@ -212,8 +212,7 @@ let selectedKeys = ref<number[]>([]);
 const emit = defineEmits(['select']);
 
 function selectNode(keys, e) {
-  if (e?.node?.dataRef?.type === 'dir') {
-    // 目录不可被点击
+  if (e?.node?.dataRef?.type === 'dir') { // 目录不可被点击
     return;
   }
 
@@ -338,13 +337,13 @@ const importCurlCancel = () => {
   curlImportVisible.value = false
 }
 
-const openRecordConf = (node) => {
-  console.log('openRecordConf', node)
+const openRecordTab = (node) => {
+  console.log('openRecordTab', node)
   let paths = []
   getNodePath(node, paths, treeDataMap.value)
 
-  const data = {targetId: node.id, targetName: paths.join(' -> ')}
-  store.dispatch('DiagnoseInterface/openRecordConf', data)
+  const data = {targetId: node.id, targetName: paths.join(' -> '), id: -1, title: '请求录制', type: 'record'}
+  store.dispatch('DiagnoseInterface/openRecordTab', data)
 }
 
 async function onDrop(info: DropEvent) {
@@ -432,7 +431,7 @@ if (!isLyEnv) {
   DropdownMenuList.push({
     label: '录制请求',
     ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
-    action: (nodeProps) => openRecordConf(nodeProps.dataRef),
+    action: (nodeProps) => openRecordTab(nodeProps.dataRef),
   })
 }
 

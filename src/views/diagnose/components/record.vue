@@ -119,7 +119,7 @@ import {StateType as ServeStateType} from "@/store/serve";
 import {requestMethodOpts} from "@/config/constant";
 
 const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType, ServeGlobal: ServeStateType }>();
-const recordConf = computed<any>(() => store.state.DiagnoseInterface.recordConf);
+const recordConf = computed<any>(() => store.state.DiagnoseInterface.interfaceData);
 const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 
 const useForm = Form.useForm;
