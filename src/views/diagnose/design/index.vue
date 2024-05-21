@@ -168,17 +168,6 @@ const onContextMenuClick = (evt, record?: any) => {
   }
 }
 
-function changeTab(key) {
-  console.log('changeTab', key)
-  activeTabKey.value = key
-  store.commit('DiagnoseInterface/setInterfaceId', key)
-
-  const found = interfaceTabs.value.find(function (item, index, arr) {
-    return item.id === +key
-  })
-  store.dispatch('DiagnoseInterface/openInterfaceTab', found);
-}
-
 const usedBy = UsedBy.DiagnoseDebug
 const loadDebugData = debounce(async () => {
   console.log('loadDebugData')
@@ -230,6 +219,20 @@ const saveDiagnoseInterface = async (e) => {
   store.commit("Global/setSpinning",false)
 }
 
+function changeTab(key) {
+  console.log('changeTab', key)
+  activeTabKey.value = key
+  store.commit('DiagnoseInterface/setInterfaceId', key)
+
+  const found = interfaceTabs.value.find(function (item, index, arr) {
+    return item.id === +key
+  })
+
+  if (found.id === -1)
+    store.dispatch('DiagnoseInterface/openRecordTab', found);
+  else
+    store.dispatch('DiagnoseInterface/openInterfaceTab', found);
+}
 const onTabEdit = (key, action) => {
   console.log('onTabEdit', key, action)
   if (action === 'remove') {
