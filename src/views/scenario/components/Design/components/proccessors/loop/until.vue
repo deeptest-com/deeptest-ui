@@ -6,7 +6,7 @@
       <div>
         <a-form :label-col="{ style: { width: '96px' } }" :wrapper-col="wrapperCol">
 
-          <a-form-item label="判断表达式" v-bind="validateInfos.untilExpression">
+          <a-form-item label="结束条件" v-bind="validateInfos.untilExpression">
             <a-input v-model:value="modelRef.untilExpression"
                      @blur="validate('untilExpression', { trigger: 'blur' }).catch(() => {})"/>
             <div class="dp-input-tip">{{t('tips_expression_bool', {name: '{name}', number: '{+number}'})}}</div>
