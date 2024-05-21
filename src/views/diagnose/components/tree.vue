@@ -417,6 +417,18 @@ const DropdownMenuList = [
 ]
 
 if (!isLyEnv) {
+  DropdownMenuList.splice(1, 0,
+      {
+        label: '新建WebSocket请求',
+        ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
+        action: (nodeProps) => create(nodeProps.dataRef?.id, 'websocket_interface'),
+      },
+      {
+        label: '新建gRPC请求',
+        ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
+        action: (nodeProps) => create(nodeProps.dataRef?.id, 'grpc_interface'),
+      })
+
   DropdownMenuList.push({
     label: '录制请求',
     ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',

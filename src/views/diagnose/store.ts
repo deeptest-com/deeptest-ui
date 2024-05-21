@@ -8,6 +8,9 @@ import {
     remove,
     move,
     clone, saveDiagnoseDebugData, importInterfaces, importCurl, importRecordData,
+    getWebsocketDebugData, saveWebsocketDebugData,
+    getGrpcDebugData, saveGrpcDebugData,
+
 } from './service';
 import {serverList} from "@/views/project-settings/service";
 import {genNodeMap, getNodeMap} from "@/services/tree";
@@ -16,6 +19,9 @@ export interface StateType {
     interfaceId: number;
     interfaceData: any;
     interfaceTabs: any[];
+
+    websocketDebugData: any;
+    grpcDebugData: any;
 
     queryParams: any;
     serveServers: [],
@@ -31,6 +37,9 @@ export interface ModuleType extends StoreModuleType<StateType> {
     mutations: {
         setInterfaceId: Mutation<StateType>;
         setInterfaceData: Mutation<StateType>;
+
+        setWebsocketDebugData: Mutation<StateType>;
+        setGrpcDebugData: Mutation<StateType>;
 
         setQueryParams: Mutation<StateType>;
         setServeServers: Mutation<StateType>;
@@ -53,6 +62,11 @@ export interface ModuleType extends StoreModuleType<StateType> {
         moveInterface: Action<StateType, StateType>;
         cloneInterface: Action<StateType, StateType>;
 
+        loadWebsocketDebugData: Action<StateType, StateType>;
+        saveWebsocketDebugData: Action<StateType, StateType>;
+        loadGrpcDebugData: Action<StateType, StateType>;
+        saveGrpcDebugData: Action<StateType, StateType>;
+
         importInterfaces: Action<StateType, StateType>;
         importCurl: Action<StateType, StateType>;
         openRecordConf: Action<StateType, StateType>;
@@ -71,6 +85,9 @@ const initState: StateType = {
     interfaceId: 0,
     interfaceData: null,
     interfaceTabs: [],
+
+    websocketDebugData: {message: '{}'},
+    grpcDebugData: {},
 
     queryParams: {},
     serveServers: [],
@@ -93,6 +110,13 @@ const StoreModel: ModuleType = {
         },
         setInterfaceData(state, payload) {
             state.interfaceData = payload;
+        },
+
+        setWebsocketDebugData(state, payload) {
+            state.websocketDebugData = payload;
+        },
+        setGrpcDebugData(state, payload) {
+            state.grpcDebugData = payload;
         },
 
         setTreeData(state, data) {
@@ -246,6 +270,53 @@ const StoreModel: ModuleType = {
                 return true;
             } else {
                 return false
+            }
+        },
+        // websocket
+        async loadWebsocketDebugData({ commit, state, dispatch }, params: any) {
+            try {
+                const resp: ResponseData = await getWebsocketDebugData(params)
+                if (resp.code == 0) {
+                    commit('setWebsocketDebugData', resp.data);
+                    return true
+                }
+
+                return false;
+
+            } catch (error) {
+                return false;
+            }
+        },
+        async saveWebsocketDebugData({ commit, state, dispatch }, data: any) {
+            try {
+                const resp: ResponseData = await saveWebsocketDebugData(data)
+                return resp.code == 0;
+            } catch (error) {
+                return false;
+            }
+        },
+
+        // grpc
+        async loadGrpcDebugData({ commit, state, dispatch }, params: any) {
+            try {
+                const resp: ResponseData = await getGrpcDebugData(params)
+                if (resp.code == 0) {
+                    commit('setGrpcDebugData', resp.data);
+                    return true
+                }
+
+                return false;
+
+            } catch (error) {
+                return false;
+            }
+        },
+        async saveGrpcDebugData({ commit, state, dispatch }, data: any) {
+            try {
+                const resp: ResponseData = await saveGrpcDebugData(data)
+                return resp.code == 0;
+            } catch (error) {
+                return false;
             }
         },
 

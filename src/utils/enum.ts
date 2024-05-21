@@ -36,6 +36,12 @@ export enum WsMsgCategory {
     InProgress = "in_progress",
     End = "end",
     Result = "result",
+    Exception       = "exception",
+}
+export enum WsMsgProgress {
+    NotStart = "not_start",
+    InProgress = "in_progress",
+    End = "end",
 }
 
 export enum ProcessorAction {

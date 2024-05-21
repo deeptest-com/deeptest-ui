@@ -28,17 +28,25 @@
             </template>
             <a-spin :spinning="spinning">
               <div class="interface-tabs-content">
-                <template v-if="debugData?.method" >
+                <template v-if="interfaceData?.type === 'interface'" >
                   <DebugComp :onSaveDebugData="saveDiagnoseInterface"
-                              :baseUrlDisabled="false" />
+                             :baseUrlDisabled="false" />
+                </template>
+
+                <template v-else-if="interfaceData?.type === 'websocket_interface'" >
+                  <WebsocketDebug />
+                </template>
+
+                <template v-else-if="interfaceData?.type === 'grpc_interface'" >
+                  <GrpcDebug />
                 </template>
               </div>
             </a-spin>
           </TabPane>
           <template #addIcon>
-            <div 
-              :class="['extra-menu', dropdownVisible ? 'visible' : '']" 
-              @mouseenter="dropdownVisible = true" 
+            <div
+              :class="['extra-menu', dropdownVisible ? 'visible' : '']"
+              @mouseenter="dropdownVisible = true"
               @mouseleave="dropdownVisible = false">
               <span style="cursor: pointer;"><EllipsisOutlined /></span>
               <a-menu @click="e => onContextMenuClick(e)" :selectedKeys="null">
@@ -67,6 +75,9 @@ import { EllipsisOutlined } from '@ant-design/icons-vue';
 import { vOnClickOutside } from '@vueuse/components';
 
 import DebugComp from '@/views/component/debug/index.vue';
+import WebsocketDebug from '../websocket/index.vue';
+import GrpcDebug from '../grpc/index.vue';
+
 import {prepareDataForRequest} from "@/views/component/debug/service";
 import {StateType as Debug} from "@/views/component/debug/store";
 
@@ -138,7 +149,7 @@ const onContextMenuClick = (evt, record?: any) => {
       store.dispatch('Debug/resetDataAndInvocations');
       break;
     default:
-      break;  
+      break;
   }
 }
 
@@ -252,7 +263,7 @@ const getTitle = (title) => {
     ) {
       height: 100%;
     }
-    
+
 
     :deep(.ant-tabs.diagnose-tabs-full-height > .ant-tabs-nav > .ant-tabs-nav-wrap > .ant-tabs-nav-list > .ant-tabs-tab) {
       display: flex;
