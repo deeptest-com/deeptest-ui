@@ -21,6 +21,7 @@
 <script setup lang="ts">
 import {WsMsgCategory} from '@/utils/enum';
 import {defineProps, defineEmits, computed, onUnmounted, ref, watch, onMounted} from 'vue';
+import {progressValue} from "@/composables/useExecLogs";
 
 
 const props = defineProps(['percent', 'execStatus']);
@@ -58,6 +59,9 @@ watch(() => {
 }, (newVal) => {
   if(newVal === "cancel" || newVal === "failed" || newVal === "exception") {
     timeId.value && window.clearInterval(timeId.value);
+
+    if(newVal === "failed" || newVal === "exception") percentVal.value = 100;
+
     return;
   }
   if (newVal === "end") {
