@@ -114,7 +114,6 @@ const ActionList = (opts: { list: MenuItem[], record: Recordable}) => {
     <div class="action-list">
       {list.map((actionItem: MenuItem) => (
         <div class="action-item" onClick={() => actionItem.action(record)}>
-          {JSON.stringify(actionItem)}
           { actionItem.checkExecClickAble ? renderExecBtn(actionItem) : actionItem.customLoadingRender ? 
             <a-tooltip title={record.loading ? (actionItem.loadingText || null) : actionItem.label} placement="top">
               {customRenderLoadingLabel(actionItem)}

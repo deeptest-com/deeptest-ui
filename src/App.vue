@@ -217,7 +217,7 @@ export default defineComponent({
     watch(() => {
       return currProject.value.id;
     }, async (val, oldv) => {
-      if (val) {
+      if (val && val !== oldv) {
         store.dispatch('Global/getIntegrationDetail', {
           projectId: val,
         })

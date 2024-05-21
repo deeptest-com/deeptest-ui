@@ -61,7 +61,7 @@
   </a-spin>
 </template>
 <script setup lang="ts">
-import { ref, computed, watch, defineEmits } from 'vue';
+import { ref, computed, watch, defineEmits, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { BarsOutlined, CodeOutlined } from '@ant-design/icons-vue';
 import EditAndShowField from '@/components/EditAndShow/index.vue';
@@ -198,6 +198,10 @@ watch(() => {
 }, {
   immediate: true
 })
+
+onMounted(() => {
+  store.dispatch('Endpoint/getMockExpressions');
+});
 </script>
 
 <style scoped lang="less">
