@@ -73,7 +73,7 @@
         <a-input v-model:value="model.value"
                  @blur="validate('value', { trigger: 'blur' }).catch(() => {})" />
         <div class="dp-input-tip">
-          {{t('tips_expression_value', {name: '{name}', number: '{+number}'})}}
+          {{t('tips_expression_value')}}
         </div>
       </a-form-item>
 

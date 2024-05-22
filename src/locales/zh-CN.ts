@@ -183,9 +183,9 @@ export default {
     'block': '阻塞',
     'unknown': '位置',
 
-    'tips_use_variable': '字符串中可引用变量，如user-${name}。',
-    'tips_expression_value': '表达式中的字符串请用英文单引号括起，如\'foo\'。可引用形如${name}的变量，使用加号${number}可获取数字值。',
-    'tips_expression_bool': '该表达式需返回一个布尔值。字符串请用英文单引号括起，如\'foo\'。\n可引用形如${name}的变量，使用加号${number}可获取数字值。',
+    'tips_use_variable': `输入字符串，可嵌入多个形如\${expression}的JS表达式或变量。`,
+    'tips_expression_value': `输入JS表达式，支持引用接口和场景处理器中生成的变量。`,
+    'tips_expression_bool': `输入结果为布尔值的JS表达式，支持引用接口和场景处理器中生成的变量。`,
 
     'extractor_err': '提取失败',
     'extractor_err_short': '失败',
