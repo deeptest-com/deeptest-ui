@@ -164,7 +164,7 @@ const StoreModel: ModuleType = {
             }
         },
         async getInterface({ commit }, node: any) {
-            if (!node || node.type !== 'interface') {
+            if (!node || node.type === 'dir') {
                 commit('setInterfaceData', null)
                 return
             }

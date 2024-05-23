@@ -18,6 +18,13 @@ export enum UsedBy {
     OpenAPIYaml = "openapi_yaml",
 }
 
+export enum DiagnoseInterfaceType {
+    Dir = "dir",
+    Interface = "interface",
+    WebsocketInterface  = "websocket_interface",
+    GrpcInterface = "grpc_interface",
+}
+
 export enum ProcessorInterfaceSrc {
     Define = "define",
     Case = "case",

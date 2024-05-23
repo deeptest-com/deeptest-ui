@@ -32,6 +32,7 @@
 
             <a-spin :spinning="spinning">
               <div class="interface-tabs-content">
+
                 <template v-if="interfaceData?.type === 'interface'" >
                   <DebugComp :onSaveDebugData="saveDiagnoseInterface"
                              :baseUrlDisabled="false" />
@@ -96,7 +97,7 @@ import {prepareDataForRequest} from "@/views/component/debug/service";
 import {StateType as Debug} from "@/views/component/debug/store";
 
 import {notifyError, notifySuccess} from "@/utils/notify";
-import {UsedBy} from "@/utils/enum";
+import {DiagnoseInterfaceType, UsedBy} from "@/utils/enum";
 import {StateType as ServeStateType} from "@/store/serve";
 import {StateType as ProjectStateType} from "@/store/project";
 import {StateType as DiagnoseInterfaceStateType} from '../store';
@@ -174,10 +175,26 @@ const loadDebugData = debounce(async () => {
   if (interfaceData.value.id <= 9) return // is record tab
 
   store.commit("Global/setSpinning",true)
-  await store.dispatch('Debug/loadDataAndInvocations', {
-    diagnoseInterfaceId: interfaceData.value.id,
-    usedBy: usedBy,
-  });
+
+  if (interfaceData.value.type === DiagnoseInterfaceType.Interface) {
+    await store.dispatch('Debug/loadDataAndInvocations', {
+      diagnoseInterfaceId: interfaceData.value.id,
+      usedBy: usedBy,
+    })
+  } else if (interfaceData.value.type === DiagnoseInterfaceType.WebsocketInterface) {
+    store.commit('Debug/setDebugData', {});
+    await store.dispatch('DiagnoseInterface/loadWebsocketDebugData', {
+      diagnoseInterfaceId: interfaceData.value.id,
+      usedBy: usedBy,
+    })
+  } else if (interfaceData.value.type === DiagnoseInterfaceType.GrpcInterface) {
+    store.commit('Debug/setDebugData', {});
+    await store.dispatch('DiagnoseInterface/loadGrpcDebugData', {
+      diagnoseInterfaceId: interfaceData.value.id,
+      usedBy: usedBy,
+    })
+  }
+
   store.commit("Global/setSpinning",false)
 }, 300)
 
