@@ -38,7 +38,7 @@
           <div class="dp-input-tip">数据查询返回的结果是个数组，可使用表达式$[0].name读取第一行记录的name属性。</div>
           <!-- <div @click="openHelp()" class="dp-link-primary">
                 了解更多 <ArrowRightOutlined/>
-               </div>-->
+               </div> -->
         </div>
 
       </a-form-item>

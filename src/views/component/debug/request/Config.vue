@@ -3,14 +3,13 @@
     <a-tabs v-model:activeKey="activeKey" class="dp-tabs-full-height">
 
       <a-tab-pane key="query-param" :tab="getTabTitle('queryParams')">
-        <GlobalParameters :in="'query'" />
-        <QueryParameters v-if="activeKey === 'query-param'" />
+        <div style="height: 100%; overflow-y: scroll">
+          <GlobalParameters class="dp-unset-height" :in="'query'" />
+          <QueryParameters class="dp-unset-height" v-if="activeKey === 'query-param'" />
+        </div>
       </a-tab-pane>
 
       <a-tab-pane key="path-param" :tab="getTabTitle('pathParams')">
-        <!--
-        <GlobalParameters :in="'path'" />
-        -->
         <PathParameters />
       </a-tab-pane>
 
@@ -19,15 +18,17 @@
       </a-tab-pane>
 
       <a-tab-pane key="header" :tab="getTabTitle('headers')">
-        <div style="height: 100%;overflow-y: scroll">
-          <GlobalParameters style="overflow: unset;max-height: max-content;" :in="'header'" />
-          <RequestHeaders style="overflow: unset;max-height: max-content;" v-if="activeKey === 'header'" />
+        <div style="height: 100%; overflow-y: scroll">
+          <GlobalParameters class="dp-unset-height" :in="'header'" />
+          <RequestHeaders class="dp-unset-height" v-if="activeKey === 'header'" />
         </div>
       </a-tab-pane>
 
       <a-tab-pane key="cookie" :tab="getTabTitle('cookies')">
-        <GlobalParameters :in="'cookie'" />
-        <Cookie v-if="activeKey === 'cookie'" />
+        <div style="height:100%; overflow-y:scroll">
+          <GlobalParameters class="dp-unset-height" :in="'cookie'" />
+          <Cookie class="dp-unset-height" v-if="activeKey === 'cookie'" />
+        </div>
       </a-tab-pane>
 
       <a-tab-pane key="auth" tab="授权">
