@@ -183,7 +183,7 @@ export default {
     'block': '阻塞',
     'unknown': '位置',
 
-    'tips_use_variable': `输入字符串，可嵌入多个形如\${expression}的JS表达式或变量。`,
+    'tips_use_variable': `输入字符串，可嵌入多个形如\${param1}的JS表达式或变量。`,
     'tips_expression_value': `输入JS表达式，支持引用接口和场景处理器中生成的变量。`,
     'tips_expression_bool': `输入结果为布尔值的JS表达式，支持引用接口和场景处理器中生成的变量。`,
 

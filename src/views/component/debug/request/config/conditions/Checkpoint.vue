@@ -28,7 +28,7 @@
         </a-select>
       </a-form-item>
 
-      <!-- for extractor --> ={{model.type}}=
+      <!-- for extractor -->
       <template v-if="model.type === 'extractor'">
         <a-form-item label="提取方法" v-bind="validateInfos.type" required>
           <a-select v-model:value="model.extractorType"

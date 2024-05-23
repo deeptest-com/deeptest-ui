@@ -28,16 +28,17 @@
       <a-form-item label="SQL语句" v-bind="validateInfos.sql" required>
         <a-textarea v-model:value="model.sql"
                     @blur="validate('sql', { trigger: 'blur' }).catch(() => {})"/>
+        <div class="dp-input-tip">{{t('tips_use_variable', {param1: '{expression}'})}}</div>
       </a-form-item>
 
       <a-form-item label="JSONPath">
         <a-input v-model:value="model.jsonPath" />
 
         <div class="tips">
-          <div>数据查询返回的结果是个数组，可使用表达式$[0].name读取第一行记录的name属性。</div>
-          <!--          <div @click="openHelp()" class="dp-link-primary">
-                      了解更多 <ArrowRightOutlined/>
-                    </div>-->
+          <div class="dp-input-tip">数据查询返回的结果是个数组，可使用表达式$[0].name读取第一行记录的name属性。</div>
+          <!-- <div @click="openHelp()" class="dp-link-primary">
+                了解更多 <ArrowRightOutlined/>
+               </div>-->
         </div>
 
       </a-form-item>

@@ -7,7 +7,7 @@
           <a-form-item label="输出" v-bind="validateInfos.rightValue">
             <a-input v-model:value="modelRef.rightValue"
                      @blur="validate('rightValue', { trigger: 'blur' }).catch(() => {})" />
-            <div class="dp-input-tip pre-line">{{t('tips_use_variable')}}</div>
+            <div class="dp-input-tip pre-line">{{t('tips_use_variable', {param1: '{expression}'})}}</div>
           </a-form-item>
 
           <a-form-item label="备注" v-bind="validateInfos.comments">
