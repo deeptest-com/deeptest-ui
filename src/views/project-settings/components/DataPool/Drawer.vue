@@ -58,7 +58,7 @@
           </a-form-item>
 
           <a-form-item :wrapper-col="{ span: wrapperCol.span, offset: labelCol.span }">
-            请求中可使用形如${_dp(myData, A, 1)}的表达式引用数据池，追回一个参数支持数字（索引）、seq（顺序）和rand（随机）。
+            请求中可使用形如${_dp('myDatapool', 'colA', 1)}的表达式引用数据池，追回一个参数支持数字（索引）、seq（顺序）和rand（随机）。
           </a-form-item>
 
           <a-form-item :wrapper-col="{ span: wrapperCol.span, offset: labelCol.span }">
