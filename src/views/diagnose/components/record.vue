@@ -107,13 +107,12 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, computed, watch, ref, onUnmounted, provide } from 'vue';
-import { useStore } from 'vuex';
-import {CheckCircleOutlined, CloseCircleOutlined, RightOutlined, DownOutlined,} from '@ant-design/icons-vue';
+import {computed, ref, watch} from 'vue';
+import {useStore} from 'vuex';
+import {CheckCircleOutlined, CloseCircleOutlined, DownOutlined, RightOutlined,} from '@ant-design/icons-vue';
 
 import {ScopeDeeptest} from "@/utils/const";
 import {Form} from "ant-design-vue";
-import {ResultStatus} from "@/utils/enum";
 import {StateType as DiagnoseInterfaceStateType} from "@/views/diagnose/store";
 import {StateType as ServeStateType} from "@/store/serve";
 import {requestMethodOpts} from "@/config/constant";
@@ -151,18 +150,14 @@ const ignoreMethods = ['HEAD', 'OPTIONS', 'TRACE']
 
 const recordDataOrigin = ref([] as any[])
 const recordData = computed<any>(() => {
-  const ret = recordDataOrigin.value.filter((item) => {
+  console.log('computed recordData', recordDataOrigin.value.length)
+  return recordDataOrigin.value.filter((item: any) => {
     const method = item.info?.request?.method
-    if (checkResType(item) &&
+    return checkResType(item) &&
         ignoreMethods.indexOf(method) < 0 &&
         method.indexOf(searchModel.value.method) > -1 &&
-        item.info?.request?.url.indexOf(searchModel.value.keywords) > -1)
-      return true
-    else
-      return false
+        item.info?.request?.url.indexOf(searchModel.value.keywords) > -1;
   })
-
-  return ret
 })
 
 const typeMap = {}
@@ -170,8 +165,6 @@ function checkResType(item) {
   const type = item.info?.type
 
   typeMap[type] = true
-  console.log('!!! typeMap', typeMap)
-
   if (!type) return true
 
   let ret = true
