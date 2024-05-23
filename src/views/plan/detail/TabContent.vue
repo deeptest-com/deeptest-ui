@@ -2,26 +2,34 @@
   <div class="tab-pane">
     <div style="padding-top: 20px" v-if="activeKey === 'test-scenario'">
       <ScenarioList
-          :list="planScenarioList"
-          :show-scenario-operation="true"
-          :columns="columns"
-          :scroll="{ x: 1240 }"
-          :loading="loading"
-          :pagination="scenarioPagination"
-          @refresh-list="getScenarioList"
-          @handle-sort="handleSort"
-          :sortable="true"
-          />
+        ref="scenarioListRef"
+        :list="planScenarioList"
+        :show-scenario-operation="true"
+        :columns="columns"
+        :scroll="{ x: 1240 }"
+        :loading="loading"
+        :pagination="scenarioPagination"
+        @refresh-list="getScenarioList"
+        @handle-sort="handleSort"
+        @selectRowIds="handleSelectRow"
+        :sortable="true"
+        />
     </div>
     <div style="padding-top: 20px" v-if="activeKey === 'test-report'">
       <ReportList />
     </div>
   </div>
+  <BatchAction 
+    v-if="showBatch"
+    :action-list="batchActionList"
+    :rows="selectedRowIds"
+    @cancel="handleCancelBatch" />
 </template>
-<script setup lang="ts">
+<script setup lang="tsx">
 import { defineProps, computed, reactive, ref } from "vue";
 import { useStore } from "vuex";
-
+import { DeleteOutlined } from '@ant-design/icons-vue';
+import BatchAction from '@/components/BatchAction/index';
 import {ScenarioList, ReportList} from '../components';
 import {StateType as PlanStateType} from '../store';
 
@@ -34,6 +42,8 @@ const planDetail = computed<any>(() => store.state.Plan.detailResult);
 const planScenarioList = computed<any[]>(() => store.state.Plan.relationScenarios.scenarioList);
 const scenarioPagination = computed<any>(() => store.state.Plan.relationScenarios.pagination);
 const loading = ref(false);
+const selectedRowIds = ref([]);
+const scenarioListRef = ref();
 
 const columns: any[] = reactive([
   {
@@ -100,5 +110,27 @@ const handleSort = async (opt)=>{
   });
 
   await getScenarioList({planId: planDetail.value.id});
+}
+
+const handleSelectRow = (e) => {
+  console.error(e);
+  selectedRowIds.value = e;
+}
+
+const showBatch = computed(() => {
+  return selectedRowIds.value.length > 0;
+});
+
+const batchActionList = [
+  {
+    label: '删除',
+    icon: <DeleteOutlined style="font-size: 16px" />,
+    action: () => scenarioListRef.value?.handleRemove(),
+  },
+];
+
+const handleCancelBatch = () => {
+  selectedRowIds.value = [];
+  scenarioListRef.value?.handleCancelBatch()
 }
 </script>

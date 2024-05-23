@@ -143,12 +143,17 @@ const getSelectedRow = () => {
   return (unref(dataSource) || []).filter(e => unref(checkedKeys).includes(e.id));
 };
 
+const initCheckedKeys = () => {
+  checkedKeys.value = [];
+};
+
 onMounted(() => {
   initSortable();
 })
 
 defineExpose({
-  getSelectedRow
+  getSelectedRow,
+  initCheckedKeys,
 })
 
 

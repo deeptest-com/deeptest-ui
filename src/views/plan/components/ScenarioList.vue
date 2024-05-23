@@ -22,6 +22,7 @@
         </div>
     </div>
     <Table
+        ref="customTable"
         :custom-row-selection="{
             selectedRowKeys: selectedRowKeys,
             onChange: onSelectChange
@@ -66,15 +67,16 @@
         </template>
     </Table>
     <RelationScenario
+        v-if="associateModalVisible"
         :associate-modal-visible="associateModalVisible"
         @on-cancel="associateModalVisible = false"
         @on-ok="handleFinish"
     />
 </template>
-<script lang="ts" setup>
-import { ref, reactive, defineProps, defineEmits, PropType, computed, watch, onMounted } from 'vue';
+<script lang="tsx" setup>
+import { ref, reactive, defineProps, defineEmits, PropType, computed, watch, onMounted, defineExpose } from 'vue';
 import { useStore } from 'vuex';
-import { PlusOutlined } from '@ant-design/icons-vue';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import RelationScenario from './RelationScenario.vue';
 import ToolTipCell from '@/components/Table/tooltipCell.vue';
 import Table from '@/components/Table/index.vue';
@@ -125,10 +127,10 @@ const props = defineProps({
         type: Boolean,
         default: true,
         required: false
-    },  
+    },
 })
 
-const emits = defineEmits(['selectRowKeys', 'refreshList','handleSort']);
+const emits = defineEmits(['selectRowKeys', 'refreshList','handleSort', 'selectRowIds']);
 const store = useStore<{ Plan: PlanStateType,Project }>();
 const currPlan = computed<any>(() => store.state.Plan.detailResult);
 const members = computed(() => store.state.Plan.members);
@@ -136,11 +138,13 @@ const associateModalVisible = ref(false);
 const selectedRowKeys = ref<any[]>(props.selectedKeys || []); // Check here to configure the default column
 let selectedRowIds = ref<any[]>([]);
 const userList = computed<any>(() => store.state.Project.userList);
+const customTable = ref();
 
 const onSelectChange = (changableRowKeys: string[], rows: any) => {
     selectedRowKeys.value = changableRowKeys;
     selectedRowIds.value = rows.map((item: any) => item.id);
     emits('selectRowKeys', changableRowKeys);
+    emits('selectRowIds', selectedRowIds?.value);
 };
 
 const priorityOptions = ref<any>([
@@ -192,6 +196,9 @@ const handleRemove = async (record?: any) => {
             console.log('解除关联场景: --', params);
             await store.dispatch('Plan/removeScenario', { planId: currPlan.value.id, params });
             selectedRowKeys.value = []; //清空已选的item
+            selectedRowIds.value = [];
+            emits('selectRowKeys', []);
+            emits('selectRowIds', []);
             emits('refreshList', formState);
         }
     })
@@ -221,8 +228,16 @@ const handleSort = (opt:any)=>{
   emits('handleSort', opt);
 }
 
+const handleCancelBatch = () => {
+  selectedRowKeys.value = [];
+  selectedRowIds.value = [];
+  customTable.value?.initCheckedKeys();
+}
 
-
+defineExpose({
+  handleCancelBatch,
+  handleRemove,
+})
 </script>
 <style scoped lang="less">
 .table-filter {
