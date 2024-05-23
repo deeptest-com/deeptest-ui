@@ -89,7 +89,7 @@ export default defineComponent({
           title={this.showTooltip ? this.tip || this.text : null}>
           <div class={['out', this.customClass]} onClick={() => this.handleClick()}>
             <span ref="textRef" class="text">
-              {this.text}
+              {this.$slots.customText ? this.$slots.customText() : this.text}
               {/* 支持 插入自定义标签 */}
               {this.$slots.default && this.$slots.default()}
             </span>
