@@ -24,8 +24,9 @@
   </div>
 </template>
 <script setup lang="ts">
-import {defineProps, defineEmits, ref, computed, watch, onMounted} from 'vue';
+import {defineProps, defineEmits, ref, computed, watch, onMounted, provide} from 'vue';
 import {useStore} from 'vuex';
+import { useRouter } from 'vue-router';
 
 import {
   ReportBasicInfo,
@@ -56,6 +57,7 @@ import {getUuid} from "@/utils/string";
 import { setServeUrl } from '@/utils/url';
 import {loadProjectEnvVars} from "@/utils/cache";
 import {StateType as ProjectStateType} from "@/store/project";
+import { useWujie } from '@/composables/useWujie';
 
 const props = defineProps<{
   drawerVisible: boolean
@@ -73,12 +75,14 @@ const store = useStore<{
   CurrentUser, ProjectGlobal: ProjectStateType
 }>();
 
+const router = useRouter();
 const currPlan = computed<any>(() => store.state.Plan.detailResult);
 const currEnvId = computed(() => store.state.ProjectSetting.selectEnvId);
 const envList = computed(() => store.state.ProjectSetting.envList);
 const currentUser = computed(() => store.state.User.currentUser);
 const currUser = computed(() => store.state.User.currentUser);
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
+const { parentOrigin, isInLeyanWujieContainer, projectName } = useWujie();
 
 // 执行计划的基本信息
 const basicInfoList = computed(() => {
@@ -202,7 +206,9 @@ const onWebSocketConnStatusMsg = (data: any) => {
     return;
   }
   const {conn}: any = JSON.parse(data.msg);
-  progressStatus.value = conn === 'success' ? 'in_progress' : 'exception';
+  if (progressStatus.value !== 'end') {
+    progressStatus.value = conn === 'success' ? 'in_progress' : 'exception';
+  }
 }
 
 function onClose() {
@@ -230,6 +236,15 @@ onMounted(() => {
   execCancel();
 });
 
+provide('execStatus', computed(() => progressStatus.value));
+provide('showBugAction', true);
+provide('detailLink', computed(() => {
+  // 无界环境，使用父级域名跳转
+  if(isInLeyanWujieContainer && statInfo.value?.id) {
+    return `${parentOrigin}/lyapi/${projectName}/TR/${projectName}-TR-${statInfo.value?.id}`;
+  }
+  return '';
+}));
 </script>
 <style scoped lang="less">
 .report-drawer {

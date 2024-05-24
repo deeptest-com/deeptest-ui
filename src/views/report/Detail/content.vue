@@ -22,7 +22,11 @@ const detailResult = computed<any>(() => store.state.Report.detailResult);
 const scenarioReports = computed(() => {
   return detailResult.value.scenarioReports?.map((item) => {
     if (item?.logs?.length > 0) {
-      return item.logs[0]
+      return {
+        ...item.logs[0],
+        bugId: item.bugId,
+        bugType: item.bugType,
+      }
     }
   })
 })

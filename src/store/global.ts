@@ -32,6 +32,8 @@ export interface StateType {
   clientVersion: string;
   permissionMenuList: string[];
   userRolesAuth: string[];
+  lyUserEngineering: any[];
+  lyUserSpaces: any[];
 }
 
 interface ResponseState {
@@ -56,6 +58,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
     setCurrAgent: Mutation<StateType>;
     setPermissionMenuList: Mutation<StateType>;
     setRolesAuth: Mutation<StateType>;
+    setLyUserEngineering: Mutation<StateType>;
+    setLyUserSpaces: Mutation<StateType>;
   };
   actions: {
     getServerConfig: Action<StateType, StateType>;
@@ -96,6 +100,8 @@ const initState: StateType = {
   clientVersion: '0.0.1',
   permissionMenuList: [],
   userRolesAuth: [],
+  lyUserEngineering: [],
+  lyUserSpaces: [],
 };
 
 const StoreModel: ModuleType = {
@@ -161,6 +167,12 @@ const StoreModel: ModuleType = {
     },
     setRolesAuth(state, payload) {
       state.userRolesAuth = payload;
+    },
+    setLyUserEngineering(state, payload) {
+      state.lyUserEngineering = payload;
+    },
+    setLyUserSpaces(state, payload) {
+      state.lyUserSpaces = payload;
     }
   },
   actions: {
@@ -240,39 +252,27 @@ const StoreModel: ModuleType = {
     },
 
     async getLyProducts() {
-      try {
-        const { code, data, msg }: any = await getUserProducts({ page: 1, pageSize: 9999 });
-        if (code === 0) {
-          return Promise.resolve(data);
-        }
-        return Promise.reject(msg);
-      } catch(error: any) {
-        return Promise.reject(error?.message || error);
+      const { code, data, msg }: any = await getUserProducts({ page: 1, pageSize: 9999 });
+      if (code === 0) {
+        return Promise.resolve(data);
       }
     },
 
     async getLySpaces() {
-      try {
-        const { code, data, msg }: any = await getUserSpaces();
-        if (code === 0) {
-          return Promise.resolve(data);
-        }
-        return Promise.reject(msg);
-      } catch(error: any) {
-        return Promise.reject(error?.message || error);
+      const { code, data, msg }: any = await getUserSpaces();
+      if (code === 0) {
+        return Promise.resolve(data);
       }
+      return Promise.reject(msg);
     },
 
-    async getIntegrationDetail(_, payload) {
-      try {
-        const { code, data, msg }: any = await getUserIntegrationDetail(payload);
-        if (code === 0) {
-          return Promise.resolve(data);
-        }
-        return Promise.reject(msg);
-      } catch(error: any) {
-        return Promise.reject(error?.message || error);
-      } 
+    async getIntegrationDetail({ commit }, payload) {
+      const { code, data, msg }: any = await getUserIntegrationDetail(payload);
+      if (code === 0) {
+        commit('setLyUserSpaces', data.spaces || []);
+        return Promise.resolve(data);
+      }
+      return Promise.reject(msg);
     },
 
     async getLyEngineering() {
@@ -283,9 +283,10 @@ const StoreModel: ModuleType = {
       return false;
     },
 
-    async getLyUserEngineering(_, params) {
+    async getLyUserEngineering({ commit }, params) {
       const { code, data }: any = await getUserEngineering(params);
       if (code === 0) {
+        commit('setLyUserEngineering', data);
         return data;
       }
       return false;

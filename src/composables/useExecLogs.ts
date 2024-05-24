@@ -41,7 +41,8 @@ const reports = computed(() => {
         return {
             ...item, ...{
                 resultStatus: report?.resultStatus,
-                totalProcessorNum: report?.totalProcessorNum
+                totalProcessorNum: report?.totalProcessorNum,
+                reportId: report?.id,
             }
         };
     });
@@ -118,7 +119,7 @@ function updateExecLogs(processor) {
 
 
 // 统计聚合数据
-const statInfo = ref({
+const statInfo = ref<any>({
     checkpointFail: 0,
     checkpointPass: 0,
     interfaceCount: 0,

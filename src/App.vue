@@ -217,7 +217,10 @@ export default defineComponent({
     watch(() => {
       return currProject.value.id;
     }, async (val, oldv) => {
-      if (val) {
+      if (val && val !== oldv) {
+        store.dispatch('Global/getIntegrationDetail', {
+          projectId: val,
+        })
         if (!isSaas) {
           const result = await store.dispatch('Global/getLyUserEngineering', {
             projectId: val,
@@ -243,6 +246,7 @@ export default defineComponent({
       }
     }, {
       immediate: true,
+      deep: true,
     })
 
     return {
