@@ -72,7 +72,10 @@ const resultCallback = (room, agenetResp) => {
         console.log('****** get agent ws exception: ', agenetResp)
         logs.value.push(agenetResp.data)
     }
-    scrollTo('websocket-test-logs', 0)
+
+    setTimeout(function(){
+        scrollTo('websocket-test-logs', 0);
+    }, 200)
 }
 
 function useExecution(): WebsocketExecution {

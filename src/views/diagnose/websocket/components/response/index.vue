@@ -52,6 +52,7 @@ watch(() => model.value.id, (val: any) => {
 
 <style lang="less" scoped>
 .response-main {
+  padding-bottom: 16px;
   height: 100%;
   position: relative;
 
