@@ -11,17 +11,28 @@
   </div>
 </template>
 <script setup lang="ts">
-import {ref, watch, computed, onMounted} from "vue";
+import {ref, watch, computed, onMounted, provide} from "vue";
 import {useStore} from "vuex";
 import { useRouter } from "vue-router";
 
 import { DetailLayout, DetailHeader } from "@/views/component/DetailLayout";
 
 import Content from "./content.vue";
+import { useWujie } from "@/composables/useWujie";
 
 const router = useRouter();
 const store = useStore();
 const detailResult = computed<any>(() => store.state.Report.detailResult);
+
+const {projectName,parentOrigin,isWujieEnv,isInLeyanWujieContainer} = useWujie();
+const detailLink = computed(() => {
+  const { params: { projectNameAbbr } } = router.currentRoute.value;
+  // 无界环境，使用父级域名跳转
+  if(isInLeyanWujieContainer) {
+    return `${parentOrigin}/lyapi/${projectName}/TR/${detailResult.value?.serialNumber}`;
+  }
+  return `${window.location.origin}/${projectNameAbbr}/TR/${detailResult.value.serialNumber}`;
+});
 
 onMounted(async () => {
   const { params: { reportSerialNumber = '' } }: any = router.currentRoute.value;
@@ -43,6 +54,10 @@ onMounted(async () => {
     store.commit('Detail/setShow', true);
   }
 })
+
+provide('execStatus', computed(() => { return 'end' }));
+provide('showBugAction', true);
+provide('detailLink', computed(() => detailLink.value));
 </script>
 <style scoped lang="less">
 .report-detail {

@@ -122,10 +122,27 @@ let formState = ref({
   syncMembers: false,
 });
 
+const autoEditProject = async(code) => {
+  try {
+    const result = await store.dispatch('ProjectGlobal/checkProjectAndUser', { project_code: code });
+    handleOpenEdit({
+      projectId: result.id,
+      projectName: result.name,
+      projectShortName: result.shortName,
+      ...result,
+    });
+  } catch(err) {
+    console.log(err);
+  }
+};
+
 const bus: any = window?.$wujie?.bus;
 onMounted(async () => {
   if (router.currentRoute.value?.query?.type == 'all') {
     activeKey.value = 0
+  }
+  if (router.currentRoute.value?.query?.code) {
+    autoEditProject(router.currentRoute.value?.query?.code)
   }
   await store.dispatch("User/fetchCurrent");
   await store.dispatch('Global/getPermissionMenuList', { needSysAuth: true });

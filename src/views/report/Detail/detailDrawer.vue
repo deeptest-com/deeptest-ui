@@ -21,7 +21,7 @@
   </DrawerLayout>
 </template>
 <script setup lang="ts">
-import {defineProps, defineEmits, ref, computed, onMounted} from 'vue';
+import {defineProps, defineEmits, ref, computed, onMounted, provide} from 'vue';
 import {useStore} from 'vuex';
 import { useRouter } from 'vue-router';
 
@@ -63,6 +63,9 @@ onMounted(() => {
   store.commit('Global/setSpinning', false);
 })
 
+provide('execStatus', computed(() => { return 'end' }));
+provide('showBugAction', true);
+provide('detailLink', computed(() => detailLink.value));
 </script>
 <style scoped lang="less">
 .report-drawer {

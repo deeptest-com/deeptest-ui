@@ -67,7 +67,7 @@
            :disabled="!isPathValid"
            class="save-as-case">
         <a-button trigger="click" @click="saveAsCase" class="dp-bg-light">
-          另存为用例
+          另存为测试用例
         </a-button>
       </div>
       <div v-if="isShowSync && showOperation"
@@ -417,7 +417,6 @@ onUnmounted(() => {
 
     .save-as-case {
       margin-left: 8px;
-      width: 102px;
     }
 
     .sync {

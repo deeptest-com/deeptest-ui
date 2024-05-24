@@ -951,7 +951,7 @@ const StoreModel: ModuleType = {
                     return;
                 }
                 commit('setCronProjectList', {
-                    list: data.result || [],
+                    list: (data.result || []).map(e => ({ ...e, loading: e.execStatus === 'running' })),
                     pagination: {
                         ...state.cronProjectListResult,
                         current: data.page,

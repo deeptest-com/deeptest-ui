@@ -67,7 +67,7 @@ const driverTypeOpts = [
 ];
 
 const autoImport = async (record) => {
-  if (record.loading) {
+  if (record.loading || record.execStatus == 'running') {
     return;
   }
   record.loading = true;
