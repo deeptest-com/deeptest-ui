@@ -5,7 +5,8 @@ import {DownOutlined, PlusOutlined, RightOutlined,} from '@ant-design/icons-vue'
 import Actions from "./Actions.vue";
 import ExtraActions from "./ExtraActions.vue";
 import DataTypeSetting from './DataTypeSetting.vue';
-import MockRule from "./MockRule.vue";
+import MockRule from "./MoclRule";
+import { Description } from './Description';
 import cloneDeep from "lodash/cloneDeep";
 import {
     addExtraViewInfo,
@@ -26,6 +27,7 @@ import {message, notification} from "ant-design-vue";
 import {useStore} from "vuex";
 import {StateType as ServeStateType} from "@/store/serve";
 import {notifyWarn} from "@/utils/notify";
+import { useResizeObserver } from '@vueuse/core';
 
 
 
@@ -36,6 +38,7 @@ export default defineComponent({
     setup(props, {emit}) {
         const store = useStore<{ Endpoint, ServeGlobal: ServeStateType }>();
         const data: any = ref(null);
+
         const expandIt = async (tree: any, options: any, e: any) => {
             const {parent, ancestor, isRoot} = options;
             // 异步获取组件详情信息
@@ -290,6 +293,11 @@ export default defineComponent({
             data.value = addExtraViewInfo(data.value);
         };
 
+        const updateDescription = (tree: any, evt: any) => {
+            tree.description = evt.value;
+            data.value = addExtraViewInfo(data.value);
+        };
+
         const del = (keyIndex: any, parent: any) => {
             if (isCompositeType(parent.type)) {
                 const combines = {
@@ -429,6 +437,13 @@ export default defineComponent({
             return <MockRule tree={tree} readonly={!!isRefChildNode}  onUpdate={updateMockType.bind(this,tree)}/>
         }
 
+        const renderDesc = (options) => {
+            const {tree, isRefChildNode} = options;
+            return (
+                <Description isRefChildNode={isRefChildNode} tree={tree} onUpdateDescription={updateDescription.bind(this, tree)} />
+            );
+        }
+
         const renderHorizontalLine = (depth: number) => {
             if (depth === 1) return null;
             return <div class={'horizontalLine'}
@@ -444,6 +459,7 @@ export default defineComponent({
                     {renderKeyName(options)}
                     {renderDataTypeSetting(options)}
                     {!isRef(tree) ? renderMockRule(options) : null}
+                    {renderDesc(options)}
                 </div>
                 {renderAction(options)}
                 {renderExtraAction(options)}
