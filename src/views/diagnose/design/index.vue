@@ -172,7 +172,7 @@ const onContextMenuClick = (evt, record?: any) => {
 const usedBy = UsedBy.DiagnoseDebug
 const loadDebugData = debounce(async () => {
   console.log('loadDebugData')
-  if (interfaceData.value.id <= 9) return // is record tab
+  if (interfaceData.value.id <= 0) return // is record tab
 
   store.commit("Global/setSpinning",true)
 
