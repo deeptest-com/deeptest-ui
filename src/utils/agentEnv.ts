@@ -9,14 +9,11 @@ export const isElectronEnv = win?.versions?.electron;
 
 /**
  * 获取当前的 Agent 的 URL
- * @param agentUrlOpts 可选的 Agent 服务地址
- * @notice 仅仅适用于 LY 项目
- *
  * */
 export async function getAgentUrl() {
     const currAgent: any = await getCache(Cache_Key_Agent)
 
-    let agentUrl = currAgent?.url;
+    let agentUrl = currAgent ? currAgent.url : process.env.VUE_APP_API_AGENT;
 
     const localAgentPort = window.localStorage.getItem(Cache_Key_Agent_Local_Port) || '';
     if (isElectronEnv && localAgentPort?.length === 5 && agentUrl.includes('127.0.0.1')) {
