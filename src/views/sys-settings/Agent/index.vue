@@ -5,19 +5,51 @@
         <a-button type="primary" @click="() => edit(0)">
           新建执行代理
         </a-button>
-        <span class="sys-agent-download" @click="downloadAgent">代理安装包下载
-          <a-tooltip placement="right" overlayClassName="agent-toolt-tip">
-            <template #title>
-              所有接口请求通过执行代理转发。可下载安装包自行安装配置后使用。 <br />
-              步骤一、点击代理安装包下载，解压LeyanAPIAgent.zip包到运行代理的服务器目录下 <br />
-              步骤二、启动代理 <br />
-              * windows环境：在文件存放目录，双击 lyapiagent.exe 启动 <br />
-              * Mac环境：在文件存放目录，执行chmod -R 0777 lyapiagent赋予可执行权限，执行./lyapiagent 启动代理。Mac下执行时会被安全性拦截，在 系统设置-》隐私与安全性 下允许代理运行。 <br />
-              步骤三、配置代理。在代理设置页面，新建执行代理。代理地址为：http://安装IP地址:8086/api/v1。例如本地安装，代理地址为：http://127.0.0.1:8086/api/v1
-            </template>
-            <QuestionCircleOutlined />
-          </a-tooltip>
+        <span class="sys-agent-download" @click="downloadAgent">
+          代理安装包下载 &nbsp;
         </span>
+        <a-popover title="安装配置代理" trigger="hover"
+                     placement="leftBottom"
+                     overlayClassName="agent-tips"
+                     visible="true">
+            <template #content>
+              <div class="tips">
+                <div class="title">所有接口请求通过执行代理转发，用户可自行下载、安装和配置代理后使用。</div>
+
+                <div class="content">
+                  <ol>
+                    <li>点击"代理安装包下载"链接，下载、解压文件到本地目录。</li>
+                    <li>启动代理：</li>
+                    <div>
+                      <div>Windows环境：</div>
+                      <div class="indent">双击可执行文件启动。</div>
+
+                      <div>Linux或Mac环境：</div>
+                      <div class="indent">cd到解压的目录；</div>
+                      <div class="indent">执行chmod -R 777 {{getAgentName()}}赋予可执行权限；</div>
+                      <div class="indent">执行./deeptest-agent启动代理。</div>
+                      <div class="indent" style="font-style:italic;">
+                        注意：Mac中执行时会被安全性拦截，需在“系统设置->隐私与安全性”下允许代理运行。
+                      </div>
+                    </div>
+                    <li>配置代理：</li>
+                    <div>
+                      <div>在代理设置页面，点击“新建执行代理”按钮;</div>
+                      <div>填写代理地址 http://&lt;代理所在机器IP地址>:8086/api/v1。</div>
+                      <div style="font-style:italic;">
+                        例如：本地安装的代理，地址为 http://127.0.0.1:8086/api/v1。
+                      </div>
+                    </div>
+
+                  </ol>
+                </div>
+              </div>
+            </template>
+            <span>
+              <QuestionCircleOutlined />
+            </span>
+          </a-popover>
+
       </template>
       <template #extra>
         <a-input-search
@@ -109,8 +141,10 @@ import EditDrawer from './drawer.vue';
 import debounce from "lodash.debounce";
 import {useWujie} from "@/composables/useWujie";
 import settings from '@/config/settings';
+import {isLeyan} from "@/utils/comm";
 
 const {t} = useI18n();
+const isLyEnv = isLeyan()
 
 const {isWujieEnv, parentOrigin} = useWujie();
 const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
@@ -189,13 +223,34 @@ const setAgent = async () => {
   });
 }
 
+const getAgentName = () => {
+   return isLyEnv ? 'lyapiagent.exe' : 'deeptest-agent'
+}
+
 </script>
 
 <style lang="less">
-.agent-toolt-tip {
+.agent-tips {
+  .tips {
+    padding: 0 10px 0 10px;
+    .title {
+      margin-bottom: 10px;
+    }
+    .content {
+      ol {
+        margin-left: 16px;
+        li {
+          margin: 2px 0;
+        }
+      }
 
-  .ant-tooltip-content {
-    width: 550px;
+      div {
+        padding: 3px 0;
+        &.indent {
+          padding-left: 16px;
+        }
+      }
+    }
   }
 }
 </style>
