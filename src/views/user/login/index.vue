@@ -20,13 +20,15 @@
                 </div>
             </a-form-item>
             <div class="text-align-right">
-                <!-- <router-link to="/user/forgotPassword">
+              <div v-if="!isLyEnv">
+                <router-link to="/user/forgotPassword">
                     忘记密码
-                </router-link> -->
-                <!-- &nbsp;&nbsp;&nbsp;
+                </router-link>
+                &nbsp;&nbsp;&nbsp;
                 <router-link to="/user/register">
                     现在注册
-                </router-link> -->
+                </router-link>
+              </div>
             </div>
             <a-form-item>
                 <div class="login-input-button">
@@ -58,6 +60,7 @@ import { NotificationKeyCommon } from "@/utils/const";
 import {notifySuccess, notifyWarn} from "@/utils/notify";
 import {setCache,getCache} from "@/utils/localCache";
 import settings from "@/config/settings";
+import {isLeyan} from "@/utils/comm";
 
 interface UserLoginSetupData {
     t: (key: string | number) => string;
@@ -72,10 +75,12 @@ interface UserLoginSetupData {
 export default defineComponent({
     name: 'UserLogin',
     setup() {
+      const { t } = useI18n();
+      const isLyEnv = isLeyan()
+
         const router = useRouter();
         const { currentRoute } = router;
         const store = useStore<{ UserLogin: UserLoginStateType }>();
-        const { t } = useI18n();
 
         // 表单值
         const modelRef = reactive<LoginParamsType>({
@@ -150,7 +155,7 @@ export default defineComponent({
         const validateInfosNew = useI18nAntdFormVaildateInfos(validateInfos);
 
         return {
-            t,
+            t, isLyEnv,
             resetFields,
             validateInfos: validateInfosNew,
             modelRef,
