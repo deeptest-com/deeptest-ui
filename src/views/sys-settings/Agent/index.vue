@@ -10,8 +10,7 @@
         </span>
         <a-popover title="安装配置代理" trigger="hover"
                      placement="leftBottom"
-                     overlayClassName="agent-tips"
-                     visible="true">
+                     overlayClassName="agent-tips">
             <template #content>
               <div class="tips">
                 <div class="title">所有接口请求通过执行代理转发，用户可自行下载、安装和配置代理后使用。</div>
