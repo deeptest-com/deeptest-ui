@@ -5,9 +5,11 @@
         <a-button type="primary" @click="() => edit(0)">
           新建执行代理
         </a-button>
+
         <span class="sys-agent-download" @click="downloadAgent">
-          代理安装包下载 &nbsp;
-        </span>
+          代理安装包下载
+        </span> &nbsp;
+
         <a-popover title="安装配置代理" trigger="hover"
                      placement="leftBottom"
                      overlayClassName="agent-tips">
@@ -44,7 +46,8 @@
                 </div>
               </div>
             </template>
-            <span>
+
+            <span class="dp-link-primary">
               <QuestionCircleOutlined />
             </span>
           </a-popover>
