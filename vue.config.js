@@ -6,7 +6,7 @@ const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
 let { NODE_ENV, VUE_APP_PORT, VUE_APP_MOCK, APP_CONF, VUE_APP_DEPLOY_ENV } = process.env
 
 // loa app conf if needed
-if (NODE_ENV === 'production' && APP_CONF) {
+if (APP_CONF) { // if (NODE_ENV === 'production' && APP_CONF) {
     const prodConf = require(`./.app.${APP_CONF}`)
 
     process.env.VUE_APP_API_SERVER = prodConf.VUE_APP_API_SERVER
@@ -44,7 +44,7 @@ module.exports = {
     },
     // 修改webpack的配置
     configureWebpack: {
-      
+
     },
     chainWebpack(config) {
         // 内置的 svg Rule 添加 exclude

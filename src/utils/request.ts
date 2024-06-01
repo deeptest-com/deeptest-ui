@@ -36,7 +36,7 @@ export const getUrls = () => {
     const agentUrl = process.env.VUE_APP_API_AGENT;
     const staticUrl = process.env.VUE_APP_API_STATIC;
 
-    if (!serverUrl) { // deeptest-ui is under deeptest server
+    if (!serverUrl) { // deeptest-ui static folder is under deeptest server
         serverUrl = new URL(unescape(window.location.href)).origin
         if (!serverUrl.endsWith('/')) serverUrl += '/'
         serverUrl = serverUrl + 'api/v1'
