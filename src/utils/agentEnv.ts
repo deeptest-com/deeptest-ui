@@ -8,7 +8,7 @@ const win: any = window?.process;
 export const isElectronEnv = win?.versions?.electron;
 
 /**
- * 获取当前的 Agent 的 URL
+ * 获取当前的Agent的URL 1. 从缓存获取 2. 用Election传过来的动态端口替换
  * */
 export async function getAgentUrl() {
     console.log('getAgentUrl')
