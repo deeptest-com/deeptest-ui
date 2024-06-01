@@ -89,9 +89,9 @@ export default defineComponent({
     if (isElectronEnv && window?.require('electron')?.ipcRenderer) {
       const ipcRenderer = window.require('electron').ipcRenderer
 
-      // 更新本地Agent所在的端口号，对于electron客户端，可能启动在
+      // 更新本地Agent所在的端口号，对于electron客户端，可能启动在类似56111的随机端口
       ipcRenderer.on(settings.electronMsgUsePort, async (event, data) => {
-        console.log('use port msg from electron', event,data);
+        console.log('use port msg from electron', event, data);
         window.localStorage.setItem(Cache_Key_Agent_Local_Port, data?.agentPort || '');
       })
 

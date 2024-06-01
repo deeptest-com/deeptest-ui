@@ -11,14 +11,20 @@ export const isElectronEnv = win?.versions?.electron;
  * 获取当前的 Agent 的 URL
  * */
 export async function getAgentUrl() {
+    console.log('getAgentUrl')
+
     const currAgent: any = await getCache(Cache_Key_Agent)
+    console.log('currAgent', currAgent)
 
     let agentUrl = currAgent && currAgent.url ? currAgent.url : process.env.VUE_APP_API_AGENT;
+    console.log('agentUrl before computer', agentUrl)
 
     const localAgentPort = window.localStorage.getItem(Cache_Key_Agent_Local_Port) || '';
+
     if (isElectronEnv && localAgentPort?.length === 5 && agentUrl.includes('127.0.0.1')) {
-        agentUrl = agentUrl.replace(/\d{5}/, localAgentPort);
+        agentUrl = agentUrl.replace(/:\d{4,5}/, ':'+localAgentPort);
     }
+    console.log('agentUrl after computer', agentUrl)
 
     return agentUrl;
 }
