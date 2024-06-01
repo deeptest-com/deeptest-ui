@@ -85,10 +85,11 @@ export default defineComponent({
     /*************************************************
      * ::::::::::: 以下代码仅适用于 Electron 环境 ::::::::::
      ************************************************/
-    if (isElectronEnv && window?.require('electron')?.ipcRenderer && isLyEnv) {
+    console.log(`isElectronEnv = ${isElectronEnv}`)
+    if (isElectronEnv && window?.require('electron')?.ipcRenderer) {
       const ipcRenderer = window.require('electron').ipcRenderer
 
-      // 更新本地占用的端口号
+      // 更新本地Agent所在的端口号，对于electron客户端，可能启动在
       ipcRenderer.on(settings.electronMsgUsePort, async (event, data) => {
         console.log('use port msg from electron', event,data);
         window.localStorage.setItem(Cache_Key_Agent_Local_Port, data?.agentPort || '');
@@ -163,7 +164,7 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      setHtmlLang(locale.value); 
+      setHtmlLang(locale.value);
       //  监听父应用传递过来的消息
       if(isWujieEnv){
         WebSocket.init(true);
@@ -232,7 +233,7 @@ export default defineComponent({
             }
           })
         }
-       
+
         setTimeout(() => {
           bus?.$emit(settings.sendMsgToLeyan, {
             type: 'fetchProjectSuccess',
