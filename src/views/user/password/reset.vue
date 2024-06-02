@@ -1,20 +1,20 @@
 <template>
-  <div class="resetPassword-main">
+  <div class="login-form-main">
     <h1 class="title">
-      设置密码
+      重置密码
     </h1>
     <a-form :wrapper-col="{span:24}">
       <a-form-item label="">
         用户 {{username}}
       </a-form-item>
 
-      <a-form-item label="" v-bind="validateInfos.password">
-        <a-input v-model:value="modelRef.password" placeholder="输入新密码"
+      <a-form-item label="" v-bind="validateInfos.password" class="login-input-item">
+        <a-input-password v-model:value="modelRef.password" placeholder="输入新密码"
                  @blur="validate('password', { trigger: 'blur' }).catch(() => {})" />
       </a-form-item>
 
-      <a-form-item label="" v-bind="validateInfos.confirm">
-        <a-input v-model:value="modelRef.confirm" placeholder="重复新密码"
+      <a-form-item label="" v-bind="validateInfos.confirm" class="login-input-item">
+        <a-input-password v-model:value="modelRef.confirm" placeholder="重复新密码"
                  @blur="validate('confirm', { trigger: 'blur' }).catch(() => {})" />
       </a-form-item>
 
@@ -22,7 +22,8 @@
         <a-button type="primary" class="submit" @click="handleSubmit" :loading="submitLoading">
           提交
         </a-button>
-        <div class="text-align-right">
+
+        <div class="back text-align-right">
           <router-link to="/user/login">
             返回登录
           </router-link>
@@ -47,7 +48,7 @@ const { t } = useI18n();
 
 const username = router.currentRoute.value.params.username
 const vcode = router.currentRoute.value.params.vcode
-const modelRef = ref({usernameOrPassword: '', username:username, vcode: vcode});
+const modelRef = ref({username:username, vcode: vcode, password: '', confirm: ''});
 
 const rulesRef = reactive({
   password: [
@@ -100,22 +101,13 @@ const handleSubmit = async (e: MouseEvent) => {
 
 </script>
 <style lang="less" scoped>
-.resetPassword-main {
-  flex: none;
-  width: 380px;
-  padding: 36px;
-  margin: 0 auto;
-  border-radius: 4px;
-  background-color: rgba(255, 255, 255, 0.2);
-  .title {
-    font-size: 28px;
-    margin-top: 0;
-    margin-bottom: 30px;
-    text-align: center;
-    color: #ffffff;
-  }
-  .submit {
-    width: 100%;
-  }
+@import '../assets/login.less';
+.login-input-item-input:focus{
+  box-shadow: none!important;
+  background-color: #fff!important;
+}
+
+.back {
+  margin-top: 28px;
 }
 </style>
