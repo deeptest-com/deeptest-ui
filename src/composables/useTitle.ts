@@ -11,7 +11,14 @@ export default function useTitle(route: ComputedRef<RoutesDataItem> | Ref<Routes
     const{ t } = useI18n();
 
     const setTitle = (title: string): void => {
-        document.title = `${t(title)} - ${settings.siteTitle}`;
+        let tt = t(title) ? t(title) : title
+        if (tt) {
+            tt += ' - ' + settings.siteTitle
+        } else {
+            tt = settings.siteTitle
+        }
+
+        document.title = tt
     }
 
     watch<RoutesDataItem, false>(route,(route) => {

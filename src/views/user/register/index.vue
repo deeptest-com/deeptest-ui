@@ -6,13 +6,15 @@
         <a-form :wrapper-col="{span:24}">
             <a-form-item label="" v-bind="validateInfos.username">
                 <div class="login-input-item">
-                    <a-input v-model:value="modelRef.username" :placeholder="t('page.user.register.form-item-username')" @keyup.enter="handleSubmit" />
+                    <a-input class="login-input-item-input"
+                             v-model:value="modelRef.username" :placeholder="t('page.user.register.form-item-username')" @keyup.enter="handleSubmit" />
                 </div>
             </a-form-item>
 
             <a-form-item label="" v-bind="validateInfos.email">
                 <div class="login-input-item">
-                    <a-input v-model:value="modelRef.email" :placeholder="t('page.user.register.form-item-email')" @keyup.enter="handleSubmit" />
+                    <a-input class="login-input-item-input"
+                             v-model:value="modelRef.email" :placeholder="t('page.user.register.form-item-email')" @keyup.enter="handleSubmit" />
                 </div>
             </a-form-item>
 
@@ -167,4 +169,8 @@ export default defineComponent({
 </script>
 <style lang="less" scoped>
 @import '../assets/login.less';
+.login-input-item-input:focus{
+  box-shadow: none!important;
+  background-color: #fff!important;
+}
 </style>
