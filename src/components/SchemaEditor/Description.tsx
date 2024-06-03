@@ -37,7 +37,7 @@ export const Description = defineComponent({
       emit('updateDescription', { tree: props.tree, value: e.target.value });
     }
 
-    const renderDesc = (props) => {
+    const renderDesc = () => {
       return (
         <a-tooltip placement="top" title={value.value}>
           <div class="tree-schema-description">
@@ -77,14 +77,14 @@ export const Description = defineComponent({
           </a-tooltip>);
       },
       content: () => {
-        return <div class="schema-desc-popover">{ renderDesc({}) }</div>;
+        return <div class="schema-desc-popover">{ renderDesc() }</div>;
       }
     }
     return () => {
       return (
         <div class="tree-description-wrapper" ref={treeDescRef}>
           {!showSmallDesc.value ? (
-            <>{renderDesc({})}</>
+            <>{renderDesc()}</>
           ) : (
             <>
               <a-popover
