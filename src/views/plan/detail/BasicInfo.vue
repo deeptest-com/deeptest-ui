@@ -10,7 +10,7 @@
     }}
     </a-descriptions-item>
 
-    <a-descriptions-item label="分类">
+    <a-descriptions-item label="分类" v-if="!isLinkFromLy">
       <EditAndShowTreeSelect
           :label="categoryLabel"
           :value="planDetail?.categoryId || -1"
@@ -43,11 +43,17 @@ import { notifyError } from '@/utils/notify';
 import settings from "@/config/settings";
 import bus from "@/utils/eventBus";
 import EditAndShowTreeSelect from "@/components/EditAndShowTreeSelect/index.vue";
+import { useRoute } from 'vue-router';
 
 const emits = defineEmits(['onCancel', 'onSelectEnv', 'onUpdate', 'update:tabKey']);
 const store = useStore<{ Plan: PlanStateType }>();
 const planDetail:any = computed<any>(() => store.state.Plan.detailResult);
 const treeDataCategory = computed<any>(() => store.state.Plan.treeDataCategory);
+const route = useRoute();
+
+const isLinkFromLy = computed(() => {
+  return route.query.linkOrigin === 'leyan';
+})
 
 async function handleChange(type,value) {
   console.log('changeStatus --', value);
