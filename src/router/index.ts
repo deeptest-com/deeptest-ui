@@ -66,16 +66,16 @@ export const routes: RoutesDataItem[] = [
         ],
     },
     {
-        title: '',
-        path: '/blank',
-        component: BlankLayout,
-    },
-    {
         title: 'empty',
         path: '/',
         redirect: '/',
         component: SecurityLayout,
         children: [
+            {
+                title: '',
+                path: 'blank',
+                component: BlankLayout,
+            },
             {
                 icon: 'home',
                 title: '首页',

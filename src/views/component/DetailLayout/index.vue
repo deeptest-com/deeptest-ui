@@ -7,7 +7,7 @@
         </div>
         <a-divider v-if="!isLinkFromLy" />
         <div class="detail-content" ref="contentRef">
-          <div class="detail-basic-info" v-if="showBasicInfo">
+          <div class="detail-basic-info" v-if="showBasicInfo && !isLinkFromLy">
             <slot name="basicInfo" />
           </div>
           <div class="detail-tab-header" v-if="showTabHeader">
