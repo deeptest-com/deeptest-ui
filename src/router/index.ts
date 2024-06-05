@@ -66,6 +66,11 @@ export const routes: RoutesDataItem[] = [
         ],
     },
     {
+        title: '',
+        path: '/blank',
+        component: BlankLayout,
+    },
+    {
         title: 'empty',
         path: '/',
         redirect: '/',

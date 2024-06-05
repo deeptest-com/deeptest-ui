@@ -145,10 +145,6 @@ provide('containerScrollTop', computed(() => containerScrollTop.value));
       padding: 0;
     }
 
-    .detail-basic-info {
-      padding-top: 16px;
-    }
-
     .detail-header {
       padding-top: 16px;
     }
@@ -156,6 +152,10 @@ provide('containerScrollTop', computed(() => containerScrollTop.value));
     .detail-content {
       height: 100%;
       overflow: unset;
+    }
+
+    :deep(.report-basicinfo) {
+      margin-top: 0 !important;
     }
   }
 
