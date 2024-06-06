@@ -1,5 +1,5 @@
 <template>
-  <a-spin tip="loading....." :spinning="spinning">
+  <a-spin :spinning="spinning">
     <div :class="['detail-wrapper', prefixCls, isLinkFromLy ? 'no-padding': '']">
       <template v-if="show">
         <div class="detail-header" v-if="!isLinkFromLy">
