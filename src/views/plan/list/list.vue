@@ -41,7 +41,10 @@
             </div>
           </template>
           <template #status="{ record }">
-            <a-tag  :color="planStatusColorMap.get(record.status || 'draft')">{{ planStatusTextMap.get(record.status || 'draft') }}</a-tag>
+            <DropdownActionMenu :dropdown-list="statusDropdownMenu(updatePlanStatus)" :record="record" :selectedKey="record.status">
+              <a-tag style="cursor: pointer;" :color="planStatusColorMap.get(record.status || 'draft')">{{ planStatusTextMap.get(record.status || 'draft') }}</a-tag>
+            </DropdownActionMenu>  
+            
           </template>
           <template #updatedAt="{ record }">
             <span>{{ momentUtc(record.updatedAt) }}</span>
@@ -85,7 +88,7 @@
     @on-ok="onExec" />
 </template>
 
-<script setup lang="ts">
+<script setup lang="tsx">
 import {computed, onMounted, provide, reactive, ref, watch} from "vue";
 import { useStore } from "vuex";
 import { Modal } from "ant-design-vue";
@@ -109,7 +112,7 @@ import { FilterSelect } from "@/components/FilterSelect/index";
 import {notifyError} from "@/utils/notify";
 import useSharePage from "@/hooks/share";
 import usePermission from "@/composables/usePermission";
-
+import { statusDropdownMenu } from "../components/form";  
 const { hasPermission, isCreator }  = usePermission();
 const { share } = useSharePage();
 const store = useStore<{ Plan: StateType, ProjectGlobal: ProjectStateType,Project }>();
@@ -194,6 +197,12 @@ const searchInfo = reactive<any>({});
     slots: { customRender: 'action' },
   },
 ];
+
+const updatePlanStatus = async (params) => {
+  await store.dispatch('Plan/savePlan', {
+    ...params
+  });
+};
 
 const dropdownMenuList = [
   {

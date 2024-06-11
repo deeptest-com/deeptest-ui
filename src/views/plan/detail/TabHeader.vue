@@ -10,22 +10,28 @@
   <div class="tab-header-btns">
     <ExecBtn placement="left">
       <template #execBtn="{ isNotClickable }">
-        <a-button class="plan-exec" type="primary" :disabled="isNotClickable" @click="handleEnvSelect(isNotClickable)">执行计划</a-button>
+        <a-button class="plan-exec" type="primary" :disabled="isNotClickable || checkDisabled" @click="handleEnvSelect(isNotClickable)">执行计划</a-button>
       </template>
     </ExecBtn>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, defineEmits, defineProps } from "vue";
+import { ref, defineEmits, defineProps, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import ExecBtn from "@/components/ExecBtn/index.vue";
+import { useRoute } from "vue-router";
 
 const props = defineProps<{
   tabKey?: string;
 }>();
-
+const route = useRoute();
 const emits = defineEmits(['changeTab', 'onSelectEnv']);
-
+const status = ref(route.query.planStatus || '1');
+const store = useStore<{ Plan, Project }>();
+const currPlan = computed<any>(() => store.state.Plan.detailResult);
+const checkDisabled = computed(() => {
+  return Number(status.value) === 2 || currPlan.value.status === 'disabled';
+});
 const tabsList = [
   {
     "key": "test-scenario",
@@ -50,6 +56,18 @@ const handleEnvSelect = async (isNotClickable) => {
   }
   emits('onSelectEnv');
 }
+
+const bus = window?.$wujie?.bus;
+
+onMounted(() => {
+    // emits('refreshList', formState);
+    bus?.$on('sendMsgToLeyanAPI', ({ type, data }) => {
+        if (type === 'getLeyanPlanStatus') {
+            status.value = data;
+        }
+    })
+})
+
 </script>
 
 <style scoped lang="less">

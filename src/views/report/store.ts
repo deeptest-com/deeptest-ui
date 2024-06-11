@@ -131,7 +131,7 @@ const StoreModel: ModuleType = {
                     basicInfoList: [
                         {
                             label: '测试计划',
-                            value: data.name || '-'
+                            value: data.planName || '-'
                         },
                         {
                             label: '开始时间',

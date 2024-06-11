@@ -27,8 +27,10 @@ const scenarioReports = computed(() => {
         bugId: item.bugId,
         bugType: item.bugType,
       }
+    } else {
+      return {};
     }
-  })
+  }).filter(e => JSON.stringify(e) !== '{}')
 })
 const statInfo = computed(() => {
   const data = JSON.parse(detailResult.value?.stat || '{}');
