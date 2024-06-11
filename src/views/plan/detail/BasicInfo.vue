@@ -21,19 +21,16 @@
     </a-descriptions-item>
     <a-descriptions-item label="执行环境">{{ planDetail.execEnv }}</a-descriptions-item>
     <a-descriptions-item label="状态">
-      <EditAndShowSelect
-        :label="planStatusTextMap.get((planDetail?.status || 'draft'))"
-        :value="planDetail.status"
-        :options="planStatusOptions"
-        @update="(val) => {
-               handleChange('status',val)
-            }"/>
+      <DropdownActionMenu :dropdown-list="statusDropdownMenu(updatePlanStatus)" :record="planDetail" :selectedKey="planDetail.status">
+        <span style="cursor: pointer;">{{ planStatusTextMap.get(planDetail.status || 'draft') }}</span> 
+      </DropdownActionMenu>  
     </a-descriptions-item>
   </a-descriptions>
 </template>
 <script setup lang="ts">
 import {defineProps, defineEmits, computed, unref, onMounted} from 'vue';
 import {useStore} from 'vuex';
+import { useRoute } from 'vue-router';
 
 import EditAndShowSelect from '@/components/EditAndShowSelect/index.vue';
 import {momentUtc} from '@/utils/datetime';
@@ -43,7 +40,8 @@ import { notifyError } from '@/utils/notify';
 import settings from "@/config/settings";
 import bus from "@/utils/eventBus";
 import EditAndShowTreeSelect from "@/components/EditAndShowTreeSelect/index.vue";
-import { useRoute } from 'vue-router';
+import { DropdownActionMenu } from "@/components/DropDownMenu";
+import { statusDropdownMenu } from "../components/form";
 
 const emits = defineEmits(['onCancel', 'onSelectEnv', 'onUpdate', 'update:tabKey']);
 const store = useStore<{ Plan: PlanStateType }>();
@@ -86,6 +84,17 @@ async function handleChange(type,value) {
     console.log(err);
   }
   emits('onUpdate', {status: value});
+}
+
+const updatePlanStatus = async (params) => {
+  const result = await store.dispatch('Plan/savePlan', {
+      ...params
+    });
+    if (result) {
+      store.dispatch('Plan/getPlan', planDetail.value.id);
+    } else {
+      notifyError('更新计划失败');
+    }
 }
 
 onMounted(async () => {

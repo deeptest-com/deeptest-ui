@@ -1,11 +1,11 @@
 <template>
     <div class="table-filter">
         <div class="left" v-if="showScenarioOperation">
-            <a-button type="primary" @click="associateModalVisible = true">
+            <a-button :disabled="checkDisabled" type="primary" @click="associateModalVisible = true">
                 <template #icon><plus-outlined /></template>
                 关联测试场景
             </a-button>
-            <a-button type="default" :disabled="!selectedRowIds?.length" @click="handleRemove()">批量移除</a-button>
+            <a-button type="default" :disabled="!selectedRowIds?.length || checkDisabled" @click="handleRemove()">批量移除</a-button>
         </div>
         <div class="right">
             <a-form-item label="优先级">
@@ -60,7 +60,7 @@
           </div>
         </template>
         <template #operation="{ record }">
-            <a-button type="primary" @click="handleRemove(record)">
+            <a-button :disabled="checkDisabled" type="primary" @click="handleRemove(record)">
                 移除
             </a-button>
         </template>
@@ -83,6 +83,8 @@ import {message, Modal, notification} from 'ant-design-vue';
 import { planStatusColorMap, planStatusTextMap } from '@/config/constant';
 import { momentUtc } from '@/utils/datetime';
 import {notifyWarn} from "@/utils/notify";
+import settings from '@/config/settings';
+import { useRoute } from 'vue-router';
 
 const props = defineProps({
     showScenarioOperation: {
@@ -136,6 +138,11 @@ const associateModalVisible = ref(false);
 const selectedRowKeys = ref<any[]>(props.selectedKeys || []); // Check here to configure the default column
 let selectedRowIds = ref<any[]>([]);
 const userList = computed<any>(() => store.state.Project.userList);
+const route = useRoute();
+const status = ref(route.query.planStatus || '1')
+const checkDisabled = computed(() => {
+    return Number(status.value) === 2 || currPlan.value.status === 'disabled';
+});
 
 const onSelectChange = (changableRowKeys: string[], rows: any) => {
     selectedRowKeys.value = changableRowKeys;
@@ -207,8 +214,15 @@ const username = (user:string)=>{
   return result?.label || '-'
 }
 
+const bus = window?.$wujie?.bus;
+
 onMounted(() => {
     // emits('refreshList', formState);
+    bus?.$on('sendMsgToLeyanAPI', ({ type, data }) => {
+        if (type === 'getLeyanPlanStatus') {
+            status.value = data;
+        }
+    })
 })
 
 watch(() => {
@@ -220,6 +234,7 @@ watch(() => {
 const handleSort = (opt:any)=>{
   emits('handleSort', opt);
 }
+
 
 
 
