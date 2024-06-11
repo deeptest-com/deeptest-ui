@@ -89,6 +89,12 @@
                     @click="copyCurl" />
         </a-tooltip>
       </div>
+      <div v-if="usedBy === UsedBy.DiagnoseDebug" class="copy-as">
+        <a-tooltip>
+          <template #title>分享链接</template>
+          <SelectOutlined @click="shareDiagnoseDetail" />
+        </a-tooltip>
+      </div>
     </div>
 
     <ContextMenu
@@ -103,7 +109,7 @@
 <script setup lang="ts">
 import {computed, defineProps, inject, onMounted, onUnmounted, PropType, ref, watch, Teleport} from "vue";
 import {notification} from 'ant-design-vue';
-import {QuestionCircleOutlined} from '@ant-design/icons-vue';
+import {QuestionCircleOutlined, SelectOutlined} from '@ant-design/icons-vue';
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import IconSvg from "@/components/IconSvg";
@@ -189,6 +195,7 @@ const props = defineProps({
   },
 })
 const usedBy = inject('usedBy') as UsedBy
+const shareDiagnose = inject('shareDiagnose', () => {});
 const {t} = useI18n();
 const {showContextMenu, contextMenuStyle, onContextMenuShow, onMenuClick} = useVariableReplace('endpointInterfaceUrl')
 const showBaseUrl = () => {
@@ -311,6 +318,10 @@ const validateInfo = () => {
   }
 
   return true
+};
+
+const shareDiagnoseDetail = () => {
+  shareDiagnose();
 };
 
 onUnmounted(() => {

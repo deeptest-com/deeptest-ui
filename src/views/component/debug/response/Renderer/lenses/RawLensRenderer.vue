@@ -1,5 +1,5 @@
 <template>
-  <div class="response-raw-main">
+  <div class="response-raw-main" ref="responseRawMain">
     <div class="head">
       <a-row type="flex">
         <a-col flex="1">
@@ -147,12 +147,15 @@ const responseExtractorCancel = () => {
   responseExtractorVisible.value = false
 }
 
+const responseRawMain = ref();
+
 onMounted(() => {
   bus.on(settings.paneResizeTop, () => {
     monacoEditor.value?.resizeIt({
       act: settings.eventTypeContainerHeightChanged,
       container: 'response-raw-main',
       id: 'raw-lens-main',
+      el: responseRawMain.value,
     })
   })
 });

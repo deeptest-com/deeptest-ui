@@ -259,10 +259,7 @@ export default defineComponent({
      * 避免展示不全
      */
     resizeIt(data) {
-      const container = document.getElementsByClassName(data.container)[0]
-      if (!container) {
-        return;
-      }
+      const container = data.el;
       let height = container.clientHeight;
       if (!container.clientHeight) {
         const parentContainer = document.getElementsByClassName('response-renderer')[0];
@@ -279,6 +276,7 @@ export default defineComponent({
        * 为同一个才可以触发重置editor layout
        */
       if (data.id === this.$props.customId) {
+        console.error(1111);
         this.editor.layout(size)
       }
     },
