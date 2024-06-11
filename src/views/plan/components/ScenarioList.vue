@@ -66,6 +66,7 @@
         </template>
     </Table>
     <RelationScenario
+        v-if="associateModalVisible"
         :associate-modal-visible="associateModalVisible"
         @on-cancel="associateModalVisible = false"
         @on-ok="handleFinish"
