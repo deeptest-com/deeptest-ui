@@ -37,12 +37,13 @@ import fixMonacoEditor from "@/utils/fixMonacoEditor";
 import {WebSocket} from "@/services/websocket";
 import {getCache, setCache} from "@/utils/localCache";
 import { config, observer } from "./utils/observer";
+
 fixMonacoEditor();
 export default defineComponent({
   name: 'App',
   components: {
     Notification,
-    CreateProjectModal
+    CreateProjectModal,
   },
   setup() {
     const { locale } = useI18n();

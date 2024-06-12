@@ -62,8 +62,9 @@
           :visible="applyProPermissionsModalVisible"
           :item="applyItem"
           @update:visible="applyProPermissionsModalVisible = false"
-          @handleSuccess="handleSuccess"
-      />
+          @handleSuccess="handleSuccess" />
+
+      <AiChat />
     </div>
   </HomeLayout>
 </template>
@@ -74,12 +75,14 @@ import {useStore} from "vuex";
 import {useRouter} from "vue-router";
 import {Modal, notification} from "ant-design-vue";
 
+import HomeLayout from "@/layouts/HomeLayout.vue";
 import StatisticHeader from "@/components/StatisticHeader/index.vue";
 import CreateProjectModal from "@/components/CreateProjectModal/index.vue";
 import ApplyProPermissionsModal from "@/components/ApplyProPermissions/index.vue";
 import HomeList from "./component/HomeList/index.vue";
 import CardList from "./component/CardList/index.vue";
-import HomeLayout from "@/layouts/HomeLayout.vue";
+import AiChat from "./component/AiChat/index.vue";
+
 import {StateType} from "./store";
 import {removeMember} from "@/views/project/service";
 
