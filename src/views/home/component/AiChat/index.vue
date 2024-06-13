@@ -1,6 +1,6 @@
 <template>
   <div class="aichat-main">
-    <div class="fix-action dp-link clear-both"
+    <div class="fix-action dp-link clear-both" :title="(showChat?'关闭':'打开') + '数字人'"
          @click="show">
       <img src="@/assets/images/chat-close.png" :class="{closed: showChat}"/>
     </div>
@@ -38,23 +38,36 @@
       <div class="messages" id="chat-messages">
         <template v-for="(item, index) in messages" :key="index" class="log">
           <div v-if="item.type === 'human'" class="chat-sender human">
-            <div class="avatar"
-                 v-bind:style="{ 'background-image': 'url(' + require('@/assets/images/chat-human.png') + ')' }"></div>
-            <div class="content">
+            <div class="avatar-container">
+              <div class="avatar"></div>
+<!--              <div class="avatar"
+                 v-bind:style="{ 'background-image': 'url(' + require('@/assets/images/chat-human.png') + ')' }"
+              ></div>-->
+            </div>
+              <div class="content">
               <span>{{item.content}}</span>
             </div>
           </div>
 
           <div v-if="item.type === 'robot'" class="chat-sender robot">
-            <div class="avatar"></div>
+            <div class="avatar-container">
+              <div class="avatar"></div>
+            </div>
             <div class="content">
               <span v-html="item.content" />
+            </div>
+            <div class="toolbar">
+              <div class="call dp-link-primary">重新生成</div>
+              <div class="copy">
+                <img src="@/assets/images/chat-copy.png" />
+                复制
+              </div>
             </div>
           </div>
         </template>
       </div>
 
-      <div class="actions">
+      <div class="sender">
         <a-input-search
             v-model:value="msg"
             placeholder="输入文字聊天，上下键可切换历史。"
@@ -62,9 +75,18 @@
             @search="send"
             @keydown="keyDown">
           <template #enterButton>
-            <a-button :disabled="isChatting"><img src="@/assets/images/chat-submit.png" class="submit-btn" /> </a-button>
+            <a-button :disabled="isChatting">
+              <img src="@/assets/images/chat-submit.png" class="submit-btn" />
+            </a-button>
           </template>
         </a-input-search>
+      </div>
+
+      <div class="actions">
+        <span class="icon-container" title="帮助"><span class="help icon dp-link"></span></span>
+        <span class="icon-container" title="评论"><span class="comments icon dp-link"></span></span>
+        <span class="icon-container" title="点赞"><span class="up icon dp-link"></span></span>
+        <span class="icon-container" title="拍砖"><span class="down icon dp-link"></span></span>
       </div>
     </div>
   </div>
@@ -383,22 +405,34 @@ onMounted(async () => {
       .chat-sender {
         clear: both;
         font-size: 100%;
-        .avatar {
-          float: left;
-          margin: 5px;
-          width: 36px;
-          height: 36px;
-          background-repeat: no-repeat;
-          background-size: cover;
-          border-radius: 5px;
-        }
 
-        &.human  {
-          font-weight: bold;
+        &.human .avatar-container .avatar {
+          background-image: url('../../../../assets/images/chat-human.png');
         }
-        &.robot .avatar {
+        &.robot .avatar-container .avatar {
           background-image: url('../../../../assets/images/chat-robot.png');
         }
+
+        .avatar-container {
+          float: left;
+          margin: 5px;
+          padding: 4px;
+          width: 36px;
+          height: 36px;
+          border-radius: 6px;
+          background: #FFFFFF;
+
+          .avatar {
+            width: 28px;
+            height: 28px;
+            background-size: cover;
+
+            &.human  {
+              font-weight: bold;
+            }
+          }
+        }
+
         &.robot .content {
           background-color: white;
           padding-left: 14px;
@@ -408,6 +442,22 @@ onMounted(async () => {
           margin: 0 50px 10px 50px;
           padding: 12px 10px 10px 0;
           border-radius: 7px;
+        }
+
+        .toolbar {
+          display: flex;
+          margin: auto 50px auto 50px;
+          line-height: 23px;
+
+          .call {
+            flex: 1;
+          }
+          .copy {
+            width: 70px;
+            img {
+              width: 23px;
+            }
+          }
         }
 
         span {
@@ -451,7 +501,7 @@ onMounted(async () => {
       }
     }
 
-    .actions {
+    .sender {
       margin-top: 12px;
       height: 41px;
       .ant-input {
@@ -468,6 +518,44 @@ onMounted(async () => {
         .submit-btn {
           height: 24px;
           width: 24px;
+        }
+      }
+    }
+
+    .actions {
+      text-align: right;
+      padding: 10px;
+
+      .icon-container {
+        display: inline-block;
+        margin-left: 10px;
+        padding: 8px;
+        width: 36px;
+        height: 36px;
+        border-radius: 40px;
+        background: #FFFFFF;
+        border: 1px solid #F5F5F5;
+        box-shadow: 0 6px 32px -2px rgba(0, 0, 0, 0.1);
+
+        .icon {
+          display: inline-block;
+          width: 17px;
+          height: 17px;
+
+          background-size: cover;
+
+          &.help {
+            background-image: url("../../../../assets/images/chat-help.png");
+          }
+          &.comments {
+            background-image: url("../../../../assets/images/chat-comments.png");
+          }
+          &.up {
+            background-image: url("../../../../assets/images/chat-up.png");
+          }
+          &.down {
+            background-image: url("../../../../assets/images/chat-down.png");
+          }
         }
       }
     }
