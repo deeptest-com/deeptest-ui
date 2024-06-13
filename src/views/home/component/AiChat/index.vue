@@ -1,61 +1,71 @@
 <template>
   <div class="aichat-main">
-    <div class="header">
-      <div class="label">大模型</div>
-      <div class="contrl">
-        <a-select v-model:value="llm">
-          <a-select-option v-for="(item, index) in aiModels" :key="index"
-                           :value="item.code">
-            {{ item.name }}
-          </a-select-option>
-        </a-select>
-      </div>
-
-      <div class="label">知识库</div>
-      <div class="contrl">
-        <a-select v-model:value="kb">
-          <a-select-option v-for="(item, index) in aiKbs" :key="index"
-                           :value="item">
-            {{ item }}
-          </a-select-option>
-        </a-select>
-      </div>
+    <div class="fix-action dp-link clear-both"
+         @click="show">
+      <img src="@/assets/images/chat-close.png" :class="{closed: showChat}"/>
     </div>
 
-    <div class="messages" id="chat-messages">
-      <template v-for="(item, index) in messages" :key="index" class="log">
-        <div v-if="item.type === 'robot'" class="chat-sender">
-          <div class="avatar robot"></div>
-          <div>ChatGPT</div>
-          <div>
-            <div class="chat-left_triangle"></div>
-            <span v-html="item.content" />
-          </div>
+    <div v-if="showChat"
+         class="aichat-container">
+      <div class="header">
+        <div class="logo">
+          <img src="@/assets/images/chat-robot.png" />
         </div>
 
-        <div v-if="item.type === 'human'" class="chat-receiver">
-          <div class="avatar"
-               v-bind:style="{ 'background-image': 'url(' + require('@/assets/images/chat-einstein.png') + ')' }"></div>
-          <div>{{item.name}}</div>
-          <div>
-            <div class="chat-right_triangle"></div>
-            <span>{{item.content}}</span>
-          </div>
+        <div class="label">大模型</div>
+        <div class="contrl">
+          <a-select v-model:value="llm">
+            <a-select-option v-for="(item, index) in aiModels" :key="index"
+                             :value="item.code">
+              {{ item.name }}
+            </a-select-option>
+          </a-select>
         </div>
-      </template>
-    </div>
 
-    <div class="actions">
-      <a-input-search
-          v-model:value="msg"
-          placeholder="输入文字和机器人聊天"
-          size="large"
-          @search="send"
-          @keydown="keyDown">
-        <template #enterButton>
-          <a-button :disabled="isChatting">发送</a-button>
+        <div class="label">知识库</div>
+        <div class="contrl">
+          <a-select v-model:value="kb">
+            <a-select-option v-for="(item, index) in aiKbs" :key="index"
+                             :value="item">
+              {{ item }}
+            </a-select-option>
+          </a-select>
+        </div>
+
+        <div class="action"></div>
+      </div>
+
+      <div class="messages" id="chat-messages">
+        <template v-for="(item, index) in messages" :key="index" class="log">
+          <div v-if="item.type === 'human'" class="chat-sender human">
+            <div class="avatar"
+                 v-bind:style="{ 'background-image': 'url(' + require('@/assets/images/chat-human.png') + ')' }"></div>
+            <div class="content">
+              <span>{{item.content}}</span>
+            </div>
+          </div>
+
+          <div v-if="item.type === 'robot'" class="chat-sender robot">
+            <div class="avatar"></div>
+            <div class="content">
+              <span v-html="item.content" />
+            </div>
+          </div>
         </template>
-      </a-input-search>
+      </div>
+
+      <div class="actions">
+        <a-input-search
+            v-model:value="msg"
+            placeholder="输入文字聊天，上下键可切换历史。"
+            size="large"
+            @search="send"
+            @keydown="keyDown">
+          <template #enterButton>
+            <a-button :disabled="isChatting"><img src="@/assets/images/chat-submit.png" class="submit-btn" /> </a-button>
+          </template>
+        </a-input-search>
+      </div>
     </div>
   </div>
 </template>
@@ -75,7 +85,7 @@ const humanAvatar = '../../../../assets/images/chat-einstein.png'
 
 const CHAT_HISTORIES = 'chat_history_key'
 const histories = ref([] as any[])
-const historyIndex = ref(0)
+const historyIndex = ref(-1)
 
 const aiModels = ref([] as any[])
 const aiKbs = ref([] as string[])
@@ -201,16 +211,36 @@ const send = async () => {
 const keyDown = (event) => {
   console.log(event)
 
+  if (historyIndex.value === -1 && histories.value.length === 0) { // fist time
+    return
+  }
+
   if (event.keyCode === KeyCode.UP) {
     console.log('up')
-    if (historyIndex.value > 0) historyIndex.value--
 
+    if (historyIndex.value === -1) { // fist time
+      historyIndex.value = histories.value.length - 1
+      msg.value = histories.value[historyIndex.value]
+
+      return
+    }
+
+    if (historyIndex.value > 0) {
+      historyIndex.value--
+    }
     msg.value = histories.value[historyIndex.value]
 
   } else if (event.keyCode === KeyCode.DOWN) {
     console.log('keyDown', event)
-    if (historyIndex.value < histories.value.length - 1) historyIndex.value++
 
+    if (historyIndex.value === -1 ||  // fist time
+        historyIndex.value === histories.value.length - 1) { // is max
+      historyIndex.value === -1
+      msg.value = ''
+      return
+    }
+
+    historyIndex.value++
     msg.value = histories.value[historyIndex.value]
   }
 }
@@ -232,8 +262,6 @@ watch(currMsg, (newVal, oldValue) => {
   scroll()
 }, {immediate: false, deep: true})
 
-
-
 const initAiData = async () => {
   const modelsResp = await list_valid_models({})
   console.log('list_valid_models', modelsResp)
@@ -249,8 +277,13 @@ const initAiData = async () => {
 const initHistory = async () => {
   histories.value = await getCache(CHAT_HISTORIES)
   if (!histories.value) histories.value = []
-  if (histories.value.length > 0)
-    msg.value = histories.value[histories.value.length - 1]
+  // if (histories.value.length > 0)
+  //   msg.value = histories.value[histories.value.length - 1]
+}
+
+const showChat = ref(true)
+const show = () => {
+  showChat.value = !showChat.value
 }
 
 onMounted(async () => {
@@ -260,165 +293,184 @@ onMounted(async () => {
 
 </script>
 
+<style lang="less">
+.aichat-main .aichat-container {
+  .actions {
+    input {
+      border-right: 0;
+      border-color: #447DFD !important;
+      border-radius: 8px 0 0 8px !important;
+    }
+
+    input:focus {
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      -webkit-user-modify: read-write-plaintext-only;
+      outline: none;
+      box-shadow: none;
+    }
+  }
+}
+</style>
+
 <style lang="less" scoped>
 .aichat-main {
-  z-index: 9;
-  position: fixed;
-  top: 65px;
-  right: 0;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-
-  height: calc(100% - 60px);
-  width: 496px;
-
-  background-color: #ebebeb;
-  font-family: -apple-system;
-  font-family: "-apple-system", "Helvetica Neue", "Roboto", "Segoe UI", sans-serif;
-
-  .header {
-    margin-bottom: 16px;
-    padding: 6px;
+  .fix-action {
+    position: fixed;
+    z-index: 999;
+    padding: 4px;
+    top: 90px;
+    right: 16px;
     height: 32px;
-    display: flex;
-q
-    .label {
-      width: 60px;
-      padding-right: 6px;
-      text-align: right;
-      line-height: 32px;
-    }
-    .contrl {
-      flex: 1;
-    }
-
-    .ant-select {
-      width: 90%;
+    img {
+      height: 16px;
+      width: 16px;
+      &.closed {
+        transform: rotate(90deg);
+      }
     }
   }
 
-  .messages {
-    flex: 1;
-    overflow-y: auto;
+  .aichat-container {
+    z-index: 9;
+    position: fixed;
+    top: 75px;
+    right: 0;
+    padding: 16px;
+    height: calc(100% - 90px);
+    width: 650px;
+    background-color: #FFFFFF;
+    border: 1px solid #f0f0f0;
 
-    .chat-sender, .chat-receiver {
-      .avatar {
-        margin: 5px;
+    display: flex;
+    flex-direction: column;
+
+    .header {
+      margin-bottom: 16px;
+      height: 32px;
+      display: flex;
+
+      .logo {
+        width: 30px;
+        img {
+          height: 32px;
+          width: 32px;
+        }
+      }
+      .label {
+        width: 65px;
+        padding-right: 7px;
+        text-align: right;
+        line-height: 32px;
+      }
+      .contrl {
+        flex: 1;
+        .ant-select {
+          width: 100%;
+        }
+      }
+      .action {
+        width: 30px;
+      }
+    }
+
+    .messages {
+      flex: 1;
+      padding: 16px 10px;
+      overflow-y: auto;
+      background: linear-gradient(180deg, #F3F3F6 0%, #EAEDF6 100%);
+      border-radius: 8px;
+
+      .chat-sender {
+        clear: both;
+        font-size: 100%;
+        .avatar {
+          float: left;
+          margin: 5px;
+          width: 36px;
+          height: 36px;
+          background-repeat: no-repeat;
+          background-size: cover;
+          border-radius: 5px;
+        }
+
+        &.human  {
+          font-weight: bold;
+        }
+        &.robot .avatar {
+          background-image: url('../../../../assets/images/chat-robot.png');
+        }
+        &.robot .content {
+          background-color: white;
+          padding-left: 14px;
+        }
+        .content {
+          /*float: left;*/
+          margin: 0 50px 10px 50px;
+          padding: 12px 10px 10px 0;
+          border-radius: 7px;
+        }
+
+        span {
+          word-break: break-all;
+        }
+      }
+
+      .chat-sender div:first-child img {
         width: 40px;
         height: 40px;
-        background-repeat: no-repeat;
-        background-size: cover;
-        border-radius: 5px;
+        /*border-radius: 10%;*/
       }
-      span {
+
+      .chat-left_triangle {
+        height: 0px;
+        width: 0px;
+        border-width: 6px;
+        border-style: solid;
+        border-color: transparent white transparent transparent;
+        position: relative;
+        left: -22px;
+        top: 3px;
+      }
+
+      .chat-notice {
+        clear: both;
+        font-size: 70%;
+        color: white;
+        text-align: center;
+        margin-top: 15px;
+        margin-bottom: 15px;
+      }
+
+      .chat-notice span {
+        background-color: #cecece;
+        line-height: 25px;
+        border-radius: 5px;
+        padding: 5px 10px;
+
         word-break: break-all;
       }
     }
-    .chat-sender {
-      clear: both;
-      font-size: 80%;
-      .avatar {
-        background-image: url('../../../../assets/images/chat-robot.png');
+
+    .actions {
+      margin-top: 12px;
+      height: 41px;
+      .ant-input {
+        border-right: 0;
+        border-color: #447DFD !important;
+        border-radius: 8px 0 0 8px !important;
+      }
+
+      button {
+        border-left: 0;
+        border-color: #447DFD;
+        border-radius: 0 8px 8px 0;
+
+        .submit-btn {
+          height: 24px;
+          width: 24px;
+        }
       }
     }
-
-    .chat-sender div:nth-of-type(1) {
-      float: left;
-    }
-
-    .chat-sender div:nth-of-type(2) {
-      margin: 0 50px 2px 50px;
-      padding: 0px;
-      color: #848484;
-      font-size: 80%;
-      text-align: left;
-    }
-
-    .chat-sender div:nth-of-type(3) {
-      background-color: white;
-      /*float: left;*/
-      margin: 0 50px 10px 50px;
-      padding: 10px 10px 10px 10px;
-      border-radius: 7px;
-      text-indent: -12px;
-    }
-
-    .chat-receiver {
-      clear: both;
-      font-size: 80%;
-    }
-
-    .chat-receiver div:nth-of-type(1) {
-      float: right;
-    }
-
-    .chat-receiver div:nth-of-type(2) {
-      margin: 0px 50px 2px 50px;
-      padding: 0px;
-      color: #848484;
-      font-size: 70%;
-      text-align: right;
-    }
-
-    .chat-receiver div:nth-of-type(3) {
-      /*float:right;*/
-      background-color: #b2e281;
-      margin: 0px 50px 10px 50px;
-      padding: 10px 10px 10px 10px;
-      border-radius: 7px;
-    }
-
-    .chat-receiver div:first-child img,
-    .chat-sender div:first-child img {
-      width: 40px;
-      height: 40px;
-      /*border-radius: 10%;*/
-    }
-
-    .chat-left_triangle {
-      height: 0px;
-      width: 0px;
-      border-width: 6px;
-      border-style: solid;
-      border-color: transparent white transparent transparent;
-      position: relative;
-      left: -22px;
-      top: 3px;
-    }
-
-    .chat-right_triangle {
-      height: 0px;
-      width: 0px;
-      border-width: 6px;
-      border-style: solid;
-      border-color: transparent transparent transparent #b2e281;
-      position: relative;
-      right: -22px;
-      top: 3px;
-    }
-
-    .chat-notice {
-      clear: both;
-      font-size: 70%;
-      color: white;
-      text-align: center;
-      margin-top: 15px;
-      margin-bottom: 15px;
-    }
-
-    .chat-notice span {
-      background-color: #cecece;
-      line-height: 25px;
-      border-radius: 5px;
-      padding: 5px 10px;
-
-      word-break: break-all;
-    }
-  }
-
-  .actions {
-    height: 50px;
   }
 }
 </style>
