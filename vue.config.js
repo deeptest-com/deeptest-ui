@@ -12,7 +12,8 @@ if (APP_CONF) { // if (NODE_ENV === 'production' && APP_CONF) {
     process.env.VUE_APP_API_SERVER = prodConf.VUE_APP_API_SERVER
     process.env.VUE_APP_API_AGENT = prodConf.VUE_APP_API_AGENT
 }
-console.log('API URL: ', process.env.VUE_APP_API_SERVER, process.env.VUE_APP_API_AGENT, process.env.VUE_APP_DEPLOY_ENV)
+console.log('API URL: ', process.env.VUE_APP_API_SERVER, process.env.VUE_APP_API_AGENT)
+console.log('Deploy Env: ', process.env.VUE_APP_DEPLOY_ENV)
 
 module.exports = {
     publicPath: VUE_APP_DEPLOY_ENV === 'ly-saas' ? '/lya' : '/',
