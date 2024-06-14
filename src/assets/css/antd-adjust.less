@@ -1,6 +1,9 @@
 @import './antd-variables.less';
 @import './variables.less';
 
+.ant-notification-notice-message {
+    word-break: break-all;
+}
 .ant-spin-nested-loading {
     height: 100%;
     .ant-spin-container {
@@ -230,11 +233,11 @@
         overflow: hidden;
         white-space: nowrap;
         text-align: left;
-        
+
         label::after {
             color: transparent;
         }
-    
+
         label:not(.ant-form-item-required)::before {
             display: inline-block;
             margin-right: 4px;

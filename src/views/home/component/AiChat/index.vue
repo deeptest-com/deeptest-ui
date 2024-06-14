@@ -98,12 +98,11 @@
 </template>
 
 <script setup lang="ts">
-import {EventStreamContentType, fetchEventSource} from '@microsoft/fetch-event-source';
+import {fetchEventSource} from '@microsoft/fetch-event-source';
 import {onMounted, ref, watch} from "vue";
 import {getUrls} from "@/utils/request";
-import {scrollTo} from "@/utils/dom";
 import {getCache, setCache} from "@/utils/localCache";
-import {KEY_CODES} from "handsontable/helpers";
+import {notification} from 'ant-design-vue';
 import KeyCode from "ant-design-vue-v3/lib/_util/KeyCode";
 import {markToHtml, docToHtml, urlToLink, scroll, list_valid_models, list_knowledge_bases} from "./service";
 import {notifySuccess} from "@/utils/notify";
