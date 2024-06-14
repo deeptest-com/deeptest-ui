@@ -1,4 +1,4 @@
-import {PropType, defineComponent, toRefs, computed} from "vue";
+import {PropType, defineComponent, toRefs, computed, ref, inject, watch} from "vue";
 import "./index.less";
 import { MoreOutlined } from "@ant-design/icons-vue";
 import { MenuItem, Recordable } from "./type";
@@ -26,7 +26,7 @@ const DropdownMenuProps = {
   selectedKey: {
     type: [Number, String],
     default: ''
-  }
+  },
 };
 
 const RenderMenuItem = ({ item, record }: { item: MenuItem, record: Recordable }) => {
@@ -59,7 +59,7 @@ const RenderMenuItem = ({ item, record }: { item: MenuItem, record: Recordable }
     return item.label;
   };
 
-  if (!hasMoreThanOneChildren.value) {
+  if (!item.children || item.children?.length === 0) {
     return (
         <a-menu-item key={item.key} class={{ 'lyapi-drop-menu-item': true, 'has-no-permission': item.disabled }} onClick={e => handleClick(e)}>
           <span class="drop-down-menu-text">{renderContent()}</span>
@@ -67,7 +67,7 @@ const RenderMenuItem = ({ item, record }: { item: MenuItem, record: Recordable }
     )
   } else {
     return (
-        <a-sub-menu title={item.label} class={{'dp-action-submenu': true}}>
+        <a-sub-menu popupClassName="ly-drop-down-sub-menu" title={item.label} class={{'dp-action-submenu': true}} key={item.key}>
           {
             item.children?.map((e: any, index) => (
                 RenderMenuItem({ item: e, record: record })
@@ -113,7 +113,7 @@ const ActionList = (opts: { list: MenuItem[], record: Recordable}) => {
   return (
     <div class="action-list">
       {list.map((actionItem: MenuItem) => (
-        <div class="action-item" onClick={() => actionItem.action(record)}>
+        <div class="action-item" onClick={() => actionItem.action?.(record)}>
           { actionItem.checkExecClickAble ? renderExecBtn(actionItem) : actionItem.customLoadingRender ? 
             <a-tooltip title={record.loading ? (actionItem.loadingText || null) : actionItem.label} placement="top">
               {customRenderLoadingLabel(actionItem)}
@@ -142,6 +142,14 @@ const DropdownList = defineComponent({
     },
   },
   setup(props, { slots }) {
+    const handleOpenChange = inject('handleOpenChange', null) as any;
+    const openKeys = ref([]);
+
+    const handleOpen = e => {
+      if (handleOpenChange) {
+        handleOpenChange?.(e);
+      }
+    }
 
     const vslots = {
       default: () => {
@@ -149,7 +157,7 @@ const DropdownList = defineComponent({
       },
       overlay: () => {
         return (
-          <a-menu selectedKeys={[props.selectedkey]}>
+          <a-menu style={{ maxHeight: '300px', overflowY: 'scroll' }} selectedKeys={[props.selectedkey]} openKeys={openKeys.value} onOpenChange={e => handleOpen(e)}>
             {
               props.list.map((e: any, index) => (
                 RenderMenuItem({ item: e, record: props.record })

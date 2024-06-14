@@ -36,6 +36,7 @@ import {
     saveExtractor,
     saveResponseDefine,
     saveScript,
+    getSnippetsListMock,
 } from './service';
 
 import {changeServe, getVarsByEnv, listDbConn, serverList} from '@/views/project-settings/service';
@@ -85,6 +86,7 @@ export interface StateType {
     environmentsFromServers: any[];
     currServe: any;
     dbConns: any[];
+    magicList: any[];
 
     benchMarkCase: {
         preConditions: any[];
@@ -159,6 +161,28 @@ const initState: StateType = {
         cookieData: {},
         checkpointData: {},
     },
+    magicList: [
+        {
+            label: '引用变量',
+            key: 'variable',
+            children: [],
+        },
+        {
+            key: 'mock',
+            label: '特定规则生成(Mock)',
+            children: [],
+        },
+        {
+            key: 'sysFn',
+            label: '系统函数',
+            children: [],
+        },
+        {
+            key: 'customFn',
+            label: '自定义函数',
+            children: [],
+        },
+    ]
 };
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -225,6 +249,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setAssertionConditionsObj: Mutation<StateType>;
         setSrcAssertionConditionsObj: Mutation<StateType>;
+
+        setMagicList: Mutation<StateType>;
     };
     actions: {
         loadDataAndInvocations: Action<StateType, StateType>;
@@ -285,6 +311,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
         leaveSaveScript: Action<StateType, StateType>;
         leaveSaveCheckpoint: Action<StateType, StateType>;
         leaveSaveDbOpt: Action<StateType, StateType>;
+
+        getListMock: Action<StateType, StateType>;
     };
 }
 
@@ -515,6 +543,15 @@ const StoreModel: ModuleType = {
         setSrcAssertionConditionsObj(state, payload){
             state.srcAssertionConditionsDataObj[payload.id] = payload.value
         },
+        setMagicList(state, payload) {
+            const newList = cloneDeep(state.magicList);
+            newList.forEach(e => {
+                if (e.key === payload.type) {
+                    e.children = payload.data;
+                }
+            })
+            state.magicList = newList;
+        }
     },
     actions: {
         // debug
@@ -1214,6 +1251,13 @@ const StoreModel: ModuleType = {
             } catch (error) {
                 return false;
             }
+        },
+        async getListMock({ commit }) {
+            const result: any = await getSnippetsListMock();
+            if (result.code === 0) {
+                return result.data;
+            }
+            return [];
         }
     }
 };

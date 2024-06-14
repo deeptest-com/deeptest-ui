@@ -103,21 +103,21 @@ const selectMenuItem = async (item) => {
     const body = getEditorNewContent(item.name)
     store.dispatch("Debug/updateBody", body);
 
-  } else if (variableSelectionData.value.src === 'queryParam') {
+  } else if (variableSelectionData.value.src === 'queryParams') {
     let param = debugData.value.queryParams[variableSelectionData.value.index].value
     param = getInputNewContent(item.name, param,
         variableSelectionData.value.data.selectionStart, variableSelectionData.value.data.selectionEnd)
 
     updateInput(targetElemId, param)
 
-  }  else if (variableSelectionData.value.src === 'pathParam') {
+  }  else if (variableSelectionData.value.src === 'pathParams') {
     let param = debugData.value.pathParams[variableSelectionData.value.index].value
     param = getInputNewContent(item.name, param,
         variableSelectionData.value.data.selectionStart, variableSelectionData.value.data.selectionEnd)
 
     updateInput(targetElemId, param)
 
-  } else if (variableSelectionData.value.src === 'header') {
+  } else if (variableSelectionData.value.src === 'headers') {
     let header = debugData.value.headers[variableSelectionData.value.index].value
     header = getInputNewContent(item.name, header,
             variableSelectionData.value.data.selectionStart, variableSelectionData.value.data.selectionEnd)

@@ -410,6 +410,13 @@ export async function loadCurl(data): Promise<any> {
     });
 }
 
+export async function getSnippetsListMock() {
+    return request({
+        url: '/snippets/listMock',
+        method: 'get',
+    })
+}
+
 export const showBaseUrlOrNot = (debugData) => {
     const notShow = debugData.usedBy === UsedBy.DiagnoseDebug
         || (debugData.usedBy === UsedBy.ScenarioDebug &&
