@@ -57,8 +57,13 @@
               <span v-html="item.content" />
             </div>
             <div class="toolbar">
-              <div class="call dp-link-primary">重新生成</div>
-              <div class="copy">
+              <div class="call dp-link-primary"
+                   @click="recall(index)">
+                重新生成
+              </div>
+
+              <div class="copy dp-link"
+                   @click="copy">
                 <img src="@/assets/images/chat-copy.png" />
                 复制
               </div>
@@ -101,6 +106,7 @@ import {getCache, setCache} from "@/utils/localCache";
 import {KEY_CODES} from "handsontable/helpers";
 import KeyCode from "ant-design-vue-v3/lib/_util/KeyCode";
 import {markToHtml, docToHtml, urlToLink, scroll, list_valid_models, list_knowledge_bases} from "./service";
+import {notifySuccess} from "@/utils/notify";
 
 const humanName = 'Albert'
 const humanAvatar = '../../../../assets/images/chat-einstein.png'
@@ -308,6 +314,27 @@ const show = () => {
   showChat.value = !showChat.value
 }
 
+const recall = (index) => {
+  console.log('recall', index)
+  if (index > messages.value.length - 1) {
+    return
+  }
+
+  const item = messages.value[index-1]
+  msg.value = item.content
+  send()
+}
+
+const copy = () => {
+  console.log('copy')
+  if (messages.value.length === 0) {
+    return
+  }
+
+  navigator.clipboard.writeText(messages.value[messages.value.length - 1].content)
+  notifySuccess('成功复制回复结果到剪贴板。');
+}
+
 onMounted(async () => {
   initHistory()
   initAiData()
@@ -317,7 +344,7 @@ onMounted(async () => {
 
 <style lang="less">
 .aichat-main .aichat-container {
-  .actions {
+  .sender {
     input {
       border-right: 0;
       border-color: #447DFD !important;
@@ -399,8 +426,8 @@ onMounted(async () => {
       flex: 1;
       padding: 16px 10px;
       overflow-y: auto;
-      background: linear-gradient(180deg, #F3F3F6 0%, #EAEDF6 100%);
       border-radius: 8px;
+      background: linear-gradient(180deg, #F3F3F6 0%, #EAEDF6 100%);
 
       .chat-sender {
         clear: both;
@@ -524,7 +551,7 @@ onMounted(async () => {
 
     .actions {
       text-align: right;
-      padding: 10px;
+      padding-top: 10px;
 
       .icon-container {
         display: inline-block;
