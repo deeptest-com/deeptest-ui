@@ -40,12 +40,14 @@
           <div v-if="item.type === 'human'" class="chat-sender human">
             <div class="avatar-container">
               <div class="avatar"></div>
-<!--              <div class="avatar"
-                 v-bind:style="{ 'background-image': 'url(' + require('@/assets/images/chat-human.png') + ')' }"
-              ></div>-->
             </div>
-              <div class="content">
+
+            <div class="content">
               <span>{{item.content}}</span>
+              <span v-if="index === messages.length - 1"
+                    class="loading">
+                <img src="@/assets/images/loading.gif" />
+              </span>
             </div>
           </div>
 
@@ -100,9 +102,9 @@
 <script setup lang="ts">
 import {fetchEventSource} from '@microsoft/fetch-event-source';
 import {onMounted, ref, watch} from "vue";
+import {LoadingOutlined} from "@ant-design/icons-vue";
 import {getUrls} from "@/utils/request";
 import {getCache, setCache} from "@/utils/localCache";
-import {notification} from 'ant-design-vue';
 import KeyCode from "ant-design-vue-v3/lib/_util/KeyCode";
 import {markToHtml, docToHtml, urlToLink, scroll, list_valid_models, list_knowledge_bases} from "./service";
 import {notifySuccess} from "@/utils/notify";
@@ -462,6 +464,14 @@ onMounted(async () => {
         &.robot .content {
           background-color: white;
           padding-left: 14px;
+        }
+        &.human .content {
+          .loading {
+            float: right;
+            img {
+              height: 20px;
+            }
+          }
         }
         .content {
           /*float: left;*/
