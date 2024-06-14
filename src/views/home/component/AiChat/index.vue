@@ -134,6 +134,7 @@ messages.value.push({
   name: 'ChatGPT',
   content: '您好，有什么可以帮助您的？',
 })
+scroll()
 
 const isChatting = ref(false)
 const currMsg = ref('')
@@ -160,6 +161,7 @@ const send = async () => {
     avatar: humanAvatar,
   }
   messages.value.push(humanMsg)
+  scroll()
 
   const {serverUrl} = getUrls()
   const url = `${serverUrl}/aichat/knowledge_base_chat`
