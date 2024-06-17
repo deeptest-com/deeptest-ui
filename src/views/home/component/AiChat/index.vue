@@ -1,8 +1,13 @@
 <template>
   <div class="aichat-main">
-    <div class="fix-action dp-link clear-both" :title="(showChat?'关闭':'打开') + '数字人'"
+    <div class="fix-action-close dp-link clear-both" :title="'关闭数字人'"
          @click="show">
-      <img src="@/assets/images/chat-close.png" :class="{closed: showChat}"/>
+      <span v-if="showChat" class="close" />
+    </div>
+
+    <div class="fix-action-open dp-link clear-both" :title="'打开数字人'"
+         @click="show">
+      <span v-if="!showChat" class="open" />
     </div>
 
     <div v-if="showChat"
@@ -382,29 +387,48 @@ onMounted(async () => {
 
 <style lang="less" scoped>
 .aichat-main {
-  .fix-action {
+  .fix-action-close {
     position: fixed;
     z-index: 999;
     padding: 4px;
-    top: 90px;
+    top: 17px;
     right: 16px;
     height: 32px;
-    img {
+    .close {
+      display: inline-block;
+      margin: 5px;
       height: 16px;
       width: 16px;
-      &.closed {
-        transform: rotate(90deg);
-      }
+      background-size: cover;
+      background-image: url('../../../../assets/images/chat-close.png');
+    }
+  }
+
+  .fix-action-open {
+    position: fixed;
+    z-index: 999;
+    padding: 4px;
+    bottom: 70px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    .open {
+      display: inline-block;
+      margin: 6px;
+      height: 20px;
+      width: 20px;
+      background-size: cover;
+      background-image: url('../../../../assets/images/chat-robot.png');
     }
   }
 
   .aichat-container {
     z-index: 9;
     position: fixed;
-    top: 75px;
+    top: 0;
     right: 0;
     padding: 16px;
-    height: calc(100% - 90px);
+    height: 100%;
     width: 650px;
     background-color: #FFFFFF;
     border: 1px solid #f0f0f0;
@@ -419,9 +443,10 @@ onMounted(async () => {
 
       .logo {
         width: 30px;
+        padding: 4px;
         img {
-          height: 32px;
-          width: 32px;
+          height: 22px;
+          width: 22px;
         }
       }
       .label {

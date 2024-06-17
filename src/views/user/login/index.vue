@@ -89,6 +89,8 @@ export default defineComponent({
         });
 
         onMounted(async () => {
+          console.log('login onMounted')
+
           // 客户端里，自动填充用户名和密码
           const isElectron = !!window?.require;
           const ipcRenderer = undefined as any
@@ -97,7 +99,9 @@ export default defineComponent({
             const userInfo = JSON.parse(userInfoStr || '{}');
             modelRef.username = userInfo?.username || '';
             modelRef.password = userInfo?.password || '';
-          } else if(window.location.host === 'demo.deeptest.com' || window.location.host === '192.168.5.134') { // 演示站点，自动填充用户名和密码
+          } else if(window.location.host === 'demo.deeptest.com'
+              || window.location.host.indexOf('192.168.5.134') > -1
+              || window.location.host.indexOf('localhost') > -1) { // 演示和开发站点，自动填充用户名和密码
             modelRef.username = 'admin';
             modelRef.password = 'P2ssw0rd';
           }
