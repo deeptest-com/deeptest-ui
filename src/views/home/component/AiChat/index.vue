@@ -80,7 +80,8 @@
             placeholder="输入文字聊天，上下键可切换历史。"
             size="large"
             @search="send"
-            @keydown="keyDown">
+            @keydown="keyDown"
+            id="msgInput">
           <template #enterButton>
             <a-button :disabled="isChatting">
               <img src="@/assets/images/chat-submit.png" class="submit-btn" />
@@ -106,7 +107,15 @@ import {LoadingOutlined} from "@ant-design/icons-vue";
 import {getUrls} from "@/utils/request";
 import {getCache, setCache} from "@/utils/localCache";
 import KeyCode from "ant-design-vue-v3/lib/_util/KeyCode";
-import {markToHtml, docToHtml, urlToLink, scroll, list_valid_models, list_knowledge_bases} from "./service";
+import {
+  markToHtml,
+  docToHtml,
+  urlToLink,
+  scroll,
+  list_valid_models,
+  list_knowledge_bases,
+  setSelectionRange
+} from "./service";
 import {notifySuccess} from "@/utils/notify";
 
 const humanName = 'Albert'
@@ -121,6 +130,7 @@ const aiKbs = ref([] as string[])
 const llm = ref('openai-api')
 const kb = ref('poc')
 const msg = ref('')
+const msgInput = ref();
 
 const messages = ref([] as any[])
 messages.value.push({
@@ -274,6 +284,8 @@ const keyDown = (event) => {
     historyIndex.value++
     msg.value = histories.value[historyIndex.value]
   }
+
+  setSelectionRange(document.getElementById('msgInput'), msg.value.length)
 }
 
 watch(currMsg, (newVal, oldValue) => {

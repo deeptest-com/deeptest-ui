@@ -75,3 +75,20 @@ export function docToHtml (md){
 
     return html
 }
+
+export const setSelectionRange = function (ctrl, pos) {
+    console.log('setSelectionRange', ctrl, pos)
+
+    setTimeout(() => {
+        if (ctrl.setSelectionRange) {
+            ctrl.focus()
+            ctrl.setSelectionRange(pos, pos)
+        } else if (ctrl.createTextRange) {
+            const range = ctrl.createTextRange()
+            range.collapse(true)
+            range.moveEnd('character', pos)
+            range.moveStart('character', pos)
+            range.select()
+        }
+    }, 100)
+}
