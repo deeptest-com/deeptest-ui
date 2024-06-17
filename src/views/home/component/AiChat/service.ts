@@ -20,7 +20,7 @@ export async function list_knowledge_bases(): Promise<any> {
 export function scroll() {
     setTimeout(() => {
         scrollTo('chat-messages', 0)
-    }, 500)
+    }, 200)
 }
 
 export function markToHtml(md){
