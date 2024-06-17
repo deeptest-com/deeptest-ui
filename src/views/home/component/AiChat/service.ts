@@ -82,7 +82,7 @@ export const setSelectionRange = function (ctrl, pos) {
     setTimeout(() => {
         if (ctrl.setSelectionRange) {
             ctrl.focus()
-            ctrl.setSelectionRange(pos, pos)
+            ctrl.setSelectionRange(-1, -1)
         } else if (ctrl.createTextRange) {
             const range = ctrl.createTextRange()
             range.collapse(true)

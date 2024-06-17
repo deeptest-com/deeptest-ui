@@ -285,7 +285,9 @@ const keyDown = (event) => {
     msg.value = histories.value[historyIndex.value]
   }
 
-  setSelectionRange(document.getElementById('msgInput'), msg.value.length)
+  if (event.keyCode === KeyCode.UP || event.keyCode === KeyCode.DOWN) {
+    setSelectionRange(document.getElementById('msgInput'), msg.value.length)
+    }
 }
 
 watch(currMsg, (newVal, oldValue) => {
