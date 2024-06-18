@@ -3,7 +3,7 @@
     <ProcessorHeader v-if="fullscreen"/>
     <CustomCodeHeader v-if="fullscreen" mode="fullscreen" @update-screen="emits('cancel')" />
     <div class="content">
-      <div class="codes">
+      <div class="codes" ref="codesMain">
         <MonacoEditor
           customId="custom-code-container"
           ref="monacoEditor"
@@ -92,6 +92,7 @@ const editorOptions = ref(Object.assign({
   },
 }, MonacoOptions));
 const monacoEditor = ref();
+const codesMain = ref();
 
 onMounted(() => {
   store.dispatch('Snippet/listJslibNames');
@@ -100,7 +101,8 @@ onMounted(() => {
     monacoEditor.value?.resizeIt({
       act: settings.eventTypeContainerHeightChanged,
       container: 'codes',
-      id: 'custom-code-container'
+      id: 'custom-code-container',
+      el: codesMain.value,
     });
   })
 })

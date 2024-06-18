@@ -215,6 +215,7 @@ onMounted(() => {
     flex: 1;
     overflow-y: scroll;
     scrollbar-width: none;
+    padding-bottom: 10px;
   }
 }
 .schema-header {

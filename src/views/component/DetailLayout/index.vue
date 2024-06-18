@@ -1,13 +1,13 @@
 <template>
-  <a-spin tip="loading....." :spinning="spinning">
-    <div :class="['detail-wrapper', prefixCls]">
+  <a-spin :spinning="spinning">
+    <div :class="['detail-wrapper', prefixCls, isLinkFromLy ? 'no-padding': '']">
       <template v-if="show">
-        <div class="detail-header">
+        <div class="detail-header" v-if="!isLinkFromLy">
           <slot name="header" />
         </div>
-        <a-divider />
+        <a-divider v-if="!isLinkFromLy" />
         <div class="detail-content" ref="contentRef">
-          <div class="detail-basic-info" v-if="showBasicInfo">
+          <div class="detail-basic-info" v-if="showBasicInfo && !isLinkFromLy">
             <slot name="basicInfo" />
           </div>
           <div class="detail-tab-header" v-if="showTabHeader">
@@ -26,6 +26,7 @@ import { defineProps, computed, watch, ref, onUnmounted, provide } from 'vue';
 import { useStore } from 'vuex';
 
 import { StateType as DetailStateType } from "./store";
+import { useRoute } from 'vue-router';
 
 const props = defineProps({
   showTabHeader: {
@@ -60,6 +61,12 @@ const containerScrollTop = ref(0);
 const onScroll = (event) => {
   containerScrollTop.value = (event.target && event.target.scrollTop) || 0;
 };
+
+const router = useRoute();
+
+const isLinkFromLy = computed(() => {
+  return router.query.linkOrigin;
+})
 
 watch(() => {
   return props.stickyKey;
@@ -131,6 +138,25 @@ provide('containerScrollTop', computed(() => containerScrollTop.value));
 
   .detail-header, .detail-basic-info, .detail-tab-header, .detail-tab-content {
     padding: 0 16px;
+  }
+
+  &.no-padding {
+    .detail-header, .detail-basic-info, .detail-tab-header, .detail-tab-content {
+      padding: 0;
+    }
+
+    .detail-header {
+      padding-top: 16px;
+    }
+
+    .detail-content {
+      height: 100%;
+      overflow: unset;
+    }
+
+    :deep(.report-basicinfo) {
+      margin-top: 0 !important;
+    }
   }
 
   .detail-basic-info {

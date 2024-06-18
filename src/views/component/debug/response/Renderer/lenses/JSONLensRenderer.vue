@@ -1,5 +1,5 @@
 <template>
-  <div class="response-json-main">
+  <div class="response-json-main" ref="responseJsonMain">
     <div class="head">
       <a-row type="flex">
         <a-col flex="1">
@@ -172,12 +172,15 @@ const format = (item) => {
   bus.emit(settings.eventEditorAction, {act: settings.eventTypeFormat})
 }
 
+const responseJsonMain = ref();
+
 onMounted(() => {
   bus.on(settings.paneResizeTop, () => {
     monacoEditor.value?.resizeIt({
       act: settings.eventTypeContainerHeightChanged,
       container: 'response-json-main',
-      id: 'json-lens-main'
+      id: 'json-lens-main',
+      el: responseJsonMain.value,
     });
   })
 });

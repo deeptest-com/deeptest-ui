@@ -83,7 +83,7 @@ watch(() => {
     </a-button>
   </a-tooltip>
 
-  <a-popover :title="null"
+  <!-- <a-popover :title="null"
              trigger="click"
              v-model:visible="visible"
              placement="left"
@@ -102,7 +102,7 @@ watch(() => {
         </template>
       </a-button>
     </a-tooltip>
-  </a-popover>
+  </a-popover> -->
   <a-tooltip placement="topLeft" :title="disableDel ? null :  '删除'" arrow-point-at-center>
     <a-button :size="'small'" :disabled="disableDel" type="text" @click="emit('del')">
       <template #icon>

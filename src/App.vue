@@ -118,7 +118,6 @@ export default defineComponent({
         console.log('832msg', msg)
 
         if (msg?.type === 'changeRouter') {
-          // 切换项目了，需要重置数据
           if((!currProject.value.id || msg?.data?.needCheckProject) && msg?.data?.projectName){
               const result = await store.dispatch('ProjectGlobal/checkProjectAndUser', { project_code: msg?.data?.projectName });
             // 更新左侧菜单以及按钮权限

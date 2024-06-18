@@ -13,7 +13,7 @@
             label="执行环境"
             has-feedback
             :rules="[{ required: true, message: '请选择执行环境' }]">
-          <a-select @change="changeEnv" v-model:value="currEnvId" placeholder="请选择" :options="envList"/>
+          <a-select @change="changeEnv" v-model:value="currEnvId" placeholder="请选择" :options="envList" :getPopupContainer="triggerNode => triggerNode.parentNode" />
         </a-form-item>
       </a-form>
     </div>
