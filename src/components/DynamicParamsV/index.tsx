@@ -15,6 +15,9 @@ const DynamicParamsV = defineComponent({
   props: {
     index: {
       type: Number
+    },
+    variables: {
+      type: Array
     }
   },
   setup(props) {
@@ -26,16 +29,22 @@ const DynamicParamsV = defineComponent({
       }
       const dispatchActionMap = {
         'mock': 'Debug/getListMock',
+        'sysFn':'Debug/getListSysFn'
       }
-      const dispatchAction = dispatchActionMap[keys[0]];
-      if (!dispatchAction) {
-        return;
+      
+      let res = props.variables
+      if (keys[0] != 'variable') {
+        const dispatchAction = dispatchActionMap[keys[0]];
+        if (!dispatchAction) {
+          return;
+        }
+        const children = dropdownList.value.filter(e => e.key === keys[0])?.[0]?.children || [];
+        if (!children.find(e => e.key === 'loading')) {
+          return;
+        }
+         res = await store.dispatch(dispatchAction);
       }
-      const children = dropdownList.value.filter(e => e.key === keys[0])?.[0]?.children || [];
-      if (!children.find(e => e.key === 'loading')) {
-        return;
-      }
-      const res = await store.dispatch(dispatchAction);
+
       const transverse = (array) => {
         return cloneDeep(array).map(item => {
           if (!item.children) {
@@ -62,7 +71,6 @@ const DynamicParamsV = defineComponent({
 
     const dropdownList = computed(() => {
       const lastList = cloneDeep(store.state.Debug.magicList);
-      console.log(lastList);
       return lastList.map(e => {
         if (e.children.length === 0) {
           e.children = [{

@@ -410,9 +410,16 @@ export async function loadCurl(data): Promise<any> {
     });
 }
 
-export async function getSnippetsListMock() {
+export async function getSnippetsListMock(): Promise<any> {
     return request({
         url: '/snippets/listMock',
+        method: 'get',
+    })
+}
+
+export async function getSnippetsListSysFunc() : Promise<any> {
+    return request({
+        url: '/snippets/listSysFunc',
         method: 'get',
     })
 }

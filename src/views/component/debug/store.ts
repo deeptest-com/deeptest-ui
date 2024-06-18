@@ -37,6 +37,7 @@ import {
     saveResponseDefine,
     saveScript,
     getSnippetsListMock,
+    getSnippetsListSysFunc,
 } from './service';
 
 import {changeServe, getVarsByEnv, listDbConn, serverList} from '@/views/project-settings/service';
@@ -313,6 +314,9 @@ export interface ModuleType extends StoreModuleType<StateType> {
         leaveSaveDbOpt: Action<StateType, StateType>;
 
         getListMock: Action<StateType, StateType>;
+
+        getListSysFn: Action<StateType, StateType>;
+    
     };
 }
 
@@ -1258,7 +1262,15 @@ const StoreModel: ModuleType = {
                 return result.data;
             }
             return [];
+        },
+        async getListSysFn({ commit }) {
+            const result: any = await getSnippetsListSysFunc();
+            if (result.code === 0) {
+                return result.data;
+            }
+            return [];
         }
+        
     }
 };
 
