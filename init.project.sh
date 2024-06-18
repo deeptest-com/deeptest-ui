@@ -1,7 +1,6 @@
 
 # Notice: 请在项目根目录下执行该脚本
 
-node ./compatible-wujie.js
 # 同步 config/root-directory 下的文件到 / 目录下
 # 复制根目录下的文件
 cp -a frontend-config/.env.*   ./
