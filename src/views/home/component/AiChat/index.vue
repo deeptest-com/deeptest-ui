@@ -351,7 +351,7 @@ const recall = (index) => {
 
 const copy = () => {
   console.log('copy')
-  if (messages.value.length === 0) {
+  if (messages.value.length === 0 || !navigator.clipboard) {
     return
   }
 
