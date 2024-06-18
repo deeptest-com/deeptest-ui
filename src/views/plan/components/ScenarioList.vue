@@ -1,11 +1,11 @@
 <template>
     <div class="table-filter">
         <div class="left" v-if="showScenarioOperation">
-            <a-button type="primary" @click="associateModalVisible = true">
+            <a-button :disabled="checkDisabled" type="primary" @click="associateModalVisible = true">
                 <template #icon><plus-outlined /></template>
                 关联测试场景
             </a-button>
-            <a-button type="default" :disabled="!selectedRowIds?.length" @click="handleRemove()">批量移除</a-button>
+            <a-button type="default" :disabled="!selectedRowIds?.length || checkDisabled" @click="handleRemove()">批量移除</a-button>
         </div>
         <div class="right">
             <a-form-item label="优先级">
@@ -22,6 +22,7 @@
         </div>
     </div>
     <Table
+        ref="customTable"
         :custom-row-selection="{
             selectedRowKeys: selectedRowKeys,
             onChange: onSelectChange
@@ -60,21 +61,22 @@
           </div>
         </template>
         <template #operation="{ record }">
-            <a-button type="primary" @click="handleRemove(record)">
+            <a-button :disabled="checkDisabled" type="primary" @click="handleRemove(record)">
                 移除
             </a-button>
         </template>
     </Table>
     <RelationScenario
+        v-if="associateModalVisible"
         :associate-modal-visible="associateModalVisible"
         @on-cancel="associateModalVisible = false"
         @on-ok="handleFinish"
     />
 </template>
-<script lang="ts" setup>
-import { ref, reactive, defineProps, defineEmits, PropType, computed, watch, onMounted } from 'vue';
+<script lang="tsx" setup>
+import { ref, reactive, defineProps, defineEmits, PropType, computed, watch, onMounted, defineExpose } from 'vue';
 import { useStore } from 'vuex';
-import { PlusOutlined } from '@ant-design/icons-vue';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons-vue';
 import RelationScenario from './RelationScenario.vue';
 import ToolTipCell from '@/components/Table/tooltipCell.vue';
 import Table from '@/components/Table/index.vue';
@@ -83,6 +85,8 @@ import {message, Modal, notification} from 'ant-design-vue';
 import { planStatusColorMap, planStatusTextMap } from '@/config/constant';
 import { momentUtc } from '@/utils/datetime';
 import {notifyWarn} from "@/utils/notify";
+import settings from '@/config/settings';
+import { useRoute } from 'vue-router';
 
 const props = defineProps({
     showScenarioOperation: {
@@ -125,10 +129,10 @@ const props = defineProps({
         type: Boolean,
         default: true,
         required: false
-    },  
+    },
 })
 
-const emits = defineEmits(['selectRowKeys', 'refreshList','handleSort']);
+const emits = defineEmits(['selectRowKeys', 'refreshList','handleSort', 'selectRowIds']);
 const store = useStore<{ Plan: PlanStateType,Project }>();
 const currPlan = computed<any>(() => store.state.Plan.detailResult);
 const members = computed(() => store.state.Plan.members);
@@ -136,11 +140,18 @@ const associateModalVisible = ref(false);
 const selectedRowKeys = ref<any[]>(props.selectedKeys || []); // Check here to configure the default column
 let selectedRowIds = ref<any[]>([]);
 const userList = computed<any>(() => store.state.Project.userList);
+const customTable = ref();
+const route = useRoute();
+const status = ref(route.query.planStatus || '1')
+const checkDisabled = computed(() => {
+    return Number(status.value) === 2 || currPlan.value.status === 'disabled';
+});
 
 const onSelectChange = (changableRowKeys: string[], rows: any) => {
     selectedRowKeys.value = changableRowKeys;
     selectedRowIds.value = rows.map((item: any) => item.id);
     emits('selectRowKeys', changableRowKeys);
+    emits('selectRowIds', selectedRowIds?.value);
 };
 
 const priorityOptions = ref<any>([
@@ -192,6 +203,9 @@ const handleRemove = async (record?: any) => {
             console.log('解除关联场景: --', params);
             await store.dispatch('Plan/removeScenario', { planId: currPlan.value.id, params });
             selectedRowKeys.value = []; //清空已选的item
+            selectedRowIds.value = [];
+            emits('selectRowKeys', []);
+            emits('selectRowIds', []);
             emits('refreshList', formState);
         }
     })
@@ -207,8 +221,15 @@ const username = (user:string)=>{
   return result?.label || '-'
 }
 
+const bus = window?.$wujie?.bus;
+
 onMounted(() => {
     // emits('refreshList', formState);
+    bus?.$on('sendMsgToLeyanAPI', ({ type, data }) => {
+        if (type === 'getLeyanPlanStatus') {
+            status.value = data;
+        }
+    })
 })
 
 watch(() => {
@@ -221,8 +242,16 @@ const handleSort = (opt:any)=>{
   emits('handleSort', opt);
 }
 
+const handleCancelBatch = () => {
+  selectedRowKeys.value = [];
+  selectedRowIds.value = [];
+  customTable.value?.initCheckedKeys();
+}
 
-
+defineExpose({
+  handleCancelBatch,
+  handleRemove,
+})
 </script>
 <style scoped lang="less">
 .table-filter {

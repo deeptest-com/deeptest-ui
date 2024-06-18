@@ -1,5 +1,5 @@
 <template>
-  <div class="response-html-main">
+  <div class="response-html-main" ref="responseHtmlMain">
     <div class="head">
       <a-row type="flex">
         <a-col flex="1">
@@ -90,6 +90,7 @@ const expr = ref('')
 const exprType = ref('')
 const result = ref('')
 const monacoEditor = ref();
+const responseHtmlMain = ref();
 
 // let frameElem: HTMLIFrameElement
 // let frameDoc: Document
@@ -175,6 +176,7 @@ onMounted(() => {
       act: settings.eventTypeContainerHeightChanged,
       container: 'response-html-main',
       id: 'html-lens-main',
+      el: responseHtmlMain.value,
     })
   })
 });
