@@ -1,12 +1,7 @@
 <template>
   <div class="aichat-main">
-    <div class="fix-action-close dp-link clear-both" :title="'关闭数字人'"
-         @click="show">
-      <span v-if="showChat" class="close" />
-    </div>
-
     <div class="fix-action-open dp-link clear-both" :title="'打开数字人'"
-         @click="show">
+         @click="showOrNot">
       <span v-if="!showChat" class="open" />
     </div>
 
@@ -37,7 +32,10 @@
           </a-select>
         </div>
 
-        <div class="action"></div>
+        <div class="action dp-link"
+             @click="showOrNot">
+          <span class="close" />
+        </div>
       </div>
 
       <div class="messages" id="chat-messages">
@@ -334,7 +332,7 @@ const initHistory = async () => {
 }
 
 const showChat = ref(true)
-const show = () => {
+const showOrNot = () => {
   showChat.value = !showChat.value
 }
 
@@ -387,23 +385,6 @@ onMounted(async () => {
 
 <style lang="less" scoped>
 .aichat-main {
-  .fix-action-close {
-    position: fixed;
-    z-index: 999;
-    padding: 4px;
-    top: 17px;
-    right: 16px;
-    height: 32px;
-    .close {
-      display: inline-block;
-      margin: 5px;
-      height: 16px;
-      width: 16px;
-      background-size: cover;
-      background-image: url('../../../../assets/images/chat-close.png');
-    }
-  }
-
   .fix-action-open {
     position: fixed;
     z-index: 999;
@@ -463,6 +444,15 @@ onMounted(async () => {
       }
       .action {
         width: 30px;
+        padding: 7px;
+
+        .close {
+          display: inline-block;
+          height: 16px;
+          width: 16px;
+          background-size: cover;
+          background-image: url('../../../../assets/images/chat-close.png');
+        }
       }
     }
 
