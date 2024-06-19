@@ -5,6 +5,8 @@ export type Recordable<T = any> = {
 }
 
 export type MenuItem = {
+  /** 描述 */
+  desc: any;
   /** 提示 */
   tooltip?: string;
   /** 显示图标，只支持图片 */

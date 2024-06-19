@@ -54,8 +54,9 @@ const DynamicParamsV = defineComponent({
           } else {
             item.children = transverse(item.children);
           }
+          
           return item;
-        });
+      });
       };
       store.commit('Debug/setMagicList', {
         type: keys[0],
@@ -64,7 +65,7 @@ const DynamicParamsV = defineComponent({
     }
 
     const vSlots = {
-      default() {
+      default:() => {
         return <MagicIcon />;
       },
     };

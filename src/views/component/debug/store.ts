@@ -1201,9 +1201,9 @@ const StoreModel: ModuleType = {
                 commit('setCurrServe', res.data);
             }
             if (requestEnvVars) {
-                const json = await listEnvVarByServer(serverId)
+                const json = await getVarsByEnv(serverId)
                 if (json.code === 0) {
-                    commit('setServerId', serverId);
+                    //commit('setServerId', serverId);
                     commit('setEnvVars', json.data);
                 }
             }
@@ -1230,7 +1230,7 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
-        async listServes({ commit }, payload: { serveId: number }) {
+        async listServes({ commit,dispatch }, payload: { serveId: number }) {
             const res = await serverList(payload);
             if (res.code === 0) {
                 const servers = (res.data.servers || []).map((item: any) => {
@@ -1240,15 +1240,17 @@ const StoreModel: ModuleType = {
                 })
                 commit('setEnvironmentsFromServers', servers);
                 commit('setCurrServe', res.data.currServer);
+                dispatch("getEnvVarsByEnv",res.data.currServer?.environmentId)
             }
         },
-        async getEnvVarsByEnv({ state }, envId) {
+        async getEnvVarsByEnv({commit, state }, envId) {
             try {
                 if (!state.currServe.environmentId) {
                     return false;
                 }
                 const res = await getVarsByEnv(envId);
                 if (res.code === 0) {
+                    commit('setEnvVars', res.data);
                     return res.data;
                 }
                 return [];

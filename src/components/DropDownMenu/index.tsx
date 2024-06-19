@@ -56,6 +56,11 @@ const RenderMenuItem = ({ item, record }: { item: MenuItem, record: Recordable }
     if (item.checkExecClickAble) {
       return renderExecBtn(item);
     }
+    if (item.desc) {
+      return renderLabelDesc(item);
+    }
+    
+
     return item.label;
   };
 
@@ -93,6 +98,15 @@ const renderExecBtn = (item) => {
         }
       }}  
     </ExecBtn>
+  )
+};
+
+const renderLabelDesc = (item) => {
+  return (
+    <div class="label-desc">
+      <div class="label">{item.label}</div>
+      <div class="desc">{item.desc}</div>
+    </div>
   )
 };
 

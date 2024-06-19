@@ -9,11 +9,11 @@
           <Tips :section="selection" title="发送到服务端的查询参数" />
           <a-tooltip @click="removeAll" overlayClassName="dp-tip-small">
             <template #title>全部清除</template>
-            <DeleteOutlined class="dp-icon-btn dp-trans-80"/>
+            <DeleteOutlined class="dp-icon-btn dp-trans-80" />
           </a-tooltip>
           <a-tooltip @click="add" overlayClassName="dp-tip-small">
             <template #title>新增</template>
-            <PlusOutlined class="dp-icon-btn dp-trans-80"/>
+            <PlusOutlined class="dp-icon-btn dp-trans-80" />
           </a-tooltip>
         </a-col>
       </a-row>
@@ -25,12 +25,8 @@
         </a-col>
         <a-col flex="1">
           <div class="params-value-textarea">
-            <a-input 
-              :id="type + idx"
-              v-model:value="item.value"
-              @change="onParamChange(idx)"
-              v-contextmenu="e => onContextMenuShow(idx, e)"
-              class="dp-bg-input-transparent" />
+            <a-input :id="type + idx" v-model:value="item.value" @change="onParamChange(idx)"
+              v-contextmenu="e => onContextMenuShow(idx, e)" class="dp-bg-input-transparent" />
             <span class="params-value-magic">
               <DynamicParamsV :index="idx" :variables="variables" />
             </span>
@@ -49,36 +45,33 @@
 
           <a-tooltip @click="remove(idx)" overlayClassName="dp-tip-small">
             <template #title>移除</template>
-            <DeleteOutlined class="dp-icon-btn dp-trans-80"/>
+            <DeleteOutlined class="dp-icon-btn dp-trans-80" />
           </a-tooltip>
 
           <a-tooltip @click="insert(idx)" overlayClassName="dp-tip-small">
             <template #title>插入</template>
-            <PlusOutlined class="dp-icon-btn dp-trans-80"/>
+            <PlusOutlined class="dp-icon-btn dp-trans-80" />
           </a-tooltip>
         </a-col>
       </a-row>
     </div>
   </div>
-  <ContextMenu
-    :isShow="showContextMenu"
-    :style="contextMenuStyle"
-    :menu-click="onMenuClick">
-    </ContextMenu>
+  <ContextMenu :isShow="showContextMenu" :style="contextMenuStyle" :menu-click="onMenuClick">
+  </ContextMenu>
 </template>
 <script setup lang="tsx">
-import { defineProps, ref, computed, provide,onMounted } from 'vue';
-import {useStore} from "vuex";
+import { defineProps, ref, computed, provide, onMounted } from 'vue';
+import { useStore } from "vuex";
 import { DeleteOutlined, PlusOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons-vue';
 import ContextMenu from "@/views/component/debug/others/variable-replace/ContextMenu.vue"
 import Tips from "@/components/Tips/index.vue";
-import {Param} from "@/views/component/debug/data";
-import {StateType as Debug} from "@/views/component/debug/store";
+import { Param } from "@/views/component/debug/data";
+import { StateType as Debug } from "@/views/component/debug/store";
 import useVariableReplace from "@/hooks/variable-replace";
 import DynamicParamsV from "@/components/DynamicParamsV";
-import { getConsoleLog } from '@/views/component/debug/service';
+import { showBaseUrlOrNot } from "@/views/component/debug/service";
 
-const store = useStore<{  Debug: Debug }>();
+const store = useStore<{ Debug: Debug }>();
 const props = defineProps<{
   type: string;
   selection: string;
@@ -86,28 +79,30 @@ const props = defineProps<{
 const { showContextMenu, contextMenuStyle, onContextMenuShow, onMenuClick } = useVariableReplace(props.selection);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const paramsData = computed(() => debugData.value[props.type]);
-const variables = computed(function ()  {
-  let data : object[] = []
-
- let list = ["envVars", "shareVars", "globalVars"]
-list.forEach(element => {
-  debugData.value.envDataToView[element].forEach(element => {
-    data.push({
-      label: element.name,
-      value: "${"+element.name+"}",
-      desc : element == "envVars" ? "环境变量" : element == "shareVars" ? "共享变量" : "全局变量"
+const variables = computed( () => {
+  let data: object[] = []
+  let list = ["shareVars","envVars", "globalVars"]
+  list.forEach((item) => {
+    if (!showBaseUrlOrNot(debugData.value) && item == "envVars") {
+      return
+    }
+    debugData.value.envDataToView[item]?.forEach(element => {
+      data.push({
+        label: element.name,
+        value: "${" + element.name + "}",
+        desc: item == "envVars" ? "环境变量" : item == "shareVars" ? "共享变量" : "全局变量"
+      })
     })
   })
-})
   return data
 }
 );
 
 const add = () => {
-  debugData.value[props.type].push({paramIn: 'query'} as Param)
+  debugData.value[props.type].push({ paramIn: 'query' } as Param)
 };
 const removeAll = () => {
-  debugData.value[props.type] = [{paramIn: 'query'} as Param]
+  debugData.value[props.type] = [{ paramIn: 'query' } as Param]
 };
 const disable = (idx) => {
   debugData.value[props.type][idx].disabled = !debugData.value[props.type][idx].disabled
@@ -115,17 +110,17 @@ const disable = (idx) => {
 const remove = (idx) => {
   debugData.value[props.type].splice(idx, 1)
   const len = debugData.value[props.type].length
-  if (len == 0 || !!debugData.value[props.type][len-1].name) {
+  if (len == 0 || !!debugData.value[props.type][len - 1].name) {
     add()
   }
 };
 const insert = (idx) => {
-  debugData.value[props.type].splice(idx+1, 0, {paramIn: 'query'} as Param)
+  debugData.value[props.type].splice(idx + 1, 0, { paramIn: 'query' } as Param)
 };
 const onParamChange = (idx) => {
   if (debugData.value[props.type].length <= idx + 1
-        && (debugData.value[props.type][idx].name !== '' || debugData.value[props.type][idx].value !== '')) {
-    debugData.value[props.type].push({paramIn: 'query'} as Param)
+    && (debugData.value[props.type][idx].name !== '' || debugData.value[props.type][idx].value !== '')) {
+    debugData.value[props.type].push({ paramIn: 'query' } as Param)
   }
 };
 

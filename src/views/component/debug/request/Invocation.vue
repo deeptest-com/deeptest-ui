@@ -230,7 +230,7 @@ watch(debugData, (newVal) => {
 }, {immediate: true, deep: true});
 
 function changeServer(id) {
-  store.dispatch('Debug/changeServer', { serverId: id,serveId:debugData.value.serveId, requestEnvVars: false })
+  store.dispatch('Debug/changeServer', { serverId: id,serveId:debugData.value.serveId, requestEnvVars: true })
 }
 
 const send = async () => {
