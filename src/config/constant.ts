@@ -1200,9 +1200,9 @@ export const defaultEndpointDetail = {
     "cookies": []
 }
 
-export const planStatusTextMap = new Map([['disabled', '已禁用'],['draft', '草稿'], ['executed', '已执行'], ['to_execute', '待执行']]);
+export const planStatusTextMap = new Map([['disabled', '已禁用'],['draft', '草稿'], ['executed', '已执行'], ['to_execute', '待执行'], ['submitted', '已提交']]);
 
-export const planStatusColorMap = new Map([['disabled', 'error'],['draft', 'warning'], ['executed', 'success'], ['to_execute', 'processing']]);
+export const planStatusColorMap = new Map([['disabled', 'error'],['draft', 'warning'], ['executed', 'success'], ['to_execute', 'processing'], ['submitted', 'processing']]);
 
 export const planStatusOptions = [
     {
@@ -1214,13 +1214,17 @@ export const planStatusOptions = [
       value: 'draft'
     },
     {
-      label: '已执行',
-      value: 'executed'
+      label: '已提交',
+      value: 'submitted'
     },
-    {
-      label: '待执行',
-      value: 'to_execute'
-    }
+    // {
+    //   label: '已执行',
+    //   value: 'executed'
+    // },
+    // {
+    //   label: '待执行',
+    //   value: 'to_execute'
+    // }
 ];
 
 export const scenarioStatusOptions = [

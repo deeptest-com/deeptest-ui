@@ -1,5 +1,5 @@
 <template>
-  <div class="response-xml-main">
+  <div class="response-xml-main" ref="responseXmlMain">
     <div class="head">
       <a-row type="flex">
         <a-col flex="1">
@@ -156,12 +156,15 @@ const format = (item) => {
   bus.emit(settings.eventEditorAction, {act: settings.eventTypeFormat})
 }
 
+const responseXmlMain = ref();
+
 onMounted(() => {
   bus.on(settings.paneResizeTop, () => {
     monacoEditor.value?.resizeIt({
       act: settings.eventTypeContainerHeightChanged,
       container: 'response-xml-main',
       id: 'xml-lens-main',
+      el: responseXmlMain.value,
     });
   })
 });

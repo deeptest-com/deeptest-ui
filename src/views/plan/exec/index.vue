@@ -62,7 +62,7 @@ import { useWujie } from '@/composables/useWujie';
 const props = defineProps<{
   drawerVisible: boolean
 }>();
-
+const wujieBus = window?.$wujie?.bus;
 const emits = defineEmits(['onClose']);
 
 const store = useStore<{
@@ -195,6 +195,12 @@ const OnWebSocketMsg = (data: any) => {
     // 测试计划执行完以后 重新获取下 计划的详情以及测试报告列表
     bus.emit(settings.eventGetPlansReports);
     bus.emit(settings.eventGetPlanDetail);
+
+    setTimeout(() => {
+      wujieBus?.$emit(settings.sendMsgToLeyan, {
+        type: 'execPlanEnd',
+      })
+    }, 300);
   } else {
     console.log('其他情况：严格来说，不能执行到这儿:', wsMsg);
   }

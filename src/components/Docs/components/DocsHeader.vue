@@ -10,57 +10,16 @@
       </span>
     </div>
 
-    <a-popover
-        :autoAdjustOverflow="false"
-        :overlayClassName="'deeptest-docs-search-popover'"
-        placement="bottomLeft"
-        :arrowPointAtCenter="false"
-        :visible="visible"
-        :overlayStyle="{}">
-      <template #content>
-        <div class="select-content">
-          <a-list item-layout="horizontal" :data-source="data" v-if="data?.length > 0">
-            <template #renderItem="{ item }">
-              <a-list-item @click="selectItem(item)" class="list-item">
-                <a-list-item-meta>
-                  <template #title>
-                    <span class="title" :title="item.name">
-                      <a-tag class="method-tag" v-if="item.method" :color="getMethodColor(item.method)">{{
-                          item.method
-                        }}</a-tag>
-                      {{ item.name }}
-                    </span>
-                  </template>
-                  <template #description>
-                    <a class="description" :title="item.url || item.description" href="javascript:void (0)"
-                       v-if="item.description || item.url">{{ item.url || item.description }}</a>
-                  </template>
-                  <template #avatar>
-                    <CloudServerOutlined v-if="!item.method" style="font-size: 20px;margin-top: 2px;"/>
-                    <ReadOutlined v-else style="font-size: 20px;margin-top: 2px;"/>
-                  </template>
-                </a-list-item-meta>
-              </a-list-item>
-            </template>
-          </a-list>
-          <a-empty v-else
-                   image="https://gw.alipayobjects.com/mdn/miniapp_social/afts/img/A*pevERLJC9v0AAAAAAAAAAABjAQAAAQ/original"
-                   :image-style="{height: '80px'}"
-                   :description="'请输入合适的关键词搜索文档'"/>
-        </div>
-      </template>
-      <div class="search api-docs-search">
-        <span class="left-divider"/>
-        <SearchOutlined class="icon"/>
-        <a-input class="search-input"
-                 @focus="focus"
-                 @blur="blur"
-                 v-model:value="keywords"
-                 ref="searchInputRef"
-                 placeholder="输入关键词搜索文档..."/>
-        <span class="search-shortcut" v-show="!isFocus">{{ shortCutText }}</span>
-      </div>
-    </a-popover>
+    <div class="search api-docs-search">
+      <span class="left-divider"/>
+      <SearchOutlined class="icon"/>
+      <a-input class="search-input"
+                v-model:value="keywords"
+                ref="searchInputRef"
+                @input="handleInput"
+                placeholder="输入关键词搜索文档..."/>
+      <span class="search-shortcut" v-show="!isFocus">{{ shortCutText }}</span>
+    </div>
     <div class="space"/>
     <div class="action">
       <a-dropdown 
@@ -164,7 +123,7 @@ const props = defineProps({
 
 const data: any = ref([]);
 
-const emit = defineEmits(['select', 'changeVersion']);
+const emit = defineEmits(['select', 'changeVersion', 'change']);
 
 const keys = useMagicKeys()
 const CtrlK = keys['Ctrl+K'];
@@ -198,38 +157,15 @@ const isFocus = ref(false);
 const keywords = ref(null);
 
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
-
-function focus() {
-  isFocus.value = true;
-}
-
-const visible = ref(false);
-
-function blur() {
-  isFocus.value = false;
-}
-
-onMounted(() => {
-  document.addEventListener('click', (el: any) => {
-    const apiDocsSearchEl = document.querySelector('.api-docs-search');
-    const docsSearchPopover = document.querySelector('.deeptest-docs-search-popover');
-    if (keywords.value && apiDocsSearchEl && docsSearchPopover && !apiDocsSearchEl.contains(el.target) && !docsSearchPopover.contains(el.target)) {
-      visible.value = false;
-    }
-  })
-})
+const handleInput = debounce((e) => {
+  emit('change', e.target.value);
+}, 300);
 
 watch(() => {
-  return [isFocus.value, keywords.value];
-}, val => {
-  const [inputFocus, searchKeyword] = val;
-  if (inputFocus || searchKeyword) {
-    visible.value = true;
-  } else {
-    visible.value = false;
-  }
-})
-
+  return keywords.value
+}, (newVal: any) => {
+  // debounce(handleInput, 300)(newVal);
+});
 
 watch(CtrlK, (v) => {
   if (!isMac) {
@@ -267,38 +203,6 @@ function copyUrl() {
   copy(source.value);
   notifySuccess('分享链接已复制到剪切板 ');
 }
-
-function keywordsChange(newVal) {
-  if (newVal && props?.items?.length) {
-    let lists: any = [];
-    const keyword = newVal.toLowerCase();
-    props?.items.forEach((item) => {
-      const c1 = item.name && item.name.toLowerCase().includes(keyword);
-      const c2 = item.method && item.method.toLowerCase().includes(keyword);
-      const c3 = item.url && item.url.toLowerCase().includes(keyword);
-      const c4 = item.description && item.description.toLowerCase().includes(keyword);
-      if (c1 || c2 || c3 || c4) {
-        lists.push({
-          name: item.name,
-          method: item.method,
-          url: item.url,
-          description: item.description,
-          value: item
-        })
-      }
-    })
-    data.value = [...lists];
-  } else {
-    data.value = [];
-  }
-
-}
-
-watch(() => {
-  return keywords.value
-}, (newVal: any) => {
-  debounce(keywordsChange, 200)(newVal);
-});
 
 </script>
 <style lang="less" scoped>

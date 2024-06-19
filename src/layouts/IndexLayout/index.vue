@@ -1,5 +1,5 @@
 <template>
-  <div id="indexlayout" :class="{'indexlayout': true, 'wujie-indexlayout': isWujieEnv}">
+  <div id="indexlayout" :class="{'indexlayout': true, 'wujie-indexlayout': isWujieEnv, 'wujie-detail-page': isLinkFromLy, 'report-detail': isReportDetailPage}">
     <left
         v-if="!isWujieEnv"
         :collapsed="collapsed"
@@ -143,6 +143,10 @@ export default defineComponent({
       return selectedKeys
     });
 
+    const isLinkFromLy = computed(() => {
+      return route.query.linkOrigin;
+    })
+
     // 左侧展开菜单keys
     const leftOpenKeys = ref<string[]>(routeParentPaths.value);
     watch([routeParentPaths, collapsed], () => {
@@ -168,6 +172,10 @@ export default defineComponent({
     useTitle(routeItem);
 
     const isWorkSpacePage =  path.includes('/workspace');
+
+    const isReportDetailPage = computed(() => {
+      return path.includes('/report');
+    })
 
     const sendMsg = () => {
       console.log('sendMsg')
@@ -216,7 +224,9 @@ export default defineComponent({
       RightTopSettings,
       sendMsg,
       onChromeExtEvent,
-      rightTopStyle
+      rightTopStyle,
+      isLinkFromLy,
+      isReportDetailPage
     }
   }
 })
@@ -238,6 +248,14 @@ export default defineComponent({
         width: 100%;
       }
     }
+  }
+
+  &.wujie-detail-page {
+    height: 100%;
+  }
+
+  &.wujie-detail-page.report-detail {
+    height: calc(100vh - 120px);
   }
 }
 

@@ -5,13 +5,14 @@
                 :data="data"
                 :items="serviceList"
                 @select="selectMenu"
+                @change="handleInput"
                 @changeVersion="changeVersion"/>
     <a-divider style="margin:0" v-if="showHeader"/>
     <div class="doc-container">
       <ContentPane :containerStyle="{padding:0,margin:0,height:'100%',width:'100%'}">
         <template #left>
           <div class="left" v-if="showMenu">
-            <LeftTreeView :serviceList="serviceList" @select="selectMenu" :selectedKeys="selectedKeys"/>
+            <LeftTreeView :keywords="keywords" :serviceList="serviceList" @select="selectMenu" :selectedKeys="selectedKeys"/>
           </div>
         </template>
         <template #right>
@@ -74,22 +75,32 @@ const isDocsFullPage = isSharePage || isViewPage;
 const serviceList = computed(() => {
   // 组装数据以兼容组件 LeftTreeMenu
   let items: any = [];
-  props?.data?.serves?.forEach((item: any) => {
-    // 只显示文档，不展示服务信息
-    if (!props.onlyShowDocs) {
-      items.push(item);
-    }
-    item?.endpoints?.forEach((endpoint: any) => {
+  const setEndpointItem = (endpoints, item: any) => {
+    let endpointItems: any = [];
+    endpoints?.forEach((endpoint: any) => {
       endpoint?.interfaces?.forEach((interfaceItem: any) => {
-        items.push({
+        endpointItems.push({
           ...interfaceItem,
           endpointInfo: endpoint,
           serveInfo: item,
           components:props?.data?.components,
           serveId: item.id,
+          children: [],
         });
       })
     })
+    return endpointItems;
+  };
+  props?.data?.serves?.forEach((item: any) => {
+    // 只显示文档，不展示服务信息
+    if (!props.onlyShowDocs) {
+      items.push({
+        ...item,
+        children: setEndpointItem(item.endpoints, item), 
+      });
+    } else {
+      items = [...items, ...setEndpointItem(item.endpoints, item)]
+    }
   })
   return items;
 })
@@ -112,7 +123,8 @@ watch(() => {
 }, {immediate: true});
 
 
-async function selectMenu(item) {
+async function 
+selectMenu(item) {
   selectedItem.value = item;
 
   // 如果是接口定义页面，则不请求文档详情,会一次性请求所有接口的文档详情
@@ -152,7 +164,13 @@ function changeVersion(docId) {
   emit('changeVersion', docId);
 }
 
-
+/**
+ * 关键词搜索
+ */
+const keywords = ref('');
+const handleInput = key => {
+  keywords.value = key;
+};
 </script>
 
 <style lang="less" scoped>
@@ -226,6 +244,12 @@ function changeVersion(docId) {
       margin-left: 0 !important;
       height: calc(100vh - 96px);
     }
+  }
+}
+
+.doc-container {
+  .left {
+    overflow: hidden !important;
   }
 }
 </style>
