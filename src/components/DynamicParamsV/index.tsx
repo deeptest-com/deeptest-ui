@@ -36,13 +36,17 @@ const DynamicParamsV = defineComponent({
       let res = props.variables
       if (keys[0] != 'variable') {
         const dispatchAction = dispatchActionMap[keys[0]];
+
         if (!dispatchAction) {
           return;
         }
+        
         const children = dropdownList.value.filter(e => e.key === keys[0])?.[0]?.children || [];
-        if (!children.find(e => e.key === 'loading')) {
+      
+        if (keys[0] !== "customFn" && !children.find(e => e.key === 'loading')) {
           return;
         }
+        
          res = await store.dispatch(dispatchAction);
       }
 
@@ -61,7 +65,7 @@ const DynamicParamsV = defineComponent({
       };
       store.commit('Debug/setMagicList', {
         type: keys[0],
-        data: transverse(res)
+        data: res && res?.length > 0 ? transverse(res) : [{"label":"空","key":"loading"}]
       })
     }
 
