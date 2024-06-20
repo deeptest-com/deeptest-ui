@@ -38,6 +38,7 @@ import {
     saveScript,
     getSnippetsListMock,
     getSnippetsListSysFunc,
+    getSnippetsListCustomFunc
 } from './service';
 
 import {changeServe, getVarsByEnv, listDbConn, serverList} from '@/views/project-settings/service';
@@ -163,6 +164,7 @@ const initState: StateType = {
         checkpointData: {},
     },
     magicList: [
+        
         {
             label: '引用变量',
             key: 'variable',
@@ -178,11 +180,13 @@ const initState: StateType = {
             label: '系统函数',
             children: [],
         },
+        
         {
             key: 'customFn',
             label: '自定义函数',
             children: [],
         },
+    
     ]
 };
 
@@ -316,6 +320,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
         getListMock: Action<StateType, StateType>;
 
         getListSysFn: Action<StateType, StateType>;
+
+        getListCustomFn : Action<StateType, StateType>;
     
     };
 }
@@ -1267,6 +1273,13 @@ const StoreModel: ModuleType = {
         },
         async getListSysFn({ commit }) {
             const result: any = await getSnippetsListSysFunc();
+            if (result.code === 0) {
+                return result.data;
+            }
+            return [];
+        },
+        async getListCustomFn({ commit }) {
+            const result: any = await getSnippetsListCustomFunc();
             if (result.code === 0) {
                 return result.data;
             }

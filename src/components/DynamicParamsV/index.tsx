@@ -29,7 +29,8 @@ const DynamicParamsV = defineComponent({
       }
       const dispatchActionMap = {
         'mock': 'Debug/getListMock',
-        'sysFn':'Debug/getListSysFn'
+        'sysFn':'Debug/getListSysFn',
+        'customFn':'Debug/getListCustomFn'
       }
       
       let res = props.variables
@@ -54,7 +55,7 @@ const DynamicParamsV = defineComponent({
           } else {
             item.children = transverse(item.children);
           }
-          
+
           return item;
       });
       };
@@ -87,12 +88,13 @@ const DynamicParamsV = defineComponent({
       });
     })
 
+
     provide('handleOpenChange', handleOpenChange);
 
     return () => {
       return (
         <div>
-          <DropdownActionMenu record={{}} dropdownList={dropdownList.value} v-slots={vSlots} />
+          <DropdownActionMenu record={{}} dropdownList={dropdownList.value} v-slots={vSlots}/>
         </div>
       )
     }

@@ -424,6 +424,15 @@ export async function getSnippetsListSysFunc() : Promise<any> {
     })
 }
 
+
+export async function getSnippetsListCustomFunc() : Promise<any> {
+    return request({
+        url: '/snippets/ListCustomFunc',
+        method: 'get',
+    })
+}
+
+
 export const showBaseUrlOrNot = (debugData) => {
     const notShow = debugData.usedBy === UsedBy.DiagnoseDebug
         || (debugData.usedBy === UsedBy.ScenarioDebug &&
