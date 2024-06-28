@@ -23,6 +23,21 @@ const DynamicParamsV = defineComponent({
   setup(props) {
     const setInputValue = inject('setInputValue')as any;
     const store = useStore();
+
+    const transverse = (array) => {
+      return cloneDeep(array).map(item => {
+        if (!item.children) {
+          item.action = () => {
+            setInputValue?.(props.index, item.value);
+          }
+        } else {
+          item.children = transverse(item.children);
+        }
+
+        return item;
+      });
+    };
+
     const handleOpenChange = async (keys) => {
       if (!keys[0]) {
         return;
@@ -50,22 +65,9 @@ const DynamicParamsV = defineComponent({
          res = await store.dispatch(dispatchAction);
       }
 
-      const transverse = (array) => {
-        return cloneDeep(array).map(item => {
-          if (!item.children) {
-            item.action = () => {
-              setInputValue?.(props.index, item.value);
-            }
-          } else {
-            item.children = transverse(item.children);
-          }
-
-          return item;
-      });
-      };
       store.commit('Debug/setMagicList', {
         type: keys[0],
-        data: res && res?.length > 0 ? transverse(res) : [{"label":"空","key":"loading"}]
+        data: res && res?.length > 0 ? res : [{"label":"空","key":"loading"}]
       })
     }
 
@@ -77,7 +79,7 @@ const DynamicParamsV = defineComponent({
 
     const dropdownList = computed(() => {
       const lastList = cloneDeep(store.state.Debug.magicList);
-      return lastList.map(e => {
+      return transverse(lastList.map(e => {
         if (e.children.length === 0) {
           e.children = [{
             label: () => {
@@ -89,7 +91,7 @@ const DynamicParamsV = defineComponent({
           }];
         }
         return e;
-      });
+      }));
     })
 
 
