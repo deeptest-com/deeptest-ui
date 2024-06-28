@@ -18,10 +18,10 @@
             <a-date-picker v-model:value="modelRef.expireTime"/>
           </a-form-item>
 
-          <a-form-item label="取值" v-bind="validateInfos.rightValue">
+          <a-form-item label="表达式" v-bind="validateInfos.rightValue">
             <a-input v-model:value="modelRef.rightValue"
                      @blur="validate('rightValue', { trigger: 'blur' }).catch(() => {})"/>
-            <div class="dp-input-tip">{{t('tips_expression', {name: '{name}', number: '{+number}'})}}</div>
+            <div class="dp-input-tip">{{t('tips_use_variable', {param1: '{expression}'})}}</div>
           </a-form-item>
 
           <a-form-item label="备注" v-bind="validateInfos.comments">

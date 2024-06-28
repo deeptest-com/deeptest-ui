@@ -18,6 +18,13 @@ export enum UsedBy {
     OpenAPIYaml = "openapi_yaml",
 }
 
+export enum DiagnoseInterfaceType {
+    Dir = "dir",
+    Interface = "interface",
+    WebsocketInterface  = "websocket_interface",
+    GrpcInterface = "grpc_interface",
+}
+
 export enum ProcessorInterfaceSrc {
     Define = "define",
     Case = "case",
@@ -36,6 +43,12 @@ export enum WsMsgCategory {
     InProgress = "in_progress",
     End = "end",
     Result = "result",
+    Exception       = "exception",
+}
+export enum WsMsgProgress {
+    NotStart = "not_start",
+    InProgress = "in_progress",
+    End = "end",
 }
 
 export enum ProcessorAction {

@@ -64,14 +64,16 @@
         <a-textarea v-model:value="model.expression" :auto-size="{ minRows: 2, maxRows: 5 }"
                  @blur="validate('expression', { trigger: 'blur' }).catch(() => {})" />
 
-        <div class="dp-input-tip">{{t('tips_expression_bool', {name: '{name}', number: '{+number}'})}}</div>
+        <div class="dp-input-tip">
+          {{t('tips_expression_bool', {name: '{name}', number: '{+number}'})}}
+        </div>
       </a-form-item>
 
       <a-form-item v-if="model.type !== 'judgement'" label="取值" v-bind="validateInfos.value" required>
         <a-input v-model:value="model.value"
                  @blur="validate('value', { trigger: 'blur' }).catch(() => {})" />
         <div class="dp-input-tip">
-          可引用形如${name}的变量表达式，使用加号${+number}可获取其数字值；如果表达式中涉及字符串常量运算，字符串常量请用英文单引号括起。
+          {{t('tips_expression_value')}}
         </div>
       </a-form-item>
 

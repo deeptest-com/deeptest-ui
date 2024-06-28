@@ -25,6 +25,19 @@ import {hideGlobalLoading, showGlobalLoading} from "@/utils/handleLoad";
 export const routes: RoutesDataItem[] = [
     {
         title: 'empty',
+        path: '/test',
+        component: BlankLayout,
+        children: [
+            {
+                title: '请求测试',
+                path: 'request',
+                component: () => import('@/views/test/request.vue'),
+                hidden: true,
+            },
+        ],
+    },
+    {
+        title: 'empty',
         path: '/mock',
         component: BlankLayout,
         children: [

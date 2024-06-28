@@ -11,7 +11,8 @@ import Params from "@/components/Params/index.vue";
 <style lang="less" scoped>
 .parameters-main {
   max-height: 100%;
+}
+.headers-main {
   overflow-y: scroll;
 }
-
 </style>

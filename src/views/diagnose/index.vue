@@ -13,5 +13,6 @@
 import DiagnoseInterfaceTree from './components/tree.vue';
 import DiagnoseInterfaceDesign from './design/index.vue';
 import ContentPane from '@/views/component/ContentPane/index.vue';
+
 </script>
 

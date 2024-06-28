@@ -1,6 +1,7 @@
 <template>
   <div class="diagnose-interface-design-main">
       <div id="diagnose-interface-debug-panel">
+
         <Tabs
           class="diagnose-tabs-full-height"
           type="editable-card"
@@ -9,11 +10,13 @@
           :activeKey="interfaceId"
           @edit="onTabEdit"
           @change="changeTab">
+
           <TabPane
             v-for="tab in interfaceTabs"
             :title="tab.title"
             :key="tab.id"
             class="dp-relative">
+
             <template #tab>
               <a-dropdown :trigger="['contextmenu']" :visible="visible[tab.id]">
                 <div v-on-click-outside="cancelVisible" @contextmenu="openDropdown(tab)">
@@ -26,19 +29,36 @@
                 </template>
               </a-dropdown>
             </template>
+
             <a-spin :spinning="spinning">
               <div class="interface-tabs-content">
-                <template v-if="debugData?.method" >
+
+                <template v-if="interfaceData?.type === 'interface'" >
                   <DebugComp :onSaveDebugData="saveDiagnoseInterface"
-                              :baseUrlDisabled="false" />
+                             :baseUrlDisabled="false" />
                 </template>
+
+                <template v-else-if="interfaceData?.type === 'websocket_interface'" >
+                  <WebsocketDebug />
+                </template>
+
+                <template v-else-if="interfaceData?.type === 'grpc_interface'" >
+                  <GrpcDebug />
+                </template>
+
+                <template v-else-if="interfaceData?.type === 'record'" >
+                  <RequestRecord />
+                </template>
+
               </div>
             </a-spin>
+
           </TabPane>
+
           <template #addIcon>
-            <div 
-              :class="['extra-menu', dropdownVisible ? 'visible' : '']" 
-              @mouseenter="dropdownVisible = true" 
+            <div
+              :class="['extra-menu', dropdownVisible ? 'visible' : '']"
+              @mouseenter="dropdownVisible = true"
               @mouseleave="dropdownVisible = false">
               <span style="cursor: pointer;"><EllipsisOutlined /></span>
               <a-menu @click="e => onContextMenuClick(e)" :selectedKeys="null">
@@ -46,7 +66,9 @@
               </a-menu>
             </div>
           </template>
+
         </Tabs>
+
         <div  v-else style="margin-top: 36px;">
           <a-empty  :description="'请先在左侧目录上选择需要调试的接口'"/>
         </div>
@@ -67,11 +89,15 @@ import { EllipsisOutlined } from '@ant-design/icons-vue';
 import { vOnClickOutside } from '@vueuse/components';
 
 import DebugComp from '@/views/component/debug/index.vue';
+import WebsocketDebug from '../websocket/index.vue';
+import GrpcDebug from '../grpc/index.vue';
+import RequestRecord from "../components/record.vue";
+
 import {prepareDataForRequest} from "@/views/component/debug/service";
 import {StateType as Debug} from "@/views/component/debug/store";
 
 import {notifyError, notifySuccess} from "@/utils/notify";
-import {UsedBy} from "@/utils/enum";
+import {DiagnoseInterfaceType, UsedBy} from "@/utils/enum";
 import {StateType as ServeStateType} from "@/store/serve";
 import {StateType as ProjectStateType} from "@/store/project";
 import {StateType as DiagnoseInterfaceStateType} from '../store';
@@ -96,6 +122,7 @@ const interfaceTabs = computed<any>(() => {
   })
   return tabs;
 });
+
 const activeTabKey = ref();
 const spinning = computed(()=> store.state.Global.spinning );
 
@@ -142,29 +169,36 @@ const onContextMenuClick = (evt, record?: any) => {
       store.dispatch('Debug/resetDataAndInvocations');
       break;
     default:
-      break;  
+      break;
   }
-}
-
-function changeTab(key) {
-  console.log('changeTab', key)
-  activeTabKey.value = key
-  store.commit('DiagnoseInterface/setInterfaceId', key)
-
-  const found = interfaceTabs.value.find(function (item, index, arr) {
-    return item.id === +key
-  })
-  store.dispatch('DiagnoseInterface/openInterfaceTab', found);
 }
 
 const usedBy = UsedBy.DiagnoseDebug
 const loadDebugData = debounce(async () => {
   console.log('loadDebugData')
+  if (interfaceData.value.id <= 9) return // is record tab
+
   store.commit("Global/setSpinning",true)
-  await store.dispatch('Debug/loadDataAndInvocations', {
-    diagnoseInterfaceId: interfaceData.value.id,
-    usedBy: usedBy,
-  });
+
+  if (interfaceData.value.type === DiagnoseInterfaceType.Interface) {
+    await store.dispatch('Debug/loadDataAndInvocations', {
+      diagnoseInterfaceId: interfaceData.value.id,
+      usedBy: usedBy,
+    })
+  } else if (interfaceData.value.type === DiagnoseInterfaceType.WebsocketInterface) {
+    store.commit('Debug/setDebugData', {});
+    await store.dispatch('DiagnoseInterface/loadWebsocketDebugData', {
+      diagnoseInterfaceId: interfaceData.value.id,
+      usedBy: usedBy,
+    })
+  } else if (interfaceData.value.type === DiagnoseInterfaceType.GrpcInterface) {
+    store.commit('Debug/setDebugData', {});
+    await store.dispatch('DiagnoseInterface/loadGrpcDebugData', {
+      diagnoseInterfaceId: interfaceData.value.id,
+      usedBy: usedBy,
+    })
+  }
+
   store.commit("Global/setSpinning",false)
 }, 300)
 
@@ -206,6 +240,20 @@ const saveDiagnoseInterface = async (e) => {
   store.commit("Global/setSpinning",false)
 }
 
+function changeTab(key) {
+  console.log('changeTab', key)
+  activeTabKey.value = key
+  store.commit('DiagnoseInterface/setInterfaceId', key)
+
+  const found = interfaceTabs.value.find(function (item, index, arr) {
+    return item.id === +key
+  })
+
+  if (found.id === -1)
+    store.dispatch('DiagnoseInterface/openRecordTab', found);
+  else
+    store.dispatch('DiagnoseInterface/openInterfaceTab', found);
+}
 const onTabEdit = (key, action) => {
   console.log('onTabEdit', key, action)
   if (action === 'remove') {
@@ -266,7 +314,7 @@ provide('shareDiagnose', shareDiagnose)
     ) {
       height: 100%;
     }
-    
+
 
     :deep(.ant-tabs.diagnose-tabs-full-height > .ant-tabs-nav > .ant-tabs-nav-wrap > .ant-tabs-nav-list > .ant-tabs-tab) {
       display: flex;

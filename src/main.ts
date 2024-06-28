@@ -22,6 +22,7 @@ import i18n from '@/config/i18n';
 import _ from "lodash";
 import mitt, {Emitter} from "@/utils/mitt";
 import { setupRouterGuard } from './router/guard';
+import funcSelection from "@/directives/func-selection";
 fixMonacoEditor();
 const app = createApp(App);
 app.use(store);
@@ -36,18 +37,20 @@ const callback=(el:any,binding:any)=>{
 
 app.directive('contextmenu', {
     mounted: function (el:any, binding:any, ) {
-        el.addEventListener("contextmenu",(e: any)=>{
-            e.preventDefault()
-            callback(e, binding)
-        })
+        // el.addEventListener("contextmenu",(e: any)=>{
+        //     e.preventDefault()
+        //     callback(e, binding)
+        // })
     },
     unmounted: function (el:any, binding:any,) {
-        el.removeEventListener("contextmenu",(e: any)=>{
-            e.preventDefault()
-            callback(e, binding)
-        })
+        // el.removeEventListener("contextmenu",(e: any)=>{
+        //     e.preventDefault()
+        //     callback(e, binding)
+        // })
     }
 })
+
+app.directive('func-selection', funcSelection)
 
 setupRouterGuard(router);
 
