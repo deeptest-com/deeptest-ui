@@ -64,7 +64,7 @@
           @update:visible="applyProPermissionsModalVisible = false"
           @handleSuccess="handleSuccess" />
 
-      <AiChat />
+<!--      <AiChat />-->
     </div>
   </HomeLayout>
 </template>
