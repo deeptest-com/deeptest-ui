@@ -13,7 +13,7 @@
           <a-form-item label="值" v-bind="validateInfos.expression">
             <a-input v-model:value="modelRef.expression"
                      @blur="validate('expression', { trigger: 'blur' }).catch(() => {})"/>
-            <div class="dp-input-tip">{{t('tips_expression_value')}}</div>
+            <div class="dp-input-tip">{{"可引用变量或使用函数动态生成值，形如${name}来引用变量，形如${__uuid()}来使用系统函数。"}}</div>
           </a-form-item>
 
           <a-form-item label="备注" v-bind="validateInfos.comments">

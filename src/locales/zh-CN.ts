@@ -184,7 +184,7 @@ export default {
     'unknown': '位置',
 
     'tips_use_variable': `输入字符串，可嵌入多个形如\${param1}的JS表达式或变量。`,
-    'tips_expression_value': `可引用变量或使用函数动态生成值，形如\${name}来引用变量，形如\${__uuid()}来使用系统函数。`,
+    'tips_expression_value': "可引用变量或使用函数动态生成值，形如${name}来引用变量，形如${__uuid()}来使用系统函数。",
     'tips_expression_bool': `输入结果为布尔值的JS表达式，支持引用接口和场景处理器中生成的变量。`,
 
     'extractor_err': '提取失败',
