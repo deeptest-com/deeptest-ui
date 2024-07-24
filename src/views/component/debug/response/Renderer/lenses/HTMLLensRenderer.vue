@@ -27,9 +27,11 @@
 
     <div class="body">
       <MonacoEditor
+        v-if="responseData.content"
         ref="monacoEditor"
         customId="html-lens-main"
         class="editor"
+        :key="timestamp"
         :interfaceId="debugData.id"
         :value="responseData.content"
         :timestamp="timestamp"
