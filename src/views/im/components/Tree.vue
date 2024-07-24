@@ -434,10 +434,10 @@ const delEndpoint = (record) => {
       // 移除已有的接口标签页
       const findTab = activeTabs.value.find(e => e.entityId === record.entityId);
       if (findTab) {
-        store.dispatch('Endpoint/removeActiveTab', record.id);
+        await store.dispatch('Endpoint/removeActiveTab', record.id);
       }
       spinning.value = false
-      reLoadFavoriteList();
+      await reLoadFavoriteList();
       if (res) {
         notifySuccess('删除成功');
       } else {
@@ -663,10 +663,10 @@ onMounted(async () => {
   window.addEventListener('resize', () => {
     imCategoryTree.value?.getVirtualHeight();
   })
-  reLoadFavoriteList();
+  await reLoadFavoriteList();
   await loadCategoryOnlyDir();
   initActiveTab();
-  onRouteParams();
+  await onRouteParams();
 
   eventBus.on(settings.eventEndpointAction, (data: any) => {
     if (data.type === 'updateTreeSelectedKeys') {
@@ -696,7 +696,7 @@ watch(() => {
     imCategoryTree.value.initTree();
     imCategoryTree.value.clearSearchValue();
     store.commit('Endpoint/setTreeDataCategory', {}); // 切换项目，重置category list
-    reLoadFavoriteList();
+    await reLoadFavoriteList();
     await loadCategoryOnlyDir();
     initActiveTab();
   }

@@ -69,7 +69,7 @@
         </div>
       </a-form-item>
 
-      <a-form-item v-if="model.type !== 'judgement'" label="取值" v-bind="validateInfos.value" required>
+      <a-form-item v-if="model.type !== 'judgement'" label="期望值" v-bind="validateInfos.value" required>
         <a-input v-model:value="model.value"
                  @blur="validate('value', { trigger: 'blur' }).catch(() => {})" />
         <div class="dp-input-tip">
