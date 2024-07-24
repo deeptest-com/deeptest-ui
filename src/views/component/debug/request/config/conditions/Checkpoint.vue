@@ -73,7 +73,7 @@
         <a-input v-model:value="model.value"
                  @blur="validate('value', { trigger: 'blur' }).catch(() => {})" />
         <div class="dp-input-tip">
-          {{"可引用变量或使用函数动态生成值，形如${name}来引用变量，形如${__uuid()}来使用系统函数。"}}
+          {{t('tips_expression_value')}}
         </div>
       </a-form-item>
 
