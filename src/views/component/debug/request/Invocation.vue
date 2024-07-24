@@ -265,6 +265,7 @@ const confirmSend = async (isNotClickable)=>{
   }
   if(debugChangePreScript.value || debugChangePostScript.value || debugChangeCheckpoint.value){
     store.commit("Global/setSpinning",true)
+  
     bus.emit(settings.eventPostConditionSave, {
       callback:async () => {
         await send()
@@ -276,19 +277,18 @@ const confirmSend = async (isNotClickable)=>{
   }
 }
 
-const save = (e) => {
+const save = async (e) => {
   let data = JSON.parse(JSON.stringify(debugData.value))
   data = prepareDataForRequest(data)
 
-
-  if (validateInfo()) {
-    props.onSave && props.onSave(data)
+  if (validateInfo() && props.onSave) {
+       await props.onSave(data)
   }
 
-  bus.emit(settings.eventConditionSave, {});
-  // 后置处理器 和 断言
-  debugChangePostScript.value && bus.emit(settings.eventPostConditionSave, {});
-  debugChangePreScript.value && bus.emit(settings.eventPreConditionSave, {});
+  //await bus.emit(settings.eventConditionSave, {});  
+   //后置处理器 和 断言
+   ( debugChangePostScript.value || debugChangeCheckpoint.value || debugChangePreScript.value ) &&  bus.emit(settings.eventPostConditionSave, {});
+  
 }
 const saveAsCase = () => {
   console.log('saveAsCase')
