@@ -50,6 +50,7 @@
 
       <div v-else class="editor-container">
         <MonacoEditor
+          :key="timestamp"
           ref="monacoEditor"
           customId="request-body-main"
           class="editor"

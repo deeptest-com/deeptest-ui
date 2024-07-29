@@ -7,7 +7,10 @@ import {
     save,
     remove,
     move,
-    clone, saveDiagnoseDebugData, importInterfaces, importCurl,
+    clone, saveDiagnoseDebugData, importInterfaces, importCurl, importRecordData,
+    getWebsocketDebugData, saveWebsocketDebugData,
+    getGrpcDebugData, saveGrpcDebugData,
+
 } from './service';
 import {serverList} from "@/views/project-settings/service";
 import {genNodeMap, getNodeMap} from "@/services/tree";
@@ -16,6 +19,9 @@ export interface StateType {
     interfaceId: number;
     interfaceData: any;
     interfaceTabs: any[];
+
+    websocketDebugData: any;
+    grpcDebugData: any;
 
     queryParams: any;
     serveServers: [],
@@ -29,6 +35,9 @@ export interface ModuleType extends StoreModuleType<StateType> {
     mutations: {
         setInterfaceId: Mutation<StateType>;
         setInterfaceData: Mutation<StateType>;
+
+        setWebsocketDebugData: Mutation<StateType>;
+        setGrpcDebugData: Mutation<StateType>;
 
         setQueryParams: Mutation<StateType>;
         setServeServers: Mutation<StateType>;
@@ -49,8 +58,15 @@ export interface ModuleType extends StoreModuleType<StateType> {
         moveInterface: Action<StateType, StateType>;
         cloneInterface: Action<StateType, StateType>;
 
+        loadWebsocketDebugData: Action<StateType, StateType>;
+        saveWebsocketDebugData: Action<StateType, StateType>;
+        loadGrpcDebugData: Action<StateType, StateType>;
+        saveGrpcDebugData: Action<StateType, StateType>;
+
         importInterfaces: Action<StateType, StateType>;
         importCurl: Action<StateType, StateType>;
+        openRecordTab: Action<StateType, StateType>;
+        importRecordData: Action<StateType, StateType>;
 
         openInterfaceTab: Action<StateType, StateType>;
         removeInterfaceTab: Action<StateType, StateType>;
@@ -65,6 +81,9 @@ const initState: StateType = {
     interfaceId: 0,
     interfaceData: null,
     interfaceTabs: [],
+
+    websocketDebugData: {message: '{}'},
+    grpcDebugData: {},
 
     queryParams: {},
     serveServers: [],
@@ -85,6 +104,13 @@ const StoreModel: ModuleType = {
         },
         setInterfaceData(state, payload) {
             state.interfaceData = payload;
+        },
+
+        setWebsocketDebugData(state, payload) {
+            state.websocketDebugData = payload;
+        },
+        setGrpcDebugData(state, payload) {
+            state.grpcDebugData = payload;
         },
 
         setTreeData(state, data) {
@@ -125,7 +151,7 @@ const StoreModel: ModuleType = {
             try {
                 const response: ResponseData = await query(params);
                 if (response.code != 0) return;
-                
+
                 commit('setQueryParams', params);
                 commit('setTreeData', response.data || []);
 
@@ -138,7 +164,7 @@ const StoreModel: ModuleType = {
             }
         },
         async getInterface({ commit }, node: any) {
-            if (!node || node.type !== 'interface') {
+            if (!node || node.type === 'dir') {
                 commit('setInterfaceData', null)
                 return
             }
@@ -224,6 +250,76 @@ const StoreModel: ModuleType = {
             }
         },
 
+        async openRecordTab({commit, dispatch, state}, payload: any) {
+            const tabs = state.interfaceTabs
+            const found = tabs.find(function (item, index, arr) {
+                return item.id === payload.id
+            })
+            if (!found) {
+                tabs.push(payload)
+                commit('setInterfaceTabs', tabs);
+            }
+
+            commit('setInterfaceData', payload)
+            commit('setInterfaceId', payload.id);
+        },
+        async importRecordData({commit, dispatch, state}, payload: any) {
+            const jsn = await importRecordData(payload)
+            if (jsn.code === 0) {
+                dispatch('loadTree', state.queryParams);
+                return true;
+            } else {
+                return false
+            }
+        },
+        // websocket
+        async loadWebsocketDebugData({ commit, state, dispatch }, params: any) {
+            try {
+                const resp: ResponseData = await getWebsocketDebugData(params)
+                if (resp.code == 0) {
+                    commit('setWebsocketDebugData', resp.data);
+                    return true
+                }
+
+                return false;
+
+            } catch (error) {
+                return false;
+            }
+        },
+        async saveWebsocketDebugData({ commit, state, dispatch }, data: any) {
+            try {
+                const resp: ResponseData = await saveWebsocketDebugData(data)
+                return resp.code == 0;
+            } catch (error) {
+                return false;
+            }
+        },
+
+        // grpc
+        async loadGrpcDebugData({ commit, state, dispatch }, params: any) {
+            try {
+                const resp: ResponseData = await getGrpcDebugData(params)
+                if (resp.code == 0) {
+                    commit('setGrpcDebugData', resp.data);
+                    return true
+                }
+
+                return false;
+
+            } catch (error) {
+                return false;
+            }
+        },
+        async saveGrpcDebugData({ commit, state, dispatch }, data: any) {
+            try {
+                const resp: ResponseData = await saveGrpcDebugData(data)
+                return resp.code == 0;
+            } catch (error) {
+                return false;
+            }
+        },
+
         async getServeServers({commit}, payload: any) {
             try {
                 const res = await serverList({
@@ -250,7 +346,7 @@ const StoreModel: ModuleType = {
                 const tabs = state.interfaceTabs
 
                 const found = state.interfaceTabs.find(function (item, index, arr) {
-                    return item.id === state.interfaceData.id
+                    return item.id === state.interfaceData.id // state.interfaceData updated in getInterface action
                 })
 
                 if (!found) {

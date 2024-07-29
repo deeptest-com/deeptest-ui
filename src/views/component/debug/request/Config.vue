@@ -3,14 +3,13 @@
     <a-tabs v-model:activeKey="activeKey" class="dp-tabs-full-height">
 
       <a-tab-pane key="query-param" :tab="getTabTitle('queryParams')">
-        <GlobalParameters :in="'query'" />
-        <QueryParameters v-if="activeKey === 'query-param'" />
+        <div style="height: 100%; overflow-y: scroll">
+          <GlobalParameters class="dp-unset-height" :in="'query'" />
+          <QueryParameters class="dp-unset-height" v-if="activeKey === 'query-param'" />
+        </div>
       </a-tab-pane>
 
       <a-tab-pane key="path-param" :tab="getTabTitle('pathParams')">
-        <!--
-        <GlobalParameters :in="'path'" />
-        -->
         <PathParameters />
       </a-tab-pane>
 
@@ -19,15 +18,17 @@
       </a-tab-pane>
 
       <a-tab-pane key="header" :tab="getTabTitle('headers')">
-        <div style="height: 100%;overflow-y: scroll">
-          <GlobalParameters style="overflow: unset;max-height: max-content;" :in="'header'" />
-          <RequestHeaders style="overflow: unset;max-height: max-content;" v-if="activeKey === 'header'" />
+        <div style="height: 100%; overflow-y: scroll">
+          <GlobalParameters class="dp-unset-height" :in="'header'" />
+          <RequestHeaders class="dp-unset-height" v-if="activeKey === 'header'" />
         </div>
       </a-tab-pane>
 
       <a-tab-pane key="cookie" :tab="getTabTitle('cookies')">
-        <GlobalParameters :in="'cookie'" />
-        <Cookie v-if="activeKey === 'cookie'" />
+        <div style="height:100%; overflow-y:scroll">
+          <GlobalParameters class="dp-unset-height" :in="'cookie'" />
+          <Cookie class="dp-unset-height" v-if="activeKey === 'cookie'" />
+        </div>
       </a-tab-pane>
 
       <a-tab-pane key="auth" tab="授权">
@@ -83,6 +84,7 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 const preConditions = computed<any>(() => store.state.Debug.preConditions);
 const postConditions = computed<any>(() => store.state.Debug.postConditions);
 const assertionConditions = computed<any>(() => store.state.Debug.assertionConditions);
+const activeAssertion = computed<any>(() => store.state.Debug.activeAssertion);
 
 const activeKey = ref('query-param');
 
@@ -174,10 +176,9 @@ const getEntityType = (id, conditionSrc) => {
 
   if (conditionSrc === ConditionSrc.PreCondition) {
     conditionsList = preConditionsList.value
-  } else if (conditionSrc === ConditionSrc.PreCondition) {
+  } else if (conditionSrc === ConditionSrc.PostCondition) {
     conditionsList = postConditionsList.value
   }
-
   const cur = conditionsList?.find((item) => {
     return item.entityId === id
   })
@@ -197,6 +198,9 @@ const leaveSave =  async (event) => {
       if(entityType === ConditionType.extractor){
         await store.dispatch('Debug/leaveSaveExtractor', item)
       }
+      if (entityType === ConditionType.databaseOpt) {
+        await store.dispatch('Debug/leaveSaveDbOpt', item)
+      }
     })
   }
 
@@ -213,25 +217,25 @@ const leaveSave =  async (event) => {
       if(entityType === ConditionType.extractor){
         await store.dispatch('Debug/leaveSaveExtractor', item)
       }
+      if (entityType === ConditionType.databaseOpt) {
+        await store.dispatch('Debug/leaveSaveDbOpt', item)
+      }
     })
   }
 
   // 断言缓存的数据 - 保存
   if(Object.keys(assertionConditionsDataObj.value)?.length && debugChangeCheckpoint.value){
-    Object.values(assertionConditionsDataObj.value).map(async (item:any) => {
-      item.debugInterfaceId = debugInfo.value.debugInterfaceId;
-      item.endpointInterfaceId = debugInfo.value.endpointInterfaceId;
-      item.projectId = debugData.value.projectId;
+    for (const item of Object.values(assertionConditionsDataObj.value)) {  
+      (item as any).debugInterfaceId = debugInfo.value.debugInterfaceId;
+      (item as any).endpointInterfaceId = debugInfo.value.endpointInterfaceId;
+      (item as any).projectId = debugData.value.projectId;
       await store.dispatch('Debug/leaveSaveCheckpoint', item);
-    })
+    }
+    if (activeAssertion.value.entityId) {
+      await store.dispatch('Debug/getCheckpoint', activeAssertion.value)
+    }
   }
-  // 前置处理器保存
-  if(debugChangePreScript.value && scriptData.value?.id){
-    const data = cloneDeep(scriptData.value)
-    data.debugInterfaceId = debugInfo.value.debugInterfaceId
-    data.endpointInterfaceId = debugInfo.value.endpointInterfaceId
-    data.projectId = debugData.value.projectId;
-  }
+
 
   resetDebugChange();
   if(event?.callback){

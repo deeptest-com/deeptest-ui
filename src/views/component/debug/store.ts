@@ -36,6 +36,9 @@ import {
     saveExtractor,
     saveResponseDefine,
     saveScript,
+    getSnippetsListMock,
+    getSnippetsListSysFunc,
+    getSnippetsListCustomFunc
 } from './service';
 
 import {changeServe, getVarsByEnv, listDbConn, serverList} from '@/views/project-settings/service';
@@ -85,6 +88,7 @@ export interface StateType {
     environmentsFromServers: any[];
     currServe: any;
     dbConns: any[];
+    magicList: any[];
 
     benchMarkCase: {
         preConditions: any[];
@@ -159,6 +163,31 @@ const initState: StateType = {
         cookieData: {},
         checkpointData: {},
     },
+    magicList: [
+        
+        {
+            label: '引用变量',
+            key: 'variable',
+            children: [],
+        },
+        {
+            key: 'mock',
+            label: '特定规则生成(Mock)',
+            children: [],
+        },
+        {
+            key: 'sysFn',
+            label: '系统函数',
+            children: [],
+        },
+        
+        {
+            key: 'customFn',
+            label: '自定义函数',
+            children: [],
+        },
+    
+    ]
 };
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -225,6 +254,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setAssertionConditionsObj: Mutation<StateType>;
         setSrcAssertionConditionsObj: Mutation<StateType>;
+
+        setMagicList: Mutation<StateType>;
     };
     actions: {
         loadDataAndInvocations: Action<StateType, StateType>;
@@ -285,6 +316,13 @@ export interface ModuleType extends StoreModuleType<StateType> {
         leaveSaveScript: Action<StateType, StateType>;
         leaveSaveCheckpoint: Action<StateType, StateType>;
         leaveSaveDbOpt: Action<StateType, StateType>;
+
+        getListMock: Action<StateType, StateType>;
+
+        getListSysFn: Action<StateType, StateType>;
+
+        getListCustomFn : Action<StateType, StateType>;
+    
     };
 }
 
@@ -515,6 +553,15 @@ const StoreModel: ModuleType = {
         setSrcAssertionConditionsObj(state, payload){
             state.srcAssertionConditionsDataObj[payload.id] = payload.value
         },
+        setMagicList(state, payload) {
+            const newList = cloneDeep(state.magicList);
+            newList.forEach(e => {
+                if (e.key === payload.type) {
+                    e.children = payload.data;
+                }
+            })
+            state.magicList = newList;
+        }
     },
     actions: {
         // debug
@@ -1160,9 +1207,9 @@ const StoreModel: ModuleType = {
                 commit('setCurrServe', res.data);
             }
             if (requestEnvVars) {
-                const json = await listEnvVarByServer(serverId)
+                const json = await getVarsByEnv(serverId)
                 if (json.code === 0) {
-                    commit('setServerId', serverId);
+                    //commit('setServerId', serverId);
                     commit('setEnvVars', json.data);
                 }
             }
@@ -1189,7 +1236,7 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
-        async listServes({ commit }, payload: { serveId: number }) {
+        async listServes({ commit,dispatch }, payload: { serveId: number }) {
             const res = await serverList(payload);
             if (res.code === 0) {
                 const servers = (res.data.servers || []).map((item: any) => {
@@ -1199,22 +1246,46 @@ const StoreModel: ModuleType = {
                 })
                 commit('setEnvironmentsFromServers', servers);
                 commit('setCurrServe', res.data.currServer);
+                dispatch("getEnvVarsByEnv",res.data.currServer?.environmentId)
             }
         },
-        async getEnvVarsByEnv({ state }, envId) {
+        async getEnvVarsByEnv({commit, state }, envId) {
             try {
                 if (!state.currServe.environmentId) {
                     return false;
                 }
                 const res = await getVarsByEnv(envId);
                 if (res.code === 0) {
+                    commit('setEnvVars', res.data);
                     return res.data;
                 }
                 return [];
             } catch (error) {
                 return false;
             }
+        },
+        async getListMock({ commit }) {
+            const result: any = await getSnippetsListMock();
+            if (result.code === 0) {
+                return result.data;
+            }
+            return [];
+        },
+        async getListSysFn({ commit }) {
+            const result: any = await getSnippetsListSysFunc();
+            if (result.code === 0) {
+                return result.data;
+            }
+            return [];
+        },
+        async getListCustomFn({ commit }) {
+            const result: any = await getSnippetsListCustomFunc();
+            if (result.code === 0) {
+                return result.data;
+            }
+            return [];
         }
+        
     }
 };
 

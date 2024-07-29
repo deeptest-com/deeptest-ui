@@ -276,7 +276,6 @@ export default defineComponent({
        * 为同一个才可以触发重置editor layout
        */
       if (data.id === this.$props.customId) {
-        console.error(1111);
         this.editor.layout(size)
       }
     },

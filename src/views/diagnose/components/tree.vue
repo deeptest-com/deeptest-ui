@@ -117,7 +117,10 @@ import {StateType as DebugStateType} from "@/views/component/debug/store";
 import {UsedBy} from "@/utils/enum";
 import useCopy from "@/composables/useClipboard";
 import { useRoute } from 'vue-router';
+import {getNodePath} from "@/utils/dom";
+import {isLeyan} from "@/utils/comm";
 
+const isLyEnv = isLeyan()
 const { copy } = useCopy();
 const route = useRoute();
 const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType,  Debug: DebugStateType,
@@ -221,8 +224,7 @@ let selectedKeys = ref<number[]>([]);
 const emit = defineEmits(['select']);
 
 function selectNode(keys, e) {
-  if (e?.node?.dataRef?.type === 'dir') {
-    // 目录不可被点击
+  if (e?.node?.dataRef?.type === 'dir') { // 目录不可被点击
     return;
   }
 
@@ -347,6 +349,15 @@ const importCurlCancel = () => {
   curlImportVisible.value = false
 }
 
+const openRecordTab = (node) => {
+  console.log('openRecordTab', node)
+  let paths = []
+  getNodePath(node, paths, treeDataMap.value)
+
+  const data = {targetId: node.id, targetName: paths.join(' -> '), id: -1, title: '请求录制', type: 'record'}
+  store.dispatch('DiagnoseInterface/openRecordTab', data)
+}
+
 async function onDrop(info: DropEvent) {
   if (info.node?.dataRef?.type === "interface") {
     message.error('仅可移动到目录下');
@@ -415,6 +426,26 @@ const DropdownMenuList = [
     action: (nodeProps) => importCurl(nodeProps.dataRef),
   },
 ]
+
+if (!isLyEnv) {
+  DropdownMenuList.splice(1, 0,
+      {
+        label: '新建WebSocket请求',
+        ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
+        action: (nodeProps) => create(nodeProps.dataRef?.id, 'websocket_interface'),
+      },
+      {
+        label: '新建gRPC请求',
+        ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
+        action: (nodeProps) => create(nodeProps.dataRef?.id, 'grpc_interface'),
+      })
+
+  DropdownMenuList.push({
+    label: '录制请求',
+    ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
+    action: (nodeProps) => openRecordTab(nodeProps.dataRef),
+  })
+}
 
 onMounted(async () => {
   console.log('onMounted')

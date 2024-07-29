@@ -163,23 +163,6 @@ const rules = computed(() => { return {
   ],
 }})
 
-
-
-watch(model, (newVal) => {
-      if (!isInit.value) return
-
-      isInit.value = false
-
-      if (responseData.value.contentLang === 'json') {
-        model.value.type = ExtractorType.jsonquery
-      } else if (responseData.value.contentLang === 'xml') {
-        model.value.type = ExtractorType.xmlquery
-      } else if (responseData.value.contentLang === 'html') {
-        model.value.type = ExtractorType.htmlquery
-      }
-    }, {immediate: true, deep: true}
-)
-
 const types = getEnumSelectItems(CheckpointType)
 const operators = getEnumSelectItems(ComparisonOperator)
 const srcOptions = getEnumSelectItems(ExtractorSrc)
@@ -198,10 +181,11 @@ watch(() => props.condition, (newVal) => {
 let {resetFields, validate, validateInfos} = useForm(model, rules);
 
 const save = (item) => {
+  console.log('saveExtractor', model.value, item);
   if (item && item.entityId !== model.value.id) {
     return;
   }
-  console.log('save', model.value, item);
+ 
   validate().then(() => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
@@ -251,9 +235,11 @@ onBeforeUnmount( () => {
 })
 
 const onVarChanged = (e) => {
-  console.log('onVarChanged', e)
-
   const value = e.target.value.trim()
+  varChanged(value)
+};
+const varChanged = (value) => {
+  console.log('varChanged', value)
 
   if (!value) {
     model.value.code = ''
@@ -282,6 +268,23 @@ const onVarSelected = (value) => {
   const arr = value.split('-')
   model.value.variable = arr[1]
 }
+
+watch(model, (newVal) => {
+  console.log('watch model', newVal)
+  varChanged(model.value.variable)
+
+  if (!isInit.value) return
+
+  isInit.value = false
+
+  if (responseData.value.contentLang === 'json') {
+    model.value.type = ExtractorType.jsonquery
+  } else if (responseData.value.contentLang === 'xml') {
+    model.value.type = ExtractorType.xmlquery
+  } else if (responseData.value.contentLang === 'html') {
+    model.value.type = ExtractorType.htmlquery
+  }
+}, {immediate: true, deep: true})
 
 const labelCol = { span: 4 }
 const wrapperCol = { span: 18 }

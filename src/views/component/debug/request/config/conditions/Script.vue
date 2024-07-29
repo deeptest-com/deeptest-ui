@@ -167,6 +167,7 @@ const rules = reactive({
 let { resetFields, validate, validateInfos } = useForm(model, rules);
 
 const save = (item) => {
+  console.log('saveScript', model.value)
   if (item && item.entityId !==  model.value.id) {
     return;
   }

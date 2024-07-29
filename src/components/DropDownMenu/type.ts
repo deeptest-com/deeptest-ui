@@ -5,6 +5,8 @@ export type Recordable<T = any> = {
 }
 
 export type MenuItem = {
+  /** 描述 */
+  desc: any;
   /** 提示 */
   tooltip?: string;
   /** 显示图标，只支持图片 */
@@ -21,10 +23,11 @@ export type MenuItem = {
   renderChildren?: (record: Recordable) => any[];
   disabled?: boolean;
   key?: string | number;
-  action: (...args: any[]) => void,
+  action?: (...args: any[]) => void,
   tip?: string;
   customRender?: JSX.Element | ((record: Recordable) => JSX.Element);
   customLoadingRender?: ((record: Recordable) => JSX.Element);
   loadingText?: string;
   checkExecClickAble?: boolean;
+  value?: string | number;
 }

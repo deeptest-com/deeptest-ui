@@ -54,7 +54,7 @@
                   @blur="validate('operator', { trigger: 'change' }).catch(() => {})">
 
           <a-select-option v-for="(item, idx) in options" :key="idx" :value="item.value">
-            {{ t(item.label) }}
+            {{item.label === 'equal'?  '==': t(item.label) }}
           </a-select-option>
 
         </a-select>
@@ -64,14 +64,16 @@
         <a-textarea v-model:value="model.expression" :auto-size="{ minRows: 2, maxRows: 5 }"
                  @blur="validate('expression', { trigger: 'blur' }).catch(() => {})" />
 
-        <div class="dp-input-tip">{{t('tips_expression_bool', {name: '{name}', number: '{+number}'})}}</div>
+        <div class="dp-input-tip">
+          {{t('tips_expression_bool', {name: '{name}', number: '{+number}'})}}
+        </div>
       </a-form-item>
 
-      <a-form-item v-if="model.type !== 'judgement'" label="取值" v-bind="validateInfos.value" required>
+      <a-form-item v-if="model.type !== 'judgement'" label="期望值" v-bind="validateInfos.value" required>
         <a-input v-model:value="model.value"
                  @blur="validate('value', { trigger: 'blur' }).catch(() => {})" />
         <div class="dp-input-tip">
-          可引用形如${name}的变量表达式，使用加号${+number}可获取其数字值；如果表达式中涉及字符串常量运算，字符串常量请用英文单引号括起。
+          {{t('tips_expression_value')}}
         </div>
       </a-form-item>
 
@@ -192,7 +194,7 @@ const rulesRef = computed(() => {
 let { resetFields, validate, validateInfos } = useForm(model, rulesRef);
 
 const save = (item) => {
-  console.log('save', model.value)
+  console.log('saveCheckpoint',item, model.value)
   if (item && item.entityId !== model.value.id) {
     return;
   }
@@ -203,7 +205,6 @@ const save = (item) => {
     model.value.projectId = debugData.value.projectId
     model.value.conditionSrc = conditionSrc
     model.value.isForBenchmarkCase = isForBenchmarkCase
-
     store.dispatch('Debug/saveCheckpoint', model.value).then((result) => {
       if (result) {
         notifySuccess(`保存成功`);
