@@ -102,9 +102,13 @@ import {StateType as ServeStateType} from "@/store/serve";
 import {StateType as ProjectStateType} from "@/store/project";
 import {StateType as DiagnoseInterfaceStateType} from '../store';
 import { tabsContextMenu } from '@/utils/comm';
+import { useRoute } from 'vue-router';
+import { useWujie } from '@/composables/useWujie';
 
 provide('usedBy', UsedBy.DiagnoseDebug)
 
+const { isInLeyanWujieContainer, parentOrigin, projectName } = useWujie();
+const route = useRoute();
 const store = useStore<{ Debug: Debug, DiagnoseInterface: DiagnoseInterfaceStateType, ProjectGlobal: ProjectStateType, ServeGlobal: ServeStateType,Global }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const debugData = computed<any>(() => store.state.Debug.debugData);
@@ -264,6 +268,16 @@ const getTitle = (title) => {
   return title.substr(0, 16) + '...' + title.substr(len-6, len);
 };
 
+const shareDiagnose = () => {
+  if(isInLeyanWujieContainer){
+    window.open(`${parentOrigin}/lyapi/${projectName}/debug?interfaceId=${interfaceId.value}`, '_blank')
+    return;
+  }
+  const viewURL = `${currProject.value.shortName}/debug?interfaceId=${interfaceId.value}`
+  window.open(`${window.location.origin}/${viewURL}`, '_blank');
+}
+
+provide('shareDiagnose', shareDiagnose)
 </script>
 
 <style scoped lang="less">

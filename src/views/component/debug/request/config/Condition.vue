@@ -292,7 +292,9 @@ watch(() => {return [conditions.value, conditionsDataObj.value, srcConditionsDat
 
   const isChange = !equalObjectByLodash(cur, src);
 
-  store.commit('Debug/setDebugChange',{
+  store.commit('Debug/setDebugChange',props.conditionSrc === ConditionSrc.PreCondition ? {
+    preScript:isChange,
+  }: {
     postScript:isChange,
   })
 },{deep:true})

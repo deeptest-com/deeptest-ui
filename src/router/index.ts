@@ -85,6 +85,11 @@ export const routes: RoutesDataItem[] = [
         component: SecurityLayout,
         children: [
             {
+                title: '',
+                path: 'blank',
+                component: BlankLayout,
+            },
+            {
                 icon: 'home',
                 title: '首页',
                 path: '',

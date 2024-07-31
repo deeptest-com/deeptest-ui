@@ -410,6 +410,29 @@ export async function loadCurl(data): Promise<any> {
     });
 }
 
+export async function getSnippetsListMock(): Promise<any> {
+    return request({
+        url: '/snippets/listMock',
+        method: 'get',
+    })
+}
+
+export async function getSnippetsListSysFunc() : Promise<any> {
+    return request({
+        url: '/snippets/listSysFunc',
+        method: 'get',
+    })
+}
+
+
+export async function getSnippetsListCustomFunc() : Promise<any> {
+    return request({
+        url: '/snippets/ListCustomFunc',
+        method: 'get',
+    })
+}
+
+
 export const showBaseUrlOrNot = (debugData) => {
     const notShow = debugData.usedBy === UsedBy.DiagnoseDebug
         || (debugData.usedBy === UsedBy.ScenarioDebug &&

@@ -6,7 +6,6 @@ import {useWujie} from "@/composables/useWujie";
 
 
 function getWorkerUrl (moduleId, label) {
-
   const hostMap = {
     'localhost:3100': 'localhost:8000',
     'leyan-dev.rysaas.cn': 'leyanapi-dev.nancalcloud.com',
@@ -20,7 +19,7 @@ function getWorkerUrl (moduleId, label) {
     const parentProtocol = matchResult[0];
     basepath = parentProtocol +  (hostMap[parentOrigin.split(parentProtocol)[1]] || 'leyanapi-dev.nancalcloud.com');
   } else {
-    basepath = appUrl;
+    basepath = appUrl.replace('/blank', ''); // 默认将项目引入到blank路由下，保证初始化时页面显示正常
   }
   let url = `${basepath}/editor.worker.js`;
 

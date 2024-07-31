@@ -89,6 +89,12 @@
                     @click="copyCurl" />
         </a-tooltip>
       </div>
+      <div v-if="usedBy === UsedBy.DiagnoseDebug" class="copy-as">
+        <a-tooltip>
+          <template #title>分享链接</template>
+          <SelectOutlined @click="shareDiagnoseDetail" />
+        </a-tooltip>
+      </div>
     </div>
 
     <ContextMenu
@@ -103,7 +109,7 @@
 <script setup lang="ts">
 import {computed, defineProps, inject, onMounted, onUnmounted, PropType, ref, watch, Teleport} from "vue";
 import {notification} from 'ant-design-vue';
-import {QuestionCircleOutlined} from '@ant-design/icons-vue';
+import {QuestionCircleOutlined, SelectOutlined} from '@ant-design/icons-vue';
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import IconSvg from "@/components/IconSvg";
@@ -189,6 +195,7 @@ const props = defineProps({
   },
 })
 const usedBy = inject('usedBy') as UsedBy
+const shareDiagnose = inject('shareDiagnose', () => {});
 const {t} = useI18n();
 const {showContextMenu, contextMenuStyle, onContextMenuShow, onMenuClick} = useVariableReplace('endpointInterfaceUrl')
 const showBaseUrl = () => {
@@ -223,7 +230,7 @@ watch(debugData, (newVal) => {
 }, {immediate: true, deep: true});
 
 function changeServer(id) {
-  store.dispatch('Debug/changeServer', { serverId: id,serveId:debugData.value.serveId, requestEnvVars: false })
+  store.dispatch('Debug/changeServer', { serverId: id,serveId:debugData.value.serveId, requestEnvVars: true })
 }
 
 const send = async () => {
@@ -258,6 +265,7 @@ const confirmSend = async (isNotClickable)=>{
   }
   if(debugChangePreScript.value || debugChangePostScript.value || debugChangeCheckpoint.value){
     store.commit("Global/setSpinning",true)
+  
     bus.emit(settings.eventPostConditionSave, {
       callback:async () => {
         await send()
@@ -269,19 +277,18 @@ const confirmSend = async (isNotClickable)=>{
   }
 }
 
-const save = (e) => {
+const save = async (e) => {
   let data = JSON.parse(JSON.stringify(debugData.value))
   data = prepareDataForRequest(data)
 
-
-  if (validateInfo()) {
-    props.onSave && props.onSave(data)
+  if (validateInfo() && props.onSave) {
+       await props.onSave(data)
   }
 
-  bus.emit(settings.eventConditionSave, {});
-  // 后置处理器 和 断言
-  debugChangePostScript.value && bus.emit(settings.eventPostConditionSave, {});
-  debugChangePreScript.value && bus.emit(settings.eventPreConditionSave, {});
+  //await bus.emit(settings.eventConditionSave, {});  
+   //后置处理器 和 断言
+   ( debugChangePostScript.value || debugChangeCheckpoint.value || debugChangePreScript.value ) &&  bus.emit(settings.eventPostConditionSave, {});
+  
 }
 const saveAsCase = () => {
   console.log('saveAsCase')
@@ -311,6 +318,10 @@ const validateInfo = () => {
   }
 
   return true
+};
+
+const shareDiagnoseDetail = () => {
+  shareDiagnose();
 };
 
 onUnmounted(() => {

@@ -54,7 +54,7 @@
                   @blur="validate('operator', { trigger: 'change' }).catch(() => {})">
 
           <a-select-option v-for="(item, idx) in options" :key="idx" :value="item.value">
-            {{ t(item.label) }}
+            {{item.label === 'equal'?  '==': t(item.label) }}
           </a-select-option>
 
         </a-select>
@@ -69,7 +69,7 @@
         </div>
       </a-form-item>
 
-      <a-form-item v-if="model.type !== 'judgement'" label="取值" v-bind="validateInfos.value" required>
+      <a-form-item v-if="model.type !== 'judgement'" label="期望值" v-bind="validateInfos.value" required>
         <a-input v-model:value="model.value"
                  @blur="validate('value', { trigger: 'blur' }).catch(() => {})" />
         <div class="dp-input-tip">
@@ -194,7 +194,7 @@ const rulesRef = computed(() => {
 let { resetFields, validate, validateInfos } = useForm(model, rulesRef);
 
 const save = (item) => {
-  console.log('save', model.value)
+  console.log('saveCheckpoint',item, model.value)
   if (item && item.entityId !== model.value.id) {
     return;
   }
@@ -205,7 +205,6 @@ const save = (item) => {
     model.value.projectId = debugData.value.projectId
     model.value.conditionSrc = conditionSrc
     model.value.isForBenchmarkCase = isForBenchmarkCase
-
     store.dispatch('Debug/saveCheckpoint', model.value).then((result) => {
       if (result) {
         notifySuccess(`保存成功`);

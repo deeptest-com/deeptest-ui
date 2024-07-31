@@ -116,12 +116,13 @@ import {loadCurl} from "@/views/component/debug/service";
 import {StateType as DebugStateType} from "@/views/component/debug/store";
 import {UsedBy} from "@/utils/enum";
 import useCopy from "@/composables/useClipboard";
+import { useRoute } from 'vue-router';
 import {getNodePath} from "@/utils/dom";
 import {isLeyan} from "@/utils/comm";
 
 const isLyEnv = isLeyan()
 const { copy } = useCopy();
-
+const route = useRoute();
 const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType,  Debug: DebugStateType,
   ProjectGlobal: ProjectStateType, ServeGlobal: ServeStateType }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -156,6 +157,16 @@ async function loadTreeData() {
   expandAll();
 }
 
+const checkQueryParams = () => {
+  const queryInterfaceId: any = route.query.interfaceId;
+  if (queryInterfaceId) {
+    selectedKeys.value = [queryInterfaceId * 1];
+    setSelectedKey(getSelectedKeyName(), currProject.value.id, selectedKeys.value[0])
+    const selectedItem = treeDataMap.value[selectedKeys.value[0]]
+    store.dispatch('DiagnoseInterface/openInterfaceTab', selectedItem);
+  }
+}
+
 watch(() => currProject.value.id, async (newVal, oldVal) => {
   if (newVal !== oldVal) {
     store.commit('DiagnoseInterface/setTreeData', []);
@@ -163,6 +174,7 @@ watch(() => currProject.value.id, async (newVal, oldVal) => {
     keywords.value = '';
     await loadTreeData();
     selectStoredKeyCall();
+    checkQueryParams();
     setTimeout(() => {
       loading.value = false
     }, 300);
@@ -445,6 +457,8 @@ watch(() => {
   console.log('当前tab id变化', val);
   selectedKeys.value = val ? [val] : [];
 }, {immediate: true})
+
+
 
 </script>
 

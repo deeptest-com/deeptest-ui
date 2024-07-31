@@ -161,7 +161,7 @@ loadDbConns()
 let {resetFields, validate, validateInfos} = useForm(model, rules);
 
 const save = () => {
-  console.log('save')
+  console.log('saveDatabase')
   validate().then(() => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId

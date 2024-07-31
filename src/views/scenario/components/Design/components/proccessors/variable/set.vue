@@ -10,7 +10,7 @@
                      @blur="validate('variableName', { trigger: 'blur' }).catch(() => {})"/>
           </a-form-item>
 
-          <a-form-item label="表达式" v-bind="validateInfos.expression">
+          <a-form-item label="值" v-bind="validateInfos.expression">
             <a-input v-model:value="modelRef.expression"
                      @blur="validate('expression', { trigger: 'blur' }).catch(() => {})"/>
             <div class="dp-input-tip">{{t('tips_expression_value')}}</div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="response-html-main">
+  <div class="response-html-main" ref="responseHtmlMain">
     <div class="head">
       <a-row type="flex">
         <a-col flex="1">
@@ -27,9 +27,11 @@
 
     <div class="body">
       <MonacoEditor
+        v-if="responseData.content"
         ref="monacoEditor"
         customId="html-lens-main"
         class="editor"
+        :key="timestamp"
         :interfaceId="debugData.id"
         :value="responseData.content"
         :timestamp="timestamp"
@@ -90,6 +92,7 @@ const expr = ref('')
 const exprType = ref('')
 const result = ref('')
 const monacoEditor = ref();
+const responseHtmlMain = ref();
 
 // let frameElem: HTMLIFrameElement
 // let frameDoc: Document
@@ -175,6 +178,7 @@ onMounted(() => {
       act: settings.eventTypeContainerHeightChanged,
       container: 'response-html-main',
       id: 'html-lens-main',
+      el: responseHtmlMain.value,
     })
   })
 });

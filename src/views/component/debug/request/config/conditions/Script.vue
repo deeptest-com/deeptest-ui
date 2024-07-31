@@ -1,7 +1,7 @@
 <template>
   <div class="post-script-main">
     <div class="content">
-      <div class="codes">
+      <div class="codes" ref="codesMain">
         <MonacoEditor
           ref="monacoEditor"
           v-if="model?.id"
@@ -167,6 +167,7 @@ const rules = reactive({
 let { resetFields, validate, validateInfos } = useForm(model, rules);
 
 const save = (item) => {
+  console.log('saveScript', model.value)
   if (item && item.entityId !==  model.value.id) {
     return;
   }
@@ -206,6 +207,8 @@ const addJslib = () => {
   window.open(`${prefix}/${currProject.value.shortName}${suffix}`, '_blank');
 }
 
+const codesMain = ref();
+
 onMounted(() => {
   bus.on(settings.eventConditionSave, save);
   bus.on(settings.paneResizeTop, () => {
@@ -214,6 +217,7 @@ onMounted(() => {
         container: 'codes',
         id: `post-script-${props.condition.entityId}`,
         mixedHeight: 1,
+        el: codesMain.value,
       })
     })
 })

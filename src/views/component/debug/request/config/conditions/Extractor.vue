@@ -181,10 +181,11 @@ watch(() => props.condition, (newVal) => {
 let {resetFields, validate, validateInfos} = useForm(model, rules);
 
 const save = (item) => {
+  console.log('saveExtractor', model.value, item);
   if (item && item.entityId !== model.value.id) {
     return;
   }
-  console.log('save', model.value, item);
+ 
   validate().then(() => {
     model.value.debugInterfaceId = debugInfo.value.debugInterfaceId
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId

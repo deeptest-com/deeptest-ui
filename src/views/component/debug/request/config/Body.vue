@@ -1,5 +1,5 @@
 <template>
-  <div class="request-body-main">
+  <div class="request-body-main" ref="requestBodyMain">
     <div class="head">
       <a-row type="flex">
         <a-col flex="1">
@@ -50,6 +50,7 @@
 
       <div v-else class="editor-container">
         <MonacoEditor
+          :key="timestamp"
           ref="monacoEditor"
           customId="request-body-main"
           class="editor"
@@ -100,6 +101,7 @@ const editorOptions = ref(Object.assign({usedWith: 'request'}, {
 const bodyTypes = ref(getRequestBodyTypes())
 const timestamp = ref('')
 const monacoEditor = ref();
+const requestBodyMain = ref();
 
 watch(debugData, (newVal) => {
   timestamp.value = Date.now() + ''
@@ -124,7 +126,8 @@ onMounted(() => {
     monacoEditor.value?.resizeIt({
       act: settings.eventTypeContainerHeightChanged,
       container: 'request-body-main',
-      id: 'request-body-main'
+      id: 'request-body-main',
+      el: requestBodyMain.value,
     });
   })
 })

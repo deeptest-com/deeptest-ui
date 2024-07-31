@@ -90,8 +90,8 @@ function useEndpoint() {
   /**
    * 加载 个人收藏目录节点
    */
-  const reLoadFavoriteList = () => {
-    store.dispatch('Endpoint/loadFavoriteList');
+  const reLoadFavoriteList = async () => {
+    await store.dispatch('Endpoint/loadFavoriteList');
   }
 
   /**

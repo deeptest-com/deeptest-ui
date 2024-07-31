@@ -255,7 +255,7 @@ const clientDownloadUrlOpts = computed(() => {
 
 onMounted(async () => {
   // 获取客户端最新版本号
-  await store.dispatch('Global/getClientVersion');
+  // await store.dispatch('Global/getClientVersion');
   await store.dispatch('Global/listAgent');
   await store.commit('Global/setCurrAgent', null);
   setTimeout(() => {
