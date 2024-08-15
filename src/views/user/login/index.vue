@@ -20,13 +20,15 @@
                 </div>
             </a-form-item>
             <div class="text-align-right">
-                <!-- <router-link to="/user/forgotPassword">
+              <div v-if="!isLyEnv">
+                <router-link to="/user/forgotPassword">
                     忘记密码
-                </router-link> -->
-                <!-- &nbsp;&nbsp;&nbsp;
+                </router-link>
+                &nbsp;&nbsp;&nbsp;
                 <router-link to="/user/register">
                     现在注册
-                </router-link> -->
+                </router-link>
+              </div>
             </div>
             <a-form-item>
                 <div class="login-input-button">
@@ -58,6 +60,7 @@ import { NotificationKeyCommon } from "@/utils/const";
 import {notifySuccess, notifyWarn} from "@/utils/notify";
 import {setCache,getCache} from "@/utils/localCache";
 import settings from "@/config/settings";
+import {isLeyan} from "@/utils/comm";
 
 interface UserLoginSetupData {
     t: (key: string | number) => string;
@@ -72,10 +75,12 @@ interface UserLoginSetupData {
 export default defineComponent({
     name: 'UserLogin',
     setup() {
+      const { t } = useI18n();
+      const isLyEnv = isLeyan()
+
         const router = useRouter();
         const { currentRoute } = router;
         const store = useStore<{ UserLogin: UserLoginStateType }>();
-        const { t } = useI18n();
 
         // 表单值
         const modelRef = reactive<LoginParamsType>({
@@ -84,6 +89,8 @@ export default defineComponent({
         });
 
         onMounted(async () => {
+          console.log('login onMounted')
+
           // 客户端里，自动填充用户名和密码
           const isElectron = !!window?.require;
           const ipcRenderer = undefined as any
@@ -92,7 +99,9 @@ export default defineComponent({
             const userInfo = JSON.parse(userInfoStr || '{}');
             modelRef.username = userInfo?.username || '';
             modelRef.password = userInfo?.password || '';
-          } else if(window.location.host === 'demo.deeptest.com') { // 演示站点，自动填充用户名和密码
+          } else if(window.location.host === 'demo.deeptest.com'
+              || window.location.host.indexOf('192.168.5.134') > -1
+              || window.location.host.indexOf('localhost') > -1) { // 演示和开发站点，自动填充用户名和密码
             modelRef.username = 'admin';
             modelRef.password = 'P2ssw0rd';
           }
@@ -150,7 +159,7 @@ export default defineComponent({
         const validateInfosNew = useI18nAntdFormVaildateInfos(validateInfos);
 
         return {
-            t,
+            t, isLyEnv,
             resetFields,
             validateInfos: validateInfosNew,
             modelRef,

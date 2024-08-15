@@ -300,7 +300,7 @@ export default defineComponent({
       deep: true,
       handler(timestamp) {
         console.log('watch editor timestamp', timestamp)
-        this.value !== this._getValue() && this._setValue(this.value);
+        this.value !== this._getValue() && !!this.editor && this._setValue(this.value);
       }
     },
      value() {

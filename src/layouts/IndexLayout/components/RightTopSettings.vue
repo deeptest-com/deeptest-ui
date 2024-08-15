@@ -23,7 +23,7 @@
         <span v-else>
           <CloudDownloadOutlined class="user-icon" style="color: #c0c4cc;" />
 
-          <a href="https://deeptest.com/setup.html" target="_blank" style="color: #8A8A8A;">
+          <a href="http://111.231.16.35:8081/" target="_blank" class="agent-download">
             客户端下载
           </a>
         </span>
@@ -294,15 +294,7 @@ const isAdmin = computed(() => {
     }
 
     .user-info {
-      .user-icon {
-        color: #fff;
-      }
-
-      .operation-name {
-        color: #fff;
-      }
-
-      .agent-name {
+      .user-icon, .operation-name, .agent-download, .agent-name {
         color: #fff;
       }
     }
@@ -333,6 +325,10 @@ const isAdmin = computed(() => {
 .user-info {
   display: flex;
   align-items: center;
+
+  .agent-download {
+    color: #8A8A8A;
+  }
 
   :deep(.user-agent-manage) {
     display: flex;
@@ -367,12 +363,7 @@ const isAdmin = computed(() => {
 
   .user-icon {
     color: #8A8A8A;
-    //font-size: 18px;
-    //margin-left: 4px;
   }
-
-  //margin-right: 8px;
-
 }
 
 .msgs {

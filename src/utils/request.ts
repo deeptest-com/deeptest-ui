@@ -32,9 +32,18 @@ export interface ResultErr {
  * 配置request请求时的默认参数
  */
 export const getUrls = () => {
-    const serverUrl = process.env.VUE_APP_API_SERVER;
+    let serverUrl = process.env.VUE_APP_API_SERVER;
     const agentUrl = process.env.VUE_APP_API_AGENT;
     const staticUrl = process.env.VUE_APP_API_STATIC;
+
+    if (!serverUrl) { // deeptest-ui static folder is under deeptest server
+        serverUrl = new URL(unescape(window.location.href)).origin
+        if (!serverUrl.endsWith('/')) serverUrl += '/'
+        serverUrl = serverUrl + 'api/v1'
+    }
+
+    console.log(`serverUrl=${serverUrl}, agentUrl=${agentUrl}, staticUrl=${staticUrl}`)
+
     return {serverUrl, agentUrl,staticUrl}
 }
 const {serverUrl, agentUrl, staticUrl} = getUrls()
@@ -75,7 +84,7 @@ if (isWujieEnv) {
         requestStatic.defaults.headers['Token'] = user.token;
     }
 
-   
+
     const org = window.location.origin;
     request.defaults.headers['X-API-Origin'] = org;
     requestAgent.defaults.headers['X-API-Origin'] = org;

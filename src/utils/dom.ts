@@ -368,3 +368,12 @@ export function scrollTo(id: string, top?: number): void {
         },500);
     }
 }
+
+export function replaceLineBreak(str: string): string {
+    if (!str) return ''
+
+    let ret = str.replaceAll(' ', '&nbsp;')
+    ret = ret.replaceAll('\n', '<br />')
+
+    return ret
+}

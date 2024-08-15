@@ -23,6 +23,9 @@
           <a-form-item label="地址" v-bind="validateInfos.url" required>
             <a-input v-model:value="model.url" :disabled="disabled"
                      @blur="validate('url', { trigger: 'blur' }).catch(() => {})"/>
+            <div class="dp-input-tip">
+              {{ `请填写完整的代理访问地址，如本地代理默认为 http://127.0.0.1:8086/api/v1` }}
+            </div>
           </a-form-item>
 
           <a-form-item label="描述" v-bind="validateInfos.desc">
@@ -44,17 +47,12 @@
 import {computed, defineEmits, defineProps, reactive, ref, watch} from 'vue';
 import {Form, notification} from 'ant-design-vue';
 import {useStore} from 'vuex';
-import {UploadOutlined} from '@ant-design/icons-vue';
 
 import settings from "@/config/settings";
-import {getUrls} from "@/utils/request";
-import {getToken} from "@/utils/localToken";
 
 import {StateType as SysSettingStateType} from "../store";
-import {uploadRequest} from "@/utils/upload";
-import {notifyWarn} from "@/utils/notify";
-import {pattern} from "@/utils/const";
 import {urlValidator} from "@/utils/validate";
+import Tips from "@/components/Tips/index.vue";
 
 const useForm = Form.useForm;
 const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';

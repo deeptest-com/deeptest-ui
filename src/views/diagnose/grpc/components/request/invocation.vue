@@ -215,7 +215,6 @@ const parseRemote = async () => {
   console.log('parseRemote')
 
   if (!model.value.address) {
-    // notifyWarn('请输入gRPC地址');
     return
   }
 
