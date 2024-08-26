@@ -119,6 +119,7 @@ import useCopy from "@/composables/useClipboard";
 import { useRoute } from 'vue-router';
 import {getNodePath} from "@/utils/dom";
 import {isLeyan} from "@/utils/comm";
+import {MenuItem} from "@/components/DropDownMenu/type";
 
 const isLyEnv = isLeyan()
 const { copy } = useCopy();
@@ -425,7 +426,7 @@ const DropdownMenuList = [
     ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
     action: (nodeProps) => importCurl(nodeProps.dataRef),
   },
-]
+] as MenuItem[]
 
 if (!isLyEnv) {
   DropdownMenuList.splice(1, 0,
@@ -433,18 +434,18 @@ if (!isLyEnv) {
         label: '新建WebSocket请求',
         ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
         action: (nodeProps) => create(nodeProps.dataRef?.id, 'websocket_interface'),
-      },
+      } as MenuItem,
       {
         label: '新建gRPC请求',
         ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
         action: (nodeProps) => create(nodeProps.dataRef?.id, 'grpc_interface'),
-      })
+      } as MenuItem)
 
   DropdownMenuList.push({
     label: '录制请求',
     ifShow: (nodeProps) => nodeProps.dataRef?.type === 'dir',
     action: (nodeProps) => openRecordTab(nodeProps.dataRef),
-  })
+  } as MenuItem)
 }
 
 onMounted(async () => {

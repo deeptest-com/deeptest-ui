@@ -59,7 +59,7 @@ const RenderMenuItem = ({ item, record }: { item: MenuItem, record: Recordable }
     if (item.desc) {
       return renderLabelDesc(item);
     }
-    
+
 
     return item.label;
   };
@@ -96,7 +96,7 @@ const renderExecBtn = (item) => {
         execBtn: ({ isNotClickable }) => {
           return isNotClickable ? <a-button class="exec-btn" type='default' disabled={isNotClickable} onClick={(e) => onFreeSaasBtnclick(e, isNotClickable)}>{ item.label }</a-button> : <span>{item.label}</span>
         }
-      }}  
+      }}
     </ExecBtn>
   )
 };
@@ -128,10 +128,10 @@ const ActionList = (opts: { list: MenuItem[], record: Recordable}) => {
     <div class="action-list">
       {list.map((actionItem: MenuItem) => (
         <div class="action-item" onClick={() => actionItem.action?.(record)}>
-          { actionItem.checkExecClickAble ? renderExecBtn(actionItem) : actionItem.customLoadingRender ? 
+          { actionItem.checkExecClickAble ? renderExecBtn(actionItem) : actionItem.customLoadingRender ?
             <a-tooltip title={record.loading ? (actionItem.loadingText || null) : actionItem.label} placement="top">
               {customRenderLoadingLabel(actionItem)}
-            </a-tooltip> 
+            </a-tooltip>
             : actionItem.customRender ? customRenderLabel(actionItem) : actionItem.label}
         </div>
       ))}
@@ -171,7 +171,7 @@ const DropdownList = defineComponent({
       },
       overlay: () => {
         return (
-          <a-menu style={{ maxHeight: '300px', overflowY: 'scroll' }} selectedKeys={[props.selectedkey]} openKeys={openKeys.value} onOpenChange={e => handleOpen(e)}>
+          <a-menu style={{ maxHeight: '300px', overflowY: 'auto' }} selectedKeys={[props.selectedkey]} openKeys={openKeys.value} onOpenChange={e => handleOpen(e)}>
             {
               props.list.map((e: any, index) => (
                 RenderMenuItem({ item: e, record: props.record })
