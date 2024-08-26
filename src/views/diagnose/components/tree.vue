@@ -318,6 +318,7 @@ const interfaceSelectionFinish = async (interfaceIds) => {
     setExpandedKeys('scenario', treeData.value[0].scenarioId, expandedKeys.value)
   })
 }
+
 function interfaceSelectionCancel() {
   console.log('handleModalCancel')
   interfaceSelectionVisible.value = false
