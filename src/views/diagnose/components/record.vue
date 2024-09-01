@@ -13,7 +13,7 @@
       </a-form-item>
 
       <a-form-item label="存放目录">
-        {{ recordConf.targetName }}
+        {{ recordConf.targetName }}/
       </a-form-item>
 
       <a-form-item>
@@ -107,7 +107,8 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref, watch} from 'vue';
+import {computed, ComputedRef, ref, watch} from 'vue';
+import { toRaw } from '@vue/reactivity'
 import {useStore} from 'vuex';
 import {CheckCircleOutlined, CloseCircleOutlined, DownOutlined, RightOutlined,} from '@ant-design/icons-vue';
 
@@ -150,14 +151,25 @@ const ignoreMethods = ['HEAD', 'OPTIONS', 'TRACE']
 
 const recordDataOrigin = ref([] as any[])
 const recordData = computed<any>(() => {
-  console.log('computed recordData', recordDataOrigin.value.length)
-  return recordDataOrigin.value.filter((item: any) => {
-    const method = item.info?.request?.method
-    return checkResType(item) &&
+  console.log('computed from recordDataOrigin', recordDataOrigin.value.length)
+
+  const items = [] as any[]
+  recordDataOrigin.value.forEach((item) => {
+    const itemRaw = toRaw(item)
+    const method = itemRaw.info?.request?.method
+
+    const check = checkResType(itemRaw) &&
         ignoreMethods.indexOf(method) < 0 &&
         method.indexOf(searchModel.value.method) > -1 &&
-        item.info?.request?.url.indexOf(searchModel.value.keywords) > -1;
+        itemRaw.info?.request?.url.indexOf(searchModel.value.keywords) > -1;
+
+    if (check) {
+      items.push(itemRaw)
+    }
   })
+
+  console.log('=== computed recordData', items)
+  return items
 })
 
 const typeMap = {}
@@ -246,8 +258,12 @@ const onChromeExtEvent =(event) => {
     }
     responseMap.value[data.requestId] = data
   } else {
-    recordDataOrigin.value.push(data)
-    requestMap.value[data.requestId] = data
+    const raw = toRaw(data)
+
+    if (raw.info.request.url.endsWith('hot-update.json')) return // ignore
+
+    recordDataOrigin.value.push(raw)
+    requestMap.value[raw.requestId] = raw
   }
 }
 
