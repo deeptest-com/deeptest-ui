@@ -1,6 +1,5 @@
 <template>
   <div class="request-record">
-
     <a-form :model="model" :label-col="labelCol" :wrapper-col="wrapperCol">
       <a-form-item label="站点地址" v-bind="validateInfos.url">
         <a-input v-model:value="model.url"
@@ -120,6 +119,7 @@ import {requestMethodOpts} from "@/config/constant";
 
 const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType, ServeGlobal: ServeStateType }>();
 const recordConf = computed<any>(() => store.state.DiagnoseInterface.interfaceData);
+const recordData = computed<any>(() => store.state.DiagnoseInterface.recordData);
 const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 
 const useForm = Form.useForm;
@@ -148,29 +148,6 @@ const resTypeOptions = ref([
   {label: 'Font', value: 'Font'},
 ])
 const ignoreMethods = ['HEAD', 'OPTIONS', 'TRACE']
-
-const recordDataOrigin = ref([] as any[])
-const recordData = computed<any>(() => {
-  console.log('computed from recordDataOrigin', recordDataOrigin.value.length)
-
-  const items = [] as any[]
-  recordDataOrigin.value.forEach((item) => {
-    const itemRaw = toRaw(item)
-    const method = itemRaw.info?.request?.method
-
-    const check = checkResType(itemRaw) &&
-        ignoreMethods.indexOf(method) < 0 &&
-        method.indexOf(searchModel.value.method) > -1 &&
-        itemRaw.info?.request?.url.indexOf(searchModel.value.keywords) > -1;
-
-    if (check) {
-      items.push(itemRaw)
-    }
-  })
-
-  console.log('=== computed recordData', items)
-  return items
-})
 
 const typeMap = {}
 function checkResType(item) {
@@ -221,16 +198,19 @@ const startRecord = () => {
 }
 const importRecordData = () => {
   console.log('importRecordData', checkedItems.value)
-  const selected = recordData.value.map((item, index) => {
+
+  const selected = [] as any[]
+
+  recordData.value.forEach((item, index) => {
      if (checkedItems.value.indexOf(index) > -1) {
-       return {
+       selected.push({
          request: item.info.request,
          response: {
            body: item.response?.body,
            status: item.response?.status,
            statusText: item.response?.statusText,
          }
-       }
+       })
      }
   })
 
@@ -250,7 +230,7 @@ const onChromeExtEvent =(event) => {
   console.log('onChromeExtEvent', event.detail)
   const data = event.detail
 
-  if (data.type === 'response') {
+  if (data.type === 'response' && requestMap.value[data.requestId]) {
     requestMap.value[data.requestId].response = {
       body: data.body,
       status: data.info.response?.status,
@@ -260,10 +240,21 @@ const onChromeExtEvent =(event) => {
   } else {
     const raw = toRaw(data)
 
-    if (raw.info.request.url.endsWith('hot-update.json')) return // ignore
+    if (raw.info.request?.url?.endsWith('hot-update.json')) return // ignore
 
-    recordDataOrigin.value.push(raw)
-    requestMap.value[raw.requestId] = raw
+    const method = data.info?.request?.method
+
+    const check = checkResType(raw) &&
+        ignoreMethods.indexOf(raw) < 0 &&
+        method.indexOf(searchModel.value.method) > -1 &&
+        raw.info?.request?.url.indexOf(searchModel.value.keywords) > -1;
+
+    if (check) {
+      store.commit('DiagnoseInterface/addRecordData', raw)
+      requestMap.value[raw.requestId] = raw
+    }
+
+    console.log('recordData', recordData.value)
   }
 }
 

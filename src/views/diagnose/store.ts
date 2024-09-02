@@ -28,6 +28,8 @@ export interface StateType {
 
     treeData: any[] | null;
     treeDataMap: any,
+
+    recordData: any[],
 }
 
 export interface ModuleType extends StoreModuleType<StateType> {
@@ -49,6 +51,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setInterfaceTabs: Mutation<StateType>;
         updateTabName: Mutation<StateType>;
+
+        addRecordData: Mutation<StateType>;
     };
     actions: {
         loadTree: Action<StateType, StateType>;
@@ -90,6 +94,8 @@ const initState: StateType = {
 
     treeData: [],
     treeDataMap: {},
+
+    recordData: [] as any[],
 };
 
 const StoreModel: ModuleType = {
@@ -144,6 +150,10 @@ const StoreModel: ModuleType = {
                     item.title = payload.title
                 }
             });
+        },
+
+        addRecordData(state, payload) {
+            state.recordData.push(payload)
         },
     },
     actions: {
