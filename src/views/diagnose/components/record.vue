@@ -123,7 +123,7 @@ const recordData = computed<any>(() => store.state.DiagnoseInterface.recordData)
 const currServe = computed<any>(() => store.state.ServeGlobal.currServe);
 
 const useForm = Form.useForm;
-const model = ref({url: `${window.location.origin}/test/request`})
+const model = ref({url: 'about:blank'})
 const rules = ref({
   url: [
     {required: true, message: '请输入站点URL地址', trigger: 'blur'},
