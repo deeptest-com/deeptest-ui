@@ -61,7 +61,7 @@ const requestStatic = axios.create({
     baseURL: staticUrl
 });
 
-// 如果是嵌入到乐研中，需要设置请求头 xToken ，用于嵌入乐研的权限验证
+// 如果是嵌入到三方中，需要设置请求头 xToken ，用于嵌入三方的权限验证
 if (isWujieEnv) {
 
     if (xToken) {

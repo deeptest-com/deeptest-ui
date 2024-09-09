@@ -7,11 +7,11 @@ export const observer = new MutationObserver(mutationList => {
   const findVisibleModal = [...modalRootEl || []].find(e => e.style.display !== 'none');
   if (findVisibleModal || drawerRootEl) {
     // modal 显示
-    window?.$wujie?.bus.$emit(settings.sendMsgToLeyan, {
+    window?.$wujie?.bus.$emit(settings.sendMsgToThirdparty, {
       type: 'openModalOrDrawerEl'
     })
   } else {
-    window?.$wujie?.bus.$emit(settings.sendMsgToLeyan, {
+    window?.$wujie?.bus.$emit(settings.sendMsgToThirdparty, {
       type: 'closeModalOrDrawerEl'
     })
   }

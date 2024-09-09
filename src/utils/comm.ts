@@ -1,4 +1,4 @@
-export const isLeyan = () => {
+export const isThirdparty = () => {
     return process.env.VUE_APP_DEPLOY_ENV.includes('ly');
 }
 

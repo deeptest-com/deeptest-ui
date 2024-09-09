@@ -1329,9 +1329,9 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@leyan/feedback@0.0.4":
+"@thirdparty/feedback@0.0.4":
   version "0.0.4"
-  resolved "http://nexus.cloudnk.cn/repository/npm-group/@leyan/feedback/-/feedback-0.0.4.tgz#b3054f96d94d4fcc4ba7f8d2ec3e5dc19f2a17c7"
+  resolved "http://nexus.cloudnk.cn/repository/npm-group/@thirdparty/feedback/-/feedback-0.0.4.tgz#b3054f96d94d4fcc4ba7f8d2ec3e5dc19f2a17c7"
   integrity sha512-SisEy9F5QXRCiBxI1G0iMftu6TTFDoD8d6YcHIT5Doc8H0kZyj1E+tnJGBH67hEN1x5KPLQZ/GH6hb0+7+05SA==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":

@@ -108,7 +108,7 @@ watch(props, () => {
 const setAgent = async () => {
   await store.dispatch('Global/listAgent');
   await store.commit('Global/setCurrAgent', null);
-  bus?.$emit(settings.sendMsgToLeyan, {
+  bus?.$emit(settings.sendMsgToThirdparty, {
     type: 'initClientOrAgents',
     data: {
       agents: agents.value,

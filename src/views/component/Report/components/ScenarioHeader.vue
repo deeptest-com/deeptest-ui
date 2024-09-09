@@ -10,7 +10,7 @@
           <a-progress :percent="progressInfo.progressValue" :status="progressInfo.status" :show-info="false"/>
         </div>
         <div class="scenario-rate-info">通过率 {{ `${progressInfo.progressValue}%` }}</div>
-        <template v-if="showBugAction && isInLeyanWujieContainer">
+        <template v-if="showBugAction && isInThirdpartyWujieContainer">
           <a-tooltip :title="getTitle">
             <div :class="{'scenario-report-bug': true, 'disabled': !bugInfo.bugId && (userSpaces.length === 0 || execStatus !== 'end')}" @click="handleAubmitToBug">
               <BugIcon />
@@ -18,7 +18,7 @@
           </a-tooltip>
         </template>
       </div>
-     
+
     </template>
   </div>
 </template>
@@ -38,7 +38,7 @@ const currProject = computed(() => {
 const { parentOrigin } = useWujie();
 const props = defineProps(['record', 'showScenarioInfo', 'expandActive']);
 const statusMap = new Map([['pass', '通过'], ['fail', '失败'],['exception','失败'], ['in-progress', '进行中']]);
-const { isInLeyanWujieContainer } = useWujie();
+const { isInThirdpartyWujieContainer } = useWujie();
 const showBugAction = inject('showBugAction', false);
 const detailLink = inject('detailLink') as any;
 const execStatus = inject('execStatus') as any;
@@ -83,7 +83,7 @@ const getTitle = computed(() => {
       return <>无法提交问题，请先到<span onClick={() => handleEditProject()} style={{ cursor: 'pointer', color: '#1677ff' }}>API项目列表页</span>编辑项目，关联承接的研发空间</>
     }
   }
-  
+
   return '未提交bug，点击创建并关联';
 })
 
@@ -110,7 +110,7 @@ const referBugCallback = async (info) => {
 
 const submitToLy = (space: any) => {
   store.commit('Global/setSpinning', true);
-  bus?.$emit(settings.sendMsgToLeyan, {
+  bus?.$emit(settings.sendMsgToThirdparty, {
     type: 'openCreateBugWorkitem',
     data: {
       reportInfo: {
@@ -127,7 +127,7 @@ const handleAubmitToBug = (evt) => {
 
   // 已关联了
   if (bugInfo.value.bugId) {
-    bus?.$emit(settings.sendMsgToLeyan, {
+    bus?.$emit(settings.sendMsgToThirdparty, {
       type: 'openBugWorkitemLink',
       data: {
         workitem: {
@@ -159,9 +159,9 @@ const handleAubmitToBug = (evt) => {
       return (
         <div class="submit-bug-modal-content">
           <span style="margin-right:2px;color: red">*</span> 研发空间 :
-          <Select 
-            value={selectedSpaceKey} 
-            options={userSpaces.value.map(e => ({ value: e.nameEngAbbr, label: e.name }))} 
+          <Select
+            value={selectedSpaceKey}
+            options={userSpaces.value.map(e => ({ value: e.nameEngAbbr, label: e.name }))}
             onChange={(e) => selectedSpaceKey.value = e}/>
         </div>
       )
@@ -171,7 +171,7 @@ const handleAubmitToBug = (evt) => {
     }
   })
 
-  
+
 }
 
 </script>

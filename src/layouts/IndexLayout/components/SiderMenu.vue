@@ -25,7 +25,7 @@ import SiderMenuItem from './SiderMenuItem.vue';
 import { RoutesDataItem } from '@/utils/routes';
 import { StateType as GlobalStateType } from "@/store/global";
 import usePermission from "@/composables/usePermission";
-import {isLeyan} from "@/utils/comm";
+import {isThirdparty} from "@/utils/comm";
 
 export default defineComponent({
   name: 'SiderMenu',
@@ -74,7 +74,7 @@ export default defineComponent({
     const permissionMenuList = computed(() => store.state.Global.permissionMenuList)
     const { menuData, topNavEnable }  = toRefs(props);
     const newMenuData = ref<RoutesDataItem[]>([]);
-    const isLeyanEnv = isLeyan();
+    const isThirdpartyEnv = isThirdparty();
 
     const getNewMenuData = () => {
       if(!topNavEnable.value) {

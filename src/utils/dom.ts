@@ -182,16 +182,16 @@ export function getContextMenuStyle2(e) {
     return style
 }
 
-export function getRightTabPanelPosition(tabId, isInLeyanWujieContainer?: boolean) {
+export function getRightTabPanelPosition(tabId, isInThirdpartyWujieContainer?: boolean) {
     let ret = {}
     const elem = document.getElementById(tabId)
     if (elem) {
         const pos = elem.getBoundingClientRect()
         const top = getRightTabTop()
         ret = {
-            top: getRightTabTop() + (isInLeyanWujieContainer ? 48 : 0) + 'px',
+            top: getRightTabTop() + (isInThirdpartyWujieContainer ? 48 : 0) + 'px',
             left: (pos.left + pos.width + 10 * 2 - 360) + 'px',
-            height: ((isInLeyanWujieContainer ? window.parent.document.body.clientHeight :document.body.clientHeight) - top - (isInLeyanWujieContainer ? 48 : 0)) + 'px',
+            height: ((isInThirdpartyWujieContainer ? window.parent.document.body.clientHeight :document.body.clientHeight) - top - (isInThirdpartyWujieContainer ? 48 : 0)) + 'px',
         }
     }
 

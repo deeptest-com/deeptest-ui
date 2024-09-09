@@ -107,7 +107,7 @@ import { useWujie } from '@/composables/useWujie';
 
 provide('usedBy', UsedBy.DiagnoseDebug)
 
-const { isInLeyanWujieContainer, parentOrigin, projectName } = useWujie();
+const { isInThirdpartyWujieContainer, parentOrigin, projectName } = useWujie();
 const route = useRoute();
 const store = useStore<{ Debug: Debug, DiagnoseInterface: DiagnoseInterfaceStateType, ProjectGlobal: ProjectStateType, ServeGlobal: ServeStateType,Global }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -269,7 +269,7 @@ const getTitle = (title) => {
 };
 
 const shareDiagnose = () => {
-  if(isInLeyanWujieContainer){
+  if(isInThirdpartyWujieContainer){
     window.open(`${parentOrigin}/lyapi/${projectName}/debug?interfaceId=${interfaceId.value}`, '_blank')
     return;
   }

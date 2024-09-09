@@ -76,7 +76,7 @@ const store = useStore<{ ProjectGlobal: ProjectStateType, Scenario: ScenarioStat
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 const modelRef: any = computed<boolean>(() => store.state.Scenario.nodeData);
 const jslibNames = computed<any>(() => store.state.Snippet.jslibNames);
-const { isInLeyanWujieContainer, parentOrigin } = useWujie();
+const { isInThirdpartyWujieContainer, parentOrigin } = useWujie();
 
 const emits = defineEmits(['cancel']);
 
@@ -128,8 +128,8 @@ const editorChange = (newScriptCode) => {
 }
 
 const addJslib = () => {
-  const prefix = isInLeyanWujieContainer ? `${parentOrigin}/lyapi` : window.location.origin;
-  const suffix = isInLeyanWujieContainer ? '/settings?activeKey=jslib' : '/project-setting/jslib'; 
+  const prefix = isInThirdpartyWujieContainer ? `${parentOrigin}/lyapi` : window.location.origin;
+  const suffix = isInThirdpartyWujieContainer ? '/settings?activeKey=jslib' : '/project-setting/jslib';
   window.open(`${prefix}/${currProject.value.shortName}${suffix}`, '_blank');
 }
 

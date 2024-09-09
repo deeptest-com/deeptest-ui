@@ -17,7 +17,7 @@
 <script setup lang="ts">
 import {defineProps} from "vue";
 import { QuestionCircleOutlined, ArrowRightOutlined } from '@ant-design/icons-vue';
-import {isLeyan} from "@/utils/comm";
+import {isThirdparty} from "@/utils/comm";
 
 const props = defineProps({
   title: {
@@ -37,7 +37,7 @@ const props = defineProps({
 const openHelp = (bookmark?) => {
   if (!props.section) return
 
-  if (isLeyan()) {
+  if (isThirdparty()) {
     //
   } else {
     const base = process.env.VUE_APP_HELP_URL;

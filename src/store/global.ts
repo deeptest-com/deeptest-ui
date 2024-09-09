@@ -223,8 +223,8 @@ const StoreModel: ModuleType = {
         const { code, data }: any = await getUserMenuList(payload);
         if (code === 0) {
           commit('setPermissionMenuList', data || []);
-          window?.$wujie?.bus.$emit(settings.sendMsgToLeyan, {
-            type: 'initLeyanAPIMenu',
+          window?.$wujie?.bus.$emit(settings.sendMsgToThirdparty, {
+            type: 'initThirdpartyAPIMenu',
             data: {
               menu: data || []
             }

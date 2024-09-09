@@ -93,7 +93,7 @@ const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
 const store = useStore<{  Debug: Debug, Endpoint: Endpoint, ProjectGlobal: ProjectGlobal, Global: GlobalStateType }>();
 const debugData = computed<any>(() => store.state.Debug.debugData);
-const { isInLeyanWujieContainer } = useWujie();
+const { isInThirdpartyWujieContainer } = useWujie();
 
 const props = defineProps({
   onSaveDebugData: {
@@ -151,8 +151,8 @@ const posStyleHis = ref({})
 
 const changeRightTab = () => {
   console.log('changeRightTab')
-  posStyleEnv.value = getRightTabPanelPosition('env-tab', isInLeyanWujieContainer)
-  posStyleHis.value = getRightTabPanelPosition('his-tab', isInLeyanWujieContainer)
+  posStyleEnv.value = getRightTabPanelPosition('env-tab', isInThirdpartyWujieContainer)
+  posStyleHis.value = getRightTabPanelPosition('his-tab', isInThirdpartyWujieContainer)
 }
 
 const closeRightTab = () => {

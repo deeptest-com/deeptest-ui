@@ -6,7 +6,7 @@ export const  useWujie = () => {
 
     const {projectName,parentOrigin,xToken,tenantId,useClipboardFormWujie,appUrl,user,SaasProductStatus,SaasUpgradeStatus}:any = window?.$wujie?.props || {};
     // 可以在无界无界容器中打开
-    const isInLeyanWujieContainer =  isWujieEnv && parentOrigin && xToken;
+    const isInThirdpartyWujieContainer =  isWujieEnv && parentOrigin && xToken;
     const isInLecangWujieContainer = isWujieEnv && user && user?.token
 
     const isLoading = ref(false);
@@ -17,7 +17,7 @@ export const  useWujie = () => {
         parentOrigin,
         xToken,
         useClipboardFormWujie,
-        isInLeyanWujieContainer,
+        isInThirdpartyWujieContainer,
         isInLecangWujieContainer,
         appUrl,
         user,

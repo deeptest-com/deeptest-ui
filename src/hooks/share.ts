@@ -11,11 +11,11 @@ interface SharePage {
 function useSharePage(): SharePage {
   const router = useRouter();
   const { copy } = useClipboard({legacy: true});
-  const { isInLeyanWujieContainer, parentOrigin } = useWujie();
+  const { isInThirdpartyWujieContainer, parentOrigin } = useWujie();
   const { params: { projectNameAbbr } } = router.currentRoute.value;
 
   const getShareLink = (record, pageType) => {
-    const prefix = isInLeyanWujieContainer ? `${parentOrigin}/lyapi` : window.location.origin;
+    const prefix = isInThirdpartyWujieContainer ? `${parentOrigin}/lyapi` : window.location.origin;
     return `${prefix}/${projectNameAbbr}/${pageType}/${record.serialNumber}`;
   };
 

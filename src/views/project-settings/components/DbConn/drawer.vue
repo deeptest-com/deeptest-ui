@@ -87,7 +87,7 @@ import {StateType as ProjectSettingStateType} from "../../store";
 import {uploadRequest} from "@/utils/upload";
 import {downloadFile} from "@/utils/link";
 import {pattern} from "@/utils/const";
-import {isLeyan} from "@/utils/comm";
+import {isThirdparty} from "@/utils/comm";
 import {addSepIfNeeded} from "@/utils/url";
 import ALink from "@/components/ALink/index.vue";
 import {getFileName} from "@/utils/dom";
@@ -99,7 +99,7 @@ const useForm = Form.useForm;
 const store = useStore<{ ProjectSetting: ProjectSettingStateType }>();
 const model = computed<any>(() => store.state.ProjectSetting.dbConnModel);
 
-const isLy = isLeyan()
+const isLy = isThirdparty()
 
 const dbTypes = dbTypesDef
 

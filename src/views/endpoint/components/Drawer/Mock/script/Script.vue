@@ -67,7 +67,7 @@ import { useWujie } from "@/composables/useWujie";
 const useForm = Form.useForm;
 const usedBy = inject('usedBy') as UsedBy
 const {t} = useI18n();
-const { isInLeyanWujieContainer, parentOrigin } = useWujie();
+const { isInThirdpartyWujieContainer, parentOrigin } = useWujie();
 
 const store = useStore<{ ProjectGlobal: ProjectStateType, Endpoint, Snippet: Snippet }>();
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
@@ -103,8 +103,8 @@ const editorChange = (newScriptCode) => {
 }
 
 const addJslib = () => {
-  const prefix = isInLeyanWujieContainer ? `${parentOrigin}/lyapi` : window.location.origin;
-  const suffix = isInLeyanWujieContainer ? '/settings?activeKey=jslib' : '/project-setting/jslib'; 
+  const prefix = isInThirdpartyWujieContainer ? `${parentOrigin}/lyapi` : window.location.origin;
+  const suffix = isInThirdpartyWujieContainer ? '/settings?activeKey=jslib' : '/project-setting/jslib';
   window.open(`${prefix}/${currProject.value.shortName}${suffix}`, '_blank');
 }
 

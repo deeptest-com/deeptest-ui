@@ -1,6 +1,6 @@
 <template>
   <div class="user-layout" :style="isWujieEnv?{width:'100%',height:'100%'}:{}">
-    <div v-if="!isWujieEnv" class="logo" :class="{'ly-logo':isLeyanEnv}" ></div>
+    <div v-if="!isWujieEnv" class="logo" :class="{'ly-logo':isThirdpartyEnv}" ></div>
     <div class="right-main">
       <div class="right-content">
         <router-view></router-view>
@@ -20,7 +20,7 @@ import { useRoute } from 'vue-router';
 import { getRouteItem, RoutesDataItem, vueRoutes } from '@/utils/routes';
 import UserLayoutRoutes from './routes';
 import useTitle from '@/composables/useTitle';
-import {isLeyan} from "@/utils/comm";
+import {isThirdparty} from "@/utils/comm";
 import {useWujie} from "@/composables/useWujie";
 import {hideGlobalLoading} from "@/utils/handleLoad";
 export default defineComponent({
@@ -29,7 +29,7 @@ export default defineComponent({
   },
   setup() {
 
-    let isLeyanEnv = isLeyan();
+    let isThirdpartyEnv = isThirdparty();
     const {isWujieEnv} = useWujie();
 
     const route = useRoute();
@@ -52,7 +52,7 @@ export default defineComponent({
     const companyCopyRight = process.env.VUE_APP_DEPLOY_ENV_COMPANY_COPYRIGHT;
 
     return {
-      isLeyanEnv,
+      isThirdpartyEnv,
       company,
       isWujieEnv,
       companyCopyRight,

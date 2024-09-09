@@ -26,7 +26,7 @@
           />
         </a-form-item>
         <a-form-item label="英文缩写" name="shortName">
-          <a-input 
+          <a-input
             v-model:value="formStateRef.shortName"
             placeholder="大写英文字母开头,仅限字母和数字,<=10位"
           />
@@ -165,7 +165,7 @@ import {useStore} from "vuex";
 import {getProjectLogo, projectLogoList} from "./index";
 import {notifyError, notifySuccess} from "@/utils/notify";
 import {useWujie} from "@/composables/useWujie";
-import { isLeyan } from "@/utils/comm";
+import { isThirdparty } from "@/utils/comm";
 import { getLzosInfo, setLzosInfo } from "@/utils/lzos";
 import settings from "@/config/settings";
 
@@ -175,10 +175,10 @@ const props = defineProps<{
 }>();
 const emits = defineEmits(["update:visible", "handleOk", "handleSuccess"]);
 const store = useStore<{ User: UserStateType; Project: ProjectStateType }>();
-const { isInLeyanWujieContainer, parentOrigin, SaasProductStatus, isInLecangWujieContainer } = useWujie();
-const isLy = isLeyan();
+const { isInThirdpartyWujieContainer, parentOrigin, SaasProductStatus, isInLecangWujieContainer } = useWujie();
+const isLy = isThirdparty();
 const userListOptions = computed<SelectTypes["options"]>(
-    () => (store.state.Project.userList || []).filter(e => isInLeyanWujieContainer ? e.username !== 'admin' : e.username !== '')
+    () => (store.state.Project.userList || []).filter(e => isInThirdpartyWujieContainer ? e.username !== 'admin' : e.username !== '')
 );
 const currUser = computed(() => {
   return store.state.User.currentUser;
@@ -250,7 +250,7 @@ const submitForm = async () => {
   createProjectForm.value?.validate()
       .then(() => {
         store.dispatch("Project/saveProject", {
-          ...formStateRef, 
+          ...formStateRef,
           products: (formStateRef.products || []).map(e => e.value),
           spaces: (formStateRef.spaces || []).map(e => e.value),
           engineering: (formStateRef.engineering || []).map(e => e.value),
@@ -291,12 +291,12 @@ const getProjectDetail = async(id: number) => {
   } catch(error) {
     console.log(error);
   }
-};  
+};
 const bus = window?.$wujie?.bus;
 const handleToProducts = () => {
-  if (isInLeyanWujieContainer) {
+  if (isInThirdpartyWujieContainer) {
     if (isSaas) {
-      bus?.$emit(settings.sendMsgToLeyan, {
+      bus?.$emit(settings.sendMsgToThirdparty, {
         type: 'openCreateProductModal'
       })
       return;
@@ -305,15 +305,15 @@ const handleToProducts = () => {
     return;
   }
   if (process.env.NODE_ENV === 'development') {
-    window.open(`https://leyan-dev.rysaas.cn/pd/list`);
+    window.open(`https://thirdparty-dev.rysaas.cn/pd/list`);
     return;
   }
   const originMap = {
-    'dev': 'https://leyan-dev.rysaas.cn',
-    'test': 'http://leyan-test.rysaas.cn',
-    'prod': 'https://leyan.nancalcloud.com'
+    'dev': 'https://thirdparty-dev.rysaas.cn',
+    'test': 'http://thirdparty-test.rysaas.cn',
+    'prod': 'https://thirdparty.nancalcloud.com'
   };
-  const matchResult = window.location.href.match(/leyanapi-(\w+)/);
+  const matchResult = window.location.href.match(/thirdpartyapi-(\w+)/);
   if (matchResult) {
     window.open(`${matchResult[1] === 'dev' ? originMap['dev'] : originMap['test']}/pd/list`);
   } else {
@@ -366,7 +366,7 @@ watch(() => {
 })
 
 onMounted(async () => {
-  bus?.$on('sendMsgToLeyanAPI', async msg => {
+  bus?.$on('sendMsgToThirdpartyAPI', async msg => {
     if (msg.type === 'createProductSuccess') {
       const newProducts = await store.dispatch('Global/getLyProducts');
       lyProducts.value = (newProducts || []).map(e => ({ ...e, children: e.children || [], }));

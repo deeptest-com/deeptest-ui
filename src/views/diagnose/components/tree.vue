@@ -118,10 +118,10 @@ import {UsedBy} from "@/utils/enum";
 import useCopy from "@/composables/useClipboard";
 import { useRoute } from 'vue-router';
 import {getNodePath} from "@/utils/dom";
-import {isLeyan} from "@/utils/comm";
+import {isThirdparty} from "@/utils/comm";
 import {MenuItem} from "@/components/DropDownMenu/type";
 
-const isLyEnv = isLeyan()
+const isLyEnv = isThirdparty()
 const { copy } = useCopy();
 const route = useRoute();
 const store = useStore<{ DiagnoseInterface: DiagnoseInterfaceStateType,  Debug: DebugStateType,

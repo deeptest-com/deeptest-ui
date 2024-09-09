@@ -61,8 +61,8 @@ const bus = window?.$wujie?.bus;
 
 onMounted(() => {
     // emits('refreshList', formState);
-    bus?.$on('sendMsgToLeyanAPI', ({ type, data }) => {
-        if (type === 'getLeyanPlanStatus') {
+    bus?.$on('sendMsgToThirdpartyAPI', ({ type, data }) => {
+        if (type === 'getThirdpartyPlanStatus') {
             status.value = data;
         }
     })

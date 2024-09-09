@@ -119,9 +119,9 @@ async function ok() {
           notifySuccess('发布成功，可到接口文档页查看');
           reset();
           emit('ok');
-          const {isWujieEnv,parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
-          // if(isInLeyanWujieContainer){
-          //   //  todo 乐研环境下的跳转
+          const {isWujieEnv,parentOrigin,projectName,isInThirdpartyWujieContainer} = useWujie();
+          // if(isInThirdpartyWujieContainer){
+          //   //  todo 三方环境下的跳转
           //   // window.open(`${parentOrigin}/dev/${projectName}/API/docs?documentId=${res.data}`, '_blank')
           // }else {
           //   router.push({

@@ -26,7 +26,7 @@ import renderfeedback from "@/utils/feedback";
 import { StateType as UserStateType, CurrentUser } from "@/store/user";
 import settings from "@/config/settings";
 import {isElectronEnv} from "@/utils/agentEnv";
-import {isLeyan} from "@/utils/comm";
+import {isThirdparty} from "@/utils/comm";
 import useIMLeaveTip   from "@/composables/useIMLeaveTip";
 import {Cache_Key_Agent_Local_Port, Cache_Key_Server_Url} from "@/utils/const";
 import {useRoute, useRouter} from "vue-router";
@@ -48,7 +48,7 @@ export default defineComponent({
   setup() {
     const { locale } = useI18n();
     const antdLocales = computed(()=> antdMessages[locale.value]);
-    const isLyEnv = isLeyan();
+    const isLyEnv = isThirdparty();
     const {isWujieEnv} = useWujie();
     const spinning = ref<boolean>(false);
     const createProjectModalVisible = ref(false);
@@ -75,7 +75,7 @@ export default defineComponent({
     watch(() => {
       return currentUser.value
     },(newVal) => {
-      // 仅ly环境才会接入 嵌入到乐研中，也不需要嵌入反馈系统
+      // 仅ly环境才会接入 嵌入到三方中，也不需要嵌入反馈系统
       if(newVal?.username && isLyEnv && !isWujieEnv){
         // 渲染ly评论反馈系统
         renderfeedback(currentUser);
@@ -116,7 +116,7 @@ export default defineComponent({
     };
 
     const listenSubApp = () => {
-      bus?.$on('sendMsgToLeyanAPI', async (msg: any) => {
+      bus?.$on('sendMsgToThirdpartyAPI', async (msg: any) => {
         console.log('832msg', msg)
 
         if (msg?.type === 'changeRouter') {
@@ -130,7 +130,7 @@ export default defineComponent({
             await store.dispatch('Global/getPermissionMenuList', { currProject: result.id });
           }
           if(msg?.data?.projectName){
-            await setCache(settings.leyanProjectName, msg?.data?.projectName);
+            await setCache(settings.thirdpartyProjectName, msg?.data?.projectName);
           }
           await router.push(msg?.data?.path);
         }
@@ -145,7 +145,7 @@ export default defineComponent({
           // 更新左侧菜单以及按钮权限
           await store.dispatch("Global/getPermissionMenuList", { currProjectId: msg?.data?.project?.id });
 
-          bus?.$emit(settings.sendMsgToLeyan, {
+          bus?.$emit(settings.sendMsgToThirdparty, {
             type: 'fetchDynamicMenus',
             data: {
               roleValue: (projects.value || []).find(pro => pro.id === msg?.data?.project?.id)?.roleName
@@ -171,7 +171,7 @@ export default defineComponent({
         store.dispatch('Project/getUserList')
         listenSubApp()
         // 通知上层应用已经加载完毕
-        bus?.$emit(settings.sendMsgToLeyan, {
+        bus?.$emit(settings.sendMsgToThirdparty, {
           type: 'appMounted',
           data: {
             path: router.currentRoute.value.path
@@ -205,7 +205,7 @@ export default defineComponent({
       createProjectModalVisible.value = false;
       await store.dispatch("ProjectGlobal/fetchProject");
       await store.dispatch("Home/queryProject", {});
-      bus.$emit(settings.sendMsgToLeyan, {
+      bus.$emit(settings.sendMsgToThirdparty, {
         type: 'fetchProjectSuccess',
         data: {
           projects: setProjectLogo(projects.value),
@@ -226,7 +226,7 @@ export default defineComponent({
           const result = await store.dispatch('Global/getLyUserEngineering', {
             projectId: val,
           });
-          bus?.$emit(settings.sendMsgToLeyan, {
+          bus?.$emit(settings.sendMsgToThirdparty, {
             type: 'fetchUserEngineering',
             data: {
               engineerings: result
@@ -235,7 +235,7 @@ export default defineComponent({
         }
 
         setTimeout(() => {
-          bus?.$emit(settings.sendMsgToLeyan, {
+          bus?.$emit(settings.sendMsgToThirdparty, {
             type: 'fetchProjectSuccess',
             data: {
               projects: setProjectLogo(projects.value),

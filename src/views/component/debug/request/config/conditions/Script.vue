@@ -87,7 +87,7 @@ const conditionSrc = inject('conditionSrc') as ConditionSrc
 const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
 
 const {t} = useI18n();
-const { isInLeyanWujieContainer, parentOrigin } = useWujie();
+const { isInThirdpartyWujieContainer, parentOrigin } = useWujie();
 const store = useStore<{ ProjectGlobal: ProjectStateType, Debug: Debug, Snippet: Snippet }>();
 const currProject = computed(() => store.state.ProjectGlobal.currProject);
 
@@ -202,8 +202,8 @@ const cancel = () => {
 }
 
 const addJslib = () => {
-  const prefix = isInLeyanWujieContainer ? `${parentOrigin}/lyapi` : window.location.origin;
-  const suffix = isInLeyanWujieContainer ? '/settings?activeKey=jslib' : '/project-setting/jslib'; 
+  const prefix = isInThirdpartyWujieContainer ? `${parentOrigin}/lyapi` : window.location.origin;
+  const suffix = isInThirdpartyWujieContainer ? '/settings?activeKey=jslib' : '/project-setting/jslib';
   window.open(`${prefix}/${currProject.value.shortName}${suffix}`, '_blank');
 }
 

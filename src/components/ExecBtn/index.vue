@@ -18,7 +18,7 @@ defineProps<{
   placement?: string;
 }>();
 
-const { isInLeyanWujieContainer, parentOrigin } = useWujie();
+const { isInThirdpartyWujieContainer, parentOrigin } = useWujie();
 const router = useRouter();
 const getCurrAgentUrl = computedAsync(async() => {
   const agentUrl = await getAgentUrl() || null;
@@ -28,7 +28,7 @@ const getCurrAgentUrl = computedAsync(async() => {
 const to = 'https://www.baidu.com';
 
 const handleToAgentPage = () => {
-  if (isInLeyanWujieContainer) {
+  if (isInThirdpartyWujieContainer) {
     const url = `${parentOrigin}/setting/API`;
     window.open(url, '_blank');
     return;

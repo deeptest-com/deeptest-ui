@@ -82,7 +82,7 @@ const envList = computed(() => store.state.ProjectSetting.envList);
 const currentUser = computed(() => store.state.User.currentUser);
 const currUser = computed(() => store.state.User.currentUser);
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
-const { parentOrigin, isInLeyanWujieContainer, projectName } = useWujie();
+const { parentOrigin, isInThirdpartyWujieContainer, projectName } = useWujie();
 
 // 执行计划的基本信息
 const basicInfoList = computed(() => {
@@ -197,7 +197,7 @@ const OnWebSocketMsg = (data: any) => {
     bus.emit(settings.eventGetPlanDetail);
 
     setTimeout(() => {
-      wujieBus?.$emit(settings.sendMsgToLeyan, {
+      wujieBus?.$emit(settings.sendMsgToThirdparty, {
         type: 'execPlanEnd',
       })
     }, 300);
@@ -246,7 +246,7 @@ provide('execStatus', computed(() => progressStatus.value));
 provide('showBugAction', true);
 provide('detailLink', computed(() => {
   // 无界环境，使用父级域名跳转
-  if(isInLeyanWujieContainer && statInfo.value?.id) {
+  if(isInThirdpartyWujieContainer && statInfo.value?.id) {
     return `${parentOrigin}/lyapi/${projectName}/TR/${projectName}-TR-${statInfo.value?.id}`;
   }
   return '';

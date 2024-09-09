@@ -22,8 +22,8 @@
     <a-descriptions-item label="执行环境">{{ planDetail.execEnv }}</a-descriptions-item>
     <a-descriptions-item label="状态">
       <DropdownActionMenu :dropdown-list="statusDropdownMenu(updatePlanStatus)" :record="planDetail" :selectedKey="planDetail.status">
-        <span style="cursor: pointer;">{{ planStatusTextMap.get(planDetail.status || 'draft') }}</span> 
-      </DropdownActionMenu>  
+        <span style="cursor: pointer;">{{ planStatusTextMap.get(planDetail.status || 'draft') }}</span>
+      </DropdownActionMenu>
     </a-descriptions-item>
   </a-descriptions>
 </template>
@@ -50,7 +50,7 @@ const treeDataCategory = computed<any>(() => store.state.Plan.treeDataCategory);
 const route = useRoute();
 
 const isLinkFromLy = computed(() => {
-  return route.query.linkOrigin === 'leyan';
+  return route.query.linkOrigin === 'thirdparty';
 })
 
 async function handleChange(type,value) {

@@ -115,7 +115,7 @@ const getSelectEnvLeftPosition = () => {
 const handleRedirectEnv = (e) => {
 
   e.preventDefault();
-  const {isWujieEnv,projectName,parentOrigin,isInLeyanWujieContainer} = useWujie();
+  const {isWujieEnv,projectName,parentOrigin,isInThirdpartyWujieContainer} = useWujie();
   if(isWujieEnv && projectName && parentOrigin){
     window.open(`${parentOrigin}/lyapi/${projectName}/settings?activeKey=env`, '_blank');
     return;

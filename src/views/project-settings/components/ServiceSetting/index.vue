@@ -105,7 +105,7 @@ let formConfig = ref([
   //     const nameSplitArray = (option.name || '').split('');
   //     const usernameSplitArray = (option.username || '').split('');
   //     return valueSplitArray.every(e => nameSplitArray.includes(e) || usernameSplitArray.includes(e));
-  //   } 
+  //   }
   // },
   {
     type: 'input',
@@ -244,8 +244,8 @@ async function onDelete(record: any) {
 
 /*查看选中的接口文档*/
 function goDocs(record: any) {
-  const {isWujieEnv,parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
-  if(isInLeyanWujieContainer){
+  const {isWujieEnv,parentOrigin,projectName,isInThirdpartyWujieContainer} = useWujie();
+  if(isInThirdpartyWujieContainer){
     window.open(`${parentOrigin}/lyapi/${projectName}/docsView?serveIds=${record.id}`, '_blank')
     return;
   }

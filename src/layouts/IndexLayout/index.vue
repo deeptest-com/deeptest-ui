@@ -28,7 +28,7 @@
           :routeItem="routeItem">
       </right-top>
 
-      <div class="leyan-container-right-top" v-if="isWujieEnv">
+      <div class="thirdparty-container-right-top" v-if="isWujieEnv">
         <right-top-settings/>
       </div>
 
@@ -196,8 +196,8 @@ export default defineComponent({
       if (!isWujieEnv) {
         return {};
       }
-      const leyanRightTopEl = window.parent.document.querySelector('.vben-layout-header-action');
-      const { width = 0, height = 0 }: any = leyanRightTopEl?.getBoundingClientRect();
+      const thirdpartyRightTopEl = window.parent.document.querySelector('.vben-layout-header-action');
+      const { width = 0, height = 0 }: any = thirdpartyRightTopEl?.getBoundingClientRect();
       return {
         top: '-1px',
         right: `${width + 10}px`,
@@ -298,7 +298,7 @@ export default defineComponent({
   margin: 24px;
   position: relative;
 }
-.leyan-container-right-top{
+.thirdparty-container-right-top{
   position: fixed;
   top: 58px;
   right: -6px;

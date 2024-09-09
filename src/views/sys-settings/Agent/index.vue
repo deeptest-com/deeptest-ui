@@ -143,10 +143,10 @@ import EditDrawer from './drawer.vue';
 import debounce from "lodash.debounce";
 import {useWujie} from "@/composables/useWujie";
 import settings from '@/config/settings';
-import {isLeyan} from "@/utils/comm";
+import {isThirdparty} from "@/utils/comm";
 
 const {t} = useI18n();
-const isLyEnv = isLeyan()
+const isLyEnv = isThirdparty()
 
 const {isWujieEnv, parentOrigin} = useWujie();
 const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
@@ -209,14 +209,14 @@ function onClose() {
 
 const downloadAgent = () => {
   const isSaas = process.env.VUE_APP_DEPLOY_ENV === 'ly-saas';
-  const url = `${isSaas ? parentOrigin : window.location.origin}${isSaas ? '/lya' : ''}/upload/LeyanAPIAgent.zip`;
+  const url = `${isSaas ? parentOrigin : window.location.origin}${isSaas ? '/lya' : ''}/upload/ThirdpartyAPIAgent.zip`;
   window.open(url);
 }
 
 const setAgent = async () => {
   await store.dispatch('Global/listAgent');
   await store.commit('Global/setCurrAgent', null);
-  bus?.$emit(settings.sendMsgToLeyan, {
+  bus?.$emit(settings.sendMsgToThirdparty, {
     type: 'initClientOrAgents',
     data: {
       agents: agents.value,

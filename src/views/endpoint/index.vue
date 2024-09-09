@@ -432,8 +432,8 @@ const fetching = ref(false);
 
 /*查看选中的接口文档*/
 function goDocs() {
-  const {isWujieEnv,parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
-  if(isInLeyanWujieContainer){
+  const {isWujieEnv,parentOrigin,projectName,isInThirdpartyWujieContainer} = useWujie();
+  if(isInThirdpartyWujieContainer){
     window.open(`${parentOrigin}/lyapi/${projectName}/docsView?endpointIds=${selectedRowIds.value.join(',')}`, '_blank')
     return;
   }

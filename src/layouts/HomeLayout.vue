@@ -1,7 +1,7 @@
 <template>
-  <div :class="{ 'home-wrap': true, 'wujie-home-wrap': isInLeyanWujieContainer }">
+  <div :class="{ 'home-wrap': true, 'wujie-home-wrap': isInThirdpartyWujieContainer }">
     <div :class="{'home-header': true, 'hidden': isWujieEnv}">
-      <div class="home-header-left" :class="{'leyan-logo':isLeyanEnv}" @click="handleRedirect">
+      <div class="home-header-left" :class="{'thirdparty-logo':isThirdpartyEnv}" @click="handleRedirect">
       </div>
       <div class="home-header-right">
         <UserSetting :theme="'white-theme'"/>
@@ -20,7 +20,7 @@ import { useRouter } from 'vue-router';
 import UserSetting from './IndexLayout/components/RightTopSettings.vue';
 import RightTopUpdate from './IndexLayout/components/RightTopUpdate.vue';
 import settings from '@/config/settings';
-import {isLeyan} from "@/utils/comm";
+import {isThirdparty} from "@/utils/comm";
 import {useWujie} from "@/composables/useWujie";
 export default defineComponent({
   name: 'HomeLayout',
@@ -30,8 +30,8 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter();
-    let isLeyanEnv = isLeyan();
-    const { isWujieEnv, isInLeyanWujieContainer } = useWujie();
+    let isThirdpartyEnv = isThirdparty();
+    const { isWujieEnv, isInThirdpartyWujieContainer } = useWujie();
 
     watch(() => {
       return router.currentRoute.value;
@@ -53,9 +53,9 @@ export default defineComponent({
 
     return {
       handleRedirect,
-      isLeyanEnv,
+      isThirdpartyEnv,
       isWujieEnv,
-      isInLeyanWujieContainer
+      isInThirdpartyWujieContainer
     }
   }
 })
@@ -94,7 +94,7 @@ export default defineComponent({
       background-repeat: no-repeat;
       background-size: 100% 100%;
       cursor: pointer;
-      &.leyan-logo{
+      &.thirdparty-logo{
         transform: scale(1.1) translateX(5px);
         background-image: url('../assets/images/logo.svg');
       }

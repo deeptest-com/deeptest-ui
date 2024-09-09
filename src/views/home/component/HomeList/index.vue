@@ -51,7 +51,7 @@ const store = useStore<{
   User: UserStateType;
 }>();
 const { hasProjectAuth, isCreator } = usePermission();
-const { isInLeyanWujieContainer,isInLecangWujieContainer } = useWujie();
+const { isInThirdpartyWujieContainer,isInLecangWujieContainer } = useWujie();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
 const currentUser = computed<any>(() => store.state.User.currentUser);
 const list = computed<any>(() => store.state.Home.queryResult.list);
@@ -185,13 +185,13 @@ async function goProject(item: any) {
    //乐仓重新打开信息页面
  if (isInLecangWujieContainer) {
     window.open(`/${item.projectShortName}/workspace`, '_blank');
-    return 
+    return
   }
-  
 
-  if (isInLeyanWujieContainer) {
 
-    bus?.$emit(settings.sendMsgToLeyan, {
+  if (isInThirdpartyWujieContainer) {
+
+    bus?.$emit(settings.sendMsgToThirdparty, {
       type: 'changeParentRouter',
       data: {
         url: `${item.projectShortName}/workspace`,

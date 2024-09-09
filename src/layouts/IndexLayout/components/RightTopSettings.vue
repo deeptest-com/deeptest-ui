@@ -137,7 +137,7 @@ import {useRouter} from "vue-router";
 import {useFullscreen} from '@vueuse/core';
 import {StateType as GlobalStateType} from "@/store/global";
 import {Cache_Key_Agent} from "@/utils/const";
-import {isLeyan} from "@/utils/comm";
+import {isThirdparty} from "@/utils/comm";
 import {useWujie} from "@/composables/useWujie";
 import usePermission from "@/composables/usePermission";
 import settings from "@/config/settings";
@@ -232,7 +232,7 @@ function downloadClient(event: any) {
   }
 }
 
-const isLyEnv = isLeyan()
+const isLyEnv = isThirdparty()
 const clientDownloadUrlOpts = computed(() => {
   if (!isLyEnv) {
     return []
@@ -243,12 +243,12 @@ const clientDownloadUrlOpts = computed(() => {
     {
       label: 'Windows 客户端',
       desc: 'Windows 客户端',
-      value: `${url}/LeyanAPI/${clientVersion}/win64/LeyanAPI.zip`
+      value: `${url}/ThirdpartyAPI/${clientVersion}/win64/ThirdpartyAPI.zip`
     },
     {
       label: 'macOS 客户端',
       desc: 'macOS 客户端',
-      value: `${url}/LeyanAPI/${clientVersion}/darwin/LeyanAPI.zip`
+      value: `${url}/ThirdpartyAPI/${clientVersion}/darwin/ThirdpartyAPI.zip`
     }
   ];
 });
@@ -259,7 +259,7 @@ onMounted(async () => {
   await store.dispatch('Global/listAgent');
   await store.commit('Global/setCurrAgent', null);
   setTimeout(() => {
-    bus?.$emit(settings.sendMsgToLeyan, {
+    bus?.$emit(settings.sendMsgToThirdparty, {
       type: 'initClientOrAgents',
       data: {
         clientDownloadUrlOpts: clientDownloadUrlOpts.value,

@@ -60,7 +60,7 @@ import { NotificationKeyCommon } from "@/utils/const";
 import {notifySuccess, notifyWarn} from "@/utils/notify";
 import {setCache,getCache} from "@/utils/localCache";
 import settings from "@/config/settings";
-import {isLeyan} from "@/utils/comm";
+import {isThirdparty} from "@/utils/comm";
 
 interface UserLoginSetupData {
     t: (key: string | number) => string;
@@ -76,7 +76,7 @@ export default defineComponent({
     name: 'UserLogin',
     setup() {
       const { t } = useI18n();
-      const isLyEnv = isLeyan()
+      const isLyEnv = isThirdparty()
 
         const router = useRouter();
         const { currentRoute } = router;

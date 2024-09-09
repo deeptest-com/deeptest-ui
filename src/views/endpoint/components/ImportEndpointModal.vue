@@ -33,7 +33,7 @@
             消息名
             <a-tooltip placement="topLeft" overlayClassName="message-tooltip">
               <template v-slot:title>
-                <div>智能体消息将被同步为乐研API中的接口</div>
+                <div>智能体消息将被同步为三方API中的接口</div>
               </template>
             <QuestionCircleOutlined class="icon" style=" font-size: 14px;transform: scale(0.9)" />
             </a-tooltip>

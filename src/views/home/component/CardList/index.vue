@@ -107,7 +107,7 @@ const props = defineProps({
 const router = useRouter();
 const store = useStore<{ Home: StateType }>();
 const { hasProjectAuth, isCreator } = usePermission();
-const { isInLeyanWujieContainer,isInLecangWujieContainer, user } = useWujie();
+const { isInThirdpartyWujieContainer,isInLecangWujieContainer, user } = useWujie();
 const ListItem = List.Item;
 const list = computed<any>(() => store.state.Home.queryResult.list);
 const projects = computed<any>(() => store.state.ProjectGlobal.projects);
@@ -200,11 +200,11 @@ async function goProject(item: any, e) {
       }, childOrigin?.endsWith('/') ? childOrigin.substring(0, childOrigin.length - 1) : childOrigin);
       i++;
     }, 300);
-    return 
+    return
   }
 
-  if (isInLeyanWujieContainer) {
-    bus?.$emit(settings.sendMsgToLeyan, {
+  if (isInThirdpartyWujieContainer) {
+    bus?.$emit(settings.sendMsgToThirdparty, {
       type: 'changeParentRouter',
       data: {
         url: `${item.projectShortName}/workspace`
@@ -213,7 +213,7 @@ async function goProject(item: any, e) {
     return;
   }
 
- 
+
   router.push(`/${item.projectShortName}/workspace`);
 }
 </script>

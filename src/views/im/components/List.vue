@@ -16,7 +16,7 @@
     </div>
     <EmptyCom>
       <template #content>
-        <a-table 
+        <a-table
           :loading="isFetching"
           :rowKey="'id'"
           :row-selection="rowSelection"
@@ -59,7 +59,7 @@
             <div class="customStatusColRender">
               <DropdownActionMenu :dropdown-list="statusDropdownMenu" :record="record" :selectedKey="record.status">
                 <span style="cursor: pointer;">{{ endpointStatus.get(record?.status || 0 ) }}</span>
-              </DropdownActionMenu>  
+              </DropdownActionMenu>
             </div>
           </template>
 
@@ -179,16 +179,16 @@ const props = defineProps<{
   categoryId: number;
 }>();
 
-const { isInLeyanWujieContainer } = useWujie();
+const { isInThirdpartyWujieContainer } = useWujie();
 const { hasPermission, isCreator } = usePermission();
 const { share } = useSharePage();
-const { 
-  openEndpointTab, 
-  updateEndpointNodes, 
-  updateTreeNodeCount, 
-  copyCurl, 
-  updateTreeNodes, 
-  updateTreeNodesCount, 
+const {
+  openEndpointTab,
+  updateEndpointNodes,
+  updateTreeNodeCount,
+  copyCurl,
+  updateTreeNodes,
+  updateTreeNodesCount,
   updateTreeNodeMap } = useEndpoint();
 const store = useStore<{ Endpoint, ProjectGlobal, Debug, ServeGlobal, Project, Schema }>();
 const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
@@ -205,7 +205,7 @@ const userList = computed<any>(() => store.state.Project.userList);
 const treeData = computed(() => store.state.Endpoint.treeDataCategory);
 
 const computedY = () => {
-  if (isInLeyanWujieContainer) {
+  if (isInThirdpartyWujieContainer) {
       return window.parent.window.innerHeight - 320;
   }
   return window.innerHeight - 320;
@@ -486,7 +486,7 @@ const handleCreateApiSuccess = (endpointData) => {
 
 /**
  * diff相关
- * @param record 
+ * @param record
  */
 function showDiff(record) {
   store.commit('Endpoint/setDiffModalVisible', {
@@ -520,8 +520,8 @@ const rowSelection = computed(() => {
 });
 
 const viewDocs = () => {
-  const {parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
-  if(isInLeyanWujieContainer){
+  const {parentOrigin,projectName,isInThirdpartyWujieContainer} = useWujie();
+  if(isInThirdpartyWujieContainer){
     window.open(`${parentOrigin}/lyapi/${projectName}/docsView?endpointIds=${selectedRowKeys.value.join(',')}`, '_blank')
     return;
   }
@@ -583,7 +583,7 @@ const handleBatchUpdate = async(data) => {
       })
     })
   }
-  
+
 };
 
 const batchActionList = [

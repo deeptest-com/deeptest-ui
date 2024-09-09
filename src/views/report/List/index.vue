@@ -74,14 +74,14 @@ defineProps({
 const emits = defineEmits(['queryDetail', 'getList']);
 const { share }  = useSharePage();
 const { isCreator, hasPermission } = usePermission();
-const { isInLeyanWujieContainer } = useWujie();
+const { isInThirdpartyWujieContainer } = useWujie();
 const store = useStore<{ Report: StateType, ProjectGlobal: ProjectStateType }>();
 // 分页数据
 const pagination = computed<PaginationConfig>(() => store.state.Report.listResult.pagination);
 // 表格选中项
 const selectedRowKeys = ref<Key[]>([]);
 const y = computed(() => {
-    if (isInLeyanWujieContainer) {
+    if (isInThirdpartyWujieContainer) {
         return window.parent.window.innerHeight - 240;
     }
     return window.innerHeight - 280;
@@ -143,7 +143,7 @@ const dropdownMenuList = [
     {
         label: '分享链接',
         action: (record) => share(record, 'TR'),
-        auth: '',   
+        auth: '',
     },
     {
         label: '查看报告',

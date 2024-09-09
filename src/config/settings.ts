@@ -1,5 +1,5 @@
 import { RoutesDataItem } from "@/utils/routes";
-import {isLeyan} from "@/utils/comm";
+import {isThirdparty} from "@/utils/comm";
 import Swal from "sweetalert2";
 
 /**
@@ -98,8 +98,8 @@ export interface SettingsType {
      * pane resize
      */
     paneResizeTop: string;
-    sendMsgToLeyan: string;
-    leyanProjectName: string;
+    sendMsgToThirdparty: string;
+    thirdpartyProjectName: string;
 
     /**
      * ly api 客户端本地存储的用户信息
@@ -120,7 +120,7 @@ export interface SettingsType {
 }
 
 const settings: SettingsType = {
-    siteTitle: isLeyan() ? 'leyanapi.com' : 'deeptest.com',
+    siteTitle: isThirdparty() ? 'thirdpartyapi.com' : 'deeptest.com',
     topNavEnable: true,
     headFixed: true,
     tabNavEnable: false,
@@ -177,10 +177,10 @@ const settings: SettingsType = {
     eventGetPlanDetail: 'eventGetPlanDetail',
     eventGetPlansReports: 'eventGetPlansReports',
 
-    // 向乐研基座工程发送消息（无界）
-    sendMsgToLeyan: 'sendMsgToLeyan',
-    // 乐研内对应的工程名称
-    leyanProjectName: 'LeyanProjectName',
+    // 向三方基座工程发送消息（无界）
+    sendMsgToThirdparty: 'sendMsgToThirdparty',
+    // 三方内对应的工程名称
+    thirdpartyProjectName: 'ThirdpartyProjectName',
 
     // pane Resizer
     paneResizeTop: 'paneResizeTop',

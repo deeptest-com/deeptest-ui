@@ -24,11 +24,11 @@ const router = useRouter();
 const store = useStore();
 const detailResult = computed<any>(() => store.state.Report.detailResult);
 
-const {projectName,parentOrigin,isWujieEnv,isInLeyanWujieContainer} = useWujie();
+const {projectName,parentOrigin,isWujieEnv,isInThirdpartyWujieContainer} = useWujie();
 const detailLink = computed(() => {
   const { params: { projectNameAbbr } } = router.currentRoute.value;
   // 无界环境，使用父级域名跳转
-  if(isInLeyanWujieContainer) {
+  if(isInThirdpartyWujieContainer) {
     return `${parentOrigin}/lyapi/${projectName}/TR/${detailResult.value?.serialNumber}`;
   }
   return `${window.location.origin}/${projectNameAbbr}/TR/${detailResult.value.serialNumber}`;
@@ -72,7 +72,7 @@ provide('detailLink', computed(() => detailLink.value));
   :deep(.detail-tab-content) {
     height: 100%;
   }
-  
+
   .report-exec-info-main {
     height: 100%;
     display: flex;

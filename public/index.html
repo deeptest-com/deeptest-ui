@@ -83,13 +83,13 @@
             margin: 0 auto;
             margin-bottom: 20px;
         }
-        .leyan-loading #ly-app-loading-dots{
+        .thirdparty-loading #ly-app-loading-dots{
             transform: scale(0.42);
         }
-        .leyan-loading .app-loading-logo{
+        .thirdparty-loading .app-loading-logo{
             display: none!important;
         }
-        .leyan-loading #ly-app-loading-title{
+        .thirdparty-loading #ly-app-loading-title{
             display: none!important;
         }
 
@@ -198,8 +198,8 @@
             // 无界环境下，隐藏 loading
             if(window.__POWERED_BY_WUJIE__ && loadingEl){
                 // loadingEl.classList.add('hide');
-                // 添加乐研 loading
-                loadingEl.classList.add('leyan-loading');
+                // 添加三方 loading
+                loadingEl.classList.add('thirdparty-loading');
             }
         } else if (titleEl){
             titleEl.innerHTML = 'DeepTest.com';

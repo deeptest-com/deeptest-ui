@@ -4,7 +4,7 @@
       <router-link to="/" class="logo-url">
         <div :class="{
           'logo-title':true,
-          'leyan-logo':isLeyanEnv}"/>
+          'thirdparty-logo':isThirdpartyEnv}"/>
       </router-link>
     </div>
     <div class="indexlayout-left-menu">
@@ -41,7 +41,7 @@ import { StateType as ProjectGlobalStateType } from "@/store/project";
 import {RoutesDataItem} from '@/utils/routes';
 import SiderMenu from './SiderMenu.vue';
 import Icon from "./Icon.vue";
-import {isLeyan} from "@/utils/comm";
+import {isThirdparty} from "@/utils/comm";
 import usePermission from "@/composables/usePermission";
 
 export default defineComponent({
@@ -90,7 +90,7 @@ export default defineComponent({
     Icon,
   },
   setup(props) {
-    let isLeyanEnv = isLeyan();
+    let isThirdpartyEnv = isThirdparty();
     const router = useRouter();
     const { hasPermission } = usePermission();
     const store = useStore<{ Global: GlobalStateType, ProjectGlobal: ProjectGlobalStateType }>();
@@ -104,7 +104,7 @@ export default defineComponent({
     };
 
     return {
-      isLeyanEnv,
+      isThirdpartyEnv,
       isActive,
       handleRedirect,
       hasPermission,
@@ -155,7 +155,7 @@ export default defineComponent({
         background-size: 100% 50%;
         background-repeat: no-repeat;
         background-position: center;
-        &.leyan-logo{
+        &.thirdparty-logo{
           width: 100%;
           height: 40px;
           background-size: 100% 100%;

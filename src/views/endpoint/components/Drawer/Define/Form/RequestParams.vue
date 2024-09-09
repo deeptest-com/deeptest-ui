@@ -205,8 +205,8 @@ const paramTypeOpts = [
 const selectedParamType = ref('query');
 const router = useRouter();
 function goEditSecurity() {
-  const {isWujieEnv,parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
-  if(isInLeyanWujieContainer){
+  const {isWujieEnv,parentOrigin,projectName,isInThirdpartyWujieContainer} = useWujie();
+  if(isInThirdpartyWujieContainer){
     window.open(`${parentOrigin}/lyapi/${projectName}/settings?activeKey=service&sectab=service-security&serveId=${endpointDetail.value.serveId}`, '_blank')
     return;
   }

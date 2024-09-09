@@ -22,10 +22,10 @@
     </div>
     <div class="space"/>
     <div class="action">
-      <a-dropdown 
-        class="version-info" 
-        style="width: 100px;" 
-        placement="bottomRight" 
+      <a-dropdown
+        class="version-info"
+        style="width: 100px;"
+        placement="bottomRight"
         overlayClassName="version-drop-down-menu"
         :getPopupContainer="triggerNode => triggerNode.parentNode"
       >
@@ -180,10 +180,10 @@ watch(cmdK, (v) => {
 })
 
 async function shareDocs() {
-  const {isWujieEnv,parentOrigin,projectName,isInLeyanWujieContainer} = useWujie();
+  const {isWujieEnv,parentOrigin,projectName,isInThirdpartyWujieContainer} = useWujie();
   // 如果是分享页面，则直接复制链接即可
   if(isDocsSharePage || isDocsViewPage){
-    source.value = isInLeyanWujieContainer ? `${window.parent.location.href}` : `${window.location.href}`;
+    source.value = isInThirdpartyWujieContainer ? `${window.parent.location.href}` : `${window.location.href}`;
     copyUrl();
     return
   }
@@ -194,7 +194,7 @@ async function shareDocs() {
   })
 
   if (res) {
-    source.value = isInLeyanWujieContainer?  `${parentOrigin}/lyapi/${projectName}/docsView?code=${res.code}` : `${window.location.origin}/docs/share?code=${res.code}`;
+    source.value = isInThirdpartyWujieContainer?  `${parentOrigin}/lyapi/${projectName}/docsView?code=${res.code}` : `${window.location.origin}/docs/share?code=${res.code}`;
     copyUrl();
   }
 }

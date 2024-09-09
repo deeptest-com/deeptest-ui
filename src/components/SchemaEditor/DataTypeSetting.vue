@@ -387,11 +387,11 @@ const searchRefs = debounce(async (keyword) => {
 }, 300);
 
 // const {isWujieEnv} = useWujie();
-const {projectName,parentOrigin,isWujieEnv,isInLeyanWujieContainer} = useWujie();
+const {projectName,parentOrigin,isWujieEnv,isInThirdpartyWujieContainer} = useWujie();
 // const detailLink = computed(() => {
 //   const {params: {projectNameAbbr = ''}} = router.currentRoute.value;
 //   // 无界环境，使用父级域名跳转
-//   if(isInLeyanWujieContainer){
+//   if(isInThirdpartyWujieContainer){
 //     return `${parentOrigin}/dev/${projectName}/API/IM/${endpointDetail.value?.serialNumber}`;
 //   }
 //   return `${window.location.origin}/${projectNameAbbr}/IM/${endpointDetail.value?.serialNumber}`;
@@ -447,10 +447,10 @@ function goViewComponent() {
   // } else {
   //   // 当前是 查看接口定义详情抽屉或单独详情页. 需单独打开一个页面展示
   //   const { entityId, id, name }: any = schemaNode || {};
-  //   const prefixUrl = isInLeyanWujieContainer ? `${parentOrigin}/lyapi` : window.location.origin;
+  //   const prefixUrl = isInThirdpartyWujieContainer ? `${parentOrigin}/lyapi` : window.location.origin;
   //   window.open(`${prefixUrl}/${router.currentRoute.value.params.projectNameAbbr}/IM?ref=${JSON.stringify(schemaNode ? { entityId, id, name } : {})}`, '_blank');
   // }
-  
+
 }
 
 watch(() => {
