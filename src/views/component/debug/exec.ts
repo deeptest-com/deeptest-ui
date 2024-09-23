@@ -14,6 +14,7 @@ import {StateType as GlobalStateType} from "@/store/global";
 import {scroll} from "@/utils/dom";
 
 interface InterfaceExecution {
+    wsStatus: Ref<string>;
     inprogress: Ref<boolean>;
     execStart: Function;
     execStop: Function;
@@ -28,6 +29,7 @@ function useInterfaceExecution(): InterfaceExecution {
     const currUser = computed(() => store.state.User.currentUser);
 
     const execUuid = ref('');
+    const wsStatus = ref('');
     const inprogress = ref(false);
 
     const onWebSocketConnStatusMsg = (data: any) => {
@@ -35,8 +37,7 @@ function useInterfaceExecution(): InterfaceExecution {
             return;
         }
         const {conn}: any = JSON.parse(data.msg);
-        inprogress.value = conn === 'success';
-        alert(inprogress.value)
+        wsStatus.value = conn === 'success' ? 'connected' : 'disconnected';
     }
 
     const OnWebSocketMsg = async (jsn: any) => {
@@ -119,6 +120,7 @@ function useInterfaceExecution(): InterfaceExecution {
     }
 
     return {
+        wsStatus,
         inprogress,
         execStart,
         execStop,
