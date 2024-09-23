@@ -55,14 +55,12 @@ const reports = computed(() => store.state.Endpoint.alternativeExecResults);
 const { execStart, execStop, OnWebSocketMsg, onWebSocketConnStatusMsg, progressStatus } = useCaseExecution();
 
 const progressValue = ref(10);
-const execUuid = ref('');
 // 每次重新渲染
 const progressKey = ref(0);
 
 const execBegin = async () => {
   console.log('execBegin', environmentId.value)
 
-  execUuid.value = getUuid()
   execStart({
     environmentId: environmentId.value,
     baseCaseId: props.caseId,

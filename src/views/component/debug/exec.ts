@@ -14,7 +14,7 @@ import {StateType as GlobalStateType} from "@/store/global";
 import {scroll} from "@/utils/dom";
 
 interface InterfaceExecution {
-    progressStatus: Ref<any>;
+    inprogress: Ref<boolean>;
     execStart: Function;
     execStop: Function;
     OnWebSocketMsg: (data: any) => void;
@@ -25,37 +25,29 @@ function useInterfaceExecution(): InterfaceExecution {
     const store = useStore<{
         Debug: DebugStateType, ProjectGlobal: ProjectStateType, Global: GlobalStateType, User }>();
     const currProject = computed<any>(() => store.state.ProjectGlobal.currProject);
+    const currUser = computed(() => store.state.User.currentUser);
 
     const execUuid = ref('');
-    const progressStatus = ref({} as any);
+    const inprogress = ref(false);
 
     const onWebSocketConnStatusMsg = (data: any) => {
         if (!data.msg) {
             return;
         }
         const {conn}: any = JSON.parse(data.msg);
-        progressStatus.value = conn === 'success' ? 'in_progress' : 'exception';
+        inprogress.value = conn === 'success';
+        alert(inprogress.value)
     }
 
     const OnWebSocketMsg = async (jsn: any) => {
         console.log('****** OnWebSocketMsg', jsn.msg);
 
         const wsMsg = JSON.parse(jsn.msg || '{}');
-        if (!wsMsg.data || wsMsg.data.source !== 'execInterface') return
 
-        // 处理执行结果
-        if (wsMsg.category === 'result') {
-            if (wsMsg.data.request)
-                store.commit('Debug/setRequest', wsMsg.data.request);
-            if (wsMsg.data.response)
-                store.commit('Debug/setResponse', wsMsg.data.response);
-            if (wsMsg.data.streamItem) {
-                store.commit('Debug/pushStream', wsMsg.data.streamItem);
-                scroll('stream-list')
-            }
-        }
+        if (inprogress.value && wsMsg.category === 'end') {
+            console.log('====== end');
+            inprogress.value = false
 
-        if (wsMsg.category === 'end') {
             await store.dispatch('Debug/listInvocation')
             await store.dispatch('Debug/getLastInvocationResp')
 
@@ -73,10 +65,33 @@ function useInterfaceExecution(): InterfaceExecution {
                 conditionSrc: ConditionSrc.PostCondition,
                 category: ConditionCategory.postCondition,
             });
+
+            return
+        }
+
+        if (!wsMsg.data || wsMsg.data.source !== 'execInterface') return
+
+        // 处理执行结果
+        if (wsMsg.category === 'result') {
+            if (wsMsg.data.request) {
+                store.commit('Debug/setRequest', wsMsg.data.request);
+            }
+
+            if (wsMsg.data.response) {
+                store.commit('Debug/setResponse', wsMsg.data.response);
+            }
+
+            if (wsMsg.data.streamItem) {
+                store.commit('Debug/pushStream', wsMsg.data.streamItem);
+                scroll('stream-list')
+            }
         }
     }
 
     const execStart = async (data) => {
+        execUuid.value = currUser.value.id + '@' + getUuid()
+        data.execUuid = execUuid.value
+
         store.commit('Debug/setRequest', {});
         store.commit('Debug/setResponse', {});
         store.commit('Debug/clearStream');
@@ -88,6 +103,8 @@ function useInterfaceExecution(): InterfaceExecution {
             interfaceExecReq: data,
             localVarsCache: await loadProjectEnvVars(currProject.value.id),
         })
+
+        inprogress.value = true
     }
 
     const execStop = () => {
@@ -95,14 +112,14 @@ function useInterfaceExecution(): InterfaceExecution {
 
         WebSocket.sentMsg(execUuid.value, {
             act: 'stop',
-            execReq: {
+            interfaceExecReq: {
                 execUuid: execUuid.value
             },
         });
     }
 
     return {
-        progressStatus,
+        inprogress,
         execStart,
         execStop,
         OnWebSocketMsg,

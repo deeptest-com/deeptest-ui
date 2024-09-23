@@ -46,9 +46,16 @@
         <ExecBtn>
           <template #execBtn="{ isNotClickable }">
             <a-button type="primary" trigger="click"
+                      v-if="!inprogress"
                       @click="confirmSend(isNotClickable)"
                       :disabled="!isPathValid || isNotClickable">
               <span>发送</span>
+            </a-button>
+
+            <a-button type="primary" trigger="click"
+                      v-if="inprogress"
+                      @click="execStop">
+              <span>停止</span>
             </a-button>
           </template>
         </ExecBtn>
@@ -154,7 +161,7 @@ const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
 
-const { execStart, execStop, OnWebSocketMsg, onWebSocketConnStatusMsg, progressStatus } = useInterfaceExecution()
+const { execStart, execStop, OnWebSocketMsg, onWebSocketConnStatusMsg, inprogress } = useInterfaceExecution()
 
 const props = defineProps({
   onSave: {
@@ -199,7 +206,7 @@ const props = defineProps({
 const usedBy = inject('usedBy') as UsedBy
 const shareDiagnose = inject('shareDiagnose', () => {});
 const {t} = useI18n();
-const {showContextMenu, contextMenuStyle, onContextMenuShow, onMenuClick} = useVariableReplace('endpointInterfaceUrl')
+const {showContextMenu, contextMenuStyle, onMenuClick} = useVariableReplace('endpointInterfaceUrl')
 const showBaseUrl = () => {
   return showBaseUrlOrNot(debugData.value)
 }
@@ -260,6 +267,7 @@ const confirmSend = async (isNotClickable)=>{
   if (isNotClickable) {
     return;
   }
+
   if(debugChangePreScript.value || debugChangePostScript.value || debugChangeCheckpoint.value){
     store.commit("Global/setSpinning",true)
 
