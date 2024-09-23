@@ -4,7 +4,6 @@ import {StoreModuleType} from "@/utils/store";
 import {assert_resp_content_contain, assert_resp_json_field, assert_resp_status_Code} from './config'
 
 import {
-    call,
     clearShareVar,
     createConditions,
     disableConditions,
@@ -59,6 +58,7 @@ export interface StateType {
 
     requestData: any;
     responseData: Response;
+    streamData: any[];
     consoleData: any[];
     resultData: any[];
     invocationsData: any[];
@@ -113,6 +113,7 @@ const initState: StateType = {
 
     requestData: {},
     responseData: {} as Response,
+    streamData: [],
     consoleData: [],
     resultData: [],
 
@@ -164,7 +165,7 @@ const initState: StateType = {
         checkpointData: {},
     },
     magicList: [
-        
+
         {
             label: '引用变量',
             key: 'variable',
@@ -180,13 +181,13 @@ const initState: StateType = {
             label: '系统函数',
             children: [],
         },
-        
+
         {
             key: 'customFn',
             label: '自定义函数',
             children: [],
         },
-    
+
     ]
 };
 
@@ -202,6 +203,8 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setRequest: Mutation<StateType>;
         setResponse: Mutation<StateType>;
+        pushStream: Mutation<StateType>;
+        clearStream: Mutation<StateType>;
         setResult: Mutation<StateType>;
         setConsoleLog: Mutation<StateType>;
 
@@ -261,7 +264,6 @@ export interface ModuleType extends StoreModuleType<StateType> {
         loadDataAndInvocations: Action<StateType, StateType>;
         resetDataAndInvocations: Action<StateType, StateType>;
         loadData: Action<StateType, StateType>;
-        call: Action<StateType, StateType>;
         refreshInterfaceResultFromScenarioExec: Action<StateType, StateType>;
         save: Action<StateType, StateType>;
         saveAsCase: Action<StateType, StateType>;
@@ -322,7 +324,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         getListSysFn: Action<StateType, StateType>;
 
         getListCustomFn : Action<StateType, StateType>;
-    
+
     };
 }
 
@@ -358,6 +360,12 @@ const StoreModel: ModuleType = {
         },
         setResponse(state, payload) {
             state.responseData = payload;
+        },
+        pushStream(state, payload) {
+            state.streamData.push(payload);
+        },
+        clearStream(state) {
+            state.streamData = [];
         },
         setResult(state, payload) {
             state.resultData = payload;
@@ -643,40 +651,6 @@ const StoreModel: ModuleType = {
             commit('setResult', []);
             commit('setConsoleLog', []);
             commit('setInvocations', []);
-        },
-
-        async call({commit, dispatch, state}, data: any) {
-            console.log('call')
-
-            commit('setRequest', {});
-            commit('setResponse', {});
-            const response = await call(data)
-
-            if (response.code === 0) {
-                commit('setRequest', response.data.req);
-                commit('setResponse', response.data.resp);
-
-                await dispatch('listInvocation')
-                await dispatch('getLastInvocationResp')
-
-                commit('putInvokedMap')
-
-                dispatch('listShareVar');
-                dispatch('listAssertionCondition');
-
-                dispatch('listCondition', {
-                    isForBenchmarkCase: false,
-                    conditionSrc: ConditionSrc.PreCondition });
-                dispatch('listCondition', {
-                    isForBenchmarkCase: false,
-                    conditionSrc: ConditionSrc.PostCondition,
-                    category:ConditionCategory.postCondition,
-                 });
-
-                return true;
-            } else {
-                return false
-            }
         },
 
         async refreshInterfaceResultFromScenarioExec({commit, dispatch, state}) {
@@ -1285,7 +1259,7 @@ const StoreModel: ModuleType = {
             }
             return [];
         }
-        
+
     }
 };
 

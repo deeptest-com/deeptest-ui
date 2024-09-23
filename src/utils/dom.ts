@@ -122,15 +122,6 @@ export function removeClass( elements:any, cName:any ){
     }
 }
 
-export function scroll(id: string): void {
-    const elem = document.getElementById(id)
-    if (elem) {
-        setTimeout(function(){
-            elem.scrollTop = elem.scrollHeight + 100;
-        },300);
-    }
-}
-
 export function formatXml(xml: any) : string {
     const PADDING = ' '.repeat(2);
     const reg = /(>)(<)(\/*)/g;
@@ -356,6 +347,15 @@ export const getNodePath = (node, retPaths, treeDataMap) => {
     }
 }
 
+export function scroll(id: string): void {
+    console.log('scroll')
+    const elem = document.getElementById(id)
+    if (elem) {
+        setTimeout(function(){
+            elem.scrollTop = elem.scrollHeight + 100;
+        },300);
+    }
+}
 export function scrollTo(id: string, top?: number): void {
     console.log('scrollTo')
 

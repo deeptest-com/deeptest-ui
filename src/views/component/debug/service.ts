@@ -57,20 +57,6 @@ export async function generateCases(data: Interface): Promise<any> {
     });
 }
 
-// agent interface debug invoke
-export async function call(data): Promise<any> {
-   const agentUrl = await getAgentUrl() || null
-    console.log(`===call to agent ${agentUrl}===`, data)
-
-    // call agent api
-    return requestToAgent({
-        url: `/${apiAgentExec}/call`,
-        agentUrl: agentUrl,
-        method: 'POST',
-        data,
-    });
-}
-
 // debug invoke
 export async function listInvocation(params: DebugInfo): Promise<any> {
     return request({

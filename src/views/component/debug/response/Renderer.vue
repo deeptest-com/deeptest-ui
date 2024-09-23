@@ -1,7 +1,7 @@
 <template>
   <div class="response-renderer">
-    <template v-if="invokedMap[debugInfo.debugInterfaceId+'-'+debugInfo.endpointInterfaceId] &&
-                    responseData.invokeId">
+    <template v-if="(invokedMap[debugInfo.debugInterfaceId+'-'+debugInfo.endpointInterfaceId] &&
+                    responseData.invokeId) || streamData.length > 0">
       <div class="left">
         <a-tabs v-model:activeKey="activeKey" class="dp-tabs-full-height">
           <a-tab-pane key="body" tab="响应体" class="uppercase">
@@ -10,6 +10,8 @@
             <ResponseLensXml v-else-if="responseData.contentLang === 'xml'" />
             <ResponseLensRaw v-else-if="responseData.contentLang === 'text'" />
             <ResponseLensImage v-else-if="isImage(responseData.contentType)" />
+
+            <ResponseEventStream v-else-if="streamData.length > 0" />
           </a-tab-pane>
 
           <a-tab-pane key="header" :tab="getTabTitle('headers')">
@@ -62,6 +64,7 @@ import ResponseLensXml from "@/views/component/debug/response/Renderer/lenses/XM
 import ResponseLensHtml from "@/views/component/debug/response/Renderer/lenses/HTMLLensRenderer.vue";
 import ResponseLensImage from "@/views/component/debug/response/Renderer/lenses/ImageLensRenderer.vue";
 import ResponseLensRaw from "@/views/component/debug/response/Renderer/lenses/RawLensRenderer.vue";
+import ResponseEventStream from "@/views/component/debug/response/Renderer/lenses/EventStreamLensRenderer.vue";
 import {UsedBy} from "@/utils/enum";
 
 import {StateType as Debug} from "@/views/component/debug/store";
@@ -71,6 +74,7 @@ const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const responseData = computed<any>(() => store.state.Debug.responseData);
 const invokedMap = computed<any>(() => store.state.Debug.invokedMap);
 const consoleData = computed<any>(() => store.state.Debug.consoleData);
+const streamData = computed<any>(() => store.state.Debug.streamData);
 
 const getTabTitle = computed(() => {
   const typeMap = {

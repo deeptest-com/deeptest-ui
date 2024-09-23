@@ -77,8 +77,6 @@ const change = async (formState:any)=>{
   await store.dispatch("Debug/saveResponseDefine",{id:entityData.value.id,disabled:!formState.open,code:formState.code} )
 }
 
-
-
 </script>
 
 <style lang="less" scoped>

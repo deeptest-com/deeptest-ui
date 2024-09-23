@@ -108,14 +108,13 @@
 
 <script setup lang="ts">
 import {computed, defineProps, inject, onMounted, onUnmounted, PropType, ref, watch, Teleport} from "vue";
-import {notification} from 'ant-design-vue';
 import {QuestionCircleOutlined, SelectOutlined} from '@ant-design/icons-vue';
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 import IconSvg from "@/components/IconSvg";
 import {Methods, ProcessorInterfaceSrc, UsedBy} from "@/utils/enum";
+import useInterfaceExecution from "../exec";
 import {prepareDataForRequest, loadCurl, showBaseUrlOrNot} from "@/views/component/debug/service";
-import {NotificationKeyCommon} from "@/utils/const"
 
 import {StateType as GlobalStateType} from "@/store/global";
 import {StateType as DebugStateType} from "@/views/component/debug/store";
@@ -137,7 +136,8 @@ import { setServeUrl } from "@/utils/url";
 import {StateType as ProjectStateType} from "@/store/project";
 import {loadProjectEnvVars} from "@/utils/cache";
 import useCopy from "@/composables/useClipboard";
-import ExecBtn from "@/components/ExecBtn";
+import ExecBtn from "@/components/ExecBtn/index.vue";
+
 const {
   isDebugChange,
   debugChangePreScript,
@@ -153,6 +153,8 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const environmentId = computed<any[]>(() => store.state.Debug.currServe.environmentId || null);
 const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
+
+const { execStart, execStop, OnWebSocketMsg, onWebSocketConnStatusMsg, progressStatus } = useInterfaceExecution()
 
 const props = defineProps({
   onSave: {
@@ -238,8 +240,6 @@ const send = async () => {
   console.log('sendRequest', data);
 
   if (validateInfo()) {
-    store.commit("Global/setSpinning",true)
-
     data.environmentId = environmentId.value
     const callData = {
       execUuid: currUser.value.id + '@' + getUuid(),
@@ -251,11 +251,8 @@ const send = async () => {
       },
       localVarsCache: await loadProjectEnvVars(currProject.value.id)
     }
-    await store.dispatch('Debug/call', callData).finally(()=>{
-      store.commit("Global/setSpinning",false)
-    })
 
-    store.commit("Global/setSpinning",false)
+    execStart(callData)
   }
 }
 
@@ -265,7 +262,7 @@ const confirmSend = async (isNotClickable)=>{
   }
   if(debugChangePreScript.value || debugChangePostScript.value || debugChangeCheckpoint.value){
     store.commit("Global/setSpinning",true)
-  
+
     bus.emit(settings.eventPostConditionSave, {
       callback:async () => {
         await send()
@@ -285,10 +282,10 @@ const save = async (e) => {
        await props.onSave(data)
   }
 
-  //await bus.emit(settings.eventConditionSave, {});  
+  //await bus.emit(settings.eventConditionSave, {});
    //后置处理器 和 断言
    ( debugChangePostScript.value || debugChangeCheckpoint.value || debugChangePreScript.value ) &&  bus.emit(settings.eventPostConditionSave, {});
-  
+
 }
 const saveAsCase = () => {
   console.log('saveAsCase')
@@ -323,10 +320,6 @@ const validateInfo = () => {
 const shareDiagnoseDetail = () => {
   shareDiagnose();
 };
-
-onUnmounted(() => {
-  console.log('onUnmounted')
-})
 
 function hasDefinedMethod(method: string) {
   if (usedBy !== UsedBy.CaseDebug)
@@ -376,12 +369,19 @@ async function copyCurl() {
 }
 
 onMounted(() => {
-  // 离开前保存数据
+  console.log('onMounted')
   bus.on(settings.eventLeaveDebugSaveData, save);
+
+  bus.on(settings.eventWebSocketMsg, OnWebSocketMsg);
+  bus.on(settings.eventWebSocketConnStatus, onWebSocketConnStatusMsg);
 })
 
 onUnmounted(() => {
+  console.log('onUnmounted')
   bus.off(settings.eventLeaveDebugSaveData, save)
+
+  bus.off(settings.eventWebSocketMsg, OnWebSocketMsg);
+  bus.off(settings.eventWebSocketConnStatus, onWebSocketConnStatusMsg);
 })
 
 </script>
