@@ -71,7 +71,7 @@ const responseEventstreamMain = ref();
 </style>
 
 <style lang="less" scoped>
-.response-raw-main {
+.response-eventstream-main {
   height: 100%;
   .head {
     padding: 2px 3px;
@@ -80,13 +80,11 @@ const responseEventstreamMain = ref();
   .body {
     height: calc(100% - 30px);
     overflow-y: hidden;
-    &>div {
-      height: 100%;
-    }
 
     #stream-list {
       height: 100%;
       overflow-y: auto;
+      padding: 3px;
     }
   }
 }
