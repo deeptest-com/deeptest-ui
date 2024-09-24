@@ -1,9 +1,13 @@
 <template>
-  <div class="response-raw-main" ref="responseRawMain">
+  <div class="response-eventstream-main" ref="responseEventstreamMain">
     <div class="head">
       <a-row type="flex">
-        <a-col flex="1">
+        <a-col flex="200px">
           <span style="margin-left:5px;">Event Stream</span>
+        </a-col>
+        <a-col flex="1">
+          <a-input placeholder="输入关键字过滤" size="small"
+                   v-model:value="keywords"/>
         </a-col>
 
         <a-col flex="100px" class="dp-right">
@@ -12,22 +16,22 @@
     </div>
 
     <div class="body">
-      <div id="stream-list" v-html="streamDataStr" />
+      <div id="stream-list">
+        <template v-for="(item, index) in streamData" :key="index">
+          <div v-if="!keywords || item.indexOf(keywords) > -1">
+            {{item}}
+          </div>
+        </template>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {computed, inject, ref, watch, onMounted, onUnmounted} from "vue";
+import {computed, inject, ref, watch, onMounted} from "vue";
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
-import {MonacoOptions} from "@/utils/const";
 import {StateType as Debug} from "@/views/component/debug/store";
-import {parseText, testExpr} from "@/views/component/debug/service";
-import {ConditionSrc, ExtractorSrc, ExtractorType, UsedBy} from "@/utils/enum";
-import bus from "@/utils/eventBus";
-import settings from "@/config/settings";
-import {formatWithSeconds} from "@/utils/datetime";
 
 const {t} = useI18n();
 const store = useStore<{  Debug: Debug }>();
@@ -35,96 +39,15 @@ const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
 const responseData = computed<any>(() => store.state.Debug.responseData);
 const streamData = computed<any>(() => store.state.Debug.streamData);
-const streamDataStr = computed<any>(() => {
-  return streamData.value.join('<br/>')
-});
 
-const usedBy = inject('usedBy') as UsedBy
-const isForBenchmarkCase = inject('isForBenchmarkCase', false) as boolean
+const keywords = ref('')
 
 const timestamp = ref('')
 watch(responseData, (newVal) => {
   timestamp.value = Date.now() + ''
 }, {immediate: true, deep: true})
 
-const editorOptions = ref(Object.assign({usedWith: 'response',readOnly:false}, MonacoOptions) )
-
-const responseExtractorVisible = ref(false)
-const expr = ref('')
-const exprType = ref('')
-const result = ref('')
-const monacoEditor = ref();
-
-const responseExtractor = (data) => {
-  result.value = ''
-
-  parseText({
-    docContent: data.docContent,
-    selectContent: data.selectContent,
-
-    startLine: data.selectionObj.startLineNumber - 1,
-    endLine: data.selectionObj.endLineNumber - 1,
-    startColumn: data.selectionObj.startColumn - 1,
-    endColumn: data.selectionObj.endColumn - 1,
-  }).then((json) => {
-    console.log('json', json)
-    responseExtractorVisible.value = true
-    expr.value = json.data.expr
-    exprType.value = json.data.exprType
-  })
-}
-
-const testParse = (expr, exprType) => {
-  console.log('testParse')
-  testExpr({
-    content: responseData.value.content,
-    type: responseData.value.contentLang,
-    expr: expr,
-    exprType: exprType,
-
-  }).then((json) => {
-    console.log('json', json)
-    result.value = json.data.result
-  })
-}
-
-const responseExtractorFinish = (conf) => {
-  console.log('responseExtractorFinish')
-
-  conf.type = conf.expressionType
-  conf.src = ExtractorSrc.body
-  conf.result = result.value
-
-  const data = {
-    conf,
-    info: debugInfo.value,
-    conditionSrc: ConditionSrc.PostCondition,
-    isForBenchmarkCase: isForBenchmarkCase,
-  } as any
-
-  store.dispatch('Debug/quickCreateExtractor', data).then((result) => {
-    if (result) {
-      responseExtractorVisible.value = false
-    }
-  })
-}
-const responseExtractorCancel = () => {
-  console.log('responseExtractorCancel')
-  responseExtractorVisible.value = false
-}
-
-const responseRawMain = ref();
-
-onMounted(() => {
-  bus.on(settings.paneResizeTop, () => {
-    monacoEditor.value?.resizeIt({
-      act: settings.eventTypeContainerHeightChanged,
-      container: 'response-raw-main',
-      id: 'raw-lens-main',
-      el: responseRawMain.value,
-    })
-  })
-});
+const responseEventstreamMain = ref();
 
 </script>
 
