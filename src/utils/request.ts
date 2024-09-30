@@ -120,6 +120,7 @@ const requestInterceptors = async (config: AxiosRequestConfig & { cType?: boolea
     if (!config.params.currProjectId) {
         const projectId: any = state.ProjectGlobal?.currProject?.id;
         const { pathname = '' } = window.location;
+
         config.params = {...config.params, currProjectId: pathname === '/' ? 0 : projectId, lang: i18n.global.locale.value};
     }
 
