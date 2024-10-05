@@ -935,9 +935,7 @@ const StoreModel: ModuleType = {
             }
         },
         async saveDbConn({ dispatch }, data) {
-            console.log('888')
             const res = await saveDbConn(data);
-            console.log('999')
 
             if (res.code === 0) {
                 notifySuccess('保存成功');
@@ -993,9 +991,7 @@ const StoreModel: ModuleType = {
             }
         },
         async saveLlm({ dispatch }, data) {
-            console.log('888')
             const res = await saveLlm(data);
-            console.log('999')
 
             if (res.code === 0) {
                 notifySuccess('保存成功');
