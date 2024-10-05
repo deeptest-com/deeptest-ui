@@ -160,7 +160,7 @@ const edit = (id) => {
 
 async function remove(record: any) {
   Modal.confirm({
-    title: '确认要删除该自定义脚本库吗？',
+    title: '确认要删除该工具大模型吗？',
     icon: createVNode(ExclamationCircleOutlined),
     onOk() {
       store.dispatch('ProjectSetting/deleteLlm', record.id);
