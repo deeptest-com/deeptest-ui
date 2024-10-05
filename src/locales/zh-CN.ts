@@ -95,6 +95,16 @@ export default {
     'extractBody': '提取响应体',
     'extractorVari': '提取变量',
 
+    'summarization': '摘要',
+    'answer_relevancy': '回答相关性',
+    'faithfulness': '忠实度',
+    'contextual_precision': '检索查准率',
+    'contextual_recall': '检索查全率',
+    'contextual_relevancy': '检索相关性',
+    'hallucination': '幻觉',
+    'bias': '偏见',
+    'toxicity': '毒性',
+
     'fulltext': '全文本',
     'jsonpath':  'JSONPath',
     'jsonquery':  'JSON查询',
@@ -171,11 +181,11 @@ export default {
 
     'processor_custom_code':  '自定义代码',
 
-    'processor_interface_src_define': "接口",
-    'processor_interface_src_case': "接口用例",
-    'processor_interface_src_diagnose': "快捷调试",
-    // 'processor_interface_src_curl': "CUrl",
-    // 'processor_interface_src_custom': "自定义",
+    'processor_interface_src_define': '接口',
+    'processor_interface_src_case': '接口用例',
+    'processor_interface_src_diagnose': '快捷调试',
+    // 'processor_interface_src_curl': 'CUrl',
+    // 'processor_interface_src_custom': '自定义',
 
     'pass': '通过',
     'fail': '失败',

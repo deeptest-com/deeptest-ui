@@ -49,8 +49,8 @@
         <Assertion v-if="activeKey === 'assertion'" />
       </a-tab-pane>
 
-      <a-tab-pane key="llm" :tab="getTabTitle('llmEvaluation')">
-
+      <a-tab-pane key="metrics" :tab="getTabTitle('llmEvaluation')">
+        <Metrics v-if="activeKey === 'metrics'" />
       </a-tab-pane>
     </a-tabs>
   </div>
@@ -72,6 +72,7 @@ import RequestHeaders from "./config/Headers.vue";
 import Authorization from "./config/Authorization.vue";
 import Condition from "./config/Condition.vue";
 import Assertion from "./config/Assertion.vue";
+import Metrics from "./config/Metrics.vue";
 import {useStore} from "vuex";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";

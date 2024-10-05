@@ -30,6 +30,9 @@ export default function useIMLeaveTip()  {
     const srcPostConditionsDataObj = computed<any>(() => store.state.Debug.srcPostConditionsDataObj);
     const postConditionsDataObj = computed<any>(() => store.state.Debug.postConditionsDataObj);
 
+    const srcMetricsDataObj = computed<any>(() => store.state.Debug.srcMetricsDataObj);
+    const metricsDataObj = computed<any>(() => store.state.Debug.metricsDataObj);
+
     const assertionConditionsDataObj = computed<any>(() => store.state.Debug.srcAssertionConditionsDataObj);
     const srcAssertionConditionsDataObj = computed<any>(() => store.state.Debug.assertionConditionsDataObj);
 
@@ -127,6 +130,9 @@ export default function useIMLeaveTip()  {
         postConditionsList,
         srcPostConditionsDataObj,
         postConditionsDataObj,
+
+        srcMetricsDataObj,
+        metricsDataObj,
 
         resetDebugChange,
         debugChangeCheckpoint,

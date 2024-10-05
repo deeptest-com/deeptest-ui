@@ -60,6 +60,7 @@ export interface SettingsType {
 
     eventConditionSave: string,
     eventPostConditionSave: string,
+    eventMetricsSave: string,
 
     eventVariableSelectionStatus: string,
     eventLeaveDebugSaveData: string,
@@ -149,7 +150,8 @@ const settings: SettingsType = {
     eventTypeContainerHeightChanged: 'heightChanged',
     eventTypeFormat: 'format',
 
-    eventConditionSave: '',
+    eventConditionSave: 'eventConditionSave',
+    eventMetricsSave: 'eventMetricsSave',
     eventPostConditionSave: 'eventPostConditionSave',
 
     eventVariableSelectionStatus: 'eventVariableSelectionStatus',

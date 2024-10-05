@@ -274,3 +274,15 @@ export enum SourceType {
     SwaggerImport = 2,
     ThirdPartySync = 3
 }
+
+export enum MetricsType {
+    Summarization = "summarization",
+    AnswerRelevancy = "answer_relevancy",
+    Faithfulness = "faithfulness",
+    ContextualPrecision = "contextual_precision",
+    ContextualRecall = "contextual_recall",
+    ContextualRelevancy = "contextual_relevancy",
+    Hallucination = "hallucination",
+    Bias = "bias",
+    Toxicity = "toxicity",
+}

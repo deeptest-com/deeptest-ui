@@ -70,8 +70,12 @@ export interface StateType {
     postConditions: any[];
     postConditionsDataObj: any;
     srcPostConditionsDataObj: any;
-
     activeCondition: any;
+
+    metrics: any[];
+    activeMetrics: any;
+    srcMetricsDataObj: any;
+    metricsDataObj: any;
 
     assertionConditions: any[];
     assertionConditionsDataObj: any;
@@ -126,8 +130,12 @@ const initState: StateType = {
     postConditions: [],
     postConditionsDataObj: {},
     srcPostConditionsDataObj: {},
-
     activeCondition: {},
+
+    metrics: [],
+    activeMetrics: {},
+    srcMetricsDataObj: {},
+    metricsDataObj: {},
 
     assertionConditionsDataObj: {},
     srcAssertionConditionsDataObj: {},
