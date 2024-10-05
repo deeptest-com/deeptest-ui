@@ -292,6 +292,16 @@ const IndexLayoutRoutes: Array<RoutesDataItem> = [
         }
       },
       {
+        icon: 'llm',
+        title: 'index-layout.menu.project.setting.llm',
+        path: 'llm',
+        component: () => import('@/views/project-settings/components/Llm/index.vue'),
+        hidden: false,
+        meta: {
+          code: 'p-setting-api-llm'
+        }
+      },
+      {
         icon: 'swaggerSync',
         title: 'index-layout.menu.project.setting.swaggerSync',
         path: 'swaggerSync',

@@ -14,11 +14,11 @@
       </template>
 
       <div>
-        <div v-if="!isLy" class="dbConn-tips-container">
-          <a href="https://deeptest.com/dbConn.html" target="_blank">
+<!--        <div v-if="!isLy" class="dbConn-tips-container">
+          <a href="http://doc.deeptest.com/db_conn.html" target="_blank">
             <QuestionCircleOutlined class="dp-icon-btn dp-trans-80"/>
           </a>
-        </div>
+        </div>-->
 
         <a-form :model="model" :label-col="{ style: { width: '120px' } }" :wrapper-col="wrapperCol">
           <a-form-item label="名称" v-bind="validateInfos.name" required>

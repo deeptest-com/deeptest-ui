@@ -37,12 +37,20 @@ import {
     saveJslib,
     updateJslibName,
 
-    deleteDbConn,
-    disableDbConn,
     getDbConn,
     listDbConn,
     saveDbConn,
+    deleteDbConn,
+    disableDbConn,
     updateDbConnName,
+
+    listLlm,
+    getLlm,
+    saveLlm,
+    updateLlmName,
+    deleteLlm,
+    disableLlm,
+
     getCronProjectList,
     updateCronProjectStatus,
     saveCronProject,
@@ -52,7 +60,7 @@ import {
     getCronAllEngineeringOptions,
     getCronAllServesOptions,
     getCronAllServesList,
-    runCronProject,
+    runCronProject, setDefaultLlm,
 } from './service';
 import {message, notification} from 'ant-design-vue';
 import {
@@ -103,6 +111,9 @@ export interface StateType {
     dbConnModels: any[];
     dbConnModel: any;
 
+    llmModels: any[];
+    llmModel: any;
+
     //定时同步任务相关
     cronProjectListResult: any;
     cronProject: any;
@@ -134,6 +145,9 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         setDbConns: Mutation<StateType>,
         setDbConn: Mutation<StateType>,
+
+        setLlms: Mutation<StateType>,
+        setLlm: Mutation<StateType>,
 
         // 定时同步相关
         setCronProjectList: Mutation<StateType>,
@@ -213,6 +227,14 @@ export interface ModuleType extends StoreModuleType<StateType> {
         deleteDbConn: Action<StateType, StateType>,
         disableDbConn: Action<StateType, StateType>,
 
+        listLlm: Action<StateType, StateType>,
+        getLlm: Action<StateType, StateType>,
+        saveLlm: Action<StateType, StateType>,
+        updateLlmName: Action<StateType, StateType>,
+        deleteLlm: Action<StateType, StateType>,
+        disableLlm: Action<StateType, StateType>,
+        setDefaultLlm: Action<StateType, StateType>,
+
         // 定时同步任务相关
         getCronProjectList: Action<StateType, StateType>,
         saveCronProject: Action<StateType, StateType>,
@@ -263,6 +285,9 @@ const initState: StateType = {
 
     dbConnModels: [],
     dbConnModel: {},
+
+    llmModels: [],
+    llmModel: {},
 
     cronProjectListResult: {
         list: [],
@@ -342,6 +367,14 @@ const StoreModel: ModuleType = {
         setDbConn(state, payload) {
             state.dbConnModel = payload;
         },
+
+        setLlms(state, payload) {
+            state.llmModels = payload;
+        },
+        setLlm(state, payload) {
+            state.llmModel = payload;
+        },
+
         setCronProject(state, payload) {
             state.cronProject = payload;
         },
@@ -939,6 +972,72 @@ const StoreModel: ModuleType = {
                 dispatch('listDbConn')
             } else {
                 notifyError('删除自定义脚本库失败');
+            }
+        },
+
+        async listLlm({ commit }, params) {
+            const res = await listLlm(params)
+            if (res.code === 0) {
+                commit('setLlms', res.data);
+                return true;
+            } else {
+                return false;
+            }
+        },
+        async getLlm({ commit, dispatch }, id: number) {
+            const res = await getLlm(id);
+            if (res.code === 0) {
+                commit('setLlm', res.data);
+            } else {
+                notifyError(`获取工具大模型失败`);
+            }
+        },
+        async saveLlm({ dispatch }, data) {
+            console.log('888')
+            const res = await saveLlm(data);
+            console.log('999')
+
+            if (res.code === 0) {
+                notifySuccess('保存成功');
+                dispatch('listLlm')
+            } else {
+                notifyError(res.msg);
+            }
+            return res.msgKey
+        },
+        async updateLlmName({ dispatch }, data) {
+            const res = await updateLlmName(data);
+
+            if (res.code === 0) {
+                dispatch('listLlm')
+            } else {
+                notifyError('修改工具大模型名称失败');
+            }
+            return res.msgKey
+        },
+        async deleteLlm({ dispatch }, id) {
+            const res = await deleteLlm(id);
+            if (res.code === 0) {
+                notifySuccess('删除工具大模型成功');
+                dispatch('listLlm')
+            } else {
+                notifyError('删除工具大模型失败');
+            }
+        },
+        async disableLlm({ dispatch }, id) {
+            const res = await disableLlm(id);
+            if (res.code === 0) {
+                dispatch('listLlm')
+            } else {
+                notifyError('删除工具大模型失败');
+            }
+        },
+        async setDefaultLlm({ dispatch }, id) {
+            const res = await setDefaultLlm(id);
+            if (res.code === 0) {
+                dispatch('listLlm')
+            } else {
+                notifyError('设置默认工具大模型失败');
             }
         },
 

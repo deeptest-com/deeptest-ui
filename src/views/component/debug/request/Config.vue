@@ -1,6 +1,6 @@
 <template>
   <div class="config-main">
-    <a-tabs v-model:activeKey="activeKey" class="dp-tabs-full-height">
+    <a-tabs v-model:activeKey="activeKey" class="dp-tabs-full-height dp-tabs-small-gap">
 
       <a-tab-pane key="query-param" :tab="getTabTitle('queryParams')">
         <div style="height: 100%; overflow-y: scroll">
@@ -47,6 +47,10 @@
 
       <a-tab-pane key="assertion" :tab="getTabTitle('assertionConditions')">
         <Assertion v-if="activeKey === 'assertion'" />
+      </a-tab-pane>
+
+      <a-tab-pane key="llm" :tab="getTabTitle('llmEvaluation')">
+
       </a-tab-pane>
     </a-tabs>
   </div>
@@ -99,6 +103,7 @@ const getTabTitle = computed(() => {
     preConditions: '前置处理',
     postConditions: '后置处理',
     assertionConditions: '断言',
+    llmEvaluation: '大模型',
   }
   return type => {
     let sourceData = []
@@ -225,7 +230,7 @@ const leaveSave =  async (event) => {
 
   // 断言缓存的数据 - 保存
   if(Object.keys(assertionConditionsDataObj.value)?.length && debugChangeCheckpoint.value){
-    for (const item of Object.values(assertionConditionsDataObj.value)) {  
+    for (const item of Object.values(assertionConditionsDataObj.value)) {
       (item as any).debugInterfaceId = debugInfo.value.debugInterfaceId;
       (item as any).endpointInterfaceId = debugInfo.value.endpointInterfaceId;
       (item as any).projectId = debugData.value.projectId;

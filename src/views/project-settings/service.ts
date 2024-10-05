@@ -536,6 +536,56 @@ export async function disableDbConn(id): Promise<any> {
     });
 }
 
+const apiPathLlm = 'llms';
+
+export async function listLlm(params): Promise<any> {
+    return request({
+        url: `/${apiPathLlm}`,
+        method: 'get',
+        params
+    });
+}
+export async function getLlm(id): Promise<any> {
+    const params = {id}
+    return request({
+        url: `/${apiPathLlm}/${id}`,
+        method: 'get',
+        params
+    });
+}
+export async function saveLlm(data): Promise<any> {
+    return request({
+        url: `/${apiPathLlm}`,
+        method: 'post',
+        data
+    });
+}
+export async function updateLlmName(data): Promise<any> {
+    return request({
+        url: `/${apiPathLlm}/updateName`,
+        method: 'put',
+        data
+    });
+}
+export async function deleteLlm(id): Promise<any> {
+    return request({
+        url: `/${apiPathLlm}/${id}`,
+        method: 'delete',
+    });
+}
+export async function disableLlm(id): Promise<any> {
+    return request({
+        url: `/${apiPathLlm}/${id}/disable`,
+        method: 'put',
+    });
+}
+export async function setDefaultLlm(id): Promise<any> {
+    return request({
+        url: `/${apiPathLlm}/${id}/setDefault`,
+        method: 'put',
+    });
+}
+
 const apiPathCron = 'project/cron';
 // 定时同步任务相关
 export async function getCronProjectList(payload): Promise<any> {
