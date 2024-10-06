@@ -37,7 +37,15 @@ import {
     saveScript,
     getSnippetsListMock,
     getSnippetsListSysFunc,
-    getSnippetsListCustomFunc
+    getSnippetsListCustomFunc,
+
+    listMetrics,
+    createMetrics,
+    saveMetrics,
+    moveMetrics,
+    removeMetrics,
+    disableMetrics,
+    getMetricsEntity,
 } from './service';
 
 import {changeServe, getVarsByEnv, listDbConn, serverList} from '@/views/project-settings/service';
@@ -290,6 +298,16 @@ export interface ModuleType extends StoreModuleType<StateType> {
         removeCondition: Action<StateType, StateType>;
         disableCondition: Action<StateType, StateType>;
         moveCondition: Action<StateType, StateType>;
+
+        listMetrics: Action<StateType, StateType>;
+        createMetrics: Action<StateType, StateType>;
+        removeMetrics: Action<StateType, StateType>;
+        disableMetrics: Action<StateType, StateType>;
+        moveMetrics: Action<StateType, StateType>;
+
+        getMetricsEntity: Action<StateType, StateType>;
+        saveMetrics: Action<StateType, StateType>;
+        leaveSaveMetrics: Action<StateType, StateType>;
 
         getExtractor: Action<StateType, StateType>;
         saveExtractor: Action<StateType, StateType>;
@@ -731,8 +749,7 @@ const StoreModel: ModuleType = {
         },
 
         // conditions
-        async listCondition({commit, state}, payload: {
-            category: ConditionCategory, isForBenchmarkCase: boolean, conditionSrc: ConditionSrc }) {
+        async listCondition({commit, state}, payload: {category: ConditionCategory, isForBenchmarkCase: boolean, conditionSrc: ConditionSrc }) {
             console.log('listCondition in store')
 
             try {
@@ -1077,6 +1094,108 @@ const StoreModel: ModuleType = {
         async leaveSaveDbOpt({commit, dispatch, state}, payload: any) {
             try {
                 await saveDbOpt(payload);
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
+
+        // metrics
+        async listMetrics({commit, state}, payload: {}) {
+            console.log('listMetrics in store')
+
+            try {
+                const resp = await listMetrics({
+                    debugInterfaceId: state.debugInfo.debugInterfaceId,
+                    endpointInterfaceId: state.debugData.endpointInterfaceId
+                });
+                const {data} = resp;
+
+                commit('setMetrics', {data});
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
+        async createMetrics({commit, dispatch, state}, payload: any) {
+            try {
+                await createMetrics(payload);
+
+                await dispatch('listMetrics', {});
+
+                if (state.metrics.length > 0) {
+                    commit('setActiveMetrics', state.metrics[state.metrics.length-1]);
+                }
+
+                return true;
+
+            } catch (error) {
+                return false;
+            }
+        },
+        async disableMetrics({commit, dispatch, state}, payload: any) {
+            try {
+                await disableMetrics(payload.id);
+
+                dispatch('listMetrics', {});
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
+        async removeMetrics({commit, dispatch, state}, payload: any) {
+            try {
+                await removeMetrics(payload.id);
+
+                dispatch('listMetrics', {});
+                return true;
+
+            } catch (error) {
+                return false;
+            }
+        },
+        async moveMetrics({commit, dispatch, state}, payload: any) {
+            try {
+                await moveMetrics(payload);
+
+                dispatch('listMetrics', {});
+
+                return true;
+
+            } catch (error) {
+                return false;
+            }
+        },
+        async getMetricsEntity({commit}, payload: any) {
+            try {
+                const resp = await getMetricsEntity(payload.entityId);
+                const {data} = resp;
+                commit('setMetricsDataObj',{
+                    id: data.id,
+                    value:data
+                })
+                commit('setSrcMetricsDataObj',{
+                    id: data.id,
+                    value:cloneDeep(data)
+                })
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
+        async saveMetrics({commit, dispatch, state}, payload: any) {
+            try {
+                await saveMetrics(payload);
+                dispatch('listMetrics', {});
+
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
+        async leaveSaveMetrics({commit, dispatch, state}, payload: any) {
+            try {
+                await saveMetrics(payload);
                 return true;
             } catch (error) {
                 return false;

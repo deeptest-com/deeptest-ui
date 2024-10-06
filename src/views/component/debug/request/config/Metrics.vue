@@ -134,8 +134,8 @@ const props = defineProps({
 
 const fullscreen = ref(false)
 
-const metricsType = ref(MetricsType.AnswerRelevancy)
-const metricsTypes = ref(getMetricsTypes())
+const metricsType = ref(MetricsType.answer_relevancy)
+const metricsTypes = getMetricsTypes()
 
 function getMetricsTypes() {
   const ret = getEnumSelectItems(MetricsType)

@@ -276,13 +276,13 @@ export enum SourceType {
 }
 
 export enum MetricsType {
-    Summarization = "summarization",
-    AnswerRelevancy = "answer_relevancy",
-    Faithfulness = "faithfulness",
-    ContextualPrecision = "contextual_precision",
-    ContextualRecall = "contextual_recall",
-    ContextualRelevancy = "contextual_relevancy",
-    Hallucination = "hallucination",
-    Bias = "bias",
-    Toxicity = "toxicity",
+    summarization = "summarization",
+    answer_relevancy = "answer_relevancy",
+    faithfulness = "faithfulness",
+    contextual_precision = "contextual_precision",
+    contextual_recall = "contextual_recall",
+    contextual_relevancy = "contextual_relevancy",
+    hallucination = "hallucination",
+    bias = "bias",
+    toxicity = "toxicity",
 }

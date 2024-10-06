@@ -17,6 +17,7 @@ const apiShareVar = `shareVars`
 const apiSnippets = 'snippets'
 
 const apiConditions = 'conditions'
+const apiMetrics = 'metrics'
 const apiExtractor = 'extractors'
 const apiCookie = 'cookies'
 const apiCheckpoint = 'checkpoints'
@@ -205,7 +206,6 @@ export async function listConditions(params: {
     usedBy: string,
     isForBenchmarkCase?: boolean,
     conditionSrc?: ConditionSrc }): Promise<any> {
-
     return request({
         url: `/${apiConditions}`,
         method: 'GET',
@@ -293,6 +293,54 @@ export async function getCheckpoint(id: number): Promise<any> {
 export async function saveCheckpoint(data): Promise<any> {
     return request({
         url: `/${apiCheckpoint}`,
+        method: data.id ? 'PUT' : 'POST',
+        data: data,
+    });
+}
+
+// metrics
+export async function listMetrics(params: {debugInterfaceId, endpointInterfaceId: number}): Promise<any> {
+    return request({
+        url: `/${apiMetrics}`,
+        method: 'GET',
+        params,
+    });
+}
+export async function createMetrics(data): Promise<any> {
+    return request({
+        url: `/${apiMetrics}`,
+        method: data.id ? 'PUT' : 'POST',
+        data: data,
+    });
+}
+export async function disableMetrics(id): Promise<any> {
+    return request({
+        url: `/${apiMetrics}/${id}/disable`,
+        method: 'POST',
+    });
+}
+export async function removeMetrics(id): Promise<any> {
+    return request({
+        url: `/${apiMetrics}/${id}`,
+        method: 'DELETE',
+    });
+}
+export async function moveMetrics(data): Promise<any> {
+    return request({
+        url: `/${apiMetrics}/move`,
+        method: 'POST',
+        data: data,
+    });
+}
+export async function getMetricsEntity(id: number): Promise<any> {
+    return request({
+        url: `/${apiMetrics}/${id}/getEntity`,
+        method: 'GET',
+    });
+}
+export async function saveMetrics(data): Promise<any> {
+    return request({
+        url: `/${apiMetrics}`,
         method: data.id ? 'PUT' : 'POST',
         data: data,
     });
