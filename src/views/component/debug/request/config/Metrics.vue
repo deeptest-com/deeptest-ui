@@ -34,7 +34,7 @@
               <div @click.stop="expand(element)" class="title dp-link dp-ellipsis">
                 <icon-svg class="handle dp-drag icon" type="move" />
 
-                <icon-svg v-if="true  || element.entityType === MetricsType.summarization"
+                <icon-svg v-if="element.entityType === MetricsType.summarization || true"
                           type="variable"
                           class="icon variable" />
 
@@ -69,8 +69,8 @@
 
             <div class="content" v-if="activeMetrics.id === +element.id">
               <MetricsForm
-                :metrics="activeMetrics"
-                :finish="list"/>
+                  :metrics="activeMetrics"
+                  :finish="list"/>
             </div>
           </div>
 
