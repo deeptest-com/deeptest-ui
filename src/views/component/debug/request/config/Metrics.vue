@@ -16,8 +16,7 @@
         </a-col>
 
         <a-col flex="100px" class="dp-right">
-          <Tips v-if="metricsSrc==='pre'" section="request-process" title="对请求的预处理" />
-          <Tips v-if="metricsSrc==='post'" section="response-process" title="对响应的后处理" />
+          <Tips section="llm-metrics" title="大模型指标" />
         </a-col>
 
       </a-row>
@@ -35,7 +34,7 @@
               <div @click.stop="expand(element)" class="title dp-link dp-ellipsis">
                 <icon-svg class="handle dp-drag icon" type="move" />
 
-                <icon-svg v-if="true || element.entityType === MetricsType.Summarization"
+                <icon-svg v-if="true  || element.entityType === MetricsType.summarization"
                           type="variable"
                           class="icon variable" />
 
@@ -125,13 +124,6 @@ const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const metrics = computed<any>(() => store.state.Debug.metrics);
 const activeMetrics = computed<any>(() => store.state.Debug.activeMetrics);
 
-const props = defineProps({
-  metricsSrc: {
-    type: String,
-    required: true,
-  },
-})
-
 const fullscreen = ref(false)
 
 const metricsType = ref(MetricsType.answer_relevancy)
@@ -148,8 +140,7 @@ const expand = (item) => {
 }
 
 const list = debounce(async () => {
-  console.log('list in debug/request/config/Metrics.vue', props.metricsSrc)
-
+  console.log('list in debug/request/config/Metrics.vue')
   await store.dispatch('Debug/listMetrics', {})
 }, 300)
 
@@ -176,7 +167,6 @@ const disable = (item) => {
   store.dispatch('Debug/disableMetrics', item)
 }
 const remove = (item) => {
-  item.metricsSrc = props.metricsSrc
   console.log('remove', item)
 
   confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
@@ -207,10 +197,6 @@ const closeFullScreen = (item) => {
   console.log('closeFullScreen', item)
   fullscreen.value = false
 }
-
-/*************************************************
- * ::::后置处理器提示
- ************************************************/
 
 const {srcMetricsDataObj, metricsDataObj, debugChange} = useIMLeaveTip();
 

@@ -241,6 +241,9 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setPreScriptContent: Mutation<StateType>;
         setPostScriptContent: Mutation<StateType>;
 
+        setMetrics: Mutation<StateType>;
+        setActiveMetrics: Mutation<StateType>;
+
         setCookie: Mutation<StateType>;
 
         setPathParams: Mutation<StateType>;
@@ -424,7 +427,6 @@ const StoreModel: ModuleType = {
             } else {
                 state.assertionConditions = (payload.data || []).filter(e => !e.isForBenchmarkCase);
             }
-
         },
 
         setActiveAssertion(state, payload) {
@@ -485,6 +487,13 @@ const StoreModel: ModuleType = {
             if(data){
                 data.content = content;
             }
+        },
+
+        setMetrics(state, payload) {
+            state.metrics = payload;
+        },
+        setActiveMetrics(state, payload) {
+            state.activeMetrics = payload;
         },
 
         setPathParams(state, payload) {
@@ -1111,7 +1120,7 @@ const StoreModel: ModuleType = {
                 });
                 const {data} = resp;
 
-                commit('setMetrics', {data});
+                commit('setMetrics', data);
                 return true;
             } catch (error) {
                 return false;
