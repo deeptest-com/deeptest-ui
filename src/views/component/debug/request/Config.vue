@@ -49,7 +49,7 @@
         <Assertion v-if="activeKey === 'assertion'" />
       </a-tab-pane>
 
-      <a-tab-pane key="metrics" :tab="getTabTitle('llmEvaluation')">
+      <a-tab-pane key="metrics" :tab="getTabTitle('metrics')">
         <Metrics v-if="activeKey === 'metrics'" />
       </a-tab-pane>
     </a-tabs>
@@ -89,6 +89,8 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 const preConditions = computed<any>(() => store.state.Debug.preConditions);
 const postConditions = computed<any>(() => store.state.Debug.postConditions);
 const assertionConditions = computed<any>(() => store.state.Debug.assertionConditions);
+const metrics = computed<any>(() => store.state.Debug.metrics);
+
 const activeAssertion = computed<any>(() => store.state.Debug.activeAssertion);
 const activeMetrics = computed<any>(() => store.state.Debug.activeMetrics);
 
@@ -105,7 +107,7 @@ const getTabTitle = computed(() => {
     preConditions: '前置处理',
     postConditions: '后置处理',
     assertionConditions: '断言',
-    llmEvaluation: '大模型',
+    metrics: 'AI指标',
   }
   return type => {
     let sourceData = []
@@ -115,6 +117,8 @@ const getTabTitle = computed(() => {
       sourceData = postConditions.value || []
     } else if (type === 'assertionConditions') {
       sourceData = assertionConditions.value || []
+    } else if (type === 'metrics') {
+      sourceData = metrics.value || []
     } else {
       sourceData = (debugData.value[type] || []).filter(e => e.name)
     }
@@ -156,6 +160,7 @@ watch(() => { return debugData.value }, (val) => {
       category: ConditionCategory.postCondition,
     });
     store.dispatch('Debug/listAssertionCondition');
+    store.dispatch('Debug/listMetrics');
   }
 }, { immediate: true });
 
