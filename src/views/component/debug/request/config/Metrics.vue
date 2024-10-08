@@ -112,7 +112,7 @@ import {getEnumSelectItems} from "@/views/scenario/service";
 import useIMLeaveTip   from "@/composables/useIMLeaveTip";
 
 import Tips from "@/components/Tips/index.vue";
-import MetricsForm from "./metrics/Common.vue";
+import MetricsForm from "./metrics/Form.vue";
 import FullScreenPopup from "./MetricsPopup.vue";
 
 const {t} = useI18n();

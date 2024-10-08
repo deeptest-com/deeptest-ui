@@ -332,10 +332,11 @@ export async function moveMetrics(data): Promise<any> {
         data: data,
     });
 }
-export async function getMetricsEntity(id: number): Promise<any> {
+export async function getMetricsEntity(id: number, type: string): Promise<any> {
     return request({
         url: `/${apiMetrics}/${id}/getEntity`,
         method: 'GET',
+        params: {type}
     });
 }
 export async function saveMetrics(data): Promise<any> {

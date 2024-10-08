@@ -286,3 +286,26 @@ export enum MetricsType {
     bias = "bias",
     toxicity = "toxicity",
 }
+
+export enum MetricsFields {
+    summarization = "; threshold,include_reason,strict_mode",
+    answer_relevancy = "; threshold,include_reason,strict_mode",
+    faithfulness = "retrieval_context; threshold,include_reason,strict_mode",
+    contextual_precision = "expected_output,retrieval_context; threshold,include_reason,strict_mode",
+    contextual_recall = "expected_output,retrieval_context; threshold,include_reason,strict_mode",
+    contextual_relevancy = "retrieval_context; threshold,include_reason,strict_mode",
+    hallucination = "context; threshold,include_reason,strict_mode",
+    bias = "; threshold,include_reason,strict_mode",
+    toxicity = "; threshold,include_reason,strict_mode",
+}
+export enum MetricsFieldDefine {
+    // input = "input",
+    expected_output = "expected_output",
+
+    threshold = "threshold",
+    include_reason = "include_reason",
+    strict_mode = "strict_mode",
+
+    // actual_output = "actual_output",
+    // retrieval_context = "retrieval_context",
+}

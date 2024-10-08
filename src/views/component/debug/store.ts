@@ -349,9 +349,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         leaveSaveDbOpt: Action<StateType, StateType>;
 
         getListMock: Action<StateType, StateType>;
-
         getListSysFn: Action<StateType, StateType>;
-
         getListCustomFn : Action<StateType, StateType>;
 
     };
@@ -493,7 +491,7 @@ const StoreModel: ModuleType = {
             state.metrics = payload;
         },
         setActiveMetrics(state, payload) {
-            state.activeMetrics = payload;
+            state.activeMetrics = state.activeMetrics?.id === payload.id ? {} : payload;
         },
 
         setPathParams(state, payload) {
@@ -582,12 +580,13 @@ const StoreModel: ModuleType = {
             state.assertionConditionsDataObj = {}
             state.srcAssertionConditionsDataObj = {}
 
-            // state.srcScriptData = {};
-            // state.scriptData = {};
+            state.metricsDataObj = {}
+            state.srcMetricsDataObj = {}
         },
         resetPostConditionsDataObj(state){
             state.srcPostConditionsDataObj = cloneDeep(state.postConditionsDataObj)
             state.srcAssertionConditionsDataObj = cloneDeep(state.assertionConditionsDataObj)
+            state.srcMetricsDataObj = cloneDeep(state.metricsDataObj)
         },
 
         setAssertionConditionsObj(state, payload){
@@ -1175,15 +1174,15 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
-        async getMetricsEntity({commit}, payload: any) {
+        async getMetricsEntity({commit}, metrics: any) {
             try {
-                const resp = await getMetricsEntity(payload.entityId);
+                const resp = await getMetricsEntity(metrics.entityId, metrics.entityType);
                 const {data} = resp;
-                commit('setMetricsDataObj',{
+                commit('setPostConditionsDataObj',{
                     id: data.id,
                     value:data
                 })
-                commit('setSrcMetricsDataObj',{
+                commit('setSrcPostConditionsDataObj',{
                     id: data.id,
                     value:cloneDeep(data)
                 })
