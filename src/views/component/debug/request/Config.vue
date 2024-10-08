@@ -90,6 +90,7 @@ const preConditions = computed<any>(() => store.state.Debug.preConditions);
 const postConditions = computed<any>(() => store.state.Debug.postConditions);
 const assertionConditions = computed<any>(() => store.state.Debug.assertionConditions);
 const activeAssertion = computed<any>(() => store.state.Debug.activeAssertion);
+const activeMetrics = computed<any>(() => store.state.Debug.activeMetrics);
 
 const activeKey = ref('query-param');
 
@@ -170,8 +171,10 @@ const {
 
   debugInfo,
   assertionConditionsDataObj,
+  metricsDataObj,
   debugChangePostScript,
   debugChangeCheckpoint,
+  debugChangeMetrics,
   debugChangePreScript,
   resetDebugChange,
   scriptData,
@@ -242,6 +245,18 @@ const leaveSave =  async (event) => {
     }
   }
 
+  // 指标缓存的数据 - 保存
+  if(Object.keys(metricsDataObj.value)?.length && debugChangeMetrics.value){
+    for (const item of Object.values(metricsDataObj.value)) {
+      (item as any).debugInterfaceId = debugInfo.value.debugInterfaceId;
+      (item as any).endpointInterfaceId = debugInfo.value.endpointInterfaceId;
+      (item as any).projectId = debugData.value.projectId;
+      await store.dispatch('Debug/leaveSaveMetrics', item);
+    }
+    if (activeMetrics.value.entityId) {
+      await store.dispatch('Debug/getMetricsEntity', activeMetrics.value)
+    }
+  }
 
   resetDebugChange();
   if(event?.callback){

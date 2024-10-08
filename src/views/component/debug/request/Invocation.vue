@@ -149,7 +149,8 @@ const {
   isDebugChange,
   debugChangePreScript,
   debugChangePostScript,
-  debugChangeCheckpoint} = useIMLeaveTip();
+  debugChangeCheckpoint,
+  debugChangeMetrics} = useIMLeaveTip();
 const { copy } = useCopy();
 
 const store = useStore<{ Debug: DebugStateType, Endpoint: EndpointStateType, ProjectGlobal: ProjectStateType, Global: GlobalStateType, ServeGlobal, User }>();
@@ -268,7 +269,7 @@ const confirmSend = async (isNotClickable)=>{
     return;
   }
 
-  if(debugChangePreScript.value || debugChangePostScript.value || debugChangeCheckpoint.value){
+  if(debugChangePreScript.value || debugChangePostScript.value || debugChangeCheckpoint.value || debugChangeMetrics.value){
     store.commit("Global/setSpinning",true)
 
     bus.emit(settings.eventPostConditionSave, {
@@ -292,7 +293,8 @@ const save = async (e) => {
 
   //await bus.emit(settings.eventConditionSave, {});
    //后置处理器 和 断言
-   ( debugChangePostScript.value || debugChangeCheckpoint.value || debugChangePreScript.value ) &&  bus.emit(settings.eventPostConditionSave, {});
+   ( debugChangePostScript.value || debugChangeCheckpoint.value || debugChangePreScript.value || debugChangeMetrics.value ) &&
+   bus.emit(settings.eventPostConditionSave, {});
 
 }
 const saveAsCase = () => {

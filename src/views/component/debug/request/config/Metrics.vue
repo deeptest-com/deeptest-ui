@@ -102,7 +102,7 @@ import draggable from 'vuedraggable'
 import debounce from "lodash.debounce";
 import bus from "@/utils/eventBus";
 import {equalObjectByLodash} from "@/utils/object";
-import {MetricsType} from "@/utils/enum";
+import {ConditionSrc, MetricsType} from "@/utils/enum";
 import settings from "@/config/settings";
 import IconSvg from "@/components/IconSvg";
 import {confirmToDelete} from "@/utils/confirm";
@@ -158,10 +158,6 @@ const create = () => {
   })
 }
 
-const format = (item) => {
-  console.log('format', item)
-  bus.emit(settings.eventEditorAction, {act: settings.eventTypeFormat})
-}
 const disable = (item) => {
   console.log('disable', item)
   store.dispatch('Debug/disableMetrics', item)
@@ -198,23 +194,22 @@ const closeFullScreen = (item) => {
   fullscreen.value = false
 }
 
-const {srcMetricsDataObj, metricsDataObj, debugChange} = useIMLeaveTip();
-
+// watch changed event
+const {srcMetricsDataObj, metricsDataObj} = useIMLeaveTip();
 const getSaveBtnDisabled = (id) => {
+  console.log('getSaveBtnDisabled')
   const cur =  metricsDataObj.value?.[id] || {};
   const src =  srcMetricsDataObj.value?.[id] || {};
   return equalObjectByLodash(cur, src);
 }
-
 watch(() => {return [metrics.value, metricsDataObj.value, srcMetricsDataObj.value]},(newVal,oldValue) => {
   console.log('watch metrics objs')
 
   const cur =  metricsDataObj.value;
   const src =  srcMetricsDataObj.value;
-
   const isChange = !equalObjectByLodash(cur, src);
 
-  store.commit('Debug/setDebugChange',{})
+  store.commit('Debug/setDebugChange',{metrics: isChange})
 },{deep:true})
 
 onUnmounted(() => {

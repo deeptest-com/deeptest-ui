@@ -160,6 +160,7 @@ const initState: StateType = {
         base: false,
         condition: false,
         checkpoint: false,
+        metrics: false,
     },
     environmentsFromServers: [],
     currServe: [],
@@ -277,6 +278,9 @@ export interface ModuleType extends StoreModuleType<StateType> {
         setAssertionConditionsObj: Mutation<StateType>;
         setSrcAssertionConditionsObj: Mutation<StateType>;
 
+        setMetricsDataObj: Mutation<StateType>;
+        setSrcMetricsDataObj: Mutation<StateType>;
+
         setMagicList: Mutation<StateType>;
     };
     actions: {
@@ -310,7 +314,6 @@ export interface ModuleType extends StoreModuleType<StateType> {
 
         getMetricsEntity: Action<StateType, StateType>;
         saveMetrics: Action<StateType, StateType>;
-        leaveSaveMetrics: Action<StateType, StateType>;
 
         getExtractor: Action<StateType, StateType>;
         saveExtractor: Action<StateType, StateType>;
@@ -346,6 +349,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         leaveSaveExtractor: Action<StateType, StateType>;
         leaveSaveScript: Action<StateType, StateType>;
         leaveSaveCheckpoint: Action<StateType, StateType>;
+        leaveSaveMetrics: Action<StateType, StateType>;
         leaveSaveDbOpt: Action<StateType, StateType>;
 
         getListMock: Action<StateType, StateType>;
@@ -595,6 +599,14 @@ const StoreModel: ModuleType = {
         setSrcAssertionConditionsObj(state, payload){
             state.srcAssertionConditionsDataObj[payload.id] = payload.value
         },
+
+        setMetricsDataObj(state, payload){
+            state.metricsDataObj[payload.id] = payload.value
+        },
+        setSrcMetricsDataObj(state, payload){
+            state.srcMetricsDataObj[payload.id] = payload.value
+        },
+
         setMagicList(state, payload) {
             const newList = cloneDeep(state.magicList);
             newList.forEach(e => {
@@ -1178,11 +1190,11 @@ const StoreModel: ModuleType = {
             try {
                 const resp = await getMetricsEntity(metrics.entityId, metrics.entityType);
                 const {data} = resp;
-                commit('setPostConditionsDataObj',{
+                commit('setMetricsDataObj',{
                     id: data.id,
                     value:data
                 })
-                commit('setSrcPostConditionsDataObj',{
+                commit('setSrcMetricsDataObj',{
                     id: data.id,
                     value:cloneDeep(data)
                 })

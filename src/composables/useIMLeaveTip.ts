@@ -14,10 +14,13 @@ export default function useIMLeaveTip()  {
     const endpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.endpointDetail);
     const debugChange: any = computed<Endpoint>(() => store.state.Debug.debugChange);
     const scriptData: any = computed<Endpoint>(() => store.state.Debug.scriptData);
+
     const debugChangeBase: any = computed<Endpoint>(() => store.state.Debug.debugChange?.base);
     const debugChangePreScript: any = computed<Endpoint>(() => store.state.Debug.debugChange?.preScript);
     const debugChangePostScript: any = computed<Endpoint>(() => store.state.Debug.debugChange?.postScript);
     const debugChangeCheckpoint: any = computed<Endpoint>(() => store.state.Debug.debugChange?.checkpoint);
+    const debugChangeMetrics: any = computed<Endpoint>(() => store.state.Debug.debugChange?.metrics);
+
     const srcEndpointDetail: any = computed<Endpoint>(() => store.state.Endpoint.srcEndpointDetail);
     const debugData = computed<any>(() => store.state.Debug.debugData);
     const srcDebugData: any = computed<Endpoint>(() => store.state.Debug.srcDebugData);
@@ -49,7 +52,8 @@ export default function useIMLeaveTip()  {
     });
 
     const isDebugChange = computed(() => {
-        return debugChangeBase.value || debugChangePostScript.value || debugChangePreScript.value || debugChangeCheckpoint.value;
+        return debugChangeBase.value || debugChangePostScript.value || debugChangePreScript.value
+            || debugChangeCheckpoint.value || debugChangeMetrics.value;
     });
 
     const resetDebugChange = () => {
@@ -61,7 +65,8 @@ export default function useIMLeaveTip()  {
             base: false,
             preScript: false,
             postScript: false,
-            checkpoint:false
+            checkpoint:false,
+            metrics: false,
         });
     }
 
@@ -74,10 +79,10 @@ export default function useIMLeaveTip()  {
             base: false,
             preScript: false,
             postScript: false,
-            checkpoint:false
+            checkpoint:false,
+            metrics: false,
         });
     }
-
 
     const resetDebugChangeBase = () => {
         store.commit('Debug/setDebugChange',{
@@ -136,6 +141,7 @@ export default function useIMLeaveTip()  {
 
         resetDebugChange,
         debugChangeCheckpoint,
+        debugChangeMetrics,
         debugChangePreScript,
 
         assertionConditionsList,

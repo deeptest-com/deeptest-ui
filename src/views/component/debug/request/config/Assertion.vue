@@ -202,6 +202,7 @@ const closeFullScreen = (item) => {
  ************************************************/
 const {srcAssertionConditionsDataObj,assertionConditionsDataObj} = useIMLeaveTip();
 const getSaveBtnDisabled = (id) => {
+  console.log('getSaveBtnDisabled')
   const cur =  assertionConditionsDataObj.value?.[id] || {};
   const src =  srcAssertionConditionsDataObj.value?.[id] || {};
   return equalObjectByLodash(cur, src);
