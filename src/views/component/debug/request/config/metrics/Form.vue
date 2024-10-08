@@ -65,7 +65,7 @@ const debugData = computed<any>(() => store.state.Debug.debugData);
 const metricsDataObj = computed<any>(() => store.state.Debug.metricsDataObj);
 
 const model = computed<any>(() => {
-  return metricsDataObj.value?.[props?.metrics?.entityId] || {}
+  return metricsDataObj.value?.[props?.metrics?.id] || {}
 });
 
 const props = defineProps({
@@ -85,9 +85,8 @@ console.log(metricsFields)
 // load detail
 const load = () => {
   console.log('load metrics', props.metrics)
-  if (props.metrics.entityId) {
-    store.dispatch('Debug/getMetricsEntity', props.metrics)
-  }
+
+  store.dispatch('Debug/getMetrics', props.metrics)
 }
 watch(() => props.metrics, (newVal) => {
       load()
@@ -111,8 +110,8 @@ function isRequired(field) {
 let { resetFields, validate, validateInfos } = useForm(model, rulesRef);
 
 const save = (item) => {
-  console.log('saveCheckpoint',item, model.value)
-  if (item && item.entityId !== model.value.id) {
+  console.log('saveMetrics',item, model.value)
+  if (item && item.id !== model.value.id) {
     return;
   }
 
@@ -121,7 +120,7 @@ const save = (item) => {
     model.value.endpointInterfaceId = debugInfo.value.endpointInterfaceId
     model.value.projectId = debugData.value.projectId
 
-    store.dispatch('Debug/saveCheckpoint', model.value).then((result) => {
+    store.dispatch('Debug/saveMetrics', model.value).then((result) => {
       if (result) {
         notifySuccess(`保存成功`);
         if (props.finish) {
@@ -144,7 +143,7 @@ const cancel = () => {
 }
 onMounted(() => {
   console.log('onMounted')
-  bus.on(settings.eventConditionSave, save);
+  bus.on(settings.eventMetricsSave, save);
 
   if(!model?.value?.id){
     load();
@@ -152,7 +151,7 @@ onMounted(() => {
 })
 onBeforeUnmount( () => {
   console.log('onBeforeUnmount')
-  bus.off(settings.eventConditionSave, save);
+  bus.off(settings.eventMetricsSave, save);
 
 })
 

@@ -45,7 +45,7 @@ import {
     moveMetrics,
     removeMetrics,
     disableMetrics,
-    getMetricsEntity,
+    getMetrics,
 } from './service';
 
 import {changeServe, getVarsByEnv, listDbConn, serverList} from '@/views/project-settings/service';
@@ -312,7 +312,7 @@ export interface ModuleType extends StoreModuleType<StateType> {
         disableMetrics: Action<StateType, StateType>;
         moveMetrics: Action<StateType, StateType>;
 
-        getMetricsEntity: Action<StateType, StateType>;
+        getMetrics: Action<StateType, StateType>;
         saveMetrics: Action<StateType, StateType>;
 
         getExtractor: Action<StateType, StateType>;
@@ -1186,9 +1186,9 @@ const StoreModel: ModuleType = {
                 return false;
             }
         },
-        async getMetricsEntity({commit}, metrics: any) {
+        async getMetrics({commit}, metrics: any) {
             try {
-                const resp = await getMetricsEntity(metrics.entityId, metrics.entityType);
+                const resp = await getMetrics(metrics.id);
                 const {data} = resp;
                 commit('setMetricsDataObj',{
                     id: data.id,

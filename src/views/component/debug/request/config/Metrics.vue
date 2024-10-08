@@ -43,7 +43,7 @@
 
               <div class="buttons">
                 <a-button size="small" type="primary"
-                          :disabled="getSaveBtnDisabled(element?.entityId)"
+                          :disabled="getSaveBtnDisabled(element?.id)"
                           v-if="activeMetrics.id === element.id"
                           @click.stop="save(element)">保存</a-button>
 
@@ -165,7 +165,7 @@ const disable = (item) => {
 const remove = (item) => {
   console.log('remove', item)
 
-  confirmToDelete(`确定删除该${t(item.entityType)}？`, '', () => {
+  confirmToDelete(`确定删除此"${t(item.entityType)}"指标？`, '', () => {
     store.dispatch('Debug/removeMetrics', item)
   })
 }
@@ -176,7 +176,6 @@ function move(_e: any) {
   store.dispatch('Debug/moveMetrics', {
     data: envIdList,
     info: debugInfo.value,
-    entityType: '',
   })
 }
 
