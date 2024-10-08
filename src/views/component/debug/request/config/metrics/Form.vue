@@ -62,7 +62,11 @@ const store = useStore<{  Debug: any }>();
 
 const debugInfo = computed<any>(() => store.state.Debug.debugInfo);
 const debugData = computed<any>(() => store.state.Debug.debugData);
-const model = computed<any>(() => store.state.Debug.activeMetrics);
+const metricsDataObj = computed<any>(() => store.state.Debug.metricsDataObj);
+
+const model = computed<any>(() => {
+  return metricsDataObj.value?.[props?.metrics?.entityId] || {}
+});
 
 const props = defineProps({
   metrics: {
@@ -99,7 +103,7 @@ const rulesRef = computed(() => {
 })
 function isRequired(field) {
   if (!model.value.entityType) return false
-  
+
   const arr = MetricsFields[model.value.entityType].split(';')[0].split(',')
   return isInArray(field, arr)
 }
@@ -151,21 +155,6 @@ onBeforeUnmount( () => {
   bus.off(settings.eventConditionSave, save);
 
 })
-
-const selectType = () => {
-  console.log('selectType')
-
-  if (model.value.type === CheckpointType.responseBody) {
-    model.value.operator = ComparisonOperator.contain
-  } else {
-    model.value.operator = ComparisonOperator.equal
-  }
-}
-
-const changeType = () => {
-  console.log('changeType')
-  model.value.extractorExpression = ''
-}
 
 const labelCol = { span: 4 }
 const wrapperCol = { span: 18 }
