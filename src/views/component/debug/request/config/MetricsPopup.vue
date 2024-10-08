@@ -1,38 +1,16 @@
 <template>
   <a-modal
-      :title="'配置'+ t(model?.conditionEntityType ? model?.conditionEntityType : model?.entityType)"
+      :title="'配置'+ t(model?.entityType)"
       :visible="visible"
       :footer="null"
       @cancel="cancel"
       width="100%"
-      wrapClassName="dp-full-modal condition-edit-fullscreen">
+      wrapClassName="dp-full-modal metrics-edit-fullscreen">
 
     <div class="content">
       <div class="condition-form">
-        <Extractor v-if="model.entityType === ConditionType.extractor"
-                   :condition="model"
-                   :finish="onCancel"/>
-
-        <Cookie v-if="model.entityType === ConditionType.cookie"
-                :condition="model"
-                :finish="onCancel"/>
-
-        <Checkpoint v-if="model.entityType === ConditionType.checkpoint"
-                    :condition="model"
-                    :finish="onCancel" />
-
-        <PreScript v-if="model.conditionEntityType === ConditionType.script"
-                :condition="model"
-                :fullScreen="true"
-                :finish="onCancel" />
-
-        <PostScript v-if="model.entityType === ConditionType.script"
-                    :condition="model"
-                    :finish="onCancel" />
-
-        <DatabaseOpt v-if="model.entityType === ConditionType.databaseOpt"
-                    :condition="model"
-                    :finish="onCancel" />
+        <MetricsForm :metrics="model"
+                     :onCancel="cancel" />
       </div>
 
       <div class="buttons">
@@ -50,13 +28,9 @@
 import {computed, defineProps, inject, ref} from "vue";
 import {useI18n} from "vue-i18n";
 
-import {ConditionType} from "@/utils/enum";
-import Extractor from "./conditions/Extractor.vue";
-import Checkpoint from "./conditions/Checkpoint.vue";
-import PostScript from "./conditions/Script.vue";
-import DatabaseOpt from "./conditions/DatabaseOpt.vue";
 import bus from "@/utils/eventBus";
 import settings from "@/config/settings";
+import MetricsForm from "./metrics/MetricsForm.vue";
 
 const {t} = useI18n();
 
@@ -76,7 +50,7 @@ const props = defineProps({
 })
 
 const save = (item) => {
-  bus.emit(settings.eventConditionSave, props.model);
+  bus.emit(settings.eventMetricsSave, props.model);
 };
 
 const cancel = () => {
@@ -89,7 +63,7 @@ const wrapperCol = { span: 18, offset:4 }
 </script>
 
 <style lang="less">
-.condition-edit-fullscreen {
+.metrics-edit-fullscreen {
   height: 100%;
 
   .head {
