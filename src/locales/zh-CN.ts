@@ -96,7 +96,7 @@ export default {
     'extractorVari': '提取变量',
 
     'summarization': '摘要',
-    'answer_relevancy': '回答相关性',
+    'answer_relevancy': '答案相关性',
     'faithfulness': '忠实度',
     'contextual_precision': '检索查准率',
     'contextual_recall': '检索查全率',
