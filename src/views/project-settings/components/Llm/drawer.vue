@@ -21,6 +21,14 @@
               </div> -->
 
         <a-form :model="model" :label-col="{ style: { width: '120px' } }" :wrapper-col="wrapperCol">
+
+          <a-form-item label="服务提供者" v-bind="validateInfos.modelProvider" required>
+            <a-select v-model:value="model.modelProvider">
+              <a-select-option value="azure">Azure</a-select-option>
+              <a-select-option value="openai">OpenAI</a-select-option>
+            </a-select>
+          </a-form-item>
+
           <a-form-item label="名称" v-bind="validateInfos.name" required>
             <a-input v-model:value="model.name"
                      @blur="validate('name', { trigger: 'blur' }).catch(() => {})"/>
@@ -90,8 +98,11 @@ const onCancel = () => {
 }
 
 const rulesRef = reactive({
+  modelProvider: [
+    {required: true, message: '请选择大模型提供商', trigger: 'blur'},
+  ],
   name: [
-    {required: true, message: '请输入名称', trigger: 'blur'},
+    {required: true, message: '请输入工具名称', trigger: 'blur'},
   ],
   url: [
     {required: true, message: '请选择APIBase', trigger: 'blur'},
@@ -100,7 +111,7 @@ const rulesRef = reactive({
     {required: true, message: '请输入APIKey', trigger: 'blur'},
   ],
   model: [
-    {required: true, message: '请输入Model', trigger: 'blur'},
+    {required: true, message: '请输入大模型名称', trigger: 'blur'},
   ],
 });
 
@@ -111,9 +122,9 @@ watch(props, () => {
 
   if (props.modelId === 0) {
     store.commit('ProjectSetting/setLlm', {
-      name: '', type: 'mysql',
-      host: 'localhost', port: '3306', dbName: 'test',
-      username: 'root', password: ''
+      modelProvider: 'azure',
+      model: 'gpt-4o',
+      name: '微软Azure',
     });
   } else {
     store.dispatch('ProjectSetting/getLlm', props.modelId);
