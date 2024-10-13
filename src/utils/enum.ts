@@ -288,15 +288,15 @@ export enum MetricsType {
 }
 
 export enum MetricsFields {
-    summarization = "; threshold,include_reason,strict_mode",
-    answer_relevancy = "; threshold,include_reason,strict_mode",
-    faithfulness = "retrieval_context; threshold,include_reason,strict_mode",
-    contextual_precision = "expected_output,retrieval_context; threshold,include_reason,strict_mode",
-    contextual_recall = "expected_output,retrieval_context; threshold,include_reason,strict_mode",
-    contextual_relevancy = "retrieval_context; threshold,include_reason,strict_mode",
-    hallucination = "context; threshold,include_reason,strict_mode",
-    bias = "; threshold,include_reason,strict_mode",
-    toxicity = "; threshold,include_reason,strict_mode",
+    summarization = "actual_output; threshold,include_reason,strict_mode",
+    answer_relevancy = "actual_output; threshold,include_reason,strict_mode",
+    faithfulness = "retrieval_context,actual_output; threshold,include_reason,strict_mode",
+    contextual_precision = "retrieval_context,actual_output,expected_output; threshold,include_reason,strict_mode",
+    contextual_recall = "retrieval_context,actual_output,expected_output; threshold,include_reason,strict_mode",
+    contextual_relevancy = "retrieval_context,actual_output; threshold,include_reason,strict_mode",
+    hallucination = "context,actual_output; threshold,include_reason,strict_mode",
+    bias = "actual_output; threshold,include_reason,strict_mode",
+    toxicity = "actual_output; threshold,include_reason,strict_mode",
 }
 export enum MetricsFieldDefine {
     // input = "input",

@@ -2,10 +2,28 @@
   <div class="response-checkpoint-main">
     <a-form :label-col="{ style: { width: '86px' } }" :wrapper-col="wrapperCol">
 
-      <a-form-item v-if="isRequired('expected_output')" :required="true"
+      <a-form-item v-if="isNeeded('retrieval_context')" :required="true"
+                   label="检索输出" v-bind="validateInfos.retrievalContext">
+        <a-input v-model:value="model.retrievalContext"
+                 @blur="validate('retrievalContext', { trigger: 'blur' }).catch(() => {})" />
+      </a-form-item>
+
+      <a-form-item v-if="isNeeded('actual_output')" :required="true"
+                   label="实际结果" v-bind="validateInfos.actualOutput">
+        <a-input v-model:value="model.actualOutput"
+                 @blur="validate('actualOutput', { trigger: 'blur' }).catch(() => {})" />
+      </a-form-item>
+
+      <a-form-item v-if="isNeeded('expected_output')" :required="true"
                    label="期待结果" v-bind="validateInfos.expectedOutput">
         <a-input v-model:value="model.expectedOutput"
                  @blur="validate('expectedOutput', { trigger: 'blur' }).catch(() => {})" />
+      </a-form-item>
+
+      <a-form-item v-if="isNeeded('context')" :required="true"
+                   label="上下文" v-bind="validateInfos.context">
+        <a-input v-model:value="model.context"
+                 @blur="validate('context', { trigger: 'blur' }).catch(() => {})" />
       </a-form-item>
 
       <a-form-item label="阀值" v-bind="validateInfos.threshold">
@@ -97,10 +115,10 @@ watch(() => props.metrics, (newVal) => {
 const expectedOutputRequired = [{ required: true, message: '请输入期待结果', trigger: 'change' }]
 const rulesRef = computed(() => {
   return {
-    expected_output: isRequired('expected_output') ? expectedOutputRequired : [],
+    expected_output: isNeeded('expected_output') ? expectedOutputRequired : [],
   }
 })
-function isRequired(field) {
+function isNeeded(field) {
   if (!model.value.entityType) return false
 
   const arr = MetricsFields[model.value.entityType].split(';')[0].split(',')
