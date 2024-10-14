@@ -87,7 +87,8 @@ const responseEventstreamMain = ref();
       padding: 3px;
 
       .stream-item {
-        margin-bottom: 6px;
+        padding: 3px 0;
+        border-bottom: 1px solid #f0f0f0;
         word-break: break-all;
       }
     }
