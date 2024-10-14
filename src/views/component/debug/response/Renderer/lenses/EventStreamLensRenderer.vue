@@ -18,7 +18,7 @@
     <div class="body">
       <div id="stream-list">
         <template v-for="(item, index) in streamData" :key="index">
-          <div v-if="!keywords || item.indexOf(keywords) > -1">
+          <div v-if="!keywords || item.indexOf(keywords) > -1" class="stream-item">
             {{item}}
           </div>
         </template>
@@ -85,6 +85,11 @@ const responseEventstreamMain = ref();
       height: 100%;
       overflow-y: auto;
       padding: 3px;
+
+      .stream-item {
+        margin-bottom: 6px;
+        word-break: break-all;
+      }
     }
   }
 }
