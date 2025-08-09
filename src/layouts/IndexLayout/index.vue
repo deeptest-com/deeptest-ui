@@ -9,7 +9,7 @@
         :openKeys="leftOpenKeys"
         :menuData="permissionMenuData"
         :version="version"
-        :onOpenChange="onOpenChange">x
+        :onOpenChange="onOpenChange">
     </left>
 
     <div
