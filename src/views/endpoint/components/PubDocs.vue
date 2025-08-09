@@ -3,7 +3,7 @@
       width="640px"
       :visible="visible"
       @ok="ok"
-      @cancel="cancal"
+      @cancel="cancel"
       title="发布文档">
     <a-form
         ref="formRef"
@@ -87,7 +87,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['ok', 'cancal']);
+const emit = defineEmits(['ok', 'cancel']);
 const router = useRouter();
 const formRef = ref();
 
@@ -140,8 +140,8 @@ async function ok() {
       });
 }
 
-function cancal() {
-  emit('cancal', formState.value);
+function cancel() {
+  emit('cancel', formState.value);
   reset();
 }
 

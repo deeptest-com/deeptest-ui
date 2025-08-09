@@ -9,9 +9,10 @@
         :auto-expand-parent="false"
         :show-folder-icon="true"
         :checked="false"
+        :draggable="true"
         :context-menu-list="nodeMenuList"
         :root-context-menu-list="rootContextMenuList"
-        :draggable="checkDraggable"
+        :node-draggable="checkDraggable"
         :show-more-icon="showMoreIcon"
         :is-dir-node-clicked="true"
         :on-tree-node-clicked="onTreeNodeClick"
@@ -77,6 +78,7 @@ import { Modal } from 'ant-design-vue';
 import { getDynamicCateogries } from '@/views/endpoint/service';
 import useEndpoint from '../hooks/useEndpoint';
 import { useRoute } from 'vue-router';
+import Tree from "@/components/CategoryTree";
 
 const { 
   updateEndpointNodes, 
