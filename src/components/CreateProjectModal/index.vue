@@ -366,14 +366,17 @@ watch(() => {
 })
 
 onMounted(async () => {
-  bus?.$on('sendMsgToThirdpartyAPI', async msg => {
-    if (msg.type === 'createProductSuccess') {
-      const newProducts = await store.dispatch('Global/getLyProducts');
-      lyProducts.value = (newProducts || []).map(e => ({ ...e, children: e.children || [], }));
-    }
-  })
+  if (isLy) {
+    bus?.$on('sendMsgToThirdpartyAPI', async msg => {
+      if (msg.type === 'createProductSuccess') {
+        const newProducts = await store.dispatch('Global/getLyProducts');
+        lyProducts.value = (newProducts || []).map(e => ({...e, children: e.children || [],}));
+      }
+    })
+  }
   const lzUserInfo = await getLzosInfo();
   lzosInfo.value = lzUserInfo;
+
   if (isLy) {
     try {
       const products = await store.dispatch('Global/getLyProducts');

@@ -11,6 +11,7 @@ import { getEngineering, getUserEngineering, getUserIntegrationDetail, getUserMe
 import {Cache_Key_Agent} from "@/utils/const";
 import {getCache, setCache} from "@/utils/localCache";
 import { getUserRolesAuth } from '@/services/role';
+import {isThirdparty} from "@/utils/comm";
 
 export interface StateType {
   // 左侧展开收起
@@ -267,6 +268,12 @@ const StoreModel: ModuleType = {
     },
 
     async getIntegrationDetail({ commit }, payload) {
+      const isLyEnv = isThirdparty()
+      if (!isLyEnv) {
+        commit('setLyUserSpaces', []);
+        return Promise.resolve({});
+      }
+
       const { code, data, msg }: any = await getUserIntegrationDetail(payload);
       if (code === 0) {
         commit('setLyUserSpaces', data.spaces || []);

@@ -59,6 +59,7 @@ export default defineComponent({
   },
 
   mounted() {
+    console.log('editor mounted')
     this.initMonaco()
 
     bus.on(settings.eventEditorAction, (data) => {
@@ -67,17 +68,14 @@ export default defineComponent({
       }
     });
   },
-
   beforeUnmount() {
-    try {
-      console.log('editor beforeUnmount')
-      this.editor && this.editor.dispose();
-      bus.off(settings.eventEditorAction)
-
-    } catch (error) {
-      console.log('editor beforeUnmount',error)
-    }
-
+    // try {
+    //   console.log('editor beforeUnmount')
+    //   this.editor && this.editor.dispose();
+    //   bus.off(settings.eventEditorAction)
+    // } catch (error) {
+    //   console.log('editor beforeUnmount',error)
+    // }
   },
   unmounted() {
     try {
@@ -87,7 +85,6 @@ export default defineComponent({
     } catch (error) {
       console.log('editor unmounted',error)
     }
-
   },
 
   methods: {
@@ -180,6 +177,8 @@ export default defineComponent({
       // });
 
       editor?.onDidChangeModelContent(event => {
+        console.log('editor.onDidChangeModelContent')
+
         const value = editor.getValue()
         if (this.value !== value) {
           // 添加最后最后一个参数，标识是否有语法错误

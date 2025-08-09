@@ -50,7 +50,6 @@
 
       <div v-else class="editor-container">
         <MonacoEditor
-          :key="timestamp"
           ref="monacoEditor"
           customId="request-body-main"
           class="editor"
@@ -113,6 +112,7 @@ const getCodeLang = () => {
 }
 
 const editorChange = (newScriptCode) => {
+  console.log('editorChange', newScriptCode)
   debugData.value.body = newScriptCode;
 }
 
