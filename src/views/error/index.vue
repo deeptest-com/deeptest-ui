@@ -23,6 +23,7 @@ import { useRouter } from 'vue-router';
 import ApplyProPermissionsModal from "@/components/ApplyProPermissions/index.vue";
 import {hideGlobalLoading} from "@/utils/handleLoad";
 import { useWujie } from '@/composables/useWujie';
+import {formatDateTimeWithMilliseconds} from "@/utils/datetime";
 
 const router = useRouter();
 const { isWujieEnv } = useWujie();
@@ -89,6 +90,7 @@ const handleSuccess = () => {
 watch(() => {
   return router.currentRoute.value;
 }, (val: any) => {
+
   const { params: { codeNumber }, query: { msg, projectId, projectName }, path } = val;
   if (!path.includes('error')) {
     return;
