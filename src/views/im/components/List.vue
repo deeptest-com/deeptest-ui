@@ -116,6 +116,7 @@
   </div>
   <!-- 创建接口弹窗 -->
   <CreateEndpointModal
+    v-if="createEndpointModalVisible"
     :visible="createEndpointModalVisible"
     :selectedCategoryId="selectedCategoryId"
     @ok="handleCreateApiSuccess"
@@ -176,7 +177,7 @@ import useEndpoint from '../hooks/useEndpoint';
 import { useWujie } from '@/composables/useWujie';
 
 const props = defineProps<{
-  categoryId: number;
+  categoryId: number | null | undefined;
 }>();
 
 const { isInThirdpartyWujieContainer } = useWujie();
