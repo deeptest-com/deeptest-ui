@@ -50,7 +50,8 @@
     @cancel="handleCategoryCancel"
     @ok="handleCreateCategory" />
   <!-- 导入接口弹窗 -->
-  <ImportEndpointModal 
+  <ImportEndpointModal
+    v-if="importEndpointModalVisible"
     :visible="importEndpointModalVisible"
     :selectedCategoryId="selectedCategoryId"
     @cancel="importEndpointModalVisible = false"

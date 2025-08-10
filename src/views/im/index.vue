@@ -39,7 +39,7 @@
                 </template>
                 <div :class="['endpoint-tab-content', item.type]">
                   <Detail v-if="item.type === 'im' && item.entityData?.id === activeTab.entityData?.id" :endpoint-id="item.entityData?.id"/>
-                  <List v-else-if="item.type === 'im-dir' || item.id === -1" :category-id="item.id"/>
+                  <List v-else-if="item.type === 'im-dir' || item.id === -1" :category-id="item?.id"/>
                   <SchemaEditorContent v-else />
                 </div>
               </TabPane>
