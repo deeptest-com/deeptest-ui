@@ -4,7 +4,7 @@
     :visible="visible"
     :confirmLoading="confirmLoading"
     @ok="ok"
-    @cancel="cancal"
+    @cancel="cancel"
     title="导入接口数据"
     >
     <a-form
@@ -198,7 +198,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['ok', 'cancal']);
+const emit = defineEmits(['ok', 'cancel']);
 
 const driverTypeOpts = [
   {
@@ -392,8 +392,8 @@ function ok() {
     });
 }
 
-function cancal() {
-  emit('cancal', modelRef);
+function cancel() {
+  emit('cancel', modelRef);
   reset();
 }
 

@@ -5,6 +5,8 @@ const getWindowMessage = (cb?: any) => {
   return new Promise(resolve => {
     let isEmitMessage = false;
     window.addEventListener('message', async event => {
+      console.log('in getWindowMessage method', event.data)
+
       if (event.data.token) {
         await setToken(event.data.token);
         await setLzosInfo(event.data.user || null);

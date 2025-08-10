@@ -138,22 +138,26 @@
         </template>
       </ContentPane>
       <CreateEndpointModal
+          v-if="createApiModalVisible"
           :visible="createApiModalVisible"
           :selectedCategoryId="selectedCategoryId"
           @cancel="createApiModalVisible = false;"
           @ok="handleCreateApiSuccess"/>
       <ImportEndpointModal
+          v-if="showImportModal"
           :visible="showImportModal"
           :selectedCategoryId="selectedCategoryId"
           @cancal="showImportModal = false;"
           @ok="handleImport"/>
       <BatchUpdateFieldModal
+          v-if="showBatchUpdateModal"
           :visible="showBatchUpdateModal"
           :selectedCategoryId="selectedCategoryId"
           :selectedEndpointNum="selectedEndpointNum"
           @cancel="showBatchUpdateModal = false;"
           @ok="handleBatchUpdate"/>
       <PubDocs
+          v-if="showPublishDocsModal"
           :visible="showPublishDocsModal"
           :endpointIds='selectedRowIds'
           @cancal="showPublishDocsModal = false;"
