@@ -327,6 +327,9 @@ const CategoryTree = defineComponent({
 
     const onTreeLoad = (treeNode) => {
       return new Promise<void>(resolve => {
+        if (!treeNode.dataRef)
+            return
+
         if (treeNode.dataRef.isLeaf || !props.needLoadData) {
           resolve();
           return;
